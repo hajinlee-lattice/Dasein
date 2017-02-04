@@ -269,28 +269,53 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     }
 
     private void createNameLocation(DnBMatchContext matchContext, E record, CacheLoaderConfig config, String dunsStr) {
-
         NameLocation nameLocation = new NameLocation();
         setFieldValues(record, nameLocation, config);
         nameLocationService.normalize(nameLocation);
         matchContext.setInputNameLocation(nameLocation);
 
         matchContext.setDuns(dunsStr);
-        if (config.getConfidenceCode() != null) {
-            matchContext.setConfidenceCode(config.getConfidenceCode());
-        } else {
-            matchContext.setConfidenceCode(defaultConfidenceCode);
-        }
-        if (StringUtils.isNotEmpty(config.getMatchGrade())) {
-            matchContext.setMatchGrade(config.getMatchGrade());
-        } else {
-            matchContext.setMatchGrade(defaultMatchGrade);
-        }
+        setCondidenceCode(matchContext, record, config);
+        setMatchGrade(matchContext, record, config);
+        
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
         if (config.isWhiteCache()) {
             matchContext.setDnbCode(DnBReturnCode.OK);
         } else {
             matchContext.setDnbCode(DnBReturnCode.UNMATCH);
+        }
+    }
+
+    private void setMatchGrade(DnBMatchContext matchContext, E record, CacheLoaderConfig config) {
+        if (StringUtils.isNotEmpty(config.getMatchGrade())) {
+            matchContext.setMatchGrade(config.getMatchGrade());
+        } else {
+            if (StringUtils.isNotEmpty(config.getMatchGradeField())) {
+                matchContext.setMatchGrade((String) getFieldValue(record, config.getMatchGradeField()));
+            } else {
+                matchContext.setMatchGrade(defaultMatchGrade);
+            }
+        }
+    }
+
+    private void setCondidenceCode(DnBMatchContext matchContext, E record, CacheLoaderConfig config) {
+        if (config.getConfidenceCode() != null) {
+            matchContext.setConfidenceCode(config.getConfidenceCode());
+        } else {
+            if (StringUtils.isNotEmpty(config.getConfidenceCodeField())) {
+                Object confidence = getFieldValue(record, config.getConfidenceCodeField());
+                Integer confidenceCode = defaultConfidenceCode;
+                if (confidence != null) {
+                    try {
+                        confidenceCode = Integer.valueOf(confidence.toString());
+                    } catch (Exception ex) {
+                        log.warn("Failed to get confidence code from=" + confidence.toString());
+                    }
+                }
+                matchContext.setConfidenceCode(confidenceCode);
+            } else {
+                matchContext.setConfidenceCode(defaultConfidenceCode);
+            }
         }
     }
 

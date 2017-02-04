@@ -20,10 +20,15 @@ public class CacheLoaderConfig {
     private Integer confidenceCode;
     @JsonProperty("matchGrade")
     private String matchGrade;
-    
+
+    @JsonProperty("matchGradeField")
+    private String matchGradeField;
+    @JsonProperty("confidenceCodeField")
+    private String confidenceCodeField;
+
     @JsonProperty("isWhiteCache")
     private boolean isWhiteCache = true;
-    
+
     @JsonProperty("dataCloudVersion")
     private String dataCloudVersion;
 
@@ -82,8 +87,6 @@ public class CacheLoaderConfig {
     public void setMatchGrade(String matchGrade) {
         this.matchGrade = matchGrade;
     }
-    
-    
 
     public boolean isWhiteCache() {
         return isWhiteCache;
@@ -92,8 +95,7 @@ public class CacheLoaderConfig {
     public void setIsWhiteCache(boolean isWhiteCache) {
         this.isWhiteCache = isWhiteCache;
     }
-    
-    
+
     public String getDataCloudVersion() {
         return dataCloudVersion;
     }
@@ -102,14 +104,33 @@ public class CacheLoaderConfig {
         this.dataCloudVersion = dataCloudVersion;
     }
 
+    public String getMatchGradeField() {
+        return matchGradeField;
+    }
+
+    public void setMatchGradeField(String matchGradeField) {
+        this.matchGradeField = matchGradeField;
+    }
+
+    public String getConfidenceCodeField() {
+        return confidenceCodeField;
+    }
+
+    public void setConfidenceCodeField(String confidenceCodeField) {
+        this.confidenceCodeField = confidenceCodeField;
+    }
+
+    public void setWhiteCache(boolean isWhiteCache) {
+        this.isWhiteCache = isWhiteCache;
+    }
+
     @Override
     public String toString() {
         return "CacheLoaderConfig [sourceName=" + sourceName + ", version=" + version + ", dirPath=" + dirPath
                 + ", fieldMap=" + fieldMap + ", dunsField=" + dunsField + ", confidenceCode=" + confidenceCode
-                + ", matchGrade=" + matchGrade + ", isWhiteCache=" + isWhiteCache + ", dataCloudVersion="
-                + dataCloudVersion + "]";
+                + ", matchGrade=" + matchGrade + ", matchGradeField=" + matchGradeField + ", confidenceCodeField="
+                + confidenceCodeField + ", isWhiteCache=" + isWhiteCache + ", dataCloudVersion=" + dataCloudVersion
+                + "]";
     }
-
-
 
 }
