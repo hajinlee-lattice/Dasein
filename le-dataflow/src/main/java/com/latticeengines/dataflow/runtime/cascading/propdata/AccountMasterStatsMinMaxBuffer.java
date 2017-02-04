@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.StatsAttributeParser;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -25,8 +27,6 @@ public class AccountMasterStatsMinMaxBuffer extends BaseOperation implements Buf
     private Map<String, Integer> namePositionMap;
     private String minMaxKey;
 
-    private ObjectMapper om = new ObjectMapper();
-
     public AccountMasterStatsMinMaxBuffer(Params parameterObject) {
         super(parameterObject.fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
@@ -36,13 +36,16 @@ public class AccountMasterStatsMinMaxBuffer extends BaseOperation implements Buf
     @SuppressWarnings("unchecked")
     @Override
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
+        StatsAttributeParser attributeParser = new StatsAttributeParser();
+        ObjectMapper om = new ObjectMapper();
+
         Tuple result = Tuple.size(getFieldDeclaration().size());
 
         Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
         Map<String, Object[]> attributeMinMaxValues = new HashMap<>();
         Map<String, Object> groupKeyValues = new HashMap<>();
 
-        calculateMinMax(arguments, attributeMinMaxValues, groupKeyValues);
+        calculateMinMax(attributeParser, arguments, attributeMinMaxValues, groupKeyValues);
 
         try {
             result.setString(namePositionMap.get(minMaxKey), //
@@ -59,7 +62,8 @@ public class AccountMasterStatsMinMaxBuffer extends BaseOperation implements Buf
         bufferCall.getOutputCollector().add(result);
     }
 
-    private void calculateMinMax(Iterator<TupleEntry> argumentsInGroup, //
+    private void calculateMinMax(StatsAttributeParser attributeParser, //
+            Iterator<TupleEntry> argumentsInGroup, //
             Map<String, Object[]> attributeManMaxValues, //
             Map<String, Object> groupKeyValues) {
         int idx = 0;
@@ -84,48 +88,13 @@ public class AccountMasterStatsMinMaxBuffer extends BaseOperation implements Buf
                     if (obj instanceof Long //
                             || obj instanceof Integer //
                             || obj instanceof Double) {
-                        parseNumericValForMinMax(attributeManMaxValues, obj, fieldName);
+                        attributeParser.parseNumericValForMinMax(//
+                                attributeManMaxValues, obj, fieldName);
                     }
                 }
             }
             idx++;
         }
-    }
-
-    private void parseNumericValForMinMax(Map<String, Object[]> attributeManMaxValues, Object obj, String fieldName) {
-        Object objVal = obj;
-        if (!attributeManMaxValues.containsKey(fieldName)) {
-            attributeManMaxValues.put(fieldName, null);
-        }
-
-        Object[] fieldBucketMap = attributeManMaxValues.get(fieldName);
-        if (fieldBucketMap == null) {
-            fieldBucketMap = new Object[2];
-            fieldBucketMap[0] = objVal;
-            fieldBucketMap[1] = objVal;
-            attributeManMaxValues.put(fieldName, fieldBucketMap);
-        }
-
-        Object bucketMin = fieldBucketMap[0];
-        Object bucketMax = fieldBucketMap[1];
-
-        if (isGreater(bucketMin, objVal)) {
-            fieldBucketMap[0] = objVal;
-        } else if (isGreater(objVal, bucketMax)) {
-            fieldBucketMap[1] = objVal;
-        }
-    }
-
-    private boolean isGreater(Object firstVal, Object secondVal) {
-        boolean isGreater = false;
-        if (secondVal instanceof Long) {
-            isGreater = ((Long) firstVal) > ((Long) secondVal);
-        } else if (secondVal instanceof Integer) {
-            isGreater = ((Integer) firstVal) > ((Integer) secondVal);
-        } else if (secondVal instanceof Double) {
-            isGreater = ((Double) firstVal) > ((Double) secondVal);
-        }
-        return isGreater;
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
@@ -138,9 +107,9 @@ public class AccountMasterStatsMinMaxBuffer extends BaseOperation implements Buf
         return positionMap;
     }
 
-    public static class Params {
-        public String minMaxKey;
-        public Fields fieldDeclaration;
+    public static class Params implements Serializable {
+        String minMaxKey;
+        Fields fieldDeclaration;
 
         public Params(Fields fieldDeclaration, String minMaxKey) {
             this.fieldDeclaration = fieldDeclaration;

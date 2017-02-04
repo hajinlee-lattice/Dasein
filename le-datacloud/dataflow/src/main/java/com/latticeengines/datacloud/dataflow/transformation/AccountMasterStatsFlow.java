@@ -211,10 +211,11 @@ public class AccountMasterStatsFlow
 
         allLeafFields = allLeafFields.append(new Fields(getTotalKey(), Long.class));
 
-        AccountMasterStatsGroupingFunction.Params functionParams = new AccountMasterStatsGroupingFunction.Params(
-                getMinMaxKey(), attrList.toArray(new String[attrList.size()]),
-                attrIdList.toArray(new Integer[attrIdList.size()]), allLeafFields,
-                attrList.toArray(new String[attrList.size()]), getTotalKey(), //
+        AccountMasterStatsGroupingFunction.Params functionParams = new AccountMasterStatsGroupingFunction.Params(//
+                getMinMaxKey(), //
+                attrList.toArray(new String[attrList.size()]), //
+                attrIdList.toArray(new Integer[attrIdList.size()]), //
+                allLeafFields, attrList.toArray(new String[attrList.size()]), getTotalKey(), //
                 dimensionIdFieldNames, parameters.getMaxBucketCount(), //
                 AccountMasterStatsParameters.LBL_ORDER_POST, //
                 AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_YES, //

@@ -35,6 +35,7 @@ import cascading.tuple.Fields;
 public class AccountMasterStatsMinMaxFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, AccountMasterStatsParameters> {
     private static final String RENAMED_PREFIX = "_RENAMED_";
+
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
