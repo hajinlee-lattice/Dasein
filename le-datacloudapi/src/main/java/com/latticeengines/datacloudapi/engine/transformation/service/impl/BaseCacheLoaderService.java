@@ -49,7 +49,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     @Value("${datacloud.match.cache.loader.tasks.size:32}")
     private int tasksSize;
 
-    @Value("${datacloud.match.cache.loader.thread.pool.size:8}")
+    @Value("${datacloud.match.cache.loader.thread.pool.size:16}")
     private int poolSize;
 
     @Autowired
@@ -277,7 +277,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         matchContext.setDuns(dunsStr);
         setCondidenceCode(matchContext, record, config);
         setMatchGrade(matchContext, record, config);
-        
+
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
         if (config.isWhiteCache()) {
             matchContext.setDnbCode(DnBReturnCode.OK);
@@ -291,7 +291,12 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
             matchContext.setMatchGrade(config.getMatchGrade());
         } else {
             if (StringUtils.isNotEmpty(config.getMatchGradeField())) {
-                matchContext.setMatchGrade((String) getFieldValue(record, config.getMatchGradeField()));
+                Object matchGrade = getFieldValue(record, config.getMatchGradeField());
+                if (matchGrade == null) {
+                    matchContext.setMatchGrade((String)null);
+                } else {
+                    matchContext.setMatchGrade(matchGrade.toString());
+                }
             } else {
                 matchContext.setMatchGrade(defaultMatchGrade);
             }
