@@ -300,7 +300,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
         return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord, interpretedFields);
     }
-    
+
     @Override
     public Map<String, FieldSchema> getDefaultFieldSchemaForMatch() {
         return defaultFieldSchemaForMatch;
@@ -396,7 +396,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     private String getWarningPrefix(String modelId) {
-        return StringStandardizationUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId + "] => ";
+        return StringStandardizationUtils.objectIsNullOrEmptyString(modelId) ? ""
+                : "[For ModelId - " + modelId + "] => ";
     }
 
     protected boolean shouldStopCheckForScoreDerivation(String path) throws IOException {
@@ -439,21 +440,26 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         boolean withinRange = false;
         if (bucketMetadataList != null && !bucketMetadataList.isEmpty()) {
             for (BucketMetadata bucketMetadata : bucketMetadataList) {
+                // leftBoundScore is the upper bound, and the rightBoundScore is
+                // the lower bound
                 int leftBoundScore = bucketMetadata.getLeftBoundScore();
                 int rightBoundScore = bucketMetadata.getRightBoundScore();
                 BucketName currentBucketName = bucketMetadata.getBucketName();
-                if (leftBoundScore < min) {
-                    min = leftBoundScore;
+                if (rightBoundScore < min) {
+                    min = rightBoundScore;
                     minBucket = currentBucketName;
                 }
-                if (rightBoundScore > max) {
-                    max = rightBoundScore;
+                if (leftBoundScore > max) {
+                    max = leftBoundScore;
                     maxBucket = currentBucketName;
                 }
-                if (percentile > leftBoundScore && percentile <= rightBoundScore) {
+                if (percentile > rightBoundScore && percentile <= leftBoundScore) {
                     withinRange = true;
                     bucketName = currentBucketName;
                 }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("min: %d, manx: %d", min, max));
             }
             if (min > max) {
                 throw new RuntimeException("Bucket metadata has wrong buckets");
