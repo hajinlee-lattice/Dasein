@@ -46,10 +46,10 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     @Value("${datacloud.match.cache.loader.batch.size:25}")
     private int batchSize;
 
-    @Value("${datacloud.match.cache.loader.tasks.size:16}")
+    @Value("${datacloud.match.cache.loader.tasks.size:32}")
     private int tasksSize;
 
-    @Value("${datacloud.match.cache.loader.thread.pool.size:8}")
+    @Value("${datacloud.match.cache.loader.thread.pool.size:16}")
     private int poolSize;
 
     @Autowired
@@ -114,8 +114,17 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         List<Future<Integer>> futures = new ArrayList<>();
         AtomicLong counter = new AtomicLong();
         long recordStart = 0;
+        long currentRow = 0;
         while (iterator.hasNext()) {
             E record = iterator.next();
+            if (config.getStartRow() != null && currentRow < config.getStartRow()) {
+                continue;
+            }
+            if (config.getEndRow() != null && currentRow > config.getEndRow()) {
+                continue;
+            }
+            currentRow++;
+            
             records.add(record);
             if (records.size() >= batchSize) {
                 Future<Integer> future = executor
