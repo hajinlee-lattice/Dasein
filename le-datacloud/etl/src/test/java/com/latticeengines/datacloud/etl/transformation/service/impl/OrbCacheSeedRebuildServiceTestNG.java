@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -8,10 +9,13 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.OrbCacheSeed;
@@ -33,7 +37,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 public class OrbCacheSeedRebuildServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(OrbCacheSeedRebuildServiceTestNG.class);
 
     @Autowired
@@ -66,6 +69,7 @@ public class OrbCacheSeedRebuildServiceTestNG
         progress = transformData(progress);
         finish(progress);
         confirmResultFile(progress);
+        confirmIntermediateResultFile();
         cleanupProgressTables();
     }
 
@@ -298,7 +302,140 @@ public class OrbCacheSeedRebuildServiceTestNG
 
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        // TODO Auto-generated method stub
+        log.info("Start to verify records one by one.");
+        Object[][] expectedData = { { "1", "google.com", "Company1", "101-250M", ">10,000", "Media" },
+                { "3", "yahoo.com", "Company3", "null", "201-500", "null" },
+                { "4", "baidu.com", "Company4", "null", "null", "null" } };
+        int rowNum = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String id = String.valueOf(record.get("ID"));
+            String domain = String.valueOf(record.get("Domain"));
+            String name = String.valueOf(record.get("Name"));
+            String revenueRange = String.valueOf(record.get("RevenueRange"));
+            String employeeRange = String.valueOf(record.get("EmployeeRange"));
+            String primaryIndustry = String.valueOf(record.get("PrimaryIndustry"));
+            boolean flag = false;
+            for (Object[] data : expectedData) {
+                if (id.equals(data[0]) && domain.equals(data[1]) && name.equals(data[2]) && revenueRange.equals(data[3])
+                        && employeeRange.equals(data[4]) && primaryIndustry.equals(data[5])) {
+                    flag = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(flag);
+            rowNum++;
+        }
+        Assert.assertEquals(rowNum, 3);
+    }
+
+    void confirmIntermediateResultFile() {
+        String path = hdfsPathBuilder.constructSnapshotDir("OrbCacheSeed", targetVersion).toString();
+        System.out.println("Checking for result file: " + path);
+        List<String> files;
+        try {
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Assert.assertTrue(files.size() >= 2);
+        for (String file : files) {
+            if (!file.endsWith(SUCCESS_FLAG)) {
+                Assert.assertTrue(file.endsWith(".avro"));
+                continue;
+            }
+            Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
+        }
+
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        verifyIntermediateResultAvroRecords(records);
+    }
+
+    void verifyIntermediateResultAvroRecords(Iterator<GenericRecord> records) {
+        log.info("Start to verify records one by one.");
+        Object[][] expectedData = {
+                { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",
+                        "101-250M", "Media", "googlecompany3.com", "google.com", true, null },
+                { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",
+                        "101-250M", "Media", "google.com", "google.com", false, null },
+                { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",
+                        "101-250M", "Media", "googlecompany2.com", "google.com", true, null },
+                { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",
+                        "101-250M", "Media", "googledomain1.com", "google.com", true, true },
+                { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",
+                        "101-250M", "Media", "googlecompany1.com", "google.com", true, null },
+                { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",
+                        "101-250M", "Media", "googledomain2.com", "google.com", true, false },
+                { "2", "Company2", "company", null, null, null, null, null, null, null, "null", "null", "null",
+                        "google.com", "google.com", false, true },
+                { "2", "Company2", "company", null, null, null, null, null, null, null, "null", "null", "null",
+                        "googledomain1.com", "google.com", true, false },
+                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", "null", "null",
+                        "yahoocompany1.com", "yahoo.com", true, null },
+                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", "null", "null",
+                        "yahoocompany2.com", "yahoo.com", true, null },
+                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", "null", "null",
+                        "yahoo.com", "yahoo.com", false, null },
+                { "4", "Company4", "company", null, null, null, null, null, null, null, "null", "null", "null",
+                        "baidu.com", "baidu.com", false, null } };
+        int rowNum = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String orbNum = String.valueOf(record.get("OrbNum"));
+            String name = String.valueOf(record.get("Name"));
+            String entityType = String.valueOf(record.get("EntityType"));
+            Integer employee = (record.get("Employee") == null) ? null : ((Integer) record.get("Employee"));
+            Integer locationEmployee = (record.get("Employee") == null) ? null
+                    : ((Integer) record.get("LocationEmployee"));
+            Long facebookLikes = (record.get("FacebookLikes") == null) ? null : ((Long) record.get("FacebookLikes"));
+            Long twitterFollowers = (record.get("TwitterFollowers") == null) ? null
+                    : ((Long) record.get("TwitterFollowers"));
+            Long totalAmountRaised = (record.get("TotalAmountRaised") == null) ? null
+                    : ((Long) record.get("TotalAmountRaised"));
+            Long lastFundingRoundAmount = (record.get("LastFundingRoundAmount") == null) ? null
+                    : ((Long) record.get("LastFundingRoundAmount"));
+            Long searchRank = (record.get("SearchRank") == null) ? null : ((Long) record.get("SearchRank"));
+            String consolidateEmployeeRange = String.valueOf(record.get("ConsolidateEmployeeRange"));
+            String consolidateRevenueRange = String.valueOf(record.get("ConsolidateRevenueRange"));
+            String primaryIndustry = String.valueOf(record.get("PrimaryIndustry"));
+            String domain = String.valueOf(record.get("Domain"));
+            String primaryDomain = String.valueOf(record.get("PrimaryDomain"));
+            Boolean isSecondaryDomain = (record.get("IsSecondaryDomain") == null) ? null
+                    : ((Boolean) record.get("IsSecondaryDomain"));
+            Boolean domainHasEmail = (record.get("DomainHasEmail") == null) ? null
+                    : ((Boolean) record.get("DomainHasEmail"));
+            log.info(String
+                    .format("OrbNum = %s, Name = %s, EntityType = %s, Employee = %d, LocationEmployee = %d, FacebookLikes = %d, "
+                            + "TwitterFollowers = %d, TotalAmountRaised = %d, LastFundingRoundAmount = %d, SearchRank = %d, ConsolidateEmployeeRange = %s, "
+                            + "ConsolidateRevenueRange = %s, PrimaryIndustry = %s, Domain = %s, PrimaryDomain = %s, IsSecondaryDomain = %s, DomainHasEmail = %s",
+                    orbNum, name, entityType, employee, locationEmployee, facebookLikes, twitterFollowers,
+                    totalAmountRaised, lastFundingRoundAmount, searchRank, consolidateEmployeeRange,
+                    consolidateRevenueRange, primaryIndustry, domain, primaryDomain,
+                    isSecondaryDomain == null ? null : String.valueOf(domainHasEmail),
+                    domainHasEmail == null ? null : String.valueOf(domainHasEmail)));
+            boolean flag = false;
+            for (Object[] data : expectedData) {
+                if (orbNum.equals(data[0]) && name.equals(data[1]) && entityType.equals(data[2])
+                        && ((employee == null && data[3] == null) || employee.equals(data[3]))
+                        && ((locationEmployee == null && data[4] == null) || locationEmployee.equals(data[4]))
+                        && ((facebookLikes == null && data[5] == null) || facebookLikes.equals(data[5]))
+                        && ((twitterFollowers == null && data[6] == null) || twitterFollowers.equals(data[6]))
+                        && ((totalAmountRaised == null && data[7] == null) || totalAmountRaised.equals(data[7]))
+                        && ((lastFundingRoundAmount == null && data[8] == null)
+                                || lastFundingRoundAmount.equals(data[8]))
+                        && ((searchRank == null && data[9] == null) || searchRank.equals(data[9]))
+                        && consolidateEmployeeRange.equals(data[10])
+                        && consolidateRevenueRange.equals(data[11]) && primaryIndustry.equals(data[12])
+                        && domain.equals(data[13]) && primaryDomain.equals(data[14]) && isSecondaryDomain == data[15]
+                        && domainHasEmail == data[16]) {
+                    flag = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(flag);
+            rowNum++;
+        }
+        Assert.assertEquals(rowNum, 12);
 
     }
 }
