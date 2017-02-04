@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 
 public interface ModelSummaryDownloadFlagEntityMgr extends BaseEntityMgr<ModelSummaryDownloadFlag> {
 
-    List<ModelSummaryDownloadFlag> getWaitingFlags();
+    List<String> getWaitingFlags();
 
     void addDownloadFlag(String tenantId);
 

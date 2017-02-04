@@ -1,15 +1,20 @@
 package com.latticeengines.pls.dao.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.type.StringType;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 import com.latticeengines.pls.dao.ModelSummaryDownloadFlagDao;
+
+import javax.persistence.Table;
 
 @Component("modelSummaryDownloadFlagDao")
 public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDownloadFlag> implements ModelSummaryDownloadFlagDao {
@@ -18,22 +23,32 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
         return ModelSummaryDownloadFlag.class;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<ModelSummaryDownloadFlag> getWaitingFlags() {
+    public List<String> getWaitingFlags() {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
-        String queryStr = String.format("from %s",
-                entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        List<?> list = query.list();
+        String msFlagTable = entityClz.getAnnotation(Table.class).name();
+        String sqlStr = String.format("SELECT msFlag.Tenant_ID FROM %s as msFlag GROUP BY msFlag.Tenant_ID",
+                msFlagTable);
+        SQLQuery sqlQuery = session.createSQLQuery(sqlStr).addScalar("Tenant_ID", new StringType());
+        List<String> list = sqlQuery.list();
         if (list.size() == 0) {
             return null;
         } else {
-            List<ModelSummaryDownloadFlag> allFlags = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                allFlags.add((ModelSummaryDownloadFlag) list.get(i));
-            }
-            return allFlags;
+            return list;
         }
+    }
+
+    @Override
+    public void deleteOldFlags(long timeTicks) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
+        Timestamp timeLimit = new Timestamp(timeTicks);
+        String queryStr = String.format("delete from %s where MARK_TIME < :timeLimit",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("timeLimit", timeLimit);
+        query.executeUpdate();
     }
 }

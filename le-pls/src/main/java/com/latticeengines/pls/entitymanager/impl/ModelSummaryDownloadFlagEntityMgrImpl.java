@@ -28,7 +28,7 @@ public class ModelSummaryDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<Mod
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ModelSummaryDownloadFlag> getWaitingFlags() {
+    public List<String> getWaitingFlags() {
         return modelSummaryDownloadFlagDao.getWaitingFlags();
     }
 
@@ -44,16 +44,7 @@ public class ModelSummaryDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<Mod
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeDownloadedFlag(long timeTicks) {
-        List<ModelSummaryDownloadFlag> downloadedFlags = modelSummaryDownloadFlagDao.getWaitingFlags();
-        if (downloadedFlags != null) {
-            for (int i = 0; i < downloadedFlags.size(); i++) {
-                if (downloadedFlags.get(i).getMarkTime().getTime() < timeTicks) {
-                    modelSummaryDownloadFlagDao.delete(downloadedFlags.get(i));
-                } else {
-                    return;
-                }
-            }
-        }
+        modelSummaryDownloadFlagDao.deleteOldFlags(timeTicks);
     }
 
 

@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import org.hibernate.annotations.Index;
 
 @Entity
 @Table(name = "MODEL_SUMMARY_DOWNLOAD_FLAGS")
@@ -26,10 +27,12 @@ public class ModelSummaryDownloadFlag implements HasPid {
     private Long pid;
 
     @JsonProperty("tenant_id")
+    @Index(name = "IX_TENANT_ID")
     @Column(name = "Tenant_ID")
     private String tenantId;
 
     @JsonProperty("mark_time")
+    @Index(name = "IX_MARK_TIME")
     @Column(name = "MARK_TIME")
     private Date markTime;
 

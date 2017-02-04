@@ -87,9 +87,11 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         }
 
         List<String> files = new ArrayList<>();
-
         try {
+            long startTime = System.currentTimeMillis();
             files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
+            long recursiveGetFilesTime = System.currentTimeMillis() - startTime;
+            log.info(String.format("Recursive get files from Hdfs duration: %d milliseconds", recursiveGetFilesTime));
             log.debug(String.format("%d file(s) downloaded from modeling service for tenant %s.",
                     files.size(), tenant.getId()));
         } catch (FileNotFoundException e) {
@@ -116,6 +118,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                     }
                 }
                 String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
+                long getHdfsFileContentsTime = System.currentTimeMillis() - startTime;
+                log.info(String.format("Reading data from %s elapse %d milliseconds", file, getHdfsFileContentsTime));
                 ModelSummary summary = parser.parse(file, contents);
                 String[] tokens = file.split("/");
                 summary.setTenant(tenant);
@@ -132,16 +136,16 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                             String.format("Cannot set application id of model summary with id %s.",
                                     modelSummaryId));
                 }
-                long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
-                log.info(String.format(
-                        "Creating model summary with id %s appId %s from file %s. Duration: %d seconds.", //
-                        summary.getId(), summary.getApplicationId(), file, totalSeconds));
                 constraintViolationId = summary.getId();
                 modelSummaryEntityMgr.create(summary);
                 foundFilesToDownload = true;
                 if (summary.getEventTableName().startsWith("copy_")) {
                     createBucketMetadatasForCopiedModel(summary.getId());
                 }
+                long totalTime = System.currentTimeMillis() - startTime;
+                log.info(String.format(
+                        "Creating model summary with id %s appId %s from file %s. Duration: %d milliseconds.", //
+                        summary.getId(), summary.getApplicationId(), file, totalTime));
             } catch (BlockMissingException e) {
                 log.error(e);
                 // delete the bad model summary file

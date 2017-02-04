@@ -7,5 +7,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 
 public interface ModelSummaryDownloadFlagDao extends BaseDao<ModelSummaryDownloadFlag> {
 
-    List<ModelSummaryDownloadFlag> getWaitingFlags();
+    List<String> getWaitingFlags();
+
+    void deleteOldFlags(long timeTicks);
 }

@@ -130,12 +130,9 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 
     private Boolean partialDownload() {
         long startTime = System.currentTimeMillis();
-        List<ModelSummaryDownloadFlag> waitingFlags = modelSummaryDownloadFlagEntityMgr.getWaitingFlags();
+        List<String> waitingFlags = modelSummaryDownloadFlagEntityMgr.getWaitingFlags();
         if (waitingFlags != null && waitingFlags.size() > 0) {
-            HashSet<String> tenantIds = new HashSet<> ();
-            for (ModelSummaryDownloadFlag flag : waitingFlags) {
-                tenantIds.add(flag.getTenantId());
-            }
+            HashSet<String> tenantIds = new HashSet<>(waitingFlags);
             Set<String> modelSummaryIds = getModelSummaryIds();
             List<Future<Boolean>> futures = new ArrayList<>();
             log.info(String.format("Begin download following tenants: %s", tenantIds.toString()));
