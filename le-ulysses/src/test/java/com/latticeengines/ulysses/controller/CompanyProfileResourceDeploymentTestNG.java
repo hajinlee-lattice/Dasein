@@ -5,6 +5,8 @@ import static org.testng.AssertJUnit.assertNotNull;
 
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
@@ -33,5 +35,17 @@ public class CompanyProfileResourceDeploymentTestNG extends UlyssesDeploymentTes
             thrown = true;
         }
         assertTrue(thrown);
+    }
+
+    @Test(groups = "deployment")
+    public void testIgnoreProperties() {
+        String url = ulyssesHostPort + "/ulysses/companyprofiles/?enforceFuzzyMatch=true";
+        ObjectNode body = JsonUtils.createObjectNode();
+        body.put("record", JsonUtils.createObjectNode());
+        ObjectNode record = (ObjectNode) body.get("record");
+        record.put("Email", "someuser@google.com");
+        body.put("ignoreMe", "foo");
+        CompanyProfile profile = getOAuth2RestTemplate().postForObject(url, body, CompanyProfile.class);
+        assertNotNull(profile);
     }
 }
