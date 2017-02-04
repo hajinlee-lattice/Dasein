@@ -407,6 +407,7 @@
                         margin: 0.25em 0 1em;
                         font-weight: bold;
                         .category-icon {
+                            position: relative;
                             height: 36px;
                             width: 36px;
                             border-width: 1px;
@@ -422,6 +423,19 @@
                                 margin-bottom: 5px;
                                 height: 100%;
                                 width: 100%;
+                            }
+                            .highlighted-decoration {
+                                position: absolute;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                white-space: nowrap;
+                                margin: 0 10px;
+                                &:first-child {
+                                    right: 100%;
+                                }
+                                &:last-child {
+                                    left: 100%;
+                                }
                             }
                         }
                         strong {

@@ -17,15 +17,15 @@
                         <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
                     </div>
                 </li>
-                <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed" ng-if="vm.section != 'lookup'">
+                <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
                     <h2 class="button icon-button white-button" ng-class="{active:openFilters, selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
                         <i class="fa fa-filter"></i>
                     </h2>
                     <ul class="dropdown">
-                        <li ng-if="vm.section != 'browse'"><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
-                        <li><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
-                        <li><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
-                        <li ng-if="vm.show_internal_filter"><input type="checkbox" id="internal" name="internal" ng-model="vm.metadata.toggle.show.internal" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.internal" /> <label for="internal">Include Internal Attributes</label></li>
+                        <li ng-if="!vm.lookupMode && vm.section != 'browse'"><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
+                        <li ng-if="!vm.lookupMode"><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
+                        <li ng-if="!vm.lookupMode"><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
+                        <li ng-if="!vm.lookupMode && vm.show_internal_filter"><input type="checkbox" id="internal" name="internal" ng-model="vm.metadata.toggle.show.internal" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.internal" /> <label for="internal">Include Internal Attributes</label></li>
                         <li ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls" ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" /> <label for="nulls">Include "No" Attributes</label></li>
                     </ul>
                 </li>
@@ -240,17 +240,23 @@
                     <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">
+                            <h2 title="{{enrichment.DisplayName}}">
+                                <div class="category-icon">
+                                    <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted">
+                                        <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
+                                    </div>
+                                    <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" />
+                                    <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted">
+                                        <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                                <strong>{{enrichment.DisplayName}}</strong>
+                            </h2>
+                            <!--// keep this below the h2 so that the z-indexes work with out setting z-index in the css -->
                             <ul class="tags">
                                 <li data-corner-ribbon="premium" ng-if="enrichment.IsPremium" class="premium noselect-children"><strong>premium</strong></li>
                                 <li data-corner-ribbon="internal" ng-if="enrichment.IsInternal" class="internal noselect-children"><strong>internal</strong></li>
                             </ul>
-                            <h2 title="{{enrichment.DisplayName}}">
-                                <div class="category-icon">
-                                    <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" />
-                                </div>
-
-                                <strong>{{enrichment.DisplayName}}</strong>
-                            </h2>
                         </div>
 
                         <p class="description" title="{{enrichment.Description}}">
@@ -261,7 +267,7 @@
                         <span class="lesser-description" ng-if="vm.lookupMode">
                             {{ enrichment.Description }}
                         </span>
-                        <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.section != 'lookup'">
+                        <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && vm.section != 'lookup'">
                             <h5><label>Attribute range</label><label>Records</label></h5>
                             <ul>
                               <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List"><label>{{stat.Lbl}}</label> <span style="width: {{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt)|number:0}}%;"><span class="{{vm.categoryClass(enrichment.Category)}} background-color" ></span></span><em>{{stat.Cnt|number}}</em></li>
