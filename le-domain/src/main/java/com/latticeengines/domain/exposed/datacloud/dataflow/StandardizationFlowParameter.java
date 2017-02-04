@@ -24,11 +24,11 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("StringFields")
     private String[] stringFields;
 
-    @JsonProperty("StringToIntFields")
-    private String[] stringToIntFields;
+    @JsonProperty("ConvertTypeFields")
+    private String[] convertTypeFields;
 
-    @JsonProperty("StringToLongFields")
-    private String[] stringToLongFields;
+    @JsonProperty("ConvertTypeStrategies")
+    private TypeConvertStrategy[] convertTypeStrategies;
 
     @JsonProperty("DedupFields")
     private String[] dedupFields;
@@ -56,6 +56,9 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     @JsonProperty("RetainFields")
     private String[] retainFields;
+
+    @JsonProperty("DiscardFields")
+    private String[] discardFields;
 
     @JsonProperty("AddNullFields")
     private String[] addNullFields;
@@ -134,20 +137,20 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         this.stringFields = stringFields;
     }
 
-    public String[] getStringToIntFields() {
-        return stringToIntFields;
+    public String[] getConvertTypeFields() {
+        return convertTypeFields;
     }
 
-    public void setStringToIntFields(String[] stringToIntFields) {
-        this.stringToIntFields = stringToIntFields;
+    public void setConvertTypeFields(String[] convertTypeFields) {
+        this.convertTypeFields = convertTypeFields;
     }
 
-    public String[] getStringToLongFields() {
-        return stringToLongFields;
+    public TypeConvertStrategy[] getConvertTypeStrategies() {
+        return convertTypeStrategies;
     }
 
-    public void setStringToLongFields(String[] stringToLongFields) {
-        this.stringToLongFields = stringToLongFields;
+    public void setConvertTypeStrategies(TypeConvertStrategy[] convertTypeStrategies) {
+        this.convertTypeStrategies = convertTypeStrategies;
     }
 
     public String[] getDedupFields() {
@@ -348,6 +351,14 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setRangeMapFileNames(String[] rangeMapFileNames) {
         this.rangeMapFileNames = rangeMapFileNames;
+    }
+
+    public String[] getDiscardFields() {
+        return discardFields;
+    }
+
+    public void setDiscardFields(String[] discardFields) {
+        this.discardFields = discardFields;
     }
 
 }

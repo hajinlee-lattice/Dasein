@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.ConsolidateIndustryFromNaicsFunction;
 import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateIndustryFromNaicsFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.StateStandardizationFunction;
@@ -25,6 +25,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.StringStandardizat
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ValueToRangeMappingFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
@@ -55,11 +56,8 @@ public class SourceStandardizationFlow
             case COUNTRY:
                 source = standardizeCountry(source, parameters.getCountryFields(), parameters.getStandardCountries());
                 break;
-            case STRING_TO_INT:
-                source = stringToInt(source, parameters.getStringToIntFields());
-                break;
-            case STRING_TO_LONG:
-                source = stringToLong(source, parameters.getStringToLongFields());
+            case CONVERT_TYPE:
+                source = convertType(source, parameters.getConvertTypeFields(), parameters.getConvertTypeStrategies());
                 break;
             case DEDUP:
                 source = dedup(source, parameters.getDedupFields());
@@ -105,6 +103,9 @@ public class SourceStandardizationFlow
             case STATE:
                 source = standardizeState(source, parameters.getCountryFields(), parameters.getStateFields());
                 break;
+            case DISCARD:
+                source = discard(source, parameters.getDiscardFields());
+                break;
             default:
                 break;
             }
@@ -113,6 +114,13 @@ public class SourceStandardizationFlow
         return source;
     }
     
+    private Node discard(Node source, String[] discardFields) {
+        if (discardFields != null && discardFields.length != 0) {
+            source = source.discard(new FieldList(discardFields));
+        }
+        return source;
+    }
+
     private Node standardizeState(Node source, String[] countryFields, String[] stateFields) {
         if (countryFields != null && countryFields.length > 0 && stateFields != null && stateFields.length > 0) {
             String countryField = countryFields[0];
@@ -363,25 +371,29 @@ public class SourceStandardizationFlow
         return source;
     }
 
-    private Node stringToInt(Node source, String[] stringToIntFields) {
-        if (stringToIntFields != null && stringToIntFields.length > 0) {
-            for (String stringToIntField : stringToIntFields) {
-                TypeConvertFunction function = new TypeConvertFunction(stringToIntField,
-                        TypeConvertFunction.ConvertTrategy.STRING_TO_INT);
-                source = source.apply(function, new FieldList(stringToIntField),
-                        new FieldMetadata(stringToIntField, Integer.class));
-            }
-        }
-        return source;
-    }
-
-    private Node stringToLong(Node source, String[] stringToLongFields) {
-        if (stringToLongFields != null && stringToLongFields.length > 0) {
-            for (String stringToLongField : stringToLongFields) {
-                TypeConvertFunction function = new TypeConvertFunction(stringToLongField,
-                        TypeConvertFunction.ConvertTrategy.STRING_TO_LONG);
-                source = source.apply(function, new FieldList(stringToLongField),
-                        new FieldMetadata(stringToLongField, Long.class));
+    private Node convertType(Node source, String[] convertTypeFields, TypeConvertStrategy[] strategies) {
+        if (convertTypeFields != null && convertTypeFields.length > 0 && strategies != null
+                && strategies.length > 0 && convertTypeFields.length == strategies.length) {
+            for (int i = 0; i < convertTypeFields.length; i++) {
+                String convertTypeField = convertTypeFields[i];
+                TypeConvertStrategy strategy = strategies[i];
+                TypeConvertFunction function = new TypeConvertFunction(convertTypeField, strategy);
+                switch (strategy) {
+                case STRING_TO_INT:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Integer.class));
+                    break;
+                case STRING_TO_LONG:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Long.class));
+                    break;
+                case STRING_TO_BOOLEAN:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, Boolean.class));
+                    break;
+                default:
+                    break;
+                }
             }
         }
         return source;

@@ -19,11 +19,14 @@ import com.latticeengines.datacloud.core.source.impl.OrbCompanyRaw;
 import com.latticeengines.datacloud.core.source.impl.OrbDomainRaw;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.OrbCacheSeedRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateIndustryStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.FieldType;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 
@@ -101,12 +104,12 @@ public class OrbCacheSeedRebuildServiceTestNG
 
             // Data cleanup for OrbCompany
             TransformationStepConfig step2 = new TransformationStepConfig();
-            List<Integer> inputSteps = new ArrayList<Integer>();
-            inputSteps.add(0);
-            step2.setInputSteps(inputSteps);
+            baseSources = new ArrayList<String>();
+            baseSources.add("OrbCompanyRawMarked");
+            step2.setBaseSources(baseSources);
             step2.setTransformer("standardizationTransformer");
             step2.setTargetSource("OrbCompany");
-            String confParamStr2 = getStandardizationTransformerConfigForOrbCompanyCleanup();
+            String confParamStr2 = getStandardizationTransformerConfigForCleanup();
             step2.setConfiguration(confParamStr2);
 
             // Field standardization for OrbDomain
@@ -115,30 +118,40 @@ public class OrbCacheSeedRebuildServiceTestNG
             baseSources.add("OrbDomainRaw");
             step3.setBaseSources(baseSources);
             step3.setTransformer("standardizationTransformer");
-            step3.setTargetSource("OrbDomain");
+            step3.setTargetSource("OrbDomainRawMarked");
             String confParamStr3 = getStandardizationTransformerConfigForOrbDomain();
             step3.setConfiguration(confParamStr3);
 
-            // Generate OrbCacheSeed
+            // Data cleanup for OrbDomain
             TransformationStepConfig step4 = new TransformationStepConfig();
+            baseSources = new ArrayList<String>();
+            baseSources.add("OrbDomainRawMarked");
+            step4.setBaseSources(baseSources);
+            step4.setTransformer("standardizationTransformer");
+            step4.setTargetSource("OrbDomain");
+            String confParamStr4 = getStandardizationTransformerConfigForCleanup();
+            step4.setConfiguration(confParamStr4);
+
+            // Generate OrbCacheSeed
+            TransformationStepConfig step5 = new TransformationStepConfig();
             baseSources = new ArrayList<String>();
             baseSources.add("OrbCompany");
             baseSources.add("OrbDomain");
-            step4.setBaseSources(baseSources);
-            step4.setTransformer("orbCacheSeedRebuildTransformer");
-            step4.setTargetSource("OrbCacheSeed");
-            String confParamStr4 = getOrbCacheSeedRebuildConfig();
-            step4.setConfiguration(confParamStr4);
+            step5.setBaseSources(baseSources);
+            step5.setTransformer("orbCacheSeedRebuildTransformer");
+            step5.setTargetSource("OrbCacheSeed");
+            String confParamStr5 = getOrbCacheSeedRebuildConfig();
+            step5.setConfiguration(confParamStr5);
 
             // Generate OrbCacheSeedStantard
-            TransformationStepConfig step5 = new TransformationStepConfig();
+            TransformationStepConfig step6 = new TransformationStepConfig();
             baseSources = new ArrayList<String>();
             baseSources.add("OrbCacheSeed");
-            step5.setBaseSources(baseSources);
-            step5.setTransformer("standardizationTransformer");
-            step5.setTargetSource(targetSourceName);
-            String confParamStr5 = getOrbCacheSeedStandardConfig();
-            step5.setConfiguration(confParamStr5);
+            step6.setBaseSources(baseSources);
+            step6.setTransformer("standardizationTransformer");
+            step6.setTargetSource(targetSourceName);
+            String confParamStr6 = getOrbCacheSeedStandardConfig();
+            step6.setConfiguration(confParamStr6);
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
@@ -147,6 +160,7 @@ public class OrbCacheSeedRebuildServiceTestNG
             steps.add(step3);
             steps.add(step4);
             steps.add(step5);
+            steps.add(step6);
 
             // -----------
             configuration.setSteps(steps);
@@ -161,15 +175,28 @@ public class OrbCacheSeedRebuildServiceTestNG
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] domainFields = { "Website" };
         conf.setDomainFields(domainFields);
-        String[] countryFields = { "Country" };
-        conf.setCountryFields(countryFields);
-        String[] stringToIntFields = { "Employee", "LocationEmployee" };
-        conf.setStringToIntFields(stringToIntFields);
-        String[] stringToLongFields = { "FacebookLikes", "TwitterFollowers", "TotalAmountRaised",
-                "LastFundingRoundAmount", "SearchRank" };
-        conf.setStringToLongFields(stringToLongFields);
+        String[] convertTypeFields = {"Employee", "LocationEmployee","FacebookLikes", "TwitterFollowers", "TotalAmountRaised", "LastFundingRoundAmount", "SearchRank" };
+        conf.setConvertTypeFields(convertTypeFields);
+        TypeConvertStrategy[] convertTypeStrategies = { TypeConvertStrategy.STRING_TO_INT,
+                TypeConvertStrategy.STRING_TO_INT, TypeConvertStrategy.STRING_TO_LONG,
+                TypeConvertStrategy.STRING_TO_LONG, TypeConvertStrategy.STRING_TO_LONG,
+                TypeConvertStrategy.STRING_TO_LONG, TypeConvertStrategy.STRING_TO_LONG };
+        conf.setConvertTypeStrategies(convertTypeStrategies);
         String[] dedupFields = { "OrbNum" };
         conf.setDedupFields(dedupFields);
+        String[] addConsolidatedRangeFields = { "ConsolidateEmployeeRange", "ConsolidateRevenueRange" };
+        conf.setAddConsolidatedRangeFields(addConsolidatedRangeFields);
+        ConsolidateRangeStrategy[] strategies = { ConsolidateRangeStrategy.MAP_VALUE,
+                ConsolidateRangeStrategy.MAP_RANGE };
+        conf.setConsolidateRangeStrategies(strategies);
+        String[] rangeInputFields = { "Employee", "RevenueRange" };
+        conf.setRangeInputFields(rangeInputFields);
+        String[] rangeMapFileNames = { "EmployeeRangeMapping.txt", "OrbRevenueRangeMapping.txt" };
+        conf.setRangeMapFileNames(rangeMapFileNames);
+        conf.setConsolidateIndustryStrategy(ConsolidateIndustryStrategy.MAP_INDUSTRY);
+        conf.setAddConsolidatedIndustryField("PrimaryIndustry");
+        conf.setIndustryField("Industry");
+        conf.setIndustryMapFileName("OrbIndustryMapping.txt");
         String markerExpression = "OrbNum != null && Website != null";
         conf.setMarkerExpression(markerExpression);
         String[] markerCheckFields = { "OrbNum", "Website" };
@@ -177,28 +204,46 @@ public class OrbCacheSeedRebuildServiceTestNG
         String markerField = "IsValid";
         conf.setMarkerField(markerField);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.DEDUP,
-                StandardizationStrategy.DOMAIN, StandardizationStrategy.COUNTRY, StandardizationStrategy.STRING_TO_INT,
-                StandardizationStrategy.STRING_TO_LONG, StandardizationStrategy.MARKER };
+                StandardizationStrategy.DOMAIN, StandardizationStrategy.CONVERT_TYPE,
+                StandardizationStrategy.CONSOLIDATE_RANGE,
+                StandardizationStrategy.CONSOLIDATE_INDUSTRY, StandardizationStrategy.MARKER };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
 
-    private String getStandardizationTransformerConfigForOrbCompanyCleanup() throws JsonProcessingException {
+    private String getStandardizationTransformerConfigForCleanup() throws JsonProcessingException {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String filterExpression = "IsValid == true";
         conf.setFilterExpression(filterExpression);
         String[] filterFields = { "IsValid" };
         conf.setFilterFields(filterFields);
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER };
+        String[] discardFields = { "IsValid" };
+        conf.setDiscardFields(discardFields);
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
+                StandardizationStrategy.DISCARD };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
 
     private String getStandardizationTransformerConfigForOrbDomain() throws JsonProcessingException {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
+        String[] dedupFields = { "OrbNum", "WebDomain" };
+        conf.setDedupFields(dedupFields);
         String[] domainFields = { "WebDomain" };
         conf.setDomainFields(domainFields);
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.DOMAIN };
+        String[] convertTypeFields = { "DomainHasEmail", "DomainHasWebsite", "DomainIsEmailHosting" };
+        conf.setConvertTypeFields(convertTypeFields);
+        TypeConvertStrategy[] convertTypeStrategies = { TypeConvertStrategy.STRING_TO_BOOLEAN,
+                TypeConvertStrategy.STRING_TO_BOOLEAN, TypeConvertStrategy.STRING_TO_BOOLEAN };
+        conf.setConvertTypeStrategies(convertTypeStrategies);
+        String markerExpression = "OrbNum != null && WebDomain != null";
+        conf.setMarkerExpression(markerExpression);
+        String[] markerCheckFields = { "OrbNum", "WebDomain" };
+        conf.setMarkerCheckFields(markerCheckFields);
+        String markerField = "IsValid";
+        conf.setMarkerField(markerField);
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.DEDUP,
+                StandardizationStrategy.DOMAIN, StandardizationStrategy.CONVERT_TYPE, StandardizationStrategy.MARKER };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
@@ -225,18 +270,20 @@ public class OrbCacheSeedRebuildServiceTestNG
         conf.setFilterExpression(filterExpression);
         String[] filterFields = { "IsSecondaryDomain", "DomainHasEmail" };
         conf.setFilterFields(filterFields);
-        String[][] renameFields = { { "OrbNum", "ID" }, { "Address1", "Street" }, { "Zip", "ZipCode" },
-                { "Phone", "PhoneNumber" } };
-        conf.setRenameFields(renameFields);
-        String[] retainFields = { "ID", "Domain", "Name", "Country", "State", "City", "Street", "ZipCode",
-                "PhoneNumber", "RevenueRange", "EmployeeRange", "Industry" };
+        String[] retainFields = { "OrbNum", "Domain", "Name", "Country", "State", "City", "Address1", "Zip", "Phone",
+                "ConsolidateRevenueRange", "ConsolidateEmployeeRange", "PrimaryIndustry" };
         conf.setRetainFields(retainFields);
+        String[][] renameFields = { { "OrbNum", "ID" }, { "Address1", "Street" }, { "Zip", "ZipCode" },
+                { "Phone", "PhoneNumber" }, { "ConsolidateRevenueRange", "RevenueRange" },
+                { "ConsolidateEmployeeRange", "EmployeeRange" } };
+        conf.setRenameFields(renameFields);
+
         String[] addNullFields = { "DUNS" };
         conf.setAddNullFields(addNullFields);
         StandardizationTransformerConfig.FieldType[] addNullFieldTypes = { FieldType.STRING };
         conf.setAddNullFieldTypes(addNullFieldTypes);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
-                StandardizationStrategy.RENAME, StandardizationStrategy.RETAIN,
+                StandardizationStrategy.RETAIN, StandardizationStrategy.RENAME,
                 StandardizationStrategy.ADD_NULL_FIELD };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);

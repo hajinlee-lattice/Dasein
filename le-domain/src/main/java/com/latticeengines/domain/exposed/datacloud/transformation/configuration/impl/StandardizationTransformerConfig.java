@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 
 public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("Sequence")
@@ -18,11 +19,11 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("StringFields")
     private String[] stringFields;
 
-    @JsonProperty("StringToIntFields")
-    private String[] stringToIntFields;
+    @JsonProperty("ConvertTypeFields")
+    private String[] convertTypeFields;
 
-    @JsonProperty("StringToLongFields")
-    private String[] stringToLongFields;
+    @JsonProperty("ConvertTypeStrategies")
+    private TypeConvertStrategy[] convertTypeStrategies;
 
     @JsonProperty("DedupFields")
     private String[] dedupFields;
@@ -50,6 +51,9 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     @JsonProperty("RetainFields")
     private String[] retainFields;
+
+    @JsonProperty("DiscardFields")
+    private String[] discardFields;
 
     @JsonProperty("AddNullFields")
     private String[] addNullFields;
@@ -94,7 +98,7 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private String[] rangeMapFileNames;
 
     public enum StandardizationStrategy {
-        DOMAIN, COUNTRY, STATE, STRING, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
+        DOMAIN, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_NULL_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
     }
 
     public enum FieldType {
@@ -141,20 +145,20 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         this.stringFields = stringFields;
     }
 
-    public String[] getStringToIntFields() {
-        return stringToIntFields;
+    public String[] getConvertTypeFields() {
+        return convertTypeFields;
     }
 
-    public void setStringToIntFields(String[] stringToIntFields) {
-        this.stringToIntFields = stringToIntFields;
+    public void setConvertTypeFields(String[] convertTypeFields) {
+        this.convertTypeFields = convertTypeFields;
     }
 
-    public String[] getStringToLongFields() {
-        return stringToLongFields;
+    public TypeConvertStrategy[] getConvertTypeStrategies() {
+        return convertTypeStrategies;
     }
 
-    public void setStringToLongFields(String[] stringToLongFields) {
-        this.stringToLongFields = stringToLongFields;
+    public void setConvertTypeStrategies(TypeConvertStrategy[] convertTypeStrategies) {
+        this.convertTypeStrategies = convertTypeStrategies;
     }
 
     public String[] getDedupFields() {
@@ -347,6 +351,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setRangeMapFileNames(String[] rangeMapFileNames) {
         this.rangeMapFileNames = rangeMapFileNames;
+    }
+
+    public String[] getDiscardFields() {
+        return discardFields;
+    }
+
+    public void setDiscardFields(String[] discardFields) {
+        this.discardFields = discardFields;
     }
     
     

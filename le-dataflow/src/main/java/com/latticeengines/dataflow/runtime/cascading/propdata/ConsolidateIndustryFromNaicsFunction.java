@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading;
+package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -18,7 +18,6 @@ public class ConsolidateIndustryFromNaicsFunction extends BaseOperation implemen
 
     private static final long serialVersionUID = 2410139712740071369L;
     private String naicsField;
-    // TreeMap ordered by key (length of naics string) descendingly
     private Map<Integer, Map<Serializable, Serializable>> naicsMap;
 
     public ConsolidateIndustryFromNaicsFunction(String naicsField, String consolidatedIndustryField,

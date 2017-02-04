@@ -31,7 +31,8 @@ public class OrbCacheSeedRebuildFlow extends ConfigurableFlowBase<OrbCacheSeedRe
     }
 
     private Node removeBranches(Node source, OrbCacheSeedRebuildConfig config) {
-        source = source.filter(String.format("%s == null || !(%s.equals(\"branch\"))",
+        source = source.filter(
+                String.format("%s == null || !(%s.equalsIgnoreCase(\"branch\"))",
                 config.getCompanyFileEntityTypeField(), config.getCompanyFileEntityTypeField()),
                 new FieldList(config.getCompanyFileEntityTypeField()));
         return source;

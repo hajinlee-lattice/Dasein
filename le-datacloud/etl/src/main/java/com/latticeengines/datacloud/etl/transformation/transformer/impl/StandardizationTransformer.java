@@ -12,6 +12,7 @@ import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.DomainValidation;
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
@@ -75,26 +76,25 @@ public class StandardizationTransformer
                     }
                 }
                 break;
-            case STRING_TO_INT:
-                if (config.getStringToIntFields() == null || config.getStringToIntFields().length == 0) {
-                    log.error("StringToInt fields are required for string to int type convertion");
+            case CONVERT_TYPE:
+                if (config.getConvertTypeFields() == null || config.getConvertTypeFields().length == 0
+                        || config.getConvertTypeStrategies() == null || config.getConvertTypeStrategies().length == 0) {
+                    log.error("ConvertTypeFields and ConvertTypeStrategies are required for type convertion");
                     return false;
                 }
-                for (String stringToIntField : config.getStringToIntFields()) {
-                    if (StringUtils.isEmpty(stringToIntField)) {
-                        log.error("Empty string or null is not allowed for StringToInt field");
+                if (config.getConvertTypeFields().length != config.getConvertTypeStrategies().length) {
+                    log.error("Must provide same number of ConvertTypeFields and ConvertTypeStrategies");
+                    return false;
+                }
+                for (String convertTypeField : config.getConvertTypeFields()) {
+                    if (StringUtils.isEmpty(convertTypeField)) {
+                        log.error("Empty string or null is not allowed for ConvertTypeField");
                         return false;
                     }
                 }
-                break;
-            case STRING_TO_LONG:
-                if (config.getStringToLongFields() == null || config.getStringToLongFields().length == 0) {
-                    log.error("StringToLong fields are required for string to long type convertion");
-                    return false;
-                }
-                for (String stringToLongField : config.getStringToLongFields()) {
-                    if (StringUtils.isEmpty(stringToLongField)) {
-                        log.error("Empty string or null is not allowed for StringToLong field");
+                for (TypeConvertStrategy convertTypeStrategy : config.getConvertTypeStrategies()) {
+                    if (convertTypeStrategy == null) {
+                        log.error("Null is not allowed for ConvertTypeStrategy");
                         return false;
                     }
                 }
@@ -291,6 +291,18 @@ public class StandardizationTransformer
                     }
                 }
                 break;
+            case DISCARD:
+                if (config.getDiscardFields() == null || config.getDiscardFields().length == 0) {
+                    log.error("DiscardFields are required to discard attributes from a source ");
+                    return false;
+                }
+                for (String discardField : config.getDiscardFields()) {
+                    if (StringUtils.isEmpty(discardField)) {
+                        log.error("EMpty string or null is not allowed in DiscardFields");
+                        return false;
+                    }
+                }
+                break;
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
@@ -315,8 +327,8 @@ public class StandardizationTransformer
         parameters.setDomainFields(config.getDomainFields());
         parameters.setCountryFields(config.getCountryFields());
         parameters.setStateFields(config.getStateFields());
-        parameters.setStringToIntFields(config.getStringToIntFields());
-        parameters.setStringToLongFields(config.getStringToLongFields());
+        parameters.setConvertTypeFields(config.getConvertTypeFields());
+        parameters.setConvertTypeStrategies(config.getConvertTypeStrategies());
         parameters.setDedupFields(config.getDedupFields());
         parameters.setFilterExpression(config.getFilterExpression());
         parameters.setFilterFields(config.getFilterFields());
@@ -343,6 +355,7 @@ public class StandardizationTransformer
         parameters.setRangeInputFields(config.getRangeInputFields());
         parameters.setConsolidateRangeStrategies(config.getConsolidateRangeStrategies());
         parameters.setRangeMapFileNames(config.getRangeMapFileNames());
+        parameters.setDiscardFields(config.getDiscardFields());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

@@ -23,6 +23,7 @@ import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.DnBCacheSeedRaw;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -116,19 +117,20 @@ public class DnBCacheSeedCleanServiceImplTestNG
         conf.setAddConsolidatedIndustryField(LE_PRIMARY_INDUSTRY);
         conf.setNaicsField("LE_NAICS_CODE");
         conf.setNaicsMapFileName("NaicsIndustryMapping.txt");
-        String[] stringToIntFields = { LE_NUMBER_OF_LOCATIONS, EMPLOYEES_HERE, EMPLOYEES_TOTAL,
-                NUMBER_OF_FAMILY_MEMBERS };
-        conf.setStringToIntFields(stringToIntFields);
-        String[] stringToLongFields = { SALES_VOLUME_LOCAL_CURRENCY, SALES_VOLUME_US_DOLLARS };
-        conf.setStringToLongFields(stringToLongFields);
+        String[] convertTypeFields = { LE_NUMBER_OF_LOCATIONS, EMPLOYEES_HERE, EMPLOYEES_TOTAL,
+                NUMBER_OF_FAMILY_MEMBERS, SALES_VOLUME_LOCAL_CURRENCY, SALES_VOLUME_US_DOLLARS };
+        conf.setConvertTypeFields(convertTypeFields);
+        TypeConvertStrategy[] convertTypeStrategies = { TypeConvertStrategy.STRING_TO_INT,
+                TypeConvertStrategy.STRING_TO_INT, TypeConvertStrategy.STRING_TO_INT, TypeConvertStrategy.STRING_TO_INT,
+                TypeConvertStrategy.STRING_TO_LONG, TypeConvertStrategy.STRING_TO_LONG };
+        conf.setConvertTypeStrategies(convertTypeStrategies);
         String[] dedupFields = { DUNS_NUMBER, LE_DOMAIN };
         conf.setDedupFields(dedupFields);
         String uploadTimestampField = "LE_Last_Upload_Date";
         conf.setUploadTimestampField(uploadTimestampField);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
                 StandardizationStrategy.DOMAIN, StandardizationStrategy.CONSOLIDATE_INDUSTRY,
-                StandardizationStrategy.STRING_TO_INT,
-                StandardizationStrategy.STRING_TO_LONG, StandardizationStrategy.DEDUP,
+                StandardizationStrategy.CONVERT_TYPE, StandardizationStrategy.DEDUP,
                 StandardizationStrategy.UPLOAD_TIMESTAMP };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
