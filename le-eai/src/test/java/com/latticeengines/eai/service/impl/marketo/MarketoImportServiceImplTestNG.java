@@ -62,6 +62,11 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         Table activityType = MarketoExtractAndImportUtil.createMarketoActivityType();
         Table lead = MarketoExtractAndImportUtil.createMarketoLead();
         Table activity = MarketoExtractAndImportUtil.createMarketoActivity();
+        
+        System.out.println(activityType);
+        System.out.println(lead);
+        System.out.println(activity);
+        
         tables.add(activityType);
         tables.add(lead);
         tables.add(activity);
@@ -70,7 +75,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         marketoImportConfig.setFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void importMetadata() {
         List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, importContext);
 
@@ -82,7 +87,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "importMetadata" }, enabled = false)
+    @Test(groups = "functional", dependsOnMethods = { "importMetadata" }, enabled = true)
     public void importDataAndWriteToHdfs() throws Exception {
         marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, importContext);
         Thread.sleep(10000L);
