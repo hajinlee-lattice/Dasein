@@ -117,12 +117,14 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         long currentRow = 0;
         while (iterator.hasNext()) {
             E record = iterator.next();
-            if ((config.getStartRow() != null && currentRow < config.getStartRow())
-                    || (config.getEndRow() != null && currentRow > config.getEndRow())) {
+            if (config.getStartRow() != null && currentRow < config.getStartRow()) {
                 continue;
             }
+            if (config.getEndRow() != null && currentRow > config.getEndRow()) {
+                break;
+            }
             currentRow++;
-
+            
             records.add(record);
             if (records.size() >= batchSize) {
                 Future<Integer> future = executor
@@ -300,7 +302,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
             if (StringUtils.isNotEmpty(config.getMatchGradeField())) {
                 Object matchGrade = getFieldValue(record, config.getMatchGradeField());
                 if (matchGrade == null) {
-                    matchContext.setMatchGrade((String) null);
+                    matchContext.setMatchGrade((String)null);
                 } else {
                     matchContext.setMatchGrade(matchGrade.toString());
                 }
