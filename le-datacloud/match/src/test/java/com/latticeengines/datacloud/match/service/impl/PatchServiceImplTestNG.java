@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,9 @@ public class PatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         patchServiceImpl = (PatchServiceImpl) patchService;
+        if (StringUtils.isEmpty(leStack)) {
+            leStack = "default";
+        }
     }
 
     @Test(groups = "functional")
