@@ -32,6 +32,12 @@ public class CacheLoaderConfig {
     @JsonProperty("dataCloudVersion")
     private String dataCloudVersion;
 
+    @JsonProperty("startRow")
+    private Long startRow;
+
+    @JsonProperty("endRow")
+    private Long endRow;
+
     public String getVersion() {
         return version;
     }
@@ -123,6 +129,22 @@ public class CacheLoaderConfig {
     public void setWhiteCache(boolean isWhiteCache) {
         this.isWhiteCache = isWhiteCache;
     }
+    
+    public Long getStartRow() {
+        return startRow;
+    }
+
+    public void setStartRow(Long startRow) {
+        this.startRow = startRow;
+    }
+
+    public Long getEndRow() {
+        return endRow;
+    }
+
+    public void setEndRow(Long endRow) {
+        this.endRow = endRow;
+    }
 
     @Override
     public String toString() {
@@ -130,7 +152,8 @@ public class CacheLoaderConfig {
                 + ", fieldMap=" + fieldMap + ", dunsField=" + dunsField + ", confidenceCode=" + confidenceCode
                 + ", matchGrade=" + matchGrade + ", matchGradeField=" + matchGradeField + ", confidenceCodeField="
                 + confidenceCodeField + ", isWhiteCache=" + isWhiteCache + ", dataCloudVersion=" + dataCloudVersion
-                + "]";
+                + ", startRow=" + startRow + ", endRow=" + endRow + "]";
     }
 
+    
 }
