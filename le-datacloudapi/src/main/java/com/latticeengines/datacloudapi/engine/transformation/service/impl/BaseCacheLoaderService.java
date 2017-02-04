@@ -304,7 +304,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         } else {
             if (StringUtils.isNotEmpty(config.getConfidenceCodeField())) {
                 Object confidence = getFieldValue(record, config.getConfidenceCodeField());
-                Integer confidenceCode = defaultConfidenceCode;
+                Integer confidenceCode = null;
                 if (confidence != null) {
                     try {
                         confidenceCode = Integer.valueOf(confidence.toString());
