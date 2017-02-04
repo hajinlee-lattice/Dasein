@@ -32,7 +32,8 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
 
     private static final String ACCOUNT_MASTER_SEED_CLEANED = "AccountMasterSeedCleaned";
 
-    private static final Log log = LogFactory.getLog(AccountMasterLookupRebuildServiceImplTestNG.class);
+    private static final Log log = LogFactory
+            .getLog(PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG.class);
 
     @Autowired
     PipelineSource source;
@@ -78,7 +79,8 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(baseAccountMasterSeedSource, baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(baseAccountMasterSeedSource.getSourceName(), baseSourceVersion)
+                .toString();
     }
 
     @Override
@@ -118,7 +120,7 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
         targetSourceName = ACCOUNT_MASTER_SEED_CLEANED;
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override

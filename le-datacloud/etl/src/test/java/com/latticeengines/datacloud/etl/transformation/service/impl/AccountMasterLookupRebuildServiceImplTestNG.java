@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -9,16 +11,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeed;
 import com.latticeengines.datacloud.core.source.impl.OrbCacheSeedSecondaryDomain;
+import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 public class AccountMasterLookupRebuildServiceImplTestNG
-        extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {
+        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final Log log = LogFactory.getLog(AccountMasterLookupRebuildServiceImplTestNG.class);
 
     private static final String LATTICEID = "LatticeID";
@@ -28,20 +36,30 @@ public class AccountMasterLookupRebuildServiceImplTestNG
     AccountMasterLookup source;
 
     @Autowired
-    AccountMasterSeed baseSource;
+    AccountMasterSeed baseSourceAccountMasterSeed;
 
     @Autowired
     OrbCacheSeedSecondaryDomain baseSourceOrbCacheSeedSecondaryDomain;
 
     @Autowired
-    private AccountMasterLookupRebuildService accountMasterLookupRebuildService;
+    SourceService sourceService;
+
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    private PipelineTransformationService pipelineTransformationService;
+
+    String targetSourceName = "AccountMasterLookup";
+
+    ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "functional")
     public void testTransformation() {
-        uploadBaseSourceFile(baseSource, baseSource.getSourceName() + "_Test" + source.getSourceName(),
+        uploadBaseSourceFile(baseSourceAccountMasterSeed, "AccountMasterSeed_TestAccountMasterLookup",
                 baseSourceVersion);
         uploadBaseSourceFile(baseSourceOrbCacheSeedSecondaryDomain,
-                baseSourceOrbCacheSeedSecondaryDomain.getSourceName() + "_Test", baseSourceVersion);
+                "OrbCacheSeedSecondaryDomain_TestAccountMasterLookup", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -50,8 +68,8 @@ public class AccountMasterLookupRebuildServiceImplTestNG
     }
 
     @Override
-    TransformationService<BasicTransformationConfiguration> getTransformationService() {
-        return accountMasterLookupRebuildService;
+    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+        return pipelineTransformationService;
     }
 
     @Override
@@ -60,20 +78,52 @@ public class AccountMasterLookupRebuildServiceImplTestNG
     }
 
     @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getBaseSources()[0], baseSourceVersion).toString();
+    String getPathToUploadBaseData() {
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    BasicTransformationConfiguration createTransformationConfiguration() {
-        BasicTransformationConfiguration configuration = new BasicTransformationConfiguration();
-        configuration.setVersion(targetVersion);
-        return configuration;
+    PipelineTransformationConfiguration createTransformationConfiguration() {
+        try {
+            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+
+            configuration.setName("AccountMasterLookupRebuild");
+            configuration.setVersion(targetVersion);
+
+            TransformationStepConfig step1 = new TransformationStepConfig();
+            List<String> baseSources = new ArrayList<String>();
+            baseSources.add("AccountMasterSeed");
+            baseSources.add("OrbCacheSeedSecondaryDomain");
+            step1.setBaseSources(baseSources);
+            step1.setTransformer("accountMasterLookupRebuildTransformer");
+            step1.setTargetSource(targetSourceName);
+            String confParamStr1 = getTransformerConfig();
+            step1.setConfiguration(confParamStr1);
+
+            // -----------
+            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            steps.add(step1);
+
+            // -----------
+            configuration.setSteps(steps);
+
+            return configuration;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getTransformerConfig() throws JsonProcessingException {
+        TransformerConfig conf = new TransformerConfig();
+        conf.setTransformer("accountMasterLookupRebuildTransformer");
+        return om.writeValueAsString(conf);
     }
 
     @Override
-    protected String getPathForResult() {
-        return hdfsPathBuilder.constructSnapshotDir(source, targetVersion).toString();
+    String getPathForResult() {
+        Source targetSource = sourceService.findBySourceName(targetSourceName);
+        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
@@ -112,4 +162,5 @@ public class AccountMasterLookupRebuildServiceImplTestNG
         }
         Assert.assertEquals(rowNum, 22);
     }
+
 }

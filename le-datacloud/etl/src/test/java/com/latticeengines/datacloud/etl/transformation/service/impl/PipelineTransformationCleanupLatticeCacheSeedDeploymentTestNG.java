@@ -50,7 +50,8 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
     private static final String LATTICE_CACHE_SEED_CLEANED = "LatticeCacheSeed";
 
-    private static final Log log = LogFactory.getLog(AccountMasterLookupRebuildServiceImplTestNG.class);
+    private static final Log log = LogFactory
+            .getLog(PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG.class);
 
     @Autowired
     private PipelineSource source;
@@ -112,7 +113,8 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(baseLatticeCacheSource, baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(baseLatticeCacheSource.getSourceName(), baseSourceVersion)
+                .toString();
     }
 
     @Override
@@ -271,7 +273,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         targetSourceName = LATTICE_CACHE_SEED_CLEANED;
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override

@@ -8,15 +8,13 @@ import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupKeyFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
 @Component("accountMasterLookupRebuildFlow")
-public class AccountMasterLookupRebuildFlow
-        extends TransformationFlowBase<BasicTransformationConfiguration, TransformationFlowParameters> {
+public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<TransformerConfig> {
 
     private final static String LATTICEID_FIELD = "LatticeID";
     private final static String KEY_FIELD = "Key";
@@ -30,10 +28,6 @@ public class AccountMasterLookupRebuildFlow
     private final static String PRIMARY_LOCATION_FIELD = "LE_IS_PRIMARY_LOCATION";
     private final static String GLOBAL_DUNS_FIELD = "GLOBAL_ULTIMATE_DUNS_NUMBER";
 
-    @Override
-    protected Class<? extends TransformationConfiguration> getTransConfClass() {
-        return BasicTransformationConfiguration.class;
-    }
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -110,5 +104,20 @@ public class AccountMasterLookupRebuildFlow
         node = node.apply(new AccountMasterLookupKeyFunction(KEY_FIELD, DOMAIN_FIELD, DUNS_FIELD),
                 new FieldList(node.getFieldNames()), new FieldMetadata(KEY_FIELD, String.class));
         return node.retain(new FieldList(LATTICEID_FIELD, KEY_FIELD));
+    }
+
+    @Override
+    public String getDataFlowBeanName() {
+        return "accountMasterLookupRebuildFlow";
+    }
+
+    @Override
+    public String getTransformerName() {
+        return "accountMasterLookupRebuildTransformer";
+    }
+
+    @Override
+    public Class<? extends TransformerConfig> getTransformerConfigClass() {
+        return TransformerConfig.class;
     }
 }
