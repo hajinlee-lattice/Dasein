@@ -109,7 +109,7 @@ public class DnBCacheSeedCleanServiceImplTestNG
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String filterExpression = "DUNS_NUMBER != null";
         conf.setFilterExpression(filterExpression);
-        String[] filterFields = { DUNS_NUMBER, "LE_PRIMARY_DUNS", "LE_INDUSTRY" };
+        String[] filterFields = { DUNS_NUMBER };
         conf.setFilterFields(filterFields);
         String[] domainFields = { LE_DOMAIN };
         conf.setDomainFields(domainFields);
