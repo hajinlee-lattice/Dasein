@@ -46,10 +46,10 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     @Value("${datacloud.match.cache.loader.batch.size:25}")
     private int batchSize;
 
-    @Value("${datacloud.match.cache.loader.tasks.size:32}")
+    @Value("${datacloud.match.cache.loader.tasks.size:16}")
     private int tasksSize;
 
-    @Value("${datacloud.match.cache.loader.thread.pool.size:16}")
+    @Value("${datacloud.match.cache.loader.thread.pool.size:8}")
     private int poolSize;
 
     @Autowired
