@@ -246,8 +246,8 @@ public class OrbCacheSeedRebuildServiceTestNG
         conf.setMarkerCheckFields(markerCheckFields);
         String markerField = "IsValid";
         conf.setMarkerField(markerField);
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.DEDUP,
-                StandardizationStrategy.DOMAIN, StandardizationStrategy.CONVERT_TYPE, StandardizationStrategy.MARKER };
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.DOMAIN,
+                StandardizationStrategy.DEDUP, StandardizationStrategy.CONVERT_TYPE, StandardizationStrategy.MARKER };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
