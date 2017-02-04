@@ -107,7 +107,7 @@ public class DnBCacheSeedCleanServiceImplTestNG
 
     private String getStandardizationTransformerConfig() throws JsonProcessingException {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
-        String filterExpression = "DUNS_NUMBER != null && (LE_PRIMARY_DUNS != null || LE_INDUSTRY == null || !(LE_INDUSTRY.equals(\"Nonclassifiable Establishments\")))";
+        String filterExpression = "DUNS_NUMBER != null";
         conf.setFilterExpression(filterExpression);
         String[] filterFields = { DUNS_NUMBER, "LE_PRIMARY_DUNS", "LE_INDUSTRY" };
         conf.setFilterFields(filterFields);
@@ -161,6 +161,9 @@ public class DnBCacheSeedCleanServiceImplTestNG
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
+        Object[][] expectedData = {
+                { "01", "google.com", 10, 100L, 1000L, 10000, 100000, 1000000, "Biotechnology", "01" },
+                { "02", "yahoo.com", 10, 100L, 1000L, 10000, 100000, 1000000, "null", "null" } };
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
@@ -180,14 +183,21 @@ public class DnBCacheSeedCleanServiceImplTestNG
                     + " " + EMPLOYEES_TOTAL + "=" + employeeTotal + " " + NUMBER_OF_FAMILY_MEMBERS + "="
                     + numberOfFamilyMembers + " " + " " + LE_PRIMARY_INDUSTRY + "=" + lePrimaryIndustry + " "
                     + LE_PRIMARY_DUNS + "=" + lePrimaryDuns);
-            Assert.assertTrue(duns.equals("01") && domain.equals("google.com") && numberOfLocation.equals(10)
-                    && salesVolumnLocalCurrency.equals(100L) && salesVolumnUSDollars.equals(1000L)
-                    && employeeHere.equals(10000) && employeeTotal.equals(100000)
-                    && numberOfFamilyMembers.equals(1000000) 
-                    && lePrimaryIndustry.equals("Biotechnology") && lePrimaryDuns.equals("01"));
+            boolean flag = false;
+            for (Object[] data : expectedData) {
+                if (duns.equals(data[0]) && domain.equals(data[1]) && numberOfLocation.equals(data[2])
+                        && salesVolumnLocalCurrency.equals(data[3]) && salesVolumnUSDollars.equals(data[4])
+                        && employeeHere.equals(data[5]) && employeeTotal.equals(data[6])
+                        && numberOfFamilyMembers.equals(data[7]) && lePrimaryIndustry.equals(data[8])
+                        && lePrimaryDuns.equals(data[9])) {
+                    flag = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 1);
+        Assert.assertEquals(rowNum, 2);
     }
 
     @Override
