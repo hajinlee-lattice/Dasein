@@ -248,21 +248,15 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     private DnBMatchContext createMatchContext(E record, CacheLoaderConfig config) {
         String dunsField = getDunsField(config);
         Object duns = getFieldValue(record, dunsField);
-        if (duns == null && config.isWhiteCache()) {
+        if ((duns == null || StringUtils.isBlank(duns.toString())) && config.isWhiteCache()) {
             return null;
         }
-        if (duns != null && !config.isWhiteCache()) {
+        if (duns != null && StringUtils.isNotBlank(duns.toString()) && !config.isWhiteCache()) {
             return null;
         }
         String dunsStr = null;
         if (config.isWhiteCache()) {
             dunsStr = duns.toString();
-        }
-        if (StringUtils.isBlank(dunsStr) && config.isWhiteCache()) {
-            return null;
-        }
-        if (!StringUtils.isBlank(dunsStr) && !config.isWhiteCache()) {
-            return null;
         }
         DnBMatchContext matchContext = new DnBMatchContext();
         createNameLocation(matchContext, record, config, dunsStr);
