@@ -3,9 +3,10 @@
   * @param  {[type]} !String.prototype.includes [description]
   * @return {[type]}                            [description]
   */
- if (!String.prototype.includes) {
-     String.prototype.includes = function() {
+ console.log(1111);
+ if (!string.prototype.includes) {
+     string.prototype.includes = function() {
          'use strict';
-         return String.prototype.indexOf.apply(this, arguments) !== -1;
+         return string.prototype.indexof.apply(this, arguments) !== -1;
      };
  }

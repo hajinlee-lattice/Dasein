@@ -836,7 +836,7 @@ angular.module('common.datacloud.explorer', [
         var category = category || '';
         if(vm.subcategory && vm.category == category) {
             vm.subcategory = '';
-            if(subcategoriesExclude.includes(category)) { // don't show subcategories
+            if(subcategoriesExclude.indexOf(category)) { // don't show subcategories
                 vm.subcategory = vm.subcategories[category][0];
             }
         } else if(vm.category == category) {
@@ -844,7 +844,7 @@ angular.module('common.datacloud.explorer', [
             //vm.category = '';
         } else {
             vm.subcategory = '';
-            if(subcategoriesExclude.includes(category)) {
+            if(subcategoriesExclude.indexOf(category)) {
                 vm.subcategory = vm.subcategories[category][0];
             }
             vm.category = category;
@@ -907,7 +907,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     var addUniqueToArray = function(array, item) {
-        if (array && item && !array.includes(item)) {
+        if (array && item && !array.indexOf(item)) {
             array.push(item);
         }
     }
@@ -938,7 +938,7 @@ angular.module('common.datacloud.explorer', [
                 vm.updateStateParams();
             } else {
 
-                if (subcategoriesExclude.includes(vm.category)) {
+                if (subcategoriesExclude.indexOf(vm.category)) {
                     vm.subcategory = '';
                     vm.updateStateParams();
                 }
@@ -948,9 +948,15 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.percentage = function(number, total) {
+    vm.percentage = function(number, total, suffix, limit) {
+        var suffix = suffix || '',
+            percentage = 0;
         if (number && total) {
-            return ((number / total) * 100);
+            percentage = ((number / total) * 100);
+            if(typeof limit != 'undefined') {
+                percentage = percentage.toFixed(limit);
+            }
+            return percentage + suffix;
         }
         return 0;
     }
