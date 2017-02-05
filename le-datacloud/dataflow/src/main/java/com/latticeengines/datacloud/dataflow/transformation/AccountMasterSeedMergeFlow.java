@@ -59,6 +59,8 @@ public class AccountMasterSeedMergeFlow extends ConfigurableFlowBase<Transformer
     private String amsNumberOfLocationColumn;
     private String dnbDuDunsColumn;
     private String amsDomainSourceColumn = "DomainSource";
+    private String amsEmployeesHere;
+    private String amsSalesVolumeUsDollars;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -92,54 +94,47 @@ public class AccountMasterSeedMergeFlow extends ConfigurableFlowBase<Transformer
     }
 
     private Node processDu(Node source) {
-        List<FieldMetadata> fieldMetadatas = new ArrayList<FieldMetadata>();
-        for (String attr : amsAttrs) {
-            if (attr.equals(amsNumberOfLocationColumn)) {
-                fieldMetadatas.add(new FieldMetadata(attr, Integer.class));
-            } else {
-                fieldMetadatas.add(new FieldMetadata(attr, String.class));
-            }
-        }
+        List<FieldMetadata> fieldMetadata = prepareAmsFieldMetadata();
         source = source.groupByAndBuffer(new FieldList(dnbDuDunsColumn),
                 new AccountMasterSeedMergeWithDunsBuffer(new Fields(amsAttrs.toArray(new String[amsAttrs.size()])),
                         attrsFromDnB, dnbDunsColumn, dnbDomainColumn, leDomainColumn, dnbIsPrimaryDomainColumn,
                         dnbDuDunsColumn, amsIsPrimaryDomainColumn, amsDomainColumn, amsDomainSourceColumn),
-                fieldMetadatas);
+                fieldMetadata);
         return source;
     }
 
     private Node processWithoutDuWithDuns(Node source) {
-        List<FieldMetadata> fieldMetadatas = new ArrayList<FieldMetadata>();
-        for (String attr : amsAttrs) {
-            if (attr.equals(amsNumberOfLocationColumn)) {
-                fieldMetadatas.add(new FieldMetadata(attr, Integer.class));
-            } else {
-                fieldMetadatas.add(new FieldMetadata(attr, String.class));
-            }
-        }
+        List<FieldMetadata> fieldMetadata = prepareAmsFieldMetadata();
         source = source.groupByAndBuffer(new FieldList(dnbDunsColumn),
                 new AccountMasterSeedMergeWithDunsBuffer(new Fields(amsAttrs.toArray(new String[amsAttrs.size()])),
                         attrsFromDnB, dnbDunsColumn, dnbDomainColumn, leDomainColumn, dnbIsPrimaryDomainColumn,
                         dnbDuDunsColumn, amsIsPrimaryDomainColumn, amsDomainColumn, amsDomainSourceColumn),
-                fieldMetadatas);
+                fieldMetadata);
         return source;
     }
 
     private Node amsWithoutDuWithoutDuns(Node source) {
-        List<FieldMetadata> fieldMetadatas = new ArrayList<FieldMetadata>();
-        for (String attr : amsAttrs) {
-            if (attr.equals(amsNumberOfLocationColumn)) {
-                fieldMetadatas.add(new FieldMetadata(attr, Integer.class));
-            } else {
-                fieldMetadatas.add(new FieldMetadata(attr, String.class));
-            }
-        }
+        List<FieldMetadata> fieldMetadata = prepareAmsFieldMetadata();
         source = source.apply(
                 new AccountMasterSeedMergeWithoutDunsFunction(new Fields(amsAttrs.toArray(new String[amsAttrs.size()])),
                         attrsFromLe, amsDunsColumn, amsIsPrimaryDomainColumn, amsIsPrimaryLocationColumn,
                         amsNumberOfLocationColumn, amsDomainSourceColumn),
-                new FieldList(source.getFieldNames()), fieldMetadatas, new FieldList(amsAttrs), Fields.RESULTS);
+                new FieldList(source.getFieldNames()), fieldMetadata, new FieldList(amsAttrs), Fields.RESULTS);
         return source;
+    }
+
+    private List<FieldMetadata> prepareAmsFieldMetadata() {
+        List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
+        for (String attr : amsAttrs) {
+            if (attr.equals(amsNumberOfLocationColumn) || attr.equals(amsEmployeesHere)) {
+                fieldMetadata.add(new FieldMetadata(attr, Integer.class));
+            } else if (attr.equals(amsSalesVolumeUsDollars)) {
+                fieldMetadata.add(new FieldMetadata(attr, Long.class));
+            } else {
+                fieldMetadata.add(new FieldMetadata(attr, String.class));
+            }
+        }
+        return fieldMetadata;
     }
 
     private Node retainDnBColumns(Node node) {
@@ -216,6 +211,12 @@ public class AccountMasterSeedMergeFlow extends ConfigurableFlowBase<Transformer
                 break;
             case DU_DUNS:
                 dnbDuDunsColumn = item.getDnbColumn();
+                break;
+            case EMPLOYEES_HERE:
+                amsEmployeesHere = item.getTargetColumn();
+                break;
+            case SALES_VOLUME_US_DOLLARS:
+                amsSalesVolumeUsDollars = item.getTargetColumn();
                 break;
             default:
                 break;
