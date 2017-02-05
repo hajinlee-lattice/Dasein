@@ -118,6 +118,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         while (iterator.hasNext()) {
             E record = iterator.next();
             if (config.getStartRow() != null && currentRow < config.getStartRow()) {
+                currentRow++;
                 continue;
             }
             if (config.getEndRow() != null && currentRow > config.getEndRow()) {
@@ -176,7 +177,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     private void sleepForSeconds() {
         try {
             log.info("Many records, sleep for seconds");
-            Thread.sleep(5_000L);
+            Thread.sleep(300L);
         } catch (Exception ex) {
             log.warn(ex);
         }
@@ -196,8 +197,8 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
 
     private void checkTimeout(Long startTime) {
         if (System.currentTimeMillis() - startTime > 72_000_000) {
-            throw new RuntimeException(String.format("Did not finish matching %d rows in %.2f minutes.",
-                    18_000_000 / 60_000.0));
+            throw new RuntimeException(String.format("Did not finish loading %d rows in %.2f minutes.",
+                    72_000_000 / 60_000.0));
         }
     }
 
