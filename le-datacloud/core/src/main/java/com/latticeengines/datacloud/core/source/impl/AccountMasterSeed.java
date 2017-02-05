@@ -65,6 +65,7 @@ public class AccountMasterSeed implements DerivedSource {
 
     public String[] getRetainFields() {
         return new String[] { "LatticeID", "DUNS", "Domain", "Name", "Street", "City", "State", "Country", "ZipCode",
-                "LE_IS_PRIMARY_DOMAIN", "LE_IS_PRIMARY_LOCATION", "LE_NUMBER_OF_LOCATIONS" };
+                "LE_IS_PRIMARY_DOMAIN", "LE_IS_PRIMARY_LOCATION", "LE_NUMBER_OF_LOCATIONS", "PrimaryIndustry",
+                "LE_COMPANY_PHONE", "LE_REVENUE_RANGE", "LE_EMPLOYEE_RANGE", "DomainSource" };
     }
 }

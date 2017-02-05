@@ -189,6 +189,8 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
                 put("DUNS", "LDC_DUNS");
                 put("Street", "LDC_Street");
                 put("ZipCode", "LDC_ZipCode");
+                put("PrimaryIndustry", "LDC_PrimaryIndustry");
+                put("DomainSource", "LDC_DomainSource");
             }
         };
         List<String> oldNames = node.getFieldNames();
