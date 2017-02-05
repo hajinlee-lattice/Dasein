@@ -93,7 +93,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         try {
             validateConfig(config);
             String dirPath = config.getDirPath();
-            if (StringUtils.isEmpty(dirPath)) {
+            if (StringUtils.isBlank(dirPath)) {
                 dirPath = getDirPathWithSource(config);
             }
             CacheLoaderDisplatchRunnable runnable = new CacheLoaderDisplatchRunnable(dirPath, config);
@@ -258,10 +258,10 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         if (config.isWhiteCache()) {
             dunsStr = duns.toString();
         }
-        if (StringUtils.isEmpty(dunsStr) && config.isWhiteCache()) {
+        if (StringUtils.isBlank(dunsStr) && config.isWhiteCache()) {
             return null;
         }
-        if (!StringUtils.isEmpty(dunsStr) && !config.isWhiteCache()) {
+        if (!StringUtils.isBlank(dunsStr) && !config.isWhiteCache()) {
             return null;
         }
         DnBMatchContext matchContext = new DnBMatchContext();
@@ -271,7 +271,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
 
     private String getDunsField(CacheLoaderConfig config) {
         String dunsField = config.getDunsField();
-        if (StringUtils.isEmpty(dunsField)) {
+        if (StringUtils.isBlank(dunsField)) {
             dunsField = defaultDunsField;
         }
         return dunsField;
