@@ -24,6 +24,7 @@ angular
         initialized: false,
         NextClicked: false,
         standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
+        standardFieldsListMap: {},
         requiredFieldsMissing: {
             'Event': true,
             'Id': true
@@ -73,6 +74,9 @@ angular
                     userField: vm.ignoredFieldLabel
                 };
             }
+
+            // creating a map for special handling of fields in standardFieldsList
+            vm.standardFieldsListMap[field] = field;
         });
 
         vm.refreshLatticeFields();
@@ -192,7 +196,7 @@ angular
                     userMapping.mappedToLatticeField = true;
                     delete userMapping.ignored;
                 }
-            } else if (userField && userField === vm.ignoredFieldLabel && vm.UnmappedFieldsMap[standardField]) {
+            } else if (userField && userField === vm.ignoredFieldLabel && vm.standardFieldsListMap[standardField]) {
                 // if a userfield is reserved, and was unmapped, set as custom predictor
                 var mappedFieldMapping = mappedFieldMappingsMap[standardField];
                 if (mappedFieldMapping) {
