@@ -49,7 +49,7 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
         setupForAttributeLevelSummary();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         CreateAttributeLevelSummaryWorkflowConfiguration workflowConfig = generateWorkflowConfiguration();
 
