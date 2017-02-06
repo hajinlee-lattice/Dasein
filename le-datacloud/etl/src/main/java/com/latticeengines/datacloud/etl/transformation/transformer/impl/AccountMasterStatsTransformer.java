@@ -9,15 +9,19 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.AccountMasterReport;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterStatisticsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -29,11 +33,16 @@ import com.latticeengines.proxy.exposed.matchapi.DimensionAttributeProxy;
 @Component("accountMasterStatsTransformer")
 public class AccountMasterStatsTransformer
         extends AbstractDataflowTransformer<AccountMasterStatisticsConfig, AccountMasterStatsParameters> {
+    private static final Log log = LogFactory.getLog(AccountMasterStatsTransformer.class);
+
     @Autowired
     private DimensionAttributeProxy dimensionAttributeProxy;
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Autowired
+    private AccountMasterReport accountMasterReport;
 
     @Override
     public String getName() {
@@ -134,6 +143,35 @@ public class AccountMasterStatsTransformer
         }
         parameters.setTypeFieldMap(typeFieldMap);
         parameters.setEncodedColumns(new ArrayList<String>(encodedColumns));
+
+        String originalBaseSourceName = accountMasterReport.getBaseSources()[0].getSourceName();
+        HashSet<String> excludeCols = new HashSet<String>();
+        String[] excludeAttrs = accountMasterReport.getExcludeAttrs();
+        for (int i = 0; i < excludeAttrs.length; i++) {
+            excludeCols.add(excludeAttrs[i]);
+        }
+
+        List<String> attrs = new ArrayList<String>();
+        List<Integer> attrIds = new ArrayList<Integer>();
+        List<SourceColumn> sourceColumns = sourceColumnEntityMgr.getSourceColumns(originalBaseSourceName);
+
+        for (int i = 0; i < sourceColumns.size(); i++) {
+            SourceColumn col = sourceColumns.get(i);
+            String attr = col.getColumnName();
+            if (excludeCols.contains(attr)) {
+                continue;
+            }
+            Integer attrId = col.getCharAttrId();
+            if (attrId == null) {
+                log.info("Skip attr " + attr + " without attr id");
+                continue;
+            }
+
+            attrs.add(attr);
+            attrIds.add(attrId);
+        }
+        parameters.setAttrsForSplunk(attrs);
+        parameters.setAttrIdsForSplunk(attrIds);
 
         parameters.setAttributeCategoryMap(config.getAttributeCategoryMap());
         parameters.setCubeColumnName(config.getCubeColumnName());

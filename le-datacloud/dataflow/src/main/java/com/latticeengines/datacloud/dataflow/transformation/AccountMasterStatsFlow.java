@@ -245,8 +245,10 @@ public class AccountMasterStatsFlow
 
         Node report = generateFinalReport(grouped, //
                 getFieldList(fms), newColumns, //
-                getFieldList(fmsOutputColumns), Fields.RESULTS, parameters.getCubeColumnName(),
-                parameters.getRootIdsForNonRequiredDimensions(), finalAttrColList);
+                getFieldList(fmsOutputColumns), Fields.RESULTS, //
+                parameters.getCubeColumnName(), parameters.getRootIdsForNonRequiredDimensions(), //
+                finalAttrColList, parameters.getAttrsForSplunk(), //
+                parameters.getAttrIdsForSplunk());
         return report;
     }
 
@@ -274,24 +276,27 @@ public class AccountMasterStatsFlow
 
     private Node generateFinalReport(Node grouped, FieldList applyToFieldList, List<FieldMetadata> newColumns,
             FieldList outputFieldList, Fields overrideFieldStrategy, String cubeColumnName,
-            Map<String, Long> rootIdsForNonRequiredDimensions, List<String> finalAttrColList) {
+            Map<String, Long> rootIdsForNonRequiredDimensions, List<String> finalAttrColList,
+            List<String> attrsForSplunk, List<Integer> attrIdsForSplunk) {
 
         String[] fields = outputFieldList.getFields();
 
         Fields fieldDeclaration = new Fields(fields);
 
-        AccountMasterStatsReportFunction.Params functionParam = new AccountMasterStatsReportFunction.Params(
-                fieldDeclaration, newColumns, cubeColumnName, //
-                getTotalKey(), finalAttrColList, rootIdsForNonRequiredDimensions, //
-                AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX, //
-                AccountMasterStatsParameters.LBL_ORDER_POST, //
-                AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_YES, //
-                AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_NO, //
-                AccountMasterStatsParameters.LBL_ORDER_PRE_NUMERIC, //
-                AccountMasterStatsParameters.LBL_ORDER_PRE_BOOLEAN, //
-                AccountMasterStatsParameters.LBL_ORDER_PRE_OBJECT, //
-                AccountMasterStatsParameters.COUNT_KEY, //
-                AccountMasterStatsParameters.GROUP_TOTAL_KEY);
+        AccountMasterStatsReportFunction.Params functionParam = //
+                new AccountMasterStatsReportFunction.Params(//
+                        fieldDeclaration, newColumns, cubeColumnName, //
+                        getTotalKey(), finalAttrColList, rootIdsForNonRequiredDimensions, //
+                        attrsForSplunk, attrIdsForSplunk, //
+                        AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX, //
+                        AccountMasterStatsParameters.LBL_ORDER_POST, //
+                        AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_YES, //
+                        AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_NO, //
+                        AccountMasterStatsParameters.LBL_ORDER_PRE_NUMERIC, //
+                        AccountMasterStatsParameters.LBL_ORDER_PRE_BOOLEAN, //
+                        AccountMasterStatsParameters.LBL_ORDER_PRE_OBJECT, //
+                        AccountMasterStatsParameters.COUNT_KEY, //
+                        AccountMasterStatsParameters.GROUP_TOTAL_KEY);
 
         AccountMasterStatsReportFunction reportGenerationFunction = new AccountMasterStatsReportFunction(functionParam);
         Node report = grouped.apply(reportGenerationFunction, applyToFieldList, newColumns, outputFieldList,

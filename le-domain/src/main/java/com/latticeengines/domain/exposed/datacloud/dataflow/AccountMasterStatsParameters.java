@@ -24,6 +24,7 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String ATTR_COUNT_3_KEY = "AttrCount3";
     public static final String ATTR_COUNT_4_KEY = "AttrCount4";
     public static final String PID_KEY = "PID";
+    public static final Integer DEFAULT_MAX_BUCKET_COUNT = 5;
 
     private Map<String, List<String>> dimensionDefinitionMap;
 
@@ -45,7 +46,11 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     private List<String> encodedColumns;
 
-    private int maxBucketCount = 5;
+    private int maxBucketCount = DEFAULT_MAX_BUCKET_COUNT;
+
+    private List<String> setAttrsForSplunk;
+
+    private List<Integer> setAttrIdsForSplunk;
 
     public Map<String, List<String>> getDimensionDefinitionMap() {
         return dimensionDefinitionMap;
@@ -134,6 +139,22 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     public void setEncodedColumns(List<String> encodedColumns) {
         this.encodedColumns = encodedColumns;
+    }
+
+    public List<String> getAttrsForSplunk() {
+        return setAttrsForSplunk;
+    }
+
+    public void setAttrsForSplunk(List<String> setAttrsForSplunk) {
+        this.setAttrsForSplunk = setAttrsForSplunk;
+    }
+
+    public List<Integer> getAttrIdsForSplunk() {
+        return setAttrIdsForSplunk;
+    }
+
+    public void setAttrIdsForSplunk(List<Integer> setAttrIdsForSplunk) {
+        this.setAttrIdsForSplunk = setAttrIdsForSplunk;
     }
 
 }

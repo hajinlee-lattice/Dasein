@@ -67,6 +67,7 @@ public class AccountMasterStatsDeploymentTestNG
         return source;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).toString();
@@ -159,6 +160,7 @@ public class AccountMasterStatsDeploymentTestNG
         return param;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(targetSourceName);

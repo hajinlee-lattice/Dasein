@@ -47,6 +47,7 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
     private String groupTotalKey;
     private List<String> finalAttrColList;
     private String dimensionColumnPrepostfix;
+    public Map<String, Integer> attrIdsMapForSplunk;
     private String lblOrderPost;
     private String lblOrderPreEncodedYes;
     private String lblOrderPreEncodedNo;
@@ -87,9 +88,15 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
         }
 
         this.attrLoc = new Integer[finalAttrColList.size()];
-        int i = 0;
+        idx = 0;
         for (String attrCol : finalAttrColList) {
-            this.attrLoc[i++] = namePositionMap.get(attrCol);
+            this.attrLoc[idx++] = namePositionMap.get(attrCol);
+        }
+
+        attrIdsMapForSplunk = new HashMap<>();
+        idx = 0;
+        for (String attrName : parameterObject.attrsForSplunk) {
+            attrIdsMapForSplunk.put(attrName, parameterObject.attrIdsForSplunk.get(idx++));
         }
     }
 
@@ -174,7 +181,11 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
             AttributeStatistics stats = new AttributeStatistics();
             AttributeStatsDetails rowBasedStatistics = new AttributeStatsDetails();
             rowBasedStatistics.setNonNullCount(nonNullCount[0]);
-            getSplunkReportPortion(attrBuilder, curAttrCol, nonNullCount[0], pos);
+
+            if (attrIdsMapForSplunk.containsKey(field)) {
+                getSplunkReportPortion(attrBuilder, curAttrCol, //
+                        nonNullCount[0], attrIdsMapForSplunk.get(field));
+            }
             Buckets buckets = new Buckets();
             buckets.setType(BucketType.Numerical);
             Bucket[] bucketArray = null;
@@ -297,6 +308,8 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
         public String groupTotalKey;
         public List<String> finalAttrColList;
         public Map<String, Long> rootIdsForNonRequiredDimensions;
+        public List<String> attrsForSplunk;
+        public List<Integer> attrIdsForSplunk;
         public String dimensionColumnPrepostfix;
         public String lblOrderPost;
         public String lblOrderPreEncodedYes;
@@ -309,9 +322,10 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
 
         public Params(Fields fieldDeclaration, List<FieldMetadata> leafSchemaNewColumns, String cubeColumnName,
                 String groupTotalKey, List<String> finalAttrColList, Map<String, Long> rootIdsForNonRequiredDimensions,
-                String dimensionColumnPrepostfix, String lblOrderPost, String lblOrderPreEncodedYes,
-                String lblOrderPreEncodedNo, String lblOrderPreNumeric, String lblOrderPreBoolean,
-                String lblOrderPreObject, String countKey, String finalGroupTotalKey) {
+                List<String> attrsForSplunk, List<Integer> attrIdsForSplunk, String dimensionColumnPrepostfix,
+                String lblOrderPost, String lblOrderPreEncodedYes, String lblOrderPreEncodedNo,
+                String lblOrderPreNumeric, String lblOrderPreBoolean, String lblOrderPreObject, String countKey,
+                String finalGroupTotalKey) {
             super();
             this.fieldDeclaration = fieldDeclaration;
             this.leafSchemaNewColumns = leafSchemaNewColumns;
@@ -319,6 +333,8 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
             this.groupTotalKey = groupTotalKey;
             this.finalAttrColList = finalAttrColList;
             this.rootIdsForNonRequiredDimensions = rootIdsForNonRequiredDimensions;
+            this.attrsForSplunk = attrsForSplunk;
+            this.attrIdsForSplunk = attrIdsForSplunk;
             this.dimensionColumnPrepostfix = dimensionColumnPrepostfix;
             this.lblOrderPost = lblOrderPost;
             this.lblOrderPreEncodedYes = lblOrderPreEncodedYes;
