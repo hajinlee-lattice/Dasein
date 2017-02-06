@@ -6,6 +6,5 @@
 
     <import resource="classpath:datacloud-etl-madison-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
-    <import resource="classpath:workflow-context.xml"/>
 
 </beans>
