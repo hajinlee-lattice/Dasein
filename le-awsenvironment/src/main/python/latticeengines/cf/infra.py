@@ -53,10 +53,10 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.upload)
+    template(args.environment, ui=args.ui, upload=args.upload)
 
-def template(environment, upload=False):
-    stack = create_template()
+def template(environment, ui=False, upload=False):
+    stack = create_template(ui)
     if upload:
         stack.validate()
         stack.upload(environment, _S3_CF_PATH)
@@ -64,7 +64,7 @@ def template(environment, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template():
+def create_template(ui):
     stack = Stack("AWS CloudFormation template for LPI infrastructure.")
     stack.add_params([PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
 
@@ -72,7 +72,7 @@ def create_template():
     tgs, tg_map = create_taget_groups()
     stack.add_resources(tgs)
 
-    resources, albs = create_load_balancers(tg_map)
+    resources, albs = create_load_balancers(tg_map, ui=ui)
     stack.add_resources(resources)
 
     stack.add_ouputs(add_outputs(albs))
