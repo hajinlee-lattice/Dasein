@@ -70,6 +70,12 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     }
 
     @Override
+    public String getModelRunModelHDFSDirByName(String modelRunName) {
+        String url = constructUrl("/modelruns/modelhdfsdir/{modelRunName}", modelRunName);
+        return get("getModelRunModelHDFSDirByName", url, String.class);
+    }
+
+    @Override
     public String uploadPipelineStepMetadata(String fileName, String stepName, MultipartFile file) {
         String url = constructUrl("/pipelines/pipelinestepfiles/metadata?fileName={fileName}&stepName={stepName}",
                 fileName, stepName);

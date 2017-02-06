@@ -46,6 +46,12 @@ public class ModelProxy extends MicroserviceRestApiProxy implements ModelInterfa
     }
 
     @Override
+    public Model getModel(String modelId) {
+        String url = constructUrl("/model/{modelId}", modelId);
+        return get("getModel", url, Model.class);
+    }
+
+    @Override
     public AppSubmission submit(Model model) {
         String url = constructUrl("/models");
         return post("submit", url, model, AppSubmission.class);
