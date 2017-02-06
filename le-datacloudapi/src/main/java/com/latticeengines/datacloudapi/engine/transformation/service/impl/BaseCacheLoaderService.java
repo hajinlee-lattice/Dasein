@@ -177,7 +177,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     private void sleepForSeconds() {
         try {
             log.info("Many records, sleep for seconds");
-            Thread.sleep(300L);
+            Thread.sleep(100L);
         } catch (Exception ex) {
             log.warn(ex);
         }
@@ -197,7 +197,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
 
     private void checkTimeout(Long startTime) {
         if (System.currentTimeMillis() - startTime > 72_000_000) {
-            throw new RuntimeException(String.format("Did not finish loading %d rows in %.2f minutes.",
+            throw new RuntimeException(String.format("Did not finish loading in %.2f minutes.",
                     72_000_000 / 60_000.0));
         }
     }
