@@ -187,9 +187,6 @@ def parse_args():
     subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     subparser.set_defaults(func=purge)
 
-    subparser = commands.add_parser("test")
-    subparser.set_defaults(func=test)
-
     args = parser.parse_args()
     return args
 
