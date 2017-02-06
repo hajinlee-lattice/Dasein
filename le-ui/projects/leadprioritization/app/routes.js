@@ -1,17 +1,17 @@
 angular
 .module('mainApp')
 .run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility, LookupStore) {
-    $rootScope.$on('$stateChangeStart', function(evt, toState, params, fromState, fromParams) {
+    $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
         // when user hits browser Back button after app instantiate, send back to login
         if (fromState.name == 'home.models' && toState.name == 'home') {
-            evt.preventDefault();
+            event.preventDefault();
             window.open("/login", "_self");
         }
 
         var LoadingString = ResourceUtility.getString("");
 
         if (toState.redirectTo) {
-            evt.preventDefault();
+            event.preventDefault();
             $state.go(toState.redirectTo, params);
         }
 
@@ -19,10 +19,11 @@ angular
         ServiceErrorUtility.hideBanner();
     });
 
-    $rootScope.$on('$stateChangeSuccess', function(evt, toState, params, fromState, fromParams) {
+    $rootScope.$on('$stateChangeSuccess', function(event, toState, params, fromState, fromParams) {
         var from = fromState.name;
         var to = toState.name;
 
+        // clear LookupStore data when leaving Data-Cloud section
         if ((from.indexOf('home.lookup') > -1 || from.indexOf('home.data-cloud') > -1) &&
             !(to.indexOf('home.lookup') > -1 || to.indexOf('home.data-cloud') > -1)) {
 
@@ -30,9 +31,10 @@ angular
         }
     });
 
-    $rootScope.$on('$stateChangeError', function(evt, toState, params) {
+    $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
+        console.log('-!- error changing state:', error, event, toState, toParams, fromState, fromParams);
+        
         if ($state.current.name != toState.name) {
-            console.log('-!- error; could not load '+toState.name);
             $state.reload();
         }
     });
@@ -77,6 +79,9 @@ angular
                     });
 
                     return deferred.promise;
+                },
+                ApiHost: function() {
+                    return '/pls';
                 }
             },
             views: {
@@ -1336,9 +1341,43 @@ angular
                     templateUrl: 'app/setup/views/SetupView.html'
                 }   
             }
+        })
+        .state('home.insights', {
+            url: '/insights/:Authentication',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'BIS Insights Test',
+                Authentication: 'ee440c75-a6a0-4abe-9d28-655d54c911d2'
+            },
+            views: {
+                "main@": {
+                    controller: function(LookupStore, $stateParams) {
+                        var host = "/insights/";
+                        $('#sureshot_iframe_container')
+                            .html('<iframe id="insights_iframe" src="' + host + '" style="border: 1px inset"></iframe><div id="insights_console"></div>');
+
+                        var childWindow = document.getElementById('insights_iframe').contentWindow;
+                        window.addEventListener("message", function (event){
+                            console.log('message from Insights:', event.data);
+                            if (event.data == 'init') {
+                                var json = {};
+
+                                json.Authentication = $stateParams.Authentication;
+
+                                json.request = LookupStore.get('request');
+                                json.request.record.CompanyName = 'Lattice Engines';
+
+                                childWindow.postMessage(json,window.location.origin + host);
+                            }
+                        }, false);
+                    },
+                    templateUrl: 'app/marketo/views/SureshotTemplateView.html'
+                }   
+            }
         });
 });
-
+'https://bodcdevsvipa25.lattice.local:8075/ulysses/companyprofiles/?enforceFuzzyMatch=true'
+'http://localhost:3001                    /ulysses/companyprofiles/?enforceFuzzyMatch=true'
 function ShowSpinner(LoadingString, type) {
     // state change spinner
     var element = $('#mainContentView'),

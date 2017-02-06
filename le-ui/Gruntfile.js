@@ -24,6 +24,7 @@ module.exports = function (grunt) {
             dev: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
+                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 API_URL: 'https://testapp.lattice-engines.com',
                 //API_URL: 'https://10.41.0.13:8081',
                 API_ADMIN_URL: 'https://10.41.0.25:8085',
@@ -64,6 +65,7 @@ module.exports = function (grunt) {
             devb: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
+                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
                 API_ADMIN_URL: 'https://10.41.0.26:8085',
                 API_CON_URL: 'https://bodcdevsvipb26.lattice.local:8073',
@@ -98,6 +100,7 @@ module.exports = function (grunt) {
             local: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
+                ULYSSES_URL: 'http://localhost:8075',
                 API_URL: 'http://localhost:8081',
                 API_ADMIN_URL: 'http://localhost:8085',
                 API_CON_URL: 'http://localhost:8073',
@@ -117,6 +120,7 @@ module.exports = function (grunt) {
             local_admin: {
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
+                ULYSSES_URL: 'http://localhost:8075',
                 API_URL: 'http://localhost:8081',
                 API_ADMIN_URL: 'http://localhost:8085',
                 API_CON_URL: 'http://localhost:8073',
@@ -136,6 +140,7 @@ module.exports = function (grunt) {
             qa: {
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
+                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 //API_URL: 'https://testapp.lattice-engines.com',
                 API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
                 //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
@@ -158,6 +163,7 @@ module.exports = function (grunt) {
             qadev: {
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
+                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 API_URL: 'https://testapp.lattice-engines.com',
                 //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
                 API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
@@ -179,6 +185,7 @@ module.exports = function (grunt) {
             production: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'production',
+                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 API_URL: 'https://app.lattice-engines.com',
                 API_ADMIN_URL: ' https://admin.prod.lattice.local:8085/',
                 API_CON_URL: 'https://api.lattice-engines.com',
@@ -196,6 +203,7 @@ module.exports = function (grunt) {
             proddev: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'production',
+                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 API_URL: 'https://app.lattice-engines.com',
                 API_ADMIN_URL: 'https://admin.prod.lattice.local:8085/',
                 API_CON_URL: 'https://api.lattice-engines.com',

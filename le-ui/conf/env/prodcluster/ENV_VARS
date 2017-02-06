@@ -1,5 +1,6 @@
 export NODE_APPS={{NODE_APPS}}
 export NODE_ENV=production
+export ULYSSES_URL=https://${OUTSIDE_TOMCAT}:8075
 export API_URL=https://${OUTSIDE_TOMCAT}:8081
 export API_CON_URL=https://${INSIDE_TOMCAT}:8073
 export API_ADMIN_URL=https://${INSIDE_TOMCAT}:8085

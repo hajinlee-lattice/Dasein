@@ -13,65 +13,51 @@ angular.module('insightsApp')
     });
 
     $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error){ 
-        console.log('-!- error changing state:', error);
+        console.log('-!- error changing state:', error, event, toState, toParams, fromState, fromParams);
 
         event.preventDefault();
     });
 })
 .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
-    $urlRouterProvider.otherwise('/tenant/');
+    $urlRouterProvider.otherwise('/');
 
     $stateProvider
         .state('home', {
-            url: '/tenant/:tenantName',
+            url: '/',
             resolve: {
-                ClientSession: function(BrowserStorageUtility) {
-                    return BrowserStorageUtility.getClientSession();
-                },
-                Tenant: function(ClientSession) {
-                    return ClientSession.Tenant;
-                },
-                FeatureFlags: function($q, FeatureFlagService) {
-                    var deferred = $q.defer();
-                    
-                    FeatureFlagService.GetAllFlags().then(function() {
-                        deferred.resolve();
-                    });
-                    
-                    return deferred.promise;
-                },
-                ResourceStrings: function($q, ResourceStringsService, ClientSession) {
+                ResourceStrings: function($q, ResourceStringsService) {
                     var deferred = $q.defer();
 
-                    ResourceStringsService.GetInternalResourceStringsForLocale(ClientSession.Locale).then(function(result) {
+                    ResourceStringsService.GetInternalResourceStringsForLocale('en-US').then(function(result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
+                },
+                ApiHost: function() {
+                    return '/ulysses';
                 }
             },
             views: {
                 "main": {
-                    controller: function($rootScope, $stateParams, $state, Tenant) {
-                        var tenantName = $stateParams.tenantName;
+                    controller: function($state, AuthStore, LookupStore) {
+                        parent.postMessage("init", window.location.href);
 
-                        console.log('hello world', $stateParams, tenantName);
-                        if (tenantName != Tenant.DisplayName) {
-                            $rootScope.tenantName = window.escape(Tenant.DisplayName);
-                            $rootScope.tenantId = window.escape(Tenant.Identifier);
+                        window.addEventListener("message", function (event){
+                            console.log('message from LPI:', event.data);
+                            var timestamp = new Date().getTime();
+
+                            LookupStore.add('timestamp', timestamp);
+                            LookupStore.add('request', event.data.request);
+                            AuthStore.set('Bearer ' + event.data.Authentication);
                             
-                            $state.go('home.main', { 
-                                tenantName: Tenant.DisplayName
-                            });
-                        }
+                            console.log('insights', LookupStore.get('request'), AuthStore.get())
+                            $state.go('home.datacloud.insights');
+                        }, false);
                     }
                 }
             }
-        })
-        .state('home.main', {
-            url: '/main',
-            redirectTo: 'home.datacloud.insights'
         });
 });
 

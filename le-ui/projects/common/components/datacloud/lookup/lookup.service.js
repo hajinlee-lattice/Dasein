@@ -7,13 +7,13 @@ angular
         this.count = 0;
         this.timestamp = 0;
         this.params = { 
-            shouldSkipLoadingEnrichmentMetadata: true,
+            //shouldSkipLoadingEnrichmentMetadata: true,
             enforceFuzzyMatch: true
         };
         this.response = {};
         this.request = {
-            modelId: '',
-            performEnrichment: true,
+            //modelId: '',
+            //performEnrichment: true,
             record: { }
         };
     }
@@ -61,15 +61,17 @@ angular
     this.reset();
 })
 .service('LookupService', function($q, $http, LookupStore) {
-    this.submit = function() {
+    this.submit = function(ApiHost) {
         var deferred = $q.defer();
 
         $http({
             method: 'POST',
-            url: '/pls/scores/apiconsole/record/debug',
+            url: ApiHost + '/companyprofiles/',
             params: LookupStore.get('params'),
             data: LookupStore.get('request'),
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json' 
+            }
         })
         .success(function(data, status, headers, config) {
             deferred.resolve(data);

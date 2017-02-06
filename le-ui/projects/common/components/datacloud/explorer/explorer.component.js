@@ -3,7 +3,7 @@ angular.module('common.datacloud.explorer', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('DataCloudController', function(
-    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, 
+    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, ApiHost,
     BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount, 
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
 ){

@@ -9,17 +9,21 @@ angular
         .state('home.datacloud', {
             url: '/datacloud',
             resolve: {
-                EnrichmentCount: function($q, DataCloudStore) {
+                EnrichmentCount: function($q, DataCloudStore, ApiHost) {
                     var deferred = $q.defer();
 
+                    DataCloudStore.setHost(ApiHost);
+                    
                     DataCloudStore.getCount().then(function(result) {
                         deferred.resolve(result);
                     });
 
                     return deferred.promise;
                 },
-                EnrichmentTopAttributes: function($q, DataCloudStore) {
+                EnrichmentTopAttributes: function($q, DataCloudStore, ApiHost) {
                     var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
 
                     DataCloudStore.getAllTopAttributes().then(function(result) {
                         deferred.resolve(result);
@@ -27,8 +31,10 @@ angular
 
                     return deferred.promise;
                 },
-                EnrichmentPremiumSelectMaximum: function($q, DataCloudStore) {
+                EnrichmentPremiumSelectMaximum: function($q, DataCloudStore, ApiHost) {
                     var deferred = $q.defer();
+
+                    DataCloudStore.setHost(ApiHost);
 
                     DataCloudStore.getPremiumSelectMaximum().then(function(result) {
                         deferred.resolve(result);
@@ -72,11 +78,11 @@ angular
                 pageTitle: 'Lattice Data Cloud'
             },
             resolve: {
-                LookupResponse: function($q, LookupService, LookupStore) {
+                LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
                     var deferred = $q.defer();
                     //var data = LookupStore.get('response');
 
-                    LookupService.submit().then(function(data) {
+                    LookupService.submit(ApiHost).then(function(data) {
                         //console.log('response', data);
                         var current = new Date().getTime();
                         var old = LookupStore.get('timestamp');
@@ -98,7 +104,7 @@ angular
                 },
                 "subsummary@": {
                     controller: function(LookupResponse, LookupStore) {
-                        LookupStore.add('count', 0);//Object.keys(LookupResponse.enrichmentAttributeValues).length;
+                        LookupStore.add('count', 0);//Object.keys(LookupResponse.attributes).length;
                         
                         this.store = LookupStore;
                         this.ldc_name = LookupResponse.companyInfo
@@ -142,7 +148,7 @@ angular
                         EnrichmentAccountLookup: function($q, DataCloudStore, LookupResponse) {
                             var deferred = $q.defer();
 
-                            deferred.resolve(LookupResponse.enrichmentAttributeValues || {});
+                            deferred.resolve(LookupResponse.attributes || {});
 
                             return deferred.promise;
                         }
@@ -183,24 +189,43 @@ angular
             }
         })
         .state('home.datacloud.insights', {
-            url: '/insights/:category/:subcategory',
+            url: '/tabs',
             params: {
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Lattice Data Cloud',
                 section: 'insights'
+                //section: 'lookup'
             },
             views: {
                 "main@": {
                     resolve: {
-                        // Note: this is needed for Account Lookup, dont remove!
-                        EnrichmentAccountLookup: function() {
-                            return null;
+                        LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
+                            var deferred = $q.defer();
+
+                            LookupService.submit(ApiHost).then(function(data) {
+                                var current = new Date().getTime();
+                                var old = LookupStore.get('timestamp');
+
+                                LookupStore.add('elapsedTime', current - old);
+                                LookupStore.add('response', data);
+
+                                deferred.resolve(data);
+                            });
+
+                            return deferred.promise;
+                        },
+                        EnrichmentAccountLookup: function($q, DataCloudStore, LookupResponse) {
+                            var deferred = $q.defer();
+
+                            deferred.resolve(LookupResponse.attributes || {});
+
+                            return deferred.promise;
                         }
                     },
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
-                } 
+                }
             }
         });
 });

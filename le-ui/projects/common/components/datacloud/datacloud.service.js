@@ -69,6 +69,10 @@ angular.module('common.datacloud')
         setObj(name, value, this.metadata);
     }
 
+    this.setHost = function(value) {
+        DataCloudService.setHost(value);
+    }
+
     this.getPremiumSelectMaximum = function(){
         var deferred = $q.defer();
         if (this.premiumSelectMaximum) {
@@ -226,14 +230,20 @@ angular.module('common.datacloud')
         this.cube = items;
     }
 })
-.service('DataCloudService', function($q, $http){
+.service('DataCloudService', function($q, $http, $state) {
+    this.host = '';
+
+    this.setHost = function(value) {
+        this.host = value;
+    }
+
     this.getPremiumSelectMaximum = function(){
         var deferred = $q.defer();
         $http({
             method: 'get',
             //ENVs: Default, QA, Production
             //url: '/Pods/<ENV>/Default/PLS/EnrichAttributeMaxNumber'
-            url: '/pls/latticeinsights/insights/premiumattributeslimitation'
+            url: this.host + '/latticeinsights/insights/premiumattributeslimitation'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -244,7 +254,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/insights/count'
+            url: this.host + '/latticeinsights/insights/count'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -255,7 +265,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/insights/selectedattributes/count'
+            url: this.host + '/latticeinsights/insights/selectedattributes/count'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -266,7 +276,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/insights/categories'
+            url: this.host + '/latticeinsights/insights/categories'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -277,7 +287,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/insights/subcategories',
+            url: this.host + '/latticeinsights/insights/subcategories',
             params: {
                 category: category
             }
@@ -295,7 +305,7 @@ angular.module('common.datacloud')
             onlySelectedAttributes = opts.onlySelectedAttributes || null;
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/insights',
+            url: this.host + '/latticeinsights/insights',
             params: {
                 offset: offset,
                 max: max,
@@ -311,7 +321,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'put',
-            url: '/pls/latticeinsights/insights',
+            url: this.host + '/latticeinsights/insights',
             data: data
         }).then(function(response){
             deferred.resolve(response.data);
@@ -327,7 +337,7 @@ angular.module('common.datacloud')
         opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/stats/topn',
+            url: this.host + '/latticeinsights/stats/topn',
             params: {
                 category: opts.category,
                 limit: opts.limit,
@@ -347,7 +357,7 @@ angular.module('common.datacloud')
         opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/stats/topn/all',
+            url: this.host + '/latticeinsights/stats/topn/all',
             params: {
                 limit: opts.limit,
                 loadEnrichmentMetadata: opts.loadEnrichmentMetadata
@@ -364,7 +374,7 @@ angular.module('common.datacloud')
             query = opts.query || '';
         $http({
             method: 'get',
-            url: '/pls/latticeinsights/stats/cube',
+            url: this.host + '/latticeinsights/stats/cube',
             params: {
                 q: query
             }

@@ -33,6 +33,7 @@
                 right: 0;
                 bottom: 0;
                 z-index: 2;
+                cursor: pointer;
             }
             &:last-child {
                 border-right: 1px solid #d0d1d0;
@@ -44,6 +45,7 @@
                     border-bottom-color: transparent;
                     background: #fafafa;
                     z-index: 1;
+                    cursor: default;
                 }
             }
             .count {

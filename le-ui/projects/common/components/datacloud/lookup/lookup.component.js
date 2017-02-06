@@ -28,7 +28,6 @@ angular
     }
 
     vm.validate = function() {
-
         if (vm.request.record.Website || vm.request.record.CompanyName) {
             vm.requiredMissingField = {};
             return true;

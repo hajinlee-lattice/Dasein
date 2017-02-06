@@ -1,5 +1,6 @@
 export NODE_APPS=leui,leadmin
 export NODE_ENV=development
+export ULYSSES_URL=http://localhost:8075
 export API_URL=http://localhost:8081
 export API_CON_URL=http://localhost:8073
 export HTTP_PORT=3000

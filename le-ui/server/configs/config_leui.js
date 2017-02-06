@@ -12,6 +12,12 @@ module.exports = {
             'remote_path': '/pls',
             'type': 'pipe'
         },
+        '/ulysses': {
+            'local_path': '/ulysses',
+            'remote_host': process.env.ULYSSES_URL || 'http://localhost:8075',
+            'remote_path': '/ulysses',
+            'type': 'pipe'
+        },
         '/score': {
             'local_path': '/score',
             'remote_host': process.env.API_CON_URL || 'http://localhost:8073',

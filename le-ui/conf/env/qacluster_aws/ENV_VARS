@@ -1,5 +1,6 @@
 export NODE_APPS={{NODE_APPS}}
 export NODE_ENV=qa
+export ULYSSES_URL=https://bodcdevsvipa25.lattice.local:8075
 export API_URL=${AWS_PUBLIC_LB}
 export API_CON_URL=${AWS_PUBLIC_LB}
 export API_ADMIN_URL=${AWS_PRIVATE_LB}

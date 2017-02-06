@@ -26,18 +26,29 @@ var mainApp = angular.module('insightsApp', [
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('authInterceptor');
 })
-.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
+.service('AuthStore', function($q) {
+    this.Authorization = '';
+    
+    this.get = function() {
+        return this.Authorization;
+    }
+
+    this.set = function(value) {
+        this.Authorization = value;
+    }
+})
+.factory('authInterceptor', function ($q, AuthStore) {
     return {
-        request: function (config) {
+        request: function(config) {
             config.headers = config.headers || {};
             
-            if (BrowserStorageUtility.getTokenDocument()) {
-                config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
+            if (AuthStore.get()) {
+                config.headers.Authorization = AuthStore.get();
             }
 
             return config;
         },
-        response: function (response) {
+        response: function(response) {
             if (response.status === 401) {
                 // handle the case where the user is not authenticated
             }

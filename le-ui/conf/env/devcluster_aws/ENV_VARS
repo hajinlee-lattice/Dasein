@@ -1,5 +1,6 @@
 export NODE_APPS=leui,leadmin
 export NODE_ENV=development
+export ULYSSES_URL=https://${LE_CLIENT_ADDRESS}
 export API_URL=http://${LE_CLIENT_ADDRESS}
 export API_CON_URL=http://${LE_CLIENT_ADDRESS}
 export API_ADMIN_URL=http://${LE_CLIENT_ADDRESS}
