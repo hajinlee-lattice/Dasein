@@ -130,7 +130,9 @@ def create_load_balancers(tg_map, ui=False):
     resources.append(create_listener_rule(private_lsnr, tg_map["modeling"], "/modeling/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["datacloudapi"], "/datacloudapi/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["modelquality"], "/modelquality/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["propdata"], "/propdata/*"))
+
+    # cannot add to private listener, max rules is 10
+    # resources.append(create_listener_rule(private_lsnr, tg_map["propdata"], "/propdata/*"))
 
     resources.append(create_listener_rule(public_lsnr, tg_map["pls"], "/pls/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/score/*"))
