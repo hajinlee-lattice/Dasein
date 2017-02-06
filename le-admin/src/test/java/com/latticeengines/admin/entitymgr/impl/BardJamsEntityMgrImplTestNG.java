@@ -1,6 +1,6 @@
 package com.latticeengines.admin.entitymgr.impl;
 
-import org.junit.Assert;
+import org.testng.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;

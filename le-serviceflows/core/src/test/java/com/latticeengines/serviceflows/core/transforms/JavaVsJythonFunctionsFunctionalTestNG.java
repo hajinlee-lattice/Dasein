@@ -14,7 +14,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -419,8 +419,8 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
                         String.format("Valid FundingStage Calculation: %f", (double) nValidFundingStage / (double) i));
             }
 
-            Assert.assertTrue("Java vs Jython transformation test failed. Unacceptable number of mismatches. ",
-                    numberOfErrors < maxNumberOfErrors);
+            Assert.assertTrue(numberOfErrors < maxNumberOfErrors,
+                    "Java vs Jython transformation test failed. Unacceptable number of mismatches. ");
         }
     }
 
@@ -703,8 +703,8 @@ public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringC
             }
         }
 
-        Assert.assertTrue("Java vs Jython transformation test failed. Unacceptable number of mismatches. ",
-                numberOfErrors < maxNumberOfErrors);
+        Assert.assertTrue(numberOfErrors < maxNumberOfErrors,
+                "Java vs Jython transformation test failed. Unacceptable number of mismatches. ");
     }
 
     private Object applyJavaTransform(String functionName, String[] values) {

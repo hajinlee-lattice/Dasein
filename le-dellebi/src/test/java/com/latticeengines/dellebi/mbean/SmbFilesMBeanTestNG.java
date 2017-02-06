@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -83,7 +83,7 @@ public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
         for (SmbFile file : smbFiles) {
             log.info(file.getName());
         }
-        Assert.assertArrayEquals(sortedFileNames, smbFilesMBean.getSmbFileNamesArray(smbFiles));
+        Assert.assertEquals(sortedFileNames, smbFilesMBean.getSmbFileNamesArray(smbFiles));
 
     }
 

@@ -2,7 +2,7 @@ package com.latticeengines.camille;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.zookeeper.ZooDefs;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
