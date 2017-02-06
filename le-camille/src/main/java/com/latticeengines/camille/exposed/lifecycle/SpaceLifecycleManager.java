@@ -151,7 +151,7 @@ public class SpaceLifecycleManager {
         String products = productsDoc.getData();
         if (StringUtils.isEmpty(products)) {
             log.info(String.format("Tenant %s does not have products information", tenantId));
-            return "";
+            return tenantFeatureFlagDoc.getData();
         }
 
         Set<String> productFeatureFlagSet = new HashSet<String>();
