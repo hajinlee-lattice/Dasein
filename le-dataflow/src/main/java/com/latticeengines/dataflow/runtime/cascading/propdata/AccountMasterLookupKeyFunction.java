@@ -17,17 +17,41 @@ public class AccountMasterLookupKeyFunction extends BaseOperation implements Fun
 
     private String domainColumn;
     private String dunsColumn;
+    private String countryColumn;
+    private String stateColumn;
+    private String zipCodeColumn;
 
-    public AccountMasterLookupKeyFunction(String keyColumn, String domainColumn, String dunsColumn) {
+    public AccountMasterLookupKeyFunction(String keyColumn, String domainColumn, String dunsColumn,
+            String countryColumn, String stateColumn, String zipCodeColumn) {
         super(new Fields(keyColumn));
         this.domainColumn = domainColumn;
         this.dunsColumn = dunsColumn;
+        this.countryColumn = countryColumn;
+        this.stateColumn = stateColumn;
+        this.zipCodeColumn = zipCodeColumn;
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        if (domainColumn != null && dunsColumn != null) {
+        if (domainColumn != null && zipCodeColumn != null && countryColumn != null) {
+            String domain = arguments.getString(domainColumn);
+            String zipCode = arguments.getString(zipCodeColumn);
+            String country = arguments.getString(countryColumn);
+            functionCall.getOutputCollector()
+                    .add(new Tuple(AccountLookupEntry.buildIdWithLocation(domain, null, country, null, zipCode)));
+        } else if (domainColumn != null && stateColumn != null && countryColumn != null) {
+            String domain = arguments.getString(domainColumn);
+            String state = arguments.getString(stateColumn);
+            String country = arguments.getString(countryColumn);
+            functionCall.getOutputCollector()
+                    .add(new Tuple(AccountLookupEntry.buildIdWithLocation(domain, null, country, state, null)));
+        } else if (domainColumn != null && countryColumn != null) {
+            String domain = arguments.getString(domainColumn);
+            String country = arguments.getString(countryColumn);
+            functionCall.getOutputCollector()
+                    .add(new Tuple(AccountLookupEntry.buildIdWithLocation(domain, null, country, null, null)));
+        } else if (domainColumn != null && dunsColumn != null) {
             String domain = arguments.getString(domainColumn);
             String duns = arguments.getString(dunsColumn);
             functionCall.getOutputCollector().add(new Tuple(AccountLookupEntry.buildId(domain, duns)));

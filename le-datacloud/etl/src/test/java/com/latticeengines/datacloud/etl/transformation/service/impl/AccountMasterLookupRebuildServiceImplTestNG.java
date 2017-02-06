@@ -1,8 +1,10 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -22,8 +24,8 @@ import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 public class AccountMasterLookupRebuildServiceImplTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
@@ -114,8 +116,22 @@ public class AccountMasterLookupRebuildServiceImplTestNG
     }
 
     private String getTransformerConfig() throws JsonProcessingException {
-        TransformerConfig conf = new TransformerConfig();
-        conf.setTransformer("accountMasterLookupRebuildTransformer");
+        AccountMasterLookupRebuildConfig conf = new AccountMasterLookupRebuildConfig();
+        conf.setCountryField("Country");
+        conf.setDomainField("Domain");
+        conf.setDomainMappingPrimaryDomainField("PrimaryDomain");
+        conf.setDomainMappingSecondaryDomainField("SecondaryDomain");
+        conf.setDuDunsField("LE_PRIMARY_DUNS");
+        conf.setDunsField("DUNS");
+        conf.setEmployeeField("EMPLOYEES_HERE");
+        conf.setGuDunsField("GLOBAL_ULTIMATE_DUNS_NUMBER");
+        conf.setIsPrimaryDomainField("LE_IS_PRIMARY_DOMAIN");
+        conf.setIsPrimaryLocationField("LE_IS_PRIMARY_LOCATION");
+        conf.setKeyField("Key");
+        conf.setLatticeIdField("LatticeID");
+        conf.setSalesVolumeUsDollars("SALES_VOLUME_US_DOLLARS");
+        conf.setStateField("State");
+        conf.setZipCodeField("ZipCode");
         return om.writeValueAsString(conf);
     }
 
@@ -130,37 +146,53 @@ public class AccountMasterLookupRebuildServiceImplTestNG
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
+        Set<String> keys = new HashSet<String>();
+        Object[][] expectedData = { { "_DOMAIN_a.com_DUNS_NULL", 6L }, { "_DOMAIN_secondary.com_DUNS_NULL", 6L },
+                { "_DOMAIN_mailserver.com_DUNS_NULL", 6L },
+                { "_DOMAIN_a.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_ZipCode1", 1L },
+                { "_DOMAIN_secondary.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_ZipCode1", 1L },
+                { "_DOMAIN_mailserver.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_ZipCode1", 1L },
+                { "_DOMAIN_a.com_DUNS_NULL_COUNTRY_Country1_STATE_State1_ZIPCODE_NULL", 1L },
+                { "_DOMAIN_secondary.com_DUNS_NULL_COUNTRY_Country1_STATE_State1_ZIPCODE_NULL", 1L },
+                { "_DOMAIN_mailserver.com_DUNS_NULL_COUNTRY_Country1_STATE_State1_ZIPCODE_NULL", 1L },
+                { "_DOMAIN_a.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_NULL", 1L },
+                { "_DOMAIN_secondary.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_NULL", 1L },
+                { "_DOMAIN_mailserver.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_NULL", 1L },
+                { "_DOMAIN_a.com_DUNS_NULL_COUNTRY_Country2_STATE_NULL_ZIPCODE_NULL", 6L },
+                { "_DOMAIN_secondary.com_DUNS_NULL_COUNTRY_Country2_STATE_NULL_ZIPCODE_NULL", 6L },
+                { "_DOMAIN_mailserver.com_DUNS_NULL_COUNTRY_Country2_STATE_NULL_ZIPCODE_NULL", 6L },
+                { "_DOMAIN_b.com_DUNS_NULL", 8L }, { "_DOMAIN_c.com_DUNS_NULL", 9L },
+                { "_DOMAIN_d.com_DUNS_NULL", 10L }, { "_DOMAIN_NULL_DUNS_01", 10L }, { "_DOMAIN_NULL_DUNS_02", 2L },
+                { "_DOMAIN_NULL_DUNS_03", 3L }, { "_DOMAIN_NULL_DUNS_04", 4L }, { "_DOMAIN_NULL_DUNS_05", 5L },
+                { "_DOMAIN_NULL_DUNS_06", 6L }, { "_DOMAIN_NULL_DUNS_07", 8L }, { "_DOMAIN_a.com_DUNS_01", 1L },
+                { "_DOMAIN_secondary.com_DUNS_01", 1L }, { "_DOMAIN_mailserver.com_DUNS_01", 1L },
+                { "_DOMAIN_a.com_DUNS_02", 2L }, { "_DOMAIN_secondary.com_DUNS_02", 2L },
+                { "_DOMAIN_mailserver.com_DUNS_02", 2L }, { "_DOMAIN_a.com_DUNS_03", 3L },
+                { "_DOMAIN_secondary.com_DUNS_03", 3L }, { "_DOMAIN_mailserver.com_DUNS_03", 3L },
+                { "_DOMAIN_a.com_DUNS_04", 4L }, { "_DOMAIN_secondary.com_DUNS_04", 4L },
+                { "_DOMAIN_mailserver.com_DUNS_04", 4L }, { "_DOMAIN_a.com_DUNS_05", 5L },
+                { "_DOMAIN_secondary.com_DUNS_05", 5L }, { "_DOMAIN_mailserver.com_DUNS_05", 5L },
+                { "_DOMAIN_a.com_DUNS_06", 6L }, { "_DOMAIN_secondary.com_DUNS_06", 6L },
+                { "_DOMAIN_mailserver.com_DUNS_06", 6L },
+                { "_DOMAIN_b.com_DUNS_07", 8L }, { "_DOMAIN_d.com_DUNS_01", 10L }, };
         while (records.hasNext()) {
             GenericRecord record = records.next();
             Long latticeId = (Long) record.get(LATTICEID);
             String key = String.valueOf(record.get(KEY));
             log.info(latticeId + " " + key);
-
-            Assert.assertTrue((latticeId.equals(1L) && key.equals("_DOMAIN_a.com_DUNS_NULL"))
-                    || (latticeId.equals(1L) && key.equals("_DOMAIN_secondary.com_DUNS_NULL"))
-                    || (latticeId.equals(1L) && key.equals("_DOMAIN_mailserver.com_DUNS_NULL"))
-                    || (latticeId.equals(1L) && key.equals("_DOMAIN_a.com_DUNS_01"))
-                    || (latticeId.equals(1L) && key.equals("_DOMAIN_mailserver.com_DUNS_01"))
-                    || (latticeId.equals(1L) && key.equals("_DOMAIN_secondary.com_DUNS_01"))
-                    || (latticeId.equals(1L) && key.equals("_DOMAIN_NULL_DUNS_01"))
-                    || (latticeId.equals(2L) && key.equals("_DOMAIN_secondary.com_DUNS_02"))
-                    || (latticeId.equals(2L) && key.equals("_DOMAIN_NULL_DUNS_02"))
-                    || (latticeId.equals(2L) && key.equals("_DOMAIN_a.com_DUNS_02"))
-                    || (latticeId.equals(2L) && key.equals("_DOMAIN_mailserver.com_DUNS_02"))
-                    || (latticeId.equals(3L) && key.equals("_DOMAIN_secondary.com_DUNS_03"))
-                    || (latticeId.equals(3L) && key.equals("_DOMAIN_mailserver.com_DUNS_03"))
-                    || (latticeId.equals(3L) && key.equals("_DOMAIN_NULL_DUNS_03"))
-                    || (latticeId.equals(3L) && key.equals("_DOMAIN_a.com_DUNS_03"))
-                    || (latticeId.equals(4L) && key.equals("_DOMAIN_b.com_DUNS_01"))
-                    || (latticeId.equals(5L) && key.equals("_DOMAIN_b.com_DUNS_02"))
-                    || (latticeId.equals(5L) && key.equals("_DOMAIN_b.com_DUNS_NULL"))
-                    || (latticeId.equals(6L) && key.equals("_DOMAIN_b.com_DUNS_03"))
-                    || (latticeId.equals(7L) && key.equals("_DOMAIN_NULL_DUNS_04"))
-                    || (latticeId.equals(7L) && key.equals("_DOMAIN_b.com_DUNS_04"))
-                    || (latticeId.equals(8L) && key.equals("_DOMAIN_c.com_DUNS_NULL")));
+            Assert.assertFalse(keys.contains(key));
+            keys.add(key);
+            boolean flag = false;
+            for (Object[] data : expectedData) {
+                if (key.equals(data[0]) && latticeId.equals(data[1])) {
+                    flag = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 22);
+        Assert.assertEquals(rowNum, 45);
     }
 
 }

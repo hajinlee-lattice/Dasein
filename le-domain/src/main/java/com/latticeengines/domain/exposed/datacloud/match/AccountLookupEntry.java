@@ -16,6 +16,9 @@ public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
 
     private static final String DOMAIN_TOKEN = "_DOMAIN_";
     private static final String DUNS_TOKEN = "_DUNS_";
+    private static final String COUNTRY_TOKEN = "_COUNTRY_";
+    private static final String STATE_TOKEN = "_STATE_";
+    private static final String ZIPCODE_TOKEN = "_ZIPCODE_";
 
     public static final String UNKNOWN = "NULL";
     private static final String DOMAIN = "domain";
@@ -94,6 +97,16 @@ public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
         domain = domain != null ? domain : UNKNOWN;
         duns = duns != null ? duns : UNKNOWN;
         return DOMAIN_TOKEN + domain + DUNS_TOKEN + duns;
+    }
+
+    public static String buildIdWithLocation(String domain, String duns, String country, String state, String zipCode) {
+        domain = domain != null ? domain : UNKNOWN;
+        duns = duns != null ? duns : UNKNOWN;
+        country = country != null ? country : UNKNOWN;
+        state = state != null ? state : UNKNOWN;
+        zipCode = zipCode != null ? zipCode : UNKNOWN;
+        return DOMAIN_TOKEN + domain + DUNS_TOKEN + duns + COUNTRY_TOKEN + country + STATE_TOKEN + state + ZIPCODE_TOKEN
+                + zipCode;
     }
 
     public static AccountLookupEntry fromKey(String latticeAccountId, String key) {
