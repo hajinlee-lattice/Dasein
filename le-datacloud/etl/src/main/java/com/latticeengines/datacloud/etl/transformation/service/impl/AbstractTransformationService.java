@@ -298,13 +298,18 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
             HdfsUtils.writeToFile(yarnConfiguration, sourceDir + HDFS_PATH_SEPARATOR + SUCCESS_FLAG, "");
 
-            // register hive table
-            hiveTableService.createTable(source.getSourceName(), version);
-
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
             return false;
         }
+        
+        try {
+            // register hive table
+            hiveTableService.createTable(source.getSourceName(), version);
+        } catch (Exception e) {
+            getLogger().error("Failed to create hive table.", e);
+        }
+
         return true;
     }
 
