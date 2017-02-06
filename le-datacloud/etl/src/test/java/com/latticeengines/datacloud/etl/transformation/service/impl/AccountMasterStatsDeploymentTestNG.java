@@ -82,6 +82,7 @@ public class AccountMasterStatsDeploymentTestNG
         List<String> baseSources = new ArrayList<String>();
         baseSources.add("AccountMaster");
         step1.setBaseSources(baseSources);
+        step1.setBaseVersions(null);
         step1.setTransformer("sourceDeduper");
         step1.setTargetSource("AccountMasterDeduped");
         String deduperConfig = getDeduperConfig();
@@ -93,6 +94,7 @@ public class AccountMasterStatsDeploymentTestNG
         List<Integer> inputSteps2 = new ArrayList<Integer>();
         inputSteps2.add(0);
         step2.setInputSteps(inputSteps2);
+        step2.setTargetSource("accountMasterStatsMinMax");
         step2.setTransformer("accountMasterStatsMinMaxTransformer");
 
         AccountMasterStatisticsConfig confParam2 = getAccountMasterStatsParameters();

@@ -16,8 +16,14 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String LBL_ORDER_PRE_BOOLEAN = "[B";
     public static final String LBL_ORDER_PRE_OBJECT = "[O";
     public static final String COUNT_KEY = "_COUNT_";
-    public static final String GROUP_TOTAL_KEY = "_GroupTotal_";
     public static final String MIN_MAX_KEY = "_MinMax_";
+    public static final String GROUP_TOTAL_KEY_TEMP = "_GroupTotal_";
+    public static final String GROUP_TOTAL_KEY = "GroupTotal";
+    public static final String ATTR_COUNT_1_KEY = "AttrCount1";
+    public static final String ATTR_COUNT_2_KEY = "AttrCount2";
+    public static final String ATTR_COUNT_3_KEY = "AttrCount3";
+    public static final String ATTR_COUNT_4_KEY = "AttrCount4";
+    public static final String PID_KEY = "PID";
 
     private Map<String, List<String>> dimensionDefinitionMap;
 

@@ -37,6 +37,7 @@ import cascading.tuple.Fields;
 public class AccountMasterStatsFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, AccountMasterStatsParameters> {
 
+    private static final String TEMP_RENAMED_PREFIX = "_RENAMED_";
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
@@ -124,7 +125,7 @@ public class AccountMasterStatsFlow
         String[] renamedDimensionFieldNames = new String[dimensionIdFieldNames.length];
         int i = 0;
         for (String id : dimensionIdFieldNames) {
-            renamedDimensionFieldNames[i++] = "_RENAMED_" + id;
+            renamedDimensionFieldNames[i++] = TEMP_RENAMED_PREFIX + id;
         }
 
         node.renamePipe("beginJoinWithMinMax");
@@ -235,20 +236,22 @@ public class AccountMasterStatsFlow
 
     protected Node createReportGenerationNode(AccountMasterStatsParameters parameters, String[] dimensionIdFieldNames,
             List<FieldMetadata> fms, Node grouped) {
+        List<String> finalAttrColList = new ArrayList<>();
         List<FieldMetadata> newColumns = getFinalReportColumns(parameters.getFinalDimensionColumns(),
-                parameters.getCubeColumnName());
+                parameters.getCubeColumnName(), finalAttrColList);
 
-        List<FieldMetadata> fms1 = new ArrayList<>();
-        fms1.addAll(newColumns);
+        List<FieldMetadata> fmsOutputColumns = new ArrayList<>();
+        fmsOutputColumns.addAll(newColumns);
 
         Node report = generateFinalReport(grouped, //
                 getFieldList(fms), newColumns, //
-                getFieldList(fms1), Fields.RESULTS, parameters.getCubeColumnName(),
-                parameters.getRootIdsForNonRequiredDimensions());
+                getFieldList(fmsOutputColumns), Fields.RESULTS, parameters.getCubeColumnName(),
+                parameters.getRootIdsForNonRequiredDimensions(), finalAttrColList);
         return report;
     }
 
-    private List<FieldMetadata> getFinalReportColumns(List<String> finalDimensionsList, String encodedCubeColumnName) {
+    private List<FieldMetadata> getFinalReportColumns(List<String> finalDimensionsList, String encodedCubeColumnName,
+            List<String> finalAttrColList) {
         List<FieldMetadata> finalReportColumns = new ArrayList<>();
 
         for (String dimensionKey : finalDimensionsList) {
@@ -256,13 +259,22 @@ public class AccountMasterStatsFlow
         }
 
         finalReportColumns.add(new FieldMetadata(encodedCubeColumnName, String.class));
-        finalReportColumns.add(new FieldMetadata("PID", Long.class));
+        finalReportColumns.add(new FieldMetadata(AccountMasterStatsParameters.GROUP_TOTAL_KEY, Long.class));
+
+        finalAttrColList.add(AccountMasterStatsParameters.ATTR_COUNT_1_KEY);
+        finalReportColumns.add(new FieldMetadata(AccountMasterStatsParameters.ATTR_COUNT_1_KEY, String.class));
+        finalAttrColList.add(AccountMasterStatsParameters.ATTR_COUNT_2_KEY);
+        finalReportColumns.add(new FieldMetadata(AccountMasterStatsParameters.ATTR_COUNT_2_KEY, String.class));
+        finalAttrColList.add(AccountMasterStatsParameters.ATTR_COUNT_3_KEY);
+        finalReportColumns.add(new FieldMetadata(AccountMasterStatsParameters.ATTR_COUNT_3_KEY, String.class));
+        finalAttrColList.add(AccountMasterStatsParameters.ATTR_COUNT_4_KEY);
+        finalReportColumns.add(new FieldMetadata(AccountMasterStatsParameters.ATTR_COUNT_4_KEY, String.class));
         return finalReportColumns;
     }
 
     private Node generateFinalReport(Node grouped, FieldList applyToFieldList, List<FieldMetadata> newColumns,
             FieldList outputFieldList, Fields overrideFieldStrategy, String cubeColumnName,
-            Map<String, Long> rootIdsForNonRequiredDimensions) {
+            Map<String, Long> rootIdsForNonRequiredDimensions, List<String> finalAttrColList) {
 
         String[] fields = outputFieldList.getFields();
 
@@ -270,7 +282,7 @@ public class AccountMasterStatsFlow
 
         AccountMasterStatsReportFunction.Params functionParam = new AccountMasterStatsReportFunction.Params(
                 fieldDeclaration, newColumns, cubeColumnName, //
-                getTotalKey(), rootIdsForNonRequiredDimensions, //
+                getTotalKey(), finalAttrColList, rootIdsForNonRequiredDimensions, //
                 AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX, //
                 AccountMasterStatsParameters.LBL_ORDER_POST, //
                 AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_YES, //
@@ -278,11 +290,16 @@ public class AccountMasterStatsFlow
                 AccountMasterStatsParameters.LBL_ORDER_PRE_NUMERIC, //
                 AccountMasterStatsParameters.LBL_ORDER_PRE_BOOLEAN, //
                 AccountMasterStatsParameters.LBL_ORDER_PRE_OBJECT, //
-                AccountMasterStatsParameters.COUNT_KEY);
+                AccountMasterStatsParameters.COUNT_KEY, //
+                AccountMasterStatsParameters.GROUP_TOTAL_KEY);
 
         AccountMasterStatsReportFunction reportGenerationFunction = new AccountMasterStatsReportFunction(functionParam);
-        return grouped.apply(reportGenerationFunction, applyToFieldList, newColumns, outputFieldList,
+        Node report = grouped.apply(reportGenerationFunction, applyToFieldList, newColumns, outputFieldList,
                 overrideFieldStrategy);
+
+        report = report.addRowID(AccountMasterStatsParameters.PID_KEY);
+
+        return report;
     }
 
     private List<FieldMetadata> resultSchema(List<FieldMetadata> leafSchemaAllOutputColumns) {
@@ -362,7 +379,7 @@ public class AccountMasterStatsFlow
     }
 
     public String getTotalKey() {
-        return AccountMasterStatsParameters.GROUP_TOTAL_KEY;
+        return AccountMasterStatsParameters.GROUP_TOTAL_KEY_TEMP;
     }
 
     public String getMinMaxKey() {

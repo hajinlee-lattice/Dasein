@@ -273,7 +273,7 @@ public class AccountMasterStatsMinMaxFlow
     }
 
     public String getTotalKey() {
-        return AccountMasterStatsParameters.GROUP_TOTAL_KEY;
+        return AccountMasterStatsParameters.GROUP_TOTAL_KEY_TEMP;
     }
 
     public String getMinMaxKey() {
