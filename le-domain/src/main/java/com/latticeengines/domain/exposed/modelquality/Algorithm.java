@@ -88,6 +88,19 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
         return type.toString();
     }
 
+    @JsonIgnore
+    public String getDataPlatformAlgorithmName() {
+        switch (type) {
+        case RANDOMFOREST:
+            return "RF";
+        case LOGISTICREGRESSION:
+            return "LR";
+        case DECISIONTREE:
+            return "DT";
+        }
+        return "RF";
+    }
+
     public void setType(AlgorithmType type) {
         this.type = type;
     }

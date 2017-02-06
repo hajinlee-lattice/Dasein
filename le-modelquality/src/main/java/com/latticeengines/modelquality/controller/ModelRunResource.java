@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modelquality.Environment;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
@@ -19,6 +21,7 @@ import com.latticeengines.domain.exposed.modelquality.ModelRunStatus;
 import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
 import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.network.exposed.modelquality.ModelQualityModelRunInterface;
+import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +36,9 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
 
     @Autowired
     private ModelRunEntityMgr modelRunEntityMgr;
+
+    @Autowired
+    private ModelProxy modelProxy;
 
     @Override
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -65,9 +71,17 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     @Override
     @RequestMapping(value = "/status/{modelRunName:.*}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Get ModelRun Status by name")
+    @ApiOperation(value = "Get ModelRun status by name")
     public String getModelRunStatusByName(@PathVariable String modelRunName) {
         return getStatusByName(modelRunName).toString();
+    }
+
+    @Override
+    @RequestMapping(value = "/modelhdfsdir/{modelRunName:.*}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get ModelRun model HDFS directory by name")
+    public String getModelRunModelHDFSDirByName(@PathVariable String modelRunName) {
+        return getModelHDFSDirByName(modelRunName);
     }
 
     @Override
@@ -80,6 +94,13 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     public ModelRunStatus getStatusByName(String name) {
         ModelRun run = modelRunEntityMgr.findByName(name);
         return run.getStatus();
+    }
+
+    public String getModelHDFSDirByName(String name) {
+        ModelRun run = modelRunEntityMgr.findByName(name);
+        String modelId = run.getModelId();
+        Model model = modelProxy.getModel(UuidUtils.extractUuid(modelId));
+        return model.getModelHdfsDir();
     }
 
     @Override

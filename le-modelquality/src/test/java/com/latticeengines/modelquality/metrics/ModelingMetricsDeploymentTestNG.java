@@ -11,10 +11,10 @@ import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
+import com.latticeengines.modelquality.functionalframework.ModelQualityTestNGBase;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
-public class ModelingMetricsDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
+public class ModelingMetricsDeploymentTestNG extends ModelQualityTestNGBase {
 
     @Autowired
     private MetricService metricService;

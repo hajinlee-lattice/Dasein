@@ -34,4 +34,6 @@ public interface ModelingService {
     ApplicationId exportData(ExportConfiguration config);
 
     ApplicationId reviewData(ModelReviewConfiguration config);
+
+    Model getModel(String Id);
 }

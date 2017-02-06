@@ -51,8 +51,8 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 @Table(name = "MODEL_SUMMARY", uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
         @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId, Fact,
-        Dimension {
+public class ModelSummary
+        implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId, Fact, Dimension {
 
     private String id;
     private String name;
@@ -610,27 +610,25 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.setPredefinedSelectionName(predefinedSelection.getName());
     }
 
-    @Transient
+    @Column(name = "CROSS_VALIDATION_MEAN", nullable = true)
     @JsonIgnore
     @MetricField(name = "CrossValidatedMean", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedMean() {
         return crossValidatedMean;
     }
 
-    @Transient
     @JsonIgnore
     public void setCrossValidatedMean(Double crossValidatedMean) {
         this.crossValidatedMean = crossValidatedMean;
     }
 
-    @Transient
+    @Column(name = "CROSS_VALIDATION_STD", nullable = true)
     @JsonIgnore
     @MetricField(name = "CrossValidatedStd", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedStd() {
         return crossValidatedStd;
     }
 
-    @Transient
     @JsonIgnore
     public void setCrossValidatedStd(Double crossValidatedStd) {
         this.crossValidatedStd = crossValidatedStd;
@@ -655,5 +653,5 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public void setMatch(boolean isMatch) {
         this.isMatch = isMatch;
     }
-    
+
 }

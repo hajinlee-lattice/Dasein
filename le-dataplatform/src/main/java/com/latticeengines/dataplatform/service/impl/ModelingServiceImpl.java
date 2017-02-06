@@ -41,6 +41,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
@@ -92,6 +93,9 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Resource(name = "modelingJobService")
     private ModelingJobService modelingJobService;
+
+    @Resource(name = "modelEntityMgr")
+    private ModelEntityMgr modelEntityMgr;
 
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
@@ -216,7 +220,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         m.setDataFormat("avro");
         m.setTargetsList(dataProfileConfig.getTargets());
-        m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
+        m.setKeyCols(Arrays.<String>asList(new String[] { featureList.get(0) }));
         m.setFeaturesList(featureList);
 
         m.setModelHdfsDir(m.getMetadataHdfsPath());
@@ -234,7 +238,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
             dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
         }
-        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
+        modelDefinition.addAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataProfileAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
 
@@ -260,7 +264,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         m.setDataFormat("avro");
         m.setTargetsList(dataReviewConfig.getTargets());
-        m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
+        m.setKeyCols(Arrays.<String>asList(new String[] { featureList.get(0) }));
         m.setFeaturesList(featureList);
 
         m.setModelHdfsDir(m.getMetadataHdfsPath());
@@ -279,7 +283,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (!StringUtils.isEmpty(dataReviewConfig.getScript())) {
             dataReviewAlgorithm.setScript(dataReviewConfig.getScript());
         }
-        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataReviewAlgorithm }));
+        modelDefinition.addAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataReviewAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
 
@@ -850,5 +854,10 @@ public class ModelingServiceImpl implements ModelingService {
     @Override
     public JobStatus getJobStatus(String applicationId) {
         return modelingJobService.getJobStatus(applicationId);
+    }
+
+    @Override
+    public Model getModel(String Id) {
+        return modelEntityMgr.findByObjectId(Id);
     }
 }

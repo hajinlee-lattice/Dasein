@@ -18,17 +18,23 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 @Entity
 @Table(name = "MODEL_DEFINITION")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class ModelDefinition implements HasName, HasPid {
 
     private Long pid;
     private String name;
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type",
+            defaultImpl = RandomForestAlgorithm.class)
     private List<Algorithm> algorithms = new ArrayList<Algorithm>();
     private List<Model> models = new ArrayList<Model>();
 
@@ -61,7 +67,8 @@ public class ModelDefinition implements HasName, HasPid {
     }
 
     @JsonProperty("algorithms")
-    @OneToMany(mappedBy = "modelDefinition", targetEntity = AlgorithmBase.class, fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
+    @OneToMany(mappedBy = "modelDefinition", targetEntity = AlgorithmBase.class, fetch = FetchType.EAGER,
+            cascade = { CascadeType.ALL })
     public List<Algorithm> getAlgorithms() {
         return algorithms;
     }

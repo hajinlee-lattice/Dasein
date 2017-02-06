@@ -116,7 +116,7 @@ public class AlgorithmFactory extends ModelFactory {
         if (StringUtils.isNotEmpty(modelAlgo.getScript())) {
             algo.setScript(modelAlgo.getScript());
         }
-        algo.setName(modelAlgo.getName());
+        algo.setName(modelAlgo.getDataPlatformAlgorithmName());
         algo.setSampleName(SAMPLE_NAME);
         List<AlgorithmPropertyDef> defs = modelAlgo.getAlgorithmPropertyDefs();
         defs.add(getRandomSeedPropertyDef());

@@ -20,6 +20,8 @@ public interface ModelInterface {
 
     StringList getFeatures(Model model);
 
+    Model getModel(String Id);
+
     AppSubmission submit(Model model);
 
     AppSubmission review(ModelReviewConfiguration config);

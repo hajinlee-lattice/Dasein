@@ -15,4 +15,6 @@ public interface ModelQualityModelRunInterface {
 
     String getModelRunStatusByName(String modelRunName);
 
+    String getModelRunModelHDFSDirByName(String modelRunName);
+
 }
