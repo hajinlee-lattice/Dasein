@@ -26,6 +26,9 @@ import com.latticeengines.actors.exposed.MetricActor;
 import com.latticeengines.actors.exposed.RoutingLogic;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryStateBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryZipCodeBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
@@ -171,6 +174,9 @@ public class MatchActorSystem {
         initNamedActor(DomainBasedMicroEngineActor.class);
         initNamedActor(DunsBasedMicroEngineActor.class);
         initNamedActor(LocationToDunsMicroEngineActor.class);
+        initNamedActor(DomainCountryZipCodeBasedMicroEngineActor.class);
+        initNamedActor(DomainCountryStateBasedMicroEngineActor.class);
+        initNamedActor(DomainCountryBasedMicroEngineActor.class);
     }
 
     private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz) {

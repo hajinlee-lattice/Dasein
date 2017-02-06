@@ -6,10 +6,6 @@ import java.util.List;
 
 public class AccountLookupRequest {
 
-    public static final String DOMAIN = "_DOMAIN_";
-    public static final String DUNS = "_DUNS_";
-    public static final String UNKNOWN = "NULL";
-
     private String version;
 
     private List<String> ids;
@@ -24,9 +20,11 @@ public class AccountLookupRequest {
     }
 
     public void addLookupPair(String domain, String duns) {
-        if (domain == null) domain = UNKNOWN;
-        if (duns == null) duns = UNKNOWN;
-        ids.add(DOMAIN + domain + DUNS + duns);
+        ids.add(AccountLookupEntry.buildId(domain, duns));
+    }
+
+    public void addLookupPair(String domain, String duns, String country, String state, String zipCode) {
+        ids.add(AccountLookupEntry.buildIdWithLocation(domain, duns, country, state, zipCode));
     }
 
     public void addId(String id) {

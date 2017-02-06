@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
@@ -72,7 +72,12 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
         if (matchKeyTuple.getDuns() != null || matchKeyTuple.getDomain() != null) {
             AccountLookupRequest accountLookupRequest = new AccountLookupRequest(
                     request.getMatchTravelerContext().getDataCloudVersion());
-            accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
+            if (matchKeyTuple.getCountry() != null) {
+                accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns(),
+                        matchKeyTuple.getCountry(), matchKeyTuple.getState(), matchKeyTuple.getZipcode());
+            } else {
+                accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
+            }
             Long startTime = System.currentTimeMillis();
             result = accountLookupService.batchLookupIds(accountLookupRequest).get(0);
             log.info(String.format(
@@ -153,8 +158,15 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                         if (!reqIdsWithVersion.containsKey(dataCloudVersion)) {
                             reqIdsWithVersion.put(dataCloudVersion, new ArrayList<>());
                         }
-                        lookupReqWithVersion.get(dataCloudVersion).addLookupPair(matchKeyTuple.getDomain(),
-                                matchKeyTuple.getDuns());
+                        if (matchKeyTuple.getCountry() != null) {
+                            lookupReqWithVersion.get(dataCloudVersion).addLookupPair(matchKeyTuple.getDomain(),
+                                    matchKeyTuple.getDuns(), matchKeyTuple.getCountry(), matchKeyTuple.getState(),
+                                    matchKeyTuple.getZipcode());
+                        } else {
+                            lookupReqWithVersion.get(dataCloudVersion).addLookupPair(matchKeyTuple.getDomain(),
+                                    matchKeyTuple.getDuns());
+                        }
+
                         reqIdsWithVersion.get(dataCloudVersion).add(lookupRequestId);
                     }
                 }
