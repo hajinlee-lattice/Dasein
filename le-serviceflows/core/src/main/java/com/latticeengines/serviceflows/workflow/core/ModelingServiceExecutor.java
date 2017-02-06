@@ -348,6 +348,10 @@ public class ModelingServiceExecutor {
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
         StringList features = modelProxy.getFeatures(model);
+        if (CollectionUtils.isNotEmpty(features.getElements()) && builder.getProfileExcludeList() != null
+                && builder.getProfileExcludeList().length > 0) {
+            features.getElements().removeAll(Arrays.asList(builder.getProfileExcludeList()));
+        }
         return new AbstractMap.SimpleEntry<>(Arrays.asList(builder.getTargets()), features.getElements());
     }
 
