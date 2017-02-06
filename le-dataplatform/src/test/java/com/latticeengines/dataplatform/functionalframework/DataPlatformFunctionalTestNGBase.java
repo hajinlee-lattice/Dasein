@@ -60,7 +60,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
-    private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 20;
+    private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 25;
 
     protected String suffix = this.getClass().getSimpleName() + "_" + generateUnique();
 
@@ -293,7 +293,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     public YarnClient getYarnClient() {
         return yarnClient;
     }
-    
+
     /**
      * Sets the {@link YarnClient}.
      *
@@ -340,18 +340,18 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return applicationId;
     }
 
-    public FinalApplicationStatus waitForStatus(ApplicationId applicationId, FinalApplicationStatus... applicationStatuses)
-    throws Exception {
+    public FinalApplicationStatus waitForStatus(ApplicationId applicationId,
+            FinalApplicationStatus... applicationStatuses) throws Exception {
         return waitForStatus(applicationId.toString(), MAX_MILLIS_TO_WAIT, applicationStatuses);
     }
 
     public FinalApplicationStatus waitForStatus(String applicationId, FinalApplicationStatus... applicationStatuses)
-    throws Exception {
+            throws Exception {
         return waitForStatus(applicationId, MAX_MILLIS_TO_WAIT, applicationStatuses);
     }
 
-    public FinalApplicationStatus waitForStatus(String applicationId, Long waitTimeInMillis, FinalApplicationStatus... applicationStatuses)
-            throws Exception {
+    public FinalApplicationStatus waitForStatus(String applicationId, Long waitTimeInMillis,
+            FinalApplicationStatus... applicationStatuses) throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
         waitTimeInMillis = waitTimeInMillis == null ? MAX_MILLIS_TO_WAIT : waitTimeInMillis;
@@ -375,7 +375,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         } while (System.currentTimeMillis() - start < waitTimeInMillis);
         return status;
     }
-    
+
     private YarnClient getYarnClient(String yarnClientName) {
         ConfigurableApplicationContext context = null;
         try {
