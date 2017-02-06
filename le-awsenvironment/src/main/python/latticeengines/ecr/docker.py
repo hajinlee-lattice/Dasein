@@ -23,6 +23,9 @@ def push(args):
     config = AwsEnvironment(args.environment)
     print "pushing image %s:%s to repo ..." % (args.image, args.remotetag)
 
+    if args.environment != "dev":
+        create_ecr_if_not_exists(args.environment, args.image)
+
     if args.skiplogin:
         login_cmd = "echo skipping docker login ..."
     else:
@@ -115,6 +118,24 @@ def tag_for_local(registry, image, remotetag, localtag):
     destination = "" + NAMESPACE + "/" +  image + ":" + localtag
     subprocess.call(["docker", "tag", source, destination])
 
+def create_ecr_if_not_exists(env, image):
+    if not repo_in_ecr(env, image):
+        client = boto3.client('ecr')
+        full_name = NAMESPACE + "/" +  image
+        client.create_repository(
+            repositoryName=full_name
+        )
+
+def repo_in_ecr(env, image):
+    config = AwsEnvironment(env)
+    id = config.aws_account_id()
+    full_name = NAMESPACE + "/" +  image
+    client = boto3.client('ecr')
+    response = client.describe_repositories(registryId=id)
+    for repo in response['repositories']:
+        if repo['repositoryName'] == full_name:
+            return True
+    return False
 
 def login_internal(environment):
     if environment == 'dev':
@@ -165,6 +186,9 @@ def parse_args():
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
     subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     subparser.set_defaults(func=purge)
+
+    subparser = commands.add_parser("test")
+    subparser.set_defaults(func=test)
 
     args = parser.parse_args()
     return args
