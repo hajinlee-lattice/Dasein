@@ -44,6 +44,8 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
     private URL metadataUrl;
 
     private URL dataUrl;
+    
+    private String fileName = "";
 
     @Autowired
     private JobService jobService;
@@ -58,7 +60,7 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/sourceFiles");
         HdfsUtils.mkdir(yarnConfiguration, "/tmp/sourceFiles");
         // change file name
-        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/outputRvDomainsvLeftv2.csv");
+        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/" + fileName);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
         // change metadata json
         metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/table.json");
@@ -123,7 +125,7 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
 //            props.put(ImportProperty.METADATA, contents);
 //        }
         // change file name
-        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/outputRvDomainsvLeftv2.csv");
+        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/" + fileName);
         return props;
     }
 }
