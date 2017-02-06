@@ -46,13 +46,16 @@ def purge(args):
     print "purging old tags of image %s from repo ..." % args.image
     purge_internal(args.environment, args.image)
 
-def pull_internal(environment, image, remotetag, localtag):
+def pull_internal(environment, image, remotetag, localtag, skiplogin=False):
     registry = AwsEnvironment(environment).ecr_registry()
     if environment == 'dev':
         registry = NEXUS_DOCKER_REGISTRY
     source = registry + "/" + NAMESPACE + "/" + image + ":" + remotetag
-    login_cmd = login_internal(environment)
-    subprocess.call(login_cmd + "; docker pull %s" % source, shell=True)
+    if skiplogin:
+        subprocess.call("docker pull %s" % source, shell=True)
+    else:
+        login_cmd = login_internal(environment)
+        subprocess.call(login_cmd + "; docker pull %s" % source, shell=True)
     tag_for_local(registry, image, remotetag, localtag)
     subprocess.call("docker rmi " + source, shell=True)
 
@@ -155,6 +158,7 @@ def parse_args():
     subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
+    subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
     subparser.set_defaults(func=pull)
 
     subparser = commands.add_parser("purge")
