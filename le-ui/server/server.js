@@ -14,6 +14,7 @@ const fs        = require('graceful-fs');
 const helmet    = require('helmet');
 const compress  = require('compression');
 const chalk     = require('chalk');
+const cors      = require('cors');
 /*
 const proxy     = require('express-http-proxy');
 const session   = require('express-session');
@@ -65,11 +66,16 @@ class Server {
         // order matters
         this.setRenderer();
         this.setMiddleware();
+        this.setCors();
         options.config.WHITELIST ? this.trustProxy(options.config.WHITELIST) : null;
         options.config.LOGGING ? this.startLogging(options.config.LOGGING) : null;
         options.routes ? this.setAppRoutes(options.routes) : null;
         this.setProxies();
         this.setDefaultRoutes(options.config.NODE_ENV);
+    }
+
+    setCors() {
+        this.app.get('/insights', cors(), function(req, res, next) { });
     }
 
     setRenderer() {
