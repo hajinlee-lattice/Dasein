@@ -74,7 +74,8 @@ public class LongBucketUtil extends BucketUtil {
 
     @Override
     public String getHigherPartOfLbl(Object lowerObject, Object higherObject) {
-        Long obj = ((Long) higherObject);
-        return LABEL_NUMERICAL_SEPARATOR + obj;
+        long objH = ((Long) higherObject);
+        long objL = ((Long) lowerObject);
+        return (objH - objL == 1L) ? "" : LABEL_NUMERICAL_SEPARATOR + (objH - 1);
     }
 }
