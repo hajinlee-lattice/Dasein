@@ -191,8 +191,12 @@ def provision(environment, stackname, tag, instance_type='r3.large'):
         ],
         Tags=[
             {
-                'Key': 'product',
+                'Key': 'le-product',
                 'Value': 'lpi'
+            },
+            {
+                'Key': 'le-stack',
+                'Value': stackname
             }
         ]
     )

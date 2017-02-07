@@ -83,12 +83,14 @@ def create_taget_groups():
     tg_map = {}
     for app, health in TOMCAT_APP_HEALTH_MAP.items():
         tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health)
-        tg.add_tag("product", "lpi")
+        tg.add_tag("le-product", "lpi")
+        tg.add_tag("le-service", app)
         tgs.append(tg)
         tg_map[app] = tg
     for app in UI_APPS:
         tg = TargetGroup(app, port="443", protocol="HTTPS", checkon="/")
-        tg.add_tag("product", "lpi")
+        tg.add_tag("le-product", "lpi")
+        tg.add_tag("le-service", app)
         tgs.append(tg)
         tg_map[app] = tg
     return tgs, tg_map
@@ -99,7 +101,7 @@ def create_load_balancers(tg_map, ui=False):
 
     # private tomcat
     private_lb = ApplicationLoadBalancer("private", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
-    private_lb.add_tag("product", "lpi")
+    private_lb.add_tag("le-product", "lpi")
     for k, v in tg_map.items():
         private_lb.depends_on(v)
     resources.append(private_lb)
@@ -107,7 +109,7 @@ def create_load_balancers(tg_map, ui=False):
 
     # public tomcat
     public_lb = ApplicationLoadBalancer("public", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
-    public_lb.add_tag("product", "lpi")
+    public_lb.add_tag("le-product", "lpi")
     for k, v in tg_map.items():
         private_lb.depends_on(v)
     resources.append(public_lb)
@@ -145,12 +147,14 @@ def create_load_balancers(tg_map, ui=False):
         # lpi
         lpi_lb = ApplicationLoadBalancer("lpi", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
         lpi_lb.depends_on(tg_map["lpi"])
+        lpi_lb.add_tag("le-product", "lpi")
         resources.append(lpi_lb)
         albs["lpi"] = lpi_lb
 
         # adminconsole
         ac_lb = ApplicationLoadBalancer("adminconsole", PARAM_NODEJS_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
         ac_lb.depends_on(tg_map["adminconsole"])
+        ac_lb.add_tag("le-product", "lpi")
         resources.append(ac_lb)
         albs["adminconsole"] = ac_lb
 
@@ -219,7 +223,7 @@ def provision(environment, stackname):
         ],
         Tags=[
             {
-                'Key': 'product',
+                'Key': 'le-product',
                 'Value': 'lpi'
             }
         ]

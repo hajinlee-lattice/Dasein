@@ -307,13 +307,14 @@ class ECSStack(Stack):
             ],
             Tags=[
                 {
-                    'Key': 'product',
+                    'Key': 'le-product',
                     'Value': 'lpi'
                 },
                 {
-                    'Key': 'le.stack',
-                    'Value': le_stack
+                    'Key': 'le-stack',
+                    'Value': stackname
                 }
+
             ]
         )
         print 'Got StackId: %s' % response['StackId']
