@@ -4,7 +4,7 @@ import java.util.List;
 
 public abstract class BucketUtil {
     protected static final String LABEL_NUMERICAL_END_PLUS = "+";
-    protected static final String LABEL_NUMERICAL_SEPARATOR = "-";
+    protected static final String LABEL_NUMERICAL_SEPARATOR = " - ";
 
     abstract boolean accepts(Class<?> type);
 
