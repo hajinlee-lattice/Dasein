@@ -46,6 +46,8 @@ PARAM_PUBLIC_SUBNET_1 = Parameter("PublicSubnetId1", "The first public subnet to
 PARAM_PUBLIC_SUBNET_2 = Parameter("PublicSubnetId2", "The second public subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
 PARAM_PUBLIC_SUBNET_3 = Parameter("PublicSubnetId3", "The third public subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
 
+PARAM_LE_STACK = Parameter("LeStack", "Tag value for le-stack")
+
 LISTENER_RULE_COUNTER = {}
 
 def main():
@@ -66,7 +68,7 @@ def template(environment, ui=False, upload=False):
 
 def create_template(ui):
     stack = Stack("AWS CloudFormation template for LPI infrastructure.")
-    stack.add_params([PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    stack.add_params([PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3, PARAM_LE_STACK])
 
     # target groups
     tgs, tg_map = create_taget_groups()
@@ -85,12 +87,15 @@ def create_taget_groups():
         tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health)
         tg.add_tag("le-product", "lpi")
         tg.add_tag("le-service", app)
+        tg.add_tag("le-stack", PARAM_LE_STACK.ref())
         tgs.append(tg)
         tg_map[app] = tg
+
     for app in UI_APPS:
         tg = TargetGroup(app, port="443", protocol="HTTPS", checkon="/")
         tg.add_tag("le-product", "lpi")
         tg.add_tag("le-service", app)
+        tg.add_tag("le-stack", PARAM_LE_STACK.ref())
         tgs.append(tg)
         tg_map[app] = tg
     return tgs, tg_map
@@ -211,6 +216,7 @@ def provision(environment, stackname):
             PARAM_PUBLIC_SUBNET_3.config(config.private_subnet_3()),
             PARAM_KEY_NAME.config(config.ec2_key()),
             PARAM_ENVIRONMENT.config(environment),
+            PARAM_LE_STACK.config(stackname),
 
             PARAM_TOMCAT_SECURITY_GROUP.config(config.tomcat_sg()),
             PARAM_NODEJS_SECURITY_GROUP.config(config.nodejs_sg()),
@@ -225,6 +231,10 @@ def provision(environment, stackname):
             {
                 'Key': 'le-product',
                 'Value': 'lpi'
+            },
+            {
+                'Key': 'le-stack',
+                'Value': stackname
             }
         ]
     )

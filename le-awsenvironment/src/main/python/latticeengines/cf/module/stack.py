@@ -312,7 +312,7 @@ class ECSStack(Stack):
                 },
                 {
                     'Key': 'le-stack',
-                    'Value': stackname
+                    'Value': le_stack
                 }
 
             ]
