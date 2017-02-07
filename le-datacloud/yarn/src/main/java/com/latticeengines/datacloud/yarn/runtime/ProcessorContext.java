@@ -117,6 +117,8 @@ public class ProcessorContext {
 
     private long recordTimeOut;
 
+    private boolean disableDunsValidation;
+
     public DataCloudJobConfiguration getJobConfiguration() {
         return jobConfiguration;
     }
@@ -237,6 +239,10 @@ public class ProcessorContext {
         return matchDebugEnabled;
     }
 
+    public boolean isDisableDunsValidation() {
+        return disableDunsValidation;
+    }
+
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
             throws Exception {
         this.jobConfiguration = jobConfiguration;
@@ -326,6 +332,9 @@ public class ProcessorContext {
         if (matchDebugEnabled) {
             outputSchema = appendDebugSchema(outputSchema);
         }
+
+        disableDunsValidation = jobConfiguration.getMatchInput().getConfiguration().getDisableDunsValidation();
+        log.info(String.format("Duns validation is disabled: %b", disableDunsValidation));
         cleanup();
     }
 

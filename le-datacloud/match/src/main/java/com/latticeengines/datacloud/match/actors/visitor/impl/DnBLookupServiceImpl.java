@@ -119,7 +119,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             DnBCache cache = dnbCacheService.lookupCache(context);
             if (cache != null) {
                 if (cache.isWhiteCache()) {
-                    if (isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
+                    if ((request.getMatchTravelerContext().getMatchConfiguration() != null
+                            && request.getMatchTravelerContext().getMatchConfiguration().getDisableDunsValidation())
+                            || isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
                         context.setDuration(System.currentTimeMillis() - startTime);
@@ -199,7 +201,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             DnBCache cache = dnbCacheService.lookupCache(context);
             if (cache != null) {
                 if (cache.isWhiteCache()) {
-                    if (isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
+                    if ((request.getMatchTravelerContext().getMatchConfiguration() != null
+                            && request.getMatchTravelerContext().getMatchConfiguration().getDisableDunsValidation())
+                            || isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
                         context.setDuration(System.currentTimeMillis() - startTime);

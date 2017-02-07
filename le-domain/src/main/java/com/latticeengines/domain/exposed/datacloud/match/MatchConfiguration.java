@@ -22,6 +22,9 @@ public class MatchConfiguration {
     @JsonProperty("UseRemoteDnB")
     private Boolean useRemoteDnB;
 
+    @JsonProperty("DisableDunsValidation")
+    private boolean disableDunsValidation;
+
     public Long getTimeout() {
         return timeout;
     }
@@ -46,6 +49,14 @@ public class MatchConfiguration {
         this.requestSource = requestSource;
     }
 
+    public boolean getDisableDunsValidation() {
+        return disableDunsValidation;
+    }
+
+    private void setDisableDunsValidation(boolean disableDunsValidation) {
+        this.disableDunsValidation = disableDunsValidation;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -53,7 +64,8 @@ public class MatchConfiguration {
     public static Builder from(MatchConfiguration configuration) {
         return builder() //
                 .timeout(configuration.getTimeout()) //
-                .useRemoteDnB(configuration.getUseRemoteDnB());
+                .useRemoteDnB(configuration.getUseRemoteDnB())
+                .disableDunsValidation(configuration.getDisableDunsValidation());
     }
 
     public static class Builder {
@@ -61,6 +73,7 @@ public class MatchConfiguration {
         private Long timeout;
         private Boolean useRemoteDnB;
         private String requestSource;
+        private boolean disableDunsValidation;
         
         private Builder() {
         }
@@ -75,8 +88,13 @@ public class MatchConfiguration {
             return this;
         }
 
-        public Builder useRemoteDnB(String requestSource) {
+        public Builder requestSource(String requestSource) {
             this.requestSource = requestSource;
+            return this;
+        }
+
+        public Builder disableDunsValidation(boolean disableDunsValidation) {
+            this.disableDunsValidation = disableDunsValidation;
             return this;
         }
 
@@ -85,6 +103,7 @@ public class MatchConfiguration {
             configuration.setTimeout(timeout);
             configuration.setUseRemoteDnB(useRemoteDnB);
             configuration.setRequestSource(requestSource);
+            configuration.setDisableDunsValidation(disableDunsValidation);
             return configuration;
         }
 

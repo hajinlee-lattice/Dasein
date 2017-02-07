@@ -99,7 +99,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         matchInput.setUseRemoteDnB(processorContext.isUseRemoteDnB());
         matchInput.setLogDnBBulkResult(processorContext.getJobConfiguration().getMatchInput().getLogDnBBulkResult());
         MatchConfiguration matchConfig = MatchConfiguration.builder().timeout(processorContext.getRecordTimeOut())
-                .useRemoteDnB(processorContext.isUseRemoteDnB()).build();
+                .useRemoteDnB(processorContext.isUseRemoteDnB())
+                .disableDunsValidation(processorContext.isDisableDunsValidation()).build();
         matchInput.setConfiguration(matchConfig);
         return matchInput;
     }
