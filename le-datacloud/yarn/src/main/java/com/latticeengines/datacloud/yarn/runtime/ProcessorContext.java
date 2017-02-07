@@ -333,7 +333,8 @@ public class ProcessorContext {
             outputSchema = appendDebugSchema(outputSchema);
         }
 
-        disableDunsValidation = jobConfiguration.getMatchInput().getConfiguration().getDisableDunsValidation();
+        disableDunsValidation = jobConfiguration.getMatchInput().getConfiguration() == null ? false
+                : jobConfiguration.getMatchInput().getConfiguration().getDisableDunsValidation();
         log.info(String.format("Duns validation is disabled: %b", disableDunsValidation));
         cleanup();
     }
