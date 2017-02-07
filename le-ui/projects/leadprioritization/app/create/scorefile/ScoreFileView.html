@@ -4,10 +4,10 @@
         <div class="ten offset-one columns box-outline">
           <div class="section-header">
             <h4>{{ vm.schema }} File</h4>
-            <h5>Upload a CSV file with {{ vm.schema | lowercase }}s to score.  After a file is uploaded you will have a chance to map it to the fields in the model.</h5>
+            <h5>Upload a CSV file with {{ vm.schema | lowercase }}s to score. {{:: !vm.isPmml ? 'After a file is uploaded you will have a chance to map it to the fields in the model.' : '' }}</h5>
           </div>
           <hr />
-          <div 
+          <div
               file-uploader-container
               params="vm.params"
               input-name="csvFileName"
@@ -16,7 +16,7 @@
               file-load="vm.fileLoad(headers)"
               file-done="vm.fileDone(result)"
               file-cancel="vm.fileCancel()"
-              class="section-body with-padding form-group file-upload" 
+              class="section-body with-padding form-group file-upload"
               ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
           </div>
           <hr />
@@ -25,8 +25,8 @@
               <button type="button" ui-sref="home.model.jobs" class="button gray-button block-button">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
             </div>
             <div class="three columns pull-right">
-              <button 
-                  type="button" 
+              <button
+                  type="button"
                   class="button orange-button block-button"
                   ng-disabled="uploadForm.$invalid || !vm.uploaded"
                   ng-click="vm.clickNext(vm_uploader.choosenFileName)">
