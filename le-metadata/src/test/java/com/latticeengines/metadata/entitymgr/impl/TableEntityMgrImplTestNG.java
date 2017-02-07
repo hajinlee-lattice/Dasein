@@ -34,7 +34,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     public void setup() {
         super.setup();
     }
-    
+
     @AfterClass(groups = "functional")
     public void tearDown() {
         metadataService.deleteTable(CustomerSpace.parse(CUSTOMERSPACE2), TABLE2);
@@ -93,7 +93,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
             rule.setDescription("desc");
             rule.setEnabled(true);
             rule.setMandatoryRemoval(false);
-            Map<String, String> properties = new HashMap<>();
+            Map<String, Object> properties = new HashMap<>();
             properties.put("customdomains", "a.com, b.com, c.com");
             rule.setProperties(properties);
             dataRules.add(rule);
@@ -117,10 +117,10 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrs.get(3).getStatisticalType(), "ratio");
         assertEquals(attrs.get(3).getDataSource().get(0), "DerivedColumns");
     }
-    
+
     @Test(groups = "functional")
     public void createTags() {
-        
+
     }
 
     @DataProvider(name = "tableProvider")

@@ -56,7 +56,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Column(name = "NAME", nullable = false)
     private String name;
-    
+
     @Column(name = "DISPLAY_NAME", nullable = false)
     @JsonProperty("display_name")
     private String displayName;
@@ -68,35 +68,35 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Column(name = "NULLABLE", nullable = false)
     @JsonProperty("nullable")
     private Boolean nullable = Boolean.FALSE;
-    
+
     @Column(name = "DATA_TYPE", nullable = false)
     @JsonProperty("physical_data_type")
     private String physicalDataType;
-    
+
     @Column(name = "SOURCE_LOGICAL_DATA_TYPE", nullable = true)
     @JsonProperty("source_logical_type")
     private String sourceLogicalDataType;
-    
+
     @Column(name = "LOGICAL_DATA_TYPE", nullable = true)
     @JsonProperty("logical_type")
     @Enumerated(EnumType.STRING)
     private LogicalDataType logicalDataType;
-    
+
     @Column(name = "PRECISION", nullable = true)
     @JsonProperty("precision")
     private Integer precision;
-    
+
     @Column(name = "SCALE", nullable = true)
     @JsonProperty("scale")
     private Integer scale;
-    
+
     @Transient
     private List<String> cleanedUpEnumValues = new ArrayList<String>();
-    
+
     @Column(name = "ENUM_VALUES", nullable = true, length = 2048)
     @JsonProperty("enum_values")
     private String cleanedUpEnumValuesAsString = "";
-    
+
     @Column(name = "PROPERTIES", nullable = false)
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
@@ -107,7 +107,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @ManyToOne
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     private Table table;
-    
+
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
     private Long tenantId;
@@ -145,7 +145,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.displayName = displayName;
     }
 
-
     public Integer getLength() {
         return length;
     }
@@ -159,7 +158,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return nullable;
     }
 
-
     public Boolean getNullable() {
         return nullable;
     }
@@ -172,7 +170,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
      * Corresponds to an avro data type. Only possible values are in
      * Schema.Type.
      */
-    
+
     public String getPhysicalDataType() {
         return physicalDataType;
     }
@@ -252,7 +250,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
     }
 
-    
     public Integer getPrecision() {
         return precision;
     }
@@ -261,7 +258,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.precision = precision;
     }
 
-    
     public Integer getScale() {
         return scale;
     }
@@ -364,7 +360,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Override
     @JsonIgnore
-    
+
     public Long getTenantId() {
         return tenantId;
     }
@@ -757,7 +753,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setExcludeFromFiltering(String excludeFromFiltering) {
         properties.put("ExcludeFromFiltering", Boolean.valueOf(excludeFromFiltering));
     }
-    
+
     @Transient
     @JsonIgnore
     public Boolean getExcludeFromPlaymakerExport() {
@@ -773,7 +769,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setExcludeFromPlaymakerExport(String excludeFromPlaymakerExport) {
         properties.put("xcludeFromPlaymakerExport", Boolean.valueOf(excludeFromPlaymakerExport));
     }
-    
+
     @Transient
     @JsonIgnore
     public Boolean getExcludeFromTalkingPoints() {
@@ -789,7 +785,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setExcludeFromTalkingPoints(String excludeFromTalkingPoints) {
         properties.put("ExcludeFromTalkingPoints", Boolean.valueOf(excludeFromTalkingPoints));
     }
-    
+
     @Transient
     @JsonIgnore
     public Boolean getExcludeFromListView() {
@@ -805,7 +801,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setExcludeFromListView(String excludeFromListView) {
         properties.put("ExcludeFromListView", Boolean.valueOf(excludeFromListView));
     }
-    
+
     @Transient
     @JsonIgnore
     public Boolean getExcludeFromDetailView() {
@@ -821,7 +817,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setExcludeFromDetailView(String excludeFromDetailView) {
         properties.put("ExcludeFromDetailView", Boolean.valueOf(excludeFromDetailView));
     }
-    
+
     @Override
     @Transient
     @JsonIgnore
@@ -837,7 +833,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
         return strs;
     }
-    
 
     @Transient
     @JsonIgnore
@@ -870,5 +865,26 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
 
         return parents;
+    }
+
+    @Transient
+    @JsonIgnore
+    public boolean isCustomerPredictor() {
+        boolean isInternalAttributeOrTransform = false;
+        List<String> tags = getTags();
+        if (tags != null) {
+            for (String tag : tags) {
+                if (tag.equals(Tag.INTERNAL.toString()) || tag.equals(Tag.INTERNAL_TRANSFORM.toString())) {
+                    isInternalAttributeOrTransform = true;
+                    break;
+                }
+            }
+        }
+        if (!isInternalAttributeOrTransform) {
+            return false;
+        }
+        if (getInterfaceName() != null)
+            return false;
+        return true;
     }
 }

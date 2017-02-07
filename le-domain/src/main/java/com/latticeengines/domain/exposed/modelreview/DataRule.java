@@ -66,13 +66,13 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     @Column(name = "FLAGGED_COLUMNS", nullable = true)
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
-    private List<String> flaggedColumnNames;
+    private List<String> flaggedColumnNames = new ArrayList<>();
 
     @JsonProperty
     @Column(name = "PROPERTIES", nullable = true)
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
-    private Map<String, String> properties;
+    private Map<String, Object> properties = new HashMap<>();
 
     @JsonProperty
     @Column(name = "ENABLED", nullable = false)
@@ -86,8 +86,6 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
         this.mandatoryRemoval = false;
         this.displayName = name;
         this.description = name;
-        this.flaggedColumnNames = new ArrayList<String>();
-        this.properties = new HashMap<String, String>();
         this.enabled = true;
     }
 
@@ -151,11 +149,43 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
         this.flaggedColumnNames = flaggedColumnNames;
     }
 
-    public Map<String, String> getProperties() {
+    @Transient
+    @JsonIgnore
+    public Object getPropertyValue(String key) {
+        return properties.get(key);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setPropertyValue(String key, Object value) {
+        properties.put(key, value);
+    }
+
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public List<String> getCustomerPredictors() {
+        if (!properties.containsKey("CustomerPredictors")) {
+            return new ArrayList<String>();
+        }
+        return (List<String>) properties.get("CustomerPredictors");
+    }
+
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public void addCustomerPredictor(String customerPredictor) {
+        if (!properties.containsKey("CustomerPredictors")) {
+            properties.put("CustomerPredictors", new ArrayList<String>());
+        }
+        ((List<String>) properties.get("CustomerPredictors")).add(customerPredictor);
+    }
+
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 

@@ -104,17 +104,22 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
 
             for (String flaggedColumn : dataRule.getFlaggedColumnNames()) {
                 Attribute attribute = eventTable.getAttribute(flaggedColumn);
-                attribute.addAssociatedDataRuleName(dataRule.getName());
-                if (dataRule.hasMandatoryRemoval()) {
-                    attribute.setApprovedUsage(ApprovedUsage.NONE);
-                    attribute.setIsCoveredByMandatoryRule(true);
-                } else {
-                    attribute.setIsCoveredByOptionalRule(true);
-                }
+                if (attribute != null) {
+                    attribute.addAssociatedDataRuleName(dataRule.getName());
+                    if (attribute.isCustomerPredictor()) {
+                        dataRule.addCustomerPredictor(attribute.getName());
+                    }
+                    if (dataRule.hasMandatoryRemoval()) {
+                        attribute.setApprovedUsage(ApprovedUsage.NONE);
+                        attribute.setIsCoveredByMandatoryRule(true);
+                    } else {
+                        attribute.setIsCoveredByOptionalRule(true);
+                    }
 
-                if (attribute.getIsCoveredByMandatoryRule() && attribute.getIsCoveredByOptionalRule()
-                        && parentChild.containsKey(attribute)) {
-                    setApprovedUsageNoneRecursively(parentChild.get(attribute), derivedAttribute, parentChild);
+                    if (attribute.getIsCoveredByMandatoryRule() && attribute.getIsCoveredByOptionalRule()
+                            && parentChild.containsKey(attribute)) {
+                        setApprovedUsageNoneRecursively(parentChild.get(attribute), derivedAttribute, parentChild);
+                    }
                 }
             }
         }

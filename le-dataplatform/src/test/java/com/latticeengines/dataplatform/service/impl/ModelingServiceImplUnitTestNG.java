@@ -112,7 +112,7 @@ public class ModelingServiceImplUnitTestNG {
     public void getReviewPipelineProps() {
 
         List<DataRule> dataRules = new ArrayList<>();
-        Map<String, String> propA = new HashMap<>();
+        Map<String, Object> propA = new HashMap<>();
         propA.put("threshold", "200");
         propA.put("limit", "10");
         DataRule ruleA = new DataRule("RuleA");
@@ -121,7 +121,7 @@ public class ModelingServiceImplUnitTestNG {
         ruleA.setProperties(propA);
         dataRules.add(ruleA);
 
-        Map<String, String> propB = new HashMap<>();
+        Map<String, Object> propB = new HashMap<>();
         propB.put("Battr", "200");
         propB.put("Battr2", "10");
         DataRule ruleB = new DataRule("RuleB");

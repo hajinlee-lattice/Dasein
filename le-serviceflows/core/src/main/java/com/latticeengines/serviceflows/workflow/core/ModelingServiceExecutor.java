@@ -78,16 +78,16 @@ public class ModelingServiceExecutor {
 
     public void init() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(
-                new Path(String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir, builder.getCustomer(),
-                        builder.getTable())), true);
+        fs.delete(new Path(
+                String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getTable())),
+                true);
     }
 
     public void cleanCustomerDataDir() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(
-                new Path(String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir, builder.getCustomer(),
-                        builder.getTable())), true);
+        fs.delete(new Path(
+                String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getTable())),
+                true);
     }
 
     public void runPipeline() throws Exception {
@@ -188,17 +188,22 @@ public class ModelingServiceExecutor {
     String getEnabledRulesAsPipelineProp(List<DataRule> dataRules) {
         String enabledRulesProp = "";
         if (CollectionUtils.isNotEmpty(dataRules)) {
-            Map<String, List<String>> enabledRules = new HashMap<>();
+            Map<String, List<String>> enabledMandatoryRules = new HashMap<>();
+            List<String> customerPredictors = new ArrayList<>();
             for (DataRule dataRule : dataRules) {
-                if (dataRule.isEnabled()) {
-                    enabledRules.put(
-                            dataRule.getName(),
-                            dataRule.getFlaggedColumnNames() == null ? new ArrayList<String>() : dataRule
-                                    .getFlaggedColumnNames());
+                if (dataRule.isEnabled() && dataRule.hasMandatoryRemoval()) {
+                    enabledMandatoryRules.put(dataRule.getName(), dataRule.getFlaggedColumnNames() == null
+                            ? new ArrayList<String>() : dataRule.getFlaggedColumnNames());
+                    for (String customerPredictor : dataRule.getCustomerPredictors()) {
+                        if (!customerPredictors.contains(customerPredictor))
+                            customerPredictors.add(customerPredictor);
+                    }
                 }
             }
             enabledRulesProp = String.format("remediatedatarulesstep.enabledRules=%s",
-                    JsonUtils.serialize(enabledRules));
+                    JsonUtils.serialize(enabledMandatoryRules));
+            enabledRulesProp += String.format(" remediatedatarulesstep.customerPredictors=%s",
+                    JsonUtils.serialize(customerPredictors));
         }
         return enabledRulesProp;
     }
@@ -215,8 +220,8 @@ public class ModelingServiceExecutor {
 
         if (builder.dataCloudVersion != null && builder.dataCloudVersion.startsWith("2")) {
             if (!algorithm.getPipelineProperties().isEmpty()) {
-                algorithm.setPipelineProperties(algorithm.getPipelineProperties()
-                        + " featureselectionstep.enabled=true");
+                algorithm.setPipelineProperties(
+                        algorithm.getPipelineProperties() + " featureselectionstep.enabled=true");
             } else {
                 algorithm.setPipelineProperties("featureselectionstep.enabled=true");
             }

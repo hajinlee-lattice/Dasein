@@ -40,6 +40,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
@@ -299,8 +300,9 @@ public class ModelingServiceImpl implements ModelingService {
             for (DataRule dataRule : dataRules) {
                 if (MapUtils.isNotEmpty(dataRule.getProperties())) {
                     for (String key : dataRule.getProperties().keySet()) {
-                        String value = dataRule.getProperties().get(key);
-                        String pipelineProp = String.format("%s.%s=%s", dataRule.getName().toLowerCase(), key, value);
+                        Object value = dataRule.getProperties().get(key);
+                        String pipelineProp = String.format("%s.%s=%s", dataRule.getName().toLowerCase(), key,
+                                JsonUtils.serialize(value));
                         pipelineProps.add(pipelineProp);
                     }
                 }
