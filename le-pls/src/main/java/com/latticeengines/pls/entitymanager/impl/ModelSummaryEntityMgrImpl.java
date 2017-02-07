@@ -117,6 +117,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary>
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<String> getAllModelSummaryIds() {
+        return modelSummaryDao.getAllModelSummaryIds();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> getAllByTenant(Tenant tenant) {
         return modelSummaryDao.getAllByTenant(tenant);
     }

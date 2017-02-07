@@ -27,6 +27,8 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     List<ModelSummary> getAll();
 
+    List<String> getAllModelSummaryIds();
+
     List<ModelSummary> getAllByTenant(Tenant tenant);
 
     List<ModelSummary> findAllValid();

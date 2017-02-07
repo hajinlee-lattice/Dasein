@@ -3,7 +3,9 @@ package com.latticeengines.pls.dao.impl;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.type.StringType;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -11,6 +13,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.ModelSummaryDao;
+
+import javax.persistence.Table;
 
 @Component("modelSummaryDao")
 public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements ModelSummaryDao {
@@ -91,6 +95,18 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         query.setLong("tenantId", tenant.getPid());
         query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());
         return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getAllModelSummaryIds() {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        String modelSummaryTable = entityClz.getAnnotation(Table.class).name();
+        String sqlStr = String.format("SELECT ModelSummary.ID FROM %s as ModelSummary",
+                modelSummaryTable);
+        SQLQuery sqlQuery = session.createSQLQuery(sqlStr).addScalar("ID", new StringType());
+        return sqlQuery.list();
     }
 
     @SuppressWarnings("unchecked")

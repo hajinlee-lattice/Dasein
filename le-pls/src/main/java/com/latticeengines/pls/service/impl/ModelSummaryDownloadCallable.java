@@ -105,10 +105,10 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 
     private Set<String> getModelSummaryIds() {
         Set<String> modelSummaryIds = Collections.synchronizedSet(new HashSet<String>());
-        List<ModelSummary> summaries = modelSummaryEntityMgr.getAll();
-        for (ModelSummary summary : summaries) {
+        List<String> summaries = modelSummaryEntityMgr.getAllModelSummaryIds();
+        for (String summary : summaries) {
             try {
-                modelSummaryIds.add(UuidUtils.extractUuid(summary.getId()));
+                modelSummaryIds.add(UuidUtils.extractUuid(summary));
             } catch (Exception e) {
                 // Skip any model summaries that have unexpected ID syntax
                 log.warn(e.getMessage());
@@ -131,6 +131,8 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     private Boolean partialDownload() {
         long startTime = System.currentTimeMillis();
         List<String> waitingFlags = modelSummaryDownloadFlagEntityMgr.getWaitingFlags();
+        long getWaitingFlagTime = System.currentTimeMillis() - startTime;
+        log.info(String.format("Get waiting flags duration: %d milliseconds.", getWaitingFlagTime));
         if (waitingFlags != null && waitingFlags.size() > 0) {
             HashSet<String> tenantIds = new HashSet<>(waitingFlags);
             Set<String> modelSummaryIds = getModelSummaryIds();

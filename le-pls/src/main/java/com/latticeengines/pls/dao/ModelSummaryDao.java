@@ -16,6 +16,8 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     List<ModelSummary> getAllByTenant(Tenant tenant);
 
+    List<String> getAllModelSummaryIds();
+
     List<ModelSummary> findAllValid();
 
     List<ModelSummary> findAllActive();
