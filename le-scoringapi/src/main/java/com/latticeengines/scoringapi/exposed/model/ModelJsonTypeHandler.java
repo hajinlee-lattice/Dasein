@@ -39,7 +39,7 @@ public interface ModelJsonTypeHandler {
             List<String> matchErrorLogs);
 
     ScoringApiException checkForMissingEssentialFields(String recordId, String modelId, boolean hasOneOfDomain,
-            boolean hasCompanyName, boolean hasCompanyState, List<String> missingMatchFields);
+            boolean hasCompanyName, List<String> missingMatchFields);
 
     SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(String recordId,
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, String modelId);

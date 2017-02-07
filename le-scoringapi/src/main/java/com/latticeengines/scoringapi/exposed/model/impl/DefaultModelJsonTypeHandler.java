@@ -231,9 +231,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             String modelId, //
             boolean hasOneOfDomain, //
             boolean hasCompanyName, //
-            boolean hasCompanyState, //
             List<String> missingMatchFields) {
-        if (!hasOneOfDomain && (!hasCompanyName || !hasCompanyState)) {
+        if (!hasOneOfDomain && !hasCompanyName) {
             return new ScoringApiException(LedpCode.LEDP_31199,
                     new String[] { Joiner.on(",").join(missingMatchFields) });
         }

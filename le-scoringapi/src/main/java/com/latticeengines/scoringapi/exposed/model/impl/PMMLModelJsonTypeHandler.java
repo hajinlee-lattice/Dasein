@@ -52,7 +52,7 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
             String modelId, //
             boolean hasOneOfDomain, //
             boolean hasCompanyName, //
-            boolean hasCompanyState, List<String> missingMatchFields) {
+            List<String> missingMatchFields) {
         return null;
     }
 

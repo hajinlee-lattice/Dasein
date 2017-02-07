@@ -780,7 +780,6 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         boolean hasOneOfDomain = false;
         // PropData does not use City and will default Country to US
         boolean hasCompanyName = false;
-        boolean hasCompanyState = false;
 
         Map<String, FieldSchema> combinedFieldSchema = new HashMap<>();
         combinedFieldSchema.putAll(modelJsonTypeHandler.getDefaultFieldSchemaForMatch());
@@ -809,14 +808,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             if (fieldSchema.interpretation == FieldInterpretation.CompanyName
                     && !StringStandardizationUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyName = true;
-            } else if (fieldSchema.interpretation == FieldInterpretation.State
-                    && !StringStandardizationUtils.objectIsNullOrEmptyString(fieldValue)) {
-                hasCompanyState = true;
             }
         }
 
         ScoringApiException missingEssentialFieldsException = modelJsonTypeHandler.checkForMissingEssentialFields(
-                recordId, modelId, hasOneOfDomain, hasCompanyName, hasCompanyState, missingMatchFields);
+                recordId, modelId, //
+                hasOneOfDomain, hasCompanyName, missingMatchFields);
 
         if (!missingFields.isEmpty()) {
             addWarning(WarningCode.MISSING_COLUMN, recordId, missingFields, modelId);
