@@ -70,6 +70,10 @@ public abstract class WorkflowSubmitter {
         return dataCloudVersion;
     }
 
+    protected String getLatestDataCloudVersion() {
+        return columnMetadataProxy.latestVersion(null).getVersion();
+    }
+
     protected List<TransformDefinition> getTransformDefinitions(Table modelingEventTable,
             TransformationGroup transformationGroup) {
         if (transformationGroup != TransformationGroup.NONE

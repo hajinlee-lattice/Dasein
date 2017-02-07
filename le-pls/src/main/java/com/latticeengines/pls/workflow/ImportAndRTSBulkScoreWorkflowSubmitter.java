@@ -91,7 +91,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
         }
-        String dataCloudVersion = getComplatibleDataCloudVersionFromModelSummary(modelSummary);
+        String dataCloudVersion = getLatestDataCloudVersion();
         boolean skipIdMatch = true;
         if (modelSummary != null) {
             skipIdMatch = !modelSummary.isMatch();
