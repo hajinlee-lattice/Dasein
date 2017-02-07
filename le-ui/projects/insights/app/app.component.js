@@ -7,6 +7,8 @@ var mainApp = angular.module('insightsApp', [
     'common.datacloud',
     'common.utilities.SessionTimeout',
     'pd.navigation.pagination',
+    'angulartics', 
+    'angulartics.mixpanel',
 
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.modules.ServiceErrorModule',

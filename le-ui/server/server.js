@@ -75,7 +75,9 @@ class Server {
     }
 
     setCors() {
-        this.app.get('/insights', cors(), function(req, res, next) { });
+        this.app.get('/insights', cors(), function(req, res, next) { 
+            next(); 
+        });
     }
 
     setRenderer() {
