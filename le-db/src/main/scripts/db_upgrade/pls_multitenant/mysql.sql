@@ -198,7 +198,7 @@ DELIMITER //
 CREATE PROCEDURE `UpdateModelQualityAlgorithm`()
   BEGIN
 
-    # add column if not exists
+    # add column if it does not exist
     IF NOT EXISTS(SELECT *
                   FROM information_schema.COLUMNS
                   WHERE
@@ -213,6 +213,38 @@ CREATE PROCEDURE `UpdateModelQualityAlgorithm`()
   END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS `UpdateModelSummary`;
+
+DELIMITER //
+CREATE PROCEDURE `UpdateModelSummary`()
+  BEGIN
+
+    # add columns if they do not exist
+    IF NOT EXISTS(SELECT *
+                  FROM information_schema.COLUMNS
+                  WHERE
+                    TABLE_SCHEMA = 'PLS_MultiTenant'
+                    AND TABLE_NAME = 'MODEL_SUMMARY'
+                    AND COLUMN_NAME = 'CROSS_VALIDATION_MEAN')
+    THEN
+      ALTER TABLE `MODEL_SUMMARY`
+        ADD `CROSS_VALIDATION_MEAN` DOUBLE DEFAULT NULL;
+    END IF;
+
+    IF NOT EXISTS(SELECT *
+                  FROM information_schema.COLUMNS
+                  WHERE
+                    TABLE_SCHEMA = 'PLS_MultiTenant'
+                    AND TABLE_NAME = 'MODEL_SUMMARY'
+                    AND COLUMN_NAME = 'CROSS_VALIDATION_STD')
+    THEN
+      ALTER TABLE `MODEL_SUMMARY`
+        ADD `CROSS_VALIDATION_STD` DOUBLE DEFAULT NULL;
+    END IF;
+
+  END //
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
@@ -222,6 +254,7 @@ CREATE PROCEDURE `UpdateSchema`()
     CALL `CreateMetadataStorage`();
     CALL `CreateBucketMetadaTable`();
     CALL `UpdateModelQualityAlgorithm`();
+    CALL `UpdateModelSummary`();
 
   END //
 DELIMITER ;
