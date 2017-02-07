@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
@@ -115,14 +116,16 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
-        Iterator<Attribute> requiredAttributesIterator = requiredAttributes.iterator();
-        while (requiredAttributesIterator.hasNext()) {
-            Attribute requiredAttribute = requiredAttributesIterator.next();
-            Iterator<String> scoringHeaderFieldsIterator = scoringHeaderFields.iterator();
-
+        List<Attribute> schemaFields = SchemaRepository.instance().getSchema(schemaInterpretation).getAttributes();
+        Iterator<String> scoringHeaderFieldsIterator = scoringHeaderFields.iterator();
+        while (scoringHeaderFieldsIterator.hasNext()) {
+            String scoringHeaderField = scoringHeaderFieldsIterator.next();
             FieldMapping fieldMapping = new FieldMapping();
-            while (scoringHeaderFieldsIterator.hasNext()) {
-                String scoringHeaderField = scoringHeaderFieldsIterator.next();
+
+            Iterator<Attribute> requiredAttributesIterator = requiredAttributes.iterator();
+            while (requiredAttributesIterator.hasNext()) {
+                Attribute requiredAttribute = requiredAttributesIterator.next();
+
                 if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField, requiredAttribute)) {
                     fieldMapping.setUserField(scoringHeaderField);
                     fieldMapping.setMappedField(requiredAttribute.getName());
@@ -132,6 +135,22 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                     scoringHeaderFieldsIterator.remove();
                     requiredAttributesIterator.remove();
                     break;
+                }
+            }
+            if (!fieldMapping.isMappedToLatticeField()) {
+                Iterator<Attribute> schemaFieldsIterator = schemaFields.iterator();
+                while(schemaFieldsIterator.hasNext()) {
+                    Attribute schemaField = schemaFieldsIterator.next();
+                    if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField, schemaField)) {
+                        fieldMapping.setUserField(scoringHeaderField);
+                        fieldMapping.setMappedField(schemaField.getName());
+                        fieldMapping.setMappedToLatticeField(true);
+                        fieldMappingDocument.getFieldMappings().add(fieldMapping);
+
+                        scoringHeaderFieldsIterator.remove();
+                        schemaFieldsIterator.remove();
+                        break;
+                    }
                 }
             }
         }
