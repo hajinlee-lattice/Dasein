@@ -173,12 +173,16 @@ angular.module('common.datacloud.explorer', [
             }
             buttons.click(function(e){
                 var button = angular.element(this),
-                    toggle_on = !button.hasClass('active');
+                    toggle_on = !button.hasClass('active'),
+                    parent = button.closest('.dropdown-container');
 
+                parent.removeClass('active');
                 buttons.removeClass('active');
+                buttons.parents().find('.dropdown-container').removeClass('active');
                 buttons.siblings('ul.dropdown').removeClass('open');
 
                 if(toggle_on) {
+                    parent.addClass('active');
                     button.addClass('active');
                     button.siblings('ul.dropdown').addClass('open');
                 }
@@ -192,9 +196,12 @@ angular.module('common.datacloud.explorer', [
             var target = angular.element(event.target),
                 el = angular.element('.dropdown-container ul.dropdown, button ul.button-dropdown'),
                 has_parent = target.parents().is('.dropdown-container'),
+                parent = el.parents().find('.dropdown-container'),
                 is_visible = el.is(':visible');
+
             if(!has_parent) {
                 el.removeClass('open');
+                parent.removeClass('active');
                 el.siblings('.button.active').removeClass('active');
             }
         });
@@ -278,6 +285,7 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
+    vm.cube = [];
     vm.xhrResult = function(result, cached) {
         var _store, key, item;
 
@@ -330,6 +338,12 @@ angular.module('common.datacloud.explorer', [
                 vm.generateTree(true);
             } else {
                 vm.generateTree();
+            }
+
+            if(vm.enrichments_completed) {
+                getEnrichmentCube().then(function(result){
+                    vm.cube = result.data;
+                });
             }
         }
 
@@ -431,7 +445,6 @@ angular.module('common.datacloud.explorer', [
 
     var setFlag = function(opts, flags) {
         var deferred = $q.defer();
-
         DataCloudService.setFlag(opts, flags).then(function(result) {
             deferred.resolve(result);
         });
@@ -456,9 +469,10 @@ angular.module('common.datacloud.explorer', [
             flags.hidden = true;
             flags.highlighted = false;
         }
-
         setFlag({fieldName: enrichment.FieldName}, flags).then(function(){
             enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted};
+            vm.enrichments.find(function(i){return i.FieldName === enrichment.FieldName;}).AttributeFlagsMap.CompanyProfile = flags;
+            DataCloudStore.updateEnrichments(vm.enrichments);
         });
     }
 
@@ -961,7 +975,6 @@ angular.module('common.datacloud.explorer', [
         return 0;
     }
 
-
     var getEnrichmentCube = function() {
         var deferred = $q.defer();
 
@@ -970,11 +983,6 @@ angular.module('common.datacloud.explorer', [
         });
         return deferred.promise;
     }
-
-    vm.cube = [];
-    getEnrichmentCube().then(function(result){
-        vm.cube = result.data;
-    });
 
     vm.init();
 })

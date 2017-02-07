@@ -10,7 +10,7 @@ angular.module('common.datacloud')
         this.selectedCount = null;
         this.premiumSelectMaximum = null;
         this.topAttributes = null;
-        this.cube = null;
+        this.cube = this.cube || null;
         this.metadata = {
             current: 1,
             toggle: {
@@ -139,6 +139,10 @@ angular.module('common.datacloud')
 
     this.setEnrichments = function(item){
         this.enrichments = item;
+    }
+
+    this.updateEnrichments = function(enrichments){
+        this.enrichments.data = enrichments;
     }
 
     this.getCount = function(){

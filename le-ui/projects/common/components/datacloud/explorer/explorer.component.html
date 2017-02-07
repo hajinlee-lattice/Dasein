@@ -18,7 +18,7 @@
                     </div>
                 </li>
                 <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
-                    <h2 class="button icon-button white-button" ng-class="{active:openFilters, selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
+                    <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
                         <i class="fa fa-filter"></i>
                     </h2>
                     <ul class="dropdown">
@@ -38,7 +38,7 @@
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
                 <li class="download dropdown-container" ng-if="!vm.lookupMode && vm.section != 'insights' && vm.section != 'browse'">
-                    <h2 class="button icon-button white-button" ng-class="{active:openDownload}">
+                    <h2 class="button icon-button white-button">
                         <i class="fa fa-download"></i>
                     </h2>
                     <ul class="dropdown">
@@ -270,7 +270,13 @@
                         <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && vm.section != 'lookup'">
                             <h5><label>Attribute range</label><label>Records</label></h5>
                             <ul>
-                              <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List"><label>{{stat.Lbl}}</label><div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}}"><span class="bar_ {{vm.categoryClass(enrichment.Category)}} background-color"></span></div><div>{{stat.Cnt|number}}</div></li>
+                                <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List">
+                                    <label title="{{stat.Lbl}}">{{stat.Lbl}}</label>
+                                    <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}}">
+                                        <span class="bar_ {{vm.categoryClass(enrichment.Category)}} background-color"></span>
+                                    </div>
+                                    <div>{{stat.Cnt|number}}</div>
+                                </li>
                             </ul>
                         </div>
 

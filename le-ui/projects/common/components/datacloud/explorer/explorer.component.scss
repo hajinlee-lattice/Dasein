@@ -376,7 +376,7 @@
         .enrichments {
             .box {
                 .box-inner {
-                    padding-bottom: 3.5em;
+                    padding-bottom: 4em;
                 }
             }
         }
@@ -492,8 +492,9 @@
                             white-space: nowrap;
                             color: #000;
                             label {
-                                @include flex-item(0 1 auto);
-                                width: 10px;
+                                @include flex-item(0 0 auto);
+                                @include text-ellipsis;
+                                width: 100px;
                                 overflow: hidden;
                             }
                             div {
@@ -526,7 +527,7 @@
                     position: absolute;
                     left: 0;
                     right: 0;
-                    bottom: 1.5em;
+                    bottom: 1.2em;
                     .control {
                         @include flex-item(1 0 auto);
                         @include flex-container;
@@ -762,6 +763,9 @@
     .dropdown-container {
         position: relative;
         z-index: 1;
+        &.active {
+            z-index: 2;
+        }
         h2.active {
             background: #1a1a1a;
             border-radius: 5px 5px 0 0;
@@ -785,6 +789,12 @@
             display: none;
             &.open {
                 display: inline-block;
+            }
+        }
+        &.download {
+            .dropdown {
+                left: auto;
+                right: 1px;
             }
         }
     }
