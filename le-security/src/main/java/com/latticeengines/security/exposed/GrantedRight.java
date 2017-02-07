@@ -129,6 +129,12 @@ public enum GrantedRight implements GrantedAuthority {
             return "Create_PLS_Oauth2Token";
         }
     }, //
+    CREATE_PLS_OAUTH2_TOKEN_EXTERNAL {
+        @Override
+        public String getAuthority() {
+            return "Create_PLS_Oauth2Token_External";
+        }
+    }, //
     VIEW_PLS_CRMCREDENTIAL {
         @Override
         public String getAuthority() {

@@ -37,7 +37,7 @@ public class Oauth2Resource {
     @RequestMapping(value = "/accesstoken", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
-    @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
+    @PreAuthorize("hasRole('Create_PLS_Oauth2Token_External')")
     public String createOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId,
             @RequestParam(value = "app_id", required = false) String appId) {
         log.info("Generating access token for tenant " + tenantId + ", app_id '" + appId + "'");

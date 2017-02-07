@@ -26,7 +26,7 @@ public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = { "deployment" })
     public void createApiToken() {
-        switchToExternalAdmin();
+        switchToInternalAdmin();
         String token = restTemplate.getForObject(
                 getRestAPIHostPort() + "/pls/oauth2/apitoken?tenantId=" + mainTestTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));

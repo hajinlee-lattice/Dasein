@@ -54,7 +54,7 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
-            GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
+            GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL //
     ) //
     ), //
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
