@@ -18,6 +18,7 @@ public class CompanyProfileResourceDeploymentTestNG extends UlyssesDeploymentTes
         String url = ulyssesHostPort + "/ulysses/companyprofiles/?enforceFuzzyMatch=true";
         CompanyProfileRequest request = new CompanyProfileRequest();
         request.getRecord().put("Email", "someuser@google.com");
+        request.getRecord().put("Domain", "www.google.com");
         CompanyProfile profile = getOAuth2RestTemplate().postForObject(url, request, CompanyProfile.class);
         assertNotNull(profile);
     }

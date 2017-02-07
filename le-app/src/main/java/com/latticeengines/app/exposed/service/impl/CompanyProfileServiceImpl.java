@@ -43,13 +43,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         List<List<Object>> data = new ArrayList<>();
         List<String> fields = new ArrayList<>();
+        List<Object> datum = new ArrayList<>();
         for (Map.Entry<String, Object> entry : request.getRecord().entrySet()) {
             FieldInterpretation interpretation = getFieldInterpretation(entry.getKey());
-            List<Object> datum = new ArrayList<>();
             fields.add(interpretation.name());
             datum.add(entry.getValue());
-            data.add(datum);
         }
+        data.add(datum);
 
         Tenant tenant = new Tenant(customerSpace.toString());
         matchInput.setTenant(tenant);

@@ -24,6 +24,7 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
         String url = getRestAPIHostPort() + "/pls/companyprofiles/?enforceFuzzyMatch=true";
         CompanyProfileRequest request = new CompanyProfileRequest();
         request.getRecord().put("Email", "someuser@google.com");
+        request.getRecord().put("Domain", "www.google.com");
         CompanyProfile profile = restTemplate.postForObject(url, request, CompanyProfile.class);
         assertNotNull(profile);
     }
