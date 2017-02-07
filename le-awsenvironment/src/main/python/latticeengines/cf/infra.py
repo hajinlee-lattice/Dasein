@@ -234,7 +234,7 @@ def provision(environment, stackname):
             },
             {
                 'Key': 'le-stack',
-                'Value': stackname
+                'Value': stackname.replace('lpi-', '')
             }
         ]
     )
