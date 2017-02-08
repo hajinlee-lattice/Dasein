@@ -137,7 +137,8 @@ public class ModelingServiceImplUnitTestNG {
         dataRules.add(ruleC);
 
         String pipelineProps = modelingService.getReviewPipelineProps(dataRules);
-        assertEquals(pipelineProps, "rulea.limit=10 rulea.threshold=200 ruleb.Battr2=10 ruleb.Battr=200");
+        assertEquals(pipelineProps,
+                "rulea.limit=\"10\" rulea.threshold=\"200\" ruleb.Battr2=\"10\" ruleb.Battr=\"200\"");
     }
 
 }
