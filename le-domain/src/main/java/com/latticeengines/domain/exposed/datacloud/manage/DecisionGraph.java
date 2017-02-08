@@ -78,14 +78,22 @@ public class DecisionGraph implements HasPid, Serializable {
 
     public List<Node> getStartingNodes() {
         if (startingNodes == null) {
-            constructGraph();
+            synchronized (this) {
+                if (startingNodes == null) {
+                    constructGraph();
+                }
+            }
         }
         return startingNodes;
     }
 
     public Node getNode(String nodeName) {
-        if (nodeMap == null) {
-            constructGraph();
+        if (startingNodes == null) {
+            synchronized (this) {
+                if (startingNodes == null) {
+                    constructGraph();
+                }
+            }
         }
         return nodeMap.get(nodeName);
     }
