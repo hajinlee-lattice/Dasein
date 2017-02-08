@@ -37,4 +37,12 @@ public class DunsDomainBasedMicroEngineActor extends LookupMicroEngineActorTempl
     protected String usedKeys(MatchKeyTuple keyTuple) {
         return String.format("( Domain=%s, DUNS=%s )", keyTuple.getDomain(), keyTuple.getDuns());
     }
+
+    @Override
+    protected MatchKeyTuple prepareInputData(MatchKeyTuple input) {
+        MatchKeyTuple domainDuns = new MatchKeyTuple();
+        domainDuns.setDuns(input.getDuns());
+        domainDuns.setDomain(input.getDomain());
+        return domainDuns;
+    }
 }

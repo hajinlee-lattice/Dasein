@@ -222,69 +222,65 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     private void parseRecordForNameLocation(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
             Set<NameLocation> nameLocationSet, InternalOutputRecord record) {
-        if (keyPositionMap.containsKey(MatchKey.Name)) {
-            List<Integer> namePosList = keyPositionMap.get(MatchKey.Name);
-
-            try {
-                String originalName = null;
+        try {
+            String originalName = null;
+            if (keyPositionMap.containsKey(MatchKey.Name)) {
+                List<Integer> namePosList = keyPositionMap.get(MatchKey.Name);
                 for (Integer namePos : namePosList) {
                     originalName = (String) inputRecord.get(namePos);
                 }
-                if (StringUtils.isNotEmpty(originalName)) {
-
-                    String originalCountry = null;
-                    if (keyPositionMap.containsKey(MatchKey.Country)) {
-                        List<Integer> countryPosList = keyPositionMap.get(MatchKey.Country);
-                        for (Integer countryPos : countryPosList) {
-                            originalCountry = (String) inputRecord.get(countryPos);
-                        }
-                    }
-                    if (StringUtils.isEmpty(originalCountry)) {
-                        originalCountry = LocationUtils.USA;
-                    }
-                    String originalState = null;
-                    if (keyPositionMap.containsKey(MatchKey.State)) {
-                        List<Integer> statePosList = keyPositionMap.get(MatchKey.State);
-                        for (Integer statePos : statePosList) {
-                            originalState = (String) inputRecord.get(statePos);
-                        }
-                    }
-                    String originalCity = null;
-                    if (keyPositionMap.containsKey(MatchKey.City)) {
-                        for (Integer cityPos : keyPositionMap.get(MatchKey.City)) {
-                            originalCity = (String) inputRecord.get(cityPos);
-                        }
-                    }
-                    String originalZipCode = null;
-                    if (keyPositionMap.containsKey(MatchKey.Zipcode)) {
-                        for (Integer pos : keyPositionMap.get(MatchKey.Zipcode)) {
-                            originalZipCode = (String) inputRecord.get(pos);
-                        }
-                    }
-                    String originalPhoneNumber = null;
-                    if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
-                        for (Integer pos : keyPositionMap.get(MatchKey.PhoneNumber)) {
-                            originalPhoneNumber = (String) inputRecord.get(pos);
-                        }
-                    }
-
-                    NameLocation nameLocation = new NameLocation();
-                    nameLocation.setName(originalName);
-                    nameLocation.setState(originalState);
-                    nameLocation.setCountry(originalCountry);
-                    nameLocation.setCity(originalCity);
-                    nameLocation.setZipcode(originalZipCode);
-                    nameLocation.setPhoneNumber(originalPhoneNumber);
-
-                    nameLocationService.normalize(nameLocation);
-                    record.setParsedNameLocation(nameLocation);
-                    nameLocationSet.add(nameLocation);
-                }
-            } catch (Exception e) {
-                log.error(ExceptionUtils.getFullStackTrace(e));
-                record.setFailed(true);
-                record.addErrorMessages("Error when cleanup name and location fields: " + e.getMessage());
             }
+            String originalCountry = null;
+            if (keyPositionMap.containsKey(MatchKey.Country)) {
+                List<Integer> countryPosList = keyPositionMap.get(MatchKey.Country);
+                for (Integer countryPos : countryPosList) {
+                    originalCountry = (String) inputRecord.get(countryPos);
+                }
+            }
+            if (StringUtils.isEmpty(originalCountry)) {
+                originalCountry = LocationUtils.USA;
+            }
+            String originalState = null;
+            if (keyPositionMap.containsKey(MatchKey.State)) {
+                List<Integer> statePosList = keyPositionMap.get(MatchKey.State);
+                for (Integer statePos : statePosList) {
+                    originalState = (String) inputRecord.get(statePos);
+                }
+            }
+            String originalCity = null;
+            if (keyPositionMap.containsKey(MatchKey.City)) {
+                for (Integer cityPos : keyPositionMap.get(MatchKey.City)) {
+                    originalCity = (String) inputRecord.get(cityPos);
+                }
+            }
+            String originalZipCode = null;
+            if (keyPositionMap.containsKey(MatchKey.Zipcode)) {
+                for (Integer pos : keyPositionMap.get(MatchKey.Zipcode)) {
+                    originalZipCode = (String) inputRecord.get(pos);
+                }
+            }
+            String originalPhoneNumber = null;
+            if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
+                for (Integer pos : keyPositionMap.get(MatchKey.PhoneNumber)) {
+                    originalPhoneNumber = (String) inputRecord.get(pos);
+                }
+            }
+
+            NameLocation nameLocation = new NameLocation();
+            nameLocation.setName(originalName);
+            nameLocation.setState(originalState);
+            nameLocation.setCountry(originalCountry);
+            nameLocation.setCity(originalCity);
+            nameLocation.setZipcode(originalZipCode);
+            nameLocation.setPhoneNumber(originalPhoneNumber);
+
+            nameLocationService.normalize(nameLocation);
+            record.setParsedNameLocation(nameLocation);
+            nameLocationSet.add(nameLocation);
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getFullStackTrace(e));
+            record.setFailed(true);
+            record.addErrorMessages("Error when cleanup name and location fields: " + e.getMessage());
         }
     }
 
