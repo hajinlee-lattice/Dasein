@@ -4,6 +4,8 @@ DROP PROCEDURE IF EXISTS `UpdateSchema`;
 
 DROP PROCEDURE IF EXISTS `UpdateMetadataTable`;
 
+DROP PROCEDURE IF EXISTS `UpdateModelSummaryDownloadFlag`;
+
 DELIMITER //
 CREATE PROCEDURE `UpdateMetadataTable`()
   BEGIN
@@ -246,6 +248,30 @@ CREATE PROCEDURE `UpdateModelSummary`()
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE `UpdateModelSummaryDownloadFlag`()
+  BEGIN
+    IF NOT EXISTS(SELECT * 
+              FROM information_schema.STATISTICS
+              WHERE TABLE_SCHEMA = 'PLS_MultiTenant'
+              AND TABLE_NAME = 'MODEL_SUMMARY_DOWNLOAD_FLAGS'
+              AND INDEX_NAME = 'IX_MARK_TIME')
+    THEN
+      ALTER TABLE `MODEL_SUMMARY_DOWNLOAD_FLAGS`
+        ADD INDEX IX_MARK_TIME (MARK_TIME);
+    END IF;
+    IF NOT EXISTS(SELECT * 
+              FROM information_schema.STATISTICS
+              WHERE TABLE_SCHEMA = 'PLS_MultiTenant'
+              AND TABLE_NAME = 'MODEL_SUMMARY_DOWNLOAD_FLAGS'
+              AND INDEX_NAME = 'IX_TENANT_ID')
+    THEN
+      ALTER TABLE `MODEL_SUMMARY_DOWNLOAD_FLAGS`
+        ADD INDEX IX_TENANT_ID (Tenant_ID);
+    END IF;
+  END //
+DELIMITER ;
+
+DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
 
@@ -255,6 +281,7 @@ CREATE PROCEDURE `UpdateSchema`()
     CALL `CreateBucketMetadaTable`();
     CALL `UpdateModelQualityAlgorithm`();
     CALL `UpdateModelSummary`();
+    CALL `UpdateModelSummaryDownloadFlag`();
 
   END //
 DELIMITER ;
