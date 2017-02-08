@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
+import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -13,6 +14,7 @@ public class RealTimeMatchCallable implements Callable<MatchContext> {
 
     private MatchInput matchInput;
     private String podId;
+    private MatchPlanner matchPlanner;
     private MatchProxy matchProxy;
 
     RealTimeMatchCallable(MatchInput matchInput, String podId, MatchProxy matchProxy) {
@@ -31,8 +33,13 @@ public class RealTimeMatchCallable implements Callable<MatchContext> {
     private MatchContext matchBlock(MatchInput input) {
         MatchContext matchContext = new MatchContext();
         matchContext.setInput(input);
-        MatchOutput output = matchProxy.matchRealTime(input);
-        matchContext.setOutput(output);
-        return matchContext;
+        try {
+            MatchOutput output = matchProxy.matchRealTime(input);
+            matchContext.setOutput(output);
+            return matchContext;
+        } catch (Exception e) {
+            matchContext = matchPlanner.plan(input);
+            return BulkMatchCallable.generateFakeOutput(matchContext, e);
+        }
     }
 }

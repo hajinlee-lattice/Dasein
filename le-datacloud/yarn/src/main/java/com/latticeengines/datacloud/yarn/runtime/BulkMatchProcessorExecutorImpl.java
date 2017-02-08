@@ -45,8 +45,8 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
                 if (processorContext.isUseProxy()) {
                     future = executor.submit(new RealTimeMatchCallable(input, processorContext.getPodId(), matchProxy));
                 } else {
-                    future = executor.submit(new BulkMatchCallable(input, processorContext.getPodId(), matchPlanner,
-                            matchExecutor));
+                    future = executor.submit(
+                            new BulkMatchCallable(input, processorContext.getPodId(), matchPlanner, matchExecutor));
                 }
                 futures.add(future);
             }
@@ -75,8 +75,11 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
             MatchContext context;
             try {
                 context = future.get(100, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            } catch (TimeoutException | InterruptedException e) {
                 continue;
+            } catch (ExecutionException e) {
+                throw new RuntimeException("ExecutionException in the thread, "
+                        + "not sure if match result will be impacted. Terminate the block", e);
             }
             // always skip this future if it has not timed out.
             toDelete.add(future);
