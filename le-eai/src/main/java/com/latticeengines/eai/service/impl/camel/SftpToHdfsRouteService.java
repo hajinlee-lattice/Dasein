@@ -1,6 +1,7 @@
 package com.latticeengines.eai.service.impl.camel;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 
@@ -33,6 +34,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
 
     private static final String OPEN_SUFFIX = SftpToHdfsRouteConfiguration.OPEN_SUFFIX;
     private static final String CAMEL_TEMP_FILE_SUFFIX = "inprogress";
+    private static final String KNOWN_HOSTS_FILE = "./known_hosts";
     private static final Log log = LogFactory.getLog(SftpToHdfsRouteService.class);
 
     @Autowired
@@ -80,6 +82,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
             sftpDir = "/" + sftpDir;
         }
 
+        createKnownHostsFile();
         final String sftpUrl = String.format(
                 "sftp://%s:%d%s?" //
                         + "noop=true&" //
@@ -87,10 +90,10 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
                         + "username=%s&" //
                         + "password=%s&" //
                         + "stepwise=false&" //
-                        + "localWorkDirectory=%s",
+                        + "localWorkDirectory=%s&" //
+                        + "knownHostsFile=%s",
                 config.getSftpHost(), config.getSftpPort(), sftpDir, config.getFileName(), config.getSftpUserName(),
-                CipherUtils.decrypt(config.getSftpPasswordEncrypted()), getTempDirectory());
-
+                CipherUtils.decrypt(config.getSftpPasswordEncrypted()), getTempDirectory(), KNOWN_HOSTS_FILE);
         switch (fsType) {
         case LOCAL:
             final String fileUrl = String.format("file:%s?tempFileName={file:name}.%s",
@@ -121,18 +124,24 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         try {
             SftpToHdfsRouteConfiguration config = (SftpToHdfsRouteConfiguration) camelRouteConfiguration;
             String fullPath = cleanDirPath(config.getHdfsDir()) + config.getFileName();
+            boolean isFinished = false;
             switch (fsType) {
             case LOCAL:
-                return FileUtils.waitFor(new File(fullPath), 1);
+                isFinished = FileUtils.waitFor(new File(fullPath), 1);
+                break;
             case HDFS:
             default:
                 if (HdfsUtils.fileExists(yarnConfiguration, fullPath)) {
                     log.info("Successfully downloaded a file of size " + checkDestFileSize(config) + "  bytes.");
-                    return true;
+                    isFinished = true;
                 } else {
-                    return false;
+                    isFinished = false;
                 }
             }
+            if (isFinished) {
+                deleteKnownHostsFile();
+            }
+            return isFinished;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -267,6 +276,21 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         // use current directory as it is already set as per
         // yarn.nodemanager.local-dirs configuration
         return ".";
+    }
+
+    private void createKnownHostsFile() {
+        // use current directory as it is already set as per
+        // yarn.nodemanager.local-dirs configuration
+        File knownHostsFile = new File(KNOWN_HOSTS_FILE);
+        try {
+            FileUtils.touch(knownHostsFile);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot create the temporary known hosts file.", e);
+        }
+    }
+
+    private void deleteKnownHostsFile() {
+        FileUtils.deleteQuietly(new File(KNOWN_HOSTS_FILE));
     }
 
 }
