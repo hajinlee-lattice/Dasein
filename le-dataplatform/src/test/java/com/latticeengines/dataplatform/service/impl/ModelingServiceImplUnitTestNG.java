@@ -137,8 +137,20 @@ public class ModelingServiceImplUnitTestNG {
         dataRules.add(ruleC);
 
         String pipelineProps = modelingService.getReviewPipelineProps(dataRules);
-        assertEquals(pipelineProps,
-                "rulea.limit=\"10\" rulea.threshold=\"200\" ruleb.Battr2=\"10\" ruleb.Battr=\"200\"");
+        Map<String, String> returnedProperties = new HashMap<>();
+        String[] properties = pipelineProps.split(" ");
+        String[] proptery1 = properties[0].split("=");
+        String[] proptery2 = properties[1].split("=");
+        String[] proptery3 = properties[2].split("=");
+        String[] proptery4 = properties[3].split("=");
+        returnedProperties.put(proptery1[0], proptery1[1]);
+        returnedProperties.put(proptery2[0], proptery2[1]);
+        returnedProperties.put(proptery3[0], proptery3[1]);
+        returnedProperties.put(proptery4[0], proptery4[1]);
+        assertEquals(returnedProperties.get("rulea.limit"), "\"10\"");
+        assertEquals(returnedProperties.get("rulea.threshold"), "\"200\"");
+        assertEquals(returnedProperties.get("ruleb.Battr"), "\"200\"");
+        assertEquals(returnedProperties.get("ruleb.Battr2"), "\"10\"");
     }
 
 }
