@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.eai.route;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HdfsToS3Configuration extends ExportConfiguration {
 
     @JsonProperty("s3_bucket")

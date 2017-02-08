@@ -81,7 +81,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         if (!sftpDir.startsWith("/")) {
             sftpDir = "/" + sftpDir;
         }
-
+        deleteKnownHostsFile();
         createKnownHostsFile();
         final String sftpUrl = String.format(
                 "sftp://%s:%d%s?" //
