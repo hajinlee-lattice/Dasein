@@ -110,4 +110,7 @@ if [ "${LE_ENVIRONMENT}" = "devcluster" ]; then
     hdfs dfs -ls hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK}
 fi
 
+echo "Clean up old test tenants"
+runtest testframework -g cleanup -t GlobalAuthCleanupTestNG
+
 echo "Success!!!"
