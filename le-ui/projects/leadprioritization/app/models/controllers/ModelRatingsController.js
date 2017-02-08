@@ -1,5 +1,7 @@
 angular.module('lp.models.ratings', [
-    'mainApp.appCommon.utilities.ResourceUtility'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.widgets.ModelDetailsWidget',
+    'mainApp.models.services.ModelService'
 ])
 .controller('ModelRatingsController', function ($scope, $rootScope, $stateParams,
     ResourceUtility, Model, ModelStore, ModelRatingsService, MostRecentConfiguration, BucketSummary) {
@@ -8,6 +10,7 @@ angular.module('lp.models.ratings', [
     angular.extend(vm, {
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
+        model: Model,
         data: ModelStore.data,
         chartNotUpdated: true,
         saveInProgress: false,
@@ -23,7 +26,13 @@ angular.module('lp.models.ratings', [
 
         $scope.Math = window.Math;
 
-        console.log(vm.currentConfiguration);
+        if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
+            vm.modelType = "Leads";
+        } else {
+            vm.modelType = "Accounts";
+        }
+
+        console.log(vm.modelType, vm.currentConfiguration);
 
         renderChart();
     }
@@ -66,12 +75,72 @@ angular.module('lp.models.ratings', [
         vm.getNumber = function(num) {return new Array(num);}
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
 
-        handleSliders();
+            
+    }
+
+    function initSliders(){
+
+        var vanilla = document.getElementById("sliders"),
+            vListItems = vanilla.getElementsByClassName("slider"),
+            vDragItem,
+            vDropItem;
+
+        console.log(vListItems);
+
+        for (var i = 0; i < vListItems.length; i++) {
+          var el = vListItems.item(i);
+          el.draggable = true;
+
+          dataRegistry[getId(el)] = "data: " + el.textContent;
+          
+          el.addEventListener("dragstart", function(e) {
+            e.dataTransfer.setData(dataType, e.target.textContent);
+            e.dataTransfer.effectAllowed = "move";
+            vDragItem = e.target;
+          });
+          
+          el.addEventListener("dragend", function(e) {
+            if (vDropItem) {
+              vDropItem.classList.remove("dropzone");
+            }
+            vDragItem = vDropItem = null;
+          });
+          
+          el.addEventListener("dragenter", function(e) {
+            e.preventDefault();
+            if (e.dataTransfer.types.indexOf(dataType) != -1) {
+              e.target.classList.add("dropzone");      
+            }
+            vDropItem = e.target;
+          });
+          
+          el.addEventListener("dragover", function(e) {
+            e.preventDefault();
+          });
+          
+          el.addEventListener("drop", function(e) {
+            e.preventDefault();
+            var data = e.dataTransfer.getData(dataType);
+            var text = data + " dropped on " + e.target.textContent;
+            setData(text || "[no data]");
+          });
+          
+          el.addEventListener("dragleave", function(e) {
+            e.target.classList.remove("dropzone");
+            if (vDropItem === e.target) {
+              vDropItem = null;
+            }
+          });
+        }
 
     }
-    function handleSliders(){
-                        
-    };
+
+    function adjustColors(){
+        console.log("adjust colors");
+    }
+    function adjustWorkingBuckets(){
+        console.log("adjust working buckets");
+    }
 
     vm.init();
 })
@@ -80,20 +149,26 @@ angular.module('lp.models.ratings', [
 
     var vm = this;
     angular.extend(vm, {
+        model: Model,
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
-        data: ModelStore.data,
+        data: ModelStore,
         ResourceUtility: ResourceUtility,
         historicalBuckets: HistoricalABCDBuckets
     });
 
     vm.init = function() {
-        $scope.data = ModelStore.data;
         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+        $scope.Math = window.Math;
 
         console.log(vm.historicalBuckets);
 
-        $scope.Math = window.Math;
+        if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
+            vm.modelType = "Leads";
+        } else {
+            vm.modelType = "Accounts";
+        }
+
     };
 
     vm.init();

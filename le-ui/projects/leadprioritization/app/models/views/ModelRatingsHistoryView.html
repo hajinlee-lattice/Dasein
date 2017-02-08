@@ -12,20 +12,20 @@
 
             <ul class="history-list">
 
-            	<li ng-repeat="configuration in vm.historicalBuckets">
+            	<li ng-repeat="configuration in vm.historicalBuckets track by $key">
 		            <div class="chart-header clearfix">
 		                <div class="list-data pull-left">Created by: bnguyen@lattice-engines.com</div>
-		                <div class="list-data pull-right">Published on: 01/03/17 at 1:45pm</div>
+		                <div class="list-data pull-right">Published on: {{configuration[0].creation_timestamp | date : 'MMM d, y h:mm:ss a'}}</div>
 		            </div><!-- End .chart-header -->
 		            <ul class="bucket-tiles published">
 		            	<li ng-repeat="bucket in configuration">
 		                    <div class="bucket-label">{{bucket.name}}</div>
 		                    <dl>
 		                        <dt>Lift</dt>
-		                        <dd class="lift">{{Math.round(bucket.lift)}}x</dd>
-		                        <dt>Leads %</dt>
-		                        <dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
-		                        <dt>Leads</dt>
+		                        <dd class="lift">{{Math.max(bucket.lift).toFixed(2);}}x</dd>
+		                        <dt>{{vm.modelType}} %</dt>
+		                        <dd>{{ bucket.sum_leads }}%</dd>
+		                        <dt>{{vm.modelType}}</dt>
 		                        <dd>{{bucket.num_leads | number}}</dd>
 		                    </dl>
 		                </li>

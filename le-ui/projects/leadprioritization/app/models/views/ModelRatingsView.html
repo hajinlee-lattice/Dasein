@@ -11,7 +11,7 @@
 
 
             <div class="chart-header">
-                <div class="list-data pull-left">All Leads: <strong>{{vm.summary.total_num_leads | number}}</strong></div>
+                <div class="list-data pull-left">All {{vm.modelType}}: <strong>{{vm.summary.total_num_leads | number}}</strong></div>
                 <div class="actions pull-right">
                 	<button 
                 		type="button" 
@@ -21,37 +21,55 @@
                 	>Publish Configuration</button>
                 </div>
             </div><!-- End .chart-header -->
-            <div class="ratings-chart" style="height:{{vm.chartContainerHeight}}px">
 
-                <div id="" class="sliders-container" style="height:{{vm.dugoutHeight}}px">
+            <div 
+                class="ratings-chart"
+                ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}">
+                <div 
+                    id="sliders" 
+                    class="sliders-container" 
+                    ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
                     <div 
-                        class="slider" 
-                        style="height:{{vm.dugoutHeight}}px; left:{{100- bucket.right_bound_score}}%"
+                        class="slider"
+                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;right: '+ bucket.right_bound_score +'%'}}"
                         ng-repeat="bucket in vm.currentConfiguration">
                         <div class="handle">&nbsp;</div>
                     </div>
+
+                    <div 
+                        class="slider-dugout"
+                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">&nbsp;</div>
+
                 </div><!-- End .sliders-container -->
 
                 <ul class="vertical-axis">
-                    <li ng-repeat="i in vm.getNumber(vm.yAxisNumber) track by $index" style="height: {{vm.axisItemHeight}}px"><span>{{$index+1}}x</span></li>
+                    <li 
+                        ng-repeat="i in vm.getNumber(vm.yAxisNumber) track by $index"
+                        ng-attr-style="{{'height: '+ vm.axisItemHeight +'px;'}}">
+                        <span>{{$index+1}}x</span></li>
                 </ul>
 
                 <ul class="data">
                     <li 
-                        ng-repeat="data in vm.summary.bar_lifts track by $index" style="height: {{Math.round(12*data)}}px"
+                        ng-repeat="data in vm.summary.bar_lifts track by $index"
+                        ng-attr-style="{{'height: '+ Math.round(12*data) +'px;'}}"
                         title="{{num_converted/data.num_leads}}"
                         >&nbsp;</li>
                 </ul>
 
-                <div id="" class="bar-colors" style="height:{{vm.dugoutHeight}}px">
+                <div 
+                    id="" 
+                    class="bar-colors" 
+                    ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
                     <div 
                         class="overlay" 
-                        style="height:{{vm.dugoutHeight}}px; right:{{bucket.right_bound_score}}%; width:{{bucket.left_bound_score - bucket.right_bound_score}}%"
+                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;right: '+ bucket.right_bound_score +'%;width: '+ (bucket.left_bound_score - bucket.right_bound_score) +'%;'}}" 
                         ng-repeat="bucket in vm.currentConfiguration">
                     </div>
                 </div><!-- End .bar-colors -->
 
                 <ul class="horizontal-axis">
+                    <li class="hidden"></li>
                     <li class="mark"><span>99</span></li>
                     <li></li><li></li><li></li><li class="mid"></li>
                     <li></li><li></li><li></li><li></li>
@@ -81,7 +99,8 @@
                     <li></li><li></li><li></li><li></li>
                     <li class="mark"><span>10</span></li>
                     <li></li><li></li><li></li><li></li>
-                    <li class="mark"><span>5</span></li>
+                    <li class="mark five"><span>5</span></li>
+                    <li class="hidden"></li><li class="hidden"></li><li class="hidden"></li><li class="hidden"></li><li class="hidden"></li>
                 </ul><!-- End .horizontal-axis -->
             </div><!-- End .ratings-chart -->
 
@@ -90,10 +109,10 @@
             		<div class="bucket-label">{{bucket.name}}</div>
             		<dl>
             			<dt>Lift</dt>
-            			<dd class="lift">{{Math.round(bucket.lift)}}x</dd>
-            			<dt>Leads %</dt>
+            			<dd class="lift">{{Math.max(bucket.lift).toFixed(2);}}x</dd>
+            			<dt>{{vm.modelType}} %</dt>
             			<dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
-            			<dt>Leads</dt>
+            			<dt>{{vm.modelType}}</dt>
             			<dd>{{bucket.num_leads | number}}</dd>
             		</dl>
             	</li>
@@ -107,10 +126,10 @@
                     <div class="bucket-label">{{bucket.name}}</div>
                     <dl>
                         <dt>Lift</dt>
-                        <dd class="lift">{{Math.round(bucket.lift)}}x</dd>
-                        <dt>Leads %</dt>
+                        <dd class="lift">{{Math.max(bucket.lift).toFixed(2);}}x</dd>
+                        <dt>{{vm.modelType}} %</dt>
                         <dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
-                        <dt>Leads</dt>
+                        <dt>{{vm.modelType}}</dt>
                         <dd>{{bucket.num_leads | number}}</dd>
                     </dl>
                 </li>
