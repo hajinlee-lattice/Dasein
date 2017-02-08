@@ -246,7 +246,14 @@ angular.module('common.datacloud.explorer', [
 
     vm.filter = function(items, property, value) {
         for (var i=0, result=[]; i < items.length; i++) {
-            if (typeof items[i][property] != 'undefined' && items[i][property] == value) {
+
+            function index(obj, j) {
+                if(obj && j && obj[j]) {
+                    return obj[j];
+                }
+            }
+            var item = property.split('.').reduce(index, items[i]);
+            if (typeof item != 'undefined' && item == value) {
                 result.push(items[i]);
             }
         }
@@ -348,10 +355,13 @@ angular.module('common.datacloud.explorer', [
         }
 
         var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
+            DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
+            EnabledForSalesTeamTotal = vm.enrichments.length - DisabledForSalesTeamTotal.length;
 
         DataCloudStore.setMetadata('generalSelectedTotal', selectedTotal.length);
         DataCloudStore.setMetadata('premiumSelectedTotal', vm.filter(selectedTotal, 'IsPremium', true).length);
         DataCloudStore.setMetadata('enrichmentsTotal', vm.enrichments.length);
+        DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
 
         vm.generalSelectedTotal = DataCloudStore.getMetadata('generalSelectedTotal');
         vm.premiumSelectedTotal = DataCloudStore.getMetadata('premiumSelectedTotal');
@@ -377,6 +387,8 @@ angular.module('common.datacloud.explorer', [
             }
 
             item.HighlightState = highlightOptionsInitState(item);
+            item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden ? item.AttributeFlagsMap.CompanyProfile.hidden : null);
+            item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : null);
 
             obj[category][subcategory].push(index);
         });
@@ -473,6 +485,14 @@ angular.module('common.datacloud.explorer', [
             enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted};
             vm.enrichments.find(function(i){return i.FieldName === enrichment.FieldName;}).AttributeFlagsMap.CompanyProfile = flags;
             DataCloudStore.updateEnrichments(vm.enrichments);
+
+            var DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
+                EnabledForSalesTeamTotal = vm.enrichments.length - DisabledForSalesTeamTotal.length;
+
+            DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
+
+            enrichment.HighlightHidden = flags.hidden;
+            enrichment.HighlightHighlighted = flags.highlighted;
         });
     }
 
@@ -746,13 +766,17 @@ angular.module('common.datacloud.explorer', [
 
     vm.enrichmentsFilter = function() {
         var filter = {
-            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 
+            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true) || (!vm.metadata.toggle.hide.selected ? '' : false),
             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
             'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
             'Category': vm.category,
-            'Subcategory': vm.subcategory
+            'Subcategory': vm.subcategory,
+            'AttributeFlagsMap': {
+                'CompanyProfile': {
+                    'highlighted': (!vm.metadata.toggle.show.highlighted ? '' : true) || (!vm.metadata.toggle.hide.highlighted ? '' : false)
+                }
+            }
         };
-        
         if (vm.lookupMode && vm.isYesNoCategory(vm.category)) {
             filter.Value = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
         }
@@ -801,9 +825,12 @@ angular.module('common.datacloud.explorer', [
                 || (item.Subcategory != subcategory)
                 || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue != "Yes" && vm.isYesNoCategory(category)) 
                 || (vm.metadata.toggle.show.selected && !item.IsSelected) 
+                || (vm.metadata.toggle.hide.selected && item.IsSelected) 
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
                 || (vm.metadata.toggle.hide.premium && item.IsPremium) 
-                || (vm.metadata.toggle.show.internal && !item.IsInternal)) {
+                || (vm.metadata.toggle.show.internal && !item.IsInternal)
+                || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
+                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
                     continue;
                 }
                 result.push(item);
@@ -826,9 +853,12 @@ angular.module('common.datacloud.explorer', [
                 if ((item.Category != category)
                 || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue != "Yes" && vm.isYesNoCategory(category)) 
                 || (vm.metadata.toggle.show.selected && !item.IsSelected) 
+                || (vm.metadata.toggle.hide.selected && item.IsSelected) 
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
                 || (vm.metadata.toggle.hide.premium && item.IsPremium) 
-                || (vm.metadata.toggle.show.internal && !item.IsInternal)) {
+                || (vm.metadata.toggle.show.internal && !item.IsInternal)
+                || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
+                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
                     continue;
                 }
                 result.push(item);

@@ -47,6 +47,22 @@
             &.filter {
                 &.dropdown-container {
                     z-index: 2;
+                    .dropdown {
+                        .selected, .highlighted {
+                            &.hide {
+                                border-bottom: 1px solid #333;
+                                padding-bottom: 5px;
+                                margin-bottom: 10px;
+                            }
+                        }
+                        .internal {
+                            &.show {
+                                border-top: 1px solid #333;
+                                padding-top: 5px;
+                                margin-top: 10px;
+                            }
+                        }
+                    }
                 }
                 li {
                     padding: 0 7px;
@@ -785,7 +801,7 @@
             color: #fafafa;
             white-space: nowrap;
             padding: 5px;
-            border-radius: 0 4px 4px 4px;
+            border-radius: 4px;
             display: none;
             &.open {
                 display: inline-block;
