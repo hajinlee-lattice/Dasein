@@ -106,11 +106,11 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
-         plsRest.deleteTenant(customerSpace);
-         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
-         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
-         HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
-         HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
+        plsRest.deleteTenant(customerSpace);
+        HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
+        HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
+        HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
+        HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
     }
 
     @Test(groups = "deployment")
@@ -152,7 +152,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
             Assert.assertNotNull(record.get(InterfaceName.Id.toString()));
             Assert.assertNotNull(record.get(ScoringDaemonService.MODEL_ID));
             Assert.assertNotNull(record.get(ScoreResultField.Percentile.displayName));
-            Assert.assertNotNull(record.get(ScoreResultField.Bucket.displayName));
+            Assert.assertNotNull(record.get(ScoreResultField.Rating.displayName));
             Assert.assertNull(record.get(ScoreResultField.RawScore.displayName));
             System.out.println(record);
         }
@@ -165,7 +165,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
         Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
         Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
-        Assert.assertEquals(fields.get(3).name(), ScoreResultField.Bucket.displayName);
+        Assert.assertEquals(fields.get(3).name(), ScoreResultField.Rating.displayName);
         Assert.assertEquals(fields.size(), 7);
 
         List<String> csvfiles = HdfsUtils.getFilesForDir(yarnConfiguration, targetDir, ".*.csv$");

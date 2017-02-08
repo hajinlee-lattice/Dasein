@@ -206,7 +206,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
             Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
             Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
-            Assert.assertEquals(fields.get(3).name(), ScoreResultField.Bucket.displayName);
+            Assert.assertEquals(fields.get(3).name(), ScoreResultField.Rating.displayName);
             System.out.println(record.get(0));
             System.out.println(record.get(1));
             System.out.println(record.get(2));

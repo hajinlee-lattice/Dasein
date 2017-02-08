@@ -383,8 +383,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         scoreAttr.setSourceLogicalDataType("");
         scoreAttr.setPhysicalDataType(Type.DOUBLE.name());
         Attribute bucketAttr = new Attribute();
-        bucketAttr.setName(ScoreResultField.Bucket.displayName);
-        bucketAttr.setDisplayName(ScoreResultField.Bucket.displayName);
+        bucketAttr.setName(ScoreResultField.Rating.displayName);
+        bucketAttr.setDisplayName(ScoreResultField.Rating.displayName);
         bucketAttr.setSourceLogicalDataType("");
         bucketAttr.setPhysicalDataType(Type.STRING.name());
         outputTable.addAttribute(idAttr);
@@ -456,7 +456,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
                 builder.set(ScoringDaemonService.MODEL_ID, modelId);
                 builder.set(ScoreResultField.Percentile.displayName, score);
-                builder.set(ScoreResultField.Bucket.displayName, bucketName);
+                builder.set(ScoreResultField.Rating.displayName, bucketName);
                 if (isEnableDebug) {
                     Double rawScore = tuple.getProbability();
                     if (rawScore != null && (rawScore > 1 || rawScore < 0)) {

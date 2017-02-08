@@ -20,7 +20,7 @@ public class ScoreResponse extends BaseResponse {
     @ApiModelProperty(value = "Score")
     private double score;
 
-    @JsonProperty("bucket")
+    @JsonProperty("rating")
     @ApiModelProperty(value = "Bucket Information Based on Score")
     private BucketName bucket;
 

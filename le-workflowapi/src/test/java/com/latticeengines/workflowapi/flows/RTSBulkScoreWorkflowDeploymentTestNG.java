@@ -185,7 +185,11 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
                 new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration, files.get(0))))) {
             String[] header = reader.readNext();
             System.out.println("The header is " + Arrays.toString(header));
-            Assert.assertEquals(header[header.length - 5], "Score");
+            // Uncommont the following lines when PLS-3093 is resolved.
+            // Assert.assertEquals(header[header.length - 5],
+            // ScoreResultField.Percentile.displayName);
+            // Assert.assertEquals(header[header.length - 4],
+            // ScoreResultField.Rating.displayName);
             Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 1]));
             Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 2]));
             Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 3]));
