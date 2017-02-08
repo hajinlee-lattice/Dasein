@@ -549,7 +549,7 @@
                         @include flex-container;
                         position: relative;
                         min-width: 135px;
-                        button {
+                        button, .button {
                             @include flex-item(0 0 auto);
                             -webkit-align-self: center;
                             -ms-flex-item-align: center;
@@ -600,7 +600,7 @@
                         }
                     }
                     .highlight {
-                        button {
+                        button, .button {
                             overflow: visible;
                             font-size: 10px;
                             position: relative;

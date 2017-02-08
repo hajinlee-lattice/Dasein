@@ -194,7 +194,7 @@ angular.module('common.datacloud.explorer', [
 
         angular.element(document).click(function(event) {
             var target = angular.element(event.target),
-                el = angular.element('.dropdown-container ul.dropdown, button ul.button-dropdown'),
+                el = angular.element('.dropdown-container ul.dropdown, button ul.button-dropdown, .button ul.button-dropdown'),
                 has_parent = target.parents().is('.dropdown-container'),
                 parent = el.parents().find('.dropdown-container'),
                 is_visible = el.is(':visible');
@@ -481,7 +481,12 @@ angular.module('common.datacloud.explorer', [
             flags.hidden = true;
             flags.highlighted = false;
         }
+
+        vm.statusMessage(vm.label.saving_alert, {wait: 0});
+
         setFlag({fieldName: enrichment.FieldName}, flags).then(function(){
+            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+
             enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted};
             vm.enrichments.find(function(i){return i.FieldName === enrichment.FieldName;}).AttributeFlagsMap.CompanyProfile = flags;
             DataCloudStore.updateEnrichments(vm.enrichments);

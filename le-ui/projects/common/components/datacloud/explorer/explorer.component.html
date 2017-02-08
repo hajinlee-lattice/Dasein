@@ -295,14 +295,15 @@
                                 </button>
                             </li>
                             <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[enrichment.FieldName] = {}">
-                                <button class="button" 
+                                <!-- this can't be a <button> element because IE and FF don't like it -->
+                                <div class="button" 
                                         ng-class="{'selected': openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}" 
                                         ng-click="openHighlighter[enrichment.FieldName].open = !openHighlighter[enrichment.FieldName].open">
                                     <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">{{openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}</span>
                                     <ul ng-class="{open: openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
                                         <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-click="openHighlighter[enrichment.FieldName].state = vm.setFlag(type, enrichment)">{{label}}</li>
                                     </ul>
-                                </button>
+                                </div>
                             </li>
                         </ul>
                     </div>
