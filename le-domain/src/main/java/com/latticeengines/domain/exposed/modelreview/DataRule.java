@@ -186,7 +186,8 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     }
 
     public void setProperties(Map<String, Object> properties) {
-        this.properties = properties;
+        this.properties.clear();
+        this.properties.putAll(properties);
     }
 
     public boolean isEnabled() {
