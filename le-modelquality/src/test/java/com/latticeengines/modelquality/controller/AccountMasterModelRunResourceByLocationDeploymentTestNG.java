@@ -39,7 +39,7 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
         super.tearDown();
     }
 
-    @Test(groups = "deployment", enabled = true, dataProvider = "getAccountMasterLocationCsvFile")
+    @Test(groups = "deployment", enabled = false, dataProvider = "getAccountMasterLocationCsvFile")
     public void runModelAccountMasterLoction(String dataSetName, String csvFile) {
         runModelAccountMaster(dataSetName, csvFile);
     }
