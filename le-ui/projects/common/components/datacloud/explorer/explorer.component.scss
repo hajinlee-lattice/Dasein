@@ -510,11 +510,11 @@
                                 li {
                                     &.label {
                                         @include flex-item(0 1 auto);
-                                        max-width: 100px;
+                                        width: 100px;
                                         max-height: 31px;
                                         overflow: hidden;
                                         word-wrap: break-word;
-                                        text-align: left;
+                                        text-align: right;
                                         margin: 5px 0;
                                         line-height: 12px;
                                     }
@@ -615,6 +615,10 @@
                         }
                     }
                     .highlight {
+                        &[disabled] {
+                            pointer-events: none;
+                            opacity: .5;
+                        }
                         button, .button {
                             overflow: visible;
                             font-size: 10px;
@@ -810,7 +814,7 @@
             @include box-shadow(0,0,0);
             position: absolute;
             bottom: 3px;
-            left: 1px;
+            right: 1px;
             transform: translateY(100%);
             background: #1a1a1a;
             color: #fafafa;

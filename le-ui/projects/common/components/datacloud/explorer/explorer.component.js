@@ -397,6 +397,11 @@ angular.module('common.datacloud.explorer', [
             item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden ? item.AttributeFlagsMap.CompanyProfile.hidden : null);
             item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : null);
 
+            if(!item.AttributeFlagsMap || !item.AttributeFlagsMap.CompanyProfile) {
+                item.AttributeFlagsMap = {};
+                item.AttributeFlagsMap.CompanyProfile = {};
+            }
+
             obj[category][subcategory].push(index);
         });
 
@@ -418,8 +423,8 @@ angular.module('common.datacloud.explorer', [
     }
 
     var highlightOptionsInitState = function(enrichment) {
-        var ret = {type: '', label: '', highlighted: false, enabled: false};
-
+        var ret = {type: 'enabled', label: '', highlighted: false, enabled: false};
+        
         if(!enrichment.AttributeFlagsMap || !enrichment.AttributeFlagsMap.CompanyProfile) {
             ret.type = 'enabled';
             ret.label = vm.highlightTypes[ret.type];
@@ -779,7 +784,7 @@ angular.module('common.datacloud.explorer', [
         return fieldTypes[fieldType] || fieldTypes.default;
     }
 
-    vm.enrichmentsFilter = function() {
+    vm.enrichmentsFilter = function(enrichment) {
         var filter = {
             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true) || (!vm.metadata.toggle.hide.selected ? '' : false),
             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
@@ -787,7 +792,7 @@ angular.module('common.datacloud.explorer', [
             'Category': vm.category,
             'Subcategory': vm.subcategory,
         };
-        if(vm.section == 'team') {
+        if(vm.section == 'team' && enrichment.AttributeFlagsMap) {
             filter.AttributeFlagsMap = {
                 'CompanyProfile': {
                     'hidden': (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false),

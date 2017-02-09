@@ -164,8 +164,8 @@
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1; vm.updateStateParams();">
                     
-                    <div    class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
-                            ng-class="{active: vm.subcategory == subcategory}">
+                    <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
+                         ng-class="{active: vm.subcategory == subcategory}">
                         
                         <h2 class="noselect-children">
                             <div class="category-icon">
@@ -226,7 +226,7 @@
                 <span ng-click="vm.subcategory = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
             </div>
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length < 2 && vm.subcategory">
-                <span ng-click="vm.queryText = ''; vm.subcategory = '';  vm.metadata.current = 1; vm.updateStateParams();">Back</span>
+                <span ng-click="vm.queryText = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span>  | {{vm.subcategory}}
             </div>
 
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
@@ -242,7 +242,7 @@
                 <li class="box" 
                     ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category] 
                         | filter: vm.searchFields
-                        | filter: vm.enrichmentsFilter()
+                        | filter: vm.enrichmentsFilter
                         | orderBy: vm.sortOrder()))
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                         | limitTo: vm.pagesize 
