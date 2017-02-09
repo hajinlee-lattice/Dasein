@@ -1,7 +1,7 @@
 <section class="import-job-status ng-scope">
     <div class="row">
         <div class="columns eight offset-two box-outline">
-            
+
 
             <div class="section-header" data-ng-if="jobStatus != 'Completed'">
                 <h4>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_MAIN_TITLE')}}</h4>
@@ -14,30 +14,30 @@
             <hr />
 
             <div class="section-header text-right">
-                <dl>
-                    <dt>Job Started</dt>
-                    <dd>
-                        <div class="progress-icon"  data-ng-if="jobStatus != null">
+                <table>
+                    <tr>
+                        <td>Job Started</td>
+                        <td>
+                            <div class="progress-icon"  data-ng-if="jobStatus != null">
+                                <span data-ng-if="startTimestamp && jobStatus != 'Pending'">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            </div>
+                        </td>
+                        <td>
                             <span data-ng-if="jobStatus == 'Pending'">
                                 <span class="loading-small"></span>
                             </span>
-                            <span data-ng-if="startTimestamp && jobStatus != 'Pending'">
-                                <i class="fa fa-check"></i>
-                            </span>
-                        </div>
-                        <div data-ng-if="startTimestamp && jobStatus != 'Pending'">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</div>
-                    </dd>
-                </dl>
-
-                <div ng-if="!isPMMLJob">
-                    <dl>
-                        <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Processing File</dt>
-                        <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</dt>
-                        <dd>
+                            <span data-ng-if="startTimestamp && jobStatus != 'Pending'">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</span>
+                        </td>
+                    </tr>
+                    <tr ng-if="!isPMMLJob">
+                        <td>
+                            <span data-ng-if="jobStatus == 'Pending'" class="not-started">Processing File</span>
+                            <span data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</span>
+                        </td>
+                        <td>
                             <div class="progress-icon">
-                                <span data-ng-if="jobStepsRunningStates.load_data">
-                                    <span class="loading-small"></span>
-                                </span>
                                 <span data-ng-if="jobStepsCompletedStates.load_data">
                                     <i class="fa fa-check"></i>
                                 </span>
@@ -45,17 +45,21 @@
                                     <i class="fa fa-warning"></i>
                                 </span>
                             </div>
-                            <div data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</div>
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</dt>
-                        <dt data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</dt>
-                        <dd>
+                        </td>
+                        <td>
+                            <span data-ng-if="jobStepsRunningStates.load_data">
+                                <span class="loading-small"></span>
+                            </span>
+                            <span data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</span>
+                        </td>
+                    </tr>
+                    <tr ng-if="!isPMMLJob">
+                        <td>
+                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</span>
+                            <span data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</span>
+                        </td>
+                        <td>
                             <div class="progress-icon">
-                                <span data-ng-if="jobStepsRunningStates.generate_insights">
-                                    <span class="loading-small"></span>
-                                </span>
                                 <span data-ng-if="jobStepsCompletedStates.generate_insights">
                                     <i class="fa fa-check"></i>
                                 </span>
@@ -63,49 +67,63 @@
                                     <i class="fa fa-warning"></i>
                                 </span>
                             </div>
-                            <div data-ng-if="jobStepsCompletedStates.generate_insights">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</div>
-                        </dd>
-                    </dl>
-                </div>
-                <dl>
-                    <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</dt>
-                    <dt data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</dt>
-                    <dd>
-                        <div class="progress-icon">
+                        </td>
+                        <td>
+                            <span data-ng-if="jobStepsRunningStates.generate_insights">
+                                <span class="loading-small"></span>
+                            </span>
+                            <span data-ng-if="jobStepsCompletedStates.generate_insights">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</span>
+                            <span data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</span>
+                        </td>
+                        <td>
+                            <div class="progress-icon">
+                                <span data-ng-if="jobStepsCompletedStates.create_global_target_market">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                                <span data-ng-if="stepFailed == 'create_global_target_market'">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            </div>
+                        </td>
+                        <td>
                             <span data-ng-if="jobStepsRunningStates.create_global_target_market">
                                 <span class="loading-small"></span>
                             </span>
-                            <span data-ng-if="jobStepsCompletedStates.create_global_target_market">
-                                <i class="fa fa-check"></i>
-                            </span>
-                            <span data-ng-if="stepFailed == 'create_global_target_market'">
-                                <i class="fa fa-warning"></i>
-                            </span>
-                        </div>
-                        <div data-ng-if="jobStepsCompletedStates.create_global_target_market">{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</div>
-                    </dd>
-                </dl>
-                <dl ng-if="!isPMMLJob">
-                    <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights || jobStepsRunningStates.create_global_target_market" class="not-started">Scoring Training Set</dt>
-                    <dt data-ng-if="jobStepsRunningStates.score_training_set || jobStepsCompletedStates.score_training_set || stepFailed == 'score_training_set'">Scoring Training Set</dt>
-                    <dd>
-                        <div class="progress-icon">
+                            <span data-ng-if="jobStepsCompletedStates.create_global_target_market">{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</span>
+                        </td>
+                    </tr>
+                    <tr ng-if="!isPMMLJob">
+                        <td>
+                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights || jobStepsRunningStates.create_global_target_market" class="not-started">Scoring Training Set</span>
+                            <span data-ng-if="jobStepsRunningStates.score_training_set || jobStepsCompletedStates.score_training_set || stepFailed == 'score_training_set'">Scoring Training Set</span>
+                        </td>
+                        <td>
+                            <div class="progress-icon">
+                                <span data-ng-if="jobStepsCompletedStates.score_training_set">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                                <span data-ng-if="stepFailed == 'score_training_set'">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            </div>
+                        </td>
+                        <td>
                             <span data-ng-if="jobStepsRunningStates.score_training_set">
                                 <span class="loading-small"></span>
                             </span>
-                            <span data-ng-if="jobStepsCompletedStates.score_training_set">
-                                <i class="fa fa-check"></i>
-                            </span>
-                            <span data-ng-if="stepFailed == 'score_training_set'">
-                                <i class="fa fa-warning"></i>
-                            </span>
-                        </div>
-                        <div data-ng-if="jobStepsCompletedStates.score_training_set">{{stepsCompletedTimes.score_training_set | date: 'MM/dd/yyyy h:mma'}}</div>
-                    </dd>
-                </dl>
+                            <span data-ng-if="jobStepsCompletedStates.score_training_set">{{stepsCompletedTimes.score_training_set | date: 'MM/dd/yyyy h:mma'}}</span>
+                        </td>
+                    </tr>
+                </table>
             </div>
             <div class="section-header">
-                <div class="meter bar" data-ng-if="(jobStatus == 'Pending' || jobStatus == 'Running') && jobStatus != 'Completed'"> 
+                <div class="meter bar" data-ng-if="(jobStatus == 'Pending' || jobStatus == 'Running') && jobStatus != 'Completed'">
                     <span ng-style="{ width: (isPMMLCompleted ? 100 : compress_percent) + '%' }" class="indeterminate"></span>
                 </div>
                 <div>
@@ -115,7 +133,7 @@
             </div>
 
             <hr />
-            
+
             <div class="container section-actions">
                 <div class="pull-left section-actions-tertiary" ng-show="jobStatus === 'Running'">
                     <button class="button white-button" type="button" ng-click="cancelJob($event, jobId)">

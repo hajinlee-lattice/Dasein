@@ -491,25 +491,36 @@ Create Model: Import Job Status
         border-bottom: 1px solid #ccc;
         text-transform: none;
     }
-    dt {
-      width: auto;
-      font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
-      &.not-started {
-        color: #bbb;
-        font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
-      }
-    }
-    dd {
-      margin: 0 0 0 35%;
-      font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
-      .fa-warning {
-        color: #D22027;
-      }
-    }
-    dd div {
-        display: inline-block;
-        &.progress-icon {
-            margin-right: 10px;
+    table {
+        font-size: 1.25em;
+        tbody td,
+        tbody tr {
+            background: none;
+            border: none;
+            margin: 0;
+            padding: 0;
+            height: 28px;
+        }
+        td:first-child {
+            font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
+        }
+        td:nth-child(2),
+        td:last-child {
+            font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
+            text-align: right;
+        }
+        td:nth-child(2) {
+            width: 24px;
+        }
+        td:last-child {
+            width: 170px;
+        }
+        .fa-warning {
+          color: #D22027;
+        }
+        .not-started {
+          color: #bbb;
+          font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
         }
     }
     .row {
