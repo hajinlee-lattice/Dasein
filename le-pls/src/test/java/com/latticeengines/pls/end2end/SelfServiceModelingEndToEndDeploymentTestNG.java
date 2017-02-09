@@ -349,17 +349,17 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 break;
             case B:
                 bucketNames.remove(bucketMetadata.getBucketName());
-                assertEquals(bucketMetadata.getLeftBoundScore(), 95);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 94);
                 assertEquals(bucketMetadata.getRightBoundScore(), 85);
                 break;
             case C:
                 bucketNames.remove(bucketMetadata.getBucketName());
-                assertEquals(bucketMetadata.getLeftBoundScore(), 85);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 84);
                 assertEquals(bucketMetadata.getRightBoundScore(), 50);
                 break;
             case D:
                 bucketNames.remove(bucketMetadata.getBucketName());
-                assertEquals(bucketMetadata.getLeftBoundScore(), 50);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 49);
                 assertEquals(bucketMetadata.getRightBoundScore(), 5);
                 break;
             default:

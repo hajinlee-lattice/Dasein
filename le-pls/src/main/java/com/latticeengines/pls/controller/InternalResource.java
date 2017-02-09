@@ -119,6 +119,7 @@ public class InternalResource extends InternalResourceBase {
     private static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String UTC = "UTC";
+    private static final Integer BUCKET_0 = 99;
     private static final Integer BUCKET_1 = 95;
     private static final Integer BUCKET_2 = 85;
     private static final Integer BUCKET_3 = 50;
@@ -483,7 +484,8 @@ public class InternalResource extends InternalResourceBase {
         return modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
     }
 
-    @RequestMapping(value = "/metadata/required/modelId/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/metadata/required/modelId/{modelId}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get required column names for the event table used for the specified model")
     public List<String> getRequiredColumns(@PathVariable String modelId,
@@ -600,8 +602,8 @@ public class InternalResource extends InternalResourceBase {
             Boolean considerInternalAttributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category)
+                ? null : Category.fromName(category));
         return attributeService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
                 subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
@@ -631,8 +633,8 @@ public class InternalResource extends InternalResourceBase {
     ) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category)
+                ? null : Category.fromName(category));
         return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum,
                 subcategory, onlySelectedAttributes, Boolean.FALSE);
     }
@@ -757,39 +759,39 @@ public class InternalResource extends InternalResourceBase {
         Double overallLift = bucketedScoreSummary.getOverallLift();
 
         bucketMetadata1.setBucketName(BucketName.A);
-        bucketMetadata1.setLeftBoundScore(99);
+        bucketMetadata1.setLeftBoundScore(BUCKET_0);
         bucketMetadata1.setRightBoundScore(BUCKET_1);
-        bucketMetadata1.setNumLeads(
-                bucketedScores[BUCKET_1].getLeftNumLeads() - bucketedScores[99].getLeftNumLeads());
-        bucketMetadata1.setLift(((bucketedScores[BUCKET_1].getLeftNumConverted()
-                - bucketedScores[99].getLeftNumConverted())
+        bucketMetadata1.setNumLeads(bucketedScores[BUCKET_1 - 1].getLeftNumLeads()
+                - bucketedScores[BUCKET_0].getLeftNumLeads());
+        bucketMetadata1.setLift(((bucketedScores[BUCKET_1 - 1].getLeftNumConverted()
+                - bucketedScores[BUCKET_0].getLeftNumConverted())
                 / (double) bucketMetadata1.getNumLeads()) / overallLift);
 
         bucketMetadata2.setBucketName(BucketName.B);
-        bucketMetadata2.setLeftBoundScore(BUCKET_1);
+        bucketMetadata2.setLeftBoundScore(BUCKET_1 - 1);
         bucketMetadata2.setRightBoundScore(BUCKET_2);
-        bucketMetadata2.setNumLeads(bucketedScores[BUCKET_2].getLeftNumLeads()
-                - bucketedScores[BUCKET_1].getLeftNumLeads());
-        bucketMetadata2.setLift(((bucketedScores[BUCKET_2].getLeftNumConverted()
-                - bucketedScores[BUCKET_1].getLeftNumConverted())
+        bucketMetadata2.setNumLeads(bucketedScores[BUCKET_2 - 1].getLeftNumLeads()
+                - bucketedScores[BUCKET_1 - 1].getLeftNumLeads());
+        bucketMetadata2.setLift(((bucketedScores[BUCKET_2 - 1].getLeftNumConverted()
+                - bucketedScores[BUCKET_1 - 1].getLeftNumConverted())
                 / (double) bucketMetadata2.getNumLeads()) / overallLift);
 
         bucketMetadata3.setBucketName(BucketName.C);
-        bucketMetadata3.setLeftBoundScore(BUCKET_2);
+        bucketMetadata3.setLeftBoundScore(BUCKET_2 - 1);
         bucketMetadata3.setRightBoundScore(BUCKET_3);
-        bucketMetadata3.setNumLeads(bucketedScores[BUCKET_3].getLeftNumLeads()
-                - bucketedScores[BUCKET_2].getLeftNumLeads());
-        bucketMetadata3.setLift(((bucketedScores[BUCKET_3].getLeftNumConverted()
-                - bucketedScores[BUCKET_2].getLeftNumConverted())
+        bucketMetadata3.setNumLeads(bucketedScores[BUCKET_3 - 1].getLeftNumLeads()
+                - bucketedScores[BUCKET_2 - 1].getLeftNumLeads());
+        bucketMetadata3.setLift(((bucketedScores[BUCKET_3 - 1].getLeftNumConverted()
+                - bucketedScores[BUCKET_2 - 1].getLeftNumConverted())
                 / (double) bucketMetadata3.getNumLeads()) / overallLift);
 
         bucketMetadata4.setBucketName(BucketName.D);
-        bucketMetadata4.setLeftBoundScore(BUCKET_3);
+        bucketMetadata4.setLeftBoundScore(BUCKET_3 - 1);
         bucketMetadata4.setRightBoundScore(BUCKET_4);
-        bucketMetadata4.setNumLeads(bucketedScores[BUCKET_4].getLeftNumLeads()
-                - bucketedScores[BUCKET_3].getLeftNumLeads());
-        bucketMetadata4.setLift(((bucketedScores[BUCKET_4].getLeftNumConverted()
-                - bucketedScores[BUCKET_3].getLeftNumConverted())
+        bucketMetadata4.setNumLeads(bucketedScores[BUCKET_4 - 1].getLeftNumLeads()
+                - bucketedScores[BUCKET_3 - 1].getLeftNumLeads());
+        bucketMetadata4.setLift(((bucketedScores[BUCKET_4 - 1].getLeftNumConverted()
+                - bucketedScores[BUCKET_3 - 1].getLeftNumConverted())
                 / (double) bucketMetadata4.getNumLeads()) / overallLift);
 
         bucketedScoreService.createBucketMetadatas(modelId,
