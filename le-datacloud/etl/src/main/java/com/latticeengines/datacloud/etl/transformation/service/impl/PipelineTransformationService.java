@@ -286,10 +286,10 @@ public class PipelineTransformationService extends AbstractTransformationService
     }
 
     private boolean executeTransformSteps(TransformationProgress progress, TransformStep[] steps, String workflowDir,
-                                          PipelineTransformationConfiguration transConf) {
+            PipelineTransformationConfiguration transConf) {
         for (int i = 0; i < steps.length; i++) {
-            String slackMessage = "Started step " + i + " of the transform " + progress.getSourceName() + " at  "
-                    + new Date();
+            String slackMessage = String.format("Started step %d of the transformation %s [%s] at %s", i,
+                    progress.getSourceName(), progress.getYarnAppId(), new Date().toString());
             sendSlack(slackMessage, transConf);
             TransformStep step = steps[i];
             Transformer transformer = step.getTransformer();
@@ -309,15 +309,16 @@ public class PipelineTransformationService extends AbstractTransformationService
                     step.setElapsedTime(stepDuration / 1000);
                     if (!succeeded) {
                         // failed message
-                        slackMessage = "Failed to transform " + progress.getSourceName() + " at step " + i + " after "
-                                + Duration.ofMillis(startTime) + ". :sob:";
+                        slackMessage = String.format("Failed to transform %s [%s] at step %d after %s :sob:",
+                                progress.getSourceName(), progress.getYarnAppId(), i,
+                                Duration.ofMillis(startTime).toString());
                         sendSlack(slackMessage, transConf);
                         updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
                         return false;
                     }
                     // success message
-                    slackMessage = "Step " + i + " of the transform " + progress.getSourceName() + " finished after "
-                            + Duration.ofMillis(startTime) + ". :smile:";
+                    slackMessage = String.format("Step %d of the transform %s [%s] finished after %s :smile:", i,
+                            progress.getSourceName(), progress.getYarnAppId(), Duration.ofMillis(startTime).toString());
                     sendSlack(slackMessage, transConf);
 
                     saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
