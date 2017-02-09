@@ -233,6 +233,8 @@ def bootstrap(environment, stackname, apps, profile, instances, tag,region="us-e
     for thread in threads:
         thread.join(120)
 
+    print "HAProxy IP from consul: %s" % ip
+
 def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag, region):
     alloc = ALLOCATION[app]
     container = Container("tomcat", "%s/latticeengines/%s:%s" % (ecr_url, app, tag))
@@ -247,8 +249,6 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
     container.publish_port(8080, alloc["port"])
     container.hostname("%s-%s" % (stackname, app))
     container.privileged()
-
-    config = AwsEnvironment(environment)
 
     params = get_profile_vars(profile_file)
     params["LE_CLIENT_ADDRESS"] = ip

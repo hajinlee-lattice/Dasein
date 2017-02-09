@@ -21,6 +21,9 @@ public class PipelineTransformationRequest {
     @JsonProperty("Steps")
     private List<TransformationStepConfig> steps;
 
+    @JsonProperty("EnableSlack")
+    private boolean enableSlack;
+
     public String getSubmitter() {
         return submitter;
     }
@@ -59,5 +62,13 @@ public class PipelineTransformationRequest {
 
     public void setSteps(List<TransformationStepConfig> steps) {
         this.steps = steps;
+    }
+
+    public boolean isEnableSlack() {
+        return enableSlack;
+    }
+
+    public void setEnableSlack(boolean enableSlack) {
+        this.enableSlack = enableSlack;
     }
 }

@@ -24,6 +24,7 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
     private List<TransformationStepConfig> steps;
 
     private boolean keepTemp;
+    private boolean enableSlack;
 
     @Override
     public String getSourceName() {
@@ -111,5 +112,13 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
 
     public void setKeepTemp(boolean keepTemp) {
         this.keepTemp = keepTemp;
+    }
+
+    public boolean isEnableSlack() {
+        return enableSlack;
+    }
+
+    public void setEnableSlack(boolean enableSlack) {
+        this.enableSlack = enableSlack;
     }
 }

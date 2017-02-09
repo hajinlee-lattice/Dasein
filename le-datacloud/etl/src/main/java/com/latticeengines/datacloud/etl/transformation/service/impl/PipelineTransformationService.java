@@ -1,18 +1,24 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
@@ -32,14 +38,16 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
 /**
- * This transformation service allows parameterizing the source and target, pipelining the tranformation process.
+ * This transformation service allows parameterizing the source and target,
+ * pipelining the tranformation process.
  */
 @Component("pipelineTransformationService")
-public class PipelineTransformationService
-        extends AbstractTransformationService<PipelineTransformationConfiguration>
+public class PipelineTransformationService extends AbstractTransformationService<PipelineTransformationConfiguration>
         implements TransformationService<PipelineTransformationConfiguration> {
 
     private static final Log log = LogFactory.getLog(PipelineTransformationService.class);
+    private static final String SLACK_BOT = "PipelineTransformer";
+    private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
     private PipelineSource pipelineSource;
@@ -53,6 +61,17 @@ public class PipelineTransformationService
     @Autowired
     private PipelineTransformationReportEntityMgr reportEntityMgr;
 
+    @Value("${datacloud.slack.webhook.url")
+    private String slackWebhookUrl;
+
+    @Value("${common.le.environment}")
+    private String leEnv;
+
+    @Value("${common.le.stack}")
+    private String leStack;
+
+    private RestTemplate slackRestTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
+
     private final String PIPELINE = "Pipeline_";
     private final String VERSION = "_version_";
     private final String STEP = "_step_";
@@ -65,7 +84,6 @@ public class PipelineTransformationService
     public String getServiceBeanName() {
         return "pipelineTransformationService";
     }
-
 
     @Override
     public Source getSource() {
@@ -83,7 +101,8 @@ public class PipelineTransformationService
     }
 
     @Override
-    protected TransformationProgress transformHook(TransformationProgress progress, PipelineTransformationConfiguration transConf) {
+    protected TransformationProgress transformHook(TransformationProgress progress,
+            PipelineTransformationConfiguration transConf) {
 
         boolean succeeded = false;
         String workflowDir = initialDataFlowDirInHdfs(progress);
@@ -94,7 +113,7 @@ public class PipelineTransformationService
         if (steps == null) {
             updateStatusToFailed(progress, "Failed to initiate transfom steps", null);
         } else {
-            succeeded = executeTransformSteps(progress, steps, workflowDir);
+            succeeded = executeTransformSteps(progress, steps, workflowDir, transConf);
             log.info("Report pipe " + transConf.getName() + transConf.getVersion());
             reportPipelineExec(progress, transConf, steps);
             reportPipelineExecToDB(progress, transConf, steps);
@@ -113,7 +132,6 @@ public class PipelineTransformationService
     public List<String> findUnprocessedBaseVersions() {
         return new ArrayList<String>();
     }
-
 
     private void cleanupWorkflowDir(TransformationProgress progress, String workflowDir) {
         deleteFSEntry(progress, workflowDir + "/*");
@@ -139,7 +157,7 @@ public class PipelineTransformationService
     }
 
     private TransformStep[] initiateTransformSteps(TransformationProgress progress,
-                                           PipelineTransformationConfiguration transConf) {
+            PipelineTransformationConfiguration transConf) {
 
         List<TransformationStepConfig> stepConfigs = transConf.getSteps();
         TransformStep[] steps = new TransformStep[stepConfigs.size()];
@@ -154,7 +172,6 @@ public class PipelineTransformationService
                 log.error("Failed to find transformer " + config.getTransformer());
                 return null;
             }
-
 
             List<Integer> inputSteps = config.getInputSteps();
 
@@ -220,12 +237,12 @@ public class PipelineTransformationService
 
                     String sourceVersion = null;
                     if (inputBaseVersions == null) {
-                         sourceVersion = sourceVersions.get(source);
-                         if (sourceVersion == null) {
-                             sourceVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
-                         }
+                        sourceVersion = sourceVersions.get(source);
+                        if (sourceVersion == null) {
+                            sourceVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+                        }
                     } else {
-                         sourceVersion = inputBaseVersions.get(i);
+                        sourceVersion = inputBaseVersions.get(i);
                     }
                     sourceVersions.put(source, sourceVersion);
                     baseVersions.add(sourceVersion);
@@ -257,18 +274,23 @@ public class PipelineTransformationService
             }
 
             sourceVersions.put(target, targetVersion);
-            log.info("step " + stepIdx + " target " + target.getSourceName() + " template " + targetTemplate.getSourceName());
+            log.info("step " + stepIdx + " target " + target.getSourceName() + " template "
+                    + targetTemplate.getSourceName());
 
             String confStr = config.getConfiguration();
-            TransformStep step = new TransformStep(transformer, baseSources, baseVersions, baseTemplates,
-                                                   target, targetVersion, targetTemplate, confStr);
+            TransformStep step = new TransformStep(transformer, baseSources, baseVersions, baseTemplates, target,
+                    targetVersion, targetTemplate, confStr);
             steps[stepIdx] = step;
         }
         return steps;
     }
 
-    private boolean executeTransformSteps(TransformationProgress progress, TransformStep[] steps, String workflowDir) {
+    private boolean executeTransformSteps(TransformationProgress progress, TransformStep[] steps, String workflowDir,
+                                          PipelineTransformationConfiguration transConf) {
         for (int i = 0; i < steps.length; i++) {
+            String slackMessage = "Started step " + i + " of the transform " + progress.getSourceName() + " at  "
+                    + new Date();
+            sendSlack(slackMessage, transConf);
             TransformStep step = steps[i];
             Transformer transformer = step.getTransformer();
             try {
@@ -279,19 +301,28 @@ public class PipelineTransformationService
                 } else {
                     long startTime = System.currentTimeMillis();
 
-                    boolean succeeded = transformer.transform(progress, workflowDir, step.getBaseSources(), step.getBaseVersions(),
-                                                              step.getBaseTemplates(), step.getTargetTemplate(),
-                                                              step.getConfig());
+                    boolean succeeded = transformer.transform(progress, workflowDir, step.getBaseSources(),
+                            step.getBaseVersions(), step.getBaseTemplates(), step.getTargetTemplate(),
+                            step.getConfig());
 
-                    step.setElapsedTime((System.currentTimeMillis() - startTime) / 1000);
+                    long stepDuration = System.currentTimeMillis() - startTime;
+                    step.setElapsedTime(stepDuration / 1000);
                     if (!succeeded) {
+                        // failed message
+                        slackMessage = "Failed to transform " + progress.getSourceName() + " at step " + i + " after "
+                                + Duration.ofMillis(startTime) + ". :sob:";
+                        sendSlack(slackMessage, transConf);
                         updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
                         return false;
                     }
+                    // success message
+                    slackMessage = "Step " + i + " of the transform " + progress.getSourceName() + " finished after "
+                            + Duration.ofMillis(startTime) + ". :smile:";
+                    sendSlack(slackMessage, transConf);
 
                     saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
                     cleanupWorkflowDir(progress, workflowDir);
-               }
+                }
             } catch (Exception e) {
                 updateStatusToFailed(progress, "Failed to transform data at step " + i, e);
                 return false;
@@ -300,7 +331,8 @@ public class PipelineTransformationService
         return true;
     }
 
-    private void reportPipelineExec(TransformationProgress progress, PipelineTransformationConfiguration transConf, TransformStep[] steps) {
+    private void reportPipelineExec(TransformationProgress progress, PipelineTransformationConfiguration transConf,
+            TransformStep[] steps) {
         String name = transConf.getName();
 
         if (name == null) {
@@ -340,8 +372,8 @@ public class PipelineTransformationService
         hdfsSourceEntityMgr.saveReport(pipelineSource, name, version, JsonUtils.serialize(report));
     }
 
-
-    private void reportPipelineExecToDB(TransformationProgress progress, PipelineTransformationConfiguration transConf, TransformStep[] steps) {
+    private void reportPipelineExecToDB(TransformationProgress progress, PipelineTransformationConfiguration transConf,
+            TransformStep[] steps) {
         String name = transConf.getName();
         if (name == null) {
             log.info("Report will not be generated for anonymous pipeline");
@@ -393,11 +425,13 @@ public class PipelineTransformationService
     }
 
     @Override
-    public PipelineTransformationConfiguration createTransformationConfiguration(List<String> baseVersions, String targetVersion) {
+    public PipelineTransformationConfiguration createTransformationConfiguration(List<String> baseVersions,
+            String targetVersion) {
         return null;
     }
 
-    public PipelineTransformationConfiguration createTransformationConfiguration(PipelineTransformationRequest inputRequest) {
+    public PipelineTransformationConfiguration createTransformationConfiguration(
+            PipelineTransformationRequest inputRequest) {
 
         PipelineTransformationRequest request = inputRequest;
 
@@ -415,9 +449,9 @@ public class PipelineTransformationService
             log.info("Building pipeline " + pipelineName + " from templates in hdfs");
             try {
                 String requestJson = hdfsSourceEntityMgr.getRequest(pipelineSource, pipelineName);
-                if  (requestJson != null) {
-                     request = JsonUtils.deserialize(requestJson, PipelineTransformationRequest.class);
-                     steps = request.getSteps();
+                if (requestJson != null) {
+                    request = JsonUtils.deserialize(requestJson, PipelineTransformationRequest.class);
+                    steps = request.getSteps();
                 }
             } catch (Exception e) {
                 log.error("Failed to load pipeline template " + pipelineName + " from hdfs", e);
@@ -452,23 +486,24 @@ public class PipelineTransformationService
             }
 
             List<String> baseSourceNames = step.getBaseSources();
-            if (((baseSourceNames == null) || (baseSourceNames.size() == 0)) &&
-                ((inputSteps == null) || (inputSteps.size() == 0))) {
+            if (((baseSourceNames == null) || (baseSourceNames.size() == 0))
+                    && ((inputSteps == null) || (inputSteps.size() == 0))) {
                 log.error("Step " + currentStep + " does not have any input source specified");
                 return null;
             }
 
             List<String> baseVersions = step.getBaseVersions();
             if ((baseVersions != null) && (baseVersions.size() != baseSourceNames.size())) {
-                log.error("Base versions(" + baseVersions.size() + ") does match base sources(" + baseSourceNames.size() + ")");
+                log.error("Base versions(" + baseVersions.size() + ") does match base sources(" + baseSourceNames.size()
+                        + ")");
                 return null;
             }
-
 
             List<String> baseTemplates = step.getBaseTemplates();
             if (baseTemplates != null) {
                 if (baseTemplates.size() != baseSourceNames.size()) {
-                    log.error("Base templates(" + baseTemplates.size() + ") does match base sources(" + baseSourceNames.size() + ")");
+                    log.error("Base templates(" + baseTemplates.size() + ") does match base sources("
+                            + baseSourceNames.size() + ")");
                     return null;
                 } else {
                     for (String sourceName : baseTemplates) {
@@ -518,6 +553,7 @@ public class PipelineTransformationService
         configuration.setServiceBeanName(getServiceBeanName());
         configuration.setKeepTemp(inputRequest.getKeepTemp());
         configuration.setSteps(steps);
+        configuration.setEnableSlack(inputRequest.isEnableSlack());
 
         return configuration;
     }
@@ -535,6 +571,23 @@ public class PipelineTransformationService
         return JsonUtils.deserialize(confStr, getConfigurationClass());
     }
 
+    private void sendSlack(String message, PipelineTransformationConfiguration transConf) {
+        if (StringUtils.isNotEmpty(slackWebhookUrl) && transConf.isEnableSlack()) {
+            try {
+                slackRestTemplate.postForObject(slackWebhookUrl, slackPayload(message), String.class);
+            } catch (Exception e) {
+                log.error("Failed to send slack message.", e);
+            }
+        }
+    }
+
+    private String slackPayload(String message) {
+        ObjectNode objectNode = OM.createObjectNode();
+        objectNode.put("username", SLACK_BOT);
+        objectNode.put("text", "@channel [" + leEnv + "-" + leStack + "] " + message);
+        return JsonUtils.serialize(objectNode);
+    }
+
     private class TransformStep {
 
         private String config;
@@ -548,8 +601,7 @@ public class PipelineTransformationService
         private long elapsedTime;
 
         public TransformStep(Transformer transformer, Source[] baseSources, List<String> baseVersions,
-                             Source[] baseTemplates, Source target, String targetVersion, Source targetTemplate,
-                             String config) {
+                Source[] baseTemplates, Source target, String targetVersion, Source targetTemplate, String config) {
             this.transformer = transformer;
             this.config = config;
             this.baseSources = baseSources;
