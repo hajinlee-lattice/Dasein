@@ -79,6 +79,7 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
             scoreResponse.setBucket(scoreEvaluation.getBucketName());
         } else if (scoreEvaluation.getScoreType() == ScoreType.PROBABILITY_OR_VALUE) {
             scoreResponse.setScore(scoreEvaluation.getProbabilityOrValue());
+            scoreResponse.setBucket(scoreEvaluation.getBucketName());
         }
         return scoreResponse;
     }
