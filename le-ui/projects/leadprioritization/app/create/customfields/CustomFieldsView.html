@@ -3,7 +3,6 @@
 		<td class="field-mapping-inputs">
 			<select class="form-control"
 					ng-disabled="vm.NextClicked"
-					name="mapping_lattice_field_select_{{ ::fieldMapping.userField }}"
 					ng-model="fieldMapping.userField"
 					ng-change="vm.changeLatticeField(fieldMapping)"
 					ng-class="{'required': vm.requiredFieldsMissing[fieldMapping.mappedField], 'disabled': (fieldMapping.userField == vm.ignoredFieldLabel && !vm.requiredFieldsMissing[fieldMapping.mappedField])}">
@@ -13,7 +12,7 @@
 				</option>
 				<option value="{{ fieldMapping.userField }}"
 						ng-selected="true">
-					{{ fieldMapping.userField }}
+					{{ (vm.AvailableFields.length === 0 && fieldMapping.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : fieldMapping.userField }}
 				</option>
 				<option value="{{ AvailableField }}"
 						ng-repeat="AvailableField in vm.AvailableFields"
@@ -30,7 +29,6 @@
 		<td class="field-mapping-type">
 			<select disabled
 					class="custom-select"
-					name="columnType_{{ ::fieldMapping.userField }}"
 					ng-model="fieldMapping.fieldType"
 					value="{{fieldMapping.fieldType}}">
 				<option value="TEXT" selected>Text</option>
