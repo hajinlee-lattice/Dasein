@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 
 public class ScoringConfiguration {
 
@@ -17,6 +18,8 @@ public class ScoringConfiguration {
     private String targetResultDir;
 
     private List<String> modelGuids = new ArrayList<>();
+
+    private List<BucketMetadata> bucketMetadata;
 
     @JsonProperty("customer")
     public String getCustomer() {
@@ -66,6 +69,16 @@ public class ScoringConfiguration {
     @JsonProperty("model_guids")
     public void setModelGuids(List<String> modelGuids) {
         this.modelGuids = modelGuids;
+    }
+
+    @JsonProperty("bucket_metadata")
+    public void setBucketMetadata(List<BucketMetadata> bucketMetadata) {
+        this.bucketMetadata = bucketMetadata;
+    }
+
+    @JsonProperty("bucket_metadata")
+    public List<BucketMetadata> getBucketMetadata() {
+        return this.bucketMetadata;
     }
 
     public String toString() {

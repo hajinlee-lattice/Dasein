@@ -382,6 +382,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             assertTrue(csvHeaders.contains("Industry"));
             assertTrue(csvHeaders.contains("PhoneNumber"));
             assertTrue(csvHeaders.contains("Score"));
+            assertTrue(csvHeaders.contains("Rating"));
             assertFalse(csvHeaders.contains("RawScore"));
 
             int line = 1;

@@ -13,7 +13,6 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreEvaluation;
@@ -96,11 +95,10 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
         ScoreEvaluation scoreEvaluation = null;
         if (p != null) {
             double probability = BigDecimal.valueOf(p).setScale(8, RoundingMode.HALF_UP).doubleValue();
-            scoreEvaluation = new ScoreEvaluation(probability, -1);
+            scoreEvaluation = new ScoreEvaluation(probability, -1, null);
             scoreEvaluation.setScoreType(ScoreType.PROBABILITY_OR_VALUE);
         } else if (i != null) {
-            BucketName bucketName = bucketPercileScore(scoringArtifacts, i);
-            scoreEvaluation = new ScoreEvaluation(-1.0, i, bucketName);
+            scoreEvaluation = new ScoreEvaluation(-1.0, i, null);
             scoreEvaluation.setScoreType(ScoreType.PERCENTILE);
         }
         Object c = evaluation.get(ScoreType.CLASSIFICATION);

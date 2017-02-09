@@ -1,6 +1,7 @@
 package com.latticeengines.pls.workflow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,11 +17,13 @@ import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -39,6 +42,9 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
+
+    @Autowired
+    private BucketedScoreService bucketedScoreService;
 
     public ApplicationId submit(String modelId, String tableToScore, boolean enableLeadEnrichment,
             String sourceDisplayName, boolean enableDebug) {
@@ -80,6 +86,10 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         String modelType = modelSummary != null ? modelSummary.getModelType() : ModelType.PYTHONMODEL.getModelType();
         skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelType);
         log.info("Data Cloud Version=" + dataCloudVersion);
+        List<BucketMetadata> bucketMetadataList = bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
+        if (bucketMetadataList == null) {
+            throw new LedpException(LedpCode.LEDP_18128, new String[] { modelId });
+        }
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
         return new RTSBulkScoreWorkflowConfiguration.Builder() //
@@ -103,6 +113,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .dataCloudVersion(dataCloudVersion) //
                 .skipMatchingStep(skipIdMatch) //
                 .matchClientDocument(matchClientDocument) //
+                .bucketMetadata(bucketMetadataList) //
                 .build();
     }
 }

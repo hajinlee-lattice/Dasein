@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -147,6 +148,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder transformDefinitions(List<TransformDefinition> transforms) {
             scoreWorkflowConfigurationBuilder.transformDefinitions(transforms);
+            return this;
+        }
+
+        public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
+            scoreWorkflowConfigurationBuilder.bucketMetadata(bucketMetadata);
             return this;
         }
 

@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.domain.exposed.scoring.ScoreRating;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
@@ -430,10 +431,10 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     protected BucketName bucketPercileScore(ScoringArtifacts scoringArtifacts, int percentile) {
-        BucketName bucketName = null;
         List<BucketMetadata> bucketMetadataList = scoringArtifacts.getBucketMetadataList();
-        int min = 99;
-        int max = 5;
+        BucketName bucketName = null;
+        int min = ScoreRating.BUCKET_A_UPPER;
+        int max = ScoreRating.BUCKET_D_LOWER;
         BucketName minBucket = null;
         BucketName maxBucket = null;
         boolean withinRange = false;
@@ -452,7 +453,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
                     max = leftBoundScore;
                     maxBucket = currentBucketName;
                 }
-                if (percentile > rightBoundScore && percentile <= leftBoundScore) {
+                if (percentile >= rightBoundScore && percentile <= leftBoundScore) {
                     withinRange = true;
                     bucketName = currentBucketName;
                 }
@@ -463,10 +464,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             if (min > max) {
                 throw new RuntimeException("Bucket metadata has wrong buckets");
             }
-            if (!withinRange && percentile == min) {
-                withinRange = true;
-                bucketName = minBucket;
-            } else if (!withinRange && percentile < min) {
+
+            if (!withinRange && percentile < min) {
                 log.warn(String.format("%d is less than minimum bound, setting to %s", percentile,
                         minBucket.toString()));
                 bucketName = minBucket;
@@ -474,6 +473,28 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
                 log.warn(String.format("%d is more than maximum bound, setting to %s", percentile,
                         maxBucket.toString()));
                 bucketName = maxBucket;
+            }
+        } else {
+            // use default bucketing criteria
+            if (log.isDebugEnabled()) {
+                log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");
+            }
+            if (percentile < ScoreRating.BUCKET_D_LOWER) {
+                log.warn(
+                        String.format("%d is less than minimum bound, setting to %s", percentile, BucketName.D.name()));
+                bucketName = BucketName.D;
+            } else if (percentile >= ScoreRating.BUCKET_D_LOWER && percentile <= ScoreRating.BUCKET_D_UPPER) {
+                bucketName = BucketName.D;
+            } else if (percentile >= ScoreRating.BUCKET_C_LOWER && percentile <= ScoreRating.BUCKET_C_UPPER) {
+                bucketName = BucketName.C;
+            } else if (percentile >= ScoreRating.BUCKET_B_LOWER && percentile <= ScoreRating.BUCKET_B_UPPER) {
+                bucketName = BucketName.B;
+            } else if (percentile >= ScoreRating.BUCKET_A_LOWER && percentile <= ScoreRating.BUCKET_A_UPPER) {
+                bucketName = BucketName.A;
+            } else {
+                log.warn(
+                        String.format("%d is more than maximum bound, setting to %s", percentile, BucketName.A.name()));
+                bucketName = BucketName.A;
             }
         }
         return bucketName;

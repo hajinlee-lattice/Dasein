@@ -44,6 +44,7 @@ public class CombineInputTableWithScoreInternalIdTestNG extends ServiceFlowsData
         for (GenericRecord record : outputRecords) {
             assertNotNull(record.get(InterfaceName.InternalId.name()));
             assertNotNull(record.get(ScoreResultField.Percentile.displayName));
+            assertNotNull(record.get(ScoreResultField.Rating.displayName));
         }
     }
 

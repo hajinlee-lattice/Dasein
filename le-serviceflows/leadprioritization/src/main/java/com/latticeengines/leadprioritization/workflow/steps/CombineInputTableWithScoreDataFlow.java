@@ -1,8 +1,11 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("combineInputTableWithScoreDataFlow")
@@ -17,7 +20,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
 
     private void setupDataFlow() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
-                getScoreResultTableName(), getInputTableName());
+                getScoreResultTableName(), getInputTableName(), getBucketMetadata());
         configuration.setDataFlowParams(params);
     }
 
@@ -39,5 +42,9 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
 
     private CombineInputTableWithScoreParameters getDataFlowParams() {
         return (CombineInputTableWithScoreParameters) configuration.getDataFlowParams();
+    }
+
+    private List<BucketMetadata> getBucketMetadata() {
+        return getDataFlowParams().getBucketMetadata();
     }
 }

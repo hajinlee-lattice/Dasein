@@ -141,6 +141,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             updateTrainingTable(pivotArtifact.getPath(), trainingTable);
         }
         log.info("Modeling parameters: " + parameters.toString());
+
         ImportMatchAndModelWorkflowConfiguration.Builder builder = new ImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort)
                 //
@@ -214,7 +215,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .moduleName(moduleName != null ? moduleName : null) //
                 .runTimeParams(parameters.runTimeParams) //
                 .isDefaultDataRules(true) //
-                .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD));
+                .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
+                .bucketMetadata(null);
 
         if (parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) {
             builder.dedupTargetTableName(sourceFile.getTableName() + "_deduped");

@@ -1,6 +1,7 @@
 package com.latticeengines.pls.workflow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,12 +18,14 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -41,6 +44,9 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
+
+    @Autowired
+    private BucketedScoreService bucketedScoreService;
 
     public ApplicationId submit(ModelSummary modelSummary, String sourceDisplayName,
             TransformationGroup transformationGroup) {
@@ -96,6 +102,11 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         }
         String dataCloudVersion = getComplatibleDataCloudVersionFromModelSummary(summary);
 
+        List<BucketMetadata> bucketMetadataList = bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
+        if (bucketMetadataList == null) {
+            throw new LedpException(LedpCode.LEDP_18128, new String[] { modelId });
+        }
+
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .matchClientDocument(matchClientDocument) //
@@ -117,6 +128,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup) //
                 .transformDefinitions(getTransformDefinitions(modelingEventTable, transformationGroup))//
+                .bucketMetadata(bucketMetadataList) //
                 .build();
     }
 }

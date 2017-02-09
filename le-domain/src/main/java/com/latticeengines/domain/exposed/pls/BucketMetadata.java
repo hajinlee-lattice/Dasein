@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.io.Serializable;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -28,8 +30,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "BUCKET_METADATA")
 @Entity
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class BucketMetadata implements HasPid, HasTenantId, HasTenant {
+public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializable {
 
+    private static final long serialVersionUID = 5914215732568807732L;
     private Long pid;
     private String modelId;
     private BucketName bucketName;

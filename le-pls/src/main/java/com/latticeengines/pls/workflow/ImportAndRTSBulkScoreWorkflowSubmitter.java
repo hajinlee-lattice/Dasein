@@ -1,6 +1,7 @@
 package com.latticeengines.pls.workflow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
@@ -46,6 +49,9 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
+
+    @Autowired
+    private BucketedScoreService bucketedScoreService;
 
     public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment, boolean enableDebug) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
@@ -100,6 +106,10 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelType);
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
+        List<BucketMetadata> bucketMetadataList = bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
+        if (bucketMetadataList == null) {
+            throw new LedpException(LedpCode.LEDP_18128, new String[] { modelId });
+        }
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -125,6 +135,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .dataCloudVersion(dataCloudVersion) //
                 .skipMatchingStep(skipIdMatch) //
                 .matchClientDocument(matchClientDocument) //
+                .bucketMetadata(bucketMetadataList) //
                 .build();
     }
 }

@@ -1,9 +1,12 @@
 package com.latticeengines.domain.exposed.dataflow.flows;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 
 public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     @JsonProperty("score_results_table_name")
@@ -14,9 +17,19 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     @SourceTableName
     private String inputTableName;
 
+    @JsonProperty("bucket_metadata")
+    private List<BucketMetadata> bucketMetadata;
+
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
         setScoreResultsTableName(scoreResultsTable);
         setInputTableName(trainingTable);
+    }
+
+    public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable,
+            List<BucketMetadata> bucketMetadata) {
+        setScoreResultsTableName(scoreResultsTable);
+        setInputTableName(trainingTable);
+        setBucketMetadata(bucketMetadata);
     }
 
     /**
@@ -40,6 +53,14 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public void setInputTableName(String inputTableName) {
         this.inputTableName = inputTableName;
+    }
+
+    public List<BucketMetadata> getBucketMetadata() {
+        return this.bucketMetadata;
+    }
+
+    public void setBucketMetadata(List<BucketMetadata> bucketMetadata) {
+        this.bucketMetadata = bucketMetadata;
     }
 
     @Override

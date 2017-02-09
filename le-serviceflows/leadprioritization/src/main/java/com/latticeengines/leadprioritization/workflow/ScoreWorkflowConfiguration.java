@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithSco
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -166,6 +167,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);
+            return this;
+        }
+
+        public Builder bucketMetadata(List<BucketMetadata> bucketMetadataList) {
+            combineInputWithScores.setBucketMetadata(bucketMetadataList);
             return this;
         }
 

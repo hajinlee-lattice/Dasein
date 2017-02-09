@@ -1,6 +1,7 @@
 package com.latticeengines.pls.workflow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -26,6 +28,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndScoreWorkflowConfiguration;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
@@ -48,6 +51,9 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
+
+    @Autowired
+    private BucketedScoreService bucketedScoreService;
 
     public ApplicationId submit(ModelSummary modelSummary, String fileName, TransformationGroup transformationGroup) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
@@ -115,6 +121,11 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
         String dataCloudVersion = getComplatibleDataCloudVersionFromModelSummary(modelSummary);
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
 
+        List<BucketMetadata> bucketMetadataList = bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
+        if (bucketMetadataList == null) {
+            throw new LedpException(LedpCode.LEDP_18128, new String[] { modelId });
+        }
+
         return new ImportMatchAndScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -140,6 +151,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourcePort(internalResourceHostPort) //
                 .transformationGroup(transformationGroup) //
                 .transformDefinitions(getTransformDefinitions(modelingEventTable, transformationGroup)) //
+                .bucketMetadata(bucketMetadataList) //
                 .build();
     }
 }

@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -313,6 +314,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         public Builder enableV2Profiling(boolean v2ProfilingEnabled) {
             model.setV2ProfilingEnabled(v2ProfilingEnabled);
             model.addProvenanceProperty(ProvenancePropertyName.IsV2ProfilingEnabled, v2ProfilingEnabled);
+            return this;
+        }
+
+        public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
+            combineInputWithScores.setBucketMetadata(bucketMetadata);
             return this;
         }
 

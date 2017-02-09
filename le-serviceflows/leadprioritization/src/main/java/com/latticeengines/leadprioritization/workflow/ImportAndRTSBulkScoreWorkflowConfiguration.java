@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -8,6 +9,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -157,6 +159,11 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
 
         public Builder modelType(String modelType) {
             rtsBulkScoreWorkflowConfigurationBuilder.modelType(modelType);
+            return this;
+        }
+
+        public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
+            rtsBulkScoreWorkflowConfigurationBuilder.bucketMetadata(bucketMetadata);
             return this;
         }
 
