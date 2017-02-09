@@ -145,6 +145,13 @@ angular
                 return item.userField !== vm.ignoredFieldLabel;
             }).values().value();
 
+        var mappedUserAttributes = _.map(FieldDocument.fieldMappings, 'userField');
+        vm.AvailableFields.forEach(function(availableField) {
+            if (mappedUserAttributes.indexOf(availableField) < 0) {
+                FieldDocument.fieldMappings.push( { mappedField: null, mappedToLatticeField: false, userField: availableField, fieldType: null } );
+            }
+        })
+
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
             ShowSpinner('Preparing Scoring Job...');
             ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName, 'home.model.jobs');

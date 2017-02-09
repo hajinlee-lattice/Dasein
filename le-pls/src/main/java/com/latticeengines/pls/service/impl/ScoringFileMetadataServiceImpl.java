@@ -144,7 +144,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                     if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField, schemaField)) {
                         fieldMapping.setUserField(scoringHeaderField);
                         fieldMapping.setMappedField(schemaField.getName());
-                        fieldMapping.setMappedToLatticeField(true);
+                        // fields here are not in model event table, so we set false here
+                        fieldMapping.setMappedToLatticeField(false);
                         fieldMappingDocument.getFieldMappings().add(fieldMapping);
 
                         scoringHeaderFieldsIterator.remove();
@@ -225,7 +226,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
+            if (!fieldMapping.isMappedToLatticeField()) {
                 if (fieldMapping.getUserField() == null) {
                     continue;
                 }
