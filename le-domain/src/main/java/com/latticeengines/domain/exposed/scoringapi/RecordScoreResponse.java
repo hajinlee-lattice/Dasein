@@ -91,7 +91,7 @@ public class RecordScoreResponse {
         @ApiModelProperty(value = "Score")
         private Double score;
 
-        @JsonProperty("bucket")
+        @JsonProperty("rating")
         @ApiModelProperty(value = "Bucket Information Based on Score")
         private BucketName bucket;
 
