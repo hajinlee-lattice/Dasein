@@ -46,6 +46,11 @@ angular.module('insightsApp')
 
                         window.addEventListener("message", function (event){
                             console.log('message from LPI:', event.data);
+
+                            var data = ((typeof event.data).toLowerCase() == 'string')
+                                ? JSON.parse(event.data)
+                                : event.data;
+
                             var timestamp = new Date().getTime();
 
                             LookupStore.add('timestamp', timestamp);
