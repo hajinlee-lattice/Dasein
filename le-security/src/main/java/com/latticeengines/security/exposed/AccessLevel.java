@@ -107,7 +107,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
             GrantedRight.VIEW_PLS_REFINE_CLONE, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
-            GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
+            GrantedRight.CREATE_PLS_OAUTH2_TOKEN, //
+            GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL //
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -138,7 +139,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
             GrantedRight.VIEW_PLS_REFINE_CLONE, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
-            GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
+            GrantedRight.CREATE_PLS_OAUTH2_TOKEN, //
+            GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL //
     )); //
 
     private List<GrantedRight> grantedRights;
