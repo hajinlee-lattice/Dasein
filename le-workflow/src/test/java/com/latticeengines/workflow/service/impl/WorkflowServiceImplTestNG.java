@@ -13,7 +13,6 @@ import java.util.List;
 import org.mockito.Mockito;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -87,10 +86,6 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         customerSpace = bootstrapWorkFlowTenant().toString();
         workflowConfig = new WorkflowConfiguration();
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
-
-        JobProxy jobProxy = Mockito.mock(JobProxy.class);
-        when(jobProxy.getJobStatus(anyString())).thenReturn(new JobStatus());
-        ReflectionTestUtils.setField(workflowExecutionCache, "jobProxy", jobProxy);
     }
 
     @AfterClass(groups = "functional")
