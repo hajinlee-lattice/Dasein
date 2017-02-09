@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Predicate;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 
 public class ValidateFileHeaderUtilsUnitTestNG {
 
@@ -132,16 +134,24 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         assertTrue(AvroUtils.isAvroFriendlyFieldName(correctformedName));
     }
 
-    @Test(groups = "unit")
-    public void validateReserverdWordsInHeaders() throws IOException {
+    @Test(groups = "unit", dataProvider = "reservedNames")
+    public void validateReserverdWordsInHeaders(String reservedName) throws IOException {
         LedpException thrown = null;
         try {
             ValidateFileHeaderUtils.checkForReservedHeaders("file",
-                    Sets.newHashSet(new String[] { "a", "b", "Score", "c" }), Arrays.asList(new String[] { "Score" }));
+                    Sets.newHashSet(new String[] { "a", "b", reservedName, "c" }),
+                    Arrays.asList(new String[] { reservedName }));
         } catch (LedpException e) {
             thrown = e;
         }
         assertNotNull(thrown);
         assertEquals(thrown.getCode(), LedpCode.LEDP_18122);
     }
+
+    @DataProvider(name = "reservedNames")
+    public Object[][] reservedNames() {
+        return new Object[][] { new Object[] { ScoreResultField.Percentile.displayName },
+                new Object[] { ScoreResultField.Rating.displayName } };
+    }
+
 }

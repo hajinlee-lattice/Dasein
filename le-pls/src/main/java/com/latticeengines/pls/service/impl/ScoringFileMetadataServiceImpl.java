@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -83,7 +84,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
-        Collection<String> reservedWords = Arrays.asList(new String[] { "Score" });
+        Collection<String> reservedWords = Arrays
+                .asList(new String[] { ScoreResultField.Percentile.displayName, ScoreResultField.Rating.displayName });
         ValidateFileHeaderUtils.checkForReservedHeaders(displayName, headerFields, reservedWords);
         return stream;
     }
@@ -139,7 +141,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             }
             if (!fieldMapping.isMappedToLatticeField()) {
                 Iterator<Attribute> schemaFieldsIterator = schemaFields.iterator();
-                while(schemaFieldsIterator.hasNext()) {
+                while (schemaFieldsIterator.hasNext()) {
                     Attribute schemaField = schemaFieldsIterator.next();
                     if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField, schemaField)) {
                         fieldMapping.setUserField(scoringHeaderField);
