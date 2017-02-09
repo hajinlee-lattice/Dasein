@@ -32,8 +32,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
-    private static final String SEARCH_DISPLAY_NAME_STR3 = "DAY 30 ers ChangE: dAtA";
-    private static final String CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 = "30 Day Change: Ad Tech";
+    private static final String SEARCH_DISPLAY_NAME_STR3 = "Intent Change Users Database";
+    private static final String CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 = "Database Intent Users Change";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
     private static final int MAX_DESELECT = 2;
     private static final int MAX_SELECT = 1;
@@ -50,8 +50,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentCategories() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentCategories()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         Set<String> expectedCategoryStrSet = getExpectedCategorySet();
 
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights/categories";
@@ -72,8 +72,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentSubcategories() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentSubcategories()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights/subcategories?category="
                 + Category.TECHNOLOGY_PROFILE.toString();
 
@@ -88,8 +88,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         System.out.println(subcategoryStrList.get(0));
     }
 
-    private Set<String> getExpectedCategorySet() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    private Set<String> getExpectedCategorySet()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -106,8 +106,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentAttributesBeforeSave() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentAttributesBeforeSave()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -124,7 +124,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         checkLimitation();
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave" })
     public void testGetLeadEnrichmentSelectedAttributeCountBeforeSave() {
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights/selectedattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
@@ -132,7 +133,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertEquals(count.intValue(), 0);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCountBeforeSave" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentSelectedAttributeCountBeforeSave" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave() {
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
@@ -140,9 +142,10 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertEquals(count.intValue(), 0);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave" })
-    public void testSaveLeadEnrichmentAttributes() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave" })
+    public void testSaveLeadEnrichmentAttributes()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
 
@@ -167,8 +170,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributes" })
-    public void testSaveLeadEnrichmentAttributesFailure() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testSaveLeadEnrichmentAttributesFailure()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
         String duplicateFieldName = attributesOperationMap.getSelectedAttributes().get(0);
@@ -185,8 +188,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         }
 
         attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
-        duplicateFieldName = attributesOperationMap.getSelectedAttributes().get(
-                attributesOperationMap.getSelectedAttributes().size() - 1);
+        duplicateFieldName = attributesOperationMap.getSelectedAttributes()
+                .get(attributesOperationMap.getSelectedAttributes().size() - 1);
         attributesOperationMap.getSelectedAttributes().add(duplicateFieldName);
 
         url = getRestAPIHostPort() + "/pls/latticeinsights/insights";
@@ -200,9 +203,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         }
 
         attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
-        String badFieldName = attributesOperationMap.getSelectedAttributes().get(
-                attributesOperationMap.getSelectedAttributes().size() - 1)
-                + "FAIL";
+        String badFieldName = attributesOperationMap.getSelectedAttributes()
+                .get(attributesOperationMap.getSelectedAttributes().size() - 1) + "FAIL";
         attributesOperationMap.getSelectedAttributes().add(badFieldName);
 
         url = getRestAPIHostPort() + "/pls/latticeinsights/insights";
@@ -218,8 +220,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributesFailure" })
-    public void testGetLeadEnrichmentAttributes() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentAttributes()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -236,8 +238,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributes" })
-    public void testGetLeadEnrichmentAttributesWithInternalEnrichment() throws JsonParseException,
-            JsonMappingException, JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentAttributesWithInternalEnrichment()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false, true);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -266,12 +268,14 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         }
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributesWithInternalEnrichment" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentAttributesWithInternalEnrichment" })
     public void testGetLeadEnrichmentPremiumAttributesLimitation() {
         checkLimitation();
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentPremiumAttributesLimitation" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentPremiumAttributesLimitation" })
     public void testGetLeadEnrichmentSelectedAttributeCount() {
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights/selectedattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
@@ -287,9 +291,10 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertEquals(count.intValue(), MAX_PREMIUM_SELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributePremiumCount" })
-    public void testSaveLeadEnrichmentAttributesForSecondSave() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentSelectedAttributePremiumCount" })
+    public void testSaveLeadEnrichmentAttributesForSecondSave()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
 
@@ -317,8 +322,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributesForSecondSave" })
-    public void testGetLeadEnrichmentAttributesAfterSecondSave() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentAttributesAfterSecondSave()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -330,12 +335,14 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertEquals(selectedAttributeList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributesAfterSecondSave" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentAttributesAfterSecondSave" })
     public void testGetLeadEnrichmentPremiumAttributesLimitationAfterSecondSave() {
         checkLimitation();
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentPremiumAttributesLimitationAfterSecondSave" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentPremiumAttributesLimitationAfterSecondSave" })
     public void testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave() {
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights/selectedattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
@@ -343,7 +350,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertEquals(count.intValue(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCountAfterSecondSave() {
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
@@ -351,9 +359,10 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertEquals(count.intValue(), 3);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
-    public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave() throws JsonParseException,
-            JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
+    public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
                 SEARCH_DISPLAY_NAME_STR1, Category.TECHNOLOGY_PROFILE, false);
         assertNotNull(combinedAttributeList);
@@ -369,19 +378,19 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         combinedAttributeList = getLeadEnrichmentAttributeList(true, CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3,
                 Category.INTENT, false);
         assertNotNull(combinedAttributeList);
-        System.out.println("Check for " + CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 + " size is "
-                + combinedAttributeList.size());
+        System.out.println(
+                "Check for " + CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 + " size is " + combinedAttributeList.size());
         assertTrue(combinedAttributeList.size() > 0);
         assertFalse(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
             System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR3 + " - " + attr.getDisplayName());
             assertFalse(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
-            assertTrue(attr.getDisplayName().toUpperCase()
-                    .contains(CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
+            assertTrue(
+                    attr.getDisplayName().toUpperCase().contains(CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
         }
 
-        assertEquals(combinedAttributeList.size(), 2);
+        assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR2,
                 Category.TECHNOLOGY_PROFILE, false);
@@ -433,8 +442,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     }
 
-    private LeadEnrichmentAttributesOperationMap pickFewForSelectionFromAllEnrichmentList() throws JsonParseException,
-            JsonMappingException, JsonProcessingException, IOException {
+    private LeadEnrichmentAttributesOperationMap pickFewForSelectionFromAllEnrichmentList()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
 
@@ -454,8 +463,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
                     deselectCount++;
                     attr.setIsSelected(false);
                     deselectedAttributeList.add(attr.getFieldName());
-                    System.out.println("Try to delete" + (attr.getIsPremium() ? " premium" : "") + ": "
-                            + attr.getDisplayName());
+                    System.out.println(
+                            "Try to delete" + (attr.getIsPremium() ? " premium" : "") + ": " + attr.getDisplayName());
                 }
             } else {
                 if (selectCount < MAX_SELECT && !attr.getIsPremium()) {
@@ -482,8 +491,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
-            boolean considerInternalAttributes) throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+            boolean considerInternalAttributes)
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         return getLeadEnrichmentAttributeList(onlySelectedAttr, null, null, considerInternalAttributes);
     }
 
@@ -491,8 +500,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
             String attributeDisplayNameFilter, Category category, boolean considerInternalAttributes)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights";
-        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
-                || considerInternalAttributes) {
+        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
+                || category != null || considerInternalAttributes) {
             url += "?";
         }
         if (onlySelectedAttr) {

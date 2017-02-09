@@ -25,8 +25,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
-    private static final String SEARCH_DISPLAY_NAME_STR3 = "DAY 30 ers ChangE: dAtA";
-    private static final String CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 = "30 Day Change: Ad Tech";
+    private static final String SEARCH_DISPLAY_NAME_STR3 = "Intent Change Users Database";
+    private static final String CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 = "Database Intent Users Change";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
     private static final int MAX_DESELECT = 2;
     private static final int MAX_SELECT = 1;
@@ -350,17 +350,19 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         combinedAttributeList = getLeadEnrichmentAttributeList(true, CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3,
                 Category.INTENT);
         Assert.assertNotNull(combinedAttributeList);
-        System.out.println("Check for " + CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 + " size is " + combinedAttributeList.size());
+        System.out.println(
+                "Check for " + CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 + " size is " + combinedAttributeList.size());
         Assert.assertTrue(combinedAttributeList.size() > 0);
         Assert.assertFalse(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
             System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR3 + " - " + attr.getDisplayName());
             Assert.assertFalse(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
-            Assert.assertTrue(attr.getDisplayName().toUpperCase().contains(CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
+            Assert.assertTrue(
+                    attr.getDisplayName().toUpperCase().contains(CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
         }
 
-        Assert.assertEquals(combinedAttributeList.size(), 2);
+        Assert.assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR2,
                 Category.TECHNOLOGY_PROFILE);
@@ -560,8 +562,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
             String attributeDisplayNameFilter, Category category, String subcategory, Integer offset, Integer max)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = apiHostPort + "/score/enrichment";
-        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
-                || offset != null || max != null) {
+        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
+                || category != null || offset != null || max != null) {
             url += "?";
         }
         if (onlySelectedAttr) {
