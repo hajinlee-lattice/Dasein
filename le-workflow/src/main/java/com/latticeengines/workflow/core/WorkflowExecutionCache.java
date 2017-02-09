@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -54,9 +53,6 @@ public class WorkflowExecutionCache {
 
     @Autowired
     private LEJobExecutionRetriever leJobExecutionRetriever;
-
-    @Autowired
-    private JobProxy jobProxy;
 
     @Autowired
     private WorkflowService workflowService;

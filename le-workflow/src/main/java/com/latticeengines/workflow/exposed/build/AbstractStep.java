@@ -150,17 +150,17 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         putObjectInContext(WorkflowContextConstants.OUTPUTS, map);
     }
 
-    protected <V> V getObjectFromContext(String key, Class<V> clazz) {
+    public <V> V getObjectFromContext(String key, Class<V> clazz) {
         String strValue = getStringValueFromContext(key);
         return JsonUtils.deserialize(strValue, clazz);
     }
 
-    protected <V> List<V> getListObjectFromContext(String key, Class<V> clazz) {
+    public <V> List<V> getListObjectFromContext(String key, Class<V> clazz) {
         List<?> list = getObjectFromContext(key, List.class);
         return JsonUtils.convertList(list, clazz);
     }
 
-    protected <K, V> Map<K, V> getMapObjectFromContext(String key, Class<K> keyClazz, Class<V> valueClazz) {
+    public <K, V> Map<K, V> getMapObjectFromContext(String key, Class<K> keyClazz, Class<V> valueClazz) {
         Map<?, ?> map = getObjectFromContext(key, Map.class);
         return JsonUtils.convertMap(map, keyClazz, valueClazz);
     }
@@ -173,7 +173,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         executionContext.put(key, val);
     }
 
-    protected String getStringValueFromContext(String key) {
+    public String getStringValueFromContext(String key) {
         try {
             return executionContext.getString(key);
         } catch (ClassCastException e) {
@@ -181,7 +181,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         }
     }
 
-    protected Double getDoubleValueFromContext(String key) {
+    public Double getDoubleValueFromContext(String key) {
         try {
             return executionContext.getDouble(key);
         } catch (ClassCastException e) {
@@ -193,7 +193,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         executionContext.putDouble(key, val);
     }
 
-    protected Long getLongValueFromContext(String key) {
+    public Long getLongValueFromContext(String key) {
         try {
             return executionContext.getLong(key);
         } catch (ClassCastException e) {

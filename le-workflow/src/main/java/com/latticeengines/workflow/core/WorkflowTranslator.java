@@ -77,7 +77,7 @@ public class WorkflowTranslator {
         return simpleJobBuilder.build();
     }
 
-    protected Step step(AbstractStep<? extends BaseStepConfiguration> step) throws Exception {
+    public Step step(AbstractStep<? extends BaseStepConfiguration> step) throws Exception {
         return stepBuilderFactory.get(step.name()) //
                 .tasklet(tasklet(step)) //
                 .allowStartIfComplete(step.isRunAgainWhenComplete()) //

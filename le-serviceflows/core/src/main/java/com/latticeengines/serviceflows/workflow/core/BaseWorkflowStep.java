@@ -212,6 +212,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         workflowJobEntityMgr.updateWorkflowJob(workflowJob);
     }
 
+    public void setWorkflowJobEntityMgr(WorkflowJobEntityMgr workflowJobEntityMgr) {
+        this.workflowJobEntityMgr = workflowJobEntityMgr;
+    }
+
     protected SourceFile retrieveSourceFile(CustomerSpace space, String name) {
         if (name == null) {
             return null;

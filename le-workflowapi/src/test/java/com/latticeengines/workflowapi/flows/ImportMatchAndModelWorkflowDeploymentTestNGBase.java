@@ -99,8 +99,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             sourceFile.setState(SourceFileState.Uploaded);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, sourceFile.getPath());
 
-            MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(), yarnConfiguration, null) {
-            };
+            MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(), yarnConfiguration, null);
             FieldMappingDocument fieldMappingDocument = metadataResolver.getFieldMappingsDocumentBestEffort(
                     SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation()));
             mapFieldToCustomeFieldsWithSameName(fieldMappingDocument);

@@ -98,12 +98,11 @@ public class WorkflowServiceImpl implements WorkflowService {
             throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowName });
         }
 
-        JobParametersBuilder parmsBuilder = new JobParametersBuilder()
-                .addString(WORKFLOW_SERVICE_UUID, UUID.randomUUID().toString());
+        JobParametersBuilder parmsBuilder = new JobParametersBuilder().addString(WORKFLOW_SERVICE_UUID,
+                UUID.randomUUID().toString());
         if (workflowConfiguration != null) {
             if (workflowConfiguration.getCustomerSpace() != null) {
-                parmsBuilder.addString(CUSTOMER_SPACE,
-                        workflowConfiguration.getCustomerSpace().toString());
+                parmsBuilder.addString(CUSTOMER_SPACE, workflowConfiguration.getCustomerSpace().toString());
             }
             if (workflowConfiguration.getInternalResourceHostPort() != null) {
                 parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT,
@@ -114,27 +113,52 @@ public class WorkflowServiceImpl implements WorkflowService {
             } else {
                 parmsBuilder.addString(USER_ID, WorkflowUser.DEFAULT_USER.name());
             }
-            for (String configurationClassName : workflowConfiguration.getConfigRegistry()
-                    .keySet()) {
+            for (String configurationClassName : workflowConfiguration.getConfigRegistry().keySet()) {
                 parmsBuilder.addString(configurationClassName,
                         workflowConfiguration.getConfigRegistry().get(configurationClassName));
             }
         }
 
-        JobParameters parms = parmsBuilder.toJobParameters();
+        JobParameters parms = createJobParams(workflowConfiguration);
         JobExecution jobExecution = null;
         try {
             jobExecution = jobLauncher.run(workflow, parms);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException
-                | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException e) {
             throw new LedpException(LedpCode.LEDP_28001, e, new String[] { workflowName });
         }
         return jobExecution.getId();
     }
 
     @Override
-    public WorkflowExecutionId start(String workflowName,
-            WorkflowConfiguration workflowConfiguration) {
+    public JobParameters createJobParams(WorkflowConfiguration workflowConfiguration) {
+        JobParametersBuilder parmsBuilder = new JobParametersBuilder().addString(WORKFLOW_SERVICE_UUID,
+                UUID.randomUUID().toString());
+        if (workflowConfiguration != null) {
+            if (workflowConfiguration.getCustomerSpace() != null) {
+                parmsBuilder.addString(CUSTOMER_SPACE, workflowConfiguration.getCustomerSpace().toString());
+            }
+            if (workflowConfiguration.getInternalResourceHostPort() != null) {
+                parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT,
+                        workflowConfiguration.getInternalResourceHostPort().toString());
+            }
+            if (workflowConfiguration.getUserId() != null) {
+                parmsBuilder.addString(USER_ID, workflowConfiguration.getUserId());
+            } else {
+                parmsBuilder.addString(USER_ID, WorkflowUser.DEFAULT_USER.name());
+            }
+            for (String configurationClassName : workflowConfiguration.getConfigRegistry().keySet()) {
+                parmsBuilder.addString(configurationClassName,
+                        workflowConfiguration.getConfigRegistry().get(configurationClassName));
+            }
+        }
+
+        JobParameters parms = parmsBuilder.toJobParameters();
+        return parms;
+    }
+
+    @Override
+    public WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration) {
         long jobExecutionId = startWorkflowJob(workflowName, workflowConfiguration);
         Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfiguration);
         String user = workflowConfiguration.getUserId();
@@ -156,9 +180,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         try {
             jobExecutions = jobOperator.getExecutions(workflowInstanceId.getId());
         } catch (NoSuchJobInstanceException e) {
-            throw new LedpException(LedpCode.LEDP_28002, e,
-                    new String[] { String.valueOf(workflowInstanceId.getId()),
-                            String.valueOf(workflowInstanceId.getId()) });
+            throw new LedpException(LedpCode.LEDP_28002, e, new String[] { String.valueOf(workflowInstanceId.getId()),
+                    String.valueOf(workflowInstanceId.getId()) });
         }
 
         jobExecutionId = jobExecutions.get(0);
@@ -173,14 +196,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         try {
             id = jobOperator.restart(workflowExecutionId.getId());
-            log.info(String.format(
-                    "Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
+            log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
                     workflowExecutionId.getId(), id));
-        } catch (JobInstanceAlreadyCompleteException | NoSuchJobExecutionException
-                | NoSuchJobException | JobRestartException | JobParametersInvalidException e) {
-            throw new LedpException(LedpCode.LEDP_28002, e,
-                    new String[] { String.valueOf(workflowExecutionId.getId()),
-                            String.valueOf(workflowExecutionId.getId()) });
+        } catch (JobInstanceAlreadyCompleteException | NoSuchJobExecutionException | NoSuchJobException
+                | JobRestartException | JobParametersInvalidException e) {
+            throw new LedpException(LedpCode.LEDP_28002, e, new String[] { String.valueOf(workflowExecutionId.getId()),
+                    String.valueOf(workflowExecutionId.getId()) });
         }
 
         return new WorkflowExecutionId(id);
@@ -194,8 +215,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             workflowJob.setStatus(FinalApplicationStatus.KILLED);
             workflowJobEntityMgr.updateWorkflowJob(workflowJob);
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
-            throw new LedpException(LedpCode.LEDP_28003, e,
-                    new String[] { String.valueOf(workflowId.getId()) });
+            throw new LedpException(LedpCode.LEDP_28003, e, new String[] { String.valueOf(workflowId.getId()) });
         }
     }
 
@@ -219,8 +239,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
-        com.latticeengines.domain.exposed.workflow.Job job = workflowExecutionCache
-                .getJob(workflowId);
+        com.latticeengines.domain.exposed.workflow.Job job = workflowExecutionCache.getJob(workflowId);
         if (job.getOutputs() != null && job.getApplicationId() != null) {
             job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH,
                     String.format("%s/app/%s", timelineServiceUrl, job.getApplicationId()));
@@ -229,23 +248,22 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(
-            List<WorkflowExecutionId> workflowIds) {
+    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds) {
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
 
         try {
             jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
         } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for ids %s, with error %s",
-                    workflowIds.toString(), e.getMessage()));
+            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
+                    e.getMessage()));
         }
 
         return jobs;
     }
 
     @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(
-            List<WorkflowExecutionId> workflowIds, String type) {
+    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds,
+            String type) {
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
 
         try {
@@ -259,16 +277,15 @@ public class WorkflowServiceImpl implements WorkflowService {
                 }
             }
         } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for ids %s, with error %s",
-                    workflowIds.toString(), e.getMessage()));
+            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
+                    e.getMessage()));
         }
 
         return jobs;
     }
 
     private String getWorkflowName(WorkflowExecutionId workflowId) {
-        return leJobExecutionRetriever.getJobExecution(workflowId.getId()).getJobInstance()
-                .getJobName();
+        return leJobExecutionRetriever.getJobExecution(workflowId.getId()).getJobInstance().getJobName();
     }
 
     @Override
@@ -292,8 +309,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime)
-            throws Exception {
+    public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception {
         WorkflowStatus status = null;
         long start = System.currentTimeMillis();
         int retryOnException = 16;
@@ -308,8 +324,8 @@ public class WorkflowServiceImpl implements WorkflowService {
                     break done;
                 }
             } catch (Exception e) {
-                log.warn(String.format("Error while getting status for workflow %d, with error %s",
-                        workflowId.getId(), e.getMessage()));
+                log.warn(String.format("Error while getting status for workflow %d, with error %s", workflowId.getId(),
+                        e.getMessage()));
                 if (--retryOnException == 0)
                     throw e;
             } finally {
