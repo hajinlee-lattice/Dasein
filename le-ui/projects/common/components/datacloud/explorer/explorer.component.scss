@@ -48,7 +48,7 @@
                 &.dropdown-container {
                     z-index: 2;
                     .dropdown {
-                        .selected, .highlighted {
+                        .selected, .enabled, .highlighted {
                             &.hide {
                                 border-bottom: 1px solid #333;
                                 padding-bottom: 5px;

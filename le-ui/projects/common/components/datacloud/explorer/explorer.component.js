@@ -91,6 +91,8 @@ angular.module('common.datacloud.explorer', [
         categoryCounts: {}
     });
 
+    //ben console.log(vm.LookupResponse);
+
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.download_button.items = [{ 
@@ -120,6 +122,8 @@ angular.module('common.datacloud.explorer', [
                 'vm.metadata.toggle.show.premium', 
                 'vm.metadata.toggle.hide.premium', 
                 'vm.metadata.toggle.show.internal',
+                'vm.metadata.toggle.show.enabled', 
+                'vm.metadata.toggle.hide.enabled',
                 'vm.metadata.toggle.show.highlighted', 
                 'vm.metadata.toggle.hide.highlighted' 
             ], function(newValues, oldValues, scope) {
@@ -782,12 +786,15 @@ angular.module('common.datacloud.explorer', [
             'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
             'Category': vm.category,
             'Subcategory': vm.subcategory,
-            'AttributeFlagsMap': {
+        };
+        if(vm.section == 'team') {
+            filter.AttributeFlagsMap = {
                 'CompanyProfile': {
+                    'hidden': (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false),
                     'highlighted': (!vm.metadata.toggle.show.highlighted ? '' : true) || (!vm.metadata.toggle.hide.highlighted ? '' : false)
                 }
             }
-        };
+        }
         if (vm.lookupMode && vm.isYesNoCategory(vm.category)) {
             filter.Value = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
         }
@@ -868,6 +875,8 @@ angular.module('common.datacloud.explorer', [
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
                 || (vm.metadata.toggle.hide.premium && item.IsPremium) 
                 || (vm.metadata.toggle.show.internal && !item.IsInternal)
+                || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
+                || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
                 || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
                 || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
                     continue;
