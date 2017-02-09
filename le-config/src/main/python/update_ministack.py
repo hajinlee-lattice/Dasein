@@ -7,13 +7,10 @@ import os
 NEW_SUFFIX=".new"
 HAPROXY_KEY="HAProxy"
 KEYS_TO_BE_UPDATED = [
-    "AWS_ADMIN_ADDRESS",
-    "AWS_MICROSERVICE_ADDRESS",
-    "AWS_MATCHAPI_ADDRESS",
-    "AWS_PLS_ADDRESS",
-    "AWS_SCORINGAPI_ADDRESS",
-    "AWS_PLAYMAKER_ADDRESS",
-    "AWS_OAUTH_ADDRESS"
+    "AWS_PRIVATE_LB",
+    "AWS_PUBLIC_LB",
+    "LE_ENVIRONMENT",
+    "LE_STACK"
 ]
 
 def main():
@@ -26,22 +23,21 @@ def update_profile(profile, environment, stack, consul):
     print "found haproxy ip %s for stack %s in %s" % (ip, stack, environment)
     with open(profile, "r") as fin:
         with open(profile + NEW_SUFFIX, "w") as fout:
+            http_protocal = 'http'
             for line in fin:
                 if len(line.strip()) > 0 and ('#' != line.strip()[0]):
                     key = line.strip().replace('\n', '').split('=')[0]
                     value = line.strip().replace('\n', '')[len(key) + 1:]
-                    if key not in ["LE_ENVIRONMENT", "LE_STACK"]:
-                        if key in KEYS_TO_BE_UPDATED:
-                            value = "http://%s" % ip
-                            if key == "AWS_PLAYMAKER_ADDRESS":
-                                value += "/api"
-                            if key == "AWS_OAUTH_ADDRESS":
-                                value += "/oauth2"
+                    if key not in KEYS_TO_BE_UPDATED:
                         fout.write("%s=%s\n" % (key, value))
+                    if key == 'HTTP_PROTOCOL':
+                        http_protocal = value
                 else:
                     fout.write(line)
             fout.write("LE_ENVIRONMENT=%s\n" % environment)
             fout.write("LE_STACK=%s\n" % stack)
+            fout.write("AWS_PRIVATE_LB=%s://%s\n" % (http_protocal, ip))
+            fout.write("AWS_PUBLIC_LB=%s://%s\n" % (http_protocal, ip))
     os.rename(profile + NEW_SUFFIX, profile)
 
 
