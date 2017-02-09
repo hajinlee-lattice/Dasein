@@ -1,7 +1,5 @@
 package com.latticeengines.workflow.service.impl;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -10,7 +8,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
-import org.mockito.Mockito;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
@@ -18,15 +15,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.workflow.core.WorkflowExecutionCache;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.AnotherSuccessfulStep;
 import com.latticeengines.workflow.functionalframework.FailableStep;
@@ -71,9 +65,6 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
     @Autowired
     private WorkflowWithFailingListener workflowWithFailingListener;
-
-    @Autowired
-    private WorkflowExecutionCache workflowExecutionCache;
 
     private WorkflowConfiguration workflowConfig;
 
