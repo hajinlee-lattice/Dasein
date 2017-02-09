@@ -29,6 +29,7 @@ class Server {
         this.options = options;
         this.express = express;
         this.app = app;
+        //this.setCors();
 
         if (options.config.protocols.http) {
             const http = require('http');
@@ -66,7 +67,6 @@ class Server {
         // order matters
         this.setRenderer();
         this.setMiddleware();
-        this.setCors();
         options.config.WHITELIST ? this.trustProxy(options.config.WHITELIST) : null;
         options.config.LOGGING ? this.startLogging(options.config.LOGGING) : null;
         options.routes ? this.setAppRoutes(options.routes) : null;
@@ -75,8 +75,8 @@ class Server {
     }
 
     setCors() {
-        this.app.options('*', cors());
         this.app.use(cors());
+        this.app.options('*', cors());
     }
 
     setRenderer() {
@@ -91,7 +91,7 @@ class Server {
         this.app.use(compress());
 
         // helmet enables/modifies/removes http headers for security concerns
-        this.app.use(helmet());
+        //this.app.use(helmet({ frameguard: false }));
 
         // default cookie behavior - favors security
         /* don't need this yet

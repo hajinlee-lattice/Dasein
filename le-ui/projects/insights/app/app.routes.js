@@ -42,7 +42,7 @@ angular.module('insightsApp')
             views: {
                 "main": {
                     controller: function($state, AuthStore, LookupStore) {
-                        parent.postMessage("init", window.location.href);
+                        parent.postMessage("init", '*');
 
                         window.addEventListener("message", function (event){
                             console.log('message from LPI:', event.data);
