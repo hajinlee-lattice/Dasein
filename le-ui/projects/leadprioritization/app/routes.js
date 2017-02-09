@@ -1367,7 +1367,7 @@ angular
                                 json.request = LookupStore.get('request');
                                 json.request.record.CompanyName = 'Lattice Engines';
 
-                                childWindow.postMessage(json,window.location.origin + host);
+                                childWindow.postMessage(json,'*');
                             }
                         }, false);
                     },
