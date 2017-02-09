@@ -87,7 +87,8 @@ angular.module('common.datacloud.explorer', [
         enable_grid: true,
         section: $stateParams.section,
         category: $stateParams.category,
-        subcategory: $stateParams.subcategory
+        subcategory: $stateParams.subcategory,
+        categoryCounts: {}
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
@@ -111,17 +112,20 @@ angular.module('common.datacloud.explorer', [
             notify: false 
         });
     }
-
     vm.init = function() {
         $scope.$watchGroup([
                 'vm.metadata.toggle.show.nulls', 
                 'vm.metadata.toggle.show.selected', 
+                'vm.metadata.toggle.hide.selected', 
                 'vm.metadata.toggle.show.premium', 
                 'vm.metadata.toggle.hide.premium', 
-                'vm.metadata.toggle.show.internal'
+                'vm.metadata.toggle.show.internal',
+                'vm.metadata.toggle.show.highlighted', 
+                'vm.metadata.toggle.hide.highlighted' 
             ], function(newValues, oldValues, scope) {
 
             vm.filterEmptySubcategories();
+            gotoNonemptyCategory();
         });
 
         $scope.$watchGroup([
@@ -153,7 +157,6 @@ angular.module('common.datacloud.explorer', [
 
                 vm.queryInProgress = false;
             }, 333);
-
 
             if(vm.section != 'browse') {
                 //vm.category = vm.categories[0];
@@ -538,6 +541,9 @@ angular.module('common.datacloud.explorer', [
 
     var getEnrichmentCategories = function() {
         vm.categories = Object.keys(EnrichmentTopAttributes).sort();
+        for(var i in vm.categories) {
+            vm.categoryCounts[vm.categories[i]] = null;
+        }
         vm.enable_category_dropdown = true;
     }
 
@@ -869,8 +875,20 @@ angular.module('common.datacloud.explorer', [
                 result.push(item);
             }
         }
-
+        vm.categoryCounts[item.Category] = result.length;
         return result.length;
+    }
+
+    /* jumps you to non-empty category when you filter */
+    var gotoNonemptyCategory = function() {
+        if(vm.category && vm.categoryCounts[vm.category] < 1) {
+            for(var i in vm.categoryCounts) {
+                if(vm.categoryCounts[i] > 0) {
+                    vm.category = i;
+                    break;
+                }
+            }
+        }
     }
 
     vm.categoryIcon = function(category){

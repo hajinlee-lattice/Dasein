@@ -222,6 +222,9 @@
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length > 1 && vm.subcategory">
                 <span ng-click="vm.subcategory = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
             </div>
+            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length < 2 && vm.subcategory">
+                <span ng-click="vm.subcategory = ''; vm.queryText = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span>
+            </div>
 
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
@@ -277,11 +280,19 @@
                             <h5><label>Attribute range</label><label>Records</label></h5>
                             <ul>
                                 <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List">
-                                    <label title="{{stat.Lbl}}">{{stat.Lbl}}</label>
-                                    <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}}">
-                                        <span class="bar_ {{vm.categoryClass(enrichment.Category)}} background-color"></span>
-                                    </div>
-                                    <div>{{stat.Cnt|number}}</div>
+                                    <ul class="graph">
+                                        <li class="label" title="{{stat.Lbl}}">
+                                            {{stat.Lbl}}
+                                        </li>
+                                        <li class="bar_">
+                                            <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}}">
+                                                <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
+                                            </div>
+                                        </li>
+                                        <li class="count">
+                                            <span>{{stat.Cnt|number}}</span>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </div>

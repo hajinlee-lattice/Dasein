@@ -504,31 +504,46 @@
                     }
                     ul {
                         li {
-                            @include flex-container;
-                            white-space: nowrap;
-                            color: #000;
-                            label {
-                                @include flex-item(0 0 auto);
-                                @include text-ellipsis;
-                                width: 100px;
-                                overflow: hidden;
-                            }
-                            div {
-                                @include flex-item(0 1 auto);
-                                &:nth-child(2) {
-                                    border-left: 1px solid #d0d1d0;
-                                    margin: 0 5px;
+                            ul.graph {
+                                @include flex-container;
+                                color: #000;
+                                li {
+                                    &.label {
+                                        @include flex-item(0 1 auto);
+                                        max-width: 100px;
+                                        max-height: 31px;
+                                        overflow: hidden;
+                                        word-wrap: break-word;
+                                        text-align: left;
+                                        margin: 5px 0;
+                                        line-height: 12px;
+                                    }
+                                    &.bar_ {
+                                        @include flex-item(1 1 auto);
+                                        border-left: 1px solid #d0d1d0;
+                                        margin: 0 5px;
+                                        div {
+                                            height: 100%;
+                                            span {
+                                                display: block;
+                                                height: 50%; //10px
+                                                position: relative;
+                                                top: 50%;
+                                                transform: translateY(-50%);
+                                            }
+                                        }
+                                    }
+                                    &.count {
+                                        @include flex-item(0 1 auto);
+                                        white-space: nowrap;
+                                        span {
+                                            display: block;
+                                            position: relative;
+                                            top: 50%;
+                                            transform: translateY(-50%);
+                                        }
+                                    }
                                 }
-                                span.bar_ {
-                                    display: block;
-                                    height: 10px;
-                                    position: relative;
-                                    top: 50%;
-                                    transform: translateY(-50%);
-                                }
-                            }
-                            em {
-                                @include flex-item(0 1 auto);
                             }
                         }
                     }
