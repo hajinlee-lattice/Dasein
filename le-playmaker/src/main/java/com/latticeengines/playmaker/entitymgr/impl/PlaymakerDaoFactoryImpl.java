@@ -53,7 +53,7 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
             return findDao(namedJdbcTemplate, normalizedVer, defaultDao);
 
         } catch (Exception ex) {
-            log.warn("Failed to get Dao!", ex);
+            log.warn(String.format("Failed to get Dao! tenantName=%s", tenantName), ex);
         }
         return defaultDao;
     }

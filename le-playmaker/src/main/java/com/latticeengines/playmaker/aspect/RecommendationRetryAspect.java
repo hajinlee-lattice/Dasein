@@ -37,7 +37,7 @@ public class RecommendationRetryAspect {
                     retVal = joinPoint.proceed();
                     return retVal;
                 } catch (Throwable ex) {
-                    log.warn("There's exception happening!, retries=" + retries, ex);
+                    log.warn(String.format("There's exception happening!, retries=%s tenantName=%s", retries, tenantName), ex);
                     t = ex;
                     templateFactory.removeTemplate(tenantName);
                     retries--;
