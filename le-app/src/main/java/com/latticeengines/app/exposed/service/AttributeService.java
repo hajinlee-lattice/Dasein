@@ -35,4 +35,8 @@ public interface AttributeService {
             Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes);
 
     LeadEnrichmentAttribute getAttribute(String fieldName);
+
+    List<LeadEnrichmentAttribute> getAttributesBaseOnCategory(Category category);
+
+    List<LeadEnrichmentAttribute> getAttributesBaseOnSubCategory(Category category, String subCategory);
 }

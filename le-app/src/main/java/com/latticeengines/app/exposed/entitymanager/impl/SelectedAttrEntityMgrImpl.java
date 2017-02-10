@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 import com.latticeengines.app.exposed.dao.SelectedAttrDao;
 import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
+import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 
 @Component("enrichmentAttrEntityMgr")
 public class SelectedAttrEntityMgrImpl implements SelectedAttrEntityMgr {

@@ -1,11 +1,11 @@
 package com.latticeengines.app.exposed.download;
 
+import java.io.InputStream;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
-import java.io.InputStream;
 
 public class CustomerSpaceHdfsFileDownloader extends AbstractHttpFileDownLoader {
 

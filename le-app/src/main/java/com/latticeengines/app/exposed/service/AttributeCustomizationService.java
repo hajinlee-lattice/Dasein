@@ -1,14 +1,20 @@
 package com.latticeengines.app.exposed.service;
 
-import com.latticeengines.domain.exposed.pls.AttributeFlags;
-import com.latticeengines.domain.exposed.pls.AttributeUseCase;
-import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import java.util.List;
 
-public interface AttributeCustomizationService {
-    void save(String name, AttributeUseCase useCase, AttributeFlags flags);
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.pls.AttributeUseCase;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 
-    AttributeFlags retrieve(String name, AttributeUseCase useCase);
+public interface AttributeCustomizationService {
+    void save(String name, AttributeUseCase useCase, String propertyName, String value);
+
+    String retrieve(String name, AttributeUseCase useCase, String propertyName);
 
     void addFlags(List<LeadEnrichmentAttribute> attributes);
+
+    void saveCategory(Category category, AttributeUseCase useCase, String propertyName, String value);
+
+    void saveSubCategory(Category category, String subcategoryName, AttributeUseCase useCase,
+            String propertyName, String value);
 }

@@ -140,7 +140,6 @@ public class AttributePageProcessor {
         return attributes;
     }
 
-    @SuppressWarnings("unchecked")
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
             List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter, Category category,
             String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,

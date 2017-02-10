@@ -52,7 +52,7 @@ public class LeadEnrichmentAttribute {
     private FundamentalType fundamentalType;
 
     @JsonProperty("AttributeFlagsMap")
-    private Map<AttributeUseCase, AttributeFlags> attributeFlagsMap;
+    private Map<AttributeUseCase, String> attributeFlagsMap;
 
     public String getDisplayName() {
         return displayName;
@@ -166,11 +166,11 @@ public class LeadEnrichmentAttribute {
         this.fundamentalType = fundamentalType;
     }
 
-    public Map<AttributeUseCase, AttributeFlags> getAttributeFlagsMap() {
+    public Map<AttributeUseCase, String> getAttributeFlagsMap() {
         return attributeFlagsMap;
     }
 
-    public void setAttributeFlagsMap(Map<AttributeUseCase, AttributeFlags> attributeFlagsMap) {
+    public void setAttributeFlagsMap(Map<AttributeUseCase, String> attributeFlagsMap) {
         this.attributeFlagsMap = attributeFlagsMap;
     }
 }

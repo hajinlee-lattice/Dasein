@@ -7,31 +7,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationEntityMgr;
-import com.latticeengines.app.exposed.service.AttributeService;
+import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationPropertyEntityMgr;
 import com.latticeengines.app.testframework.AppTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.pls.AttributeCustomization;
-import com.latticeengines.domain.exposed.pls.AttributeFlags;
+import com.latticeengines.domain.exposed.pls.AttributeCustomizationProperty;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
-import com.latticeengines.domain.exposed.pls.CompanyProfileAttributeFlags;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-public class AttributeEntityMgrImplTestNG extends AppTestNGBase {
+public class AttributeCustomizationPropertyEntityMgrImplTestNG extends AppTestNGBase {
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace.parse("AttributeEntityMgrImplTestNG");
     private static final String ATTRIBUTE_NAME = "TestAttribute";
 
     @Autowired
-    private AttributeCustomizationEntityMgr attributeCustomizationEntityMgr;
-
-    @Autowired
-    private AttributeService attributeService;
+    private AttributeCustomizationPropertyEntityMgr attributeCustomizationPropertyEntityMgr;
 
     @Autowired
     private TenantService tenantService;
-    private AttributeFlags saved;
+
+    private String propertyName = "hidden";
+    private String propertyValue = "true";
+    private String propertyName2 = "highlighted";
+    private String category = "Firmographics";
+    private String subCategory = "b";
+
+    private String saved;
 
     @BeforeClass(groups = "functional")
     private void setUp() {
@@ -46,33 +47,38 @@ public class AttributeEntityMgrImplTestNG extends AppTestNGBase {
 
         globalAuthFunctionalTestBed.createTenant(tenant);
         MultiTenantContext.setTenant(tenant);
+
     }
 
     @Test(groups = "functional")
     public void save() {
-        AttributeCustomization customization = new AttributeCustomization();
+        AttributeCustomizationProperty customization = new AttributeCustomizationProperty();
         customization.setName(ATTRIBUTE_NAME);
         customization.setUseCase(AttributeUseCase.CompanyProfile);
-        customization.setFlags(new CompanyProfileAttributeFlags(true, false));
-        saved = customization.getFlags();
-        attributeCustomizationEntityMgr.createOrUpdate(customization);
+        customization.setCategoryName(String.format("%s.%s", category, subCategory));
+        customization.setPropertyName(propertyName);
+        customization.setPropertyValue(propertyValue);
+        saved = propertyValue;
+        attributeCustomizationPropertyEntityMgr.createOrUpdate(customization);
     }
 
     @Test(groups = "functional", dependsOnMethods = "save")
     public void update() {
-        AttributeCustomization customization = new AttributeCustomization();
+        AttributeCustomizationProperty customization = new AttributeCustomizationProperty();
         customization.setName(ATTRIBUTE_NAME);
         customization.setUseCase(AttributeUseCase.CompanyProfile);
-        customization.setFlags(new CompanyProfileAttributeFlags(false, true));
-        saved = customization.getFlags();
-        attributeCustomizationEntityMgr.createOrUpdate(customization);
+        customization.setCategoryName(String.format("%s.%s", category, subCategory));
+        customization.setPropertyName(propertyName2);
+        customization.setPropertyValue(propertyValue);
+        saved = propertyValue;
+        attributeCustomizationPropertyEntityMgr.createOrUpdate(customization);
     }
 
     @Test(groups = "functional", dependsOnMethods = "update")
     public void retrieve() {
-        AttributeCustomization customization = attributeCustomizationEntityMgr.find(ATTRIBUTE_NAME,
-                AttributeUseCase.CompanyProfile);
+        AttributeCustomizationProperty customization = attributeCustomizationPropertyEntityMgr.find(ATTRIBUTE_NAME,
+                AttributeUseCase.CompanyProfile, propertyName2);
         assertNotNull(customization);
-        assertEquals(customization.getFlags(), saved);
+        assertEquals(customization.getPropertyValue(), saved);
     }
 }

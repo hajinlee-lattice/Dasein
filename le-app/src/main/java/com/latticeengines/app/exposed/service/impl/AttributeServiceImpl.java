@@ -59,13 +59,14 @@ public class AttributeServiceImpl implements AttributeService {
     private AttributeCustomizationService attributeCustomizationService;
 
     @Override
-    public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
-            Map<String, Integer> limitationMap, Boolean considerInternalAttributes) {
+    public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Map<String, Integer> limitationMap,
+            Boolean considerInternalAttributes) {
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         Integer premiumAttributeLimitation = getTotalMaxCount(limitationMap);
         checkAmbiguityInFieldNames(attributes);
 
-        int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
+        int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant,
+                considerInternalAttributes);
         int additionalPremiumAttrCount = 0;
         List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false, null, null,
                 considerInternalAttributes);
@@ -86,7 +87,8 @@ public class AttributeServiceImpl implements AttributeService {
 
         if (!CollectionUtils.isEmpty(attributes.getDeselectedAttributes())) {
             for (String deselectedAttrStr : attributes.getDeselectedAttributes()) {
-                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes, deselectedAttrStr);
+                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes,
+                        deselectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(deselectedAttr, tenant);
                 deleteAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -115,8 +117,7 @@ public class AttributeServiceImpl implements AttributeService {
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
             Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes) {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder()
-                .columnMetadataProxy(columnMetadataProxy) //
+        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .attributeCustomizationService(attributeCustomizationService) //
                 .attributeDisplayNameFilter(attributeDisplayNameFilter) //
@@ -133,8 +134,7 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Override
     public List<LeadEnrichmentAttribute> getAllAttributes() {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder()
-                .columnMetadataProxy(columnMetadataProxy) //
+        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .considerInternalAttributes(true) //
                 .skipTenantLevelCustomization(true) //
@@ -190,8 +190,7 @@ public class AttributeServiceImpl implements AttributeService {
     @Override
     public void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName, Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes) {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder()
-                .columnMetadataProxy(columnMetadataProxy) //
+        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .onlySelectedAttributes(isSelected) //
                 .considerInternalAttributes(considerInternalAttributes) //
@@ -199,7 +198,8 @@ public class AttributeServiceImpl implements AttributeService {
                 .build();
 
         List<LeadEnrichmentAttribute> attributes = processor.getPage();
-        DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName, getCSVFromAttributes(attributes));
+        DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName,
+                getCSVFromAttributes(attributes));
         downloader.downloadFile(request, response);
     }
 
@@ -211,6 +211,27 @@ public class AttributeServiceImpl implements AttributeService {
             return null;
         }
         return matches.get(0);
+    }
+
+    @Override
+    public List<LeadEnrichmentAttribute> getAttributesBaseOnCategory(Category category) {
+        List<LeadEnrichmentAttribute> matches = getAllAttributes().stream()
+                .filter(a -> a.getCategory().equals(category.getName())).collect(Collectors.toList());
+        if (matches.size() == 0) {
+            return null;
+        }
+        return matches;
+    }
+
+    @Override
+    public List<LeadEnrichmentAttribute> getAttributesBaseOnSubCategory(Category category, String subCategory) {
+        List<LeadEnrichmentAttribute> matches = getAllAttributes().stream()
+                .filter(a -> a.getCategory().equals(category.getName()) && a.getSubcategory().equals(subCategory))
+                .collect(Collectors.toList());
+        if (matches.size() == 0) {
+            return null;
+        }
+        return matches;
     }
 
     private String getCSVFromAttributes(List<LeadEnrichmentAttribute> attributes) {

@@ -17,12 +17,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
-import com.latticeengines.domain.exposed.pls.CompanyProfileAttributeFlags;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
@@ -100,33 +100,34 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
     public void customizeAttributes() throws IOException {
         attributes = getAttributes(false);
         String fieldName = attributes.get(0).getFieldName();
-        CompanyProfileAttributeFlags flags = new CompanyProfileAttributeFlags(true, true);
-        setFlags(fieldName, flags);
-
+        String propertyName1 = "hidden";
+        String propertyName2 = "highlighted";
+        setProperty(fieldName, propertyName1, "true");
+        setProperty(fieldName, propertyName2, "true");
         attributes = getAttributes(false);
 
         for (LeadEnrichmentAttribute attribute : attributes) {
             if (fieldName.equals(attribute.getFieldName())) {
-                CompanyProfileAttributeFlags retrieved = (CompanyProfileAttributeFlags) attribute
-                        .getAttributeFlagsMap().get(AttributeUseCase.CompanyProfile);
+                String retrieved = attribute.getAttributeFlagsMap().get(AttributeUseCase.CompanyProfile);
                 assertNotNull(retrieved);
-                assertEquals(retrieved, flags);
+                assertEquals(retrieved, JsonUtils
+                        .serialize(ImmutableMap.<String, String> of(propertyName1, "true", propertyName2, "true")));
             }
         }
     }
 
-    private void setFlags(String fieldName, CompanyProfileAttributeFlags companyProfileAttributeFlags) {
-        String url = getPLSRestAPIPort()
-                + String.format("/pls/attributes/flags/%s/%s", fieldName, AttributeUseCase.CompanyProfile);
-        getGlobalAuthRestTemplate().postForObject(url, companyProfileAttributeFlags, Void.class);
+    private void setProperty(String fieldName, String propertyName, String propertyValue) {
+        String url = getPLSRestAPIPort() + String.format("/pls/attributes/flags/%s/%s/%s", fieldName,
+                AttributeUseCase.CompanyProfile, propertyName);
+        getGlobalAuthRestTemplate().postForObject(url, propertyValue, Void.class);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "customizeAttributes")
     public void retrieveCompanyProfile() {
         CompanyProfileRequest request = new CompanyProfileRequest();
         request.getRecord().put("Email", "someuser@google.com");
-        CompanyProfile profile = getOAuth2RestTemplate().postForObject(
-                getUlyssesRestAPIPort() + "/ulysses/companyprofiles/", request, CompanyProfile.class);
+        CompanyProfile profile = getOAuth2RestTemplate()
+                .postForObject(getUlyssesRestAPIPort() + "/ulysses/companyprofiles/", request, CompanyProfile.class);
         assertNotNull(profile);
         assertNotEquals(profile.getMatchLogs().size(), 0);
         assertNotNull(profile.getTimestamp());

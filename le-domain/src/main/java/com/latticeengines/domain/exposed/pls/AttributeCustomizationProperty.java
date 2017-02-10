@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -36,10 +35,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Access(AccessType.FIELD)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Table(name = "ATTRIBUTE_CUSTOMIZATION", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME", "USE_CASE" }) })
+@Table(name = "ATTRIBUTE_CUSTOMIZATION_PROPERTY", //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME", "USE_CASE", "CATEGORY_NAME",
+                "PROPERTY_NAME" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class AttributeCustomization implements HasPid, HasName, HasTenant, HasTenantId {
+public class AttributeCustomizationProperty implements HasPid, HasName, HasTenant, HasTenantId {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -68,9 +68,17 @@ public class AttributeCustomization implements HasPid, HasName, HasTenant, HasTe
     @Column(name = "TENANT_PID", nullable = false)
     private Long tenantId;
 
-    @JsonIgnore
-    @Column(name = "FLAGS", nullable = false, length = 2048)
-    private String flagsString;
+    @JsonProperty("category_name")
+    @Column(name = "CATEGORY_NAME", nullable = false)
+    private String categoryName;
+
+    @JsonProperty("property_name")
+    @Column(name = "PROPERTY_NAME")
+    private String propertyName;
+
+    @JsonProperty("property_value")
+    @Column(name = "PROPERTY_VALUE")
+    private String propertyValue;
 
     @Override
     public Long getPid() {
@@ -80,16 +88,6 @@ public class AttributeCustomization implements HasPid, HasName, HasTenant, HasTe
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
-    }
-
-    @JsonProperty("flags")
-    public AttributeFlags getFlags() {
-        return JsonUtils.deserialize(flagsString, AttributeFlags.class);
-    }
-
-    @JsonProperty("flags")
-    public void setFlags(AttributeFlags flags) {
-        this.flagsString = JsonUtils.serialize(flags);
     }
 
     @Override
@@ -131,5 +129,29 @@ public class AttributeCustomization implements HasPid, HasName, HasTenant, HasTe
 
     public void setUseCase(AttributeUseCase useCase) {
         this.useCase = useCase;
+    }
+
+    public String getCategoryName() {
+        return this.categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public String getPropertyName() {
+        return this.propertyName;
+    }
+
+    public void setPropertyName(String propertyName) {
+        this.propertyName = propertyName;
+    }
+
+    public String getPropertyValue() {
+        return this.propertyValue;
+    }
+
+    public void setPropertyValue(String propertyValue) {
+        this.propertyValue = propertyValue;
     }
 }
