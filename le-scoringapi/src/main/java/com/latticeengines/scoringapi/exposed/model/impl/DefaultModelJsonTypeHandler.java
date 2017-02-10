@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
-import com.latticeengines.domain.exposed.scoring.ScoreRating;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
@@ -433,8 +432,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     protected BucketName bucketPercileScore(ScoringArtifacts scoringArtifacts, int percentile) {
         List<BucketMetadata> bucketMetadataList = scoringArtifacts.getBucketMetadataList();
         BucketName bucketName = null;
-        int min = ScoreRating.BUCKET_A_UPPER;
-        int max = ScoreRating.BUCKET_D_LOWER;
+        int min = BucketName.A.getDefaultUpperBound();
+        int max = BucketName.D.getDefaultLowerBound();
         BucketName minBucket = null;
         BucketName maxBucket = null;
         boolean withinRange = false;
@@ -479,17 +478,21 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             if (log.isDebugEnabled()) {
                 log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");
             }
-            if (percentile < ScoreRating.BUCKET_D_LOWER) {
+            if (percentile < BucketName.D.getDefaultLowerBound()) {
                 log.warn(
                         String.format("%d is less than minimum bound, setting to %s", percentile, BucketName.D.name()));
                 bucketName = BucketName.D;
-            } else if (percentile >= ScoreRating.BUCKET_D_LOWER && percentile <= ScoreRating.BUCKET_D_UPPER) {
+            } else if (percentile >= BucketName.D.getDefaultLowerBound()
+                    && percentile <= BucketName.D.getDefaultUpperBound()) {
                 bucketName = BucketName.D;
-            } else if (percentile >= ScoreRating.BUCKET_C_LOWER && percentile <= ScoreRating.BUCKET_C_UPPER) {
+            } else if (percentile >= BucketName.C.getDefaultLowerBound()
+                    && percentile <= BucketName.C.getDefaultUpperBound()) {
                 bucketName = BucketName.C;
-            } else if (percentile >= ScoreRating.BUCKET_B_LOWER && percentile <= ScoreRating.BUCKET_B_UPPER) {
+            } else if (percentile >= BucketName.B.getDefaultLowerBound()
+                    && percentile <= BucketName.B.getDefaultUpperBound()) {
                 bucketName = BucketName.B;
-            } else if (percentile >= ScoreRating.BUCKET_A_LOWER && percentile <= ScoreRating.BUCKET_A_UPPER) {
+            } else if (percentile >= BucketName.A.getDefaultLowerBound()
+                    && percentile <= BucketName.A.getDefaultUpperBound()) {
                 bucketName = BucketName.A;
             } else {
                 log.warn(
