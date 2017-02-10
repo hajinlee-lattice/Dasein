@@ -8,9 +8,6 @@ angular.module('common.datacloud.explorer', [
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
 ){
     var vm = this,
-        across = 4, // how many across in grid view
-        approximate_pagesize = 37,
-        pagesize = Math.round(approximate_pagesize / across) * across,
         enrichment_chunk_size = 5000,
         flags = FeatureFlagService.Flags();
 
@@ -80,8 +77,6 @@ angular.module('common.datacloud.explorer', [
         selectDisabled: 1,
         saveDisabled: 1,
         selectedCount: 0,
-        pagesize: pagesize,
-        across: across,
         initialized: false,
         enable_category_dropdown: false,
         enable_grid: true,
@@ -424,7 +419,7 @@ angular.module('common.datacloud.explorer', [
 
     var highlightOptionsInitState = function(enrichment) {
         var ret = {type: 'enabled', label: '', highlighted: false, enabled: false};
-        
+
         if(!enrichment.AttributeFlagsMap || !enrichment.AttributeFlagsMap.CompanyProfile) {
             ret.type = 'enabled';
             ret.label = vm.highlightTypes[ret.type];
