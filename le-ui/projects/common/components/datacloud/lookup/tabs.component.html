@@ -9,7 +9,7 @@
                 <!--li ui-sref="home.lookup.tabs.response" ui-sref-active-eq="active">
                     API Response
                 </li-->
-                <li ui-sref="home.datacloud.lookup.tabs.matching" ui-sref-active-eq="active">
+                <li ui-sref="home.datacloud.lookup.tabs.matching" ui-sref-active-eq="active" data-ng-if="vm.isInternalUser">
                     Matching Logic
                 </li>
             </ul>

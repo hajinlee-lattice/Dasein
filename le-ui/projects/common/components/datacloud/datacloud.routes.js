@@ -2,7 +2,8 @@ angular
 .module('common.datacloud', [
     'common.datacloud.explorer',
     'common.datacloud.lookup',
-    'common.datacloud.explorertabs'
+    'common.datacloud.explorertabs',
+    'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -103,7 +104,7 @@ angular
                     templateUrl: '/components/datacloud/tabs/explorertabs.component.html'
                 },
                 "subsummary@": {
-                    controller: function(LookupResponse, LookupStore) {
+                    controller: function(LookupResponse, LookupStore, BrowserStorageUtility) {
                         LookupStore.add('count', 0);//Object.keys(LookupResponse.attributes).length;
                         
                         this.store = LookupStore;
@@ -112,6 +113,15 @@ angular
                             : '';
 
                         this.elapsedTime = LookupStore.get('elapsedTime');
+
+                        this.isInternalUser = false;
+                        if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
+                            && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
+                            var accessLevel = BrowserStorageUtility.getSessionDocument().User.AccessLevel;
+                            if (accessLevel == "INTERNAL_USER" || accessLevel == "INTERNAL_ADMIN" || accessLevel == "SUPER_ADMIN") {
+                                this.isInternalUser = true;
+                            }
+                        }
                     },
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/lookup/tabs.component.html'
