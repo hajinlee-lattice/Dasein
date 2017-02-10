@@ -25,8 +25,8 @@ public class AccountMasterSeedReportRebuildFlow extends ConfigurableFlowBase<Acc
 
         node = node.retain(fieldList);
 
-        node = node.filter(FLAG_DROP_OOB_ENTRY + " != null || " + FLAG_DROP_SMALL_BUSINESS + " != null || "
-                + FLAG_DROP_INCORRECT_DATA + " != null || " + FLAG_DROP_ORPHAN_ENTRY + " != null || "
+        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 1 || " + FLAG_DROP_SMALL_BUSINESS + " == 1 || "
+                + FLAG_DROP_INCORRECT_DATA + " == 1 || " + FLAG_DROP_ORPHAN_ENTRY + " == 1 || "
                 + FLAG_DROP_LESS_POPULAR_DOMAIN + " != null ", fieldList);
 
         return node;

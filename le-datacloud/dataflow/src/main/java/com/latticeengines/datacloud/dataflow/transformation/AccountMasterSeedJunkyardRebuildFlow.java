@@ -22,12 +22,11 @@ public class AccountMasterSeedJunkyardRebuildFlow extends ConfigurableFlowBase<A
         FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY, FLAG_DROP_SMALL_BUSINESS, FLAG_DROP_INCORRECT_DATA,
                 FLAG_DROP_ORPHAN_ENTRY);
 
-        node = node.filter(FLAG_DROP_OOB_ENTRY + " != null || " + FLAG_DROP_SMALL_BUSINESS + " != null || "
-                + FLAG_DROP_INCORRECT_DATA + " != null || " + FLAG_DROP_ORPHAN_ENTRY + " != null ", fieldList);
+        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 1 || " + FLAG_DROP_SMALL_BUSINESS + " == 1 || "
+                + FLAG_DROP_INCORRECT_DATA + " == 1 || " + FLAG_DROP_ORPHAN_ENTRY + " == 1 ", fieldList);
 
         return node;
     }
-
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
         return AccountMasterSeedMarkerConfig.class;

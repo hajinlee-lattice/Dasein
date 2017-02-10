@@ -24,8 +24,8 @@ public class AccountMasterSeedCleanupRebuildFlow extends ConfigurableFlowBase<Ac
         FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY, FLAG_DROP_SMALL_BUSINESS, FLAG_DROP_INCORRECT_DATA,
                 FLAG_DROP_LESS_POPULAR_DOMAIN, FLAG_DROP_ORPHAN_ENTRY);
 
-        node = node.filter(FLAG_DROP_OOB_ENTRY + " == null && " + FLAG_DROP_SMALL_BUSINESS + " == null && "
-                + FLAG_DROP_INCORRECT_DATA + " == null && " + FLAG_DROP_ORPHAN_ENTRY + " == null ", fieldList);
+        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 0 && " + FLAG_DROP_SMALL_BUSINESS + " == 0 && "
+                + FLAG_DROP_INCORRECT_DATA + " == 0 && " + FLAG_DROP_ORPHAN_ENTRY + " == 0 ", fieldList);
 
         node = node.discard(fieldList);
         return node;
