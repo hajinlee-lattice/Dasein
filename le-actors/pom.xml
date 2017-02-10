@@ -9,7 +9,7 @@
 
     <properties>
         <component-name>actors</component-name>
-        <com.typesafe.akka-version>2.4.16</com.typesafe.akka-version>
+        <com.typesafe.akka-version>2.3.7</com.typesafe.akka-version> <!-- to be compatible with flink 1.0.3 -->
         <com.typesafe.akka-scala-version>2.11</com.typesafe.akka-scala-version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
         <le.domain.version>3.2.0-SNAPSHOT</le.domain.version>

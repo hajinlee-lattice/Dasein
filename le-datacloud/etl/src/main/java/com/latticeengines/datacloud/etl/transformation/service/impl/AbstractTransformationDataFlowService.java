@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import org.springframework.context.ApplicationContext;
 
 public abstract class AbstractTransformationDataFlowService {
 
@@ -48,6 +49,9 @@ public abstract class AbstractTransformationDataFlowService {
     @Autowired
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
+    @Autowired
+    private ApplicationContext appCtx;
+
     protected DataFlowContext dataFlowContext(Source source, Map<String, Table> sources, DataFlowParameters parameters,
                                               String outputDir) {
         String sourceName = source.getSourceName();
@@ -69,6 +73,7 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, getJobProperties());
         ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
+        ctx.setProperty(DataFlowProperty.APPCTX, appCtx);
 
         return ctx;
     }
