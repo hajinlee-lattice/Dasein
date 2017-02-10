@@ -271,6 +271,35 @@ CREATE PROCEDURE `UpdateModelSummaryDownloadFlag`()
   END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS `CreateCustomization`;
+
+DELIMITER //
+CREATE PROCEDURE `CreateCustomization`()
+  BEGIN
+    IF NOT EXISTS(SELECT * 
+              FROM information_schema.STATISTICS
+              WHERE TABLE_SCHEMA = 'PLS_MultiTenant'
+              AND TABLE_NAME = 'ATTRIBUTE_CUSTOMIZATION_PROPERTY'
+              AND INDEX_NAME = 'IX_TENANT_ATTRIBUTENAME_USECASE')
+    THEN
+      create table `ATTRIBUTE_CUSTOMIZATION_PROPERTY` (`PID` bigint not null auto_increment unique, `ATTRIBUTE_NAME` varchar(100) not null, `CATEGORY_NAME` varchar(255) not null, `PROPERTY_NAME` varchar(255) not null, `PROPERTY_VALUE` varchar(255), `TENANT_PID` bigint not null, `USE_CASE` varchar(255) not null, FK_TENANT_ID bigint not null, primary key (`PID`), unique (`TENANT_PID`, `ATTRIBUTE_NAME`, `USE_CASE`, `CATEGORY_NAME`, `PROPERTY_NAME`));
+      create index IX_TENANT_ATTRIBUTENAME_USECASE on `ATTRIBUTE_CUSTOMIZATION_PROPERTY` (`ATTRIBUTE_NAME`, FK_TENANT_ID, `USE_CASE`);
+      alter table `ATTRIBUTE_CUSTOMIZATION_PROPERTY` add index FKBFFD520436865BC (FK_TENANT_ID), add constraint FKBFFD520436865BC foreign key (FK_TENANT_ID) references `TENANT` (`TENANT_PID`);
+    END IF;
+    IF NOT EXISTS(SELECT * 
+              FROM information_schema.STATISTICS
+              WHERE TABLE_SCHEMA = 'PLS_MultiTenant'
+              AND TABLE_NAME = 'CATEGORY_CUSTOMIZATION_PROPERTY'
+              AND INDEX_NAME = 'IX_TENANT_ATTRIBUTECATEGORY_USECASE')
+    THEN
+      create table `CATEGORY_CUSTOMIZATION_PROPERTY` (`PID` bigint not null auto_increment unique, `CATEGORY_NAME` varchar(255) not null, `PROPERTY_NAME` varchar(255) not null, `PROPERTY_VALUE` varchar(255), `TENANT_PID` bigint not null, `USE_CASE` varchar(255) not null, FK_TENANT_ID bigint not null, primary key (`PID`), unique (`TENANT_PID`, `USE_CASE`, `CATEGORY_NAME`, `PROPERTY_NAME`));
+      create index IX_TENANT_ATTRIBUTECATEGORY_USECASE on `CATEGORY_CUSTOMIZATION_PROPERTY` (FK_TENANT_ID, `USE_CASE`);
+      alter table `CATEGORY_CUSTOMIZATION_PROPERTY` add index FK60EAD4236865BC (FK_TENANT_ID), add constraint FK60EAD4236865BC foreign key (FK_TENANT_ID) references `TENANT` (`TENANT_PID`);
+    END IF;
+  END //
+DELIMITER ;
+
+
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
@@ -282,6 +311,7 @@ CREATE PROCEDURE `UpdateSchema`()
     CALL `UpdateModelQualityAlgorithm`();
     CALL `UpdateModelSummary`();
     CALL `UpdateModelSummaryDownloadFlag`();
+    CALL `CreateCustomization`();
 
   END //
 DELIMITER ;

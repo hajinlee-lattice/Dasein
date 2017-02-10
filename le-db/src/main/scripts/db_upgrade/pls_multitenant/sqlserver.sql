@@ -88,5 +88,27 @@ BEGIN
   CREATE INDEX IX_TENANT_ID on [MODEL_SUMMARY_DOWNLOAD_FLAGS] ([Tenant_ID]);
 END
 
+IF NOT EXISTS(
+  SELECT *
+  FROM sys.columns
+  WHERE [object_id] = OBJECT_ID(N'ATTRIBUTE_CUSTOMIZATION_PROPERTY'))
+  BEGIN
+    create table [ATTRIBUTE_CUSTOMIZATION_PROPERTY] ([PID] bigint identity not null unique, [ATTRIBUTE_NAME] nvarchar(100) not null, [CATEGORY_NAME] nvarchar(255) not null, [PROPERTY_NAME] nvarchar(255) not null, [PROPERTY_VALUE] nvarchar(255), [TENANT_PID] bigint not null, [USE_CASE] nvarchar(255) not null, FK_TENANT_ID bigint not null, primary key ([PID]), unique ([TENANT_PID], [ATTRIBUTE_NAME], [USE_CASE], [CATEGORY_NAME], [PROPERTY_NAME]));
+    create index IX_TENANT_ATTRIBUTENAME_USECASE on [ATTRIBUTE_CUSTOMIZATION_PROPERTY] ([ATTRIBUTE_NAME], FK_TENANT_ID, [USE_CASE]);
+    alter table [ATTRIBUTE_CUSTOMIZATION_PROPERTY] add constraint FKBFFD520436865BC foreign key (FK_TENANT_ID) references [TENANT] on delete cascade;
+    create nonclustered index FKBFFD520436865BC on [ATTRIBUTE_CUSTOMIZATION_PROPERTY] (FK_TENANT_ID)
+END
+
+IF NOT EXISTS(
+  SELECT *
+  FROM sys.columns
+  WHERE [object_id] = OBJECT_ID(N'CATEGORY_CUSTOMIZATION_PROPERTY'))
+  BEGIN
+    create table [CATEGORY_CUSTOMIZATION_PROPERTY] ([PID] bigint identity not null unique, [CATEGORY_NAME] nvarchar(255) not null, [PROPERTY_NAME] nvarchar(255) not null, [PROPERTY_VALUE] nvarchar(255), [TENANT_PID] bigint not null, [USE_CASE] nvarchar(255) not null, FK_TENANT_ID bigint not null, primary key ([PID]), unique ([TENANT_PID], [USE_CASE], [CATEGORY_NAME], [PROPERTY_NAME]));
+    create index IX_TENANT_ATTRIBUTECATEGORY_USECASE on [CATEGORY_CUSTOMIZATION_PROPERTY] (FK_TENANT_ID, [USE_CASE]);
+    alter table [CATEGORY_CUSTOMIZATION_PROPERTY] add constraint FK60EAD4236865BC foreign key (FK_TENANT_ID) references [TENANT] on delete cascade;
+    create nonclustered index FK60EAD4236865BC on [CATEGORY_CUSTOMIZATION_PROPERTY] (FK_TENANT_ID)
+END
+
 GO
 

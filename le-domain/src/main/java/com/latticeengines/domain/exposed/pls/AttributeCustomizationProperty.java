@@ -73,7 +73,7 @@ public class AttributeCustomizationProperty implements HasPid, HasName, HasTenan
     private String categoryName;
 
     @JsonProperty("property_name")
-    @Column(name = "PROPERTY_NAME")
+    @Column(name = "PROPERTY_NAME", nullable = false)
     private String propertyName;
 
     @JsonProperty("property_value")
