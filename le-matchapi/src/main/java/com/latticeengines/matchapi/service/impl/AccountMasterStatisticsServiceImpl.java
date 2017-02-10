@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
@@ -52,6 +54,9 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
     @Value("${datacloud.core.accountmasterstats.locationbased}")
     private boolean isLocationBased;
+
+    @Value("${datacloud.core.accountmasterstats.numericbuckets.enabled:true}")
+    private boolean isNumericbucketEnabled;
 
     @Autowired
     private AccountMasterFactEntityMgr accountMasterFactEntityMgr;
@@ -121,6 +126,10 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             populateDummyBuckets(cube);
             cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
                     query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
+
+            if (isNumericbucketEnabled) {
+                cleanupNumericBuckets(cube);
+            }
             return cube;
         } catch (IOException e) {
             throw new RuntimeException(
@@ -412,4 +421,28 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         }
     }
 
+    private void cleanupNumericBuckets(AccountMasterCube cube) {
+        if (MapUtils.isEmpty(cube.getStatistics())) {
+            return;
+        }
+
+        List<Bucket> emptyBucket = new ArrayList<Bucket>();
+
+        for (String attr : cube.getStatistics().keySet()) {
+            AttributeStatistics attrStats = cube.getStatistics().get(attr);
+            if (attrStats.getRowBasedStatistics() != null) {
+                AttributeStatsDetails st = attrStats.getRowBasedStatistics();
+                if (st.getBuckets().getType() == BucketType.Numerical) {
+                    st.getBuckets().setBucketList(emptyBucket);
+                }
+            }
+            if (attrStats.getUniqueLocationBasedStatistics() != null) {
+                AttributeStatsDetails st = attrStats.getUniqueLocationBasedStatistics();
+                if (st.getBuckets().getType() == BucketType.Numerical) {
+                    st.getBuckets().setBucketList(emptyBucket);
+                }
+            }
+        }
+
+    }
 }
