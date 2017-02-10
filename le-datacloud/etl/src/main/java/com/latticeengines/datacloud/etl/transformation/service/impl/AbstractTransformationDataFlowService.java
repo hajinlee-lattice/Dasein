@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
@@ -18,7 +19,6 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import org.springframework.context.ApplicationContext;
 
 public abstract class AbstractTransformationDataFlowService {
 
@@ -88,6 +88,8 @@ public abstract class AbstractTransformationDataFlowService {
                 "org.apache.hadoop.io.compress.SnappyCodec");
         jobProperties.put("tez.runtime.compress", "true");
         jobProperties.put("tez.runtime.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
+        jobProperties.put("tez.use.cluster.hadoop-libs", "true");
+        jobProperties.put("tez.task.log.level", "DEBUG");
         return jobProperties;
     }
 
