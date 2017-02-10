@@ -18,7 +18,7 @@
                     </div>
                 </li>
                 <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
-                    <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
+                    <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal || vm.metadata.toggle.show.enabled || vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted  || vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls}">
                         <i class="fa fa-filter"></i>
                     </h2>
                     <ul class="dropdown">
@@ -225,10 +225,6 @@
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length > 1 && vm.subcategory">
                 <span ng-click="vm.subcategory = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
             </div>
-            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length < 2 && vm.subcategory">
-                <span ng-click="vm.queryText = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span>  | {{vm.subcategory}}
-            </div>
-
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
@@ -242,7 +238,7 @@
                 <li class="box" 
                     ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category] 
                         | filter: vm.searchFields
-                        | filter: vm.enrichmentsFilter
+                        | filter: vm.enrichmentsFilter()
                         | orderBy: vm.sortOrder()))
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                         | limitTo: vm.pagesize 
