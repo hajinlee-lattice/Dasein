@@ -292,7 +292,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             PipelineTransformationConfiguration transConf) {
         for (int i = 0; i < steps.length; i++) {
             String slackMessage = String.format("Started step %d at %s", i, new Date().toString());
-            sendSlack(transConf.getName() + "[" + progress.getYarnAppId() + "]", slackMessage, "", transConf);
+            sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, "", transConf);
             TransformStep step = steps[i];
             Transformer transformer = step.getTransformer();
             try {
@@ -313,7 +313,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                         // failed message
                         slackMessage = String.format("Failed at step %d after %s :sob:", i,
                                 DurationFormatUtils.formatDurationHMS(stepDuration));
-                        sendSlack(transConf.getName() + "[" + progress.getYarnAppId() + "]", slackMessage,
+                        sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
                                 SLACK_COLOR_DANGER, transConf);
                         updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
                         return false;
@@ -321,7 +321,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                     // success message
                     slackMessage = String.format("Step %d finished after %s :smile:", i,
                             DurationFormatUtils.formatDurationHMS(stepDuration));
-                    sendSlack(transConf.getName() + "[" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
+                    sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
                             transConf);
 
                     saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
