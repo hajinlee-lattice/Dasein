@@ -1,8 +1,11 @@
 package com.latticeengines.pls.controller;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -27,6 +30,26 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
         request.getRecord().put("Domain", "www.google.com");
         CompanyProfile profile = restTemplate.postForObject(url, request, CompanyProfile.class);
         assertNotNull(profile);
+        assertNotNull(profile.getAttributes());
+        assertFalse(MapUtils.isEmpty(profile.getAttributes()));
+        assertNotNull(profile.getCompanyInfo());
+        assertFalse(MapUtils.isEmpty(profile.getCompanyInfo()));
+        assertNotNull(profile.getMatchLogs());
+        assertFalse(CollectionUtils.isEmpty(profile.getMatchLogs()));
+
+        for (String attr : profile.getAttributes().keySet()) {
+            Object value = profile.getAttributes().get(attr);
+
+            assertNotNull(value);
+            assertFalse("Attr: " + attr, value.equals("null"));
+        }
+
+        for (String attr : profile.getCompanyInfo().keySet()) {
+            Object value = profile.getCompanyInfo().get(attr);
+
+            assertNotNull(value);
+            assertFalse("Attr: " + attr, value.equals("null"));
+        }
     }
 
     @Test(groups = "deployment")

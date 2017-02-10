@@ -1,18 +1,18 @@
 package com.latticeengines.domain.exposed.ulysses;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CompanyProfile {
 
     @JsonProperty("attributes")
-    private Map<String, String> attributes = new HashMap<>();
+    private Map<String, Object> attributes = new HashMap<>();
 
     @JsonProperty("timestamp")
     private String timestamp;
@@ -23,11 +23,14 @@ public class CompanyProfile {
     @JsonProperty("matchLogs")
     private List<String> matchLogs = new ArrayList<>();
 
-    public Map<String, String> getAttributes() {
+    @JsonProperty("companyInfo")
+    private Map<String, Object> companyInfo;
+
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 
@@ -54,4 +57,13 @@ public class CompanyProfile {
     public void setMatchLogs(List<String> matchLogs) {
         this.matchLogs = matchLogs;
     }
+
+    public Map<String, Object> getCompanyInfo() {
+        return companyInfo;
+    }
+
+    public void setCompanyInfo(Map<String, Object> companyInfo) {
+        this.companyInfo = companyInfo;
+    }
+
 }

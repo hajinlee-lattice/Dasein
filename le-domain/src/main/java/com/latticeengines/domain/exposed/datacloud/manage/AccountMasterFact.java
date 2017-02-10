@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
-
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -19,14 +18,12 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "AccountMasterFact", uniqueConstraints = {@UniqueConstraint(columnNames = {
-        "Location", //
+@Table(name = "AccountMasterFact", uniqueConstraints = { @UniqueConstraint(columnNames = { "Location", //
         "Industry", //
         "NumEmpRange", //
         "RevRange", //
         "NumLocRange", //
-        "Category" })
-})
+        "Category" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountMasterFact implements HasPid {
 
@@ -69,6 +66,25 @@ public class AccountMasterFact implements HasPid {
     @Lob
     @Column(name = "EncodedCube", nullable = false)
     private String encodedCube;
+
+    @Column(name = "GroupTotal", nullable = true)
+    private Long groupTotal;
+
+    @Lob
+    @Column(name = "AttrCount1", nullable = true)
+    private String attrCount1;
+
+    @Lob
+    @Column(name = "AttrCount2", nullable = true)
+    private String attrCount2;
+
+    @Lob
+    @Column(name = "AttrCount3", nullable = true)
+    private String attrCount3;
+
+    @Lob
+    @Column(name = "AttrCount4", nullable = true)
+    private String attrCount4;
 
     @Override
     public Long getPid() {
@@ -134,5 +150,45 @@ public class AccountMasterFact implements HasPid {
 
     public void setEncodedCube(String encodedCube) {
         this.encodedCube = encodedCube;
+    }
+
+    public Long getGroupTotal() {
+        return groupTotal;
+    }
+
+    public void setGroupTotal(Long groupTotal) {
+        this.groupTotal = groupTotal;
+    }
+
+    public String getAttrCount1() {
+        return attrCount1;
+    }
+
+    public void setAttrCount1(String attrCount1) {
+        this.attrCount1 = attrCount1;
+    }
+
+    public String getAttrCount2() {
+        return attrCount2;
+    }
+
+    public void setAttrCount2(String attrCount2) {
+        this.attrCount2 = attrCount2;
+    }
+
+    public String getAttrCount3() {
+        return attrCount3;
+    }
+
+    public void setAttrCount3(String attrCount3) {
+        this.attrCount3 = attrCount3;
+    }
+
+    public String getAttrCount4() {
+        return attrCount4;
+    }
+
+    public void setAttrCount4(String attrCount4) {
+        this.attrCount4 = attrCount4;
     }
 }

@@ -1,8 +1,11 @@
 package com.latticeengines.ulysses.controller;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -48,5 +51,25 @@ public class CompanyProfileResourceDeploymentTestNG extends UlyssesDeploymentTes
         body.put("ignoreMe", "foo");
         CompanyProfile profile = getOAuth2RestTemplate().postForObject(url, body, CompanyProfile.class);
         assertNotNull(profile);
+        assertNotNull(profile.getAttributes());
+        assertFalse(MapUtils.isEmpty(profile.getAttributes()));
+        assertNotNull(profile.getCompanyInfo());
+        assertFalse(MapUtils.isEmpty(profile.getCompanyInfo()));
+        assertNotNull(profile.getMatchLogs());
+        assertFalse(CollectionUtils.isEmpty(profile.getMatchLogs()));
+
+        for (String attr : profile.getAttributes().keySet()) {
+            Object value = profile.getAttributes().get(attr);
+
+            assertNotNull(value);
+            assertFalse("Attr: " + attr, value.equals("null"));
+        }
+
+        for (String attr : profile.getCompanyInfo().keySet()) {
+            Object value = profile.getCompanyInfo().get(attr);
+
+            assertNotNull(value);
+            assertFalse("Attr: " + attr, value.equals("null"));
+        }
     }
 }

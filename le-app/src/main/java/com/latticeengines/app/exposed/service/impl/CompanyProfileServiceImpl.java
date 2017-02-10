@@ -1,21 +1,27 @@
 package com.latticeengines.app.exposed.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.CompanyProfileService;
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
@@ -50,6 +56,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             datum.add(entry.getValue());
         }
         data.add(datum);
+        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(customerSpace,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+
+        considerInternalAttributes = considerInternalAttributes == null //
+                ? Boolean.FALSE //
+                : considerInternalAttributes;
 
         Tenant tenant = new Tenant(customerSpace.toString());
         matchInput.setTenant(tenant);
@@ -65,7 +77,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
-        return createCompanyProfile(matchOutput);
+        return createCompanyProfile(matchOutput, dataCloudVersion, considerInternalAttributes);
     }
 
     private FieldInterpretation getFieldInterpretation(String fieldName) {
@@ -77,13 +89,54 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private CompanyProfile createCompanyProfile(MatchOutput matchOutput) {
+    private CompanyProfile createCompanyProfile(MatchOutput matchOutput, String dataCloudVersion,
+            Boolean considerInternalAttributes) {
         CompanyProfile profile = new CompanyProfile();
+
+        Map<String, Object> enrichValueMap = new HashMap<String, Object>();
+        Map<String, Object> nonNullEnrichValueMap = new HashMap<>();
+        Map<String, Object> nonNullInternalEnrichValueMap = new HashMap<>();
+
         List<String> outputFields = matchOutput.getOutputFields();
         List<Object> outputRecords = matchOutput.getResult().get(0).getOutput();
         for (int i = 0; i < outputRecords.size(); i++) {
-            profile.getAttributes().put(outputFields.get(i), String.valueOf(outputRecords.get(i)));
+            enrichValueMap.put(outputFields.get(i), String.valueOf(outputRecords.get(i)));
         }
+
+        if (!MapUtils.isEmpty(enrichValueMap)) {
+            for (String enrichKey : enrichValueMap.keySet()) {
+                Object value = enrichValueMap.get(enrichKey);
+                if (value != null && !value.equals("null")) {
+                    nonNullEnrichValueMap.put(enrichKey, value);
+                }
+            }
+
+            List<ColumnMetadata> enrichmentColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
+                    dataCloudVersion);
+
+            List<ColumnMetadata> requiredEnrichmentMetadataList = new ArrayList<>();
+
+            for (ColumnMetadata attr : enrichmentColumns) {
+                if (nonNullEnrichValueMap.containsKey(attr.getColumnName())) {
+                    requiredEnrichmentMetadataList.add(attr);
+                    if (attr.isCanInternalEnrich()) {
+                        nonNullInternalEnrichValueMap.put(attr.getColumnName(),
+                                nonNullEnrichValueMap.get(attr.getColumnName()));
+                    }
+                }
+            }
+            profile.setCompanyInfo(nonNullInternalEnrichValueMap);
+
+            if (!considerInternalAttributes) {
+                for (String key : nonNullInternalEnrichValueMap.keySet()) {
+                    nonNullEnrichValueMap.remove(key);
+                }
+            }
+
+        }
+
+        profile.setCompanyInfo(nonNullInternalEnrichValueMap);
+        profile.setAttributes(nonNullEnrichValueMap);
         profile.setTimestamp(matchOutput.getFinishedAt().toString());
         profile.setMatchLogs(matchOutput.getResult().get(0).getMatchLogs());
         profile.setMatchErrorMessages(matchOutput.getResult().get(0).getErrorMessages());
