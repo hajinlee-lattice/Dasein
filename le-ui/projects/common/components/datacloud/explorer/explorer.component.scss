@@ -146,6 +146,7 @@
                         font-size: 20px;
                         .category-label {
                             max-height: 45px;
+                            padding-right: 1.7em;
                         }
                     }
                     .count {
@@ -168,7 +169,8 @@
                 }
                 @media screen and (max-width: 850px) {
                     .category-label {
-                        display: none;
+                        /* This negatively affects the iframe Insights and causes label to dissapear */
+                        /*display: none;*/
                     }
                 }
             }
