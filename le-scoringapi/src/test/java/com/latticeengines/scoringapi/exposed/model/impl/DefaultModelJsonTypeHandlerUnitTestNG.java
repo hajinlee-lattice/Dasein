@@ -24,16 +24,16 @@ public class DefaultModelJsonTypeHandlerUnitTestNG {
         Assert.assertNotNull(scoringArtifacts);
         Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 4), BucketName.A);
         Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 5), BucketName.A);
-        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 10), BucketName.A);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 10), BucketName.B);
         Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 11), BucketName.B);
-        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 40), BucketName.B);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 40), BucketName.C);
         Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 50), BucketName.C);
         Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 99), BucketName.C);
         Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 100), BucketName.C);
 
         scoringArtifacts = new ScoringArtifacts(null, null, null, null, null, null, null, null, null,
                 Collections.emptyList());
-        Assert.assertNull(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 100));
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 100), BucketName.A);
 
     }
 
@@ -41,11 +41,11 @@ public class DefaultModelJsonTypeHandlerUnitTestNG {
         List<BucketMetadata> bucketMetadataList = new ArrayList<BucketMetadata>();
         BucketMetadata bucket1 = new BucketMetadata();
         bucket1.setBucketName(BucketName.A);
-        bucket1.setLeftBoundScore(10);
+        bucket1.setLeftBoundScore(9);
         bucket1.setRightBoundScore(5);
         BucketMetadata bucket2 = new BucketMetadata();
         bucket2.setBucketName(BucketName.B);
-        bucket2.setLeftBoundScore(40);
+        bucket2.setLeftBoundScore(39);
         bucket2.setRightBoundScore(10);
         BucketMetadata bucket3 = new BucketMetadata();
         bucket3.setBucketName(BucketName.C);
