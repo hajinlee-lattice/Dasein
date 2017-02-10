@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,14 +11,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -50,6 +48,8 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     private static final Log log = LogFactory.getLog(PipelineTransformationService.class);
     private static final String SLACK_BOT = "PipelineTransformer";
+    private static final String SLACK_COLOR_GOOD = "good";
+    private static final String SLACK_COLOR_DANGER = "danger";
     private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
@@ -291,9 +291,8 @@ public class PipelineTransformationService extends AbstractTransformationService
     private boolean executeTransformSteps(TransformationProgress progress, TransformStep[] steps, String workflowDir,
             PipelineTransformationConfiguration transConf) {
         for (int i = 0; i < steps.length; i++) {
-            String slackMessage = String.format("Started step %d of the transformation %s [%s] at %s", i,
-                    transConf.getName(), progress.getYarnAppId(), new Date().toString());
-            sendSlack(slackMessage, transConf);
+            String slackMessage = String.format("Started step %d at %s", i, new Date().toString());
+            sendSlack(transConf.getName() + "[" + progress.getYarnAppId() + "]", slackMessage, "", transConf);
             TransformStep step = steps[i];
             Transformer transformer = step.getTransformer();
             try {
@@ -312,17 +311,18 @@ public class PipelineTransformationService extends AbstractTransformationService
                     step.setElapsedTime(stepDuration / 1000);
                     if (!succeeded) {
                         // failed message
-                        slackMessage = String.format("Failed to transform %s [%s] at step %d after %s :sob:",
-                                transConf.getName(), progress.getYarnAppId(), i,
+                        slackMessage = String.format("Failed at step %d after %s :sob:", i,
                                 DurationFormatUtils.formatDurationHMS(stepDuration));
-                        sendSlack(slackMessage, transConf);
+                        sendSlack(transConf.getName() + "[" + progress.getYarnAppId() + "]", slackMessage,
+                                SLACK_COLOR_DANGER, transConf);
                         updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
                         return false;
                     }
                     // success message
-                    slackMessage = String.format("Step %d of the transform %s [%s] finished after %s :smile:", i,
-                            transConf.getName(), progress.getYarnAppId(), DurationFormatUtils.formatDurationHMS(stepDuration));
-                    sendSlack(slackMessage, transConf);
+                    slackMessage = String.format("Step %d finished after %s :smile:", i,
+                            DurationFormatUtils.formatDurationHMS(stepDuration));
+                    sendSlack(transConf.getName() + "[" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
+                            transConf);
 
                     saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
                     cleanupWorkflowDir(progress, workflowDir);
@@ -575,20 +575,36 @@ public class PipelineTransformationService extends AbstractTransformationService
         return JsonUtils.deserialize(confStr, getConfigurationClass());
     }
 
-    private void sendSlack(String message, PipelineTransformationConfiguration transConf) {
+    private void sendSlack(String title, String text, String color, PipelineTransformationConfiguration transConf) {
         if (StringUtils.isNotEmpty(slackWebhookUrl) && transConf.isEnableSlack()) {
             try {
-                slackRestTemplate.postForObject(slackWebhookUrl, slackPayload(message), String.class);
+                String payload = slackPayload(title, text, color);
+                slackRestTemplate.postForObject(slackWebhookUrl, payload, String.class);
             } catch (Exception e) {
                 log.error("Failed to send slack message.", e);
             }
         }
     }
 
-    private String slackPayload(String message) {
+    private String slackPayload(String title, String text, String color) {
         ObjectNode objectNode = OM.createObjectNode();
         objectNode.put("username", SLACK_BOT);
-        objectNode.put("text", "@channel [" + leEnv + "-" + leStack + "] " + message);
+        ArrayNode attachments = OM.createArrayNode();
+        ObjectNode attachment = OM.createObjectNode();
+        String pretext = "[" + leEnv + "-" + leStack + "]";
+        if (SLACK_COLOR_DANGER.equals(color)) {
+            pretext = "<!channel> " + pretext;
+        }
+        attachment.put("pretext", pretext);
+        if (StringUtils.isNotEmpty(color)) {
+            attachment.put("color", color);
+        }
+        if (StringUtils.isNotEmpty(title)) {
+            attachment.put("title", title);
+        }
+        attachment.put("text", text);
+        attachments.add(attachment);
+        objectNode.put("attachments", attachments);
         return JsonUtils.serialize(objectNode);
     }
 
