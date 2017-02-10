@@ -47,9 +47,23 @@ angular.module('insightsApp')
                         window.addEventListener("message", function (event){
                             console.log('message from LPI:', event.data);
 
-                            var data = ((typeof event.data).toLowerCase() == 'string')
-                                ? JSON.parse(event.data)
-                                : event.data;
+                            var data = {
+  "Authentication": "d78a1a87-b565-4f11-879c-8e7bdf58a11b",
+  "request": {
+    "modelId": "",
+    "performEnrichment": true,
+    "record": {
+      "CompanyName": "21st Century Fox",
+      "Email": "",
+      "Domain": "https://www.21cf.com/",
+      "City": "New York",
+      "State": "NY",
+      "PostalCode": "10036-8701",
+      "Country": "United States",
+      "PhoneNumber": "9-(288)984-0886"
+    }
+  }
+}
 
                             var timestamp = new Date().getTime();
 
