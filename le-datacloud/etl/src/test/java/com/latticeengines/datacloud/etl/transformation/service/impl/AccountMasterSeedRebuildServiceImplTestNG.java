@@ -5,8 +5,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +32,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 
 public class AccountMasterSeedRebuildServiceImplTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+    private static final Log log = LogFactory.getLog(AccountMasterSeedRebuildServiceImplTestNG.class);
+
+    private static final String LATTICEID = "LatticeID";
+    private static final String KEY = "Key";
     @Autowired
     PipelineSource source;
 
@@ -182,5 +191,89 @@ public class AccountMasterSeedRebuildServiceImplTestNG
 
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+        log.info("Start to verify records one by one.");
+        int rowNum = 0;
+        Object[][] expectedData = {
+                { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
+                        "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
+                        "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
+                        "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "c.com", "Y", "0", 7L, 1485366555040L },
+                { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
+                        "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
+                        "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
+                        "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "e.com", "N", "0", 8L, 1485366555040L },
+                { null, null, null, null, null, null, 1, null, "Y", "LE_NULL_CITY_2", null, "LE_NULL_NAME_2", null,
+                        null, "LE_NULL_STATE_2", null, null, null, "BRAZIL", "d.com", "Y", null, 3L, 1485366555040L },
+                { null, null, null, null, null, null, 1, null, "Y", "LE_NULL_CITY_2", null, "LE_NULL_NAME_2", null,
+                        null, "LE_NULL_STATE_2", null, null, null, "BRAZIL", "T_d.com", "Y", null, 11L,
+                        1485366555040L },
+                { "2DnB_2_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_2_01_COMPANY_PHONE",
+                        "DnB_2_01_EMPLOYEE_RANGE", "DnB_2_01_COMPANY_DESCRIPTION", "DnB_2_01_ZIPCODE", 3,
+                        "DnB_2_01_SIC_CODE", "Y", "DnB_2_01_CITY", "DnB_2_01_INDUSTRY", "DnB_2_01_NAME", null, "201",
+                        "DnB_2_01_STATE", "DnB_2_01_NAICS_CODE", "DnB_2_01_REVENUE_RANGE", "DnB_2_01_ADDR", "USA",
+                        "T_b.com", "N", "0", 13L, 1485366555040L },
+                { "DnB_04_PRIMARY_DUNS", "germany", "DnB_04_COMPANY_PHONE", "DnB_04_EMPLOYEE_RANGE",
+                        "DnB_04_COMPANY_DESCRIPTION", "DnB_04_ZIPCODE", 6, "DnB_04_SIC_CODE", "Y", "DnB_04_CITY",
+                        "DnB_04_INDUSTRY", "DnB_04_NAME", null, "04", "DnB_04_STATE", "DnB_04_NAICS_CODE",
+                        "DnB_04_REVENUE_RANGE", "DnB_04_ADDR", "GERMANY", null, "N", "0", 6L, 1485366555040L },
+                { "2DnB_2_04_PRIMARY_DUNS", "germany", "DnB_2_04_COMPANY_PHONE", "DnB_2_04_EMPLOYEE_RANGE",
+                        "DnB_2_04_COMPANY_DESCRIPTION", "DnB_2_04_ZIPCODE", 6, "DnB_2_04_SIC_CODE", "Y",
+                        "DnB_2_04_CITY", "DnB_2_04_INDUSTRY", "DnB_2_04_NAME", null, "204", "DnB_2_04_STATE",
+                        "DnB_2_04_NAICS_CODE", "DnB_2_04_REVENUE_RANGE", "DnB_2_04_ADDR", "GERMANY", null, "N", "0",
+                        14L, 1485366555040L },
+                { "DnB_02_PRIMARY_DUNS", "ca", "DnB_02_COMPANY_PHONE", "DnB_02_EMPLOYEE_RANGE",
+                        "DnB_02_COMPANY_DESCRIPTION", "DnB_02_ZIPCODE", 4, "DnB_02_SIC_CODE", "Y", "DnB_02_CITY",
+                        "DnB_02_INDUSTRY", "DnB_02_NAME", null, "02", "DnB_02_STATE", "DnB_02_NAICS_CODE",
+                        "DnB_02_REVENUE_RANGE", "DnB_02_ADDR", "CANADA", "a.com", "Y", "0", 2L, 1485366555040L },
+                { "DnB_03_PRIMARY_DUNS", "people's republic of china", "DnB_03_COMPANY_PHONE", "DnB_03_EMPLOYEE_RANGE",
+                        "DnB_03_COMPANY_DESCRIPTION", "DnB_03_ZIPCODE", 5, "DnB_03_SIC_CODE", "Y", "DnB_03_CITY",
+                        "DnB_03_INDUSTRY", "DnB_03_NAME", null, "03", "DnB_03_STATE", "DnB_03_NAICS_CODE",
+                        "DnB_03_REVENUE_RANGE", "DnB_03_ADDR", "CHINA", "a.com", "Y", "0", 1L, 1485366555040L },
+                { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
+                        "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
+                        "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
+                        "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "a.com", "N", "0", 4L, 1485366555040L },
+                { "2DnB_2_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_2_01_COMPANY_PHONE",
+                        "DnB_2_01_EMPLOYEE_RANGE", "DnB_2_01_COMPANY_DESCRIPTION", "DnB_2_01_ZIPCODE", 3,
+                        "DnB_2_01_SIC_CODE", "Y", "DnB_2_01_CITY", "DnB_2_01_INDUSTRY", "DnB_2_01_NAME", null, "201",
+                        "DnB_2_01_STATE", "DnB_2_01_NAICS_CODE", "DnB_2_01_REVENUE_RANGE", "DnB_2_01_ADDR", "USA",
+                        "T_a.com", "Y", "0", 12L, 1485366555040L },
+                { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
+                        "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
+                        "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
+                        "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "b.com", "N", "0", 5L, 1485366555040L } };
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+
+            boolean foundMatchingRecord = false;
+            for (Object[] data : expectedData) {
+                int idx = 0;
+                boolean hasFieldMismatchInRecord = false;
+                for (Field field : record.getSchema().getFields()) {
+                    Object val = record.get(field.name());
+                    if (val instanceof Utf8) {
+                        val = ((Utf8) val).toString();
+                    }
+                    Object expectedVal = data[idx];
+                    System.out.print("[" + val + " - " + expectedVal + "], ");
+                    if ((val == null && expectedVal != null) //
+                            || (val != null && !val.equals(expectedVal))) {
+                        hasFieldMismatchInRecord = true;
+                        break;
+                    }
+                    idx++;
+                }
+
+                if (!hasFieldMismatchInRecord //
+                        || idx == record.getSchema().getFields().size()) {
+                    foundMatchingRecord = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(foundMatchingRecord);
+            rowNum++;
+        }
+        Assert.assertEquals(rowNum, 12);
+
     }
 }

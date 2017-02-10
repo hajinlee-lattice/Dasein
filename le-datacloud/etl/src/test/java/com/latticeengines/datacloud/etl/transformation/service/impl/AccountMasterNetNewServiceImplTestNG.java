@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +120,13 @@ public class AccountMasterNetNewServiceImplTestNG
         configuration.setSteps(steps);
 
         configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
+
+        try {
+            System.out.println(om.writeValueAsString(configuration));
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return configuration;
     }
 
@@ -157,9 +165,9 @@ public class AccountMasterNetNewServiceImplTestNG
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         Object[][] expectedData = {
-                { "101-250M", "N H S LANARKSHIRE", "General Government, Nec", "gov.scot", "1001-2500", 105098484,
+                { "101-250M", "N H S LANARKSHIRE", "General Government, Nec", "gov.scot", "1001-2500", 105098484L,
                         "COATBRIDGE", "1315568400", "LANARKSHIRE", "SCOTLAND", "Y" },
-                { ">10B", "Electrabel SA", "Electric Services", "electrabel.be", "2501-5000", 109977375, "Antwerpen",
+                { ">10B", "Electrabel SA", "Electric Services", "electrabel.be", "2501-5000", 109977375L, "Antwerpen",
                         "25186400", "ANTWERPEN", "BELGIUM", "Y" } };
         while (records.hasNext()) {
             GenericRecord record = records.next();
@@ -167,25 +175,31 @@ public class AccountMasterNetNewServiceImplTestNG
                     "LE_EMPLOYEE_RANGE", "LatticeID", "LDC_City", "LE_COMPANY_PHONE", "LDC_State", "LE_COUNTRY",
                     "LE_IS_PRIMARY_DOMAIN", };
 
-            boolean foundMatch = false;
+            boolean foundMatchingRecord = false;
             for (Object[] data : expectedData) {
                 int idx = 0;
-                boolean hasMismatch = false;
+                boolean hasFieldMismatchInRecord = false;
                 for (String fieldName : fieldNames) {
-                    Object val = record.get(idx);
-                    if (val.equals(data[idx])) {
-                        hasMismatch = true;
+                    Object val = record.get(fieldName);
+                    if (val instanceof Utf8) {
+                        val = ((Utf8) val).toString();
+                    }
+                    Object expectedVal = data[idx];
+                    System.out.print("[" + val + " - " + expectedVal + "], ");
+                    if (!val.equals(expectedVal)) {
+                        hasFieldMismatchInRecord = true;
                         break;
                     }
                     idx++;
                 }
 
-                foundMatch = !hasMismatch;
-                if (foundMatch) {
+                if (!hasFieldMismatchInRecord //
+                        || idx == fieldNames.length) {
+                    foundMatchingRecord = true;
                     break;
                 }
             }
-            Assert.assertTrue(foundMatch);
+            Assert.assertTrue(foundMatchingRecord);
             rowNum++;
         }
         Assert.assertEquals(rowNum, 2);
