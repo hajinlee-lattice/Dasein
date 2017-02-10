@@ -61,7 +61,7 @@ public class PipelineTransformationService extends AbstractTransformationService
     @Autowired
     private PipelineTransformationReportEntityMgr reportEntityMgr;
 
-    @Value("${datacloud.slack.webhook.url")
+    @Value("${datacloud.slack.webhook.url}")
     private String slackWebhookUrl;
 
     @Value("${common.le.environment}")
