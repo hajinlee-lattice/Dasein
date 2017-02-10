@@ -88,8 +88,7 @@ public abstract class AbstractTransformationDataFlowService {
                 "org.apache.hadoop.io.compress.SnappyCodec");
         jobProperties.put("tez.runtime.compress", "true");
         jobProperties.put("tez.runtime.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
-        jobProperties.put("tez.use.cluster.hadoop-libs", "true");
-        jobProperties.put("tez.task.log.level", "DEBUG");
+        jobProperties.put("tez.runtime.shuffle.parallel.copies", "1");
         return jobProperties;
     }
 
