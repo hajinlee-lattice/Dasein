@@ -331,8 +331,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 3);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
+//    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+//            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
     public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
