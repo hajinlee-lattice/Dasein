@@ -1,8 +1,10 @@
 package com.latticeengines.app.exposed.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -137,7 +139,28 @@ public class AttributePageProcessor {
         if (!skipTenantLevelCustomization) {
             attributeCustomizationService.addFlags(attributes);
         }
+        addImportanceOrdering(attributes);
         return attributes;
+    }
+    
+    private void addImportanceOrdering(List<LeadEnrichmentAttribute> attributes) {
+        // TODO: this is subject to change on AccountMasterColumn.
+        if (attributes == null) {
+            return;
+        }
+        Map<String, Integer> orderingMap = new HashMap<>();
+        orderingMap.put("LE_INDUSTRY", 100);
+        orderingMap.put("LE_REVENUE_RANGE", 90);
+        orderingMap.put("LE_EMPLOYEE_RANGE", 80);
+        orderingMap.put("LDC_Domain", 70);
+        orderingMap.put("LDC_Country", 60);
+        orderingMap.put("LDC_City", 50);
+        orderingMap.put("LDC_State", 40);
+        for (LeadEnrichmentAttribute attribute : attributes) {
+            if (orderingMap.containsKey(attribute.getFieldName())) {
+                attribute.setImportanceOrdering(orderingMap.get(attribute.getFieldName()));
+            }
+        }
     }
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,

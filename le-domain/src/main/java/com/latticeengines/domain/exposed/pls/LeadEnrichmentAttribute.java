@@ -54,6 +54,9 @@ public class LeadEnrichmentAttribute {
     @JsonProperty("AttributeFlagsMap")
     private Map<AttributeUseCase, String> attributeFlagsMap;
 
+    @JsonProperty("ImportanceOrdering")
+    private int importanceOrdering;
+    
     public String getDisplayName() {
         return displayName;
     }
@@ -172,5 +175,13 @@ public class LeadEnrichmentAttribute {
 
     public void setAttributeFlagsMap(Map<AttributeUseCase, String> attributeFlagsMap) {
         this.attributeFlagsMap = attributeFlagsMap;
+    }
+
+    public int getImportanceOrdering() {
+        return importanceOrdering;
+    }
+
+    public void setImportanceOrdering(int importanceOrdering) {
+        this.importanceOrdering = importanceOrdering;
     }
 }
