@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
         List<TransformationStepConfig> steps = new ArrayList<>();
 
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setBaseSources(Arrays.asList("AccountMasterSeed"));
+        step.setBaseSources(Collections.singletonList("AccountMasterSeed"));
         step.setTransformer("sourceDomainCleanupByDuTransformer");
         step.setConfiguration(getCleanupByDuConfig());
         step.setTargetSource(ACCOUNT_MASTER_SEED_CLEANED);

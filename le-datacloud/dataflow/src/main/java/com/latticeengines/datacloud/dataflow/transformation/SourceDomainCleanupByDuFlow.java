@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -7,9 +10,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupByDuBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.FillBlankDomainBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceDomainCleanupByDuTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.tuple.Fields;
 
 @Component("sourceDomainCleanupByDuFlow")
 public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDomainCleanupByDuTransformerConfig> {
@@ -21,12 +28,26 @@ public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDoma
         SourceDomainCleanupByDuTransformerConfig config = getTransformerConfig(parameters);
         Node source = addSource(parameters.getBaseTables().get(0));
         Node blankSource = source.filter(config.getDuField() + "==null", new FieldList(config.getDuField()));
+        blankSource = blankSource.renamePipe("blank");
+
         Node notBlankSource = source.filter(config.getDuField() + "!=null", new FieldList(config.getDuField()));
-        notBlankSource = notBlankSource.groupByAndBuffer(
-                new FieldList(config.getDuField()),
-                new DomainCleanupByDuBuffer(source.getFieldNames(), config.getDuField(), config.getDunsField(), config
-                        .getDomainField()));
-        source = blankSource.merge(notBlankSource);
+        notBlankSource = notBlankSource.renamePipe("notblank");
+        Fields duAndDomain = new Fields(
+                new String[] { config.getDuField(), DomainCleanupByDuBuffer.DU_PRIMARY_DOMAIN });
+        List<FieldMetadata> fms = new ArrayList<>();
+        fms.add(new FieldMetadata(config.getDuField(), String.class));
+        fms.add(new FieldMetadata(DomainCleanupByDuBuffer.DU_PRIMARY_DOMAIN, String.class));
+        Node duDomain = notBlankSource.groupByAndBuffer(new FieldList(config.getDuField()), new DomainCleanupByDuBuffer(
+                duAndDomain, config.getDuField(), config.getDunsField(), config.getDomainField()), fms);
+        duDomain = duDomain.renamePipe("dudomain");
+
+        Node join = notBlankSource.leftOuterJoin(config.getDuField(), duDomain, config.getDuField());
+        Fields joinNodeFields = new Fields(join.getFieldNames().toArray(new String[join.getFieldNames().size()]));
+        Node domainFilled = join.groupByAndBuffer(new FieldList(config.getDuField()),
+                new FillBlankDomainBuffer(joinNodeFields, config.getDomainField()));
+        domainFilled = domainFilled.retain(new FieldList(source.getFieldNames()));
+
+        source = blankSource.merge(domainFilled);
         return source;
     }
 

@@ -89,7 +89,7 @@ public abstract class AbstractTransformationDataFlowService {
         jobProperties.put("tez.runtime.compress", "true");
         jobProperties.put("tez.runtime.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
         jobProperties.put("tez.task.resource.memory.mb", "8192");
-        jobProperties.put("tez.task.resource.cpu.vcores", "1");
+        jobProperties.put("tez.task.resource.cpu.vcores", "2");
         return jobProperties;
     }
 
