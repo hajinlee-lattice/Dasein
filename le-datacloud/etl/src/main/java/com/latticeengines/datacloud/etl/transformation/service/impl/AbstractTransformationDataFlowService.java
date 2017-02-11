@@ -34,6 +34,12 @@ public abstract class AbstractTransformationDataFlowService {
     @Value("${datacloud.etl.cascading.partitions}")
     protected Integer cascadingPartitions;
 
+    @Value("${datacloud.etl.cascading.tez.task.mem.gb}")
+    private int taskMem;
+
+    @Value("${datacloud.etl.cascading.tez.task.mem.vcores}")
+    private int taskVcores;
+
     @Autowired
     protected DataTransformationService dataTransformationService;
 
@@ -88,8 +94,8 @@ public abstract class AbstractTransformationDataFlowService {
                 "org.apache.hadoop.io.compress.SnappyCodec");
         jobProperties.put("tez.runtime.compress", "true");
         jobProperties.put("tez.runtime.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
-        jobProperties.put("tez.task.resource.memory.mb", "8192");
-        jobProperties.put("tez.task.resource.cpu.vcores", "2");
+        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(taskMem * 1024));
+        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(taskVcores));
         return jobProperties;
     }
 
