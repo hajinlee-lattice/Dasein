@@ -38,21 +38,22 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.tez</groupId>
-                                    <artifactId>tez-api</artifactId>
+                                    <artifactId>tez-runtime-library</artifactId>
                                     <version>${tez.version}</version>
                                     <type>jar</type>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>target/classes</outputDirectory>
                                     <includes>**/*.class,**/*.xml</includes>
                                     <excludes>
-                                        org/apache/tez/http/HttpConnection.class
+                                        org/apache/tez/http/HttpConnection.class,
+                                        org/apache/tez/runtime/library/common/shuffle/impl/ShuffleManager.class
                                     </excludes>
                                 </artifactItem>
                             </artifactItems>
                             <includes>**/*.java</includes>
                             <excludes>**/*.properties</excludes>
                             <outputDirectory>target</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteReleases>true</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                         </configuration>
                     </execution>
@@ -268,6 +269,12 @@
             <groupId>org.apache.tez</groupId>
             <artifactId>tez-dag</artifactId>
             <version>${tez.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tez</groupId>
+                    <artifactId>tez-runtime-library</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.tez</groupId>
@@ -278,12 +285,28 @@
                     <groupId>com.sun.jersey</groupId>
                     <artifactId>jersey-json</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tez</groupId>
+                    <artifactId>tez-runtime-library</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.tez</groupId>
             <artifactId>tez-mapreduce</artifactId>
             <version>${tez.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tez</groupId>
+                    <artifactId>tez-runtime-library</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tez</groupId>
+            <artifactId>tez-runtime-library</artifactId>
+            <version>${tez.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

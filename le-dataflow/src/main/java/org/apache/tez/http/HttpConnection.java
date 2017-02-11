@@ -73,6 +73,7 @@ public class HttpConnection extends BaseHttpConnection {
     this.httpConnParams = connParams;
     this.url = url;
     this.stopWatch = new Stopwatch();
+    LOG.info("MapOutput URL :" + url.toString());
     if (LOG.isDebugEnabled()) {
       LOG.debug("MapOutput URL :" + url.toString());
     }
