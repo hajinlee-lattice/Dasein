@@ -20,10 +20,13 @@ public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDoma
 
         SourceDomainCleanupByDuTransformerConfig config = getTransformerConfig(parameters);
         Node source = addSource(parameters.getBaseTables().get(0));
-        source = source.groupByAndBuffer(
+        Node blankSource = source.filter(config.getDuField() + "==null", new FieldList(config.getDuField()));
+        Node notBlankSource = source.filter(config.getDuField() + "!=null", new FieldList(config.getDuField()));
+        notBlankSource = notBlankSource.groupByAndBuffer(
                 new FieldList(config.getDuField()),
                 new DomainCleanupByDuBuffer(source.getFieldNames(), config.getDuField(), config.getDunsField(), config
                         .getDomainField()));
+        source = blankSource.merge(notBlankSource);
         return source;
     }
 
