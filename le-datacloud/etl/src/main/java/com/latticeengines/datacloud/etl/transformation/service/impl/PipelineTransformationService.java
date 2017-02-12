@@ -290,6 +290,7 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     private boolean executeTransformSteps(TransformationProgress progress, TransformStep[] steps, String workflowDir,
             PipelineTransformationConfiguration transConf) {
+        Long pipelineStarTime = System.currentTimeMillis();
         for (int i = 0; i < steps.length; i++) {
             String slackMessage = String.format("Started step %d at %s", i, new Date().toString());
             sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, "", transConf);
@@ -323,6 +324,13 @@ public class PipelineTransformationService extends AbstractTransformationService
                             DurationFormatUtils.formatDurationHMS(stepDuration));
                     sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
                             transConf);
+
+                    if (i == steps.length - 1) {
+                        slackMessage = String.format("All %d steps in the pipeline are finished after %s :clap:", steps.length
+                                DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - pipelineStarTime));
+                        sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
+                                transConf);
+                    }
 
                     saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
                     cleanupWorkflowDir(progress, workflowDir);
