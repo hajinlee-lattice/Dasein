@@ -326,7 +326,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                             transConf);
 
                     if (i == steps.length - 1) {
-                        slackMessage = String.format("All %d steps in the pipeline are finished after %s :clap:", steps.length
+                        slackMessage = String.format("All %d steps in the pipeline are finished after %s :clap:", steps.length,
                                 DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - pipelineStarTime));
                         sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
                                 transConf);
