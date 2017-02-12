@@ -186,7 +186,7 @@ public class AccountMasterSeedMergeServiceImplTestNG
                         "UNITED KINGDOM", "CALIFORNIA" },
                 { "g.com", "999", "999", "Y", "Y", 10, "DnBName999", "DnBPI999", "LE", 1000, 1000000L, "USA",
                         "UNITED KINGDOM", "CALIFORNIA" },
-                { "g.com", "101010", "999", "Y", "N", 11, "DnBName101010", "DnBPI101010", "LE", 1000, 1000000L, "USA",
+                { "g.com", "101010", "999", "Y", "N", 11, "DnBName101010", "DnBPI101010", "DnB", 1000, 1000000L, "USA",
                         "UNITED KINGDOM", "CALIFORNIA" },
                 { "i.com", "111111", "121212", "Y", "N", 12, "DnBName111111", "DnBPI111111", "LE", 1000, 1000000L,
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
@@ -198,11 +198,7 @@ public class AccountMasterSeedMergeServiceImplTestNG
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
                 { "ii.com", "121212", "121212", "Y", "Y", 13, "DnBName121212", "DnBPI121212", "LE", 1000, 1000000L,
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
-                { "h.com", "131313", "121212", "N", "N", 14, "DnBName131313", "DnBPI131313", "DnB", 1000, 1000000L,
-                        "USA", "UNITED KINGDOM", "CALIFORNIA" },
-                { "i.com", "131313", "121212", "Y", "N", 14, "DnBName131313", "DnBPI131313", "LE", 1000, 1000000L,
-                        "USA", "UNITED KINGDOM", "CALIFORNIA" },
-                { "ii.com", "131313", "121212", "Y", "N", 14, "DnBName131313", "DnBPI131313", "LE", 1000, 1000000L,
+                { "h.com", "131313", "121212", "Y", "N", 14, "DnBName131313", "DnBPI131313", "DnB", 1000, 1000000L,
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
                 { "a.com", "NoDu111", "null", "Y", "Y", 15, "DnBNameNoDu111", "DnBPINoDu111", "LE", 1000, 1000000L,
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
@@ -269,7 +265,7 @@ public class AccountMasterSeedMergeServiceImplTestNG
             Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 30);
+        Assert.assertEquals(rowNum, 26);
     }
 
 }

@@ -75,35 +75,19 @@ public class AccountMasterSeedMergeFlow extends ConfigurableFlowBase<Transformer
         le = retainLeColumns(le);
 
         Node ams = dnb.join(new FieldList(dnbDunsColumn), le, new FieldList(leDunsColumn), JoinType.OUTER);
-        Node amsWithDu = ams.filter(String.format("%s != null", dnbDuDunsColumn), new FieldList(dnbDuDunsColumn));
-        Node amsWithoutDuWithDuns = ams.filter(
-                String.format("%s == null && %s != null", dnbDuDunsColumn, dnbDunsColumn),
-                new FieldList(dnbDuDunsColumn, dnbDunsColumn));
-        Node amsWithoutDuWithoutDuns = ams.filter(
-                String.format("%s == null && %s == null", dnbDuDunsColumn, dnbDunsColumn),
-                new FieldList(dnbDuDunsColumn, dnbDunsColumn));
+        Node amsWithDuns = ams.filter(String.format("%s != null", dnbDunsColumn), new FieldList(dnbDunsColumn));
+        Node amsWithoutDuns = ams.filter(String.format("%s == null", dnbDunsColumn), new FieldList(dnbDunsColumn));
 
-        amsWithDu = processDu(amsWithDu);
-        amsWithoutDuWithDuns = processWithoutDuWithDuns(amsWithoutDuWithDuns);
-        amsWithoutDuWithoutDuns = amsWithoutDuWithoutDuns(amsWithoutDuWithoutDuns);
+        amsWithDuns = processWithDuns(amsWithDuns);
+        amsWithoutDuns = processWithoutDuns(amsWithoutDuns);
 
-        Node amsMerged = amsWithDu.merge(amsWithoutDuWithDuns).merge(amsWithoutDuWithoutDuns);
+        Node amsMerged = amsWithDuns.merge(amsWithoutDuns);
         amsMerged = addColumnNode(amsMerged, parameters.getColumns());
 
         return amsMerged;
     }
 
-    private Node processDu(Node source) {
-        List<FieldMetadata> fieldMetadata = prepareAmsFieldMetadata();
-        source = source.groupByAndBuffer(new FieldList(dnbDuDunsColumn),
-                new AccountMasterSeedMergeWithDunsBuffer(new Fields(amsAttrs.toArray(new String[amsAttrs.size()])),
-                        attrsFromDnB, dnbDunsColumn, dnbDomainColumn, leDomainColumn, dnbIsPrimaryDomainColumn,
-                        dnbDuDunsColumn, amsIsPrimaryDomainColumn, amsDomainColumn, amsDomainSourceColumn),
-                fieldMetadata);
-        return source;
-    }
-
-    private Node processWithoutDuWithDuns(Node source) {
+    private Node processWithDuns(Node source) {
         List<FieldMetadata> fieldMetadata = prepareAmsFieldMetadata();
         source = source.groupByAndBuffer(new FieldList(dnbDunsColumn),
                 new AccountMasterSeedMergeWithDunsBuffer(new Fields(amsAttrs.toArray(new String[amsAttrs.size()])),
@@ -113,7 +97,7 @@ public class AccountMasterSeedMergeFlow extends ConfigurableFlowBase<Transformer
         return source;
     }
 
-    private Node amsWithoutDuWithoutDuns(Node source) {
+    private Node processWithoutDuns(Node source) {
         List<FieldMetadata> fieldMetadata = prepareAmsFieldMetadata();
         source = source.apply(
                 new AccountMasterSeedMergeWithoutDunsFunction(new Fields(amsAttrs.toArray(new String[amsAttrs.size()])),
