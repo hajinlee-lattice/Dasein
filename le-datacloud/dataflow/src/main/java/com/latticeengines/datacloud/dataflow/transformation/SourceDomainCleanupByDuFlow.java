@@ -27,28 +27,23 @@ public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDoma
 
         SourceDomainCleanupByDuTransformerConfig config = getTransformerConfig(parameters);
         Node source = addSource(parameters.getBaseTables().get(0));
-        Node blankSource = source.filter(config.getDuField() + "==null", new FieldList(config.getDuField()));
-        blankSource = blankSource.renamePipe("blank");
 
-        Node notBlankSource = source.filter(config.getDuField() + "!=null", new FieldList(config.getDuField()));
-        notBlankSource = notBlankSource.renamePipe("notblank");
         Fields duAndDomain = new Fields(
                 new String[] { config.getDuField(), DomainCleanupByDuBuffer.DU_PRIMARY_DOMAIN });
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(config.getDuField(), String.class));
         fms.add(new FieldMetadata(DomainCleanupByDuBuffer.DU_PRIMARY_DOMAIN, String.class));
-        Node duDomain = notBlankSource.groupByAndBuffer(new FieldList(config.getDuField()), new DomainCleanupByDuBuffer(
+        Node duDomain = source.groupByAndBuffer(new FieldList(config.getDuField()), new DomainCleanupByDuBuffer(
                 duAndDomain, config.getDuField(), config.getDunsField(), config.getDomainField()), fms);
         duDomain = duDomain.renamePipe("dudomain");
 
-        Node join = notBlankSource.leftOuterJoin(config.getDuField(), duDomain, config.getDuField());
+        Node join = source.leftOuterJoin(config.getDuField(), duDomain, config.getDuField());
         Fields joinNodeFields = new Fields(join.getFieldNames().toArray(new String[join.getFieldNames().size()]));
         Node domainFilled = join.groupByAndBuffer(new FieldList(config.getDuField()),
                 new FillBlankDomainBuffer(joinNodeFields, config.getDomainField()));
         domainFilled = domainFilled.retain(new FieldList(source.getFieldNames()));
 
-        source = blankSource.merge(domainFilled);
-        return source;
+        return domainFilled;
     }
 
     @Override

@@ -47,9 +47,8 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
         TupleEntry group = bufferCall.getGroup();
         String groupValue = group.getString(0);
         Tuple result = Tuple.size(getFieldDeclaration().size());
-        if (StringUtils.isBlank(groupValue)) {
-            log.warn("Found one group with DU == null, which should not happen.");
-        } else {
+        if (StringUtils.isNotBlank(groupValue)) {
+            // only process groups with DU != null
             Integer duLoc = namePositionMap.get(duField.toLowerCase());
             result.set(duLoc, groupValue);
 
