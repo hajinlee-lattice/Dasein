@@ -15,6 +15,6 @@ public interface AttributeCustomizationService {
 
     void saveCategory(Category category, AttributeUseCase useCase, String propertyName, String value);
 
-    void saveSubCategory(Category category, String subcategoryName, AttributeUseCase useCase,
+    void saveSubcategory(Category category, String subcategoryName, AttributeUseCase useCase,
             String propertyName, String value);
 }

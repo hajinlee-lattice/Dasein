@@ -10,6 +10,8 @@ import org.apache.commons.collections.Closure;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationPropertyEntityMgr;
@@ -25,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.AttributeCustomizationProperty;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("attributeCustomizationService")
@@ -54,8 +57,8 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
         customization.setUseCase(useCase);
         customization.setPropertyName(propertyName);
         customization.setPropertyValue(value);
-        customization
-                .setCategoryName(String.format("%s.%s", enrichmentAttr.getCategory(), enrichmentAttr.getSubcategory()));
+        customization.setCategoryName(CategoryNameUtils.getCategoryName(enrichmentAttr.getCategory(), //
+                enrichmentAttr.getSubcategory()));
 
         DatabaseUtils.retry("saveAttributeProperties", new Closure() {
             @Override
@@ -72,20 +75,19 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
         if (enrichmentAttr == null) {
             throw new LedpException(LedpCode.LEDP_36001, new String[] { name });
         }
-        AttributeCustomizationProperty attrPropertyCustomization = attributeCustomizationPropertyEntityMgr.find(name, useCase,
-                propertyName);
+        AttributeCustomizationProperty attrPropertyCustomization = attributeCustomizationPropertyEntityMgr.find(name,
+                useCase, propertyName);
         if (attrPropertyCustomization != null) {
             return attrPropertyCustomization.getPropertyValue();
         }
         String category = enrichmentAttr.getCategory();
         String subCategory = enrichmentAttr.getSubcategory();
         CategoryCustomizationProperty categoryPropertyCustomization = categoryCustomizationPropertyEntityMgr
-                .find(useCase, String.format("%s.%s", category, subCategory), propertyName);
+                .find(useCase, CategoryNameUtils.getCategoryName(category, subCategory), propertyName);
         if (categoryPropertyCustomization != null) {
             return categoryPropertyCustomization.getPropertyValue();
         }
-        categoryPropertyCustomization = categoryCustomizationPropertyEntityMgr.find(useCase, category,
-                propertyName);
+        categoryPropertyCustomization = categoryCustomizationPropertyEntityMgr.find(useCase, category, propertyName);
         if (categoryPropertyCustomization != null) {
             return categoryPropertyCustomization.getPropertyValue();
         }
@@ -94,60 +96,120 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
 
     @Override
     public void addFlags(List<LeadEnrichmentAttribute> attributes) {
-        List<AttributeCustomizationProperty> allCustomizations = attributeCustomizationPropertyEntityMgr.findAll();
-        Map<String, List<AttributeCustomizationProperty>> customizationMap = new HashMap<>();
-        for (AttributeCustomizationProperty customization : allCustomizations) {
-            List<AttributeCustomizationProperty> list = customizationMap.get(customization.getName());
+        List<AttributeCustomizationProperty> allAttrCustomizations = attributeCustomizationPropertyEntityMgr.findAll();
+        List<CategoryCustomizationProperty> allCategoryCustomizations = categoryCustomizationPropertyEntityMgr
+                .findAll();
+        Map<String, List<AttributeCustomizationProperty>> attrCustomizationMap = new HashMap<>();
+        for (AttributeCustomizationProperty customization : allAttrCustomizations) {
+            List<AttributeCustomizationProperty> list = attrCustomizationMap.get(customization.getName());
             if (list == null) {
                 list = new ArrayList<>();
             }
             list.add(customization);
-            customizationMap.put(customization.getName(), list);
+            attrCustomizationMap.put(customization.getName(), list);
+        }
+
+        Map<String, List<CategoryCustomizationProperty>> categoryCustomizationMap = new HashMap<>();
+        for (CategoryCustomizationProperty customization : allCategoryCustomizations) {
+            List<CategoryCustomizationProperty> list = categoryCustomizationMap.get(customization.getCategoryName());
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            list.add(customization);
+            categoryCustomizationMap.put(customization.getCategoryName(), list);
         }
 
         for (LeadEnrichmentAttribute attribute : attributes) {
-            List<AttributeCustomizationProperty> customizations = customizationMap.get(attribute.getFieldName());
             for (AttributeUseCase useCase : AttributeUseCase.values()) {
-                if (customizations != null) {
-
-                    List<AttributeCustomizationProperty> filteredCustomizations = customizations.stream()
-                            .filter(customization -> customization.getUseCase() == useCase)
-                            .collect(Collectors.toList());
-
-                    if (!filteredCustomizations.isEmpty()) {
-                        ObjectNode node = JsonUtils.createObjectNode();
-                        for (AttributeCustomizationProperty customization : filteredCustomizations) {
-                            node.put(customization.getPropertyName(), customization.getPropertyValue());
-                        }
-
-                        Map<AttributeUseCase, String> flagsMap = new HashMap<>();
-                        flagsMap.put(useCase, node.toString());
-                        attribute.setAttributeFlagsMap(flagsMap);
-                    }
+                if (setAttributePropertyMap(attrCustomizationMap, useCase, attribute)) {
+                    continue;
                 }
+                String categoryName = CategoryNameUtils.getCategoryName(attribute.getCategory(),
+                        attribute.getSubcategory());
+                if (setAttributePropertyMap(categoryCustomizationMap, categoryName, useCase, attribute)) {
+                    continue;
+                }
+                setAttributePropertyMap(categoryCustomizationMap, attribute.getCategory(), useCase, attribute);
             }
         }
     }
 
-    @Override
-    public void saveCategory(Category category, AttributeUseCase useCase, String propertyName, String value) {
-//        List<AttributePropertyCustomization> found = attributeCustomizationEntityMgr.find(category, useCase,
-//                propertyName);
-//        if (!found.isEmpty()) {
-//            for (AttributePropertyCustomization attr : found) {
-//                attributeCustomizationEntityMgr.delete(attr);
-//            }
-//        }
-//        List<LeadEnrichmentAttribute> leadAttrs = attributeService.getAttributesBaseOnCategory(category);
-//        for (LeadEnrichmentAttribute attr : leadAttrs) {
-//            save(attr.getFieldName(), useCase, propertyName, value);
-//        }
+    private boolean setAttributePropertyMap(Map<String, List<AttributeCustomizationProperty>> attrCustomizationMap,
+            AttributeUseCase useCase, LeadEnrichmentAttribute attribute) {
+        List<AttributeCustomizationProperty> attrCustomizations = attrCustomizationMap.get(attribute.getFieldName());
+        if (attrCustomizations == null) {
+            return false;
+        }
+        List<AttributeCustomizationProperty> filteredAttrCustomizations = attrCustomizations.stream()
+                .filter(customization -> customization.getUseCase() == useCase).collect(Collectors.toList());
+        if (filteredAttrCustomizations.isEmpty()) {
+            return false;
+        }
+        ObjectNode node = JsonUtils.createObjectNode();
+        for (AttributeCustomizationProperty customization : filteredAttrCustomizations) {
+            node.put(customization.getPropertyName(), customization.getPropertyValue());
+        }
+        Map<AttributeUseCase, String> flagsMap = new HashMap<>();
+        flagsMap.put(useCase, node.toString());
+        attribute.setAttributeFlagsMap(flagsMap);
+        return true;
+    }
+
+    private boolean setAttributePropertyMap(Map<String, List<CategoryCustomizationProperty>> categoryCustomizationMap,
+            String categoryName, AttributeUseCase useCase, LeadEnrichmentAttribute attribute) {
+        List<CategoryCustomizationProperty> categoryCustomizations = categoryCustomizationMap.get(categoryName);
+        if (categoryCustomizations == null) {
+            return false;
+        }
+        List<CategoryCustomizationProperty> filteredCategoryCustomizations = categoryCustomizations.stream()
+                .filter(customization -> customization.getUseCase() == useCase).collect(Collectors.toList());
+        if (filteredCategoryCustomizations.isEmpty()) {
+            return false;
+        }
+        ObjectNode node = JsonUtils.createObjectNode();
+        for (CategoryCustomizationProperty customization : filteredCategoryCustomizations) {
+            node.put(customization.getPropertyName(), customization.getPropertyValue());
+        }
+        Map<AttributeUseCase, String> flagsMap = new HashMap<>();
+        flagsMap.put(useCase, node.toString());
+        attribute.setAttributeFlagsMap(flagsMap);
+        return true;
     }
 
     @Override
-    public void saveSubCategory(Category category, String subcategoryName, AttributeUseCase useCase,
-            String propertyName, String value) {
-        
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveCategory(Category category, AttributeUseCase useCase, String propertyName, String value) {
+        attributeCustomizationPropertyEntityMgr.deleteCategory(category, useCase, propertyName);
+        categoryCustomizationPropertyEntityMgr.deleteSubcategories(category, useCase, propertyName);
+        CategoryCustomizationProperty categoryCustomizationProperty = new CategoryCustomizationProperty();
+        categoryCustomizationProperty.setUseCase(useCase);
+        categoryCustomizationProperty.setCategoryName(category.getName());
+        categoryCustomizationProperty.setPropertyName(propertyName);
+        categoryCustomizationProperty.setPropertyValue(value);
+        DatabaseUtils.retry("saveCategoryProperties", new Closure() {
+            @Override
+            public void execute(Object input) {
+                categoryCustomizationPropertyEntityMgr.createOrUpdate(categoryCustomizationProperty);
+            }
+        });
+    }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveSubcategory(Category category, String subcategoryName, AttributeUseCase useCase,
+            String propertyName, String value) {
+        String categoryName = CategoryNameUtils.getCategoryName(category.getName(), subcategoryName);
+        attributeCustomizationPropertyEntityMgr.deleteSubcategory(categoryName, useCase, propertyName);
+        CategoryCustomizationProperty categoryCustomizationProperty = new CategoryCustomizationProperty();
+        categoryCustomizationProperty.setUseCase(useCase);
+        categoryCustomizationProperty.setCategoryName(categoryName);
+        categoryCustomizationProperty.setPropertyName(propertyName);
+        categoryCustomizationProperty.setPropertyValue(value);
+        DatabaseUtils.retry("saveCategoryProperties", new Closure() {
+            @Override
+            public void execute(Object input) {
+                categoryCustomizationPropertyEntityMgr.createOrUpdate(categoryCustomizationProperty);
+            }
+        });
     }
 }

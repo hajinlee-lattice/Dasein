@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.dao.CategoryCustomizationPropertyDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
 
@@ -22,8 +23,7 @@ public class CategoryCustomizationPropertyDaoImpl extends BaseDaoImpl<CategoryCu
 
     @SuppressWarnings("unchecked")
     @Override
-    public CategoryCustomizationProperty find(AttributeUseCase useCase, String categoryName,
-            String propertyName) {
+    public CategoryCustomizationProperty find(AttributeUseCase useCase, String categoryName, String propertyName) {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format(
                 "from %s where categoryName = :categoryName " //
@@ -39,5 +39,20 @@ public class CategoryCustomizationPropertyDaoImpl extends BaseDaoImpl<CategoryCu
             return null;
         }
         return results.get(0);
+    }
+
+    @Override
+    public void deleteSubcategories(Category category, AttributeUseCase useCase, String propertyName) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format(
+                "delete from %s where categoryName like :categoryName " //
+                        + "and useCase = :useCase " //
+                        + "and propertyName = :propertyName", //
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("categoryName", category.getName() + ".%");
+        query.setParameter("useCase", useCase);
+        query.setParameter("propertyName", propertyName);
+        query.executeUpdate();
     }
 }

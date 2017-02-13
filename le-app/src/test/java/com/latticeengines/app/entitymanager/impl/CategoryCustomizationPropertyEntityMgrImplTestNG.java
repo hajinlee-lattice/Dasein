@@ -1,31 +1,21 @@
 package com.latticeengines.app.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationPropertyEntityMgr;
 import com.latticeengines.app.exposed.entitymanager.CategoryCustomizationPropertyEntityMgr;
-import com.latticeengines.app.exposed.service.AttributeCustomizationService;
-import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.testframework.AppTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.pls.AttributeCustomizationProperty;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -33,31 +23,20 @@ public class CategoryCustomizationPropertyEntityMgrImplTestNG extends AppTestNGB
 
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace
             .parse(CategoryCustomizationPropertyEntityMgrImplTestNG.class.getSimpleName());
-    private static final String ATTRIBUTE_NAME = "TestAttribute";
-
-    @Autowired
-    private AttributeCustomizationPropertyEntityMgr attributeCustomizationPropertyEntityMgr;
 
     @Autowired
     private CategoryCustomizationPropertyEntityMgr categoryCustomizationPropertyEntityMgr;
 
     @Autowired
-    private AttributeCustomizationService attributeCustomizationService;
-
-    @Autowired
-    private AttributeService attributeService;
-
-    @Autowired
     private TenantService tenantService;
 
     private String propertyName = "hidden";
-    private String propertyValue = "true";
+    private String propertyValue = Boolean.TRUE.toString();
     private String propertyName2 = "highlighted";
-    private String propertyValue2 = "false";
-    private String category = "Firmographics";
-    private String subCategory = "b";
-
-    private String saved;
+    private String propertyValue2 = Boolean.FALSE.toString();
+    private Category category = Category.FIRMOGRAPHICS;
+    private String subcategory1 = "a";
+    private String subcategory2 = "b";
 
     @BeforeClass(groups = "functional")
     private void setUp() {
@@ -72,77 +51,99 @@ public class CategoryCustomizationPropertyEntityMgrImplTestNG extends AppTestNGB
 
         globalAuthFunctionalTestBed.createTenant(tenant);
         MultiTenantContext.setTenant(tenant);
-
-        List<ColumnMetadata> list = new ArrayList<>();
-        ColumnMetadata cm = new ColumnMetadata();
-        cm.setColumnId(ATTRIBUTE_NAME);
-        cm.setCategoryByString(category);
-        cm.setSubcategory(subCategory);
-        list.add(cm);
-
-        ColumnMetadataProxy proxy = Mockito.mock(ColumnMetadataProxy.class);
-        Mockito.when(proxy.latestVersion(null)).thenReturn(new DataCloudVersion());
-        Mockito.when(proxy.columnSelection(ColumnSelection.Predefined.Enrichment, null)).thenReturn(list);
-
-        ReflectionTestUtils.setField(attributeService, "columnMetadataProxy", proxy);
     }
 
     @Test(groups = "functional")
-    public void saveCategory() {
+    public void saveCategory1() {
         CategoryCustomizationProperty categoryCustomization = new CategoryCustomizationProperty();
-        categoryCustomization.setCategoryName(category);
+        categoryCustomization.setCategoryName(category.getName());
         categoryCustomization.setUseCase(AttributeUseCase.CompanyProfile);
         categoryCustomization.setPropertyName(propertyName);
         categoryCustomization.setPropertyValue(propertyValue);
         categoryCustomizationPropertyEntityMgr.createOrUpdate(categoryCustomization);
-        saved = propertyValue;
-        retrieve(propertyName);
+
+        assertEquals(categoryCustomizationPropertyEntityMgr.findAll().size(), 1);
+        CategoryCustomizationProperty retrieved = categoryCustomizationPropertyEntityMgr
+                .find(AttributeUseCase.CompanyProfile, category.getName(), propertyName);
+        assertEquals(categoryCustomization.getPropertyValue(), retrieved.getPropertyValue());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "saveCategory")
-    public void saveAttribute() {
-        AttributeCustomizationProperty customization = new AttributeCustomizationProperty();
-        customization.setName(ATTRIBUTE_NAME);
-        customization.setUseCase(AttributeUseCase.CompanyProfile);
-        customization.setCategoryName(String.format("%s.%s", category, subCategory));
-        customization.setPropertyName(propertyName);
-        customization.setPropertyValue(propertyValue2);
-        saved = propertyValue2;
-        attributeCustomizationPropertyEntityMgr.createOrUpdate(customization);
-        retrieve(propertyName);
-        attributeCustomizationPropertyEntityMgr.delete(customization);
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "saveAttribute")
-    public void saveSubCategory() {
+    @Test(groups = "functional", dependsOnMethods = "saveCategory1")
+    public void saveSubcategory1() {
+        String categoryName = CategoryNameUtils.getCategoryName(category.getName(), subcategory1);
         CategoryCustomizationProperty categoryCustomization = new CategoryCustomizationProperty();
-        categoryCustomization.setCategoryName(String.format("%s.%s", category, subCategory));
+        categoryCustomization.setCategoryName(CategoryNameUtils.getCategoryName(category.getName(), subcategory1));
+        categoryCustomization.setUseCase(AttributeUseCase.CompanyProfile);
+        categoryCustomization.setPropertyName(propertyName);
+        categoryCustomization.setPropertyValue(propertyValue2);
+        categoryCustomizationPropertyEntityMgr.createOrUpdate(categoryCustomization);
+
+        assertEquals(categoryCustomizationPropertyEntityMgr.findAll().size(), 2);
+        CategoryCustomizationProperty retrieved = categoryCustomizationPropertyEntityMgr
+                .find(AttributeUseCase.CompanyProfile, categoryName, propertyName);
+        assertEquals(categoryCustomization.getPropertyValue(), retrieved.getPropertyValue());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "saveSubcategory1")
+    public void saveCategory2() {
+        CategoryCustomizationProperty categoryCustomization = new CategoryCustomizationProperty();
+        categoryCustomization.setCategoryName(category.getName());
+        categoryCustomization.setUseCase(AttributeUseCase.CompanyProfile);
+        categoryCustomization.setPropertyName(propertyName2);
+        categoryCustomization.setPropertyValue(propertyValue2);
+        categoryCustomizationPropertyEntityMgr.createOrUpdate(categoryCustomization);
+
+        assertEquals(categoryCustomizationPropertyEntityMgr.findAll().size(), 3);
+        CategoryCustomizationProperty retrieved = categoryCustomizationPropertyEntityMgr
+                .find(AttributeUseCase.CompanyProfile, category.getName(), propertyName2);
+        assertEquals(categoryCustomization.getPropertyValue(), retrieved.getPropertyValue());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "saveCategory2")
+    public void saveSubCategory2() {
+        String categoryName = CategoryNameUtils.getCategoryName(category.getName(), subcategory1);
+        CategoryCustomizationProperty categoryCustomization = new CategoryCustomizationProperty();
+        categoryCustomization.setCategoryName(categoryName);
+        categoryCustomization.setUseCase(AttributeUseCase.CompanyProfile);
+        categoryCustomization.setPropertyName(propertyName2);
+        categoryCustomization.setPropertyValue(propertyValue);
+        categoryCustomizationPropertyEntityMgr.createOrUpdate(categoryCustomization);
+
+        assertEquals(categoryCustomizationPropertyEntityMgr.findAll().size(), 4);
+        CategoryCustomizationProperty retrieved = categoryCustomizationPropertyEntityMgr
+                .find(AttributeUseCase.CompanyProfile, categoryName, propertyName2);
+        assertEquals(categoryCustomization.getPropertyValue(), retrieved.getPropertyValue());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "saveSubCategory2")
+    public void saveSubCategory3() {
+        String categoryName = CategoryNameUtils.getCategoryName(category.getName(), subcategory2);
+        CategoryCustomizationProperty categoryCustomization = new CategoryCustomizationProperty();
+        categoryCustomization.setCategoryName(categoryName);
         categoryCustomization.setUseCase(AttributeUseCase.CompanyProfile);
         categoryCustomization.setPropertyName(propertyName);
         categoryCustomization.setPropertyValue(propertyValue);
         categoryCustomizationPropertyEntityMgr.createOrUpdate(categoryCustomization);
-        saved = propertyValue;
-        retrieve(propertyName);
+
+        assertEquals(categoryCustomizationPropertyEntityMgr.findAll().size(), 5);
+        CategoryCustomizationProperty retrieved = categoryCustomizationPropertyEntityMgr
+                .find(AttributeUseCase.CompanyProfile, categoryName, propertyName);
+        assertEquals(categoryCustomization.getPropertyValue(), retrieved.getPropertyValue());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "saveSubCategory")
-    public void saveAttribute2() {
-        AttributeCustomizationProperty customization = new AttributeCustomizationProperty();
-        customization.setName(ATTRIBUTE_NAME);
-        customization.setUseCase(AttributeUseCase.CompanyProfile);
-        customization.setCategoryName(String.format("%s.%s", category, subCategory));
-        customization.setPropertyName(propertyName2);
-        customization.setPropertyValue(propertyValue2);
-        attributeCustomizationPropertyEntityMgr.createOrUpdate(customization);
-        retrieve(propertyName);
-        saved = propertyValue2;
-        retrieve(propertyName2);
-    }
+    @Test(groups = "functional", dependsOnMethods = "saveSubCategory3")
+    public void deleteCategory() {
+        categoryCustomizationPropertyEntityMgr.deleteSubcategories(category, AttributeUseCase.CompanyProfile, propertyName);
+        List<CategoryCustomizationProperty> retrieved = categoryCustomizationPropertyEntityMgr.findAll();
+        assertEquals(retrieved.size(), 3);
+        System.out.println(retrieved);
+        assertEquals(retrieved.stream() //
+                .filter(a -> a.getCategoryName().equals(category.getName()) && //
+                        a.getPropertyName().equals(propertyName))
+                .count(), 1);
 
-    private void retrieve(String propertyName) {
-        String retrieved = attributeCustomizationService.retrieve(ATTRIBUTE_NAME, AttributeUseCase.CompanyProfile,
-                propertyName);
-        assertNotNull(retrieved);
-        assertEquals(retrieved, saved);
+        assertEquals(retrieved.stream() //
+                .filter(a -> a.getPropertyName().equals(propertyName2)).count(), 2);
+
     }
 }

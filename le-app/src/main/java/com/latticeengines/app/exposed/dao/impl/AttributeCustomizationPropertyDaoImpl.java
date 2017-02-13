@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.dao.AttributeCustomizationPropertyDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeCustomizationProperty;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 
@@ -38,5 +39,35 @@ public class AttributeCustomizationPropertyDaoImpl extends BaseDaoImpl<Attribute
             return null;
         }
         return results.get(0);
+    }
+
+    @Override
+    public void deleteSubcategory(String categoryName, AttributeUseCase useCase, String propertyName) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format(
+                "delete from %s where categoryName = :categoryName " //
+                        + "and useCase = :useCase " //
+                        + "and propertyName = :propertyName", //
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("categoryName", categoryName);
+        query.setParameter("useCase", useCase);
+        query.setParameter("propertyName", propertyName);
+        query.executeUpdate();
+    }
+
+    @Override
+    public void deleteCategory(Category category, AttributeUseCase useCase, String propertyName) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format(
+                "delete from %s where categoryName like :categoryName " //
+                        + "and useCase = :useCase " //
+                        + "and propertyName = :propertyName", //
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("categoryName", category.getName() + ".%");
+        query.setParameter("useCase", useCase);
+        query.setParameter("propertyName", propertyName);
+        query.executeUpdate();
     }
 }

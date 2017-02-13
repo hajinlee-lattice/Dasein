@@ -45,7 +45,7 @@ public class AttributeResource {
     @RequestMapping(value = "/categories/flags/{categoryName}/{useCase}/{propertyName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save attribute property")
-    public void savePropertyValueBaseOnCategory(@PathVariable Category category,
+    public void saveCategory(@PathVariable Category category,
             @PathVariable AttributeUseCase useCase, @PathVariable String propertyName, @RequestBody String value) {
         attributeCustomizationService.saveCategory(category, useCase, propertyName, value);
     }
@@ -53,10 +53,10 @@ public class AttributeResource {
     @RequestMapping(value = "/categories/subcategories/flags/{categoryName}/{subcategoryName}/{useCase}/{propertyName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save attribute property")
-    public void savePropertyValueBaseOnSubCategory(@PathVariable Category category,
+    public void saveSubcategory(@PathVariable Category category,
             @PathVariable String subcategoryName, @PathVariable AttributeUseCase useCase,
             @PathVariable String propertyName, @RequestBody String value) {
-        attributeCustomizationService.saveSubCategory(category, subcategoryName, useCase, propertyName,
+        attributeCustomizationService.saveSubcategory(category, subcategoryName, useCase, propertyName,
                 value);
     }
 
