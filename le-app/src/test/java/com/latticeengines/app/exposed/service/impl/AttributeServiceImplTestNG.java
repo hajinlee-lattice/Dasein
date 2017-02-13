@@ -8,6 +8,7 @@ import java.util.Arrays;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -95,6 +96,15 @@ public class AttributeServiceImplTestNG extends AppTestNGBase {
                 .thenReturn(Arrays.<ColumnMetadata> asList(new ColumnMetadata[] { cm1, cm2, cm3 }));
 
         ReflectionTestUtils.setField(attributeService, "columnMetadataProxy", proxy);
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanUp() {
+        Tenant tenant = tenantService.findByTenantId(CUSTOMER_SPACE.toString());
+
+        if (tenant != null) {
+            tenantService.discardTenant(tenant);
+        }
     }
 
     @Test(groups = "functional")

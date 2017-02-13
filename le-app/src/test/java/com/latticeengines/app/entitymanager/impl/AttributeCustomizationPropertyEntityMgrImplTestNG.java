@@ -20,7 +20,8 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class AttributeCustomizationPropertyEntityMgrImplTestNG extends AppTestNGBase {
-    private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace.parse("AttributeEntityMgrImplTestNG");
+    private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace
+            .parse(AttributeCustomizationPropertyEntityMgrImplTestNG.class.getSimpleName());
     private static final String ATTRIBUTE_NAME_1 = "TestAttribute_1";
     private static final String ATTRIBUTE_NAME_2 = "TestAttribute_2";
     private static final String ATTRIBUTE_NAME_3 = "TestAttribute_3";
