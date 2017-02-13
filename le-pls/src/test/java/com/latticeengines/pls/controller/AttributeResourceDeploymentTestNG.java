@@ -60,7 +60,7 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void testSaveMultiple() {
         Map<String, String> properties = new HashMap<>();
         properties.put("hidden", Boolean.TRUE.toString());
-        properties.put("visible", Boolean.TRUE.toString());
+        properties.put("highlighted", Boolean.TRUE.toString());
 
         String url = getRestAPIHostPort() + String.format("/pls/attributes/flags/%s/CompanyProfile", attributeName);
         testBed.getRestTemplate().postForObject(url, properties, Void.class);
@@ -75,7 +75,7 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.TRUE.toString());
 
         url = getRestAPIHostPort()
-                + String.format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "visible");
+                + String.format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "highlighted");
         retrieved = testBed.getRestTemplate().getForObject(url, String.class);
         assertNotNull(retrieved);
         assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.TRUE.toString());
@@ -85,7 +85,7 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void testSaveCategoryMultiple() {
         Map<String, String> properties = new HashMap<>();
         properties.put("hidden", Boolean.TRUE.toString());
-        properties.put("visible", Boolean.FALSE.toString());
+        properties.put("highlighted", Boolean.FALSE.toString());
 
         String url = getRestAPIHostPort()
                 + String.format("/pls/attributes/categories/flags/%s/CompanyProfile", categoryName);
@@ -101,7 +101,7 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.TRUE.toString());
 
         url = getRestAPIHostPort()
-                + String.format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "visible");
+                + String.format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "highlighted");
         retrieved = testBed.getRestTemplate().getForObject(url, String.class);
         assertNotNull(retrieved);
         assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.FALSE.toString());
@@ -118,5 +118,12 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         String retrieved = testBed.getRestTemplate().getForObject(url, String.class);
         assertNotNull(retrieved);
         assertEquals(JsonUtils.deserialize(retrieved, HashMap.class).get("value"), Boolean.FALSE.toString());
+    }
+
+    @Test(groups = "deployment", expectedExceptions = Exception.class)
+    public void testSaveInvalidProperty() {
+        String url = getRestAPIHostPort()
+                + String.format("/pls/attributes/flags/%s/CompanyProfile/%s", attributeName, "poop");
+        testBed.getRestTemplate().postForObject(url, propertyValue, Void.class);
     }
 }

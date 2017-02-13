@@ -36,10 +36,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "ATTRIBUTE_CUSTOMIZATION_PROPERTY", //
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME", "USE_CASE", "CATEGORY_NAME",
-                "PROPERTY_NAME" }) })
+uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME", "USE_CASE", "CATEGORY_NAME",
+        "PROPERTY_NAME" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class AttributeCustomizationProperty implements HasPid, HasName, HasTenant, HasTenantId {
+public class AttributeCustomizationProperty extends CustomizationProperty implements HasPid, HasName, HasTenant,
+        HasTenantId {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -71,14 +72,6 @@ public class AttributeCustomizationProperty implements HasPid, HasName, HasTenan
     @JsonProperty("category_name")
     @Column(name = "CATEGORY_NAME", nullable = false)
     private String categoryName;
-
-    @JsonProperty("property_name")
-    @Column(name = "PROPERTY_NAME", nullable = false)
-    private String propertyName;
-
-    @JsonProperty("property_value")
-    @Column(name = "PROPERTY_VALUE")
-    private String propertyValue;
 
     @Override
     public Long getPid() {
@@ -137,21 +130,5 @@ public class AttributeCustomizationProperty implements HasPid, HasName, HasTenan
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
-    }
-
-    public String getPropertyName() {
-        return this.propertyName;
-    }
-
-    public void setPropertyName(String propertyName) {
-        this.propertyName = propertyName;
-    }
-
-    public String getPropertyValue() {
-        return this.propertyValue;
-    }
-
-    public void setPropertyValue(String propertyValue) {
-        this.propertyValue = propertyValue;
     }
 }
