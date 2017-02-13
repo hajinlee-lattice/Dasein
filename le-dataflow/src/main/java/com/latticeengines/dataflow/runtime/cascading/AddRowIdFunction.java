@@ -26,10 +26,7 @@ public class AddRowIdFunction extends BaseOperation implements Function {
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         int currentSlice = flowProcess.getCurrentSliceNum();
         flowProcess.increment("LATTICE", table, 1L);
-        long value = flowProcess.getCounterValue("LATTICE", table);
-        if (currentSlice > 0) {
-            value = 10_000_000_000L * currentSlice + flowProcess.getCounterValue("LATTICE", table);
-        }
+        long value = 10_000_000_000L * currentSlice + flowProcess.getCounterValue("LATTICE", table);
         functionCall.getOutputCollector().add(new Tuple(value));
     }
 
