@@ -5,8 +5,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +32,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 
 public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+    private static final Log log = LogFactory.getLog(OrbCacheSeedSecondaryDomainCleanupServiceTestNG.class);
+
     @Autowired
     PipelineSource source;
 
@@ -177,5 +184,84 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
 
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+        log.info("Start to verify records one by one.");
+        int rowNum = 0;
+        Object[][] expectedData = { //
+                { "secondary.com", "a.com" }, //
+                { "mailserver.com", "a.com" }//
+        };
+
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            System.out.println();
+
+            for (Field field : record.getSchema().getFields()) {
+                if (record.get(field.name()) == null) {
+                    System.out.print(", null");
+                } else if (record.get(field.name()) instanceof Long) {
+                    System.out.print(", " + record.get(field.name()) + "L");
+                } else if (record.get(field.name()) instanceof Utf8) {
+                    String txt = ((Utf8) record.get(field.name())).toString();
+                    txt = txt.substring(0, (txt.length() < 40 ? txt.length() : 40));
+                    System.out.print(", \"" + txt + "\"");
+                } else {
+                    throw new RuntimeException(record.get(field.name()).getClass().getName());
+                }
+
+            }
+
+            boolean foundMatchingRecord = false;
+            for (Object[] data : expectedData) {
+                int idx = 0;
+                boolean hasFieldMismatchInRecord = false;
+                for (Field field : record.getSchema().getFields()) {
+                    Object val = record.get(field.name());
+                    if (val instanceof Utf8) {
+                        val = ((Utf8) val).toString();
+                    }
+                    Object expectedVal = data[idx];
+                    if ((val == null && expectedVal != null) //
+                            || (val != null && !val.equals(expectedVal))) {
+
+                        // System.out.print("[" + val + " - " +
+                        // expectedVal + "], ");
+                        hasFieldMismatchInRecord = true;
+                        break;
+
+                    }
+                    idx++;
+
+                }
+
+                if (!hasFieldMismatchInRecord //
+                        || idx == record.getSchema().getFields().size()) {
+                    foundMatchingRecord = true;
+                    break;
+                }
+            }
+            if (!foundMatchingRecord) {
+                System.out.println("\n\n================" + rowNum);
+                for (Field field : record.getSchema().getFields()) {
+                    if (record.get(field.name()) == null) {
+                        System.out.print(", null");
+                    } else if (record.get(field.name()) instanceof Long) {
+                        System.out.print(", " + record.get(field.name()) + "L");
+                    } else if (record.get(field.name()) instanceof Utf8) {
+                        String txt = ((Utf8) record.get(field.name())).toString();
+                        txt = txt.substring(0, (txt.length() < 40 ? txt.length() : 40));
+                        System.out.print(", \"" + txt + "\"");
+                    } else {
+                        throw new RuntimeException(record.get(field.name()).getClass().getName());
+                    }
+
+                }
+                System.out.println("================\n");
+            }
+            Assert.assertTrue(foundMatchingRecord);
+
+            rowNum++;
+        }
+        System.out.println();
+        Assert.assertEquals(rowNum, 2);
     }
 }
