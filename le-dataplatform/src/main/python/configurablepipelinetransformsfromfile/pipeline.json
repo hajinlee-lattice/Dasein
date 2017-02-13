@@ -23,6 +23,7 @@
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
         "enabledRules": {},
+        "customerPredictors": [],
         "params": "params"
       },
       "ColumnTransformFilePath": "remediatedatarulesstep.py"
@@ -34,9 +35,9 @@
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
-        "maxNumberUniqueValues": 200,
         "categoricalColumns": "categoricalColumns",
-        "params": "params"
+        "params": "params",
+        "profile": "dataprofile"
       },
       "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
     },
