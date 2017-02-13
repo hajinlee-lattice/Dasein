@@ -40,7 +40,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.Operation;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.AddRowIdFunction;
 import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
 import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
 import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
@@ -837,7 +837,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-        Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowId(new Fields(rowIdFm.getFieldName()), prior),
+        Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowIdFunction(new Fields(rowIdFm.getFieldName()), prior),
                 Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         newFm.add(rowIdFm);

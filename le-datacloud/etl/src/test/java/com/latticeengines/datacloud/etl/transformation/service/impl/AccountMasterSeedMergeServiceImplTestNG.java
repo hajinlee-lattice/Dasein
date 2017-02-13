@@ -224,8 +224,13 @@ public class AccountMasterSeedMergeServiceImplTestNG
                         "null" } };
         int rowNum = 0;
         Set<String> set = new HashSet<>();
+        Set<Long> ids = new HashSet<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
+
+            Long latticeId = (Long) record.get("LatticeID");
+            ids.add(latticeId);
+
             String domain = String.valueOf(record.get(DOMAIN));
             String duns = String.valueOf(record.get(DUNS));
             String duDuns = String.valueOf(record.get(LE_PRIMARY_DUNS));
@@ -266,6 +271,7 @@ public class AccountMasterSeedMergeServiceImplTestNG
             rowNum++;
         }
         Assert.assertEquals(rowNum, 26);
+        Assert.assertEquals(ids.size(), rowNum);
     }
 
 }

@@ -10,8 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -150,8 +148,7 @@ public class AccountMasterSeedMergeFlow extends ConfigurableFlowBase<Transformer
         return node;
     }
 
-    private void getColumnMapping(List<SourceColumn> sourceColumns)
-            throws JsonParseException, JsonMappingException, IOException {
+    private void getColumnMapping(List<SourceColumn> sourceColumns) throws IOException {
         List<SeedMergeFieldMapping> list = null;
         for (SourceColumn sourceColumn : sourceColumns) {
             if (sourceColumn.getCalculation() == Calculation.MERGE_SEED) {

@@ -1,18 +1,26 @@
 package com.latticeengines.dataflow.functionalframework;
 
+import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -26,8 +34,12 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunctionalTestNGBase {
+    
+    private static final Log log = LogFactory.getLog(DataFlowOperationFunctionalTestNGBase.class);
 
     public final String TARGET_PATH = "/tmp/DataFlowOperationTestOutput";
+    public final String INPUT_PATH = "/tmp/DataFlowOperationTestInput";
+    protected final String DYNAMIC_SOURCE = "DynamicSource";
     public final boolean LOCAL = true;
 
     @Autowired
@@ -43,7 +55,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
 
         HdfsUtils.rmdir(configuration, TARGET_PATH);
         HdfsUtils.rmdir(configuration, "/tmp/checkpoints");
-        HdfsUtils.rmdir(configuration, "/tmp/avro");
+        HdfsUtils.rmdir(configuration, INPUT_PATH);
 
         String lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro")
                 .getPath();
@@ -51,21 +63,23 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
                 .getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         String contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro")
                 .getPath();
-        String feature = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Feature.avro")
-                .getPath();
         String lead2 = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead2.avro")
                 .getPath();
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + lead, "/tmp/avro"));
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunity, "/tmp/avro"));
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, "/tmp/avro"));
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + feature, "/tmp/avro"));
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + lead2, "/tmp/avro"));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + lead, INPUT_PATH));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunity, INPUT_PATH));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, INPUT_PATH));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + lead2, INPUT_PATH));
 
         FileSystem fs = FileSystem.get(configuration);
         doCopy(fs, entries);
 
         Logger.getLogger("com.latticeengines.domain.exposed.util.AttributeUtils").setLevel(Level.WARN);
+    }
+
+    @AfterMethod(groups = "functional")
+    public void afterMethod() {
+        cleanupDyanmicSource();
     }
 
     protected Map<String, Table> getSources() {
@@ -76,18 +90,22 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
             String path = sourcePaths.get(key);
             String idColumn = null;
             String lastModifiedColumn = null;
-            sources.put(key, MetadataConverter.getTable(configuration, path, idColumn, lastModifiedColumn));
+            try {
+                sources.put(key, MetadataConverter.getTable(configuration, path, idColumn, lastModifiedColumn));
+            } catch (Exception e) {
+                log.warn("Failed to add source " + key + " using avro path " + path);
+            }
         }
         return sources;
     }
 
     protected Map<String, String> getSourcePaths() {
         Map<String, String> sources = new HashMap<>();
-        sources.put("Lead", "/tmp/avro/Lead.avro");
-        sources.put("Opportunity", "/tmp/avro/Opportunity.avro");
-        sources.put("Contact", "/tmp/avro/Contact.avro");
-        sources.put("Feature", "/tmp/avro/Feature.avro");
-        sources.put("Lead2", "/tmp/avro/Lead2.avro");
+        sources.put("Lead", INPUT_PATH + "/Lead.avro");
+        sources.put("Opportunity", INPUT_PATH + "/Opportunity.avro");
+        sources.put("Contact", INPUT_PATH + "/Contact.avro");
+        sources.put("Lead2", INPUT_PATH + "/Lead2.avro");
+        sources.put(DYNAMIC_SOURCE, INPUT_PATH + "/" + DYNAMIC_SOURCE);
         return sources;
     }
 
@@ -117,7 +135,12 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         return execute(builder, TARGET_PATH);
     }
 
-    protected Table execute(DataFlowBuilder builder, String targetPath) {
+    protected Table execute(DataFlowBuilder builder, int partitions) {
+        return execute(builder, TARGET_PATH, partitions, null);
+    }
+
+
+    protected Table execute(DataFlowBuilder builder, String targetPath, int partitions, Properties properties) {
         builder.setLocal(LOCAL);
 
         DataFlowContext ctx = new DataFlowContext();
@@ -128,9 +151,56 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty(DataFlowProperty.FLOWNAME, "Flow");
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
+        ctx.setProperty(DataFlowProperty.PARTITIONS, partitions);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, configuration);
         ctx.setProperty(DataFlowProperty.ENGINE, "FLINK");
+
+        if (properties != null) {
+            ctx.setProperty(DataFlowProperty.JOBPROPERTIES, properties);
+        }
+
         return dataTransformationService.executeNamedTransformation(ctx, builder);
+    }
+
+    protected Table execute(DataFlowBuilder builder, String targetPath) {
+        return execute(builder, targetPath, 1, null);
+    }
+
+    protected void uploadDynamicSourceAvro(Object[][] data, Schema schema) {
+        uploadDynamicSourceAvro(data, schema, "1.avro");
+    }
+
+    protected void uploadDynamicSourceAvro(Object[][] data, Schema schema, String fileName) {
+        List<GenericRecord> records = new ArrayList<>();
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        for (Object[] tuple : data) {
+            int i = 0;
+            for (Schema.Field field: schema.getFields()) {
+                builder.set(field, tuple[i]);
+                i++;
+            }
+            records.add(builder.build());
+        }
+
+        try {
+            AvroUtils.writeToLocalFile(schema, records, fileName);
+            if (HdfsUtils.fileExists(configuration, INPUT_PATH + "/" + DYNAMIC_SOURCE + "/" + fileName)) {
+                HdfsUtils.rmdir(configuration, INPUT_PATH + "/" + DYNAMIC_SOURCE + "/" + fileName);
+            }
+            HdfsUtils.copyLocalToHdfs(configuration, fileName, INPUT_PATH + "/" + DYNAMIC_SOURCE + "/" + fileName);
+        } catch (Exception e) {
+            Assert.fail("Failed to upload " + fileName, e);
+        }
+
+        FileUtils.deleteQuietly(new File(fileName));
+    }
+
+    protected void cleanupDyanmicSource() {
+        try {
+            HdfsUtils.rmdir(configuration, INPUT_PATH + "/" + DYNAMIC_SOURCE);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete dynamic source dir.", e);
+        }
     }
 
     protected Map<Object, Integer> histogram(List<GenericRecord> records, String column) {

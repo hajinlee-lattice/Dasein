@@ -15,6 +15,7 @@ public class QuotaFlowParameters extends DataFlowParameters {
         this.targetMarket = targetMarket;
         this.quota = quota;
         this.configuration = configuration;
+        this.noFlink = true;
     }
 
     @JsonProperty("target_market")
