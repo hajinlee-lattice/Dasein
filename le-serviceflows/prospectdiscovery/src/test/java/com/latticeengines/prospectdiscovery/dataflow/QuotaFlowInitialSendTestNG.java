@@ -49,6 +49,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
 
     @Test(groups = "functional")
     public void testAllProspectsSent() {
+        setEngine("TEZ");
         Table result = executeDataFlow(getStandardParameters());
 
         Assert.assertEquals(result.getExtracts().size(), 1);
@@ -62,6 +63,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
 
     @Test(groups = "functional")
     public void testOnlyFitSent() {
+        setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
         TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
                 .getDataFlowConfiguration();
@@ -81,6 +83,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
 
     @Test(groups = "functional")
     public void testOnlyIntentSent() {
+        setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
         TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
                 .getDataFlowConfiguration();
@@ -98,6 +101,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
 
     @Test(groups = "functional")
     public void testNoProspectsDesired() {
+        setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
         parameters.getTargetMarket().setNumProspectsDesired(0);
 
@@ -112,6 +116,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
 
     @Test(groups = "functional")
     public void testNoMoreThanOneProspectPerAccount() {
+        setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
         parameters.getTargetMarket().getDataFlowConfiguration()
                 .setInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount, 1);
@@ -137,6 +142,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
 
     @Test(groups = "functional")
     public void testLimitByBalance() {
+        setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
         parameters.getQuota().setBalance(2);
 

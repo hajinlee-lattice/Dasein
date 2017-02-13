@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 public class QuotaFlowLargeDataTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     private QuotaFlowParameters getStandardParameters() {
+        setEngine("TEZ");
         TargetMarket market = new TargetMarket();
         TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
         marketConfiguration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.LOW.toString());
@@ -46,6 +47,7 @@ public class QuotaFlowLargeDataTestNG extends ServiceFlowsDataFlowFunctionalTest
 
     @Test(groups = "functional", enabled = true)
     public void test() {
+        setEngine("TEZ");
         Table result = executeDataFlow(getStandardParameters());
 
         Assert.assertEquals(result.getExtracts().size(), 1);

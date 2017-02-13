@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     protected QuotaFlowParameters getStandardParameters() {
+        setEngine("TEZ");
         TargetMarket market = new TargetMarket();
         TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
         marketConfiguration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.LOW.toString());
@@ -46,6 +47,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
 
     @Test(groups = "functional")
     public void test() throws Exception {
+        setEngine("TEZ");
 
         Table result = executeDataFlow(getStandardParameters());
 
@@ -58,6 +60,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
 
     @Test(groups = "functional")
     public void testOnlyAsongSent() {
+        setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
         // This should filter out everything so that only the single contact
         // that was never sent out is sent.
@@ -78,6 +81,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
 
     @Test(groups = "functional")
     public void testFilterExistingAccounts() {
+        setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
         TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
                 .getDataFlowConfiguration();

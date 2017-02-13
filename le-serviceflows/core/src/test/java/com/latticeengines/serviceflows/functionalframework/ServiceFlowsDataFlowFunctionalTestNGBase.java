@@ -49,7 +49,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @ContextConfiguration(locations = { "classpath:test-serviceflows-context.xml" })
 public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private boolean local = getenv("SERVICEFLOWS_LOCAL", true, Boolean.class);
-    private String engine = getenv("SERVICEFLOWS_ENGINE", "TEZ", String.class);
+    private String engine = getenv("SERVICEFLOWS_ENGINE", "FLINK", String.class);
     protected static final String AVRO_INPUT = "AvroInput";
     private static final String AVRO_DIR = "/tmp/avro/";
 
@@ -386,5 +386,9 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to parse %s as a %s", value, clazz.getSimpleName()));
         }
+    }
+
+    protected void setEngine(String engine) {
+        this.engine = engine;
     }
 }

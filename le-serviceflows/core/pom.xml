@@ -322,6 +322,13 @@
             <version>${commons.io.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.tez</groupId>
+            <artifactId>tez-runtime-library</artifactId>
+            <version>${tez.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

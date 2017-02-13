@@ -46,6 +46,7 @@ public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsDataFlow
 
     @Test(groups = "functional")
     public void testNothingSent() {
+        setEngine("TEZ");
         Table result = executeDataFlow(getStandardParameters());
 
         Assert.assertEquals(result.getExtracts().size(), 1);
@@ -57,6 +58,7 @@ public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsDataFlow
 
     @Test(groups = "functional")
     public void testIntentResent() {
+        setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
         TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
                 .getDataFlowConfiguration();

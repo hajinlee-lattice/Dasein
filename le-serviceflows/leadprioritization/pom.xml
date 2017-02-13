@@ -304,6 +304,13 @@
             <version>1.8.5</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.tez</groupId>
+            <artifactId>tez-runtime-library</artifactId>
+            <version>${tez.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
