@@ -46,7 +46,7 @@
                 <li class="save" ng-if="vm.enabledManualSave">
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
-                <li class="download dropdown-container" ng-if="!vm.lookupMode && vm.section != 'insights' && vm.section != 'browse'">
+                <li class="download dropdown-container" ng-if="!vm.lookupMode && vm.section != 'insights' && vm.section != 'browse' && vm.section != 'team'">
                     <h2 class="button icon-button white-button">
                         <i class="fa fa-download"></i>
                     </h2>
@@ -62,7 +62,7 @@
             <li class="load-status">
                 <div>
                     <div class="loader"></div>
-                </div>       
+                </div>
             </li>
         </ul>
 
@@ -94,7 +94,7 @@
                                 {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_REVENUE_RANGE)}}
                             </div>
 
-                            <div class="employees" ng-if="vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE"> 
+                            <div class="employees" ng-if="vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE">
                                 <h3>Empolyees</h3>
                                 {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE)}}
                             </div>
@@ -103,11 +103,11 @@
                 </div>
 
             </li>
-            <li ng-repeat="category in vm.categories" class="category" 
+            <li ng-repeat="category in vm.categories" class="category"
                 ng-if="count = vm.categoryCount(category)"
-                ng-class="{active: vm.category == category}" 
+                ng-class="{active: vm.category == category}"
                 ng-click="vm.categoryClick(category); vm.metadata.current = 1;">
-                
+
                 <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
                     <span>
                         <h2 title="{{category}}">
@@ -139,15 +139,15 @@
                 </div>
             </li>
         </ul>
-        
+
         <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && !vm.subcategory">
             <div class="subcategory-back" ng-if="vm.category">
                 <span ng-click="vm.category = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span>
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns">
-                    <pd-pagination-controls 
-                            current="vm.metadata.current" 
+                    <pd-pagination-controls
+                            current="vm.metadata.current"
                             max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
                 </div>
@@ -156,17 +156,17 @@
             <ul class="subcategories">
                 <li ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category])
                         | orderBy: vm.sortOrder()
-                        | startFrom: (vm.metadata.current - 1) * vm.pagesize 
-                        | limitTo: vm.pagesize 
-                        track by $index" 
+                        | startFrom: (vm.metadata.current - 1) * vm.pagesize
+                        | limitTo: vm.pagesize
+                        track by $index"
                     class="subcategory"
                     ng-if="count = vm.subcategoryCount(vm.category, subcategory)"
-                    ng-class="{active: vm.subcategory == subcategory}" 
+                    ng-class="{active: vm.subcategory == subcategory}"
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1; vm.updateStateParams();">
-                    
+
                     <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
                          ng-class="{active: vm.subcategory == subcategory}">
-                        
+
                         <h2 class="noselect-children">
                             <div class="category-icon">
                                 <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
@@ -213,8 +213,8 @@
 
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns">
-                    <pd-pagination-controls 
-                            current="vm.metadata.current" 
+                    <pd-pagination-controls
+                            current="vm.metadata.current"
                             max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
                 </div>
@@ -227,21 +227,21 @@
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
-                    <pd-pagination-controls 
-                            current="vm.metadata.current" 
+                    <pd-pagination-controls
+                            current="vm.metadata.current"
                             max="vm.max = filteredList.length / vm.pagesize">
                     </pd-pagination-controls>
                 </div>
             </div>
 
             <ul class="enrichments {{vm.view}}">
-                <li class="box" 
-                    ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category] 
+                <li class="box"
+                    ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category]
                         | filter: vm.searchFields
                         | filter: vm.enrichmentsFilter()
                         | orderBy: vm.sortOrder()))
-                        | startFrom: (vm.metadata.current - 1) * vm.pagesize 
-                        | limitTo: vm.pagesize 
+                        | startFrom: (vm.metadata.current - 1) * vm.pagesize
+                        | limitTo: vm.pagesize
                         track by enrichment.FieldNameInTarget"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
                     ng-class="{'active': enrichment.IsSelected}">
@@ -298,16 +298,16 @@
 
                         <ul class="controls noselect" ng-if="!vm.lookupMode">
                             <li class="control enrich" ng-if="vm.section == 'edit'">
-                                <button class="button" 
-                                        ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}" 
+                                <button class="button"
+                                        ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}"
                                         ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
                                     <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
                                 </button>
                             </li>
                             <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[enrichment.FieldName] = {}">
                                 <!-- this can't be a <button> element because IE and FF don't like it -->
-                                <div class="button" 
-                                        ng-class="{'selected': openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}" 
+                                <div class="button"
+                                        ng-class="{'selected': openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}"
                                         ng-click="openHighlighter[enrichment.FieldName].open = !openHighlighter[enrichment.FieldName].open">
                                     <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">{{openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}</span>
                                     <ul ng-class="{open: openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
@@ -321,15 +321,15 @@
                 <li class="load-status" ng-show="!filteredList.length">
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"> </div>
-                    </div>       
+                    </div>
                     <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
 
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
-                    <pd-pagination-controls 
-                            current="vm.metadata.current" 
+                    <pd-pagination-controls
+                            current="vm.metadata.current"
                             max="vm.max = filteredList.length / vm.pagesize">
                     </pd-pagination-controls>
                 </div>
