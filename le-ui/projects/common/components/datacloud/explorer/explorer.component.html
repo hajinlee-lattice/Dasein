@@ -58,7 +58,7 @@
             </ul>
         </div>
 
-        <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="!vm.enrichments_completed">
+        <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="!vm.enrichments_completed" ng-if="loading_image" ng-init="loading_image">
             <li class="load-status">
                 <div>
                     <div class="loader"></div>
@@ -202,7 +202,7 @@
                     </div>
                 </li>
 
-                <li class="load-status" ng-show="!subcategoriesList.length">
+                <li class="load-status" ng-show="!subcategoriesList.length" ng-if="loading_image" ng-init="loading_image">
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"></div>
                     </div>
@@ -245,6 +245,7 @@
                         track by enrichment.FieldNameInTarget"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
                     ng-class="{'active': enrichment.IsSelected}">
+                    <div style="display: none;">{{enrichment|json}}</div>
                     <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">
@@ -275,7 +276,7 @@
                         <span class="lesser-description" ng-if="vm.lookupMode">
                             {{ enrichment.Description }}
                         </span>
-                        <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && (!vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type || !vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type != 'Numerical') && vm.section != 'lookup'">
+                        <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' && !vm.lookupMode">
                             <h5><label>Attribute range</label><label>Records</label></h5>
                             <ul>
                                 <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List">
@@ -318,7 +319,7 @@
                         </ul>
                     </div>
                 </li>
-                <li class="load-status" ng-show="!filteredList.length">
+                <li class="load-status" ng-show="!filteredList.length" ng-if="loading_image" ng-init="loading_image">
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"> </div>
                     </div>

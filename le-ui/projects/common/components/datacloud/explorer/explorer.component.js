@@ -124,7 +124,6 @@ angular.module('common.datacloud.explorer', [
             ], function(newValues, oldValues, scope) {
 
             vm.filterEmptySubcategories();
-            gotoNonemptyCategory();
         });
 
         $scope.$watchGroup([
@@ -246,7 +245,19 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
+    /* orginial filters, these work for all cases
     vm.filter = function(items, property, value) {
+        for (var i=0, result=[]; i < items.length; i++) {
+            if (typeof items[i][property] != 'undefined' && items[i][property] == value) {
+                result.push(items[i]);
+            }
+        }
+
+        return result;
+    }
+    */
+   /* new filters, would be great if they worked for false cases */
+    vm.filter = function(items, property, value, debug) {
         for (var i=0, result=[]; i < items.length; i++) {
 
             function index(obj, j) {
@@ -254,12 +265,11 @@ angular.module('common.datacloud.explorer', [
                     return obj[j];
                 }
             }
-            var item = property.split('.').reduce(index, items[i]);
+            var item = property.split('.').reduce(index, items[i]); //PLS-3145
             if (typeof item != 'undefined' && item == value) {
                 result.push(items[i]);
             }
         }
-
         return result;
     }
 
@@ -388,14 +398,17 @@ angular.module('common.datacloud.explorer', [
                 item.AttributeValue = vm.lookupFiltered[item.FieldName];
             }
 
-            item.HighlightState = highlightOptionsInitState(item);
-            item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden ? item.AttributeFlagsMap.CompanyProfile.hidden : null);
-            item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : null);
+            if(item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && typeof item.AttributeFlagsMap.CompanyProfile === 'string') {
+                var CompanyProfile = item.AttributeFlagsMap.CompanyProfile.replace(/"true"/g, true),
+                    CompanyProfile = CompanyProfile.replace(/"false"/g, false);
 
-            if(!item.AttributeFlagsMap || !item.AttributeFlagsMap.CompanyProfile) {
-                item.AttributeFlagsMap = {};
-                item.AttributeFlagsMap.CompanyProfile = {hidden: false, highlighted: false};
+                item.AttributeFlagsMap.CompanyProfile = JSON.parse(CompanyProfile);
             }
+
+            item.HighlightState = highlightOptionsInitState(item);
+            item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden ? item.AttributeFlagsMap.CompanyProfile.hidden : true);
+            item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : false);
+
 
             obj[category][subcategory].push(index);
         });
@@ -445,7 +458,6 @@ angular.module('common.datacloud.explorer', [
         if(ret.type) {
             ret.label = vm.highlightTypes[ret.type];
         }
-
         return ret;
     }
 
@@ -462,40 +474,55 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
-    var setFlag = function(opts, flags) {
+    var setFlag = function(opts, boolean) {
         var deferred = $q.defer();
-        DataCloudService.setFlag(opts, flags).then(function(result) {
+        DataCloudService.setFlag(opts, boolean).then(function(result) {
             deferred.resolve(result);
         });
         return deferred.promise;
     }
 
     vm.setFlag = function(type, enrichment) {
-        var flags = {
-                "@type": "companyProfileAttributeFlags",
-                "hidden": true,
-                "highlighted": false
-            },
+        var type = type || '',
+            boolean = true,
             label = vm.highlightTypes[type] || 'unknown type',
-            enabled = false;
+            property = {
+                name: 'hidden',
+                boolean: false,
+            },
+            flags = {
+                hidden: false,
+                highlighted: false
+            };
 
+        if(type === 'enabled') {
+            property.name = 'hidden';
+            property.boolean = false;
+            flags.hidden = false;
+            flags.highlighted = false;
+        }
         if(type === 'highlighted') {
+            property.name = 'highlighted';
+            property.boolean = true;
             flags.hidden = false;
             flags.highlighted = true;
-        } else if(type === 'enabled') {
-            flags.hidden = false;
-        } else if(type === 'disabled') {
+        }
+        if(type === 'disabled') {
+            property.name = 'hidden';
+            property.boolean = true;
             flags.hidden = true;
             flags.highlighted = false;
         }
 
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
-        setFlag({fieldName: enrichment.FieldName}, flags).then(function(){
+        setFlag({fieldName: enrichment.FieldName, propertyName: property.name}, property.boolean).then(function(){
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
 
+            // ben::note this would be way better if we got the attributesflag back on save so we could just update the enrichment with real data.
             enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted};
-            vm.enrichments.find(function(i){return i.FieldName === enrichment.FieldName;}).AttributeFlagsMap.CompanyProfile = flags;
+            enrichment.HighlightHidden = flags.hidden;
+            enrichment.HighlightHighlighted = flags.highlighted;
             DataCloudStore.updateEnrichments(vm.enrichments);
 
             var DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
@@ -503,8 +530,6 @@ angular.module('common.datacloud.explorer', [
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
 
-            enrichment.HighlightHidden = flags.hidden;
-            enrichment.HighlightHighlighted = flags.highlighted;
         });
     }
 
@@ -730,7 +755,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.saveSelected = function(){
         var dirtyEnrichments = vm.filter(vm.enrichments, 'IsDirty', true),
-            selectedObj = vm.filter(dirtyEnrichments, 'IsSelected', true),
+            selectedObj = vm.filter(dirtyEnrichments, 'IsSelected', true), //PLS-3145
             deselectedObj = vm.filter(dirtyEnrichments, 'IsSelected', false),
             selected = [],
             deselected = [];
@@ -785,16 +810,12 @@ angular.module('common.datacloud.explorer', [
             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
             'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
             'Category': vm.category,
-            'Subcategory': vm.subcategory,
+            'Subcategory': vm.subcategory
         };
 
-        if(vm.section == 'team') {
-            filter.AttributeFlagsMap = {
-                'CompanyProfile': {
-                    'hidden': (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false),
-                    'highlighted': (!vm.metadata.toggle.show.highlighted ? '' : true) || (!vm.metadata.toggle.hide.highlighted ? '' : false)
-                }
-            }
+        if(vm.section == 'team') { //ben
+            filter.HighlightHidden = (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false);
+            filter.HighlightHighlighted = (!vm.metadata.toggle.show.highlighted ? '' : true) || (!vm.metadata.toggle.hide.highlighted ? '' : false);
         }
 
         if (vm.lookupMode && vm.isYesNoCategory(vm.category)) {
@@ -887,18 +908,25 @@ angular.module('common.datacloud.explorer', [
             }
         }
         vm.categoryCounts[item.Category] = result.length;
+        if(result.length <= 1) {
+            //gotoNonemptyCategory();
+        }
         return result.length;
     }
 
     /* jumps you to non-empty category when you filter */
     var gotoNonemptyCategory = function() {
-        if(vm.category && vm.categoryCounts[vm.category] < 1) {
+        var categories = [],
+            category = '';
+        if(vm.category) {
             for(var i in vm.categoryCounts) {
                 if(vm.categoryCounts[i] > 0) {
-                    vm.category = i;
-                    break;
+                    categories.push(i);
                 }
             }
+        }
+        if(categories.length <= 1) {
+            vm.category = categories[0]; //ben
         }
     }
 
