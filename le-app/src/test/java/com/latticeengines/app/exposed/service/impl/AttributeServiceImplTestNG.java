@@ -163,7 +163,7 @@ public class AttributeServiceImplTestNG extends AppTestNGBase {
                 propertyValue);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = "saveSubCategory")
     public void saveAttributeProperty2() {
         assertEquals(attributeCustomizationService.retrieve(ATTRIBUTE_NAME_1, AttributeUseCase.CompanyProfile,
                 propertyName2), Boolean.FALSE.toString());
