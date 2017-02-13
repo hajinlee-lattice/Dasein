@@ -179,25 +179,30 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
             TupleEntry arguments = argumentsInGroup.next();
             Fields fields = arguments.getFields();
             int size = fields.size();
-            String minMaxObjStr = arguments.getString(params.minMaxKey);
             Map<String, List<Object>> minMaxInfo = null;
-            if (minMaxObjStr != null) {
-                Map<?, ?> tempMinMaxInfoMap1 = JsonUtils.deserialize(minMaxObjStr, Map.class);
-                Map<String, List> tempMinMaxInfoMap2 = JsonUtils.convertMap(tempMinMaxInfoMap1, String.class,
-                        List.class);
-                minMaxInfo = new HashMap<>();
-                for (String key : tempMinMaxInfoMap2.keySet()) {
-                    List<Object> minMaxList = JsonUtils.convertList(tempMinMaxInfoMap2.get(key), Object.class);
-                    minMaxInfo.put(key, minMaxList);
+
+            if (params.numericalBucketsRequired) {
+                String minMaxObjStr = arguments.getString(params.minMaxKey);
+
+                if (minMaxObjStr != null) {
+                    Map<?, ?> tempMinMaxInfoMap1 = JsonUtils.deserialize(minMaxObjStr, Map.class);
+                    Map<String, List> tempMinMaxInfoMap2 = JsonUtils.convertMap(tempMinMaxInfoMap1, String.class,
+                            List.class);
+                    minMaxInfo = new HashMap<>();
+                    for (String key : tempMinMaxInfoMap2.keySet()) {
+                        List<Object> minMaxList = JsonUtils.convertList(tempMinMaxInfoMap2.get(key), Object.class);
+                        minMaxInfo.put(key, minMaxList);
+                    }
                 }
             }
+
             for (int i = 0; i < size; i++) {
                 if (arguments.getObject(i) != null) {
                     Object obj = arguments.getObject(i);
                     String fieldName = fields.get(i).toString();
                     attributeParser.parseAttribute(params.typeFieldMap, encodedColumnsPos, attributeValueBuckets,
                             bucketLblOrderMap, bucketOrderMap, binaryCodedBuckets, minMaxInfo, i, obj, fieldName,
-                            params.maxBucketCount, ENCODED_NO, ENCODED_YES);
+                            params.maxBucketCount, ENCODED_NO, ENCODED_YES, params.numericalBucketsRequired);
 
                     Integer attrId = attrIdMap.get(fields.get(i));
                     if (attrId != null) {
@@ -228,12 +233,14 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
         String countKey;
         Map<FundamentalType, List<String>> typeFieldMap;
         List<String> encodedColumns;
+        boolean numericalBucketsRequired;
 
         public Params(String minMaxKey, String[] attrs, Integer[] attrIds, Fields fieldDeclaration, String[] attrFields,
                 String totalField, String[] dimensionIdFieldNames, int maxBucketCount, String lblOrderPost,
                 String lblOrderPreEncodedYes, String lblOrderPreEncodedNo, String lblOrderPreNumeric,
                 String lblOrderPreBoolean, String lblOrderPreObject, String countKey,
-                Map<FundamentalType, List<String>> typeFieldMap, List<String> encodedColumns) {
+                Map<FundamentalType, List<String>> typeFieldMap, List<String> encodedColumns,
+                boolean numericalBucketsRequired) {
             this.minMaxKey = minMaxKey;
             this.attrs = attrs;
             this.attrIds = attrIds;
@@ -251,6 +258,7 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
             this.countKey = countKey;
             this.typeFieldMap = typeFieldMap;
             this.encodedColumns = encodedColumns;
+            this.numericalBucketsRequired = numericalBucketsRequired;
         }
     }
 }

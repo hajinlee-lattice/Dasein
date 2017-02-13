@@ -11,6 +11,8 @@ public class AccountMasterStatisticsConfig extends TransformerConfig {
     private String cubeColumnName;
 
     private List<String> dimensions;
+    
+    private boolean numericalBucketsRequired;
 
     public Map<String, String> getAttributeCategoryMap() {
         return attributeCategoryMap;
@@ -42,6 +44,14 @@ public class AccountMasterStatisticsConfig extends TransformerConfig {
 
     public void setDimensions(List<String> dimensions) {
         this.dimensions = dimensions;
+    }
+
+    public boolean isNumericalBucketsRequired() {
+        return numericalBucketsRequired;
+    }
+
+    public void setNumericalBucketsRequired(boolean numericalBucketsRequired) {
+        this.numericalBucketsRequired = numericalBucketsRequired;
     }
 
 }

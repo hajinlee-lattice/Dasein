@@ -65,8 +65,10 @@ public class AccountMasterStatsFlow
         Map<String, Field> minMaxSourceColumns = new LinkedHashMap<>();
 
         Node node = addSource(parameters.getBaseTables().get(0), allColumns);
-        Node minMaxNode = addSource(parameters.getBaseTables().get(1), minMaxSourceColumns);
-
+        Node minMaxNode = null;
+        if(parameters.isNumericalBucketsRequired()){
+         minMaxNode = addSource(parameters.getBaseTables().get(1), minMaxSourceColumns);
+        }
         Map<String, CategoricalDimension> requiredDimensions = parameters.getRequiredDimensions();
 
         List<FieldMetadata> schema = node.getSchema();
@@ -106,7 +108,9 @@ public class AccountMasterStatsFlow
 
         node.renamePipe("leafRecordsNode");
 
+        if(parameters.isNumericalBucketsRequired()){
         node = joinWithMinMaxNode(node, minMaxNode, dimensionIdFieldNames);
+        }
 
         fms.add(new FieldMetadata(getTotalKey(), Long.class));
         FieldMetadata minMaxKeyMeta = new FieldMetadata(getMinMaxKey(), String.class);
@@ -225,7 +229,8 @@ public class AccountMasterStatsFlow
                 AccountMasterStatsParameters.LBL_ORDER_PRE_BOOLEAN, //
                 AccountMasterStatsParameters.LBL_ORDER_PRE_OBJECT, //
                 AccountMasterStatsParameters.COUNT_KEY, //
-                parameters.getTypeFieldMap(), parameters.getEncodedColumns());
+                parameters.getTypeFieldMap(), parameters.getEncodedColumns(),//
+                parameters.isNumericalBucketsRequired());
         AccountMasterStatsGroupingFunction buffer = new AccountMasterStatsGroupingFunction(functionParams);
 
         Node grouped = accountMaster.groupByAndBuffer(new FieldList(dimensionIdFieldNames), //

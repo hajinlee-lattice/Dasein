@@ -159,6 +159,7 @@ public class AccountMasterStatsDeploymentTestNG
         Map<String, Map<String, Long>> dimensionValuesIdMap = new HashMap<>();
         param.setDimensionValuesIdMap(dimensionValuesIdMap);
         param.setCubeColumnName("EncodedCube");
+        param.setNumericalBucketsRequired(true);
 
         List<String> dimensions = new ArrayList<>();
         dimensions.add("Location");
@@ -562,7 +563,8 @@ public class AccountMasterStatsDeploymentTestNG
                 int idx = 0;
                 boolean hasFieldMismatchInRecord = false;
                 for (Field field : record.getSchema().getFields()) {
-                    if (!field.name().equals("EncodedCube")) {
+                    if (!field.name().equals("EncodedCube") //
+                            && !field.name().equals("PID")) {
                         Object val = record.get(field.name());
                         if (val instanceof Utf8) {
                             val = ((Utf8) val).toString();
@@ -580,6 +582,10 @@ public class AccountMasterStatsDeploymentTestNG
                                 break;
                             }
                         }
+                        idx++;
+                    }
+                    
+                    if(field.name().equals("PID")){
                         idx++;
                     }
                 }

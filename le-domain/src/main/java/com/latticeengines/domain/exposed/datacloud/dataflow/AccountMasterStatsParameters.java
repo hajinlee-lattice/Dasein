@@ -52,6 +52,8 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     private List<Integer> setAttrIdsForSplunk;
 
+    private boolean numericalBucketsRequired;
+
     public Map<String, List<String>> getDimensionDefinitionMap() {
         return dimensionDefinitionMap;
     }
@@ -155,6 +157,14 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     public void setAttrIdsForSplunk(List<Integer> setAttrIdsForSplunk) {
         this.setAttrIdsForSplunk = setAttrIdsForSplunk;
+    }
+
+    public boolean isNumericalBucketsRequired() {
+        return numericalBucketsRequired;
+    }
+
+    public void setNumericalBucketsRequired(boolean numericalBucketsRequired) {
+        this.numericalBucketsRequired = numericalBucketsRequired;
     }
 
 }

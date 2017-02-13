@@ -44,16 +44,18 @@ public class StatsAttributeParser {
             Map<String, Map<String, Long>> attributeValueBuckets, Map<String, List<String>> bucketLblOrderMap,
             Map<String, List<Object>> bucketOrderMap, Map<String, Map<String, Long[]>> binaryCodedBuckets,
             Map<String, List<Object>> minMaxInfo, int i, Object obj, String fieldName, int maxBucketCount,
-            String encodedNoKey, String encodedYesKey) {
+            String encodedNoKey, String encodedYesKey, boolean numericalBucketsRequired) {
         if (obj instanceof Boolean) {
             Boolean objVal = (Boolean) obj;
             booleanHandler.handleBooleanAttribute(attributeValueBuckets, fieldName, objVal);
         } else if (obj instanceof Long //
                 || obj instanceof Integer //
                 || obj instanceof Double) {
-            if (minMaxInfo != null && minMaxInfo.get(fieldName) != null)
-                numericHandler.handleNumericalAttribute(attributeValueBuckets, obj, fieldName, bucketLblOrderMap,
-                        minMaxInfo.get(fieldName), bucketOrderMap, maxBucketCount);
+            if (numericalBucketsRequired) {
+                if (minMaxInfo != null && minMaxInfo.get(fieldName) != null)
+                    numericHandler.handleNumericalAttribute(attributeValueBuckets, obj, fieldName, bucketLblOrderMap,
+                            minMaxInfo.get(fieldName), bucketOrderMap, maxBucketCount);
+            }
         } else {
             List<String> booleanFields = typeFieldMap.get(FundamentalType.BOOLEAN);
             if (booleanFields.contains(fieldName)) {

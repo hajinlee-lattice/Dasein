@@ -181,6 +181,7 @@ public class AccountMasterStatsTransformer
         parameters.setRequiredDimensions(requiredDimensions);
         parameters.setRequiredDimensionsValuesMap(requiredDimensionsValuesMap);
         parameters.setRootIdsForNonRequiredDimensions(rootIdsForNonRequiredDimensions);
+        parameters.setNumericalBucketsRequired(config.isNumericalBucketsRequired());
     }
 
     private List<CategoricalDimension> getAllDimensions() {
