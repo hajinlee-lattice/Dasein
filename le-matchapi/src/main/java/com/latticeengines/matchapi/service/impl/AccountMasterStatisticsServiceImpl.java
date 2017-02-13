@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.mutable.MutableLong;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,12 +52,16 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("accountMasterStatisticsService")
 public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisticsService {
+    private static final String ENCODED_NO = "NO";
 
     @Value("${datacloud.core.accountmasterstats.locationbased}")
     private boolean isLocationBased;
 
     @Value("${datacloud.core.accountmasterstats.numericbuckets.enabled:true}")
     private boolean isNumericbucketEnabled;
+
+    @Value("${datacloud.core.accountmasterstats.dummybuckets.enabled:true}")
+    private boolean isDummybucketEnabled;
 
     @Autowired
     private AccountMasterFactEntityMgr accountMasterFactEntityMgr;
@@ -123,11 +128,15 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
                     AccountMasterCube.class);
             expandEncodedAttributes(cube);
-            populateDummyBuckets(cube);
+
+            if (isDummybucketEnabled) {
+                populateDummyBuckets(cube);
+            }
+
             cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
                     query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
 
-            if (isNumericbucketEnabled) {
+            if (!isNumericbucketEnabled) {
                 cleanupNumericBuckets(cube);
             }
             return cube;
@@ -330,10 +339,13 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                 String serializedTemplate = createTemplateInfoWithoutCodedInfo(encodedValueCountInfo);
 
                 int idx = 0;
+                MutableLong rowBasedTotalSum = new MutableLong();
+                MutableLong uniqueLocationBasedTotalSum = new MutableLong();
                 for (String attrName : codeBookInfo.get(encodedColumnName)) {
                     AttributeStatistics decodedInfo = JsonUtils.deserialize(serializedTemplate,
                             AttributeStatistics.class);
-                    populateDecodedBucketInfo(decodedInfo, encodedValueCountInfo, idx++);
+                    populateDecodedBucketInfo(decodedInfo, encodedValueCountInfo, idx++, rowBasedTotalSum,
+                            uniqueLocationBasedTotalSum);
                     cube.getStatistics().put(attrName, decodedInfo);
                 }
             }
@@ -341,31 +353,50 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     }
 
     private void populateDecodedBucketInfo(AttributeStatistics decodedInfo, AttributeStatistics encodedValueCountInfo,
-            int idx) {
+            int idx, MutableLong rowBasedTotalSum, MutableLong uniqueLocationBasedTotalSum) {
         if (encodedValueCountInfo.getRowBasedStatistics() != null) {
             AttributeStatsDetails st = encodedValueCountInfo.getRowBasedStatistics();
             populateDecodedBuckets(decodedInfo.getRowBasedStatistics(),
-                    decodedInfo.getRowBasedStatistics().getBuckets(), st.getBuckets(), idx);
+                    decodedInfo.getRowBasedStatistics().getBuckets(), st.getBuckets(), idx, rowBasedTotalSum);
         }
         if (encodedValueCountInfo.getUniqueLocationBasedStatistics() != null) {
             AttributeStatsDetails st = encodedValueCountInfo.getUniqueLocationBasedStatistics();
             populateDecodedBuckets(decodedInfo.getUniqueLocationBasedStatistics(),
-                    decodedInfo.getUniqueLocationBasedStatistics().getBuckets(), st.getBuckets(), idx);
+                    decodedInfo.getUniqueLocationBasedStatistics().getBuckets(), st.getBuckets(), idx,
+                    uniqueLocationBasedTotalSum);
         }
     }
 
     private void populateDecodedBuckets(AttributeStatsDetails attributeStatsDetails, Buckets decodedBuckets,
-            Buckets encodedBuckets, int idx) {
+            Buckets encodedBuckets, int idx, MutableLong totalSum) {
         if (encodedBuckets != null && encodedBuckets.getBucketList() != null
                 && encodedBuckets.getBucketList().size() > 0) {
             int loopId = 0;
+            int noBucketId = 0;
+            Long noBucketCount = 0L;
             Long total = 0L;
+            if (idx == 0) {
+                totalSum.setValue(0L);
+            }
             for (Bucket bucket : encodedBuckets.getBucketList()) {
                 if (bucket.getEncodedCountList() != null && bucket.getEncodedCountList().length > idx) {
                     decodedBuckets.getBucketList().get(loopId).setCount(bucket.getEncodedCountList()[idx]);
                     total += bucket.getEncodedCountList()[idx];
+                    if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(ENCODED_NO)) {
+                        noBucketId = loopId;
+                        noBucketCount = bucket.getEncodedCountList()[idx];
+                    }
                 }
                 loopId++;
+            }
+
+            if (idx == 0) {
+                totalSum.setValue(total);
+            } else if (((Long) totalSum.getValue()).longValue() > total.longValue()) {
+                loopId = 0;
+                Long diff = ((Long) totalSum.getValue()).longValue() - total.longValue();
+                decodedBuckets.getBucketList().get(noBucketId).setCount(noBucketCount + diff);
+                total += diff;
             }
             attributeStatsDetails.setNonNullCount(total);
         }
