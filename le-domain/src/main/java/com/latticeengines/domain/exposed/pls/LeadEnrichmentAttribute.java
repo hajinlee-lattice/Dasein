@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 @JsonIgnoreType
@@ -52,7 +53,7 @@ public class LeadEnrichmentAttribute {
     private FundamentalType fundamentalType;
 
     @JsonProperty("AttributeFlagsMap")
-    private Map<AttributeUseCase, String> attributeFlagsMap;
+    private Map<AttributeUseCase, JsonNode> attributeFlagsMap;
 
     @JsonProperty("ImportanceOrdering")
     private int importanceOrdering;
@@ -169,11 +170,11 @@ public class LeadEnrichmentAttribute {
         this.fundamentalType = fundamentalType;
     }
 
-    public Map<AttributeUseCase, String> getAttributeFlagsMap() {
+    public Map<AttributeUseCase, JsonNode> getAttributeFlagsMap() {
         return attributeFlagsMap;
     }
 
-    public void setAttributeFlagsMap(Map<AttributeUseCase, String> attributeFlagsMap) {
+    public void setAttributeFlagsMap(Map<AttributeUseCase, JsonNode> attributeFlagsMap) {
         this.attributeFlagsMap = attributeFlagsMap;
     }
 

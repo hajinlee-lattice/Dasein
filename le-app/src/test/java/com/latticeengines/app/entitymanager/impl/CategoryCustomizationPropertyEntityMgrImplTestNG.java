@@ -133,7 +133,8 @@ public class CategoryCustomizationPropertyEntityMgrImplTestNG extends AppTestNGB
 
     @Test(groups = "functional", dependsOnMethods = "saveSubCategory3")
     public void deleteCategory() {
-        categoryCustomizationPropertyEntityMgr.deleteSubcategories(category, AttributeUseCase.CompanyProfile, propertyName);
+        categoryCustomizationPropertyEntityMgr.deleteSubcategories(category, AttributeUseCase.CompanyProfile,
+                propertyName);
         List<CategoryCustomizationProperty> retrieved = categoryCustomizationPropertyEntityMgr.findAll();
         assertEquals(retrieved.size(), 3);
         System.out.println(retrieved);

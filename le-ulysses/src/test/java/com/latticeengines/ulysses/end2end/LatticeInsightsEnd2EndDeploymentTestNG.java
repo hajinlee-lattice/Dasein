@@ -16,8 +16,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -108,10 +108,10 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
 
         for (LeadEnrichmentAttribute attribute : attributes) {
             if (fieldName.equals(attribute.getFieldName())) {
-                String retrieved = attribute.getAttributeFlagsMap().get(AttributeUseCase.CompanyProfile);
+                JsonNode retrieved = attribute.getAttributeFlagsMap().get(AttributeUseCase.CompanyProfile);
                 assertNotNull(retrieved);
-                assertEquals(retrieved, JsonUtils
-                        .serialize(ImmutableMap.<String, String> of(propertyName1, "true", propertyName2, "true")));
+                assertEquals(retrieved.get(propertyName1).asBoolean(), true);
+                assertEquals(retrieved.get(propertyName2).asBoolean(), true);
             }
         }
     }

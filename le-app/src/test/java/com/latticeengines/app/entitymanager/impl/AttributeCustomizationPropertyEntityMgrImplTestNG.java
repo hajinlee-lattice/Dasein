@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -53,6 +54,15 @@ public class AttributeCustomizationPropertyEntityMgrImplTestNG extends AppTestNG
         globalAuthFunctionalTestBed.createTenant(tenant);
         MultiTenantContext.setTenant(tenant);
 
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanUp() {
+        Tenant tenant = tenantService.findByTenantId(CUSTOMER_SPACE.toString());
+
+        if (tenant != null) {
+            tenantService.discardTenant(tenant);
+        }
     }
 
     @Test(groups = "functional")

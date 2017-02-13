@@ -10,9 +10,11 @@ import org.apache.commons.collections.Closure;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationPropertyEntityMgr;
 import com.latticeengines.app.exposed.entitymanager.CategoryCustomizationPropertyEntityMgr;
@@ -147,10 +149,10 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
         }
         ObjectNode node = JsonUtils.createObjectNode();
         for (AttributeCustomizationProperty customization : filteredAttrCustomizations) {
-            node.put(customization.getPropertyName(), customization.getPropertyValue());
+            node.put(customization.getPropertyName(), Boolean.parseBoolean(customization.getPropertyValue()));
         }
-        Map<AttributeUseCase, String> flagsMap = new HashMap<>();
-        flagsMap.put(useCase, node.toString());
+        Map<AttributeUseCase, JsonNode> flagsMap = new HashMap<>();
+        flagsMap.put(useCase, node);
         attribute.setAttributeFlagsMap(flagsMap);
         return true;
     }
@@ -168,16 +170,16 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
         }
         ObjectNode node = JsonUtils.createObjectNode();
         for (CategoryCustomizationProperty customization : filteredCategoryCustomizations) {
-            node.put(customization.getPropertyName(), customization.getPropertyValue());
+            node.put(customization.getPropertyName(), Boolean.parseBoolean(customization.getPropertyValue()));
         }
-        Map<AttributeUseCase, String> flagsMap = new HashMap<>();
-        flagsMap.put(useCase, node.toString());
+        Map<AttributeUseCase, JsonNode> flagsMap = new HashMap<>();
+        flagsMap.put(useCase, node);
         attribute.setAttributeFlagsMap(flagsMap);
         return true;
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
     public void saveCategory(Category category, AttributeUseCase useCase, String propertyName, String value) {
         attributeCustomizationPropertyEntityMgr.deleteCategory(category, useCase, propertyName);
         categoryCustomizationPropertyEntityMgr.deleteSubcategories(category, useCase, propertyName);
@@ -195,7 +197,7 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
     public void saveSubcategory(Category category, String subcategoryName, AttributeUseCase useCase,
             String propertyName, String value) {
         String categoryName = CategoryNameUtils.getCategoryName(category.getName(), subcategoryName);
