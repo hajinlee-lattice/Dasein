@@ -222,6 +222,6 @@ public class RateLimitingResourceManagerUnitTestNG {
         double std = new StandardDeviation().evaluate(doubles);
         double mean = new Mean().evaluate(doubles);
         log.info(String.format("Mean count = %.2f; Standard deviation = %.2f [%.2f%%]", mean, std, 100 * std / mean));
-        Assert.assertTrue(std / mean < 0.35, "Standard deviation should be smaller than 35%");
+        Assert.assertTrue(std / mean < 0.40, "Standard deviation should be smaller than 40%");
     }
 }
