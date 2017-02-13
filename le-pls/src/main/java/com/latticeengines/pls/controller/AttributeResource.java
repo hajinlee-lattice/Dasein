@@ -1,5 +1,7 @@
 package com.latticeengines.pls.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +27,14 @@ public class AttributeResource {
     @Autowired
     private AttributeCustomizationService attributeCustomizationService;
 
+    @RequestMapping(value = "/flags/{name}/{useCase}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Save attribute property")
+    public void savePropertyValues(@PathVariable String name, @PathVariable AttributeUseCase useCase,
+            @RequestBody Map<String, String> properties) {
+        attributeCustomizationService.save(name, useCase, properties);
+    }
+
     @RequestMapping(value = "/flags/{name}/{useCase}/{propertyName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save attribute property")
@@ -45,19 +55,34 @@ public class AttributeResource {
     @RequestMapping(value = "/categories/flags/{categoryName}/{useCase}/{propertyName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save attribute property")
-    public void saveCategory(@PathVariable Category category,
-            @PathVariable AttributeUseCase useCase, @PathVariable String propertyName, @RequestBody String value) {
-        attributeCustomizationService.saveCategory(category, useCase, propertyName, value);
+    public void saveCategory(@PathVariable String categoryName, @PathVariable AttributeUseCase useCase,
+            @PathVariable String propertyName, @RequestBody String value) {
+        attributeCustomizationService.saveCategory(Category.fromName(categoryName), useCase, propertyName, value);
     }
 
     @RequestMapping(value = "/categories/subcategories/flags/{categoryName}/{subcategoryName}/{useCase}/{propertyName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save attribute property")
-    public void saveSubcategory(@PathVariable Category category,
-            @PathVariable String subcategoryName, @PathVariable AttributeUseCase useCase,
-            @PathVariable String propertyName, @RequestBody String value) {
-        attributeCustomizationService.saveSubcategory(category, subcategoryName, useCase, propertyName,
-                value);
+    public void saveSubcategory(@PathVariable String categoryName, @PathVariable String subcategoryName,
+            @PathVariable AttributeUseCase useCase, @PathVariable String propertyName, @RequestBody String value) {
+        attributeCustomizationService.saveSubcategory(Category.fromName(categoryName), subcategoryName, useCase,
+                propertyName, value);
     }
 
+    @RequestMapping(value = "/categories/flags/{categoryName}/{useCase}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Save attribute property")
+    public void saveCategoryProperties(@PathVariable String categoryName, @PathVariable AttributeUseCase useCase,
+            @RequestBody Map<String, String> properties) {
+        attributeCustomizationService.saveCategory(Category.fromName(categoryName), useCase, properties);
+    }
+
+    @RequestMapping(value = "/categories/subcategories/flags/{categoryName}/{subcategoryName}/{useCase}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Save attribute property")
+    public void saveSubcategoryProperties(@PathVariable String categoryName, @PathVariable String subcategoryName,
+            @PathVariable AttributeUseCase useCase, @RequestBody Map<String, String> properties) {
+        attributeCustomizationService.saveSubcategory(Category.fromName(categoryName), subcategoryName, useCase,
+                properties);
+    }
 }

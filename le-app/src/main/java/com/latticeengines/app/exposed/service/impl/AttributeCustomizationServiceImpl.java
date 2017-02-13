@@ -72,6 +72,20 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
     }
 
     @Override
+    public void save(String name, AttributeUseCase useCase, Map<String, String> properties) {
+        log.info(String.format("Customizing attribute %s for tenant %s and use case %s with flags %s", name,
+                MultiTenantContext.getCustomerSpace(), useCase, properties));
+        LeadEnrichmentAttribute enrichmentAttr = attributeService.getAttribute(name);
+        if (enrichmentAttr == null) {
+            throw new LedpException(LedpCode.LEDP_36001, new String[] { name });
+        }
+
+        for (String propertyName : properties.keySet()) {
+            save(name, useCase, propertyName, properties.get(propertyName));
+        }
+    }
+
+    @Override
     public String retrieve(String name, AttributeUseCase useCase, String propertyName) {
         LeadEnrichmentAttribute enrichmentAttr = attributeService.getAttribute(name);
         if (enrichmentAttr == null) {
@@ -84,8 +98,8 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
         }
         String category = enrichmentAttr.getCategory();
         String subCategory = enrichmentAttr.getSubcategory();
-        CategoryCustomizationProperty categoryPropertyCustomization = categoryCustomizationPropertyEntityMgr
-                .find(useCase, CategoryNameUtils.getCategoryName(category, subCategory), propertyName);
+        CategoryCustomizationProperty categoryPropertyCustomization = categoryCustomizationPropertyEntityMgr.find(
+                useCase, CategoryNameUtils.getCategoryName(category, subCategory), propertyName);
         if (categoryPropertyCustomization != null) {
             return categoryPropertyCustomization.getPropertyValue();
         }
@@ -213,5 +227,24 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
                 categoryCustomizationPropertyEntityMgr.createOrUpdate(categoryCustomizationProperty);
             }
         });
+    }
+
+    @Override
+    public void saveCategory(Category category, AttributeUseCase useCase, Map<String, String> properties) {
+        log.info(String.format("Saving properties for category %s, use case %s, properties: %s", category, useCase,
+                properties));
+        for (String propertyName : properties.keySet()) {
+            saveCategory(category, useCase, propertyName, properties.get(propertyName));
+        }
+    }
+
+    @Override
+    public void saveSubcategory(Category category, String subcategoryName, AttributeUseCase useCase,
+            Map<String, String> properties) {
+        log.info(String.format("Saving properties for category %s, use case %s, properties: %s",
+                CategoryNameUtils.getCategoryName(category.getName(), subcategoryName), useCase, properties));
+        for (String propertyName : properties.keySet()) {
+            saveSubcategory(category, subcategoryName, useCase, propertyName, properties.get(propertyName));
+        }
     }
 }
