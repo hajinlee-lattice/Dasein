@@ -1,22 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html class="no-js" lang="en" id="ng-app" data-ng-app="mainApp">
     <head runat="server">
+
         <base href="/lp/"> 
         <title>Lattice Engines</title>
         
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
         <link rel="shortcut icon" type="image/x-icon" href="assets/images/favicon.ico">
         <link rel="stylesheet" type="text/css" href="/assets/lattice.css" />
+
         <!-- build:css app.css -->
         <link rel="stylesheet" type="text/css" href="../common/assets/css/font-awesome.min.css" />
         <link rel="stylesheet" type="text/css" href="assets/styles/production.css" />
         <!-- endbuild -->
-        <!--[if gte IE 9]><link rel="stylesheet" href="assets/styles/ie9.css"><![endif]-->
+
     </head>
-    <body data-ng-controller="MainController" class="lp not-initialized">
+    <body id="body" data-ng-controller="MainController" class="lp not-initialized">
         <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
         <div id="outer-wrap">
             <div id="inner-wrap">

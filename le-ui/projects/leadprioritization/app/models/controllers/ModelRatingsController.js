@@ -50,32 +50,41 @@ angular.module('lp.models.ratings', [
         });
     }
 
-    // Render Chart
     function renderChart(){
         
-        // Define height of chart
-        vm.chartContainerHeight = Math.round(12*vm.summary.bar_lifts[0] + 10);
+        var verticalAxis = document.getElementById("verticalAxis");
+
+        // Get tallest bar in set
+        vm.largestLiftInSet = Math.max.apply(Math,vm.summary.bar_lifts.map(function(o){return o;}));
+
+        // Set height of chart components based off tallest bar
+        vm.relativeHeightOfTallest = Math.round((12*vm.largestLiftInSet) + 10);
+        if(vm.relativeHeightOfTallest < 150){
+            vm.chartContainerHeight = Math.round((25*vm.largestLiftInSet) + 10);
+            vm.barMultiplier = 25;
+            console.log("small");
+        } else {
+            vm.chartContainerHeight = Math.round((15*vm.largestLiftInSet) + 10);
+            vm.barMultiplier = 15;
+            console.log("large");
+        }
 
         // Define height of dugout
         vm.dugoutHeight = vm.chartContainerHeight - 8;
-
-        // Get highest lift value and round to next integer up
-        function getMaxLift(arr, prop) {
-            var max;
-            for (var i=0 ; i<arr.length ; i++) {
-                if (!max || parseInt(arr[i][prop]) > parseInt(max[prop]))
-                    max = arr[i];
-            }
-            return max;
-        }
-        var maxLift = getMaxLift(vm.currentConfiguration, "lift");
         
         // Create vertical axis based on maxLift
-        vm.yAxisNumber = Math.round(maxLift.lift);
+        vm.yAxisNumber = Math.round(vm.largestLiftInSet);
+        if(vm.yAxisNumber >= 3 && vm.yAxisNumber <= 10) {
+            verticalAxis.classList.add('reduceSmall');
+        } else if (vm.yAxisNumber > 10) {
+            verticalAxis.classList.add('reduceBig');
+        }
+
         vm.getNumber = function(num) {return new Array(num);}
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
 
-            
+        console.log(vm.largestLiftInSet, vm.yAxisNumber, 25*vm.largestLiftInSet+10, vm.chartContainerHeight); 
+ 
     }
 
     function initSliders(){
@@ -161,12 +170,28 @@ angular.module('lp.models.ratings', [
         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
         $scope.Math = window.Math;
 
-        console.log(vm.historicalBuckets);
+        vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
+        // console.log(vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty);
+        console.log($stateParams);
 
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
         } else {
             vm.modelType = "Accounts";
+        }
+
+        // Set value for total leads in set
+        // This will need to get changed when we're saving configurations
+        vm.historyTotalLeads = pluckDeepKey("num_leads", vm.historicalBuckets);
+
+        // Add values for a specific key in object
+        function pluckDeepKey(key, obj) {
+          if (_.has(obj, key)) {
+            return obj[key];
+          }
+          return _.reduce(_.flatten(_.map(obj, function(v) {
+            return _.isObject(v) ? pluckDeepKey(key, v) : [];
+          }), false), function(a,b) { return a + b });
         }
 
     };

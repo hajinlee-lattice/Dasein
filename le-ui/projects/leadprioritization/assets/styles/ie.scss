@@ -1,0 +1,38 @@
+.ie-9, .ie-10, .ie-11 {
+
+	.uploaded-leads {
+		background-position: center 0px;
+	}
+
+	.secondary-nav .profile-nav {
+		max-width: 300px;
+	}
+
+	.ratings-chart .data {
+		z-index: 3;
+	}
+	.ratings-chart .data li {
+		background-color: rgba(0,0,0,0.2);
+		border-top: rgba(0,0,0,0.4) solid 3px;
+	}
+
+	.bar-colors {
+		z-index: 2;
+	}
+	.bar-colors .overlay:nth-child(1) {
+		background-color: rgba(112,187,86,0.3);
+	}
+	.bar-colors .overlay:nth-child(2) {
+		background-color: rgba(255,185,61,0.3);
+	}
+	.bar-colors .overlay:nth-child(3) {
+		background-color: rgba(245,108,53,0.3);
+	}
+	.bar-colors .overlay:nth-child(4) {
+		background-color: rgba(214,43,48,0.3);
+	}
+	.bar-colors .overlay:nth-child(5) {
+		background-color: rgba(73,73,73,0.3);
+	}
+
+}

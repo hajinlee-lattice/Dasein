@@ -3,12 +3,10 @@
     <div class="row">
         <div class="twelve columns">
 
-
             <ul class="tabs_">
                 <li ui-sref="home.model.ratings({ modelId: '{{ vm.modelId | escape }}' })">Rating Setup</li>
                 <li class="active">History</li>
             </ul>
-
 
             <ul class="history-list">
 
@@ -22,19 +20,19 @@
 		                    <div class="bucket-label">{{bucket.name}}</div>
 		                    <dl>
 		                        <dt>Lift</dt>
-		                        <dd class="lift">{{Math.max(bucket.lift).toFixed(2);}}x</dd>
+		                        <dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>
 		                        <dt>{{vm.modelType}} %</dt>
-		                        <dd>{{ bucket.sum_leads }}%</dd>
+		                        <dd>{{ Math.round(100*bucket.num_leads / vm.historyTotalLeads) }}%</dd>
 		                        <dt>{{vm.modelType}}</dt>
 		                        <dd>{{bucket.num_leads | number}}</dd>
+		                        <dt>Score Range</dt>
+		                        <dd>{{bucket.left_bound_score}}-{{bucket.right_bound_score}}</dd>
 		                    </dl>
 		                </li>
 		            </ul><!-- End .bucket-tiles -->
 		        </li>
 
 		    </ul><!-- End .history -->
-
-
 
         </div><!-- End .twelve.columns -->
     </div><!-- End .row -->

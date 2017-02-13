@@ -34,7 +34,7 @@
 .ratings-chart {
 	position: relative;
 	margin: 26px auto 34px;
-	min-height: 125px;
+	/* min-height: 150px; */
 	width: 94%;
 	&:after {
 		display: table;
@@ -62,11 +62,11 @@
 }
 .bar-colors {
 	width: 100%;
-	min-height: 125px;
+	/* min-height: 150px; */
 	mix-blend-mode: color;
 	.overlay {
 		position: absolute;
-		min-height: 125px;
+		/* min-height: 150px; */
 		&:nth-child(1) {
 			background-color: rgba(112,187,86,1);
 		}
@@ -86,14 +86,14 @@
 }
 .sliders-container {
 	width: 100%;
-	min-height: 125px;
+	/* min-height: 150px; */
 	position: absolute;
 	z-index: 4;
 }	
 .slider-dugout {
 	width: 20px;
 	margin-right: 32px;
-	min-height: 125px;
+	/* min-height: 150px; */
 	background: #e8e8e8;
 	border: #dedada solid 1px;
 	float: right;
@@ -101,7 +101,7 @@
 .slider {
 	border-right: #1c3d59 solid 1px;
 	position: absolute;
-	min-height: 125px;
+	/* min-height: 150px; */
 	z-index: 5;
 	.handle {
 		position: absolute;
@@ -152,7 +152,7 @@
 }
 .vertical-axis {
 	width: 94%;
-	min-height: 125px;
+	/* min-height: 150px; */
 	margin-left: 10px;
 	display: flex;
 	flex-direction: column-reverse;
@@ -169,6 +169,22 @@
 			position: absolute;
 			left: -26px;
 			top: -12px;
+		}
+	}
+	&.reduceSmall {
+		li:nth-child(2n) {
+			visibility: hidden;
+		}
+		li:nth-child(1), li:last-of-type {
+			visibility: visible;
+		}		
+	}
+	&.reduceBig {
+		li:nth-child(2n+2) {
+			visibility: hidden;
+		}
+		li:nth-child(1), li:last-of-type {
+			visibility: visible;
 		}
 	}
 }

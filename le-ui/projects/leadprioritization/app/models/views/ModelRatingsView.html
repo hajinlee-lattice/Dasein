@@ -3,12 +3,10 @@
     <div class="row">
         <div class="twelve columns">
 
-
             <ul class="tabs_">
                 <li class="active">Rating Setup</li>
                 <li ui-sref="home.model.ratings.history({ modelId: '{{ vm.modelId | escape }}' })">History</li>
             </ul>
-
 
             <div class="chart-header">
                 <div class="list-data pull-left">All {{vm.modelType}}: <strong>{{vm.summary.total_num_leads | number}}</strong></div>
@@ -42,7 +40,7 @@
 
                 </div><!-- End .sliders-container -->
 
-                <ul class="vertical-axis">
+                <ul id="verticalAxis" class="vertical-axis" ng-attr-class="vertical-axis">
                     <li 
                         ng-repeat="i in vm.getNumber(vm.yAxisNumber) track by $index"
                         ng-attr-style="{{'height: '+ vm.axisItemHeight +'px;'}}">
@@ -52,8 +50,8 @@
                 <ul class="data">
                     <li 
                         ng-repeat="data in vm.summary.bar_lifts track by $index"
-                        ng-attr-style="{{'height: '+ Math.round(12*data) +'px;'}}"
-                        title="{{num_converted/data.num_leads}}"
+                        ng-attr-style="{{'height: '+ Math.round(vm.barMultiplier * data) +'px;'}}"
+                        ng-attr-title="{{data}}"
                         >&nbsp;</li>
                 </ul>
 
@@ -63,7 +61,10 @@
                     ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
                     <div 
                         class="overlay" 
-                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;right: '+ bucket.right_bound_score +'%;width: '+ (bucket.left_bound_score - bucket.right_bound_score) +'%;'}}" 
+                        ng-attr-style="{{'
+                            height: '+ vm.dugoutHeight +'px;
+                            right: '+ bucket.right_bound_score +'%;
+                            width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'}}" 
                         ng-repeat="bucket in vm.currentConfiguration">
                     </div>
                 </div><!-- End .bar-colors -->
@@ -109,7 +110,7 @@
             		<div class="bucket-label">{{bucket.name}}</div>
             		<dl>
             			<dt>Lift</dt>
-            			<dd class="lift">{{Math.max(bucket.lift).toFixed(2);}}x</dd>
+            			<dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>
             			<dt>{{vm.modelType}} %</dt>
             			<dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
             			<dt>{{vm.modelType}}</dt>
@@ -126,7 +127,7 @@
                     <div class="bucket-label">{{bucket.name}}</div>
                     <dl>
                         <dt>Lift</dt>
-                        <dd class="lift">{{Math.max(bucket.lift).toFixed(2);}}x</dd>
+                        <dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>
                         <dt>{{vm.modelType}} %</dt>
                         <dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
                         <dt>{{vm.modelType}}</dt>
