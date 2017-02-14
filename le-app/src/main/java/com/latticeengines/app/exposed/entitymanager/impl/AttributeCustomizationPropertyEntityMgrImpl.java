@@ -19,8 +19,8 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("attributeCustomizationPropertyEntityMgr")
-public class AttributeCustomizationPropertyEntityMgrImpl extends BaseEntityMgrImpl<AttributeCustomizationProperty> implements
-        AttributeCustomizationPropertyEntityMgr {
+public class AttributeCustomizationPropertyEntityMgrImpl extends BaseEntityMgrImpl<AttributeCustomizationProperty>
+        implements AttributeCustomizationPropertyEntityMgr {
 
     @Autowired
     private AttributeCustomizationPropertyDao attributeCustomizationPropertyDao;
@@ -52,7 +52,8 @@ public class AttributeCustomizationPropertyEntityMgrImpl extends BaseEntityMgrIm
         customization.setTenant(tenant);
         customization.setPid(null);
 
-        AttributeCustomizationProperty existing = find(customization.getName(), customization.getUseCase(), customization.getPropertyName());
+        AttributeCustomizationProperty existing = find(customization.getName(), customization.getUseCase(),
+                customization.getPropertyName());
         if (existing == null) {
             super.create(customization);
         } else {
@@ -71,5 +72,11 @@ public class AttributeCustomizationPropertyEntityMgrImpl extends BaseEntityMgrIm
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
     public void deleteCategory(Category category, AttributeUseCase useCase, String propertyName) {
         attributeCustomizationPropertyDao.deleteCategory(category, useCase, propertyName);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_UNCOMMITTED)
+    public List<AttributeCustomizationProperty> findAll() {
+        return super.findAll();
     }
 }

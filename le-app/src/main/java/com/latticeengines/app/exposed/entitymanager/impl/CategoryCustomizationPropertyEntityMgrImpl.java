@@ -1,5 +1,7 @@
 package com.latticeengines.app.exposed.entitymanager.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -61,4 +63,9 @@ public class CategoryCustomizationPropertyEntityMgrImpl extends BaseEntityMgrImp
         categoryCustomizationPropertyDao.deleteSubcategories(category, useCase, propertyName);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_UNCOMMITTED)
+    public List<CategoryCustomizationProperty> findAll() {
+        return super.findAll();
+    }
 }
