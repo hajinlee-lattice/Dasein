@@ -1,7 +1,7 @@
 <section id="ModelRatingsView" class="model-ratings container">
 
     <div class="row">
-        <div class="twelve columns">
+        <div class="ten columns offset-one">
 
             <ul class="tabs_">
                 <li class="active">Rating Setup</li>
@@ -30,7 +30,8 @@
                     <div 
                         class="slider"
                         ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;right: '+ bucket.right_bound_score +'%'}}"
-                        ng-repeat="bucket in vm.currentConfiguration">
+                        ng-repeat="bucket in vm.currentConfiguration"
+                        draggable>
                         <div class="handle">&nbsp;</div>
                     </div>
 
