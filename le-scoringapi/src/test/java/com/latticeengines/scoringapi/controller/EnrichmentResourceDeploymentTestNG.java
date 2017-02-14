@@ -331,10 +331,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 3);
     }
 
-//    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-//            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
-    public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave()
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = {"testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
+    public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
                 SEARCH_DISPLAY_NAME_STR1, Category.TECHNOLOGY_PROFILE);
         Assert.assertNotNull(combinedAttributeList);
@@ -414,7 +412,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = {
             "testGetLeadEnrichmentAttributesWithParamsAfterSecondSave" })
     public void testPagination() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);

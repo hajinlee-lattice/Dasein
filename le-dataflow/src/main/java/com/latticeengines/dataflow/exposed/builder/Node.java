@@ -5,12 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import cascading.operation.Buffer;
-import cascading.operation.Function;
-import cascading.operation.buffer.FirstNBuffer;
-import cascading.pipe.Pipe;
-import cascading.tuple.Fields;
-
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
@@ -44,6 +38,12 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+
+import cascading.operation.Buffer;
+import cascading.operation.Function;
+import cascading.operation.buffer.FirstNBuffer;
+import cascading.pipe.Pipe;
+import cascading.tuple.Fields;
 
 public class Node {
     private String identifier;
@@ -250,10 +250,12 @@ public class Node {
         return new Node(builder.addMD5(identifier, fieldsToApply, targetFieldName), builder);
     }
 
+    // only guarantee uniqueness, not necessarily sequential
     public Node addRowID(String targetFieldName) {
         return new Node(builder.addRowId(identifier, targetFieldName), builder);
     }
 
+    // only guarantee uniqueness, not necessarily sequential
     public Node addRowID(FieldMetadata fm) {
         return new Node(builder.addRowId(identifier, fm), builder);
     }
