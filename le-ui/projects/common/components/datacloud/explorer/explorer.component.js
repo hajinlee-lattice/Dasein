@@ -398,17 +398,9 @@ angular.module('common.datacloud.explorer', [
                 item.AttributeValue = vm.lookupFiltered[item.FieldName];
             }
 
-            if(item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && typeof item.AttributeFlagsMap.CompanyProfile === 'string') {
-                var CompanyProfile = item.AttributeFlagsMap.CompanyProfile.replace(/"true"/g, true),
-                    CompanyProfile = CompanyProfile.replace(/"false"/g, false);
-
-                item.AttributeFlagsMap.CompanyProfile = JSON.parse(CompanyProfile);
-            }
-
             item.HighlightState = highlightOptionsInitState(item);
             item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden ? item.AttributeFlagsMap.CompanyProfile.hidden : true);
             item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : false);
-
 
             obj[category][subcategory].push(index);
         });
@@ -474,58 +466,45 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
-    var setFlag = function(opts, boolean) {
+    var setFlags = function(opts, flags) {
         var deferred = $q.defer();
-        DataCloudService.setFlag(opts, boolean).then(function(result) {
+        DataCloudService.setFlags(opts, flags).then(function(result) {
             deferred.resolve(result);
         });
         return deferred.promise;
     }
 
-    vm.setFlag = function(type, enrichment) {
-        var type = type || '',
-            boolean = true,
-            label = vm.highlightTypes[type] || 'unknown type',
-            property = {
-                name: 'hidden',
-                boolean: false,
+    vm.setFlags = function(type, enrichment) {
+        var flags = {
+                "hidden": true,
+                "highlighted": false
             },
-            flags = {
-                hidden: false,
-                highlighted: false
-            };
+            label = vm.highlightTypes[type] || 'unknown type',
+            enabled = false;
 
-        if(type === 'enabled') {
-            property.name = 'hidden';
-            property.boolean = false;
-            flags.hidden = false;
-            flags.highlighted = false;
-        }
         if(type === 'highlighted') {
-            property.name = 'highlighted';
-            property.boolean = true;
             flags.hidden = false;
             flags.highlighted = true;
-        }
-        if(type === 'disabled') {
-            property.name = 'hidden';
-            property.boolean = true;
+        } else if(type === 'enabled') {
+            flags.hidden = false;
+        } else if(type === 'disabled') {
             flags.hidden = true;
             flags.highlighted = false;
         }
 
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
-        setFlag({fieldName: enrichment.FieldName, propertyName: property.name}, property.boolean).then(function(){
+        setFlags({fieldName: enrichment.FieldName}, flags).then(function(){
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
 
-            // ben::note this would be way better if we got the attributesflag back on save so we could just update the enrichment with real data.
             enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted};
             enrichment.HighlightHidden = flags.hidden;
             enrichment.HighlightHighlighted = flags.highlighted;
+
+            vm.enrichments.find(function(i){return i.FieldName === enrichment.FieldName;}).AttributeFlagsMap.CompanyProfile = flags;
             DataCloudStore.updateEnrichments(vm.enrichments);
 
-            var DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
+            var DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'HighlightHidden', true),
                 EnabledForSalesTeamTotal = vm.enrichments.length - DisabledForSalesTeamTotal.length;
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);

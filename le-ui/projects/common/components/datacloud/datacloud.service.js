@@ -388,6 +388,22 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
+    this.setFlags = function(opts, flags){
+        var deferred = $q.defer(),
+            opts = opts || {},
+            fieldName = opts.fieldName || '',
+            useCase = opts.useCase || 'CompanyProfile',
+            flags = flags || {}; // json
+        $http({
+            method: 'POST',
+            url: '/pls/attributes/flags/' + fieldName + '/' + useCase,
+            data: flags
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
     this.setFlag = function(opts, boolean){
         var deferred = $q.defer(),
             opts = opts || {},

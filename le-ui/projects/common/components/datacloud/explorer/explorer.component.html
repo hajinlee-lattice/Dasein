@@ -312,7 +312,7 @@
                                         ng-click="openHighlighter[enrichment.FieldName].open = !openHighlighter[enrichment.FieldName].open">
                                     <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">{{openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}</span>
                                     <ul ng-class="{open: openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
-                                        <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-click="openHighlighter[enrichment.FieldName].state = vm.setFlag(type, enrichment)">{{label}}</li>
+                                        <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-click="openHighlighter[enrichment.FieldName].state = vm.setFlags(type, enrichment)">{{label}}</li>
                                     </ul>
                                 </div>
                             </li>
