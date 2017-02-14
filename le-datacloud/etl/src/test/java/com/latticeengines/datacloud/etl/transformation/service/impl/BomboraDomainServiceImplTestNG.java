@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -33,7 +35,7 @@ public class BomboraDomainServiceImplTestNG
     @Autowired
     private BomboraDomainService bomboraDomainService;
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTransformation() {
         uploadBaseAvro(baseSource, baseSourceVersion);
         uploadBaseAvro(source, baseSourceVersion);
@@ -56,7 +58,8 @@ public class BomboraDomainServiceImplTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getBaseSources()[0], baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(source.getBaseSources()[0].getSourceName(), baseSourceVersion)
+                .toString();
     }
 
     @Override
@@ -68,25 +71,30 @@ public class BomboraDomainServiceImplTestNG
 
     @Override
     protected String getPathForResult() {
-        return hdfsPathBuilder.constructSnapshotDir(source, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
+        Set<Long> ids = new HashSet<Long>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
             String domain = String.valueOf(record.get(DOMAIN));
-            Integer id = (Integer) record.get(ID);
+            Long id = (Long) record.get(ID);
             Long timestamp = (Long) record.get(TIMESTAMP);
-
-            Assert.assertTrue((domain.equals("null") && id.equals(2) && timestamp == null)
-                    || (domain.equals("google.com") && id.equals(1) && timestamp != null)
-                    || (domain.equals("uber.com") && id.equals(3) && timestamp != null));
+            if (id != null) {
+                ids.add(id);
+                log.info(id);
+            }
+            Assert.assertTrue(
+                    (domain.equals("null") && timestamp == null) || (domain.equals("google.com") && timestamp != null)
+                            || (domain.equals("uber.com") && timestamp != null));
 
             rowNum++;
         }
         Assert.assertEquals(rowNum, 3);
+        Assert.assertEquals(ids.size(), rowNum);
     }
 }

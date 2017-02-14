@@ -60,13 +60,12 @@ public class BomboraDomainFlow
 
         Node newDomains = joined.filter(id + " == null", new FieldList(id));
         newDomains = newDomains.addRowID("ROWID");
-        newDomains = newDomains.addFunction(
-                "Long.valueOf(ROWID).intValue() + " + parameters.getCurrentRecords().toString(), new FieldList("ROWID"),
-                new FieldMetadata("ROWID", Integer.class));
+        newDomains = newDomains.addFunction("Long.valueOf(ROWID) + " + parameters.getCurrentRecords().toString(),
+                new FieldList("ROWID"), new FieldMetadata("ROWID", Long.class));
         String[] copyFrom = { "ROWID", "Daily_" + bomboraDepivotedDomain };
         String[] copyTo = {"NEW_ID", "NEW_Domain"};
         List<FieldMetadata> fms = new ArrayList<FieldMetadata>();
-        fms.add(new FieldMetadata("NEW_ID", Integer.class));
+        fms.add(new FieldMetadata("NEW_ID", Long.class));
         fms.add(new FieldMetadata("NEW_Domain", String.class));
         newDomains = newDomains.apply(new BomboraDomainFunction(copyTo, copyFrom),
                 new FieldList("ROWID", "Daily_" + bomboraDepivotedDomain), fms, new FieldList("NEW_ID", "NEW_Domain"));
