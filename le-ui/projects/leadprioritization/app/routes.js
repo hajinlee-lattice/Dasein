@@ -258,7 +258,7 @@ angular
                 },
                 "main@": {
                     resolve: {
-                        MostRecentConfiguration: function($q, $stateParams, ModelRatingsService) {
+                        MostRecentConfiguration: function($q, $stateParams, $state, ModelRatingsService) {
                             var deferred = $q.defer(),
                                 id = $stateParams.modelId;
 
@@ -312,6 +312,22 @@ angular
                     controller: 'ModelRatingsHistoryController',
                     controllerAs: 'vm',
                     templateUrl: 'app/models/views/ModelRatingsHistoryView.html'
+                }
+            }
+        })
+        .state('home.model.ratings.demo', {
+            url: '/ratings-demo',
+            params: {
+                pageIcon: 'ico-ratings',
+                pageTitle: ''
+            },
+            views: {
+                "summary@": {
+                    controller: '',
+                    template: ''
+                },
+                "main@": {
+                    templateUrl: 'app/models/views/ModelRatingsDemoView.html'
                 }
             }
         })
