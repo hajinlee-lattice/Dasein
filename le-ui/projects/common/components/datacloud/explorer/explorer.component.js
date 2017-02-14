@@ -596,7 +596,7 @@ angular.module('common.datacloud.explorer', [
                     var isSubcategory = item.Subcategory == subcategory;
                     var attrValue = vm.lookupFiltered[item.FieldName];
 
-                        console.log(category, subcategory, vm.metadata.toggle.show.nulls, attrValue)
+                        //console.log(category, subcategory, vm.metadata.toggle.show.nulls, attrValue)
                     if (vm.lookupMode && attrValue && isSubcategory) {
                         item.Value = attrValue;
                         if (!vm.metadata.toggle.show.nulls && attrValue == 'No') {
