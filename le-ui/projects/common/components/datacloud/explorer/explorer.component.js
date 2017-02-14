@@ -399,7 +399,7 @@ angular.module('common.datacloud.explorer', [
             }
 
             item.HighlightState = highlightOptionsInitState(item);
-            item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden ? item.AttributeFlagsMap.CompanyProfile.hidden : true);
+            item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden === true ? true : false);
             item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : false);
 
             if(!item.AttributeFlagsMap || !item.AttributeFlagsMap.CompanyProfile) {
@@ -800,7 +800,7 @@ angular.module('common.datacloud.explorer', [
             'Subcategory': vm.subcategory
         };
 
-        if(vm.section == 'team') { //ben
+        if(vm.section == 'team') { 
             filter.HighlightHidden = (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false);
             filter.HighlightHighlighted = (!vm.metadata.toggle.show.highlighted ? '' : true) || (!vm.metadata.toggle.hide.highlighted ? '' : false);
         }
