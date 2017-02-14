@@ -261,7 +261,7 @@ angular.module('common.datacloud.explorer', [
         for (var i=0, result=[]; i < items.length; i++) {
 
             function index(obj, j) {
-                if(obj && j && obj[j]) {
+                if(obj && j) {
                     return obj[j];
                 }
             }
