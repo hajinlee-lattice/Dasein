@@ -402,6 +402,11 @@ angular.module('common.datacloud.explorer', [
             item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden ? item.AttributeFlagsMap.CompanyProfile.hidden : true);
             item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : false);
 
+            if(!item.AttributeFlagsMap || !item.AttributeFlagsMap.CompanyProfile) {
+                item.AttributeFlagsMap = {};
+                item.AttributeFlagsMap.CompanyProfile = {};
+            }
+
             obj[category][subcategory].push(index);
         });
 
@@ -475,6 +480,9 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.setFlags = function(type, enrichment) {
+        if(type === enrichment.HighlightState.type) {
+            return false;
+        }
         var flags = {
                 "hidden": true,
                 "highlighted": false
