@@ -150,17 +150,22 @@ angular.module('common.datacloud.explorer', [
                 }
 
                 vm.query = vm.queryText;
-                
-                vm.filterEmptySubcategories(); // ben:note this is breaking
-
                 vm.queryInProgress = false;
-            }, 333);
 
-            if(vm.section != 'browse') {
-                //vm.category = vm.categories[0];
-                vm.updateStateParams();
-            }
+                if (vm.section != 'browse') {
+                    vm.updateStateParams();
+                }
+                
+                var categories = Object.keys(vm.categoryCounts).filter(function(value, index) {
+                    return vm.categoryCounts[value] > 0;
+                });
 
+                if (categories.length == 1) {
+                    vm.category = categories[0];
+                }
+
+                vm.filterEmptySubcategories(); // ben:note this is breaking
+            }, 500);
         });
 
         var find_dropdown_buttons = $interval(dropdown_buttons, 300),
@@ -556,11 +561,13 @@ angular.module('common.datacloud.explorer', [
     }
 
     var getEnrichmentCategories = function() {
-        vm.categories = Object.keys(EnrichmentTopAttributes).sort();
-        for(var i in vm.categories) {
-            vm.categoryCounts[vm.categories[i]] = null;
+        if (EnrichmentTopAttributes) {
+            vm.categories = Object.keys(EnrichmentTopAttributes).sort();
+            for(var i in vm.categories) {
+                vm.categoryCounts[vm.categories[i]] = null;
+            }
+            vm.enable_category_dropdown = true;
         }
-        vm.enable_category_dropdown = true;
     }
 
     var subcategoriesExclude = [];
@@ -589,9 +596,10 @@ angular.module('common.datacloud.explorer', [
                     var isSubcategory = item.Subcategory == subcategory;
                     var attrValue = vm.lookupFiltered[item.FieldName];
 
+                        console.log(category, subcategory, vm.metadata.toggle.show.nulls, attrValue)
                     if (vm.lookupMode && attrValue && isSubcategory) {
                         item.Value = attrValue;
-                        if (!vm.metadata.toggle.show.nulls && attrValue != 'Yes') {
+                        if (!vm.metadata.toggle.show.nulls && attrValue == 'No') {
                             return false;
                         } else {
                             return true;
@@ -851,7 +859,7 @@ angular.module('common.datacloud.explorer', [
             if (item && vm.searchFields(item)) {
                 if ((item.Category != category) 
                 || (item.Subcategory != subcategory)
-                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue != "Yes" && vm.isYesNoCategory(category)) 
+                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category)) 
                 || (vm.metadata.toggle.show.selected && !item.IsSelected) 
                 || (vm.metadata.toggle.hide.selected && item.IsSelected) 
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
@@ -879,7 +887,7 @@ angular.module('common.datacloud.explorer', [
             var item = filtered[i];
             if (item && vm.searchFields(item)) {
                 if ((item.Category != category)
-                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue != "Yes" && vm.isYesNoCategory(category)) 
+                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category)) 
                 || (vm.metadata.toggle.show.selected && !item.IsSelected) 
                 || (vm.metadata.toggle.hide.selected && item.IsSelected) 
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 

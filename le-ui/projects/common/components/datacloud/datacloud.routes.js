@@ -27,7 +27,7 @@ angular
                     DataCloudStore.setHost(ApiHost);
 
                     DataCloudStore.getAllTopAttributes().then(function(result) {
-                        deferred.resolve(result);
+                        deferred.resolve(result || {});
                     });
 
                     return deferred.promise;

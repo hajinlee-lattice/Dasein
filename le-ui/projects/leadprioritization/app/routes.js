@@ -1392,8 +1392,6 @@ angular
             }
         });
 });
-'https://bodcdevsvipa25.lattice.local:8075/ulysses/companyprofiles/?enforceFuzzyMatch=true'
-'http://localhost:3001                    /ulysses/companyprofiles/?enforceFuzzyMatch=true'
 function ShowSpinner(LoadingString, type) {
     // state change spinner
     var element = $('#mainContentView'),

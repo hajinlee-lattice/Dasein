@@ -420,5 +420,4 @@ angular.module('common.datacloud')
         });
         return deferred.promise;
     }
-
 });

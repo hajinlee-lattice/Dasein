@@ -2,22 +2,29 @@ angular
 .module('mainApp.core.modules.ServiceErrorModule', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
-.factory('ServiceErrorInterceptor', function ($q, $injector) {
-    return {
-        response: function(response) {
-            //console.log('response', response.status, response);
-            var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
-            ServiceErrorUtility.process(response);
+.service('ServiceErrorInterceptor', function ($q, $injector) {
+    this.response = function(response) {
+        //console.log('response', response.status, response);
+        var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
+        ServiceErrorUtility.process(response);
 
-            return response || $q.when(response);
-        },
-        responseError: function(rejection) {
-            //console.log('responseError', rejection.status, rejection);
-            var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
-            ServiceErrorUtility.process(rejection);
+        return response || $q.when(response);
+    };
 
-            return $q.reject(rejection);
-        }
+    this.responseError = function(rejection) {
+        //console.log('responseError', rejection);
+        var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
+        ServiceErrorUtility.process(rejection);
+
+        return $q.reject(rejection);
+    };
+
+    this.requestError = function(rejection) {
+        //console.log('requestError', rejection);
+        var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
+        ServiceErrorUtility.process(rejection);
+
+        return $q.reject(rejection);
     };
 })
 .config(function ($httpProvider) {
@@ -25,10 +32,12 @@ angular
 })
 .service('ServiceErrorUtility', function ($compile, $templateCache, $http, $rootScope) {
     this.check = function (response) {
-        return (response && response.data && (response.data.errorCode || response.data.errorMsg));
+        //console.log('check', response);
+        return (response && response.data && (response.data.error || response.data.error_description || response.data.errorMsg || response.data.errorMsg));
     };
 
     this.process = function (response) {
+        //console.log('process', response);
         if (this.check(response)) {
             var config = response.config || { headers: {} },
                 params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),
@@ -60,8 +69,8 @@ angular
             var scope = $rootScope.$new(),
                 data = response.data;
 
-            scope.errorCode = data.errorCode;
-            scope.errorMsg = data.errorMsg;
+            scope.errorCode = data.errorCode || data.error;
+            scope.errorMsg = data.errorMsg || data.error_description;
             scope.status = response.status;
             scope.statusText = response.statusText;
 
