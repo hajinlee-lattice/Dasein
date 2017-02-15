@@ -18,6 +18,7 @@ PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deplo
 PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
 PARAM_INSTALL_MODE=Parameter("InstallMode", "INTERNAL or EXTERNAL")
 PARAM_LE_STACK=Parameter("LEStack", "The name of the parent LE_STACK")
+PARAM_ECS_SCALE_ROLE_ARN = ArnParameter("EcsAutoscaleRoleArn", "ECS autoscale role Arn")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -44,12 +45,12 @@ def template(environment, stackname, mode, profile, instances, upload=False):
 
 def create_template(profile, instances, port, mode, env):
     stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", env, use_asgroup=True, instances=instances)
-    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE, PARAM_LE_STACK])
+    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE, PARAM_LE_STACK, PARAM_ECS_SCALE_ROLE_ARN])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
     task = express_task(profile_vars, port, mode)
     stack.add_resource(task)
-    stack.add_service("express", task)
+    stack.add_service("express", task, asrolearn=PARAM_ECS_SCALE_ROLE_ARN)
     return stack
 
 def express_task(profile_vars, port, mode):
