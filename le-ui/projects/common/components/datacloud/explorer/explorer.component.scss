@@ -49,13 +49,13 @@
                     z-index: 2;
                     .dropdown {
                         .selected, .enabled, .highlighted {
-                            &.hide {
+                            &.hide:not(:last-child) {
                                 border-bottom: 1px solid #333;
                                 padding-bottom: 5px;
                                 margin-bottom: 10px;
                             }
                         }
-                        .internal {
+                        .internal:not(:first-child) {
                             &.show {
                                 border-top: 1px solid #333;
                                 padding-top: 5px;

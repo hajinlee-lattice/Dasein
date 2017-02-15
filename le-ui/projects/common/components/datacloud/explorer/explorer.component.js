@@ -223,6 +223,13 @@ angular.module('common.datacloud.explorer', [
         vm.generalSelectLimit = DataCloudStore.getMetadata('generalSelectLimit');
 
         vm.statusMessageBox = angular.element('.status-alert');
+
+        /* hide disabled for sales team from iframe */
+        if(vm.section === 'insights') {
+            vm.metadata.toggle.show.enabled = true;
+        } else {
+            vm.metadata.toggle.show.enabled = '';
+        }
     }
 
     vm.sortOrder = function() {
@@ -794,7 +801,7 @@ angular.module('common.datacloud.explorer', [
             'Subcategory': vm.subcategory
         };
 
-        if(vm.section == 'team') { 
+        if(vm.section == 'team' || vm.section == 'insights') { 
             filter.HighlightHidden = (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false);
             filter.HighlightHighlighted = (!vm.metadata.toggle.show.highlighted ? '' : true) || (!vm.metadata.toggle.hide.highlighted ? '' : false);
         }
