@@ -386,6 +386,12 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                         noBucketId = loopId;
                         noBucketCount = bucket.getEncodedCountList()[idx];
                     }
+                } else if (bucket.getEncodedCountList() != null) {
+                    decodedBuckets.getBucketList().get(loopId).setCount(0L);
+                    if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(ENCODED_NO)) {
+                        noBucketId = loopId;
+                        noBucketCount = 0L;
+                    }
                 }
                 loopId++;
             }
