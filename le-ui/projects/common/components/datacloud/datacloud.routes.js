@@ -14,7 +14,7 @@ angular
                     var deferred = $q.defer();
 
                     DataCloudStore.setHost(ApiHost);
-                    
+
                     DataCloudStore.getCount().then(function(result) {
                         deferred.resolve(result);
                     });
@@ -54,7 +54,7 @@ angular
             url: '/form',
             params: {
                 pageIcon: 'ico-enrichment',
-                pageTitle: 'Lattice Data Cloud'
+                pageTitle: 'Data Cloud Explorer'
             },
             views: {
                 "navigation@": {
@@ -76,7 +76,7 @@ angular
             url: '/tabs',
             params: {
                 pageIcon: 'ico-enrichment',
-                pageTitle: 'Lattice Data Cloud'
+                pageTitle: 'Data Cloud Explorer'
             },
             resolve: {
                 LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
@@ -106,7 +106,7 @@ angular
                 "subsummary@": {
                     controller: function(LookupResponse, LookupStore, BrowserStorageUtility) {
                         LookupStore.add('count', 0);//Object.keys(LookupResponse.attributes).length;
-                        
+
                         this.store = LookupStore;
                         this.ldc_name = LookupResponse.companyInfo
                             ? LookupResponse.companyInfo.LDC_Name
@@ -173,7 +173,7 @@ angular
             url: '/explorer/:section/:category/:subcategory',
             params: {
                 pageIcon: 'ico-enrichment',
-                pageTitle: 'Lattice Data Cloud',
+                pageTitle: 'Data Cloud Explorer',
                 section: 'browse'
             },
             views: {
@@ -195,14 +195,14 @@ angular
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
-                } 
+                }
             }
         })
         .state('home.datacloud.insights', {
             url: '/tabs',
             params: {
                 pageIcon: 'ico-enrichment',
-                pageTitle: 'Lattice Data Cloud',
+                pageTitle: 'Data Cloud Explorer',
                 section: 'insights'
             },
             views: {
