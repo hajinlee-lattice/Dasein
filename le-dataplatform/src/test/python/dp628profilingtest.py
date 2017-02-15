@@ -34,4 +34,4 @@ class DP628ProfilingTest(ProfilingTestBase):
         self.assertEqual(metadata['RetirementAssetsYOY'][0]['Dtype'], 'BND')
 
         # String and Interval
-        self.assertEqual(metadata['ExperianCreditRating'][0]['Dtype'], 'STR')
+        self.assertEqual(metadata['ExperianCreditRating'][0]['Dtype'], 'BND')

@@ -197,7 +197,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
 
 
     attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecognized":[], "NULLDisplayName":[],
-                      "NULLCategory":[], "HighNullValueRate":[], "GT200_DiscreteValue":[]}
+                      "NULLCategory":[], "HighNullValueRate":[], "GT200_DistinctValue":[]}
 
     otherMetadata = retrieveOtherMetadata(configMetadata, attributeStats)
     categoricalCols = retrieveCategoricalColumns(configMetadata, features, categoricalCols)
