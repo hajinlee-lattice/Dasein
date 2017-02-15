@@ -7,18 +7,17 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 ])
 
 .controller('TopPredictorWidgetController', function (
-        $scope, $sce, $element, $compile, $rootScope, ResourceUtility, 
+        $scope, $sce, $element, $compile, $rootScope, ResourceUtility,
         WidgetFrameworkService, TopPredictorService, ModelStore, FeatureFlagService
     ) {
-    
+
     var widgetConfig = ModelStore.widgetConfig.Widgets[0];
     var metadata = ModelStore.metadata;
     var data = ModelStore.data;
     var parentData = $scope.parentData;
     var flags = FeatureFlagService.Flags();
     $scope.ResourceUtility = ResourceUtility;
-    
-    
+
     var container = $('<div></div>');
     $($element).append(container);
 
@@ -30,7 +29,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         parentData: parentData
     };
     WidgetFrameworkService.CreateChildWidgets(options, $scope.data);
-    
+
     var chartData = data.ChartData;
     if (chartData) {
         // THIS IS PART OF THE UI BAND-AID TO COMBINE INTERNAL, EXTERNAL CATEGORIES WITH SAME NAME
@@ -44,52 +43,52 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     }
 
     $scope.backToSummaryView = false;
-    
+
     // Get Internal category list
     var internalCategoryObj = data.InternalAttributes;
     if (internalCategoryObj) {
         $scope.internalPredictorTotal = internalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
         $scope.internalCategories = internalCategoryObj.categories;
         $scope.showInternalCategories = internalCategoryObj.total > 0;
-        
+
         // Get External category list
         var externalCategoryObj = data.ExternalAttributes;
         $scope.externalPredictorTotal = externalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
         $scope.externalCategories = externalCategoryObj.categories;
         $scope.showExternalCategories = externalCategoryObj.total > 0;
-    }    
+    }
     // Calculate total
     var totalPredictors = data.TotalPredictors;
     $scope.topPredictorTitle = totalPredictors + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
-    
+
     $scope.generateCategoryLabel = function(category) {
     	return $sce.trustAsHtml(category.name + '<span style="background-color:' + category.color + '">' + category.count + '</span>');
     };
-    
+
     // Methods used for the Sunburst chart
     // Stash the old values for transition.
     function stash (d) {
         d.x0 = d.x;
         d.dx0 = d.dx;
     }
-    
+
     var width = 300,
         height = 300,
         radius = Math.min(width, height) / 2,
         hoverOpacity = 0.7,
         showAttributeTimeout;
 
-    // This is used to get an initial size so it can animate 
+    // This is used to get an initial size so it can animate
     var fakePartition = d3.layout.partition()
         .sort(null)
         .size([0.01, 0.01])
         .value(function(d) { return 1; });
-        
+
     var partition = d3.layout.partition()
         .sort(null)
         .size([2 * Math.PI, radius * radius])
         .value(function(d) { return d.size; });
-    
+
     //Draw Sunburst chart
     $scope.drawSummaryChart = function () {
         $(".js-top-predictor-donut").empty();
@@ -98,11 +97,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             .attr("height", height)
           .append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-        
+
         var gutterWidth = 0.0075;  // radians
 
         var arc = d3.svg.arc()
-            .startAngle(function(d) { 
+            .startAngle(function(d) {
                 // if first category, make start angle larger for more gutter
                 var gutter = null;
 
@@ -144,8 +143,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             var path = svg.datum(chartData).selectAll("path")
                 .data(fakePartition.nodes)
             .enter().append("path")
-                .attr("display", function(d) { 
-                    return d.depth ? null : "none"; 
+                .attr("display", function(d) {
+                    return d.depth ? null : "none";
                 }) // hide inner ring
                 .attr("d", arc)
                 .attr('stroke-width', function(d) { return d.depth === 1 ? 2.5 : 1; })
@@ -193,13 +192,13 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                     break;
                 }
             }
-              
+
             if (category != null) {
                 // This is required to update bindings (although not sure why)
                 $scope.$apply($scope.categoryClicked(category));
             }
         }
-        
+
         // Interpolate the arcs in data space.
         function arcTween (a) {
             var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
@@ -221,7 +220,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     $scope.exportClicked = function () {
         var fileName = "attributes.csv";
     	var csvRows = TopPredictorService.GetTopPredictorExport(data);
-        console.log(fileName, csvRows, data);
+
         alasql("SELECT * INTO CSV('" + fileName + "') FROM ?", [csvRows]);
     };
 
@@ -231,22 +230,22 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
         $scope.drawSummaryChart();
     };
-    
+
     function clearSelectedCategory () {
         TopPredictorService.ClearCategoryClasses($scope.externalCategories);
         TopPredictorService.ClearCategoryClasses($scope.internalCategories);
     }
-    
+
     function highlightSelectedCategory (category) {
         clearSelectedCategory();
-        
+
         for (var i = 0; i < $scope.externalCategories.length; i++) {
             if ($scope.externalCategories[i].name === category.name) {
                 $scope.externalCategories[i].activeClass = "active";
                 break;
             }
         }
-        
+
         for (var x = 0; x < $scope.internalCategories.length; x++) {
             if ($scope.internalCategories[x].name === category.name) {
                 $scope.internalCategories[x].activeClass = "active";
@@ -254,7 +253,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             }
         }
     }
-    
+
     $scope.categoryClicked = function (category) {
         clearTimeout(showAttributeTimeout);
         var categoryList = TopPredictorService.GetAttributesByCategory(data, category.name, category.color, 50);
@@ -271,13 +270,13 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             children: categoryList
         };
         $(".js-top-predictor-donut").empty();
-            
+
         var svg = d3.select(".js-top-predictor-donut").append("svg")
             .attr("width", width)
             .attr("height", height)
           .append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-        
+
         // Append a back button
         setTimeout(function () {
             svg.append("svg:image")
@@ -297,9 +296,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 .on("click", function () {
                     $("#back-to-summary-link").click();
                 });
-                
+
         }, 1000);
-        
+
         svg.append("circle")
            .attr("cx", 0)
            .attr("cy", 0)
@@ -311,7 +310,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
            .on("click", function() {
                $("#back-to-summary-link").click();
            });
-            
+
         var arc2 = d3.svg.arc()
             .startAngle(function(d) { return d.x; })
             .endAngle(function(d) { return d.x + d.dx; })
@@ -322,21 +321,21 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                     return 0;
                 }
             })
-            .outerRadius(function(d) { 
+            .outerRadius(function(d) {
                 if (d.depth === 1) {
-                    return 125; 
+                    return 125;
                 } else {
                     return 0;
                 }
             });
-        
+
         var path = svg.datum(root).selectAll("path")
             .data(fakePartition.nodes)
         .enter().append("path")
-            .attr("display", function(d) { 
-                return d.depth ? null : "none"; 
+            .attr("display", function(d) {
+                return d.depth ? null : "none";
             }) // hide inner ring
-            .attr("d", arc2)   
+            .attr("d", arc2)
             .style("stroke", "#fff")
             .attr('opacity', function(d) {
                 if (d.depth === 1) {
@@ -382,7 +381,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         }
         path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
     };
-    
+
     function showAttributeHover (attributeName, attributeColor, mouseX, mouseY, path) {
         if (showAttributeTimeout != null) {
             clearTimeout(showAttributeTimeout);
@@ -405,23 +404,23 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
         }, 500);
     }
-    
-    function hideAttributeHover () { 
+
+    function hideAttributeHover () {
         if (showAttributeTimeout != null) {
             clearTimeout(showAttributeTimeout);
         }
         var topPredictorAttributeHover = $("#topPredictorAttributeHover");
         topPredictorAttributeHover.hide();
         topPredictorAttributeHover.empty();
-        
+
     }
-  
+
 })
 
 .directive('topPredictorWidget', function () {
     var directiveDefinitionObject = {
         templateUrl: 'app/AppCommon/widgets/topPredictorWidget/TopPredictorWidgetTemplate.html'
     };
-  
+
     return directiveDefinitionObject;
 });

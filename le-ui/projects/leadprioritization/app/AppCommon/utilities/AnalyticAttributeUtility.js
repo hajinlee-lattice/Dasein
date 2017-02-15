@@ -5,6 +5,8 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
 ])
 .service('AnalyticAttributeUtility', function (ResourceUtility, DateTimeFormatUtility, NumberUtility) {
 
+    var MISC_BUCKET_NAME = 'Other, Less Popular';
+
     // Enum used to determine whether a bucket should be shown
     this.ApprovedUsage = {
         None: "None",
@@ -116,10 +118,10 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
             toReturn = "No";
         } else if (value == "Y" || value == "YES" || value == "TRUE" || value == "T" || parseInt(value) == (1)) {
             toReturn = "Yes";
-        } 
+        }
         return toReturn;
     };
-    
+
     this.GetAttributeBucketName = function (bucket, attributeMetadata) {
         if (bucket == null) {
             return "";
@@ -127,6 +129,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         if (bucket.LowerInclusive > 0 && bucket.UpperExclusive == 0) {
             bucket.UpperExclusive = null;
         }
+
         var toReturn = null;
         var lowerValue;
         var upperValue;
@@ -152,7 +155,12 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                         discreteValueString += ", " + bucketValue;
                     }
                 }
-                toReturn = discreteValueString;
+
+                if (typeof discreteValueString === 'string' && discreteValueString.toUpperCase() === 'MISC.') {
+                    toReturn = MISC_BUCKET_NAME;
+                } else {
+                    toReturn = discreteValueString;
+                }
             }
         } else if (bucket.LowerInclusive != null && bucket.UpperExclusive != null) {
 
@@ -161,26 +169,21 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                 if (dataType == this.DataType.Int || dataType == this.DataType.Integer) {
                     toReturn = this.FormatIntegerBucket(bucket.LowerInclusive, bucket.UpperExclusive, attributeMetadata);
                 } else {
-                    lowerValue = this.FormatBucketValue(bucket.LowerInclusive, attributeMetadata);
                     upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
-                    toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_CONTINUOUS_BETWEEN_LABEL", [lowerValue, upperValue]);
-                    if (lowerValue == upperValue) {
-                        toReturn = lowerValue;
-                    }
+
+                    toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
+
                 }
             } else {
-                lowerValue = this.FormatBucketValue(bucket.LowerInclusive, attributeMetadata);
                 upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
-                toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_CONTINUOUS_BETWEEN_LABEL", [lowerValue, upperValue]);
-                if (lowerValue == upperValue) {
-                    toReturn = lowerValue;
-                }
+
+                toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
             }
         } else if (bucket.LowerInclusive == null && bucket.UpperExclusive == null) {
             toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_ALL_VALUES_LABEL");
         } else if (bucket.LowerInclusive != null) {
             lowerValue = this.FormatBucketValue(bucket.LowerInclusive, attributeMetadata);
-            toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_GREATER_THAN_LABEL", [lowerValue]);
+            toReturn = '>= ' + lowerValue;
         } else {
             upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
             toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
@@ -188,17 +191,10 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         return String(toReturn);
     };
 
-    // ENG-6735:
-    //  1) If the bucket spans one integer (e.g. lower is 0 and upper is 1), return lower
-    //  2) Otherwise, decrement upper exclusive so that it is "inclusive"
     this.FormatIntegerBucket = function (lower, upper, attributeMetadata) {
-        if (upper - lower <= 1) {
-            return lower;
-        }
+        var upperValue = this.FormatBucketValue(upper, attributeMetadata);
 
-        var lowerValue = this.FormatBucketValue(lower, attributeMetadata);
-        var upperValue = this.FormatBucketValue(upper - 1, attributeMetadata);
-        return ResourceUtility.getString("ANALYTIC_ATTRIBUTE_CONTINUOUS_BETWEEN_LABEL", [lowerValue, upperValue]);
+        return ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
     };
 
     this.AbbreviateNumber = function (realValue, fundamentalType) {
@@ -236,7 +232,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
     	var fundamentalType = attributeMetadata.FundamentalType != null ? attributeMetadata.FundamentalType.toUpperCase() : null;
     	return fundamentalType == this.FundamentalType.Boolean;
     };
-    
+
     this.FormatBucketValue = function (value, attributeMetadata) {
         if (value == null || attributeMetadata == null) {
             return value;
@@ -262,7 +258,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         var toReturn;
         var dataType = attributeMetadata.DataType != null ? attributeMetadata.DataType.toUpperCase() : null;
         switch (dataType) {
-            // Format Numbers         
+            // Format Numbers
             case this.DataType.Double:
             case this.DataType.Int:
             case this.DataType.Integer:
@@ -271,21 +267,21 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
             case this.DataType.Float:
                 toReturn = this.AbbreviateNumber(value, fundamentalType);
                 break;
-            // Format Date         
+            // Format Date
             case this.DataType.Date:
                 toReturn = DateTimeFormatUtility.FormatStringDate(value, false);
                 break;
-            // Format DateTime and Time         
+            // Format DateTime and Time
             case this.DataType.DateTime:
             case this.DataType.Time:
                 toReturn = DateTimeFormatUtility.FormatStringDate(value, true);
                 break;
-            // Format Boolean and Bit         
+            // Format Boolean and Bit
             case this.DataType.Boolean:
             case this.DataType.Bit:
                 toReturn = this.FormatBooleanValueForDisplay(value);
                 break;
-            // Format EpochTime         
+            // Format EpochTime
             case this.DataType.Epoch:
                 toReturn = DateTimeFormatUtility.FormatEpochDate(value);
                 break;

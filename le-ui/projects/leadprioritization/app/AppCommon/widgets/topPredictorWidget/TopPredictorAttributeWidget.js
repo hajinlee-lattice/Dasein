@@ -6,6 +6,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
 ])
 
 .controller('TopPredictorAttributeWidgetController', function ($scope, _, $sce, $filter, ResourceUtility, TopPredictorService) {
+
+    var MISC_BUCKET_NAME = 'Other, Less Popular';
+
     var data = $scope.data;
     $scope.attributeName = data.name;
     $scope.attributeFullDescription = data.description;
@@ -18,14 +21,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     $scope.attributeColor = data.color;
 
     var chartData = data.elementList;
-    var liftValues = _.map(chartData, function(d){ return d.lift; });
+    var liftValues = _.map(chartData, function(d){ return d.name === MISC_BUCKET_NAME ? 0 : d.lift });
     var bucketNames = _.map(chartData, "name");
     var percentLeads = _.map(chartData, function(d){ return TopPredictorService.FormatPercent(d.percentTotal); });
     percentLeads = TopPredictorService.SumToOne(percentLeads);
-    
-    $scope.generateAttributeName = function() { 
-        return $sce.trustAsHtml('<h4 style="border-left: ' + $scope.attributeColor + 
-    		' solid 6px;" title="' + $scope.attributeName + '">' + $scope.attributeName + '</h4>' + '<p title="' +  
+
+    $scope.generateAttributeName = function() {
+        return $sce.trustAsHtml('<h4 style="border-left: ' + $scope.attributeColor +
+    		' solid 6px;" title="' + $scope.attributeName + '">' + $scope.attributeName + '</h4>' + '<p title="' +
     		$scope.attributeDescription + '">' + decodeURIComponent(encodeURIComponent($scope.attributeDescription)) + '</p>');
     };
 
@@ -53,7 +56,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             pathRect = path.getBoundingClientRect(),
             center = (donut.offsetLeft) + (donutRect.width >> 1),
             top = (pathRect.top - donutRect.top + (pathRect.height >> 1)) / donutRect.height;
-        
+
         //console.log(center, donutRect.left, donutRect.width);
         // Adjust height of tail pseudo-element to anchor to path element
         // FIXME - Find a better way to adjust pseudo-element when supported
@@ -81,7 +84,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             attributeHover.addClass("attribute-hover-left-arrow");
         }
 
-        /* 
+        /*
             this code truncates the description.  It's a bit hacky,
             but there is no real good way of doing it.  The opacity
             changes are there to hide the box until the next frame to
@@ -211,7 +214,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             }
 
         });
-    
+
     // These are the "borders" that accompany each bar
     chart.selectAll("rect.barBorder")
         .data(liftValues)
@@ -234,7 +237,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             }
 
         });
-        
+
 
     // This is the 1x line
     chart.selectAll("line.baselineLift")
@@ -289,7 +292,13 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("text-anchor", "end")
         .attr("class", "lift")
         .style("fill", "#666")
-        .text(function(d) { return $filter('number')(d, 1) + "x"; } );
+        .text(function(d, i) {
+            if (chartData[i].name === MISC_BUCKET_NAME) {
+                return 'N/A'
+            } else {
+                return $filter('number')(d, 1) + "x";
+            }
+        });
 
     // This is the lift label to the right of the chart
     chart.append("text")

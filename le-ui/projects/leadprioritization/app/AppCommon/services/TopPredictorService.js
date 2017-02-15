@@ -6,6 +6,9 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 ])
 .service('TopPredictorService', function (_, StringUtility, AnalyticAttributeUtility, ResourceUtility) {
 
+    var MISC_BUCKET_NAME = 'Other, Less Popular',
+        NULL_BUCKET_NAME = 'Not Populated';
+
     this.GetSuppressedCategories = function (modelSummary) {
         var categories = this.GetAllCategories(modelSummary);
         return this.SelectSuppressedCategories(modelSummary, categories);
@@ -97,6 +100,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (predictor == null || totalLeads == null) {
             return false;
         }
+
         var toReturn = true;
         for (var y = 0; y < predictor.Elements.length; y++) {
             var element = predictor.Elements[y];
@@ -104,7 +108,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var percentTotal = (element.Count / totalLeads) * 100;
             if (attributeValue != null &&
                 (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE" ||
-                            attributeValue === "") && 
+                            attributeValue === "") &&
                 percentTotal >= 99.5) {
                 toReturn = false;
                 break;
@@ -181,7 +185,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         return toReturn;
     };
-    
+
     this.GetNumberOfAttributesByCategory = function (categoryList, isExternal, modelSummary) {
         var toReturn = {
             totalAttributeValues: 0,
@@ -225,7 +229,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 toReturn.total += displayCategory.count;
             }
         }
-        
+
         return toReturn;
     };
 
@@ -289,11 +293,11 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (attributeList == null || attributeList.length === 0) {
             return null;
         }
-        
+
         if (numLargeCategories == null) {
             numLargeCategories = Math.round(attributeList.length * 0.16);
         }
-        
+
         if (numMediumCategories == null) {
             numMediumCategories = Math.round(attributeList.length * 0.32);
         }
@@ -317,7 +321,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             return false;
         }
 
-        return predictorElement.LowerInclusive == null && predictorElement.UpperExclusive == null && 
+        return predictorElement.LowerInclusive == null && predictorElement.UpperExclusive == null &&
             predictorElement.Values != null && predictorElement.Values.length > 0 &&
             predictorElement.Values[0] != null;
     };
@@ -340,25 +344,29 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
 
         var columns = [
-            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_CATEGORY_LABEL'), 
-            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_NAME_LABEL'), 
-            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_VALUE_LABEL'), 
-            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_DESCRIPTION_LABEL'), 
-            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_PERCENT_LEADS_LABEL'), 
-            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_LIFT_LABEL'), 
-            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_CONVERSION_RATE_LABEL'), 
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_CATEGORY_LABEL'),
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_NAME_LABEL'),
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_VALUE_LABEL'),
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_DESCRIPTION_LABEL'),
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_PERCENT_LEADS_LABEL'),
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_LIFT_LABEL'),
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_CONVERSION_RATE_LABEL'),
             ResourceUtility.getString('TOP_PREDICTOR_EXPORT_PREDICTIVE_POWER_LABEL')
         ];
-        var toReturn = []; 
+        var toReturn = [];
         toReturn.push(columns);
+        var indexOfBucketName = 2;
 
         var totalPredictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
         var averageConversionRate = modelSummary.ModelDetails.TestingConversions/modelSummary.ModelDetails.TestingLeads;
 
         for (var x = 0; x < totalPredictors.length; x++) {
             var predictor = totalPredictors[x];
+            var isNumericRange = predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Numeric ||
+                predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Currency;
+            var maxBucket = null;
 
-            if(!StringUtility.IsEmptyString(predictor.Category) && 
+            if(!StringUtility.IsEmptyString(predictor.Category) &&
                 (this.ShowBasedOnInternalOrExternal(predictor, true) || this.ShowBasedOnInternalOrExternal(predictor, false)) &&
                 AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
                 this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
@@ -371,17 +379,40 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     }
                     percentTotal = percentTotal.toFixed(1);
                     var lift = element.Lift.toPrecision(2);
-                    var conversionRate = element.Lift * averageConversionRate;
+                    var conversionRate = (element.Lift * averageConversionRate).toFixed(2);
                     var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
                     var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+
                     if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
-                        attributeValue = "N/A";
+                        attributeValue = NULL_BUCKET_NAME;
                     }
-                    //PLS-352 
+                    //PLS-352
                     attributeValue = "'"+ attributeValue + "'";
-                    var predictivePower = predictor.UncertaintyCoefficient * 100;
+                    var predictivePower = (predictor.UncertaintyCoefficient * 100).toFixed(2);
                     var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, conversionRate, predictivePower];
                     toReturn.push(attributeRow);
+
+                    var foundMax = false;
+                    if (isNumericRange && element.LowerInclusive !== null) {
+                        if (maxBucket === null) {
+                            maxBucket = {};
+                        }
+
+                        if (!maxBucket.hasOwnProperty('LowerInclusive') || element.LowerInclusive >= maxBucket.UpperExclusive) {
+                            maxBucket.LowerInclusive = element.LowerInclusive;
+                            maxBucket.UpperExclusive = element.UpperExclusive;
+                            foundMax = true;
+                        }
+                    }
+
+                    if (foundMax) {
+                        maxBucket.indexOfMax = toReturn.length - 1;
+                    }
+                }
+
+                if (maxBucket !== null) {
+                    var row = toReturn[maxBucket.indexOfMax];
+                    row[indexOfBucketName] = "'" + AnalyticAttributeUtility.GetAttributeBucketName({LowerInclusive: maxBucket.LowerInclusive}, predictor) + "'";
                 }
             }
         }
@@ -416,12 +447,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 totalAttributes.push(category.children[y]);
             }
         }
-        
+
         this.CalculateAttributeSize(totalAttributes, numLargeCategories, numMediumCategories);
-        
+
         // Then sort the categories by the total size of their top attributes
         topCategories = topCategories.sort(this.SortBySize);
-        
+
         var toReturn = {
             name: "root",
             size : 1,
@@ -429,7 +460,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             attributesPerCategory: attributesPerCategory,
             children: topCategories
         };
-        
+
         return toReturn;
     };
 
@@ -437,13 +468,13 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (attributeName == null || predictorList == null) {
             return null;
         }
-        
+
         for (var i = 0; i < predictorList.length; i++) {
             if (attributeName == predictorList[i].Name) {
                 return predictorList[i];
             }
         }
-        
+
         return null;
     };
 
@@ -463,7 +494,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             description: predictor.Description || "",
             elementList: []
         };
-        var nullBucket = null;
+        var nullBucket = null,
+            miscBucket = null;
 
         var isContinuous = false;
         if (!AnalyticAttributeUtility.IsPredictorBoolean(predictor)) {
@@ -476,9 +508,25 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
         }
 
+        var isNumericRange = predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Numeric ||
+                predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Currency;
+        var maxBucket = null;
         for (var i = 0; i < predictor.Elements.length; i++) {
             var bucket = predictor.Elements[i];
             var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
+
+            var foundMax = false;
+            if (isNumericRange && bucket.LowerInclusive !== null) {
+                if (maxBucket === null) {
+                    maxBucket = {};
+                }
+
+                if (!maxBucket.hasOwnProperty('LowerInclusive') || bucket.LowerInclusive >= maxBucket.UpperExclusive) {
+                    maxBucket.LowerInclusive = bucket.LowerInclusive;
+                    maxBucket.UpperExclusive = bucket.UpperExclusive;
+                    foundMax = true;
+                }
+            }
 
             var bucketToDisplay = {
                 name: bucketName,
@@ -498,11 +546,24 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 if (bucketToDisplay.name != null && typeof bucketToDisplay.name === 'string' &&
                     (bucketToDisplay.name.toUpperCase() === "NULL" || bucketToDisplay.name.toUpperCase() === "NONE" || bucketToDisplay.name.toUpperCase() === "NOT AVAILABLE")) {
                     nullBucket = bucketToDisplay;
-                    nullBucket.name = "N/A";
+                    nullBucket.name = NULL_BUCKET_NAME;
+                    continue;
+                }
+                if (bucketToDisplay.name !== null && typeof bucketToDisplay.name === 'string' &&
+                    bucketToDisplay.name === MISC_BUCKET_NAME) {
+                    miscBucket = bucketToDisplay;
                     continue;
                 }
                 toReturn.elementList.push(bucketToDisplay);
+
+                if (foundMax) {
+                    maxBucket.indexOfMax = toReturn.elementList.length - 1;
+                }
             }
+        }
+
+        if (maxBucket !== null) {
+            toReturn.elementList[maxBucket.indexOfMax].name = AnalyticAttributeUtility.GetAttributeBucketName({LowerInclusive: maxBucket.LowerInclusive}, predictor);
         }
 
         // sort the list of buckets
@@ -523,39 +584,43 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (nullBucket != null) {
             toReturn.elementList.push(nullBucket);
         }
+        if (miscBucket != null) {
+            toReturn.elementList.push(miscBucket);
+        }
 
         //DP-932
         if (isContinuous && nullBucket != null && toReturn.elementList.length == 2) {
-        	toReturn.elementList[0].name = "Available";
+            toReturn.elementList[0].name = "Available";
         }
 
         return toReturn;
     };
-   
+
     this.FormatDataForAttributeValueChart = function (attributeName, attributeColor, modelSummary) {
         if (attributeName == null || modelSummary == null) {
             return null;
         }
-        
+
         var predictor = this.GetAttributeByName(attributeName, modelSummary.Predictors);
         if (predictor == null) {
             return null;
         }
-        
+
         var toReturn = {
             name: predictor.DisplayName,
             color: attributeColor,
             description: predictor.Description || "",
             elementList: []
         };
-        
+
         // number that comfortably fit on screen without resizing
         var maxElementsToDisplay = 8;
         var nullBucket = null;
+        var miscBucket = null;
         var otherBucket = null;
         var otherBucketElements = [];
         var topBucketCandidates = [];
-        
+
         // Do "Other" bucketing if discrete and not boolean
         var doOtherBucket = false;
         var isContinuous = false;
@@ -564,22 +629,23 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var bucketName = null;
 
         if (!AnalyticAttributeUtility.IsPredictorBoolean(predictor)) {
-	        for (i = 0; i < predictor.Elements.length; i++) {
-	        	bucket = predictor.Elements[i];
-	          	if (this.IsPredictorElementCategorical(bucket)) {
-	          		doOtherBucket = true;
-	          		break;
-	          	} else if (bucket.LowerInclusive != null || bucket.UpperExclusive != null) {
-	          		isContinuous = true;
-	          		break;
-	          	}
-	        }
+            for (i = 0; i < predictor.Elements.length; i++) {
+                bucket = predictor.Elements[i];
+                if (this.IsPredictorElementCategorical(bucket)) {
+                    doOtherBucket = true;
+                    break;
+                } else if (bucket.LowerInclusive != null || bucket.UpperExclusive != null) {
+                    isContinuous = true;
+                    break;
+                }
+            }
         }
-        
+
         if (doOtherBucket) {
             // Group elements less than 1% frequency into "Other" bucket
             for (i = 0; i < predictor.Elements.length; i++) {
-                bucket = predictor.Elements[i];               
+
+                bucket = predictor.Elements[i];
                 bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
 
                 var percentTotal = (bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100.0;
@@ -588,27 +654,27 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 } else {
                     topBucketCandidates.push(bucket);
                 }
-            }      
+            }
         }
-        
+
         var topPredictorElements = null;
         if (doOtherBucket) {
             topPredictorElements = topBucketCandidates;
         } else {
             topPredictorElements = predictor.Elements;
         }
-        
+
         for (i = 0; i < topPredictorElements.length; i++) {
-            
+
             bucket = topPredictorElements[i];
             bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
-            
+
             var bucketToDisplay = {
                 name: bucketName,
                 lift: bucket.Lift,
                 percentTotal: (bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100.0
             };
-            
+
             // Set sort property based on whether it is a discrete versus a continuous value
             if (isContinuous) {
                 bucketToDisplay.SortProperty = bucket.LowerInclusive != null ? bucket.LowerInclusive : bucket.UpperExclusive;
@@ -616,19 +682,24 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             } else {
                 bucketToDisplay.SortProperty = bucketToDisplay.lift;
             }
-            
+
             if (bucket.IsVisible) {
                 // Always sort NA bucket to the bottom
                 if (bucketToDisplay.name != null && typeof bucketToDisplay.name === 'string' &&
                     (bucketToDisplay.name.toUpperCase() === "NULL" || bucketToDisplay.name.toUpperCase() === "NONE" || bucketToDisplay.name.toUpperCase() === "NOT AVAILABLE")) {
-                    nullBucket = bucketToDisplay;                        
-                    nullBucket.name = "N/A";
+                    nullBucket = bucketToDisplay;
+                    nullBucket.name = NULL_BUCKET_NAME;
+                    continue;
+                }
+                if (bucketToDisplay.name !== null && typeof bucketToDisplay.name === 'string' &&
+                    bucketToDisplay.name === MISC_BUCKET_NAME) {
+                    miscBucket = bucketToDisplay;
                     continue;
                 }
                 toReturn.elementList.push(bucketToDisplay);
             }
         }
-          
+
         // sort the list of buckets
         toReturn.elementList.sort(function (a, b)  {
             if (a.SortProperty < b.SortProperty) {
@@ -642,36 +713,37 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
                 return 0;
         });
-        
+
         var nullBucketLength = nullBucket == null ? 0 : 1;
-        var otherBucketLength = otherBucketElements.length > 0 ? 1 : 0; 
-        var currentTotalNumBuckets = toReturn.elementList.length + nullBucketLength + otherBucketLength; 
+        var otherBucketLength = otherBucketElements.length > 0 ? 1 : 0;
+        var miscBucketLength = miscBucket == null ? 0 : 1;
+        var currentTotalNumBuckets = toReturn.elementList.length + nullBucketLength + otherBucketLength + miscBucketLength;
         if (currentTotalNumBuckets > maxElementsToDisplay) {
-        	var numToRemove = currentTotalNumBuckets - maxElementsToDisplay;
+            var numToRemove = currentTotalNumBuckets - maxElementsToDisplay;
             var removed = toReturn.elementList.splice(toReturn.elementList.length - numToRemove, numToRemove);
             Array.prototype.push.apply(otherBucketElements, removed);
-        }   
-        
+        }
+
         // Merge "Other" bucket averaged out lift and percentage
-        if (otherBucketElements.length > 0) {            
+        if (otherBucketElements.length > 0) {
             var otherBucketTotalPercentage = 0;
             var averagedLift = 0;
             for (i = 0; i < otherBucketElements.length; i++) {
                 var otherBucketElement = otherBucketElements[i];
                 var otherBucketPercentage = otherBucketElement.Count != null? otherBucketElement.Count / modelSummary.ModelDetails.TotalLeads :
-                	otherBucketElement.percentTotal/100;
+                    otherBucketElement.percentTotal/100;
                 otherBucketTotalPercentage += otherBucketPercentage;
                 var otherBucketLift = otherBucketElement.Lift != null ? otherBucketElement.Lift : otherBucketElement.lift;
                 averagedLift += otherBucketLift * otherBucketPercentage;
             }
-            
+
             otherBucket = {
                 name: "Other",
                 lift: averagedLift / otherBucketTotalPercentage,
                 percentTotal: otherBucketTotalPercentage * 100.0
             };
         }
-        
+
         // Always sort Other bucket second from bottom
         if (otherBucket != null) {
             toReturn.elementList.push(otherBucket);
@@ -681,18 +753,21 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (nullBucket != null) {
             toReturn.elementList.push(nullBucket);
         }
-
-        //DP-932 
-        if (isContinuous && nullBucket != null && toReturn.elementList.length == 2) {
-        	toReturn.elementList[0].name = "Available";
+        if (miscBucket != null) {
+            toReturn.elementList.push(miscBucket);
         }
-        
+
+        //DP-932
+        if (isContinuous && nullBucket != null && toReturn.elementList.length == 2) {
+            toReturn.elementList[0].name = "Available";
+        }
+
         return toReturn;
     };
-    
+
     this.SumToOne = function (percentList) {
-    	var topPercentage = 100.0;
-        
+        var topPercentage = 100.0;
+
         // Find the bucket with the largest percentage
         var index = 0;
         var maxPercentage = 0;
@@ -703,7 +778,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             } else {
                 currentPercentage = percentList[i];
             }
-            
+
             if (currentPercentage > maxPercentage) {
                 index = i;
                 maxPercentage = currentPercentage;
@@ -714,15 +789,15 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             if (i == index) {
                 continue;
             } else {
-            	if (typeof percentList[i] === 'string' && percentList[i] == "<0.1") {
-            		topPercentage -= 0.1;
-            	} else {
-                	topPercentage -= percentList[i];
-            	}
+                if (typeof percentList[i] === 'string' && percentList[i] == "<0.1") {
+                    topPercentage -= 0.1;
+                } else {
+                    topPercentage -= percentList[i];
+                }
             }
         }
         percentList[index] = topPercentage.toFixed(1);
-        
+
         return percentList;
     };
 
@@ -737,7 +812,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
         return formattedPercent;
     };
-    
+
     this.createTicks = function(maxTickValue, maxTickNumber) {
         var steps = [0.5, 1, 2, 5, 10];
         // iterate options in steps, find the maximum appropriate step
@@ -763,7 +838,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (categoryList == null || categoryList.length === 0) {
             return;
         }
-        
+
         for (var i = 0; i < categoryList.length; i++) {
             categoryList[i].activeClass = "";
         }
