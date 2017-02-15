@@ -70,7 +70,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @AfterClass(groups = "aws")
     public void teardown() throws Exception {
-        //cleanup();
+        cleanup();
     }
 
     @Test(groups = "aws")
