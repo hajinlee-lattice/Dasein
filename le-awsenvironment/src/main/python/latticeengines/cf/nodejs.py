@@ -8,7 +8,7 @@ import os
 
 from .module.ec2 import ec2_defn
 from .module.ecs import ContainerDefinition, TaskDefinition
-from .module.parameter import Parameter, EnvVarParameter
+from .module.parameter import Parameter, EnvVarParameter, ArnParameter
 from .module.stack import ECSStack, teardown_stack
 from ..conf import AwsEnvironment
 from ..ec2.ec2 import register_ec2_to_targetgroup
