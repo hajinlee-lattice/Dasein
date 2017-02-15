@@ -50,7 +50,8 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private RedshiftService redshiftService;
-
+    
+    @SuppressWarnings("unused")
     @Autowired
     private EaiService eaiService;
 
@@ -69,13 +70,15 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @AfterClass(groups = "aws")
     public void teardown() throws Exception {
-        // cleanup();
+        //cleanup();
     }
 
     @Test(groups = "aws")
     public void testUploadToRedshift() throws Exception {
         HdfsToRedshiftConfiguration configuration = getExportConfiguration();
-        eaiService.exportDataFromHdfs(configuration);
+        hdfsToRedshiftService.uploadDataObjectToS3(configuration);
+        hdfsToRedshiftService.copyToRedshift(configuration);
+        //eaiService.exportDataFromHdfs(configuration);
         verify(configuration);
     }
 
@@ -101,7 +104,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private HdfsToRedshiftConfiguration getExportConfiguration() {
         HdfsToRedshiftConfiguration configuration = new HdfsToRedshiftConfiguration();
-        configuration.setExportInputPath(HDFS_DIR + "/" + FILENAME);
+        configuration.setExportInputPath(HDFS_DIR + "/*.avro");
         configuration.setTableName(testTable);
         configuration.setJsonPathPrefix("camel.jsonpath");
         return configuration;

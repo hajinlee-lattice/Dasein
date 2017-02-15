@@ -1,8 +1,5 @@
 package com.latticeengines.eai.yarn.runtime;
 
-import java.io.IOException;
-
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -22,6 +19,7 @@ import com.latticeengines.eai.service.impl.snowflake.HdfsToSnowflakeService;
 public class ExportProcessor extends SingleContainerYarnProcessor<ExportConfiguration>
         implements ItemProcessor<ExportConfiguration, String> {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ExportProcessor.class);
 
     @Autowired
@@ -46,12 +44,7 @@ public class ExportProcessor extends SingleContainerYarnProcessor<ExportConfigur
     }
 
     private void invokeRedshiftExport(HdfsToRedshiftConfiguration configuration) {
-        try {
-            hdfsToRedshiftService.uploadToS3(configuration);
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
-            throw new RuntimeException(e);
-        }
+        hdfsToRedshiftService.uploadDataObjectToS3(configuration);
         setProgress(0.6f);
         hdfsToRedshiftService.copyToRedshift(configuration);
         setProgress(0.85f);
