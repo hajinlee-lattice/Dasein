@@ -43,7 +43,7 @@ def template(environment, stackname, mode, profile, instances, upload=False):
         stack.validate()
 
 def create_template(profile, instances, port, mode, env):
-    stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", env, use_asgroup=False, instances=instances)
+    stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", env, use_asgroup=True, instances=instances)
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE, PARAM_LE_STACK])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
