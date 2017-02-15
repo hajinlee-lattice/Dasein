@@ -4,7 +4,6 @@
             <div class="message" ng-bind-html="vm.status_alert.message"></div>
             <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
         </div>
-
         <div class="filters-container">
             <ul class="filters" >
                 <li class="query">
@@ -67,7 +66,7 @@
         </ul>
 
         <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="vm.enrichments_completed">
-            <li ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo" class="category company">
+            <li ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" class="category company">
                 <div class="box-inner company-info round-box">
                     <ul class="info">
                         <li><h2 title="{{vm.LookupResponse.companyInfo.LDC_Name}}">{{vm.LookupResponse.companyInfo.LDC_Name}}</h2></li>
@@ -245,7 +244,7 @@
                         track by enrichment.FieldNameInTarget"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
                     ng-class="{'active': enrichment.IsSelected}">
-                    <div style="display: none;">{{enrichment|json}}</div>
+                    <div ng-if="vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
                     <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">

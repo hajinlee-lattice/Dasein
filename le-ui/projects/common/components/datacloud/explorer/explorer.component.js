@@ -3,15 +3,15 @@ angular.module('common.datacloud.explorer', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('DataCloudController', function(
-    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, ApiHost,
-    BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount, 
+    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
+    ApiHost, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount, 
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
 ){
     var vm = this,
         enrichment_chunk_size = 5000,
         flags = FeatureFlagService.Flags();
-
     angular.extend(vm, {
+        debug: (window.location.search.indexOf('debug=1') > 0),
         label: {
             total: 'Total',
             premium: 'Premium',
@@ -54,7 +54,7 @@ angular.module('common.datacloud.explorer', [
         LookupResponse: LookupStore.response,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
         count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
-        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
+        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights',
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         enabledManualSave: false,
         enrichments_loaded: false,
@@ -85,8 +85,6 @@ angular.module('common.datacloud.explorer', [
         subcategory: $stateParams.subcategory,
         categoryCounts: {}
     });
-
-    //ben console.log(vm.LookupResponse);
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
@@ -250,18 +248,6 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    /* orginial filters, these work for all cases
-    vm.filter = function(items, property, value) {
-        for (var i=0, result=[]; i < items.length; i++) {
-            if (typeof items[i][property] != 'undefined' && items[i][property] == value) {
-                result.push(items[i]);
-            }
-        }
-
-        return result;
-    }
-    */
-   /* new filters, would be great if they worked for false cases */
     vm.filter = function(items, property, value, debug) {
         for (var i=0, result=[]; i < items.length; i++) {
 
@@ -270,7 +256,7 @@ angular.module('common.datacloud.explorer', [
                     return obj[j];
                 }
             }
-            var item = property.split('.').reduce(index, items[i]); //PLS-3145
+            var item = property.split('.').reduce(index, items[i]);
             if (typeof item != 'undefined' && item == value) {
                 result.push(items[i]);
             }
@@ -750,7 +736,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.saveSelected = function(){
         var dirtyEnrichments = vm.filter(vm.enrichments, 'IsDirty', true),
-            selectedObj = vm.filter(dirtyEnrichments, 'IsSelected', true), //PLS-3145
+            selectedObj = vm.filter(dirtyEnrichments, 'IsSelected', true),
             deselectedObj = vm.filter(dirtyEnrichments, 'IsSelected', false),
             selected = [],
             deselected = [];
@@ -803,7 +789,7 @@ angular.module('common.datacloud.explorer', [
         var filter = {
             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true) || (!vm.metadata.toggle.hide.selected ? '' : false),
             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
-            'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
+            'IsInternal': (!vm.metadata.toggle.show.internal ? false : ''),
             'Category': vm.category,
             'Subcategory': vm.subcategory
         };
@@ -865,6 +851,8 @@ angular.module('common.datacloud.explorer', [
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
                 || (vm.metadata.toggle.hide.premium && item.IsPremium) 
                 || (vm.metadata.toggle.show.internal && !item.IsInternal)
+                || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
+                || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
                 || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
                 || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
                     continue;
@@ -892,7 +880,7 @@ angular.module('common.datacloud.explorer', [
                 || (vm.metadata.toggle.hide.selected && item.IsSelected) 
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
                 || (vm.metadata.toggle.hide.premium && item.IsPremium) 
-                || (vm.metadata.toggle.show.internal && !item.IsInternal)
+                || (!vm.metadata.toggle.show.internal && item.IsInternal)
                 || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
                 || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
                 || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)

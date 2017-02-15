@@ -204,7 +204,6 @@ angular
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Lattice Data Cloud',
                 section: 'insights'
-                //section: 'lookup'
             },
             views: {
                 "main@": {

@@ -1368,7 +1368,7 @@ angular
             views: {
                 "main@": {
                     controller: function(LookupStore, $stateParams) {
-                        var host = "https://testapp.lattice-engines.com/insights/";
+                        var host = "/insights/";
                         $('#sureshot_iframe_container')
                             .html('<iframe id="insights_iframe" src="' + host + '" style="border: 1px inset"></iframe><div id="insights_console"></div>');
 
