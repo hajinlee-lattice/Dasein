@@ -54,7 +54,7 @@ angular.module('common.datacloud.explorer', [
         LookupResponse: LookupStore.response,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
         count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
-        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights',
+        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         enabledManualSave: false,
         enrichments_loaded: false,
@@ -224,8 +224,16 @@ angular.module('common.datacloud.explorer', [
 
         vm.statusMessageBox = angular.element('.status-alert');
 
-        /* hide disabled for sales team from iframe */
+        if(vm.show_internal_filter) {
+            /* 
+             * this is the default for the internal filter 
+             * this also effectivly hides internal attributes when the filter is hidden
+            */
+            vm.metadata.toggle.show.internal = true;
+        }
+
         if(vm.section === 'insights') {
+            /* hide disabled for sales team from iframe */
             vm.metadata.toggle.show.enabled = true;
         } else {
             vm.metadata.toggle.show.enabled = '';
@@ -366,7 +374,7 @@ angular.module('common.datacloud.explorer', [
 
         var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
             DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
-            EnabledForSalesTeamTotal = vm.enrichments.length - DisabledForSalesTeamTotal.length;
+            EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
 
         DataCloudStore.setMetadata('generalSelectedTotal', selectedTotal.length);
         DataCloudStore.setMetadata('premiumSelectedTotal', vm.filter(selectedTotal, 'IsPremium', true).length);
@@ -511,7 +519,7 @@ angular.module('common.datacloud.explorer', [
             DataCloudStore.updateEnrichments(vm.enrichments);
 
             var DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'HighlightHidden', true),
-                EnabledForSalesTeamTotal = vm.enrichments.length - DisabledForSalesTeamTotal.length;
+                EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
 
@@ -857,7 +865,7 @@ angular.module('common.datacloud.explorer', [
                 || (vm.metadata.toggle.hide.selected && item.IsSelected) 
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
                 || (vm.metadata.toggle.hide.premium && item.IsPremium) 
-                || (vm.metadata.toggle.show.internal && !item.IsInternal)
+                || (!vm.metadata.toggle.show.internal && item.IsInternal)
                 || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
                 || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
                 || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)

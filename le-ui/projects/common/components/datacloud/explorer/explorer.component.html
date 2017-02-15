@@ -17,7 +17,7 @@
                     </div>
                 </li>
                 <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
-                    <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal || vm.metadata.toggle.show.enabled || vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted  || vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls}">
+                    <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal || (vm.section != 'insights' && vm.metadata.toggle.show.enabled) || vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted  || vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls}">
                         <i class="fa fa-filter"></i>
                     </h2>
                     <ul class="dropdown">
@@ -244,7 +244,7 @@
                         track by enrichment.FieldNameInTarget"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
                     ng-class="{'active': enrichment.IsSelected}">
-                    <div ng-if="!vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
+                    <div ng-if="vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
                     <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">
