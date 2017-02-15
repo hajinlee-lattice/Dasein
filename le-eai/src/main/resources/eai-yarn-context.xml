@@ -17,8 +17,5 @@
 
     <import resource="classpath:eai-marketo-context.xml" />
     <import resource="classpath:eai-eloqua-context.xml" />
-    <import resource="classpath:proxy-context.xml" />
-    <import resource="classpath:aws-context.xml" />
-    <import resource="classpath:snowflakedb-context.xml" />
 
 </beans>

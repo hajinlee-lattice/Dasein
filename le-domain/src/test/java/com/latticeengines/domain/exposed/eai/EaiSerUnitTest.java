@@ -8,7 +8,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 
 public class EaiSerUnitTest {

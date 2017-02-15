@@ -1,12 +1,8 @@
-package com.latticeengines.domain.exposed.eai.route;
+package com.latticeengines.domain.exposed.eai;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 
-public class HdfsToSnowflakeConfiguration extends ExportConfiguration {
-
-    @JsonProperty("db")
-    private String db;
+public class HdfsToRedshiftConfiguration extends ExportConfiguration {
 
     @JsonProperty("table_name")
     private String tableName;
@@ -17,13 +13,8 @@ public class HdfsToSnowflakeConfiguration extends ExportConfiguration {
     @JsonProperty("append")
     private boolean append = false;
 
-    public String getDb() {
-        return db;
-    }
-
-    public void setDb(String db) {
-        this.db = db;
-    }
+    @JsonProperty("json_path_prefix")
+    private String jsonPathPrefix;
 
     public String getTableName() {
         return tableName;
@@ -47,5 +38,13 @@ public class HdfsToSnowflakeConfiguration extends ExportConfiguration {
 
     public void setAppend(boolean append) {
         this.append = append;
+    }
+
+    public String getJsonPathPrefix() {
+        return this.jsonPathPrefix;
+    }
+
+    public void setJsonPathPrefix(String jsonPathPrefix) {
+        this.jsonPathPrefix = jsonPathPrefix;
     }
 }

@@ -24,7 +24,7 @@ public class RedshiftUtils {
 
     public static String getCreateTableStatement(String tableName, Schema schema) {
         return String.format( //
-                "CREATE TABLE %s (%s)", //
+                "CREATE TABLE IF NOT EXISTS %s (%s)", //
                 tableName, //
                 String.join( //
                         ",", //

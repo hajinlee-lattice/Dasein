@@ -11,16 +11,6 @@
         <component-name>eai</component-name>
         <camel.version>2.18.2</camel.version>
         <camel.jackson.version>2.8.3</camel.jackson.version>
-        <le.common.version>3.3.0-SNAPSHOT</le.common.version>
-        <le.domain.version>3.3.0-SNAPSHOT</le.domain.version>
-        <le.dataplatform.version>3.3.0-SNAPSHOT</le.dataplatform.version>
-        <le.scheduler.version>3.3.0-SNAPSHOT</le.scheduler.version>
-        <le.security.version>3.3.0-SNAPSHOT</le.security.version>
-        <le.baton.version>3.3.0-SNAPSHOT</le.baton.version>
-        <le.network.version>3.3.0-SNAPSHOT</le.network.version>
-        <le.testfwk.version>3.3.0-SNAPSHOT</le.testfwk.version>
-        <le.aws.version>3.3.0-SNAPSHOT</le.aws.version>
-        <le.proxy.version>3.3.0-SNAPSHOT</le.proxy.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <parquet.avro.version>1.4.3</parquet.avro.version>
         <avro.version>1.7.7</avro.version>
@@ -57,7 +47,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -105,7 +95,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>
@@ -157,7 +147,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
             <exclusions>
@@ -170,7 +160,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
-            <version>${le.baton.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -278,7 +268,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -326,44 +316,44 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scheduler</artifactId>
-            <version>${le.scheduler.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-aws</artifactId>
-            <version>${le.aws.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -556,32 +546,37 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
             <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-network</artifactId>
-            <version>${le.network.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
             <version>${jcraft.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-redshiftdb</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

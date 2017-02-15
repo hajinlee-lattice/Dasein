@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
-import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
+import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
+import com.latticeengines.domain.exposed.eai.HdfsToSnowflakeConfiguration;
 import com.latticeengines.eai.service.impl.s3.HdfsToS3ExportService;
 import com.latticeengines.snowflakedb.exposed.service.SnowflakeService;
 import com.latticeengines.snowflakedb.exposed.util.SnowflakeUtils;

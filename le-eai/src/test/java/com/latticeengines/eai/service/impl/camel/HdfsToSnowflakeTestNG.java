@@ -18,7 +18,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
+import com.latticeengines.domain.exposed.eai.HdfsToSnowflakeConfiguration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.impl.snowflake.HdfsToSnowflakeService;
 import com.latticeengines.snowflakedb.exposed.service.SnowflakeService;

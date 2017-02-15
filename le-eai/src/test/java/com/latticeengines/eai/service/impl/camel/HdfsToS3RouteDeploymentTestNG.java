@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
+import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 

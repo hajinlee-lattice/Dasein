@@ -14,6 +14,7 @@ import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
 @Component("redshiftService")
 public class RedshiftServiceImpl implements RedshiftService {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(RedshiftServiceImpl.class);
 
     @Autowired

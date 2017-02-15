@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
+import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.eai.service.EaiYarnService;
@@ -70,10 +70,10 @@ public class S3ExportServiceImpl extends ExportService {
             ((HdfsToS3Configuration) exportConfig).setSplitSize(100L * 1024 * 1024);
         }
 
-        if (StringUtils.isEmpty(((HdfsToS3Configuration) exportConfig).getS3Bucket())){
+        if (StringUtils.isEmpty(((HdfsToS3Configuration) exportConfig).getS3Bucket())) {
             ((HdfsToS3Configuration) exportConfig).setS3Bucket(bucket);
         }
-        ApplicationId applicationId = eaiYarnService.submitSingleYarnContainer(exportConfig);
+        ApplicationId applicationId = eaiYarnService.submitSingleYarnContainerJob(exportConfig);
         context.setProperty(ExportProperty.APPID, applicationId);
     }
 

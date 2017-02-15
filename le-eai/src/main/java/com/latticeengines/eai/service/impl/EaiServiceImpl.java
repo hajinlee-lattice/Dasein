@@ -42,7 +42,7 @@ public class EaiServiceImpl implements EaiService {
         } else if (eaiJobConfig instanceof ExportConfiguration) {
             return exportDataFromHdfs((ExportConfiguration) eaiJobConfig);
         } else if (eaiJobConfig instanceof CamelRouteConfiguration) {
-            return eaiYarnService.submitSingleYarnContainer(eaiJobConfig);
+            return eaiYarnService.submitSingleYarnContainerJob(eaiJobConfig);
         }
         return null;
     }

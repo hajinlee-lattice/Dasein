@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
-import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonSubTypes({ @Type(value = HdfsToS3Configuration.class, name = "HdfsToS3Configuration"),
-        @Type(value = HdfsToSnowflakeConfiguration.class, name = "HdfsToSnowflakeConfiguration") })
+        @Type(value = HdfsToSnowflakeConfiguration.class, name = "HdfsToSnowflakeConfiguration"),
+        @Type(value = HdfsToRedshiftConfiguration.class, name = "HdfsToRedshiftConfiguration"), })
 public class ExportConfiguration extends EaiJobConfiguration {
 
     private ExportFormat exportFormat;

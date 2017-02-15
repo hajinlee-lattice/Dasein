@@ -140,7 +140,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             eaiMetadataService.registerTables(tables, importContext);
             return importContext.getProperty(ImportProperty.APPID, ApplicationId.class);
         } else {
-            appId = eaiYarnService.submitSingleYarnContainer(importConfig);
+            appId = eaiYarnService.submitSingleYarnContainerJob(importConfig);
         }
         return appId;
     }

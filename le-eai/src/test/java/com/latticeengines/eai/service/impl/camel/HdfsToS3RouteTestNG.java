@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
+import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.impl.s3.HdfsToS3ExportService;
 

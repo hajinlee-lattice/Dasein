@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
+import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 
 /**
  * This one was suppose to be a new type of camel route service, but the camel
