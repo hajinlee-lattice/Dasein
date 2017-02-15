@@ -91,13 +91,13 @@ def provision(environment, stackname, tgrp, profile, instance_type, mode, instan
     if le_stack is None:
         le_stack = stackname
 
+    config = AwsEnvironment(environment)    
     extra_params.append(PARAM_DOCKER_IMAGE.config("express"))
     extra_params.append(PARAM_DOCKER_IMAGE_TAG.config(tag))
     extra_params.append(PARAM_INSTALL_MODE.config(mode))
     extra_params.append(PARAM_LE_STACK.config(le_stack))
-
+    extra_params.append(PARAM_ECS_SCALE_ROLE_ARN.config(config.ecs_autoscale_role_arn()))
     tgrp_arn = find_tgrp_arn(tgrp)
-    config = AwsEnvironment(environment)
 
     ECSStack.provision(environment, s3_path(stackname), stackname, config.nodejs_sg(), tgrp_arn, init_cap=instances, max_cap=instances, public=public, instance_type=instance_type, additional_params=extra_params, le_stack=le_stack)
 
