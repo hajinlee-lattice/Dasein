@@ -30,8 +30,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
-@TestExecutionListeners({DirtiesContextTestExecutionListener.class})
-@ContextConfiguration(locations = {"classpath:test-redshiftdb-context.xml"})
+@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+@ContextConfiguration(locations = { "classpath:test-redshiftdb-context.xml" })
 public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     private static final String TABLE_NAME = "RedshiftServiceImplTestNG_EventTable";
@@ -103,8 +103,8 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
 
     @Test(groups = "functional", dependsOnMethods = "loadDataToRedshift")
     public void queryTable() {
-        List<Map<String, Object>> result = redshiftJdbcTemplate.queryForList(String.format("SELECT * FROM %s LIMIT 10",
-                TABLE_NAME));
+        List<Map<String, Object>> result = redshiftJdbcTemplate
+                .queryForList(String.format("SELECT * FROM %s LIMIT 10", TABLE_NAME));
         assertEquals(result.size(), 10);
         for (Map<String, Object> row : result) {
             assertNotNull(row.get("Id"));
