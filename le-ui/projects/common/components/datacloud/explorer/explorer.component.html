@@ -121,14 +121,14 @@
                             <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
 
-                        <div class="attributes-container" ng-if="!vm.category" ng-show="subcategories = vm.getTileTableItems(category)">
+                        <div class="attributes-container" ng-if="!vm.category">
                             <ul class="attributes noselect-children">
                                 <li class="header">
                                     <div class="column label">{{ vm.lookupMode ? 'Attributes' : 'Top 5 attributes' }}</div>
                                     <div class="column data">{{ vm.lookupMode ? 'Values' : 'Records' }}</div>
                                 </li>
 
-                                <li ng-repeat="attribute in subcategories | orderBy: [ '-Value' ] | limitTo: 5">
+                                <li ng-repeat="attribute in (subcategories = vm.getTileTableItems(category)) | orderBy: [ '-Value' ] | limitTo: 5">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                                     <div class="column data {{ vm.lookupMode ? 'values' : 'records' }}">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}</div>
                                 </li>

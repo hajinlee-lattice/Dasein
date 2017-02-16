@@ -83,7 +83,8 @@ angular.module('common.datacloud.explorer', [
         section: $stateParams.section,
         category: $stateParams.category,
         subcategory: $stateParams.subcategory,
-        categoryCounts: {}
+        categoryCounts: {},
+        pagesize: 24
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
@@ -584,25 +585,28 @@ angular.module('common.datacloud.explorer', [
 
     vm.getTileTableItems = function(category, subcategory) {
         var items = [];
+        var i = 0;
 
         if (vm.topAttributes[category]) {
-            items = vm.topAttributes[category].SubCategories[(subcategory || 'Other')];
+            items = vm.topAttributes[category].SubCategories[subcategory || 'Other'];
         }
 
         if (vm.lookupMode || (!items || items.length == 0)) {
             items = vm.enrichmentsObj[category];
 
-            if (subcategory) {
+            if (subcategory || vm.isYesNoCategory(category)) {
+                var subcategory = subcategory || 'Other';
+
                 items = items.filter(function(item) {
                     var isSubcategory = item.Subcategory == subcategory;
                     var attrValue = vm.lookupFiltered[item.FieldName];
 
-                        //console.log(category, subcategory, vm.metadata.toggle.show.nulls, attrValue)
                     if (vm.lookupMode && attrValue && isSubcategory) {
                         item.Value = attrValue;
-                        if (!vm.metadata.toggle.show.nulls && attrValue == 'No') {
+                        if ((!vm.metadata.toggle.show.nulls && attrValue == 'No') || i > 4) {
                             return false;
                         } else {
+                            i++;
                             return true;
                         }
                     }
@@ -801,13 +805,27 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.enrichmentsFilter = function() {
-        var filter = {
-            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true) || (!vm.metadata.toggle.hide.selected ? '' : false),
-            'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
-            'IsInternal': (!vm.metadata.toggle.show.internal ? false : ''),
-            'Category': vm.category,
-            'Subcategory': vm.subcategory
-        };
+        var filter = {};
+
+        if (vm.metadata.toggle.show.selected && !vm.metadata.toggle.hide.selected) {
+            filter.IsSelected = true;
+        }
+
+        if (vm.metadata.toggle.show.premium && !vm.metadata.toggle.hide.premium) {
+            filter.IsPremium = true;
+        }
+
+        if (vm.metadata.toggle.show.internal) {
+            filter.IsInternal = false;
+        }
+
+        if (vm.category) {
+            filter.Category = vm.category;
+        }
+
+        if (vm.subcategory) {
+            filter.Subcategory = vm.subcategory;
+        }
 
         if(vm.section == 'team' || vm.section == 'insights') { 
             filter.HighlightHidden = (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false);
