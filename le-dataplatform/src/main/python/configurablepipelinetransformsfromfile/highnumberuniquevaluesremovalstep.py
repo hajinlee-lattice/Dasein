@@ -14,7 +14,8 @@ class HighNumberUniqueValuesRemovalStep(PipelineStep):
     ## The profiling algorithm ignores columns with
     ## a number of unique values greater than N
 
-    def __init__(self, categoricalColumns, params, profile):
+    def __init__(self, maxNumberUniqueValues, categoricalColumns, params, profile):
+        ## maxNumberUniqueValues is retained for legacy pipeline drivers; it is not used anymore
         self.categoricalColumns = categoricalColumns
         self.params = params
         self.profile = profile

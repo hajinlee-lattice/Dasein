@@ -35,6 +35,7 @@
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
+        "maxNumberUniqueValues": 200,
         "categoricalColumns": "categoricalColumns",
         "params": "params",
         "profile": "dataprofile"
