@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.Field;
@@ -52,58 +51,59 @@ public class ModelRetrieverUnitTestNG {
     public void testSetField() {
         ModelRetrieverImpl modelRetriever = new ModelRetrieverImpl();
         List<Field> fieldList = new ArrayList<>();
-        String requiredColumnName = "";
 
-        String[] fieldNameArr = new String[] { "Id", "Website", "Email", "Random" };
+        String[] fieldNameArr = new String[] { "Id", "Website", "Email", "CompanyName", "Random" };
         FieldSchema fieldSchema = new FieldSchema(FieldSource.REQUEST, //
                 FieldType.STRING, FieldInterpretation.Id);
 
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceAccount;
-        requiredColumnName = InterfaceName.Website.name();
-        boolean fuzzyMatchEnabled = false;
+        boolean fuzzyMatchEnabled = true;
         for (String fieldName : fieldNameArr) {
             modelRetriever.setField(fieldList, fieldName, fieldName, fieldSchema, schemaInterpretation,
-                    requiredColumnName, fuzzyMatchEnabled);
+                    fuzzyMatchEnabled);
+        }
+        Assert.assertTrue(fieldList.get(0).isRequiredForScoring());
+        Assert.assertTrue(fieldList.get(1).isRequiredForScoring());
+        Assert.assertFalse(fieldList.get(2).isRequiredForScoring());
+        Assert.assertTrue(fieldList.get(3).isRequiredForScoring());
+        Assert.assertFalse(fieldList.get(4).isRequiredForScoring());
+        fieldList.clear();
+
+        fuzzyMatchEnabled = false;
+        for (String fieldName : fieldNameArr) {
+            modelRetriever.setField(fieldList, fieldName, fieldName, fieldSchema, schemaInterpretation,
+                    fuzzyMatchEnabled);
         }
         Assert.assertTrue(fieldList.get(0).isRequiredForScoring());
         Assert.assertTrue(fieldList.get(1).isRequiredForScoring());
         Assert.assertFalse(fieldList.get(2).isRequiredForScoring());
         Assert.assertFalse(fieldList.get(3).isRequiredForScoring());
-        fieldList.clear();
-
-        fuzzyMatchEnabled = true;
-        for (String fieldName : fieldNameArr) {
-            modelRetriever.setField(fieldList, fieldName, fieldName, fieldSchema, schemaInterpretation,
-                    requiredColumnName, fuzzyMatchEnabled);
-        }
-        Assert.assertTrue(fieldList.get(0).isRequiredForScoring());
-        Assert.assertFalse(fieldList.get(1).isRequiredForScoring());
-        Assert.assertFalse(fieldList.get(2).isRequiredForScoring());
-        Assert.assertFalse(fieldList.get(3).isRequiredForScoring());
+        Assert.assertFalse(fieldList.get(4).isRequiredForScoring());
         fieldList.clear();
 
         schemaInterpretation = SchemaInterpretation.SalesforceLead;
-        requiredColumnName = InterfaceName.Email.name();
         fuzzyMatchEnabled = false;
         for (String fieldName : fieldNameArr) {
             modelRetriever.setField(fieldList, fieldName, fieldName, fieldSchema, schemaInterpretation,
-                    requiredColumnName, fuzzyMatchEnabled);
+                    fuzzyMatchEnabled);
         }
         Assert.assertTrue(fieldList.get(0).isRequiredForScoring());
         Assert.assertFalse(fieldList.get(1).isRequiredForScoring());
         Assert.assertTrue(fieldList.get(2).isRequiredForScoring());
         Assert.assertFalse(fieldList.get(3).isRequiredForScoring());
+        Assert.assertFalse(fieldList.get(4).isRequiredForScoring());
         fieldList.clear();
 
         fuzzyMatchEnabled = true;
         for (String fieldName : fieldNameArr) {
             modelRetriever.setField(fieldList, fieldName, fieldName, fieldSchema, schemaInterpretation,
-                    requiredColumnName, fuzzyMatchEnabled);
+                    fuzzyMatchEnabled);
         }
         Assert.assertTrue(fieldList.get(0).isRequiredForScoring());
         Assert.assertFalse(fieldList.get(1).isRequiredForScoring());
-        Assert.assertFalse(fieldList.get(2).isRequiredForScoring());
-        Assert.assertFalse(fieldList.get(3).isRequiredForScoring());
+        Assert.assertTrue(fieldList.get(2).isRequiredForScoring());
+        Assert.assertTrue(fieldList.get(3).isRequiredForScoring());
+        Assert.assertFalse(fieldList.get(4).isRequiredForScoring());
     }
 
     @Test(groups = "unit")

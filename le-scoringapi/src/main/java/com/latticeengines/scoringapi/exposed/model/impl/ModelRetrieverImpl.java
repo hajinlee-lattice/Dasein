@@ -188,13 +188,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         if (schemaInterpretationStr == null) {
             throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
         }
-        String requiredColumnName = "";
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
-        if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-            requiredColumnName = InterfaceName.Website.name();
-        } else {
-            requiredColumnName = InterfaceName.Email.name();
-        }
 
         if (!CollectionUtils.isEmpty(predictors)) {
             for (String fieldName : mapFields.keySet()) {
@@ -212,8 +206,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         }
                     }
 
-                    setField(fieldList, fieldName, displayName, fieldSchema, schemaInterpretation, requiredColumnName,
-                            fuzzyMatchEnabled);
+                    setField(fieldList, fieldName, displayName, fieldSchema, schemaInterpretation, fuzzyMatchEnabled);
                 }
             }
         } else {
@@ -235,8 +228,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         displayName = attributeMap.get(fieldName).getDisplayName();
                     }
 
-                    setField(fieldList, fieldName, displayName, fieldSchema, schemaInterpretation, requiredColumnName,
-                            fuzzyMatchEnabled);
+                    setField(fieldList, fieldName, displayName, fieldSchema, schemaInterpretation, fuzzyMatchEnabled);
                 }
             }
         }
@@ -246,10 +238,17 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @VisibleForTesting
     void setField(List<Field> fieldList, String fieldName, String displayName, FieldSchema fieldSchema,
-            SchemaInterpretation schemaInterpretation, String requiredColumnName, boolean fuzzyMatchEnabled) {
+            SchemaInterpretation schemaInterpretation, boolean fuzzyMatchEnabled) {
         if (StringUtils.isEmpty(displayName)) {
             // by default use field name as display name
             displayName = fieldName;
+        }
+
+        String requiredIdColumn = "";
+        if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+            requiredIdColumn = InterfaceName.Website.name();
+        } else {
+            requiredIdColumn = InterfaceName.Email.name();
         }
 
         Field field = new Field(fieldName, fieldSchema.type, displayName);
@@ -257,9 +256,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
         // feature flag
         if (fieldName.equals(InterfaceName.Id.name())) {
             field.setRequiredForScoring(true);
+        } else if (fieldName.equals(requiredIdColumn)) {
+            field.setRequiredForScoring(true);
         }
-        if (!fuzzyMatchEnabled) {
-            if (fieldName.equals(requiredColumnName)) {
+
+        if (fuzzyMatchEnabled) {
+            if (fieldName.equals(InterfaceName.CompanyName.name())) {
                 field.setRequiredForScoring(true);
             }
         }
@@ -509,7 +511,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
             is = fs.open(new Path(modelJsonPath));
             ObjectMapper om = new ObjectMapper();
-            JsonNode node = om.readValue((InputStream)is, JsonNode.class);
+            JsonNode node = om.readValue((InputStream) is, JsonNode.class);
             node = node.get(MODEL_KEY);
             node = node.get(MODEL_TYPE_KEY);
             String type = node.textValue();
