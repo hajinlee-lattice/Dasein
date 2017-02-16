@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -35,11 +36,13 @@ public class MetadataResolver {
     private static Logger log = Logger.getLogger(MetadataResolver.class);
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false", "1", "0");
 
-    private static final Set<String> BOOLEAN_SET = Sets.newHashSet(new String[] { "Interest_esb__c",
-            "Interest_tcat__c", "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed",
-            "kickboxDisposable", "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
-    private static final Set<String> STR_SET = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus",
-            "SICCode", "Source_Detail__c", "Cloud_Plan__c" });
+    private static final Set<String> BOOLEAN_SET = Sets
+            .newHashSet(new String[]{"Interest_esb__c", "Interest_tcat__c", "kickboxAcceptAll",
+                    "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
+                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload"});
+    private static final Set<String> STR_SET = Sets
+            .newHashSet(new String[]{"Lead_Source_Asset__c", "kickboxStatus", "SICCode",
+                    "Source_Detail__c", "Cloud_Plan__c"});
 
     private String csvPath;
     private FieldMappingDocument fieldMappingDocument;
@@ -84,16 +87,17 @@ public class MetadataResolver {
         log.info("Current header list: " + headerFields);
         List<Attribute> attrs = new ArrayList<>();
         for (final String header : headerFields) {
-            Attribute attr = Iterables.find(result.metadata.getAttributes(), new Predicate<Attribute>() {
-                @Override
-                public boolean apply(Attribute input) {
-                    if (input.getDisplayName().equals(header)) {
-                        return true;
-                    }
-                    return false;
-                }
+            Attribute attr = Iterables.find(result.metadata.getAttributes(),
+                    new Predicate<Attribute>() {
+                        @Override
+                        public boolean apply(Attribute input) {
+                            if (input.getDisplayName().equals(header)) {
+                                return true;
+                            }
+                            return false;
+                        }
 
-            });
+                    });
             attrs.add(attr);
         }
         result.metadata.setAttributes(attrs);
@@ -118,7 +122,8 @@ public class MetadataResolver {
                     if (fieldMapping.getMappedField().equals(attribute.getName())) {
                         foundMatchingAttribute = true;
                         attribute.setDisplayName(fieldMapping.getUserField());
-                        attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
+                        attribute
+                                .setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
                         break;
                     }
                 }
@@ -130,7 +135,8 @@ public class MetadataResolver {
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()) {
-                attributes.add(getAttributeFromFieldName(fieldMapping.getUserField(), fieldMapping.getFieldType()));
+                attributes.add(getAttributeFromFieldName(fieldMapping.getUserField(),
+                        fieldMapping.getFieldType()));
             }
         }
 
@@ -144,7 +150,7 @@ public class MetadataResolver {
                         }
                     }, null);
                     if (attribute != null) {
-                        attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+                        attribute.setApprovedUsage(ApprovedUsage.NONE, ApprovedUsage.IGNORED);
                     }
                 }
             }
@@ -232,7 +238,8 @@ public class MetadataResolver {
 
                     knownColumn.setUserField(header);
                     knownColumn.setMappedField(attribute.getName());
-                    knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+                    knownColumn.setFieldType(
+                            getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                     knownColumn.setMappedToLatticeField(true);
                     result.fieldMappings.add(knownColumn);
                     break;
@@ -311,7 +318,8 @@ public class MetadataResolver {
 
         String fieldType;
         if (userDefinedType == null) {
-            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString().toLowerCase();
+            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString()
+                    .toLowerCase();
         } else {
             fieldType = userDefinedType.getAvroType().toString().toLowerCase();
         }
@@ -367,7 +375,8 @@ public class MetadataResolver {
     }
 
     private UserDefinedType getFieldTypeFromColumnContent(String columnHeaderName) {
-        String mappedFieldName = ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(columnHeaderName);
+        String mappedFieldName = ValidateFileHeaderUtils
+                .convertFieldNameToAvroFriendlyFormat(columnHeaderName);
         if (mappedFieldName.startsWith("Activity_Count_")) {
             return UserDefinedType.NUMBER;
         } else if (BOOLEAN_SET.contains(mappedFieldName)) {
@@ -383,9 +392,11 @@ public class MetadataResolver {
         try {
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
             InputStream is = fs.open(new Path(csvPath));
-            columnFields = ValidateFileHeaderUtils.getCSVColumnValues(columnHeaderName, is, closeableResourcePool);
+            columnFields = ValidateFileHeaderUtils.getCSVColumnValues(columnHeaderName, is,
+                    closeableResourcePool);
 
-            log.info(String.format("column with header %s is: %s", columnHeaderName, columnFields.toString()));
+            log.info(String.format("column with header %s is: %s", columnHeaderName,
+                    columnFields.toString()));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         } finally {

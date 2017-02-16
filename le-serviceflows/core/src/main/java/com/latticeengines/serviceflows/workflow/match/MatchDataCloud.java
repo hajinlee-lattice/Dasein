@@ -1,5 +1,11 @@
 package com.latticeengines.serviceflows.workflow.match;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -8,14 +14,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.IOBufferType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
@@ -29,7 +38,18 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(MatchDataCloud.class);
+    private static final Map<MatchKey, String> MATCH_KEYS_TO_DISPLAY_NAMES = new HashMap<>();
     static final String LDC_MATCH = "DataCloudMatch";
+
+    static {
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Name, "CompanyName");
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.City, "City");
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.State, "State");
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Country, "Country");
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Zipcode, "PostalCode");
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.PhoneNumber, "PhoneNumber");
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.ExternalId, "Id");
+    }
 
     @Autowired
     private MatchProxy matchProxy;
@@ -53,13 +73,13 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     @Override
     public void skipStep() {
         log.info("skipping matching step and registering event table now:");
-        putObjectInContext(EVENT_TABLE,
-                metadataProxy.getTable(configuration.getCustomerSpace().toString(), configuration.getInputTableName()));
+        putObjectInContext(EVENT_TABLE, metadataProxy.getTable(
+                configuration.getCustomerSpace().toString(), configuration.getInputTableName()));
     }
 
     private Table preMatchEventTable() {
-        Table preMatchEventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                configuration.getInputTableName());
+        Table preMatchEventTable = metadataProxy.getTable(
+                configuration.getCustomerSpace().toString(), configuration.getInputTableName());
         preMatchEventTable.setName(preMatchEventTable.getName() + "_" + System.currentTimeMillis());
         return preMatchEventTable;
     }
@@ -82,7 +102,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
         if (getConfiguration().getCustomizedColumnSelection() == null
                 && getConfiguration().getPredefinedColumnSelection() == null) {
-            throw new RuntimeException("Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
+            throw new RuntimeException(
+                    "Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
         }
 
         Predefined predefined = getConfiguration().getPredefinedColumnSelection();
@@ -101,7 +122,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } else {
             matchInput.setCustomSelection(getConfiguration().getCustomizedColumnSelection());
 
-            putObjectInContext(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
+            putObjectInContext(MATCH_CUSTOMIZED_SELECTION,
+                    getConfiguration().getCustomizedColumnSelection());
 
         }
         matchInput.setDataCloudVersion(getConfiguration().getDataCloudVersion());
@@ -110,11 +132,47 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         matchInput.setTenant(new Tenant(configuration.getCustomerSpace().toString()));
         matchInput.setOutputBufferType(IOBufferType.AVRO);
 
+        Map<MatchKey, List<String>> matchInputKeys = new HashMap<>();
+        if (configuration.getSourceSchemaInterpretation()
+                .equals(SchemaInterpretation.SalesforceAccount.toString())) {
+            if (preMatchEventTable.getAttribute("Website") != null && preMatchEventTable
+                    .getAttribute("Website").getApprovedUsage().contains("Ignored")) {
+                matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
+            } else {
+                matchInputKeys.put(MatchKey.Domain, Arrays.asList("Website"));
+            }
+        } else {
+            if (preMatchEventTable.getAttribute("Email") != null && preMatchEventTable
+                    .getAttribute("Email").getApprovedUsage().contains("Ignored")) {
+                matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
+            } else {
+                matchInputKeys.put(MatchKey.Domain, Arrays.asList("Email"));
+            }
+        }
+        for (MatchKey matchKey : MATCH_KEYS_TO_DISPLAY_NAMES.keySet()) {
+            if (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) == null
+                    || (preMatchEventTable
+                            .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) != null
+                            && preMatchEventTable
+                                    .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
+                                    .getApprovedUsage().contains("Ignored"))) {
+                matchInputKeys.put(matchKey, new ArrayList<>());
+            } else {
+                log.info(String.format("attribute: %s is found as: %s", matchKey,
+                        JsonUtils.serialize(preMatchEventTable
+                                .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)))));
+                matchInputKeys.put(matchKey,
+                        Arrays.asList(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)));
+            }
+        }
+        matchInput.setKeyMap(matchInputKeys);
+
         switch (configuration.getMatchJoinType()) {
         case OUTER_JOIN:
             break;
         default:
-            throw new UnsupportedOperationException("Unknown join type " + configuration.getMatchJoinType());
+            throw new UnsupportedOperationException(
+                    "Unknown join type " + configuration.getMatchJoinType());
         }
 
         String avroDir = ExtractUtils.getSingleExtractPath(yarnConfiguration, preMatchEventTable);
@@ -123,9 +181,11 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
         Schema providedSchema;
         try {
-            providedSchema = TableUtils.createSchema(preMatchEventTable.getName(), preMatchEventTable);
+            providedSchema = TableUtils.createSchema(preMatchEventTable.getName(),
+                    preMatchEventTable);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create avro schema from pre-match event table.", e);
+            throw new RuntimeException("Failed to create avro schema from pre-match event table.",
+                    e);
         }
 
         Schema extractedSchema;
@@ -147,7 +207,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
         matchInput.setInputBuffer(inputBuffer);
 
-        matchInput.setExcludeUnmatchedWithPublicDomain(getConfiguration().isExcludeUnmatchedWithPublicDomain());
+        matchInput.setExcludeUnmatchedWithPublicDomain(
+                getConfiguration().isExcludeUnmatchedWithPublicDomain());
 
         matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
 
@@ -160,7 +221,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         if (StringUtils.isEmpty(appId)) {
             appId = "null";
         }
-        log.info(String.format("Waiting for match command %s [ApplicationId=%s] to complete", rootUid, appId));
+        log.info(String.format("Waiting for match command %s [ApplicationId=%s] to complete",
+                rootUid, appId));
 
         MatchStatus status = null;
         do {
@@ -189,18 +251,19 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } while (!status.isTerminal());
 
         if (!MatchStatus.FINISHED.equals(status)) {
-            throw new IllegalStateException("The terminal status of match is " + status + " instead of "
-                    + MatchStatus.FINISHED);
+            throw new IllegalStateException("The terminal status of match is " + status
+                    + " instead of " + MatchStatus.FINISHED);
         }
 
     }
 
     private Table createMatchResultTable() {
-        Table matchResultTable = MetadataConverter.getTable(yarnConfiguration, matchCommand.getResultLocation(), null,
-                null);
+        Table matchResultTable = MetadataConverter.getTable(yarnConfiguration,
+                matchCommand.getResultLocation(), null, null);
         String resultTableName = LDC_MATCH + "_" + matchCommand.getRootOperationUid();
         matchResultTable.setName(resultTableName);
-        metadataProxy.createTable(configuration.getCustomerSpace().toString(), resultTableName, matchResultTable);
+        metadataProxy.createTable(configuration.getCustomerSpace().toString(), resultTableName,
+                matchResultTable);
 
         try {
             // wait 3 seconds for metadata to create the table

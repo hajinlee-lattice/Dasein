@@ -179,7 +179,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         for (Attribute attribute : table.getAttributes()) {
             if (ignoredFields.contains(attribute.getDisplayName())) {
                 log.info("The ignored field is " + attribute.getDisplayName());
-                assertEquals(attribute.getApprovedUsage(), Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE));
+                assertEquals(attribute.getApprovedUsage(), Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE, ModelingMetadata.IGNORED_APPROVED_USAGE));
             }
         }
     }

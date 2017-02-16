@@ -14,6 +14,7 @@ import com.latticeengines.common.exposed.validator.annotation.RequiredKeysInMap;
 public class ModelingMetadata {
 
     public static final String NONE_APPROVED_USAGE = "None";
+    public static final String IGNORED_APPROVED_USAGE = "Ignored";
     public static final String MODEL_APPROVED_USAGE = "Model";
     public static final String MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE = "ModelAndModelInsights";
     public static final String MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE = "ModelAndAllInsights";

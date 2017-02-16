@@ -55,6 +55,8 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     private String matchQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
 
+    private String sourceSchemaInterpretation;
+
 
     @JsonProperty("db_url")
     public String getDbUrl() {
@@ -216,4 +218,13 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         this.customizedColumnSelection = customizedColumnSelection;
     }
 
+    @JsonProperty("source_schema_interpretation")
+    public String getSourceSchemaInterpretation() {
+        return sourceSchemaInterpretation;
+    }
+
+    @JsonProperty("source_schema_interpretation")
+    public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {
+        this.sourceSchemaInterpretation = sourceSchemaInterpretation;
+    }
 }

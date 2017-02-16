@@ -10,7 +10,8 @@ public enum ApprovedUsage {
     MODEL_ALLINSIGHTS("ModelAndAllInsights"),
     MODEL_MODELINSIGHTS("ModelAndModelInsights"),
     ENRICHMENT("Enrichment"),
-    NONE("None");
+    NONE("None"),
+    IGNORED("Ignored");
 
     private final String name;
     private static Map<String, ApprovedUsage> nameMap;
