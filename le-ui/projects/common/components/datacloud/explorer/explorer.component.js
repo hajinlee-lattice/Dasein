@@ -815,7 +815,7 @@ angular.module('common.datacloud.explorer', [
             filter.IsPremium = true;
         }
 
-        if (vm.metadata.toggle.show.internal) {
+        if (!vm.metadata.toggle.show.internal) {
             filter.IsInternal = false;
         }
 
