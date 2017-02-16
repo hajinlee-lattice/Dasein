@@ -28,9 +28,9 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         Node eventTable = addSource(parameters.eventTable);
         Node last = eventTable;
 
-        fixTransformArgumentsAndMetadata(eventTable);
-
         List<TransformDefinition> definitions = parameters.transforms;
+
+        fixTransformArgumentsAndMetadata(eventTable, definitions);
 
         for (TransformDefinition definition : definitions) {
             resolveDuplicateName(eventTable, definition);
@@ -46,25 +46,31 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         return last;
     }
 
-    private void fixTransformArgumentsAndMetadata(Node eventTable) {
-        fixStdLengthDomainArgs(eventTable);
-        fixStdVisidbDsIndustryGroupArgs(eventTable);
+    private void fixTransformArgumentsAndMetadata(Node eventTable, List<TransformDefinition> definitions) {
+        fixStdLengthDomainArgs(eventTable, definitions.stream()
+                .filter(a -> a.output == TransformationPipeline.stdLengthDomain.output).findFirst().orElse(null));
+        fixStdVisidbDsIndustryGroupArgs(eventTable,
+                definitions.stream().filter(a -> a.output == TransformationPipeline.stdVisidbDsIndustryGroup.output)
+                        .findFirst().orElse(null));
     }
 
-    private void fixStdLengthDomainArgs(Node eventTable) {
-        Attribute emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Email);
-
-        if (emailOrWebsite == null) {
-            emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Website);
+    private void fixStdLengthDomainArgs(Node eventTable, TransformDefinition domainLength) {
+        if (domainLength == null) {
+            return;
         }
-        if (emailOrWebsite != null) {
-            TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
+        Attribute websiteOrEmail = eventTable.getSourceAttribute(InterfaceName.Website);
+
+        if (websiteOrEmail == null) {
+            websiteOrEmail = eventTable.getSourceAttribute(InterfaceName.Email);
+        }
+        if (websiteOrEmail != null) {
+            domainLength.arguments.put("column", websiteOrEmail.getName());
         } else {
-            TransformationPipeline.stdLengthDomain.arguments.put("column", "");
+            domainLength.arguments.put("column", "");
         }
     }
 
-    private void fixStdVisidbDsIndustryGroupArgs(Node eventTable) {
+    private void fixStdVisidbDsIndustryGroupArgs(Node eventTable, TransformDefinition stdVisidbDsIndustryGroup) {
         Attribute industryOrDataCloudIndustry = eventTable.getSourceAttribute(InterfaceName.Industry);
 
         if (industryOrDataCloudIndustry == null) {
@@ -73,15 +79,15 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
             return;
         }
 
-        if (industryOrDataCloudIndustry == null) {
+        if (stdVisidbDsIndustryGroup == null || industryOrDataCloudIndustry == null) {
             return;
         }
 
-        TransformationPipeline.stdVisidbDsIndustryGroup.arguments.put("column", industryOrDataCloudIndustry.getName());
+        stdVisidbDsIndustryGroup.arguments.put("column", industryOrDataCloudIndustry.getName());
         TransformationMetadata metadata = new TransformationMetadata();
         metadata.setTags(Tag.EXTERNAL_TRANSFORM);
         metadata.setCategory(Category.FIRMOGRAPHICS);
-        TransformationPipeline.stdVisidbDsIndustryGroup.transformationMetadata = metadata;
+        stdVisidbDsIndustryGroup.transformationMetadata = metadata;
     }
 
     @VisibleForTesting
