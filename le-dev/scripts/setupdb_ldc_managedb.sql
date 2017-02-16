@@ -6,22 +6,25 @@ USE `LDC_ManageDB`;
 SOURCE WSHOME/le-db/ddl_ldc_managedb_mysql5innodb.sql;
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn200.csv' INTO TABLE `AccountMasterColumn`
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
+FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,IsPremium,IsInternalEnrichment,Groups,DecodeStrategy);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn201.csv' INTO TABLE `AccountMasterColumn`
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
+FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,IsPremium,IsInternalEnrichment,Groups,DecodeStrategy);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn202.csv' INTO TABLE `AccountMasterColumn`
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,IsPremium,IsInternalEnrichment,Groups,DecodeStrategy);
+
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn203.csv' INTO TABLE `AccountMasterColumn`
+FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,IsPremium,IsInternalEnrichment,Groups,DecodeStrategy);
@@ -78,7 +81,8 @@ INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsV
 VALUES
   ('2.0.0', '2016-08-28', '2.0', '2016-10-15_14-37-09_UTC', '2016-10-10_17-40-35_UTC', '20161015', '20161015', 'APPROVED'),
   ('2.0.1', '2016-11-19', '2.0', '2016-11-19_20-32-21_UTC', '2016-11-19_05-33-46_UTC', '', '', 'APPROVED'),
-  ('2.0.2', '2016-12-15', '2.0', '2017-01-24_23-14-40_UTC', '2017-01-04_04-49-12_UTC', '20170126', '', 'APPROVED');
+  ('2.0.2', '2016-12-15', '2.0', '2017-01-24_23-14-40_UTC', '2017-01-04_04-49-12_UTC', '20170126', '', 'APPROVED'),
+  ('2.0.3', '2017-02-14', '2.0', '2017-02-14_07-28-18_UTC', '2017-02-14_17-20-41_UTC', '', '', 'APPROVED');
 
 INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges)
 VALUES
