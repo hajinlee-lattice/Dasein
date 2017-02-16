@@ -28,8 +28,12 @@ class FutureInfo(ColumnRule):
 
             if totalRows is None:
                 totalRows = 0
+                values = set()
                 for record in profile[columnName]:
-                    totalRows += record['count']
+                    value = record['columnvalue']
+                    if value not in values:
+                        values.add(value)
+                        totalRows += record['count']
                 logger.info('Total Rows: {}'.format(totalRows))
                 if totalRows == 0:
                     return
