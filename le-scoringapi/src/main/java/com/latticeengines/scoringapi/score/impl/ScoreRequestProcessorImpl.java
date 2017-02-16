@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
@@ -76,6 +77,9 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     @Autowired
     private ScoreHistoryEntityMgr scoreHistoryEntityMgr;
+
+    @Value("${scoringapi.score.history.publish.enabled:false}")
+    private boolean shouldPublish;
 
     @Override
     public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
@@ -213,8 +217,10 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
 
         split("scoreRecord");
-        scoreHistoryEntityMgr.publish(request, scoreResponse);
-        split("publishScoreHistory");
+        if(shouldPublish){
+            scoreHistoryEntityMgr.publish(request, scoreResponse);
+            split("publishScoreHistory");
+        }
 
         return scoreResponse;
     }
@@ -313,9 +319,10 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 log.info("Processed bulk score request for " + request.getRecords().size() + " records");
             }
             split("scoreRecord");
-
-            scoreHistoryEntityMgr.publish(request.getRecords(), scoreResponse);
-            split("publishScoreHistory");
+            if(shouldPublish){
+                scoreHistoryEntityMgr.publish(request.getRecords(), scoreResponse);
+                split("publishScoreHistory");
+            }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             generateScoreResponseForUnhandledException(scoreResponse, request, ex, requestTimestamp);
