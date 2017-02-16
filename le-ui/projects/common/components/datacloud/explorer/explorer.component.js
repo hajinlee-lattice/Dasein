@@ -819,10 +819,6 @@ angular.module('common.datacloud.explorer', [
             filter.IsInternal = false;
         }
 
-        if (vm.category) {
-            filter.Category = vm.category;
-        }
-
         if (vm.subcategory) {
             filter.Subcategory = vm.subcategory;
         }
@@ -833,14 +829,14 @@ angular.module('common.datacloud.explorer', [
         }
 
         if (vm.lookupMode && vm.isYesNoCategory(vm.category)) {
-            filter.Value = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
+            filter.AttributeValue = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
         }
 
         return filter;
     }
 
     var subcategoryRenamer = function(string, replacement){
-        if(string) {
+        if (string) {
             var replacement = replacement || '';
             return string.toLowerCase().replace(/\W+/g, replacement);
         }
