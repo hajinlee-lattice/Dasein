@@ -44,7 +44,8 @@ public class RedshiftServiceImpl implements RedshiftService {
         String statement = "COPY %s\n" //
                 + "FROM '%s'\n" //
                 + "CREDENTIALS 'aws_access_key_id=%s;aws_secret_access_key=%s'\n" //
-                + "FORMAT AVRO '%s' EMPTYASNULL";
+                + "FORMAT AVRO '%s' " //
+                + "EMPTYASNULL dateformat 'auto'";
         statement = String.format(statement, tableName, getS3Path(s3bucket, avroS3Prefix), awsAccessKey, awsSecretKey,
                 getS3Path(s3bucket, jsonPathS3Prefix));
         try {
