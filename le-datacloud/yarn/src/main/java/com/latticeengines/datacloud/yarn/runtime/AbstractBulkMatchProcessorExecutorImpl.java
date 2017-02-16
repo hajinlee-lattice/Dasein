@@ -29,7 +29,6 @@ import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
-import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -72,14 +71,17 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     }
 
     protected MatchInput constructMatchInputFromData(ProcessorContext processorContext) {
-        MatchInput matchInput = new MatchInput();
+        // make a deep copy of original input
+        MatchInput matchInput = processorContext.getOriginalInput().configurationDeepCopy();
+
+        // overwrite fields in match input
+        // TODO: many of these copy overs can be eliminated
         matchInput.setRootOperationUid(processorContext.getRootOperationUid());
         matchInput.setTenant(processorContext.getTenant());
         if (processorContext.getPredefinedSelection() == null) {
             matchInput.setCustomSelection(processorContext.getCustomizedSelection());
         } else {
             matchInput.setPredefinedSelection(processorContext.getPredefinedSelection());
-            matchInput.setPredefinedVersion("1.0");
         }
         matchInput.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
         matchInput.setFields(processorContext.getDivider().getFields());
@@ -94,14 +96,13 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             matchInput.setSkipKeyResolution(true);
         }
 
-        matchInput.setUseDnBCache(processorContext.getJobConfiguration().getMatchInput().getUseDnBCache());
+        matchInput.setUseDnBCache(processorContext.getJobConfiguration().getMatchInput().isUseDnBCache());
         matchInput.setMatchDebugEnabled(processorContext.getJobConfiguration().getMatchInput().isMatchDebugEnabled());
         matchInput.setUseRemoteDnB(processorContext.isUseRemoteDnB());
-        matchInput.setLogDnBBulkResult(processorContext.getJobConfiguration().getMatchInput().getLogDnBBulkResult());
-        MatchConfiguration matchConfig = MatchConfiguration.builder().timeout(processorContext.getRecordTimeOut())
-                .useRemoteDnB(processorContext.isUseRemoteDnB())
-                .disableDunsValidation(processorContext.isDisableDunsValidation()).build();
-        matchInput.setConfiguration(matchConfig);
+        matchInput.setLogDnBBulkResult(processorContext.getJobConfiguration().getMatchInput().isLogDnBBulkResult());
+        matchInput.setTimeout(processorContext.getRecordTimeOut());
+        matchInput.setUseRemoteDnB(processorContext.isUseRemoteDnB());
+        matchInput.setDisableDunsValidation(processorContext.isDisableDunsValidation());
         return matchInput;
     }
 

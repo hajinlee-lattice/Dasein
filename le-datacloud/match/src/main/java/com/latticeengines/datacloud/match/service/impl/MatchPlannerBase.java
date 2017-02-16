@@ -51,15 +51,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
-    void assignAndValidateColumnSelectionVersion(MatchInput input) {
-        if (input.getPredefinedSelection() != null) {
-            ColumnSelectionService columnSelectionService = beanDispatcher
-                    .getColumnSelectionService(input.getDataCloudVersion());
-            input.setPredefinedVersion(validateOrAssignPredefinedVersion(columnSelectionService,
-                    input.getPredefinedSelection(), input.getPredefinedVersion()));
-        }
-    }
-
     void setDecisionGraph(MatchInput input) {
         String decisionGraph = input.getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph)) {

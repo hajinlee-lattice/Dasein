@@ -27,117 +27,190 @@ public class MatchInput implements Fact, Dimension {
 
     public static final String DEFAULT_DATACLOUD_VERSION = "1.0.0";
 
+    @JsonProperty("Tenant")
     private Tenant tenant;
 
+    @JsonProperty("Fields")
     private List<String> fields;
+
+    @JsonProperty("Data")
     private List<List<Object>> data;
+
+    @JsonIgnore
     private int numRows;
 
-    private MatchConfiguration configuration;
-
-    private Boolean excludeUnmatchedWithPublicDomain;
-    private Boolean publicDomainAsNormalDomain;
-    private Boolean fetchOnly;
-    private Boolean skipKeyResolution;
+    @JsonProperty("DecisionGraph")
     private String decisionGraph;
+
+    @JsonIgnore
     private Level logLevel;
 
+    @JsonProperty("LogLevel")
     private String rootOperationUid;
+
+    @JsonProperty("LogLevel")
     private String tableName;
-    private boolean bulkOnly;
+
+    @JsonIgnore
     private String matchEngine;
 
     // optional, but better to provide. if not, will be resolved from the fields
+    @JsonProperty("KeyMap")
     private Map<MatchKey, List<String>> keyMap;
 
     // only one of these is needed, custom selection has higher priority
+    @JsonProperty("PredefinedSelection")
     private Predefined predefinedSelection;
+
+    @JsonProperty("CustomSelection")
     private ColumnSelection customSelection;
+
+    @JsonProperty("UnionSelection")
     private UnionSelection unionSelection;
 
+    @JsonProperty("TimeOut")
+    private Long timeout;
+
+    @JsonProperty("requestSource")
+    private String requestSource;   // scoring|modeling
+
     // if not provided, pick latest
-    private String predefinedVersion;
+    @JsonIgnore
+    private static final String predefinedVersion = "1.0";
+
+    @JsonProperty("DataCloudVersion")
     private String dataCloudVersion = DEFAULT_DATACLOUD_VERSION;
+
+    @JsonIgnore
     private Integer numSelectedColumns;
 
     // only applicable for bulk match
+    @JsonProperty("InputBuffer")
     private InputBuffer inputBuffer;
+
+    @JsonProperty("OutputBufferType")
     private IOBufferType outputBufferType;
+
+    @JsonProperty("YarnQueue")
     private String yarnQueue;
 
     // testing via real time proxy
+    @JsonProperty("UseRealTimeProxy")
     private Boolean useRealTimeProxy;
+
+    @JsonProperty("RealTimeProxyUrl")
     private String realTimeProxyUrl;
+
+    @JsonProperty("RealTimeThreadPoolSize")
     private Integer realTimeThreadPoolSize;
 
+    // ====================
+    //  BEGIN FLAGS
+    // ====================
+
+    @JsonProperty("ExcludeUnmatchedWithPublicDomain")
+    private Boolean excludeUnmatchedWithPublicDomain;
+
+    @JsonProperty("PublicDomainAsNormalDomain")
+    private Boolean publicDomainAsNormalDomain;
+
+    @JsonProperty("FetchOnly")
+    private Boolean fetchOnly;
+
+    @JsonProperty("SkipKeyResolution")
+    private Boolean skipKeyResolution;
+
     // if not provided, first check DnB cache before going to DnB api
+    @JsonProperty("UseDnBCache")
     private boolean useDnBCache = true;
+
     // Flag useRemoteDnB decides whether go to DnB api.
     // Purpose of this flag: If feature of using fuzzy match is turned off, DnB
     // cache is used to do exact location lookup, but DnB api is not called
+    @JsonProperty("UseRemoteDnB")
     private Boolean useRemoteDnB;
+
     // Flag logDnBBulkResult decides whether DnB bulk match result is logged
-    private boolean logDnBBulkResult = false;
+    @JsonProperty("LogDnBBulkResult")
+    private boolean logDnBBulkResult;
 
     // Flag to add DnB columns match output file
+    @JsonProperty("matchDebugEnabled")
     private boolean matchDebugEnabled;
 
-    @JsonProperty("ExcludeUnmatchedWithPublicDomain")
+    @JsonProperty("DisableDunsValidation")
+    private boolean disableDunsValidation;
+
+    // use cascading bulk match
+    @JsonProperty("BulkOnly")
+    private boolean bulkOnly;
+
+    // ====================
+    //  END FLAGS
+    // ====================
+
+
+    public String getRequestSource() {
+        return requestSource;
+    }
+
+    public void setRequestSource(String requestSource) {
+        this.requestSource = requestSource;
+    }
+
+    public boolean isUseDnBCache() {
+        return useDnBCache;
+    }
+
+    public boolean isLogDnBBulkResult() {
+        return logDnBBulkResult;
+    }
+
+    public Long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Long timeout) {
+        this.timeout = timeout;
+    }
+
+
     public Boolean getExcludeUnmatchedWithPublicDomain() {
         return Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
     }
 
-    @JsonProperty("ExcludeUnmatchedWithPublicDomain")
     public void setExcludeUnmatchedWithPublicDomain(Boolean excludeUnmatchedWithPublicDomain) {
         this.excludeUnmatchedWithPublicDomain = Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
     }
 
-    @JsonProperty("Configuration")
-    public MatchConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    @JsonProperty("Configuration")
-    public void setConfiguration(MatchConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
-    @JsonProperty("FetchOnly")
     public Boolean getFetchOnly() {
         return Boolean.TRUE.equals(fetchOnly);
     }
 
-    @JsonProperty("FetchOnly")
     public void setFetchOnly(Boolean fetchOnly) {
         this.fetchOnly = fetchOnly;
     }
 
-    @JsonProperty("PublicDomainAsNormalDomain")
     public Boolean getPublicDomainAsNormalDomain() {
         return Boolean.TRUE.equals(publicDomainAsNormalDomain);
     }
 
-    @JsonProperty("PublicDomainAsNormalDomain")
     public void setPublicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
         this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
     }
 
-    @JsonProperty("SkipKeyResolution")
     public Boolean getSkipKeyResolution() {
         return skipKeyResolution;
     }
 
-    @JsonProperty("SkipKeyResolution")
     public void setSkipKeyResolution(Boolean skipKeyResolution) {
         this.skipKeyResolution = skipKeyResolution;
     }
 
-    @JsonProperty("DecisionGraph")
     public String getDecisionGraph() {
         return decisionGraph;
     }
 
-    @JsonProperty("DecisionGraph")
     public void setDecisionGraph(String decisionGraph) {
         this.decisionGraph = decisionGraph;
     }
@@ -166,22 +239,18 @@ public class MatchInput implements Fact, Dimension {
         }
     }
 
-    @JsonProperty("KeyMap")
     public Map<MatchKey, List<String>> getKeyMap() {
         return keyMap;
     }
 
-    @JsonProperty("KeyMap")
     public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
         this.keyMap = keyMap;
     }
 
-    @JsonProperty("Fields")
     public List<String> getFields() {
         return fields;
     }
 
-    @JsonProperty("Fields")
     public void setFields(List<String> fields) {
         this.fields = fields;
     }
@@ -192,33 +261,27 @@ public class MatchInput implements Fact, Dimension {
         return getFields().size();
     }
 
-    @JsonProperty("Data")
     public List<List<Object>> getData() {
         return data;
     }
 
-    @JsonProperty("Data")
     public void setData(List<List<Object>> data) {
         this.data = data;
         setNumRows(data.size());
     }
 
-    @JsonProperty("InputBuffer")
     public InputBuffer getInputBuffer() {
         return inputBuffer;
     }
 
-    @JsonProperty("InputBuffer")
     public void setInputBuffer(InputBuffer buffer) {
         this.inputBuffer = buffer;
     }
 
-    @JsonProperty("OutputBufferType")
     public IOBufferType getOutputBufferType() {
         return outputBufferType;
     }
 
-    @JsonProperty("OutputBufferType")
     public void setOutputBufferType(IOBufferType outputBufferType) {
         this.outputBufferType = outputBufferType;
     }
@@ -235,63 +298,47 @@ public class MatchInput implements Fact, Dimension {
     }
 
     @MetricFieldGroup
-    @JsonProperty("Tenant")
     public Tenant getTenant() {
         return tenant;
     }
 
-    @JsonProperty("Tenant")
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
 
     @MetricTagGroup
-    @JsonProperty("PredefinedSelection")
     public Predefined getPredefinedSelection() {
         return predefinedSelection;
     }
 
-    @JsonProperty("PredefinedSelection")
     public void setPredefinedSelection(Predefined predefinedSelection) {
         this.predefinedSelection = predefinedSelection;
     }
 
-    @JsonProperty("PredefinedVersion")
     public String getPredefinedVersion() {
         return predefinedVersion;
     }
 
-    @JsonProperty("PredefinedVersion")
-    public void setPredefinedVersion(String predefinedVersion) {
-        this.predefinedVersion = predefinedVersion;
-    }
-
-    @JsonProperty("DataCloudVersion")
     public String getDataCloudVersion() {
         return dataCloudVersion;
     }
 
-    @JsonProperty("DataCloudVersion")
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
     }
 
-    @JsonProperty("CustomSelection")
     public ColumnSelection getCustomSelection() {
         return customSelection;
     }
 
-    @JsonProperty("CustomSelection")
     public void setCustomSelection(ColumnSelection customSelection) {
         this.customSelection = customSelection;
     }
 
-    @JsonProperty("UnionSelections")
     public UnionSelection getUnionSelection() {
         return unionSelection;
     }
 
-    @JsonProperty("UnionSelections")
     public void setUnionSelection(UnionSelection unionSelection) {
         this.unionSelection = unionSelection;
     }
@@ -318,123 +365,106 @@ public class MatchInput implements Fact, Dimension {
         this.numSelectedColumns = numSelectedColumns;
     }
 
-    @JsonProperty("RootOperationUID")
     public String getRootOperationUid() {
         return rootOperationUid;
     }
 
-    @JsonProperty("RootOperationUID")
     public void setRootOperationUid(String rootOperationUid) {
         this.rootOperationUid = rootOperationUid;
     }
 
-    @JsonProperty("YarnQueue")
     public String getYarnQueue() {
         return yarnQueue;
     }
 
-    @JsonProperty("YarnQueue")
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
     }
 
-    @JsonProperty("TableName")
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
 
-    @JsonProperty("TableName")
     public String getTableName() {
         return tableName;
     }
 
-    @JsonProperty("BulkOnly")
     public boolean isBulkOnly() {
         return bulkOnly;
     }
 
-    @JsonProperty("BulkOnly")
     public void setBulkOnly(boolean bulkOnly) {
         this.bulkOnly = bulkOnly;
     }
 
-    @JsonProperty("UseRealTimeProxy")
     public Boolean getUseRealTimeProxy() {
         return useRealTimeProxy;
     }
 
-    @JsonProperty("UseRealTimeProxy")
     public void setUseRealTimeProxy(Boolean useRealTimeProxy) {
         this.useRealTimeProxy = useRealTimeProxy;
     }
 
-    @JsonProperty("RealTimeProxyUrl")
     public String getRealTimeProxyUrl() {
         return realTimeProxyUrl;
     }
 
-    @JsonProperty("RealTimeProxyUrl")
     public void setRealTimeProxyUrl(String realTimeProxyUrl) {
         this.realTimeProxyUrl = realTimeProxyUrl;
     }
 
-    @JsonProperty("RealTimeThreadPoolSize")
     public Integer getRealTimeThreadPoolSize() {
         return realTimeThreadPoolSize;
     }
 
-    @JsonProperty("RealTimeThreadPoolSize")
     public void setRealTimeThreadPoolSize(Integer realTimeThreadPoolSize) {
         this.realTimeThreadPoolSize = realTimeThreadPoolSize;
     }
 
-    public static String getDefaultDatacloudVersion() {
-        return DEFAULT_DATACLOUD_VERSION;
-    }
-
-    @JsonProperty("UseDnBCache")
-    public boolean getUseDnBCache() {
-        return useDnBCache;
-    }
-
-    @JsonProperty("UseDnBCache")
     public void setUseDnBCache(boolean useDnBCache) {
         this.useDnBCache = useDnBCache;
     }
 
-    @JsonProperty("FuzzyMatchEnabled")
     public void setUseRemoteDnB(Boolean useRemoteDnB) {
         this.useRemoteDnB = useRemoteDnB;
     }
 
-    @JsonProperty("FuzzyMatchEnabled")
     public Boolean getUseRemoteDnB() {
         return useRemoteDnB;
     }
 
-    @JsonProperty("LogDnBBulkResult")
-    public boolean getLogDnBBulkResult() {
-        return logDnBBulkResult;
-    }
-
-    @JsonProperty("LogDnBBulkResult")
     public void setLogDnBBulkResult(boolean logDnBBulkResult) {
         this.logDnBBulkResult = logDnBBulkResult;
     }
 
-    @JsonProperty("MatchDebugEnable")
     public boolean isMatchDebugEnabled() {
         return matchDebugEnabled;
     }
 
-    @JsonProperty("MatchDebugEnable")
     public void setMatchDebugEnabled(boolean matchDebugEnabled) {
         this.matchDebugEnabled = matchDebugEnabled;
+    }
+
+    public boolean isDisableDunsValidation() {
+        return disableDunsValidation;
+    }
+
+    public void setDisableDunsValidation(boolean disableDunsValidation) {
+        this.disableDunsValidation = disableDunsValidation;
     }
 
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public MatchInput configurationDeepCopy() {
+        MatchInput deepCopy = JsonUtils.deserialize(JsonUtils.serialize(this), MatchInput.class);
+        deepCopy.setData(null);
+        deepCopy.setFields(null);
+        deepCopy.setMatchEngine(getMatchEngine());
+        deepCopy.setNumSelectedColumns(numSelectedColumns);
+        return deepCopy;
     }
 
 }

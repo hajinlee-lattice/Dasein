@@ -23,7 +23,7 @@ import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
-import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -46,27 +46,20 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private MatchActorSystem actorSystem;
 
     @Override
-    public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult, boolean matchDebugEnabled, MatchConfiguration matchConfiguration)
-            throws Exception {
+    public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
         checkRecordType(matchRecords);
-        logLevel = setLogLevel(logLevel);
-        List<Future<Object>> matchFutures = callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion,
-                decisionGraph, logLevel, useDnBCache, useRemoteDnB, logDnBBulkResult, matchDebugEnabled,
-                matchConfiguration);
-
+        Level logLevel = setLogLevel(matchInput.getLogLevel());
+        matchInput.setLogLevel(logLevel);
+        List<Future<Object>> matchFutures = callMatchInternal(matchRecords, matchInput);
         fetchIdResult(matchRecords, logLevel, matchFutures);
     }
 
     @Override
-    public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult, boolean matchDebugEnabled, MatchConfiguration matchConfiguration)
+    public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, MatchInput matchInput)
             throws Exception {
-        logLevel = setLogLevel(logLevel);
-        return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache,
-                useRemoteDnB, logDnBBulkResult, matchDebugEnabled, matchConfiguration);
+        Level logLevel = setLogLevel(matchInput.getLogLevel());
+        matchInput.setLogLevel(logLevel);
+        return callMatchInternal(matchRecords, matchInput);
     }
 
     @Override
@@ -130,7 +123,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private void setDebugValues(MatchTraveler traveler, InternalOutputRecord matchRecord) {
-        if (traveler.isMatchDebugEnabled()) {
+        if (traveler.getMatchInput().isMatchDebugEnabled()) {
             List<String> debugValues = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(traveler.getDnBMatchContexts())) {
                 DnBMatchContext matchContext = traveler.getDnBMatchContexts().get(0);
@@ -183,9 +176,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
-            String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache,
-            boolean useRemoteDnB, boolean logDnBBulkResult, boolean matchDebugEnabled,
-            MatchConfiguration matchConfiguration) {
+            MatchInput matchInput) {
 
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (T record : matchRecords) {
@@ -194,18 +185,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 matchFutures.add(null);
             } else {
                 MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
-                MatchTraveler travelContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
-                travelContext.setLogLevel(logLevel);
+                MatchTraveler travelContext = new MatchTraveler(matchInput.getRootOperationUid(), matchKeyTuple);
                 matchRecord.setTravelerId(travelContext.getTravelerId());
-                travelContext.setDataCloudVersion(dataCloudVersion);
-                if (StringUtils.isNotEmpty(decisionGraph)) {
-                    travelContext.setDecisionGraph(decisionGraph);
-                }
-                travelContext.setUseDnBCache(useDnBCache);
-                travelContext.setUseRemoteDnB(useRemoteDnB);
-                travelContext.setLogDnBBulkResult(logDnBBulkResult);
-                travelContext.setMatchDebugEnabled(matchDebugEnabled);
-                travelContext.setMatchConfiguration(matchConfiguration);
+                travelContext.setMatchInput(matchInput);
                 matchFutures.add(askFuzzyMatchAnchor(travelContext));
             }
         }

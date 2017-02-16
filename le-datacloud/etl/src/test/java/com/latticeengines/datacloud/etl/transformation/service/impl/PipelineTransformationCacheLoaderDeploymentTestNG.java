@@ -141,7 +141,6 @@ public class PipelineTransformationCacheLoaderDeploymentTestNG extends
         matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
         matchInput.setTenant(new Tenant("MatchTransformer"));
         matchInput.setPredefinedSelection(Predefined.ID);
-        matchInput.setPredefinedVersion("1.0");
         matchInput.setKeyMap(getKeyMap());
         matchInput.setDecisionGraph("DragonClaw");
         matchInput.setExcludeUnmatchedWithPublicDomain(false);

@@ -93,7 +93,6 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
                 version = "1.0";
                 getConfiguration().setPredefinedSelectionVersion(version);
             }
-            matchInput.setPredefinedVersion(version);
 
             putStringValueInContext(MATCH_PREDEFINED_SELECTION, predefined.getName());
             putStringValueInContext(MATCH_PREDEFINED_SELECTION_VERSION, version);

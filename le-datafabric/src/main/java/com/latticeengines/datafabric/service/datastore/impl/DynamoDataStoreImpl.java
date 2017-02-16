@@ -757,8 +757,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                             GenericRecord record = bytesToAvro(stamp);
                             Map<String, Object> tags = new HashMap<>();
                             for (Map.Entry<String, Object> attr : item.attributes()) {
-                                if (attr.getValue() != null && !BLOB.equals(attr.getValue())
-                                        && !ID.equals(attr.getValue())) {
+                                if (attr.getValue() != null && !BLOB.equals(attr.getKey())
+                                        && !ID.equals(attr.getKey())) {
                                     tags.put(attr.getKey(), attr.getValue());
                                 }
                             }
@@ -777,7 +777,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             GenericRecord record = bytesToAvro(item.getByteBuffer(BLOB));
             Map<String, Object> tags = new HashMap<>();
             for (Map.Entry<String, Object> attr : item.attributes()) {
-                if (attr.getValue() != null && !BLOB.equals(attr.getValue()) && !ID.equals(attr.getValue())) {
+                if (attr.getValue() != null && !BLOB.equals(attr.getKey()) && !ID.equals(attr.getKey())) {
                     tags.put(attr.getKey(), attr.getValue());
                 }
             }

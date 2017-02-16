@@ -13,12 +13,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -26,20 +25,17 @@ import com.latticeengines.monitor.exposed.metric.service.MetricService;
 @Test
 public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final String VALID_DUNS = "085576973";
+    private static final String VALID_DUNS = "407888804";
     private static final String VALID_DOMAIN = "shell.com";
-    private static final String EXPECTED_ID_DOMAIN_DUNS = "99285028";
-    private static final String EXPECTED_ID_DOMAIN = "98478640";
-    private static final String EXPECTED_ID_DUNS = "99285028";
+    private static final String EXPECTED_ID_DOMAIN_DUNS = "150007069766";
+    private static final String EXPECTED_ID_DOMAIN = "150007069766";
+    private static final String EXPECTED_ID_DUNS = "150003606653";
 
     @Autowired
     private FuzzyMatchService service;
 
     @Autowired
     private MatchActorSystem actorSystem;
-
-    @Autowired
-    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     @Autowired
     private MetricService metricService;
@@ -55,12 +51,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             InternalOutputRecord matchRecord = new InternalOutputRecord();
             matchRecord.setParsedDuns(VALID_DUNS);
             matchRecord.setParsedDomain(VALID_DOMAIN);
-
-            MatchConfiguration configuration = prepareConfiguration();
-
-            service.callMatch(Collections.singletonList(matchRecord), UUID.randomUUID().toString(),
-                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "Trilogy", Level.DEBUG, true,
-                    false, false, false, configuration);
+            MatchInput input = prepareMatchInput();
+            service.callMatch(Collections.singletonList(matchRecord), input);
 
             Assert.assertNotNull(matchRecord.getLatticeAccountId(), JsonUtils.serialize(matchRecord));
             Assert.assertEquals(matchRecord.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
@@ -90,11 +82,9 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         }
 
         try {
-            MatchConfiguration configuration = prepareConfiguration();
+            MatchInput input = prepareMatchInput();
             List<OutputRecord> matchRecords = prepareData(numRequests);
-            service.callMatch(matchRecords, UUID.randomUUID().toString(),
-                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), MatchGuideBook.DEFAULT_GRAPH,
-                    Level.DEBUG, true, false, false, false, configuration);
+            service.callMatch(matchRecords, input);
 
             boolean hasError = false;
             for (OutputRecord result : matchRecords) {
@@ -133,8 +123,15 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         };
     }
 
-    private MatchConfiguration prepareConfiguration() {
-        return MatchConfiguration.builder().build();
+    private MatchInput prepareMatchInput() {
+        MatchInput matchInput = new MatchInput();
+        matchInput.setLogLevel(Level.DEBUG);
+        matchInput.setDecisionGraph(MatchGuideBook.DEFAULT_GRAPH);
+        matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
+        matchInput.setRootOperationUid(UUID.randomUUID().toString());
+        matchInput.setUseDnBCache(true);
+        matchInput.setUseRemoteDnB(false);
+        return matchInput;
     }
 
     private List<OutputRecord> prepareData(int numRecords) {

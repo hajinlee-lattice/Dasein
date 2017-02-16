@@ -21,24 +21,17 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
     @Override
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         MatchContext context = new MatchContext();
-        assignAndValidateColumnSelectionVersion(input);
         context.setInput(input);
         ColumnSelection columnSelection = parseColumnSelection(input);
         if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
             context.setSeekingIdOnly(true);
         }
         context.setColumnSelection(columnSelection);
-        context.setReturnUnmatched(true);
         context.setMatchEngine(MatchContext.MatchEngine.BULK);
         MatchOutput output = initializeMatchOutput(input, columnSelection, null);
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);
-        
-        context.setUseDnBCache(input.getUseDnBCache());
-        context.setUseRemoteDnB(input.getUseRemoteDnB());
-        context.setLogDnBBulkResult(input.getLogDnBBulkResult());
-        context.setMatchDebugEnabled(input.isMatchDebugEnabled());
         return context;
     }
 }

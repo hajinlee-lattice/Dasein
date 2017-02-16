@@ -114,13 +114,13 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         MatchTraveler traveler = request.getMatchTravelerContext();
         boolean readyToReturn = false;
-        if (traveler.isUseDnBCache()) {
+        if (traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBCache cache = dnbCacheService.lookupCache(context);
             if (cache != null) {
                 if (cache.isWhiteCache()) {
-                    if ((request.getMatchTravelerContext().getMatchConfiguration() != null
-                            && request.getMatchTravelerContext().getMatchConfiguration().getDisableDunsValidation())
+                    if ((request.getMatchTravelerContext().getMatchInput() != null
+                            && request.getMatchTravelerContext().getMatchInput().isDisableDunsValidation())
                             || isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
@@ -150,7 +150,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
 
             }
         }
-        if (!readyToReturn && traveler.isUseRemoteDnB()) {
+        if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             Callable<DnBMatchContext> task = createCallableForRemoteDnBApiCall(context);
             Future<DnBMatchContext> dnbFuture = dnbDataSourceServiceExecutor.submit(task);
 
@@ -195,14 +195,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
         MatchTraveler traveler = request.getMatchTravelerContext();
-        context.setLogDnBBulkResult(traveler.getLogDnBBulkResult());
-        if (traveler.isUseDnBCache()) {
+        context.setLogDnBBulkResult(traveler.getMatchInput().isLogDnBBulkResult());
+        if (traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBCache cache = dnbCacheService.lookupCache(context);
             if (cache != null) {
                 if (cache.isWhiteCache()) {
-                    if ((request.getMatchTravelerContext().getMatchConfiguration() != null
-                            && request.getMatchTravelerContext().getMatchConfiguration().getDisableDunsValidation())
+                    if ((request.getMatchTravelerContext().getMatchInput() != null
+                            && request.getMatchTravelerContext().getMatchInput().isDisableDunsValidation())
                             || isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
@@ -253,7 +253,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             }
         }
 
-        if (traveler.isUseRemoteDnB()) {
+        if (Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             saveReq(lookupRequestId, returnAddress, request);
             comingContexts.offer(context);
             if (log.isDebugEnabled()) {

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
@@ -11,7 +13,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
-import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
@@ -20,7 +22,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private String decisionGraph;
     private String lastStop;
 
-    private MatchConfiguration matchConfiguration;
+    private MatchInput matchInput;
 
     private List<DnBMatchContext> dnBMatchContexts = new ArrayList<>();
 
@@ -30,13 +32,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // only for metric purpose
     private Double totalTravelTime;
     private Boolean isBatchMode = false;
-
-    // runtime flags
-    private boolean useRemoteDnB = false;
-    private boolean useDnBCache = true;
-    private boolean matchDebugEnabled;
-
-    private boolean logDnBBulkResult = false;
 
     private Map<String, String> dunsOriginMap;
 
@@ -57,12 +52,17 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         return super.getRootOperationUid();
     }
 
-    public MatchConfiguration getMatchConfiguration() {
-        return matchConfiguration;
+    public MatchInput getMatchInput() {
+        return matchInput;
     }
 
-    public void setMatchConfiguration(MatchConfiguration matchConfiguration) {
-        this.matchConfiguration = matchConfiguration;
+    public void setMatchInput(MatchInput matchInput) {
+        this.matchInput = matchInput;
+        if (StringUtils.isNotEmpty(matchInput.getDecisionGraph())) {
+            setDecisionGraph(matchInput.getDecisionGraph());
+        }
+        setLogLevel(matchInput.getLogLevel());
+        setDataCloudVersion(matchInput.getDataCloudVersion());
     }
 
     @MetricField(name = "Matched", fieldType = MetricField.FieldType.BOOLEAN)
@@ -109,7 +109,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         return dataCloudVersion;
     }
 
-    public void setDataCloudVersion(String dataCloudVersion) {
+    private void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
     }
 
@@ -143,38 +143,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setBatchMode(Boolean batchMode) {
         isBatchMode = batchMode;
-    }
-
-    public boolean isUseDnBCache() {
-        return useDnBCache;
-    }
-
-    public void setUseDnBCache(boolean useDnBCache) {
-        this.useDnBCache = useDnBCache;
-    }
-
-    public boolean isUseRemoteDnB() {
-        return useRemoteDnB;
-    }
-
-    public void setUseRemoteDnB(boolean useRemoteDnB) {
-        this.useRemoteDnB = useRemoteDnB;
-    }
-
-    public boolean getLogDnBBulkResult() {
-        return logDnBBulkResult;
-    }
-
-    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
-        this.logDnBBulkResult = logDnBBulkResult;
-    }
-
-    public boolean isMatchDebugEnabled() {
-        return matchDebugEnabled;
-    }
-
-    public void setMatchDebugEnabled(boolean matchDebugEnabled) {
-        this.matchDebugEnabled = matchDebugEnabled;
     }
 
     public Map<String, String> getDunsOriginMap() {

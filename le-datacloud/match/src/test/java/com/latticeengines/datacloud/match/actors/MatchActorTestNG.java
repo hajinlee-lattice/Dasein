@@ -22,6 +22,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 import akka.actor.ActorRef;
@@ -63,9 +64,11 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         msg.setInputData(matchKeyTuple);
         String rootOperationUid = UUID.randomUUID().toString();
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
-        matchTravelerContext.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
-        matchTravelerContext.setUseDnBCache(true);
-        matchTravelerContext.setUseRemoteDnB(true);
+        MatchInput matchInput = new MatchInput();
+        matchInput.setUseDnBCache(true);
+        matchInput.setUseRemoteDnB(true);
+        matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        matchTravelerContext.setMatchInput(matchInput);
         msg.setMatchTravelerContext(matchTravelerContext);
 
         Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, false);
@@ -93,6 +96,9 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         msg.setInputData(matchKeyTuple);
         String rootOperationUid = UUID.randomUUID().toString();
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
+        MatchInput matchInput = new MatchInput();
+        matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        matchTravelerContext.setMatchInput(matchInput);
         msg.setMatchTravelerContext(matchTravelerContext);
 
         Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, true);

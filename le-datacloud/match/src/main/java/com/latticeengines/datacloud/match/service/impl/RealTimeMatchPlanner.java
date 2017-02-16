@@ -27,7 +27,6 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     @Trace
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         validate(input);
-        assignAndValidateColumnSelectionVersion(input);
         setDecisionGraph(input);
         input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();
@@ -43,9 +42,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);
-        context.setUseDnBCache(input.getUseDnBCache());
-        context.setUseRemoteDnB(input.getUseRemoteDnB());
-        context.setLogDnBBulkResult(input.getLogDnBBulkResult());
+
         return context;
     }
 

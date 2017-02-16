@@ -4,20 +4,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import scala.concurrent.Future;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
-import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
-import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+
+import scala.concurrent.Future;
 
 public class MatchContext implements Fact, Dimension {
 
@@ -30,25 +28,14 @@ public class MatchContext implements Fact, Dimension {
     private Map<String, List<Map<String, Object>>> resultsByPartition;
     private List<Map<String, Object>> resultSet;
     private List<InternalOutputRecord> internalResults;
-    private boolean returnUnmatched;
     private boolean seekingIdOnly;
-    private Long numRows;
     private MatchEngine matchEngine;
-
-    private AccountLookupRequest accountLookupRequest;
-    private List<LatticeAccount> matchedAccounts;
-    private Map<String, String> latticeIdToLookupIdMap;
-
-    private boolean useDnBCache;
-    private boolean logDnBBulkResult;
 
     @JsonIgnore
     private String contextId;
 
     @JsonIgnore
     private List<Future<Object>> futuresResult;
-    private Boolean useRemoteDnB;
-    private boolean matchDebugEnabled;
 
     @MetricFieldGroup(excludes = { "InputRows" })
     @MetricTagGroup(excludes = { "MatchEngine" })
@@ -102,14 +89,6 @@ public class MatchContext implements Fact, Dimension {
         this.partitionColumnsMap = partitionColumnsMap;
     }
 
-    public Map<String, List<Map<String, Object>>> getResultsByPartition() {
-        return resultsByPartition;
-    }
-
-    public void setResultsByPartition(Map<String, List<Map<String, Object>>> resultsByPartition) {
-        this.resultsByPartition = resultsByPartition;
-    }
-
     public List<Map<String, Object>> getResultSet() {
         return resultSet;
     }
@@ -127,11 +106,7 @@ public class MatchContext implements Fact, Dimension {
     }
 
     public boolean isReturnUnmatched() {
-        return returnUnmatched;
-    }
-
-    public void setReturnUnmatched(boolean returnUnmatched) {
-        this.returnUnmatched = returnUnmatched;
+        return true;
     }
 
     public boolean isSeekingIdOnly() {
@@ -142,44 +117,8 @@ public class MatchContext implements Fact, Dimension {
         this.seekingIdOnly = seekingIdOnly;
     }
 
-    public Long getNumRows() {
-        return numRows;
-    }
-
-    public void setNumRows(Long numRows) {
-        this.numRows = numRows;
-    }
-
-    public MatchEngine getMatchEngine() {
-        return matchEngine;
-    }
-
     public void setMatchEngine(MatchEngine matchEngine) {
         this.matchEngine = matchEngine;
-    }
-
-    public AccountLookupRequest getAccountLookupRequest() {
-        return accountLookupRequest;
-    }
-
-    public void setAccountLookupRequest(AccountLookupRequest accountLookupRequest) {
-        this.accountLookupRequest = accountLookupRequest;
-    }
-
-    public List<LatticeAccount> getMatchedAccounts() {
-        return matchedAccounts;
-    }
-
-    public void setMatchedAccounts(List<LatticeAccount> matchedAccounts) {
-        this.matchedAccounts = matchedAccounts;
-    }
-
-    public Map<String, String> getLatticeIdToLookupIdMap() {
-        return latticeIdToLookupIdMap;
-    }
-
-    public void setLatticeIdToLookupIdMap(Map<String, String> latticeIdToLookupIdMap) {
-        this.latticeIdToLookupIdMap = latticeIdToLookupIdMap;
     }
 
     public String getContextId() {
@@ -188,38 +127,6 @@ public class MatchContext implements Fact, Dimension {
 
     public void setContextId(String contextId) {
         this.contextId = contextId;
-    }
-
-    public boolean isUseDnBCache() {
-        return useDnBCache;
-    }
-
-    public void setUseDnBCache(boolean useDnBCache) {
-        this.useDnBCache = useDnBCache;
-    }
-
-    public void setUseRemoteDnB(Boolean useRemoteDnB) {
-        this.useRemoteDnB = useRemoteDnB;
-    }
-    
-    public Boolean getUseRemoteDnB() {
-        return useRemoteDnB;
-    }
-
-    public boolean getLogDnBBulkResult() {
-        return logDnBBulkResult;
-    }
-
-    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
-        this.logDnBBulkResult = logDnBBulkResult;
-    }
-
-    public boolean isMatchDebugEnabled() {
-        return matchDebugEnabled;
-    }
-
-    public void setMatchDebugEnabled(boolean matchDebugEnabled) {
-        this.matchDebugEnabled = matchDebugEnabled;
     }
 
     @JsonIgnore

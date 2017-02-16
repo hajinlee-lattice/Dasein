@@ -119,6 +119,8 @@ public class ProcessorContext {
 
     private boolean disableDunsValidation;
 
+    private MatchInput originalInput;
+
     public DataCloudJobConfiguration getJobConfiguration() {
         return jobConfiguration;
     }
@@ -243,6 +245,14 @@ public class ProcessorContext {
         return disableDunsValidation;
     }
 
+    public MatchInput getOriginalInput() {
+        return originalInput;
+    }
+
+    public void setOriginalInput(MatchInput originalInput) {
+        this.originalInput = originalInput;
+    }
+
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
             throws Exception {
         this.jobConfiguration = jobConfiguration;
@@ -252,6 +262,8 @@ public class ProcessorContext {
         receivedAt = new Date();
 
         podId = jobConfiguration.getHdfsPodId();
+        originalInput = jobConfiguration.getMatchInput();
+
         returnUnmatched = true;
         excludeUnmatchedWithPublicDomain = jobConfiguration.getMatchInput().getExcludeUnmatchedWithPublicDomain();
         publicDomainAsNormalDomain = jobConfiguration.getMatchInput().getPublicDomainAsNormalDomain();
@@ -328,13 +340,14 @@ public class ProcessorContext {
                 jobConfiguration.getMatchInput().getDataCloudVersion());
 
         matchDebugEnabled = jobConfiguration.getMatchInput().isMatchDebugEnabled();
-        log.info("Match Debug Enabled=" + matchDebugEnabled);;
+        log.info("Match Debug Enabled=" + matchDebugEnabled);
+        ;
         if (matchDebugEnabled) {
             outputSchema = appendDebugSchema(outputSchema);
         }
 
-        disableDunsValidation = jobConfiguration.getMatchInput().getConfiguration() == null ? false
-                : jobConfiguration.getMatchInput().getConfiguration().getDisableDunsValidation();
+        disableDunsValidation = jobConfiguration.getMatchInput() != null
+                && jobConfiguration.getMatchInput().isDisableDunsValidation();
         log.info(String.format("Duns validation is disabled: %b", disableDunsValidation));
         cleanup();
     }

@@ -79,24 +79,18 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private void fetchInternal(MatchContext context, boolean isSync) {
-        String dataCloudVersion = context.getInput().getDataCloudVersion();
-
         boolean fetchOnly = context.getInput().getFetchOnly();
         if (!fetchOnly) {
             try {
                 String decisionGraph = parseDecisionGraph(context);
                 boolean useRemoteDnB = shouldUseRemoteDnB(context);
+                context.getInput().setUseRemoteDnB(useRemoteDnB);
+                context.getInput().setDecisionGraph(decisionGraph);
                 if (isSync) {
-                    fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                            dataCloudVersion, decisionGraph, context.getInput().getLogLevel(),
-                            context.getInput().getUseDnBCache(), useRemoteDnB, context.getInput().getLogDnBBulkResult(),
-                            context.getInput().isMatchDebugEnabled(), context.getInput().getConfiguration());
+                    fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput());
                 } else {
                     List<Future<Object>> futures = fuzzyMatchService.callMatchAsync(context.getInternalResults(),
-                            context.getInput().getRootOperationUid(), dataCloudVersion, decisionGraph,
-                            context.getInput().getLogLevel(), context.getInput().getUseDnBCache(), useRemoteDnB,
-                            context.getInput().getLogDnBBulkResult(), context.getInput().isMatchDebugEnabled(),
-                            context.getInput().getConfiguration());
+                            context.getInput());
                     context.setFuturesResult(futures);
                 }
             } catch (Exception e) {
@@ -213,7 +207,6 @@ public class FuzzyMatchHelper implements DbHelper {
     public MatchContext mergeContexts(List<MatchContext> matchContextList, String dataCloudVersion) {
         MatchContext mergedContext = new MatchContext();
         mergedContext.setInput(matchContextList.get(0).getInput());
-        mergedContext.setUseDnBCache(mergedContext.getInput().getUseDnBCache());
         List<InternalOutputRecord> internalOutputRecords = new ArrayList<>();
         for (MatchContext matchContext : matchContextList) {
             String contextId = UUID.randomUUID().toString();
