@@ -34,7 +34,7 @@ public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializa
 
     private static final long serialVersionUID = 5914215732568807732L;
     private Long pid;
-    private String modelId;
+    private ModelSummary modelSummary;
     private BucketName bucketName;
     private int leftBoundScore;
     private int rightBoundScore;
@@ -60,14 +60,17 @@ public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializa
         this.pid = pid;
     }
 
-    @Column(name = "MODEL_ID", nullable = false)
-    @JsonProperty("model_id")
-    public String getModelId() {
-        return this.modelId;
+    @ManyToOne
+    @JoinColumn(name = "MODEL_ID", nullable = false)
+    @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public ModelSummary getModelSummary() {
+        return this.modelSummary;
     }
 
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
+    @JsonIgnore
+    public void setModelSummary(ModelSummary modelSummary) {
+        this.modelSummary = modelSummary;
     }
 
     @JsonProperty("name")

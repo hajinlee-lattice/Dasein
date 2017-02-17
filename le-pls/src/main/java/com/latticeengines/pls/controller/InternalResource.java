@@ -755,6 +755,8 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(modelSummary.getTenant());
         BucketedScoreSummary bucketedScoreSummary = bucketedScoreService
                 .getBucketedScoreSummaryForModelId(modelId);
+        log.info(String.format("Creating abcd buckets for model: %s bucketed score summary: %s", modelId,
+                JsonUtils.serialize(bucketedScoreSummary)));
         BucketedScore[] bucketedScores = bucketedScoreSummary.getBucketedScores();
         Double overallLift = bucketedScoreSummary.getOverallLift();
 

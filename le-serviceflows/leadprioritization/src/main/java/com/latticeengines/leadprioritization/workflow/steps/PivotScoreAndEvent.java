@@ -57,24 +57,34 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
         putStringValueInContext(EXPORT_OUTPUT_PATH, pivotOutputPath);
         saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH,
                 pivotOutputPath);
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-        List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy
-                .createDefaultABCDBuckets(getStringValueFromContext(SCORING_MODEL_ID));
+        try {
+            internalResourceRestApiProxy = new InternalResourceRestApiProxy(
+                    internalResourceHostPort);
+            List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy
+                    .createDefaultABCDBuckets(getStringValueFromContext(SCORING_MODEL_ID));
 
-        log.info(String.format(
-                "Created A bucket (%s - %s) with %s leads and %s lift,"
-                        + "B bucket (%s - %s) with %s leads and %s lift,"
-                        + "C bucket (%s - %s) with %s leads and %s lift,"
-                        + "D bucket (%s - %s) with %s leads and %s lift",
-                bucketMetadatas.get(0).getLeftBoundScore(),
-                bucketMetadatas.get(0).getRightBoundScore(), bucketMetadatas.get(0).getNumLeads(),
-                bucketMetadatas.get(0).getLift(), bucketMetadatas.get(1).getLeftBoundScore(),
-                bucketMetadatas.get(1).getRightBoundScore(), bucketMetadatas.get(0).getNumLeads(),
-                bucketMetadatas.get(1).getLift(), bucketMetadatas.get(2).getLeftBoundScore(),
-                bucketMetadatas.get(2).getRightBoundScore(), bucketMetadatas.get(0).getNumLeads(),
-                bucketMetadatas.get(2).getLift(), bucketMetadatas.get(3).getLeftBoundScore(),
-                bucketMetadatas.get(3).getRightBoundScore(), bucketMetadatas.get(0).getNumLeads(),
-                bucketMetadatas.get(3).getLift()));
+            log.info(String.format(
+                    "Created A bucket (%s - %s) with %s leads and %s lift,"
+                            + "B bucket (%s - %s) with %s leads and %s lift,"
+                            + "C bucket (%s - %s) with %s leads and %s lift,"
+                            + "D bucket (%s - %s) with %s leads and %s lift",
+                    bucketMetadatas.get(0).getLeftBoundScore(),
+                    bucketMetadatas.get(0).getRightBoundScore(),
+                    bucketMetadatas.get(0).getNumLeads(), bucketMetadatas.get(0).getLift(),
+                    bucketMetadatas.get(1).getLeftBoundScore(),
+                    bucketMetadatas.get(1).getRightBoundScore(),
+                    bucketMetadatas.get(0).getNumLeads(), bucketMetadatas.get(1).getLift(),
+                    bucketMetadatas.get(2).getLeftBoundScore(),
+                    bucketMetadatas.get(2).getRightBoundScore(),
+                    bucketMetadatas.get(0).getNumLeads(), bucketMetadatas.get(2).getLift(),
+                    bucketMetadatas.get(3).getLeftBoundScore(),
+                    bucketMetadatas.get(3).getRightBoundScore(),
+                    bucketMetadatas.get(0).getNumLeads(), bucketMetadatas.get(3).getLift()));
+        } catch (Exception e) {
+            log.warn(String.format(
+                    "Creating default ABCD buckets for model: %s failed. Proceeding with the workflow",
+                    getStringValueFromContext(SCORING_MODEL_ID)));
+        }
     }
 
 }
