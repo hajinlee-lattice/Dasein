@@ -399,6 +399,13 @@
             }
         }
     }
+    &.section-team {
+        .category, .subcategory {
+            .box-inner {
+                padding-bottom: 4em;
+            }
+        }
+    }
     .enrichments {
         @include flex-container;
         -webkit-flex-wrap: wrap;
@@ -556,149 +563,6 @@
                     color: black;
                     text-align: left;
                 }
-                .controls {
-                    position: absolute;
-                    left: 0;
-                    right: 0;
-                    bottom: 1.2em;
-                    .control {
-                        @include flex-item(1 0 auto);
-                        @include flex-container;
-                        position: relative;
-                        min-width: 135px;
-                        button, .button {
-                            @include flex-item(0 0 auto);
-                            -webkit-align-self: center;
-                            -ms-flex-item-align: center;
-                            align-self: center;
-                            margin: 0 auto;
-                            min-width: 170px;
-
-                            position: relative;
-                            padding: 3px 9px;
-                            font-size: 10px;
-                            font-weight: bold;
-                            color: #1a1a1a;
-                            border-radius: 1px;
-                            box-shadow: 0 0 10px 0 rgba(57, 137, 195, 0.1);
-                            background-color: #e5e5e5;
-                            border: solid 1px #bbb;
-                            span {
-                                 padding-right: 20px;
-                            }
-                        }
-                    }
-                    .enrich {
-                        button {
-                            &:after {
-                                @include font-awesome-inline("\f00d");
-                                position: absolute;
-                                top: 0;
-                                bottom: 0;
-                                left: auto;
-                                right: 0;
-                                background-color: #fff;
-                                padding: 3px 5px;
-                            }
-                            &.selected {
-                                background-color: #fafafa;
-                                span {
-                                    padding: 0;
-                                    padding-left: 20px;
-                                }
-                                &:after {
-                                    @include font-awesome-inline("\f00c");
-                                    left: 0;
-                                    right: auto;
-                                    color: #6fbe4a;
-                                    border-right: 1px solid #bbb;
-                                }
-                            }
-                        }
-                    }
-                    .highlight {
-                        &[disabled] {
-                            pointer-events: none;
-                            opacity: .5;
-                        }
-                        button, .button {
-                            overflow: visible;
-                            font-size: 10px;
-                            position: relative;
-                            text-transform: none;
-                            text-align: left;
-                            padding: 2px 5px;
-                            &:after {
-                                @include font-awesome-inline("\f0d7");
-                                position: absolute;
-                                top: 0;
-                                bottom: 0;
-                                left: auto;
-                                right: 0;
-                                background-color: inherit;
-                                padding: 3px 5px;
-                            }
-                            &.enabled {
-                                background-color: #fafafa;
-                                &:after {
-                                    border-left: 1px solid #bbbbbb;
-                                }
-                            }
-                            .highlightOptions {
-                                display: none;
-                                position: absolute;
-                                top: 100%;
-                                left: -1px;
-                                right: -1px;
-                                background: white;
-                                border: 1px solid #bbb;
-                                z-index: 1;
-                                padding-top: 10px;
-                                border-radius: 0 0 1px 1px;
-                                &.open {
-                                    display: block;
-                                }
-                                li {
-                                    &.current {
-                                        //pointer-events: none;
-                                        cursor: default; 
-                                    }
-                                    margin: 3px 5px;
-                                    &.note {
-                                        border-top: 1px solid #d0d1d0;
-                                        padding: 8px 0;
-                                        margin-top: 9px;
-                                    }
-                                }
-                            }
-                            .highlight-icon {
-                                position: relative;
-                                padding-left: 16px;
-                                &:after {
-                                    @include font-awesome-inline("\f013");
-                                    display: block;
-                                    position: absolute;
-                                    top: 50%;
-                                    left: 0;
-                                    transform: translateY(-50%);
-                                }
-                                &.enabled:after {
-                                    @include font-awesome-inline("\f00c");
-                                    color: #0f9e4d;
-                                }
-                                &.disabled:after {
-                                    @include font-awesome-inline("\f111");
-                                    font-size: 5px;
-                                    margin-left: 3px;
-                                }
-                                &.highlighted:after {
-                                    @include font-awesome-inline("\f005");
-                                    color: #f78b3a;
-                                }
-                            }
-                        }
-                    }
-                }
             }
         } 
     }
@@ -801,6 +665,150 @@
         }
         &:hover .attributes-more {
             text-decoration: underline;
+        }
+        
+        .controls {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 1.2em;
+            .control {
+                @include flex-item(1 0 auto);
+                @include flex-container;
+                position: relative;
+                min-width: 135px;
+                button, .button {
+                    @include flex-item(0 0 auto);
+                    -webkit-align-self: center;
+                    -ms-flex-item-align: center;
+                    align-self: center;
+                    margin: 0 auto;
+                    min-width: 170px;
+
+                    position: relative;
+                    padding: 3px 9px;
+                    font-size: 10px;
+                    font-weight: bold;
+                    color: #1a1a1a;
+                    border-radius: 1px;
+                    box-shadow: 0 0 10px 0 rgba(57, 137, 195, 0.1);
+                    background-color: #e5e5e5;
+                    border: solid 1px #bbb;
+                    span {
+                         padding-right: 20px;
+                    }
+                }
+            }
+            .enrich {
+                button {
+                    &:after {
+                        @include font-awesome-inline("\f00d");
+                        position: absolute;
+                        top: 0;
+                        bottom: 0;
+                        left: auto;
+                        right: 0;
+                        background-color: #fff;
+                        padding: 3px 5px;
+                    }
+                    &.selected {
+                        background-color: #fafafa;
+                        span {
+                            padding: 0;
+                            padding-left: 20px;
+                        }
+                        &:after {
+                            @include font-awesome-inline("\f00c");
+                            left: 0;
+                            right: auto;
+                            color: #6fbe4a;
+                            border-right: 1px solid #bbb;
+                        }
+                    }
+                }
+            }
+            .highlight {
+                &[disabled] {
+                    pointer-events: none;
+                    opacity: .5;
+                }
+                button, .button {
+                    overflow: visible;
+                    font-size: 10px;
+                    position: relative;
+                    text-transform: none;
+                    text-align: left;
+                    padding: 2px 5px;
+                    &:after {
+                        @include font-awesome-inline("\f0d7");
+                        position: absolute;
+                        top: 0;
+                        bottom: 0;
+                        left: auto;
+                        right: 0;
+                        background-color: inherit;
+                        padding: 3px 5px;
+                    }
+                    &.enabled {
+                        background-color: #fafafa;
+                        &:after {
+                            border-left: 1px solid #bbbbbb;
+                        }
+                    }
+                    .highlightOptions {
+                        display: none;
+                        position: absolute;
+                        top: 100%;
+                        left: -1px;
+                        right: -1px;
+                        background: white;
+                        border: 1px solid #bbb;
+                        z-index: 1;
+                        padding-top: 10px;
+                        border-radius: 0 0 1px 1px;
+                        &.open {
+                            display: block;
+                        }
+                        li {
+                            &.current {
+                                //pointer-events: none;
+                                cursor: default; 
+                            }
+                            margin: 3px 5px;
+                            &.note {
+                                border-top: 1px solid #d0d1d0;
+                                padding: 8px 0;
+                                margin-top: 9px;
+                            }
+                        }
+                    }
+                    .highlight-icon {
+                        position: relative;
+                        padding-left: 16px;
+                        &:after {
+                            @include font-awesome-inline("\f013");
+                            display: block;
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            transform: translateY(-50%);
+                        }
+                        &.enabled:after {
+                            @include font-awesome-inline("\f00c");
+                            color: #0f9e4d;
+                        }
+                        &.disabled:after {
+                            @include font-awesome-inline("\f111");
+                            font-size: 5px;
+                            margin-left: 3px;
+                        }
+                        &.highlighted:after {
+                            @include font-awesome-inline("\f005");
+                            color: #f78b3a;
+                        }
+                    }
+                }
+            }
         }
     }
 

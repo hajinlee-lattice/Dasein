@@ -11,7 +11,7 @@ angular.module('common.datacloud')
         this.premiumSelectMaximum = null;
         this.topAttributes = null;
         this.cube = this.cube || null;
-        this.metadata = {
+        this.metadata = this.metadata || {
             current: 1,
             toggle: {
                 show: {
@@ -415,6 +415,39 @@ angular.module('common.datacloud')
             method: 'POST',
             url: '/pls/attributes/flags/' + fieldName + '/' + useCase + '/' + propertyName,
             data: boolean
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.setFlagsByCategory = function(opts, flags){
+        var deferred = $q.defer(),
+            opts = opts || {},
+            categoryName = opts.categoryName || '',
+            useCase = opts.useCase || 'CompanyProfile',
+            flags = flags || {}; // json
+        $http({
+            method: 'POST',
+            url: '/pls/attributes/categories/flags/' + categoryName + '/' + useCase,
+            data: flags
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+    this.setFlagsBySubcategory = function(opts, flags){
+        var deferred = $q.defer(),
+            opts = opts || {},
+            categoryName = opts.categoryName || '',
+            subcategoryName = opts.subcategoryName || '',
+            useCase = opts.useCase || 'CompanyProfile',
+            flags = flags || {}; // json
+        $http({
+            method: 'POST',
+            url: '/pls/attributes/categories/subcategories/flags/' + categoryName + '/' + subcategoryName + '/' + useCase,
+
+            data: flags
         }).then(function(response){
             deferred.resolve(response.data);
         });

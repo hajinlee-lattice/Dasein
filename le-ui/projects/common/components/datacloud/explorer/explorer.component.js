@@ -100,6 +100,18 @@ angular.module('common.datacloud.explorer', [
         }
     ];
 
+    /* some rules that might hide the page */
+    vm.hidePage = function() {
+        if (vm.section == 'insights' || vm.section == 'team') {
+            if(vm.show_lattice_insights) {
+                return false;
+            }
+            return true;
+
+        } 
+        return false;
+    }
+
     vm.updateStateParams = function() {
         $state.go('.', { 
             category: vm.category, 
@@ -231,6 +243,8 @@ angular.module('common.datacloud.explorer', [
              * this also effectivly hides internal attributes when the filter is hidden
             */
             vm.metadata.toggle.show.internal = true;
+        } else {
+            vm.metadata.toggle.show.internal = false;
         }
 
         if(vm.section === 'insights') {
@@ -377,10 +391,12 @@ angular.module('common.datacloud.explorer', [
             DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
             EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
 
-        DataCloudStore.setMetadata('generalSelectedTotal', selectedTotal.length);
-        DataCloudStore.setMetadata('premiumSelectedTotal', vm.filter(selectedTotal, 'IsPremium', true).length);
-        DataCloudStore.setMetadata('enrichmentsTotal', vm.enrichments.length);
-        DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
+        if(!vm.lookupMode) {
+            DataCloudStore.setMetadata('generalSelectedTotal', selectedTotal.length);
+            DataCloudStore.setMetadata('premiumSelectedTotal', vm.filter(selectedTotal, 'IsPremium', true).length);
+            DataCloudStore.setMetadata('enrichmentsTotal', vm.enrichments.length);
+            DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
+        }
 
         vm.generalSelectedTotal = DataCloudStore.getMetadata('generalSelectedTotal');
         vm.premiumSelectedTotal = DataCloudStore.getMetadata('premiumSelectedTotal');
@@ -432,6 +448,11 @@ angular.module('common.datacloud.explorer', [
         enabled: 'Enabled for Sales Team',
         disabled: 'Disabled for Sales Team',
         highlighted: 'Highlight for Sales Team'
+    }
+
+    vm.highlightTypesCategory = {
+        enabled: vm.highlightTypes.enabled,
+        disabled: vm.highlightTypes.disabled
     }
 
     var highlightOptionsInitState = function(enrichment) {
@@ -495,7 +516,10 @@ angular.module('common.datacloud.explorer', [
                 "highlighted": false
             },
             label = vm.highlightTypes[type] || 'unknown type',
-            enabled = false;
+            enabled = false,
+            opts = {
+                fieldName: enrichment.FieldName
+            };
 
         if(type === 'highlighted') {
             flags.hidden = false;
@@ -509,7 +533,7 @@ angular.module('common.datacloud.explorer', [
 
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
-        setFlags({fieldName: enrichment.FieldName}, flags).then(function(){
+        setFlags(opts, flags).then(function(){
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
 
             enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted};
@@ -524,6 +548,64 @@ angular.module('common.datacloud.explorer', [
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
 
+        });
+    }
+
+    var setFlagsByCategory = function(opts, flags) {
+        var deferred = $q.defer();
+        if(opts.subcategoryName) {
+            DataCloudService.setFlagsBySubcategory(opts, flags).then(function(result) {
+                deferred.resolve(result);
+            });
+        } else if(opts.categoryName) {
+            DataCloudService.setFlagsByCategory(opts, flags).then(function(result) {
+                deferred.resolve(result);
+            });
+        }
+        return deferred.promise;
+    }
+
+    vm.setFlagsByCategory = function(type, category, subcategory){
+        var opts = {
+                categoryName: category,
+                subcategoryName: subcategory
+            },
+            flags = {
+                hidden: (type === 'enabled' ? false : true),
+            },
+            label = vm.highlightTypesCategory[type] || 'unknown type',
+            enabled = false;
+
+        if(type === 'disabled') {
+            flags.highlighted = false;
+        }
+
+        vm.statusMessage(vm.label.saving_alert, {wait: 0});
+
+        setFlagsByCategory(opts, flags).then(function(){
+            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+            var enrichments = vm.filter(vm.enrichments, 'Category', category);
+            if(subcategory) {
+                enrichments = vm.filter(enrichments, 'Subcategory', subcategory);
+            }
+            for(var i in enrichments) {
+                var enrichment = enrichments[i],
+                    _flags = flags;
+                if(flags.highlighted !== false) {
+                    flags.highlighted = enrichment.AttributeFlagsMap.CompanyProfile.highlighted;
+                }
+                vm.enrichments.find(function(i){return i.FieldName === enrichment.FieldName;}).AttributeFlagsMap.CompanyProfile = _flags;
+
+                enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: _flags.highlighted};
+                enrichment.HighlightHidden = flags.hidden;
+                enrichment.HighlightHighlighted = _flags.highlighted;
+            }
+            DataCloudStore.updateEnrichments(vm.enrichments);
+
+            var DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'HighlightHidden', true),
+                EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
+
+            DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
         });
     }
 
@@ -893,6 +975,19 @@ angular.module('common.datacloud.explorer', [
         return result.length;
     }
 
+    vm.subcategoryClick = function(subcategory, $event) {
+        var target = angular.element($event.target),
+            currentTarget = angular.element($event.currentTarget);
+
+        if(target.closest("[ng-click]")[0] !== currentTarget[0]) {
+            // do nothing, user is clicking something with it's own click event
+        } else {
+            vm.subcategory = (vm.subcategory === subcategory ? '' : subcategory); 
+            vm.metadata.current = 1; 
+            vm.updateStateParams();
+        }
+    }
+
     vm.categoryCount = function(category) {
         var filtered = vm.enrichmentsObj[category];
 
@@ -950,27 +1045,34 @@ angular.module('common.datacloud.explorer', [
         return path + icon;
     }
 
-    vm.categoryClick = function(category) {
-        var category = category || '';
-        if(vm.subcategory && vm.category == category) {
-            vm.subcategory = '';
-            if(subcategoriesExclude.indexOf(category)) { // don't show subcategories
-                vm.subcategory = vm.subcategories[category][0];
-            }
-        } else if(vm.category == category) {
-            vm.subcategory = '';
-            //vm.category = '';
+    vm.categoryClick = function(category, $event) {
+        var target = angular.element($event.target),
+            currentTarget = angular.element($event.currentTarget);
+
+        if(target.closest("[ng-click]")[0] !== currentTarget[0]) {
+            // do nothing, user is clicking something with it's own click event
         } else {
-            vm.subcategory = '';
-            if(subcategoriesExclude.indexOf(category)) {
-                vm.subcategory = vm.subcategories[category][0];
+            var category = category || '';
+            if(vm.subcategory && vm.category == category) {
+                vm.subcategory = '';
+                if(subcategoriesExclude.indexOf(category)) { // don't show subcategories
+                    vm.subcategory = vm.subcategories[category][0];
+                }
+            } else if(vm.category == category) {
+                vm.subcategory = '';
+                //vm.category = '';
+            } else {
+                vm.subcategory = '';
+                if(subcategoriesExclude.indexOf(category)) {
+                    vm.subcategory = vm.subcategories[category][0];
+                }
+                vm.category = category;
+
+                vm.filterEmptySubcategories();
             }
-            vm.category = category;
-
-            vm.filterEmptySubcategories();
+            vm.metadata.current = 1;
+            vm.updateStateParams();
         }
-
-        vm.updateStateParams();
     }
 
     vm.companyInfoFormatted = function (type, value) {
