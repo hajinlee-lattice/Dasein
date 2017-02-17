@@ -30,7 +30,7 @@ module.exports = function (grunt) {
     };
 
     // version of our software. This should really be in the package.json
-    // but it gets passed in through 
+    // but it gets passed in through
     var versionStringConfig = grunt.option('versionString') || new Date().getTime();
     var env = grunt.option('env') || 'dev';
     var chosenEnv;
@@ -312,7 +312,7 @@ module.exports = function (grunt) {
                 tasks: ['sass:dev']
             }
         },
-        
+
         instrument: {
             files: 'src/main/webapp/app/**/**[!vendor]/*[!Spec].js',
             options: {
@@ -407,7 +407,7 @@ module.exports = function (grunt) {
         uglify: {
             dist: {
                 options: {
-                    mangle: false
+                    mangle: true
                 },
                 files: {
                     '<%= pls.app %>/app/production_<%= versionString %>.min.js': [
@@ -421,7 +421,7 @@ module.exports = function (grunt) {
             },
             production: {
                 options: {
-                    mangle: false
+                    mangle: true
                 },
                 files: {
                     '<%= pls.dist %>/app.js': [
@@ -449,7 +449,10 @@ module.exports = function (grunt) {
 
         html2js: {
             options: {
-                base: ''
+                base: '',
+                htmlmin: {
+                    removeComments: true
+                }
             },
             main: {
                 src: ['app/**/*.html'],
@@ -594,7 +597,7 @@ module.exports = function (grunt) {
         'makeReport',
         'http:resetTenants'
     ]);
-    
+
     var instrumentJsText = 'Instrument javascript code for code coverage';
     grunt.registerTask('instrumentJs', instrumentJsText, [
         'instrument',
