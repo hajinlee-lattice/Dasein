@@ -120,7 +120,17 @@ angular.module('common.datacloud.explorer', [
             notify: false 
         });
     }
+    
+    var clearFilters = function() {
+        for(var i in vm.metadata.toggle) {
+            for(var j in vm.metadata.toggle[i]) {
+                vm.metadata.toggle[i][j] = '';
+            }
+        }
+    }
+
     vm.init = function() {
+        clearFilters();
         $scope.$watchGroup([
                 'vm.metadata.toggle.show.nulls', 
                 'vm.metadata.toggle.show.selected', 
@@ -893,8 +903,16 @@ angular.module('common.datacloud.explorer', [
             filter.IsSelected = true;
         }
 
+        if (!vm.metadata.toggle.show.selected && vm.metadata.toggle.hide.selected) {
+            filter.IsSelected = false;
+        }
+
         if (vm.metadata.toggle.show.premium && !vm.metadata.toggle.hide.premium) {
             filter.IsPremium = true;
+        }
+
+        if (!vm.metadata.toggle.show.premium && vm.metadata.toggle.hide.premium) {
+            filter.IsPremium = false;
         }
 
         if (!vm.metadata.toggle.show.internal) {
