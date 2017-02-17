@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.mutable.MutableLong;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +31,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
-import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -322,33 +323,38 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     private void expandEncodedAttributes(AccountMasterCube cube) {
         String dataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion("2.0").getVersion();
 
-        ColumnSelection columnSelection = new ColumnSelection();
-        List<Column> columnList = new ArrayList<>();
+        ColumnSelection columnSelection = columnSelectionService
+                .parsePredefinedColumnSelection(ColumnSelection.Predefined.Enrichment, dataCloudVersion);
+        // List<Column> columnList = new ArrayList<>();
+        //
+        // for (String columnName : cube.getStatistics().keySet()) {
+        // columnList.add(new Column(columnName));
+        // }
+        // columnSelection.setColumns(columnList);
 
-        for (String columnName : cube.getStatistics().keySet()) {
-            columnList.add(new Column(columnName));
-        }
-        columnSelection.setColumns(columnList);
-
-        Map<String, List<String>> codeBookInfo = columnSelectionService.getEncodedColumnMapping(columnSelection,
-                dataCloudVersion);
+        Map<String, Pair<BitCodeBook, List<String>>> codeBookInfo = columnSelectionService
+                .getDecodeParameters(columnSelection, dataCloudVersion);
 
         for (String encodedColumnName : codeBookInfo.keySet()) {
             if (cube.getStatistics().containsKey(encodedColumnName)) {
-                AttributeStatistics encodedValueCountInfo = cube.getStatistics().get(encodedColumnName);
-                String serializedTemplate = createTemplateInfoWithoutCodedInfo(encodedValueCountInfo);
-
-                int idx = 0;
-                MutableLong rowBasedTotalSum = new MutableLong();
-                MutableLong uniqueLocationBasedTotalSum = new MutableLong();
-                for (String attrName : codeBookInfo.get(encodedColumnName)) {
-                    AttributeStatistics decodedInfo = JsonUtils.deserialize(serializedTemplate,
-                            AttributeStatistics.class);
-                    populateDecodedBucketInfo(decodedInfo, encodedValueCountInfo, idx++, rowBasedTotalSum,
-                            uniqueLocationBasedTotalSum);
-                    cube.getStatistics().put(attrName, decodedInfo);
-                }
+                parseEncodedColumnStats(cube, codeBookInfo.get(encodedColumnName).getLeft().getBitsPosMap(),
+                        encodedColumnName);
             }
+        }
+    }
+
+    private void parseEncodedColumnStats(AccountMasterCube cube, Map<String, Integer> decodeAttrIdxMap,
+            String encodedColumnName) {
+        AttributeStatistics encodedValueCountInfo = cube.getStatistics().get(encodedColumnName);
+        String serializedTemplate = createTemplateInfoWithoutCodedInfo(encodedValueCountInfo);
+
+        MutableLong rowBasedTotalSum = new MutableLong();
+        MutableLong uniqueLocationBasedTotalSum = new MutableLong();
+        for (String attrName : decodeAttrIdxMap.keySet()) {
+            AttributeStatistics decodedInfo = JsonUtils.deserialize(serializedTemplate, AttributeStatistics.class);
+            populateDecodedBucketInfo(decodedInfo, encodedValueCountInfo, decodeAttrIdxMap.get(attrName),
+                    rowBasedTotalSum, uniqueLocationBasedTotalSum);
+            cube.getStatistics().put(attrName, decodedInfo);
         }
     }
 
