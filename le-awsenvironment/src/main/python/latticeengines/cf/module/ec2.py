@@ -62,13 +62,13 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "runas=root\n"
                         ]]}
                     },
-                    # "/tmp/s-iss.pub":{
-                    #     "source":"https://s3.amazonaws.com/" + chefbucket + "/ssh_keys/s-iss/pub",
-                    #     "mode":"000777",
-                    #     "owner":"root",
-                    #     "group":"root",
-                    #     "authentication":"S3AccessCreds"
-                    # },
+                    "/tmp/s-iss.pub":{
+                        "source":"http://s3.amazonaws.com/" + chefbucket + "/ssh_keys/s-iss/pub",
+                        "mode":"000777",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
+                    },
                     "/etc/yum.repos.d/le.repo": {
                         "content": {
                             "Fn::Join": [
@@ -150,18 +150,18 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "/opt/lce_client/set-server-ip.sh 10.51.1.40 31300",
                         ] ] }
                     },
-                    # "05_iss_user" : {
-                    #     "command" : { "Fn::Join": [ "\n", [
-                    #         "#!/bin/bash",
-                    #         "useradd s-iss",
-                    #         "mkdir -p /home/s-iss/.ssh",
-                    #         "chmod 0700 /home/s-iss/.ssh",
-                    #         "mv /tmp/s-iss.pub .",
-                    #         "cat s-iss.pub > /home/s-iss/.ssh/authorized_keys",
-                    #         "chmod 0600 /home/s-iss/.ssh/authorized_keys",
-                    #         "rm -f s-iss.pub"
-                    #     ] ] }
-                    # },
+                    "05_iss_user" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "useradd s-iss",
+                            "mkdir -p /home/s-iss/.ssh",
+                            "chmod 0700 /home/s-iss/.ssh",
+                            "mv /tmp/s-iss.pub .",
+                            "cat s-iss.pub > /home/s-iss/.ssh/authorized_keys",
+                            "chmod 0600 /home/s-iss/.ssh/authorized_keys",
+                            "rm -f s-iss.pub"
+                        ] ] }
+                    },
                     "10_add_instance_to_cluster" : {
                         "command" : { "Fn::Join": [ "", [
                             "#!/bin/bash\n",
