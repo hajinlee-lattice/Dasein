@@ -176,6 +176,7 @@ def provision(environment, stackname, tag, instance_type='r3.large'):
         PARAM_TARGET_GROUP.config(DUMMY_TGRP),
         PARAM_ECS_INSTANCE_PROFILE_NAME.config(config.ecs_instance_profile_name()),
         PARAM_ECS_INSTANCE_PROFILE_ARN.config(config.ecs_instance_profile_arn()),
+        PARAM_ECS_INSTANCE_ROLE_NAME.config(config.ecs_instance_role_name()),
         PARAM_DOCKER_IMAGE_TAG.config(tag),
         PARAM_EFS.config(config.lpi_efs_id())
     ]
