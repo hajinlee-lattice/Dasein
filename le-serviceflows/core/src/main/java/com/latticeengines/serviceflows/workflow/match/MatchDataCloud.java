@@ -140,7 +140,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             } else {
                 matchInputKeys.put(MatchKey.Domain, Arrays.asList("Website"));
             }
-        } else {
+        } else if (configuration.getSourceSchemaInterpretation()
+                .equals(SchemaInterpretation.SalesforceLead.toString())) {
             if (preMatchEventTable.getAttribute("Email") != null && preMatchEventTable
                     .getAttribute("Email").getApprovedUsage().contains("Ignored")) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
