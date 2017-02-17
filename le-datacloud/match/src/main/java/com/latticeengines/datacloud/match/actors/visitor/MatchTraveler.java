@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import akka.util.Timeout;
+
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
@@ -32,6 +34,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // only for metric purpose
     private Double totalTravelTime;
     private Boolean isBatchMode = false;
+
+    private Timeout travelTimeout;
 
     private Map<String, String> dunsOriginMap;
 
@@ -153,9 +157,18 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         this.dunsOriginMap = dunsOriginMap;
     }
 
+    public Timeout getTravelTimeout() {
+        return travelTimeout;
+    }
+
+    public void setTravelTimeout(Timeout travelTimeout) {
+        this.travelTimeout = travelTimeout;
+    }
+    
     @Override
     public void start() {
         super.start();
         debug("Has " + getMatchKeyTuple() + " to begin with.");
     }
+
 }
