@@ -49,9 +49,6 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("LogLevel")
     private String rootOperationUid;
 
-    @JsonProperty("LogLevel")
-    private String tableName;
-
     @JsonIgnore
     private String matchEngine;
 
@@ -72,7 +69,7 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("TimeOut")
     private Long timeout;
 
-    @JsonProperty("requestSource")
+    @JsonProperty("RequestSource")
     private String requestSource;   // scoring|modeling
 
     // if not provided, pick latest
@@ -380,14 +377,6 @@ public class MatchInput implements Fact, Dimension {
 
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public String getTableName() {
-        return tableName;
     }
 
     public boolean isBulkOnly() {

@@ -245,7 +245,6 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setDataCloudVersion(dataCloudVersionEntityMgr.currentApprovedVersionAsString());
         matchInput.setExcludeUnmatchedWithPublicDomain(false);
-        matchInput.setTableName("AccountMasterTest");
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {
             inputBuffer.setAvroDir(avroDir);
@@ -255,6 +254,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         if (inputSchema != null) {
             inputBuffer.setSchema(inputSchema);
         }
+        inputBuffer.setTableName("AccountMasterTest");
         matchInput.setInputBuffer(inputBuffer);
 
         matchInput.setPredefinedSelection(Predefined.RTS);

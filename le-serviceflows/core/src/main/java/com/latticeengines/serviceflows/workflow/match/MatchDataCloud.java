@@ -98,7 +98,6 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     private MatchInput prepareMatchInput(Table preMatchEventTable) {
         MatchInput matchInput = new MatchInput();
         matchInput.setYarnQueue(getConfiguration().getMatchQueue());
-        matchInput.setTableName(preMatchEventTable.getName());
 
         if (getConfiguration().getCustomizedColumnSelection() == null
                 && getConfiguration().getPredefinedColumnSelection() == null) {
@@ -178,6 +177,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         String avroDir = ExtractUtils.getSingleExtractPath(yarnConfiguration, preMatchEventTable);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);
+        inputBuffer.setTableName(preMatchEventTable.getName());
 
         Schema providedSchema;
         try {

@@ -12,19 +12,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AvroInputBuffer extends InputBuffer {
 
+    @JsonProperty("AvroDir")
     private String avroDir;
+
+    @JsonIgnore
     private Schema schema;
+
+    @JsonProperty("TableName")
+    private String tableName;
 
     public AvroInputBuffer() {
         setBufferType(IOBufferType.AVRO);
     }
 
-    @JsonProperty("AvroDir")
     public String getAvroDir() {
         return avroDir;
     }
 
-    @JsonProperty("AvroDir")
     public void setAvroDir(String avroDir) {
         if (avroDir.endsWith("/*.avro") || avroDir.endsWith("/")) {
             avroDir = avroDir.substring(0, avroDir.lastIndexOf("/"));
@@ -63,5 +67,13 @@ public class AvroInputBuffer extends InputBuffer {
     @JsonIgnore
     public void setSchema(Schema schema) {
         this.schema = schema;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

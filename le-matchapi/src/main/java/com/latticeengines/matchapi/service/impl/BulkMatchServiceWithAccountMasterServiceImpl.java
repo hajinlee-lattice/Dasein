@@ -119,7 +119,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .rootOperationUid(rootOperationUid) //
                 .microServiceHostPort(microServiceHostPort) //
                 .inputProperties() //
-                .targetTableName(input.getTableName() + "_match_target") //
+                .targetTableName(((AvroInputBuffer) input.getInputBuffer()).getTableName() + "_match_target") //
                 .targetPath(targetPath) //
                 .partitions(cascadingPartitions) //
                 .jobProperties(getJobProperties(input)) //
@@ -183,7 +183,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         InputBuffer inputBuffer = input.getInputBuffer();
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
         String avroPath = avroInputBuffer.getAvroDir();
-        extraSources.put(input.getTableName() + "_" + INPUT_AVRO_KEY, avroPath);
+        extraSources.put(avroInputBuffer.getTableName() + "_" + INPUT_AVRO_KEY, avroPath);
 
         return extraSources;
     }
@@ -196,7 +196,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         parameters.setAccountMasterLookup(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion.getAccountLookupHdfsVersion());
         parameters.setAccountMaster(ACCOUNT_MASTER_KEY + dataVersion.getAccountMasterHdfsVersion());
         parameters.setPublicDomainPath(PUBLIC_DOMAIN_KEY);
-        parameters.setInputAvro(input.getTableName() + "_" + INPUT_AVRO_KEY);
+        parameters.setInputAvro(((AvroInputBuffer) input.getInputBuffer()).getTableName() + "_" + INPUT_AVRO_KEY);
         parameters.setExcludePublicDomains(input.getExcludeUnmatchedWithPublicDomain());
         parameters.setReturnUnmatched(true);
         parameters.setOutputSchemaPath(outputSchemaPath);

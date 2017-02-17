@@ -107,7 +107,16 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
-    @Test(groups = "deployment", dataProvider = "realtimeScenarios", enabled = true)
+
+
+    @Test(groups = "deployment", dataProvider = "realtimeScenarios")
+    public void testRealtimeMatchWithoutCache(String scenario) {
+        MatchInput input = prepareRealtimeMatchInput(scenario, false);
+        MatchOutput output = matchProxy.matchRealTime(input);
+        validateRealtimeMatchResult(scenario, output);
+    }
+
+    @Test(groups = "deployment", dataProvider = "realtimeScenarios")
     public void testRealtimeMatchWithCache(String scenario) {
         MatchInput input = prepareRealtimeMatchInput(scenario, true);
         MatchOutput output = matchProxy.matchRealTime(input);
@@ -124,18 +133,6 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             objs.add(new Object[] { scenario });
         }
         return objs.iterator();
-    }
-
-    @Test(groups = "dnb", enabled = true)
-    public void testRealtimeMatchWithoutCache() {
-        String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
-                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
-                SCENARIO_INCOMPLETELOCATION, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
-        for (String scenario : scenarios) {
-            MatchInput input = prepareRealtimeMatchInput(scenario, false);
-            MatchOutput output = matchProxy.matchRealTime(input);
-            validateRealtimeMatchResult(scenario, output);
-        }
     }
 
     @Test(groups = "deployment", dataProvider = "bulkCatchScenarios", enabled = false)
@@ -376,19 +373,13 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private MatchInput prepareBulkMatchInput(String scenario, boolean useDnBCache) {
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-        input.setExcludeUnmatchedWithPublicDomain(false);
-        input.setPublicDomainAsNormalDomain(false);
-        input.setFetchOnly(false);
-        input.setSkipKeyResolution(true);
-        input.setDecisionGraph("DragonClaw");
-        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
-        input.setBulkOnly(false);
-        input.setUseDnBCache(useDnBCache);
-        input.setUseRemoteDnB(true);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         input.setCustomSelection(prepareColumnSelection());
         input.setFields(prepareFields(scenario));
+        input.setSkipKeyResolution(true);
         input.setKeyMap(MatchKeyUtils.resolveKeyMap(input.getFields()));
         input.setInputBuffer(prepareBulkData(scenario));
+        input.setUseDnBCache(useDnBCache);
         input.setUseRemoteDnB(true);
         return input;
     }
