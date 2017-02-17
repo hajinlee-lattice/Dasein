@@ -325,12 +325,6 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
         ColumnSelection columnSelection = columnSelectionService
                 .parsePredefinedColumnSelection(ColumnSelection.Predefined.Enrichment, dataCloudVersion);
-        // List<Column> columnList = new ArrayList<>();
-        //
-        // for (String columnName : cube.getStatistics().keySet()) {
-        // columnList.add(new Column(columnName));
-        // }
-        // columnSelection.setColumns(columnList);
 
         Map<String, Pair<BitCodeBook, List<String>>> codeBookInfo = columnSelectionService
                 .getDecodeParameters(columnSelection, dataCloudVersion);
