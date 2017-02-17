@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -459,9 +460,8 @@ public class MatchInput implements Fact, Dimension {
     }
 
     public MatchInput configurationDeepCopy() {
-        MatchInput deepCopy = JsonUtils.deserialize(JsonUtils.serialize(this), MatchInput.class);
-        deepCopy.setData(null);
-        deepCopy.setFields(null);
+        MatchInput deepCopy = JsonUtils.deserialize(toString(), MatchInput.class);
+        deepCopy.setData(Collections.emptyList());
         deepCopy.setMatchEngine(getMatchEngine());
         deepCopy.setNumSelectedColumns(numSelectedColumns);
         return deepCopy;
