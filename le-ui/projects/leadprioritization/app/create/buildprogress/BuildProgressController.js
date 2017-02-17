@@ -91,11 +91,28 @@ angular.module('lp.create.import.job', [
         if (job.jobStatus == "Running") {
             $scope.jobStepsRunningStates[job.stepRunning] = true;
             $scope.jobStepsCompletedStates[job.stepRunning] = false;
+
+            if ($scope.jobStepsCompletedStates["score_training_set"]) {
+                $scope.jobStepsCompletedStates['generate_insights'] = true;
+                $scope.jobStepsCompletedStates['create_global_target_market'] = true;
+
+                $scope.jobStepsRunningStates['generate_insights'] = false;
+                $scope.jobStepsRunningStates['create_global_target_market'] = false;
+
+                $scope.jobStepsRunningStates['score_training_set'] = true;
+                $scope.jobStepsCompletedStates['score_training_set'] = false;
+            }
         }
 
         $scope.stepsCompletedTimes = job.completedTimes;
 
         var stepFailed = lastKnownStepBeforeCancel || job.stepFailed;
+        if ((stepFailed === "load_data" ||
+            stepFailed === "generate_insights" ||
+            stepFailed === "create_global_target_market") &&
+            $scope.jobStepsCompletedStates["score_training_set"]) {
+            stepFailed = "score_training_set";
+        }
         if (stepFailed) {
             $scope.jobStepsRunningStates[stepFailed] = false;
             $scope.jobStepsCompletedStates[stepFailed] = false;
