@@ -188,7 +188,7 @@ class ECSStack(Stack):
             name = "EC2Instance%d" % (n + 1)
             subnet_idx = (seed + n) % 3
             subnet = SUBNETS[subnet_idx]
-            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE_NAME, ecscluster, efs, env) \
+            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE_NAME, ecscluster, efs, env, PARAM_ECS_INSTANCE_ROLE_NAME) \
                 .add_sg(PARAM_SECURITY_GROUP) \
                 .set_subnet(subnet) \
                 .add_tag("Name", { "Ref" : "AWS::StackName" })
@@ -217,7 +217,7 @@ class ECSStack(Stack):
     def _create_asgroup(self, ecscluster, efs, sns_topic, env):
         asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
         launchconfig = LaunchConfiguration("containerpool").set_instance_profile(PARAM_ECS_INSTANCE_PROFILE_ARN)
-        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs, env, PARAM_ECS_INSTANCE_PROFILE_NAME))
+        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs, env, PARAM_ECS_INSTANCE_ROLE_NAME))
         launchconfig.set_userdata(ECSStack._userdata(launchconfig, asgroup))
 
         asgroup.add_pool(launchconfig)
@@ -286,6 +286,7 @@ class ECSStack(Stack):
             PARAM_ENVIRONMENT.config(environment),
             PARAM_ECS_INSTANCE_PROFILE_ARN.config(config.ecs_instance_profile_arn()),
             PARAM_ECS_INSTANCE_PROFILE_NAME.config(config.ecs_instance_profile_name()),
+            PARAM_ECS_INSTANCE_ROLE_NAME.config(config.ecs_instance_role_name()),
             PARAM_TARGET_GROUP.config(tgrp),
             PARAM_CAPACITY.config(str(init_cap)),
             PARAM_MAX_CAPACITY.config(str(max_cap))

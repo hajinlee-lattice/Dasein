@@ -81,6 +81,7 @@ PARAM_INSTANCE_TYPE = InstanceTypeParameter("InstanceType", "EC2 instance type")
 
 PARAM_ECS_INSTANCE_PROFILE_ARN = ArnParameter("EcsInstanceProfile", "InstanceProfile for ECS instances auto scaling group")
 PARAM_ECS_INSTANCE_PROFILE_NAME = Parameter("EcsInstanceProfileName", "InstanceProfile NAME for ECS instances auto scaling group")
+PARAM_ECS_INSTANCE_ROLE_NAME = Parameter("EcsInstanceRoleName", "EC2 Role Name for ECS instances auto scaling group")
 PARAM_ELB_NAME = Parameter("ElbName", "Name of the main elastic load balancer name")
 PARAM_TARGET_GROUP=ArnParameter("TargetGroupArn", "Arn of the target group for load balancer")
 PARAM_CAPACITY = Parameter("DesiredCapacity", "Desired number of containers", type="Number", default="2")
@@ -102,6 +103,7 @@ ECS_PARAMETERS = {
     PARAM_INSTANCE_TYPE,
     PARAM_ECS_INSTANCE_PROFILE_ARN,
     PARAM_ECS_INSTANCE_PROFILE_NAME,
+    PARAM_ECS_INSTANCE_ROLE_NAME,
     PARAM_TARGET_GROUP,
     PARAM_CAPACITY,
     PARAM_MAX_CAPACITY

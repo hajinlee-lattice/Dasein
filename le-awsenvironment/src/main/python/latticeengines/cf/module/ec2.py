@@ -293,7 +293,7 @@ class EC2Instance(Resource):
 
 
 class ECSInstance(EC2Instance):
-    def __init__(self, name, instance_type, ec2_key, instance_profile_name, ecscluster, efs, env):
+    def __init__(self, name, instance_type, ec2_key, instance_profile_name, ecscluster, efs, env, instance_role_name):
         assert isinstance(instance_type, Parameter)
         assert isinstance(ec2_key, Parameter)
         Resource.__init__(self, name)
@@ -314,7 +314,7 @@ class ECSInstance(EC2Instance):
                 }
             }
         }
-        self.set_metadata(ecs_metadata(self, ecscluster, efs, env, instance_profile_name))
+        self.set_metadata(ecs_metadata(self, ecscluster, efs, env, instance_role_name))
         self.set_instanceprofile(instance_profile_name)
 
     def __ecs_userdata(self):
