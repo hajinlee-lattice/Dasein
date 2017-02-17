@@ -124,8 +124,6 @@ def create_load_balancers(tg_map, ui=False):
     # listeners
     private_lsnr = create_listener(private_lb, tg_map["swaggerprivate"])
     resources.append(private_lsnr)
-    api_lsnr = create_listener(private_lb, tg_map["api"], port=8074)
-    resources.append(api_lsnr)
     public_lsnr = create_listener(public_lb, tg_map["swaggerpublic"])
     resources.append(public_lsnr)
 
