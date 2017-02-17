@@ -9,17 +9,17 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.QuerySource;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.metadata.entitymgr.QuerySourceEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import edu.emory.mathcs.backport.java.util.Collections;
 
-public class QuerySourceEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
+public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Autowired
-    private QuerySourceEntityMgr querySourceEntityMgr;
-    private QuerySource defaultQuerySource;
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
+    private DataCollection defaultDataCollection;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -35,27 +35,28 @@ public class QuerySourceEntityMgrImplTestNG extends MetadataFunctionalTestNGBase
     @Test(groups = "functional")
     @SuppressWarnings("unchecked")
     public void createDefault() {
-        defaultQuerySource = querySourceEntityMgr.createQuerySource(Collections.singletonList(TABLE1), null, true);
-        assertNotNull(defaultQuerySource);
+        defaultDataCollection = dataCollectionEntityMgr.createDataCollection(Collections.singletonList(TABLE1), null,
+                true);
+        assertNotNull(defaultDataCollection);
         Table table = tableEntityMgr.findByName(TABLE1);
-        assertTrue(table.getTags().contains(defaultQuerySource.getName()));
+        assertTrue(table.getTags().contains(defaultDataCollection.getName()));
     }
 
     @Test(groups = "functional", dependsOnMethods = "createDefault")
     public void getDefault() {
-        QuerySource retrieved = querySourceEntityMgr.getDefaultQuerySource();
+        DataCollection retrieved = dataCollectionEntityMgr.getDefaultDataCollection();
         assertEquals(retrieved.getTables().size(), 1);
         assertEquals(retrieved.getTables().get(0).getName(), TABLE1);
-        assertEquals(retrieved.getName(), defaultQuerySource.getName());
+        assertEquals(retrieved.getName(), defaultDataCollection.getName());
     }
 
     @Test(groups = "functional", dependsOnMethods = "getDefault")
     public void notVisibleInOtherTenant() {
-        // TODO Validate that QuerySource is not available in other tenant
+        // TODO Validate that DataCollection is not available in other tenant
     }
 
     @Test(groups = "functional", dependsOnMethods = "notVisibleInOtherTenant")
     public void removeQuerySource() {
-        // TODO Remove QuerySource and ensure tags are removed
+        // TODO Remove DataCollection and ensure tags are removed
     }
 }

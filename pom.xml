@@ -32,6 +32,7 @@
         <module>le-scheduler</module>
         <module>le-parent</module>
         <module>le-db</module>
+        <module>le-query</module>
         <module>le-swlib</module>
         <module>le-hadoop</module>
         <module>le-dataplatform</module>

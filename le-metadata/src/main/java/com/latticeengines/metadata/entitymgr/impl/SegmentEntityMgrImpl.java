@@ -9,7 +9,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.metadata.dao.SegmentDao;
-import com.latticeengines.metadata.entitymgr.QuerySourceEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 
 @Component("segmentEntityMgr")
@@ -19,7 +19,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     private SegmentDao segmentDao;
 
     @Autowired
-    private QuerySourceEntityMgr querySourceEntityMgr;
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     @Override
     public BaseDao<MetadataSegment> getDao() {
@@ -29,13 +29,13 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findByName(String name) {
-        return segmentDao.findByNameWithDefaultQuerySource(name);
+        return segmentDao.findByNameWithDefaultDataCollection(name);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findByName(String querySourceName, String name) {
-        return segmentDao.findByQuerySourceAndName(querySourceName, name);
+        return segmentDao.findByDataCollectionAndName(querySourceName, name);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -45,8 +45,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         if (existing != null) {
             delete(existing);
         }
-        if (segment.getQuerySource() == null) {
-            segment.setQuerySource(querySourceEntityMgr.getDefaultQuerySource());
+        if (segment.getDataCollection() == null) {
+            segment.setDataCollection(dataCollectionEntityMgr.getDefaultDataCollection());
         }
 
         super.createOrUpdate(segment);

@@ -19,12 +19,12 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
     }
 
     @Override
-    public MetadataSegment findByQuerySourceAndName(String querySourceName, String name) {
+    public MetadataSegment findByDataCollectionAndName(String dataCollectionName, String name) {
         Session session = sessionFactory.getCurrentSession();
         Class<MetadataSegment> entityClz = getEntityClass();
         String queryStr = String
-                .format("from %s as segment inner join fetch segment.querySource as querySource where querySource.name = '%s' and segment.name = '%s'",
-                        entityClz.getSimpleName(), querySourceName, name);
+                .format("from %s as segment inner join fetch segment.dataCollection as dataCollection where dataCollection.name = '%s' and segment.name = '%s'",
+                        entityClz.getSimpleName(), dataCollectionName, name);
         Query query = session.createQuery(queryStr);
         List list = query.list();
         if (list.size() == 0) {
@@ -34,11 +34,11 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
     }
 
     @Override
-    public MetadataSegment findByNameWithDefaultQuerySource(String name) {
+    public MetadataSegment findByNameWithDefaultDataCollection(String name) {
         Session session = sessionFactory.getCurrentSession();
         Class<MetadataSegment> entityClz = getEntityClass();
         String queryStr = String
-                .format("from %s as segment inner join fetch segment.querySource as querySource where querySource.isDefault = true and segment.name = '%s'",
+                .format("from %s as segment inner join fetch segment.dataCollection as dataCollection where dataCollection.isDefault = true and segment.name = '%s'",
                         entityClz.getSimpleName(), name);
         Query query = session.createQuery(queryStr);
         List list = query.list();

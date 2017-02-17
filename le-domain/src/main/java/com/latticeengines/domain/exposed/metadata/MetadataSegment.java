@@ -57,7 +57,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_QUERY_SOURCE_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private QuerySource querySource;
+    private DataCollection dataCollection;
 
     @Column(name = "UPDATED", nullable = false)
     @JsonProperty("updated")
@@ -105,12 +105,12 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
         this.frontEndFilter = frontEndFilter;
     }
 
-    public QuerySource getQuerySource() {
-        return querySource;
+    public DataCollection getDataCollection() {
+        return dataCollection;
     }
 
-    public void setQuerySource(QuerySource querySource) {
-        this.querySource = querySource;
+    public void setDataCollection(DataCollection dataCollection) {
+        this.dataCollection = dataCollection;
     }
 
     @Override

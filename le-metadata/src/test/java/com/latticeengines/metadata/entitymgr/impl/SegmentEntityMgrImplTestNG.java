@@ -11,9 +11,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.query.ComparisonType;
 import com.latticeengines.common.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.QuerySource;
-import com.latticeengines.metadata.entitymgr.QuerySourceEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -27,17 +27,17 @@ public class SegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     private TableEntityMgr tableEntityMgr;
 
     @Autowired
-    private QuerySourceEntityMgr querySourceEntityMgr;
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     private MetadataSegment segment;
-    private QuerySource defaultQuerySource;
+    private DataCollection defaultDataCollection;
 
     @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE1));
-        defaultQuerySource = querySourceEntityMgr.createQuerySource(new ArrayList<>(), null, true);
+        defaultDataCollection = dataCollectionEntityMgr.createDataCollection(new ArrayList<>(), null, true);
     }
 
     @Test(groups = "functional")
@@ -60,15 +60,15 @@ public class SegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         MetadataSegment retrieved = segmentEntityMgr.findByName("Test");
         assertEquals(retrieved.getName(), segment.getName());
         assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);
-        assertTrue(retrieved.getQuerySource().isDefault());
+        assertTrue(retrieved.getDataCollection().isDefault());
     }
 
     @Test(groups = "functional", dependsOnMethods = "getSegment")
     public void getSegmentWithExplicitQuerySource() {
-        MetadataSegment retrieved = segmentEntityMgr.findByName(defaultQuerySource.getName(), "Test");
+        MetadataSegment retrieved = segmentEntityMgr.findByName(defaultDataCollection.getName(), "Test");
         assertEquals(retrieved.getName(), segment.getName());
         assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);
-        assertTrue(retrieved.getQuerySource().isDefault());
+        assertTrue(retrieved.getDataCollection().isDefault());
     }
 
     @Test(groups = "functional", dependsOnMethods = "getSegmentWithExplicitQuerySource")

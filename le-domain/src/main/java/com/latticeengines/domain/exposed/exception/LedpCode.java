@@ -30,7 +30,7 @@ public enum LedpCode {
     LEDP_11003("Could not retrieve keys for table {0}."), //
     LEDP_11004("Could not retrieve metadata for table {0}."), //
     LEDP_11005("SQL column name {0} is different from the avro column name {1}."), //
-    LEDP_11006("Tables {0} do not exist. A QuerySource must reference an existing table."), //
+    LEDP_11006("Tables {0} do not exist. A DataCollection must reference an existing table."), //
     LEDP_11007("Default query source already exists"), //
 
     // Runtime service: 12000-12999

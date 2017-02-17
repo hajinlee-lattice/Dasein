@@ -11,20 +11,20 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.QuerySource;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableTag;
-import com.latticeengines.metadata.dao.QuerySourceDao;
-import com.latticeengines.metadata.entitymgr.QuerySourceEntityMgr;
+import com.latticeengines.metadata.dao.DataCollectionDao;
+import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-@Component("querySourceEntityMgr")
-public class QuerySourceEntityMgrImpl extends BaseEntityMgrImpl<QuerySource> implements QuerySourceEntityMgr {
+@Component("dataCollectionEntityMgr")
+public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollection> implements DataCollectionEntityMgr {
 
     @Autowired
-    private QuerySourceDao querySourceDao;
+    private DataCollectionDao dataCollectionDao;
 
     @Autowired
     private TableEntityMgr tableEntityMgr;
@@ -33,14 +33,14 @@ public class QuerySourceEntityMgrImpl extends BaseEntityMgrImpl<QuerySource> imp
     private TableTagEntityMgr tableTagEntityMgr;
 
     @Override
-    public QuerySourceDao getDao() {
-        return querySourceDao;
+    public DataCollectionDao getDao() {
+        return dataCollectionDao;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public QuerySource createQuerySource(List<String> tableNames, String statisticsId, boolean isDefault) {
-        if (isDefault && getDefaultQuerySource() != null) {
+    public DataCollection createDataCollection(List<String> tableNames, String statisticsId, boolean isDefault) {
+        if (isDefault && getDefaultDataCollection() != null) {
             throw new LedpException(LedpCode.LEDP_11007);
         }
 
@@ -50,61 +50,61 @@ public class QuerySourceEntityMgrImpl extends BaseEntityMgrImpl<QuerySource> imp
             throw new LedpException(LedpCode.LEDP_11006, new String[] { String.join(",", tableNames) });
         }
 
-        QuerySource querySource = new QuerySource();
+        DataCollection dataCollection = new DataCollection();
 
         for (Table table : tables) {
             TableTag tableTag = new TableTag();
             tableTag.setTable(table);
-            tableTag.setName(querySource.getName());
+            tableTag.setName(dataCollection.getName());
             tableTag.setTenantId(MultiTenantContext.getTenant().getPid());
             tableTagEntityMgr.create(tableTag);
         }
 
-        querySource.setTenant(MultiTenantContext.getTenant());
-        querySource.setDefault(isDefault);
+        dataCollection.setTenant(MultiTenantContext.getTenant());
+        dataCollection.setDefault(isDefault);
 
-        create(querySource);
-        return getQuerySource(querySource.getName());
+        create(dataCollection);
+        return getDataCollection(dataCollection.getName());
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public QuerySource getDefaultQuerySource() {
-        List<QuerySource> candidates = querySourceDao.findAllByField("isDefault", true);
+    public DataCollection getDefaultDataCollection() {
+        List<DataCollection> candidates = dataCollectionDao.findAllByField("isDefault", true);
 
         if (candidates.size() == 0) {
             return null;
         }
-        QuerySource querySource = candidates.get(0);
-        fillInTables(querySource);
-        return querySource;
+        DataCollection dataCollection = candidates.get(0);
+        fillInTables(dataCollection);
+        return dataCollection;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public QuerySource getQuerySource(String name) {
-        List<QuerySource> candidates = querySourceDao.findAllByField("name", name);
+    public DataCollection getDataCollection(String name) {
+        List<DataCollection> candidates = dataCollectionDao.findAllByField("name", name);
         if (candidates.size() == 0) {
             return null;
         }
-        QuerySource querySource = candidates.get(0);
-        fillInTables(querySource);
-        return querySource;
+        DataCollection dataCollection = candidates.get(0);
+        fillInTables(dataCollection);
+        return dataCollection;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void removeQuerySource(String name) {
-        QuerySource querySource = querySourceDao.findByField("name", name);
+    public void removeDataCollection(String name) {
+        DataCollection dataCollection = dataCollectionDao.findByField("name", name);
 
         // TODO Remove tags
 
-        querySourceDao.delete(querySource);
+        dataCollectionDao.delete(dataCollection);
     }
 
-    private void fillInTables(QuerySource querySource) {
-        List<Table> tables = tableTagEntityMgr.getTablesForTag(querySource.getName());
-        querySource.setTables(tables);
+    private void fillInTables(DataCollection dataCollection) {
+        List<Table> tables = tableTagEntityMgr.getTablesForTag(dataCollection.getName());
+        dataCollection.setTables(tables);
     }
 
 }

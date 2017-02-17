@@ -31,13 +31,13 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_QUERY_SOURCE")
+@javax.persistence.Table(name = "METADATA_DATA_COLLECTION")
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QuerySource implements HasName, HasTenant, HasTenantId, HasPid {
+public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
 
-    public QuerySource() {
-        setName("QuerySource_" + UUID.randomUUID());
+    public DataCollection() {
+        setName("DataCollection_" + UUID.randomUUID());
     }
 
     @Id

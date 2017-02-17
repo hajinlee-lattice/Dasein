@@ -4,7 +4,7 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 
-public class QuerySourceResourceTestNG extends MetadataFunctionalTestNGBase {
+public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
 
     @Override
     @BeforeClass(groups = "functional")
