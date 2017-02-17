@@ -70,7 +70,7 @@ mkdir tmp || true
 
 for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
     WAR=${service} &&
-    if [ "${WAR}" = "admin" ] || [ "${WAR}" = "pls" ] || [ "${WAR}" = "matchapi" ] || [ "${WAR}" = "scoringapi" ] || [ "${WAR}" = "ulysses" ]; then
+    if [ "${WAR}" = "api" ] || [ "${WAR}" = "admin" ] || [ "${WAR}" = "pls" ] || [ "${WAR}" = "matchapi" ] || [ "${WAR}" = "scoringapi" ] || [ "${WAR}" = "ulysses" ]; then
         WAR=ROOT
     fi &&
     IMAGE=latticeengines/${service} &&

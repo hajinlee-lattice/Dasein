@@ -80,6 +80,9 @@
                                       overwrite="true" />
 
                                 <!-- microservices -->
+                                <copy file="${project.basedir}/../le-api/target/le-api-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/api.war"
+                                      overwrite="true" />
                                 <copy file="${project.basedir}/../le-matchapi/target/le-matchapi-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/matchapi.war"
                                       overwrite="true" />
