@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.SegmentService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("segmentService")
 public class SegmentServiceImpl implements SegmentService {
@@ -22,7 +21,6 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
-        segment.setTenant(MultiTenantContext.getTenant());
         segmentEntityMgr.createOrUpdate(segment);
         return segment;
     }

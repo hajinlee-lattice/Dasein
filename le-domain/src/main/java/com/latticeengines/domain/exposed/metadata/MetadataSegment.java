@@ -14,10 +14,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,15 +27,11 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.frontend.query.FrontEndFilter;
-import com.latticeengines.domain.exposed.security.HasTenant;
-import com.latticeengines.domain.exposed.security.HasTenantId;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_SEGMENT")
-@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MetadataSegment implements HasName, HasTenant, HasTenantId, HasPid, HasAuditingFields {
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,17 +45,8 @@ public class MetadataSegment implements HasName, HasTenant, HasTenantId, HasPid,
     private String name;
 
     @JsonIgnore
-    @Column(name = "TENANT_ID", nullable = false)
-    private Long tenantId;
-
-    @JsonIgnore
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Tenant tenant;
-
-    @JsonIgnore
-    @Column(name = "RESTRICTION", length = 4096)
+    @Column(name = "RESTRICTION")
+    @Type(type = "text")
     private String restrictionString;
 
     @JsonProperty("front_end_filter")
@@ -99,29 +85,6 @@ public class MetadataSegment implements HasName, HasTenant, HasTenantId, HasPid,
     @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    @Override
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    @Override
-    public void setTenant(Tenant tenant) {
-        if (tenant != null) {
-            setTenantId(tenant.getPid());
-        }
-        this.tenant = tenant;
     }
 
     @JsonProperty("restriction")

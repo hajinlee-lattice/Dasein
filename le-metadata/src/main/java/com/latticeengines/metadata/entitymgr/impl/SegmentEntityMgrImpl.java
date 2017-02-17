@@ -9,6 +9,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.metadata.dao.SegmentDao;
+import com.latticeengines.metadata.entitymgr.QuerySourceEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 
 @Component("segmentEntityMgr")
@@ -17,14 +18,24 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Autowired
     private SegmentDao segmentDao;
 
+    @Autowired
+    private QuerySourceEntityMgr querySourceEntityMgr;
+
     @Override
     public BaseDao<MetadataSegment> getDao() {
         return segmentDao;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
     public MetadataSegment findByName(String name) {
-        return segmentDao.findByField("name", name);
+        return segmentDao.findByNameWithDefaultQuerySource(name);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public MetadataSegment findByName(String querySourceName, String name) {
+        return segmentDao.findByQuerySourceAndName(querySourceName, name);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -33,6 +44,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         MetadataSegment existing = findByName(segment.getName());
         if (existing != null) {
             delete(existing);
+        }
+        if (segment.getQuerySource() == null) {
+            segment.setQuerySource(querySourceEntityMgr.getDefaultQuerySource());
         }
 
         super.createOrUpdate(segment);

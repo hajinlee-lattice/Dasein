@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.query.ComparisonType;
 import com.latticeengines.common.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.QuerySource;
 import com.latticeengines.metadata.entitymgr.QuerySourceEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
@@ -29,22 +30,20 @@ public class SegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     private QuerySourceEntityMgr querySourceEntityMgr;
 
     private MetadataSegment segment;
+    private QuerySource defaultQuerySource;
 
     @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE1));
-        querySourceEntityMgr.createQuerySource(new ArrayList<>(), null, true);
+        defaultQuerySource = querySourceEntityMgr.createQuerySource(new ArrayList<>(), null, true);
     }
 
     @Test(groups = "functional")
     public void createSegment() {
         segment = new MetadataSegment();
         segment.setName("Test");
-        segment.setTenant(MultiTenantContext.getTenant());
-        segment.setQuerySource(querySourceEntityMgr.getDefaultQuerySource());
-
         segmentEntityMgr.createOrUpdate(segment);
     }
 
@@ -52,8 +51,6 @@ public class SegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     public void updateSegment() {
         segment = new MetadataSegment();
         segment.setName("Test");
-        segment.setTenant(MultiTenantContext.getTenant());
-        segment.setQuerySource(querySourceEntityMgr.getDefaultQuerySource());
         segment.setRestriction(new ConcreteRestriction(false, null, ComparisonType.EQUAL, null));
         segmentEntityMgr.createOrUpdate(segment);
     }
@@ -67,6 +64,14 @@ public class SegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "getSegment")
+    public void getSegmentWithExplicitQuerySource() {
+        MetadataSegment retrieved = segmentEntityMgr.findByName(defaultQuerySource.getName(), "Test");
+        assertEquals(retrieved.getName(), segment.getName());
+        assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);
+        assertTrue(retrieved.getQuerySource().isDefault());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "getSegmentWithExplicitQuerySource")
     public void deleteSegment() {
         segmentEntityMgr.delete(segment);
         assertEquals(segmentEntityMgr.findAll().size(), 0);

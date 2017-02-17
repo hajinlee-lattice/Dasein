@@ -6,5 +6,6 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment findByName(String name);
- 
+
+    MetadataSegment findByName(String dataSourceName, String name);
 }
