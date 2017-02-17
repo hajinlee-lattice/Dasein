@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -22,21 +24,21 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.query.Restriction;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.metadata.frontend.query.FrontEndFilter;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_SEGMENT")
+@javax.persistence.Table(name = "METADATA_QUERY_SOURCE")
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MetadataSegment implements HasName, HasTenant, HasTenantId, HasPid, HasAuditingFields {
+public class QuerySource implements HasName, HasTenant, HasTenantId, HasPid {
+
+    public QuerySource() {
+        setName("QuerySource_" + UUID.randomUUID());
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,27 +61,17 @@ public class MetadataSegment implements HasName, HasTenant, HasTenantId, HasPid,
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @JsonIgnore
-    @Column(name = "RESTRICTION", length = 4096)
-    private String restrictionString;
+    @JsonProperty("is_default")
+    @Column(name = "IS_DEFAULT", nullable = false)
+    private boolean isDefault;
 
-    @JsonProperty("front_end_filter")
+    @JsonProperty("statistics_id")
+    @Column(name = "STATISTICS_ID", nullable = true)
+    private String statisticsId;
+
+    @JsonProperty("tables")
     @Transient
-    private FrontEndFilter frontEndFilter;
-
-    @JsonIgnore
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_QUERY_SOURCE_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private QuerySource querySource;
-
-    @Column(name = "UPDATED", nullable = false)
-    @JsonProperty("updated")
-    private Date updated;
-
-    @Column(name = "CREATED", nullable = false)
-    @JsonProperty("created")
-    private Date created;
+    private List<Table> tables = new ArrayList<>();
 
     @Override
     public Long getPid() {
@@ -124,49 +116,27 @@ public class MetadataSegment implements HasName, HasTenant, HasTenantId, HasPid,
         this.tenant = tenant;
     }
 
-    @JsonProperty("restriction")
-    public Restriction getRestriction() {
-        return JsonUtils.deserialize(restrictionString, Restriction.class);
+    public boolean isDefault() {
+        return isDefault;
     }
 
-    @JsonProperty("restriction")
-    public void setRestriction(Restriction restriction) {
-        this.restrictionString = JsonUtils.serialize(restriction);
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
     }
 
-    public FrontEndFilter getFrontEndFilter() {
-        return frontEndFilter;
+    public List<Table> getTables() {
+        return tables;
     }
 
-    public void setFrontEndFilter(FrontEndFilter frontEndFilter) {
-        this.frontEndFilter = frontEndFilter;
+    public void setTables(List<Table> tables) {
+        this.tables = tables;
     }
 
-    public QuerySource getQuerySource() {
-        return querySource;
+    public String getStatisticsId() {
+        return statisticsId;
     }
 
-    public void setQuerySource(QuerySource querySource) {
-        this.querySource = querySource;
-    }
-
-    @Override
-    public Date getCreated() {
-        return created;
-    }
-
-    @Override
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    @Override
-    public Date getUpdated() {
-        return updated;
-    }
-
-    @Override
-    public void setUpdated(Date updated) {
-        this.updated = updated;
+    public void setStatisticsId(String statisticsId) {
+        this.statisticsId = statisticsId;
     }
 }

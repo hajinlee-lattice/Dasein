@@ -30,7 +30,8 @@ public enum LedpCode {
     LEDP_11003("Could not retrieve keys for table {0}."), //
     LEDP_11004("Could not retrieve metadata for table {0}."), //
     LEDP_11005("SQL column name {0} is different from the avro column name {1}."), //
-    LEDP_11006("Table {0} does not exist. A segment must reference an existing table."), //
+    LEDP_11006("Tables {0} do not exist. A QuerySource must reference an existing table."), //
+    LEDP_11007("Default query source already exists"), //
 
     // Runtime service: 12000-12999
     LEDP_12000("Parameter PRIORITY undefined for analytics job."), //
@@ -501,12 +502,11 @@ public enum LedpCode {
     LEDP_31112("enrichment_config_error", "Error while extracting enrichment configuration. Cause: {0}"), //
     LEDP_31113("missing_domain", "Either email or website is required"), //
     LEDP_31114("inactive_model", "The model {0} is not active for Real time scoring"), //
-    LEDP_31199("missing_domain",
-            "Required field(s) are missing: {0}. In case of lead type model, " //
-                    + "make sure to specify 'Email' field and for non-lead type model " //
-                    + "specify either 'Website' or 'Domain' fields. If these fields " //
-                    + "are not specified then specify both 'CompanyName' " //
-                    + "and 'State' fields."), //
+    LEDP_31199("missing_domain", "Required field(s) are missing: {0}. In case of lead type model, " //
+            + "make sure to specify 'Email' field and for non-lead type model " //
+            + "specify either 'Website' or 'Domain' fields. If these fields " //
+            + "are not specified then specify both 'CompanyName' " //
+            + "and 'State' fields."), //
     LEDP_31200("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     // le-serviceflows

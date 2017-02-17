@@ -34,5 +34,5 @@ public interface MetadataInterface {
 
     void validateArtifact(String customerSpace, ArtifactType artifactType, String filePath);
 
-    MetadataSegment createMetadataSegment(String customerSpace, String segmentName, String tableName);
+    MetadataSegment createSegment(String customerSpace, String segmentName, String tableName);
 }

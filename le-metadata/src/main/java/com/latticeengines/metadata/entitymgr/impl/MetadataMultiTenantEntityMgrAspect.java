@@ -52,4 +52,9 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     public void allSegmentMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
+
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.QuerySourceEntityMgrImpl.*(..))")
+    public void allQuerySourceMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
 }

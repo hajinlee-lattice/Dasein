@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.metadata;
 
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
@@ -189,9 +189,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     }
 
     @Override
-    public MetadataSegment createMetadataSegment(String customerSpace, String segmentName, String tableName) {
+    public MetadataSegment createSegment(String customerSpace, String segmentName, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/segments/{segmentName}?tableName={tableName}", //
                 customerSpace, segmentName, tableName);
-        return post("createMetadataSegment", url, null, MetadataSegment.class);
+        return post("createSegment", url, null, MetadataSegment.class);
     }
 }

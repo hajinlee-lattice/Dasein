@@ -89,7 +89,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @Column(name = "NAME", unique = false, nullable = false)
     @JsonProperty("name")
     private String name;
-    
+
     @Column(name = "DISPLAY_NAME", nullable = false)
     @JsonProperty("display_name")
     private String displayName;
@@ -102,7 +102,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     @Transient
     private Schema schema;
-    
+
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -111,12 +111,12 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
-    
+
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("extracts")
     private List<Extract> extracts = new ArrayList<>();
-    
+
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @JsonProperty("primary_key")
     private PrimaryKey primaryKey;
@@ -128,11 +128,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @Transient
     @JsonIgnore
     private TableType tableType;
-    
+
     @Column(name = "TYPE", nullable = false)
     @JsonIgnore
     private Integer tableTypeCode;
-    
+
     @Column(name = "INTERPRETATION")
     @JsonProperty("interpretation")
     private String interpretation;
@@ -145,12 +145,12 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DataRule> dataRules = new ArrayList<>();
-    
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "table")
     @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<TableTag> tableTags = new ArrayList<>();
-    
+
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("storage_mechanism")
@@ -341,7 +341,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         return map;
     }
 
-    
+
     public Schema getSchema() {
         return schema;
     }
@@ -633,11 +633,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
     public void setTableType(TableType tableType) {
         this.tableType = tableType;
-        
+
         if (tableType != null) {
             this.tableTypeCode = tableType.getCode();
         }
-        
+
     }
 
     public Integer getTableTypeCode() {
@@ -695,11 +695,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
-    
+
     @JsonProperty("tags")
     public void setTags(List<String> tags) {
         Set<String> tagSet = tableTags.stream().map(x -> x.getName()).collect(Collectors.toSet());
-        
+
         for (String tag : tags) {
             if (!tagSet.contains(tag)) {
                 TableTag tableTag = new TableTag();
@@ -714,12 +714,12 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     public List<String> getTags() {
         return tableTags.stream().map(x -> x.getName()).collect(Collectors.toList());
     }
-    
+
     @JsonIgnore
     public List<TableTag> getTableTags() {
         return tableTags;
     }
-    
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
@@ -731,10 +731,15 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
     public void setStorageMechanism(StorageMechanism storageMechanism) {
         this.storageMechanism = storageMechanism;
-        
+
         if (storageMechanism != null) {
             storageMechanism.setTable(this);
         }
     }
 
+    public void addTag(String name) {
+        List<String> tags = getTags();
+        tags.add(name);
+        setTags(tags);
+    }
 }
