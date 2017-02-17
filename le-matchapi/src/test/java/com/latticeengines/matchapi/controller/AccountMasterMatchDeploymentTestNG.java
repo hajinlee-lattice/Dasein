@@ -47,8 +47,6 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 @Component
 public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
-    private static final String DATA_CLOUD_VERSION = "2.0.0";
-
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
@@ -143,7 +141,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
                 fieldTypes, "ID__");
         fieldTypes = getAccountMasterLookupAvroTypes();
 
-        DataCloudVersion dataVersion = dataCloudVersionEntityMgr.findVersion(DATA_CLOUD_VERSION);
+        DataCloudVersion dataVersion = dataCloudVersionEntityMgr.currentApprovedVersion();
 
         Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup, dataVersion.getAccountLookupHdfsVersion());
 
@@ -193,8 +191,8 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         List<String> fieldNames = getFieldNamesFromCSVFile(csvFile);
         fieldNames = fieldNames.subList(9, fieldNames.size());
         ColumnSelection selection = getColumnSelection(fieldNames);
-        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(DATA_CLOUD_VERSION);
-        List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(selection, DATA_CLOUD_VERSION);
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersionEntityMgr.currentApprovedVersionAsString());
+        List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(selection, dataCloudVersionEntityMgr.currentApprovedVersionAsString());
         List<Class<?>> fieldTypesInMetadata = getFieldTypesFromMetadata(metadatas);
         List<Class<?>> fieldTypes = new ArrayList<>();
 
@@ -245,7 +243,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-        matchInput.setDataCloudVersion(DATA_CLOUD_VERSION);
+        matchInput.setDataCloudVersion(dataCloudVersionEntityMgr.currentApprovedVersionAsString());
         matchInput.setExcludeUnmatchedWithPublicDomain(false);
         matchInput.setTableName("AccountMasterTest");
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
