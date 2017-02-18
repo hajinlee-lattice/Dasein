@@ -160,6 +160,7 @@ public class TransformationPipeline {
         stdLengthCompanyName.arguments.put("column", InterfaceName.CompanyName.name());
 
         // need to set stdLengthDomain arguments
+        stdLengthDomain.arguments.put("column", InterfaceName.Website.name());
 
         stdVisidbDsPdAlexaRelatedlinksCount.arguments.put("column", "AlexaRelatedLinks");
 
