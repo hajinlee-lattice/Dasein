@@ -104,7 +104,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
     }
 
     private Node addFunction(Node last, Node eventTable, TransformDefinition definition) {
-        log.info("definition " + definition.output + ": " + definition.arguments);
+        log.info("definition: " + definition);
         for (Object value : definition.arguments.values()) {
             Attribute attr = eventTable.getSourceAttribute(String.valueOf(value));
             if (attr == null) {
