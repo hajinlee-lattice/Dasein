@@ -192,7 +192,7 @@ public class AccountMasterLookupRebuildServiceImplTestNG
             Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 45);
+        Assert.assertEquals(rowNum, 23);
     }
 
 }

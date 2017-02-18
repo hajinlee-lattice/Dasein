@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupDomainBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupKeyFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -27,7 +26,7 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
         config = getTransformerConfig(parameters);
 
         Node accountMasterSeed = addSource(parameters.getBaseTables().get(0));
-
+        /*
         Node orbCacheSeedSecondaryDomainMapping = addSource(parameters.getBaseTables().get(1));
 
         orbCacheSeedSecondaryDomainMapping = orbCacheSeedSecondaryDomainMapping.rename(
@@ -62,15 +61,13 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
                 .retain(new FieldList(accountMasterSeedSecondaryDomainCleaned.getFieldNames()));
         Node accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain = accountMasterSeedSecondaryDomainCleaned
                 .merge(accountMasterSeedWithSecondaryDomain);
-
-        Node searchByDuns = searchByDuns(accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
-        Node searchByDomain = searchByDomain(accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
-        Node searchByDomainCountryZipCode = searchByDomainCountryZipCode(
-                accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
-        Node searchByDomainCountryState = searchByDomainCountryState(
-                accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
-        Node searchByDomainCountry = searchByDomainCountry(accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
-        Node searchByBoth = searchByBoth(accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
+        */
+        Node searchByDuns = searchByDuns(accountMasterSeed);
+        Node searchByDomain = searchByDomain(accountMasterSeed);
+        Node searchByDomainCountryZipCode = searchByDomainCountryZipCode(accountMasterSeed);
+        Node searchByDomainCountryState = searchByDomainCountryState(accountMasterSeed);
+        Node searchByDomainCountry = searchByDomainCountry(accountMasterSeed);
+        Node searchByBoth = searchByBoth(accountMasterSeed);
         return searchByDomain.merge(searchByDomainCountryZipCode).merge(searchByDomainCountryState)
                 .merge(searchByDomainCountry).merge(searchByDuns).merge(searchByBoth);
     }
