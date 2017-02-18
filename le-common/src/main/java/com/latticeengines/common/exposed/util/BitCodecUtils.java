@@ -3,6 +3,13 @@ package com.latticeengines.common.exposed.util;
 import java.io.IOException;
 import java.util.BitSet;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+
 public class BitCodecUtils {
 
     public static String encode(int[] trueBits) throws IOException {
@@ -40,4 +47,24 @@ public class BitCodecUtils {
         return Base64Utils.encodeBase64(bits.toByteArray());
     }
 
+
+    /**
+     * This is command line tool to decode an encoded base64 string
+     */
+    public static void main(String[] args) throws ParseException {
+        Option posOption = new Option("b", true, " bit position");
+        Option strOption = new Option("s", true, " encoded string");
+
+        Options options = new Options();
+        options.addOption(posOption);
+        options.addOption(strOption);
+
+        CommandLineParser parser = new PosixParser();
+        CommandLine cmdLine = parser.parse(options, args);
+
+        Integer bitPos = Integer.valueOf(cmdLine.getOptionValue("b"));
+        String str = cmdLine.getOptionValue("s");
+
+        System.out.println(String.format("Decoding %d-th bit in [%s]", bitPos, str));
+    }
 }
