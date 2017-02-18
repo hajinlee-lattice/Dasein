@@ -65,6 +65,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         }
         if (websiteOrEmail != null && !domainLength.arguments.isEmpty()) {
             domainLength.arguments.put("column", websiteOrEmail.getName());
+            log.info("set domain_length arguments to: " + domainLength.arguments);
         } else {
             domainLength.arguments.put("column", "");
         }
@@ -103,6 +104,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
     }
 
     private Node addFunction(Node last, Node eventTable, TransformDefinition definition) {
+        log.info("definition " + definition.output + ": " + definition.arguments);
         for (Object value : definition.arguments.values()) {
             Attribute attr = eventTable.getSourceAttribute(String.valueOf(value));
             if (attr == null) {
