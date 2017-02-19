@@ -107,23 +107,21 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
-
-
-    @Test(groups = "deployment", dataProvider = "realtimeScenarios")
+    @Test(groups = "deployment", dataProvider = "realtimeScenarios", enabled = false)
     public void testRealtimeMatchWithoutCache(String scenario) {
         MatchInput input = prepareRealtimeMatchInput(scenario, false);
         MatchOutput output = matchProxy.matchRealTime(input);
         validateRealtimeMatchResult(scenario, output);
     }
 
-    @Test(groups = "deployment", dataProvider = "realtimeScenarios")
+    @Test(groups = "deployment", dataProvider = "realtimeScenarios", enabled = false)
     public void testRealtimeMatchWithCache(String scenario) {
         MatchInput input = prepareRealtimeMatchInput(scenario, true);
         MatchOutput output = matchProxy.matchRealTime(input);
         validateRealtimeMatchResult(scenario, output);
     }
 
-    @DataProvider(name = "realtimeScenarios")
+    @DataProvider(name = "realtimeScenarios", enabled = false)
     private Iterator<Object[]> realtimeScenarios() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
