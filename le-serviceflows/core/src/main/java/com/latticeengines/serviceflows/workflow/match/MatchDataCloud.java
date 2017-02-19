@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.match;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,18 +136,20 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         if (configuration.getSourceSchemaInterpretation()
                 .equals(SchemaInterpretation.SalesforceAccount.toString())) {
             if (preMatchEventTable.getAttribute("Website") != null && preMatchEventTable
+                    .getAttribute("Website").getApprovedUsage() != null && preMatchEventTable
                     .getAttribute("Website").getApprovedUsage().contains("Ignored")) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
-                matchInputKeys.put(MatchKey.Domain, Arrays.asList("Website"));
+                matchInputKeys.put(MatchKey.Domain, Collections.singletonList("Website"));
             }
         } else if (configuration.getSourceSchemaInterpretation()
                 .equals(SchemaInterpretation.SalesforceLead.toString())) {
-            if (preMatchEventTable.getAttribute("Email") != null && preMatchEventTable
+            if (preMatchEventTable.getAttribute("Email") != null&& preMatchEventTable
+                    .getAttribute("Email").getApprovedUsage() != null && preMatchEventTable
                     .getAttribute("Email").getApprovedUsage().contains("Ignored")) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
-                matchInputKeys.put(MatchKey.Domain, Arrays.asList("Email"));
+                matchInputKeys.put(MatchKey.Domain, Collections.singletonList("Email"));
             }
         }
         for (MatchKey matchKey : MATCH_KEYS_TO_DISPLAY_NAMES.keySet()) {
