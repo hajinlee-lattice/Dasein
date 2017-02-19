@@ -14,7 +14,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 public class TransformationStepConfig {
 
     @JsonProperty("Transformer")
-    private String transformer = "TransformerBase";
+    private String transformer;
 
     @JsonProperty("InputSteps")
     private List<Integer> inputSteps;
