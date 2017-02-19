@@ -93,6 +93,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 // This only knows how to deal with a single srcIndex for a given targetIndex.
 // In case the src task generates multiple outputs for the same target Index
 // (multiple src-indices), modifications will be required.
+@SuppressWarnings("unused")
 public class ShuffleManager implements FetcherCallback {
 
   private static final Logger LOG = LoggerFactory.getLogger(ShuffleManager.class);

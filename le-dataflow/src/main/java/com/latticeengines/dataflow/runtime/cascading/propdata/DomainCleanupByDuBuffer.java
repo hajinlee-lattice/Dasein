@@ -88,7 +88,6 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
         int maxCount = 0;
         int numTuples = 0;
         String du = null;
-        @SuppressWarnings("unchecked")
         Iterator<TupleEntry> argumentsIter = bufferCall.getArgumentsIterator();
         while (argumentsIter.hasNext()) {
             numTuples++;

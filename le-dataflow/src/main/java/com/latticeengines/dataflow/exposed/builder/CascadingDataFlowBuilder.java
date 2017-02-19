@@ -919,6 +919,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
         Properties properties = new Properties();
+        Map<String, String> extraJarsForFlink = new HashMap<>();
 
         log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
         log.info("Using hadoop fs.defaultFS = " + config.get("fs.defaultFS"));
@@ -928,6 +929,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             log.info("Using dataflow lib path = " + dataFlowLibDir);
             List<String> files = HdfsUtils.getFilesForDir(config, dataFlowLibDir);
             for (String file : files) {
+                String jarId = file.substring(file.lastIndexOf("/"));
+                if (jarId.contains("le-dataflow-")) {
+                    jarId = "flink.jar";
+                }
+                extraJarsForFlink.put(jarId, file);
                 flowDef.addToClassPath(file);
             }
         } catch (Exception e) {
@@ -948,6 +954,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (jobProperties != null) {
             properties.putAll(jobProperties);
         }
+
         AppProps.setApplicationJarClass(properties, getClass());
         FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
         Flow<?> flow = flowConnector.connect(flowDef);

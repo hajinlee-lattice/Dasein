@@ -21,7 +21,6 @@ public class AddStandardAttributesParameters extends DataFlowParameters {
     public AddStandardAttributesParameters(String eventTable, List<TransformDefinition> transforms) {
         this.eventTable = eventTable;
         this.transforms = transforms;
-        this.noFlink = true;
     }
 
     /**

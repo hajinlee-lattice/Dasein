@@ -12,6 +12,7 @@ import cascading.operation.BufferCall;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class FillBlankDomainBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = 1L;
@@ -42,7 +43,6 @@ public class FillBlankDomainBuffer extends BaseOperation implements Buffer {
 
     private void fillBlankDomains(BufferCall bufferCall) {
         String enrichingDomain = null;
-        @SuppressWarnings("unchecked")
         Iterator<TupleEntry> argumentsIter = bufferCall.getArgumentsIterator();
         while (argumentsIter.hasNext()) {
             TupleEntry arguments = argumentsIter.next();
@@ -63,7 +63,6 @@ public class FillBlankDomainBuffer extends BaseOperation implements Buffer {
     }
 
     private void returnTuplesAsIs(BufferCall bufferCall) {
-        @SuppressWarnings("unchecked")
         Iterator<TupleEntry> iter = bufferCall.getArgumentsIterator();
         while (iter.hasNext()) {
             bufferCall.getOutputCollector().add(iter.next());

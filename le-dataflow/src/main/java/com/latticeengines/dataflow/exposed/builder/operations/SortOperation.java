@@ -2,10 +2,14 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
@@ -31,10 +35,16 @@ public class SortOperation extends Operation {
     }
 
     private void init(Input prior, Sort sort) {
-        Pipe priorPipe = prior.pipe;
-
-        Pipe groupby = new GroupBy(priorPipe, Fields.NONE, getSortFields(sort), sort.getDescending());
-
+        Fields originalFields = new Fields();
+        for (FieldMetadata fm: prior.metadata) {
+            originalFields.append(new Fields(fm.getFieldName()));
+        }
+        String randomColumnName = "SortTmp" + UUID.randomUUID().toString().replace("-", "");
+        String randomColumnValue = UUID.randomUUID().toString().replace("-", "");
+        AddFieldStrategy addFieldStrategy = new AddColumnWithFixedValueStrategy(randomColumnName, randomColumnValue, String.class);
+        AddFieldOperation addFieldOperation = new AddFieldOperation(prior, addFieldStrategy);
+        Pipe addDummyField = addFieldOperation.pipe;
+        Pipe groupby = new GroupBy(addDummyField, new Fields(randomColumnName), getSortFields(sort), sort.getDescending());
         this.pipe = groupby;
         this.metadata = prior.metadata;
     }

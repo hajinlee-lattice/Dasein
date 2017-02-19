@@ -354,45 +354,6 @@
             <version>${tez.guava.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.data-artisans</groupId>
-            <artifactId>cascading-flink</artifactId>
-            <version>${cascading.flink.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>cascading</groupId>
-                    <artifactId>cascading-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>cascading</groupId>
-                    <artifactId>cascading-hadoop2-io</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>cascading</groupId>
-                    <artifactId>cascading-expression</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.flink</groupId>
-                    <artifactId>flink-shaded-hadoop2</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.flink</groupId>
-                    <artifactId>flink-java</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.flink</groupId>
-                    <artifactId>flink-clients_2.10</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.clapper</groupId>
-                    <artifactId>grizzled-slf4j_2.10</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.codahale.metrics</groupId>
-                    <artifactId>metrics-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
             <version>${flink.version}</version>
