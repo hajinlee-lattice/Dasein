@@ -121,7 +121,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         validateRealtimeMatchResult(scenario, output);
     }
 
-    @DataProvider(name = "realtimeScenarios", enabled = false)
+    @DataProvider(name = "realtimeScenarios")
     private Iterator<Object[]> realtimeScenarios() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
