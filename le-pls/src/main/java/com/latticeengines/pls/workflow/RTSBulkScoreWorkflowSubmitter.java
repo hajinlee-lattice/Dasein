@@ -98,6 +98,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourcePort(internalResourceHostPort) //
                 .modelId(modelId) //
                 .modelType(modelType) //
+                .sourceSchemaInterpretation(modelSummary.getSourceSchemaInterpretation()) //
                 .inputTableName(tableToScore) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/"

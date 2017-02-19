@@ -133,8 +133,9 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         matchInput.setOutputBufferType(IOBufferType.AVRO);
 
         Map<MatchKey, List<String>> matchInputKeys = new HashMap<>();
-        if (configuration.getSourceSchemaInterpretation()
-                .equals(SchemaInterpretation.SalesforceAccount.toString())) {
+        if (configuration.getSourceSchemaInterpretation() != null
+                && configuration.getSourceSchemaInterpretation()
+                        .equals(SchemaInterpretation.SalesforceAccount.toString())) {
             if (preMatchEventTable.getAttribute("Website") != null && preMatchEventTable
                     .getAttribute("Website").getApprovedUsage() != null && preMatchEventTable
                     .getAttribute("Website").getApprovedUsage().contains("Ignored")) {

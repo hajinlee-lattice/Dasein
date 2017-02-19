@@ -181,6 +181,11 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadataList) {
             combineInputWithScores.setBucketMetadata(bucketMetadataList);
             return this;

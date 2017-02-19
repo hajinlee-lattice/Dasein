@@ -119,6 +119,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .reportNamePrefix(sourceFile.getName() + "_Report") //
                 .modelId(modelId) //
                 .modelType(modelType) //
+                .sourceSchemaInterpretation(modelSummary.getSourceSchemaInterpretation()) //
                 .inputTableName(sourceFile.getTableName()) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
