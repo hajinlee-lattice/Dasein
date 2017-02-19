@@ -77,7 +77,7 @@ public abstract class AbstractTransformationDataFlowService {
     private ApplicationContext appCtx;
 
     protected DataFlowContext dataFlowContext(Source source, Map<String, Table> sources, DataFlowParameters parameters,
-                                              String outputDir) {
+            String outputDir) {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
         String engine = getCascadingEngine(parameters);
@@ -86,7 +86,8 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
         ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
         ctx.setProperty(DataFlowProperty.CUSTOMER, sourceName);
-        ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + CollectionDataFlowKeys.TRANSFORM_FLOW);
+        ctx.setProperty(DataFlowProperty.FLOWNAME,
+                source.getSourceName() + HIPHEN + CollectionDataFlowKeys.TRANSFORM_FLOW);
         ctx.setProperty(DataFlowProperty.RECORDNAME, sourceName);
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, sourceName);
         ctx.setProperty(DataFlowProperty.TARGETPATH, outputDir);
@@ -101,14 +102,15 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.APPCTX, appCtx);
 
         Properties jobProps = getJobProperties();
+        org.apache.flink.configuration.Configuration flinkConf = getFlinkConf();
         if (parameters instanceof TransformationFlowParameters) {
             TransformationFlowParameters tfParameters = (TransformationFlowParameters) parameters;
             if (tfParameters.getEngineConfiguration() != null) {
-                overwriteJobProperties(jobProps, tfParameters.getEngineConfiguration().getJobProperties());
+                overwriteJobProperties(jobProps, flinkConf, tfParameters.getEngineConfiguration().getJobProperties());
             }
         }
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, jobProps);
-
+        ctx.setProperty(DataFlowProperty.FLINKCONF, flinkConf);
         return ctx;
     }
 
@@ -138,17 +140,24 @@ public abstract class AbstractTransformationDataFlowService {
         jobProperties.put("tez.runtime.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(taskMem * 1024));
         jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(taskVcores));
-        jobProperties.put(FlinkConstants.JM_HEAP_CONF, String.valueOf(flinkJmMem * 1024));
-        jobProperties.put(FlinkConstants.TM_HEAP_CONF, String.valueOf(flinkTmMem * 1024));
-        jobProperties.put(FlinkConstants.TM_SLOTS, String.valueOf(flinkTmSlots));
-        jobProperties.put(FlinkConstants.NUM_CONTAINERS, String.valueOf(flinkContainers));
         return jobProperties;
     }
 
-    private void overwriteJobProperties(Properties jobProps, Map<String, String> properties) {
+    private org.apache.flink.configuration.Configuration getFlinkConf() {
+        org.apache.flink.configuration.Configuration flinkConf = new org.apache.flink.configuration.Configuration();
+        flinkConf.setString(FlinkConstants.JM_HEAP_CONF, String.valueOf(flinkJmMem * 1024));
+        flinkConf.setString(FlinkConstants.TM_HEAP_CONF, String.valueOf(flinkTmMem * 1024));
+        flinkConf.setString(FlinkConstants.TM_SLOTS, String.valueOf(flinkTmSlots));
+        flinkConf.setString(FlinkConstants.NUM_CONTAINERS, String.valueOf(flinkContainers));
+        return flinkConf;
+    }
+
+    private void overwriteJobProperties(Properties jobProps, org.apache.flink.configuration.Configuration flinkConf,
+            Map<String, String> properties) {
         if (properties != null) {
-            for (Map.Entry<String, String> entry: properties.entrySet()) {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
                 jobProps.put(entry.getKey(), entry.getValue());
+                flinkConf.setString(entry.getKey(), entry.getValue());
             }
         }
     }

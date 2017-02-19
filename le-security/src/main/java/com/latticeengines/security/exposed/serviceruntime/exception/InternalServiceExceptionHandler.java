@@ -23,7 +23,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
         if (e.getRemoteStackTrace() != null) {
             stackTrace = stackTrace + "\nCaused remotely by...\n" + e.getRemoteStackTrace();
         }
-        logError(stackTrace);
+        logError(e);
         return getModelAndView(e, stackTrace);
     }
 
@@ -32,7 +32,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     public ModelAndView handleException(LedpException e) {
         String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
                 .getStackTrace(e);
-        logError(stackTrace);
+        logError(e);
         return getModelAndView(e, stackTrace);
     }
 
@@ -40,7 +40,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(Exception e) {
         String stackTrace = ExceptionUtils.getFullStackTrace(e);
-        logError(stackTrace);
+        logError(e);
         triggerCriticalAlert(e);
         return getModelAndView(e, stackTrace);
     }
@@ -49,7 +49,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ModelAndView handleException(LoginException e) {
         String stackTrace = ExceptionUtils.getFullStackTrace(e);
-        logError(stackTrace);
+        logError(e);
         triggerCriticalAlert(e);
         return getModelAndView(e, stackTrace);
     }

@@ -20,12 +20,7 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(RemoteLedpException e) {
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
-                .getStackTrace(e);
-        if (e.getRemoteStackTrace() != null) {
-            stackTrace = stackTrace + "\nCaused remotely by...\n" + e.getRemoteStackTrace();
-        }
-        logError(stackTrace);
+        logError(e);
         return getModelAndView(e);
     }
 
@@ -41,8 +36,7 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(Exception e) {
-        String stackTrace = ExceptionUtils.getFullStackTrace(e);
-        logError(stackTrace);
+        logError(e);
         triggerCriticalAlert(e);
 
         return getModelAndView();

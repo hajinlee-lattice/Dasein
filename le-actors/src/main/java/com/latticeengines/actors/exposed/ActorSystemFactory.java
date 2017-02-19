@@ -9,7 +9,6 @@ public class ActorSystemFactory {
 
     public static ActorSystem create(String name, int numDispatchers) {
         Config akkaConf = ConfigFactory.parseString(String.format("akka {\n" +
-                "  version = \"2.3.7\" \n" +
                 "  actor {\n" +
                 "    default-dispatcher {\n" +
                 "      throughput = %d\n" +

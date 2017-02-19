@@ -21,7 +21,12 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.yarn.AbstractYarnClusterDescriptor;
 import org.apache.flink.yarn.YarnClusterClient;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+
+import com.latticeengines.common.exposed.util.YarnUtils;
 
 public class FlinkYarnCluster {
 
@@ -130,6 +135,16 @@ public class FlinkYarnCluster {
         if (yarnCluster != null) {
             log.info("Shutting down the yarnCluster");
             yarnCluster.shutdownCluster();
+            try {
+                ApplicationId appId = yarnCluster.getApplicationId();
+                ApplicationReport applicationReport = YarnUtils.getApplicationReport(yarnConf, appId);
+                FinalApplicationStatus status = applicationReport.getFinalApplicationStatus();
+                if (!YarnUtils.TERMINAL_STATUS.contains(status)) {
+                    YarnUtils.kill(yarnConf, appId);
+                }
+            } catch (Exception e) {
+                log.error("Failed to shutdown yarn application", e);
+            }
         }
     }
 

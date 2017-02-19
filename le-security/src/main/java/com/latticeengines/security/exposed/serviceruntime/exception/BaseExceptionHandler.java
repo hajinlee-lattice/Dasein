@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -20,11 +21,21 @@ public abstract class BaseExceptionHandler {
     @Autowired
     private AlertService alertService;
 
-    private static final Log log = LogFactory.getLog(BaseExceptionHandler.class);
+    private final Log log = LogFactory.getLog(getClass());
 
     protected void logError(String message) {
         HttpServletRequest request = getCurrentRequest();
         log.error("Request for " + request.getRequestURL() + " failed:\n" + message);
+    }
+
+    protected void logError(Throwable t) {
+        HttpServletRequest request = getCurrentRequest();
+        if (t instanceof LedpException) {
+            LedpException e = (LedpException) t;
+            log.error("Request for " + request.getRequestURL() + " failed", e.getCause());
+        } else {
+            log.error("Request for " + request.getRequestURL() + " failed", t);
+        }
     }
 
     protected HttpServletRequest getCurrentRequest() {

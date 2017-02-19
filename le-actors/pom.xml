@@ -9,8 +9,7 @@
 
     <properties>
         <component-name>actors</component-name>
-        <com.typesafe.akka-version>2.3.7</com.typesafe.akka-version> <!-- to be compatible with flink 1.0.3 -->
-        <com.typesafe.akka-scala-version>2.11</com.typesafe.akka-scala-version>
+        <com.flink.akka-version>2.3-custom</com.flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
         <le.domain.version>3.3.0-SNAPSHOT</le.domain.version>
         <le.auth.version>3.3.0-SNAPSHOT</le.auth.version>
@@ -30,9 +29,9 @@
     <dependencies>
         <!-- akka -->
         <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_${com.typesafe.akka-scala-version}</artifactId>
-            <version>${com.typesafe.akka-version}</version>
+            <groupId>com.data-artisans</groupId> <!-- have to use data-artisans dist to be compatible with flink -->
+            <artifactId>flakka-actor_2.11</artifactId>
+            <version>${com.flink.akka-version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
