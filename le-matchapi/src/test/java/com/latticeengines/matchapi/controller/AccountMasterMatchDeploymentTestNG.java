@@ -72,7 +72,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
     @Autowired
     private BeanDispatcher beanDispatcher;
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testBulkMatchWithSchema() throws Exception {
 
         HdfsPodContext.changeHdfsPodId(podId);
