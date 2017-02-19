@@ -32,8 +32,11 @@ COMMON_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'work
 def cleanupWars():
     print 'clean up existing wars ...'
     for dirName, subdirList, fileList in os.walk(os.path.join(CATALINA_HOME, "webapps")):
+        for dir in subdirList:
+            if dir == 'ROOT':
+                rmtree(dirName + "/" + dir)
         for file in fileList:
-            if file[-4:] == '.war' or file == 'ROOT':
+            if file[-4:] == '.war':
                 print 'removing %s from %s' % (file, dirName)
                 os.remove(dirName + "/" + file)
 
@@ -41,7 +44,7 @@ def cleanupWars():
         dirName = os.path.join(CATALINA_HOME, "webapps", "ms")
         if (os.path.isdir(dirName + "/" + module)):
             print 'removing %s from %s' % (module, dirName)
-            os.remove(dirName + "/" + module)
+            rmtree(dirName + "/" + module)
 
     print 'clean up workspace ...'
     for dir_name in os.listdir(os.path.join(CATALINA_HOME, "work")):

@@ -27,7 +27,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/ms" unpackWARs="false" autoDeploy="true" undeployOldVersions="true"
+            <Host name="localhost" appBase="webapps/ms" unpackWARs="true" autoDeploy="true" undeployOldVersions="true"
                   startStopThreads="8"/>
         </Engine>
     </Service>
@@ -40,7 +40,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/pls" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/pls" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -52,7 +52,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/admin" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/admin" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -64,7 +64,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/playmaker" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/playmaker" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -76,7 +76,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/oauth" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/oauth" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -88,7 +88,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/scoringapi" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/scoringapi" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -101,7 +101,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/saml" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/saml" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -114,7 +114,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/api" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/api" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -126,7 +126,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/ulysses" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/ulysses" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -139,7 +139,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -151,7 +151,7 @@
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/job" unpackWARs="false" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/job" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
