@@ -29,6 +29,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             { "microsoft.com", null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { "apple.com", null, null, null, null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
             { "chevron.com", null, null, null, null, "chevron.com", "Chevron Corporation", "California", "USA", ">10,000", ">10B" },
+            // ge.com, bk.com
 
             // name location only easy cases
             { null, "Alphabet Inc.", "Mountain View", "California", "USA", "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },

@@ -8,12 +8,14 @@ import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 
+import java.util.ArrayList;
+
 public class AddFieldOperation extends Operation {
 
     public AddFieldOperation(Input prior, AddFieldStrategy strategy) {
         // use all fields as arguments
         Pipe p = prior.pipe;
-        this.metadata = prior.metadata;
+        this.metadata = new ArrayList<>(prior.metadata);
 
         Fields priorFields = getFields(prior);
 

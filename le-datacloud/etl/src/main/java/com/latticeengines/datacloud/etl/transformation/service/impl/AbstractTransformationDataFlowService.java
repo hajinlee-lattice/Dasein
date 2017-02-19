@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,9 +16,11 @@ import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.flink.FlinkConstants;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class AbstractTransformationDataFlowService {
@@ -39,6 +42,21 @@ public abstract class AbstractTransformationDataFlowService {
 
     @Value("${datacloud.etl.cascading.tez.task.mem.vcores}")
     private int taskVcores;
+
+    @Value("${datacloud.etl.cascading.flink.mode}")
+    private String flinkMode;
+
+    @Value("${datacloud.etl.cascading.flink.containers}")
+    private int flinkContainers;
+
+    @Value("${datacloud.etl.cascading.flink.jm.mem.gb}")
+    private int flinkJmMem;
+
+    @Value("${datacloud.etl.cascading.flink.tm.mem.gb}")
+    private int flinkTmMem;
+
+    @Value("${datacloud.etl.cascading.flink.tm.slots}")
+    private int flinkTmSlots;
 
     @Autowired
     protected DataTransformationService dataTransformationService;
@@ -62,8 +80,9 @@ public abstract class AbstractTransformationDataFlowService {
                                               String outputDir) {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
+        String engine = getCascadingEngine(parameters);
 
-        ctx.setProperty(DataFlowProperty.ENGINE, getCascadingPlatform().toUpperCase());
+        ctx.setProperty(DataFlowProperty.ENGINE, engine.toUpperCase());
         ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
         ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
         ctx.setProperty(DataFlowProperty.CUSTOMER, sourceName);
@@ -77,11 +96,34 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
         ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
-        ctx.setProperty(DataFlowProperty.JOBPROPERTIES, getJobProperties());
         ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
+        ctx.setProperty(DataFlowProperty.FLINKMODE, flinkMode);
         ctx.setProperty(DataFlowProperty.APPCTX, appCtx);
 
+        Properties jobProps = getJobProperties();
+        if (parameters instanceof TransformationFlowParameters) {
+            TransformationFlowParameters tfParameters = (TransformationFlowParameters) parameters;
+            if (tfParameters.getEngineConfiguration() != null) {
+                overwriteJobProperties(jobProps, tfParameters.getEngineConfiguration().getJobProperties());
+            }
+        }
+        ctx.setProperty(DataFlowProperty.JOBPROPERTIES, jobProps);
+
         return ctx;
+    }
+
+    private String getCascadingEngine(DataFlowParameters parameters) {
+        String engine = null;
+        if (parameters instanceof TransformationFlowParameters) {
+            TransformationFlowParameters tfParameters = (TransformationFlowParameters) parameters;
+            if (tfParameters.getEngineConfiguration() != null) {
+                engine = tfParameters.getEngineConfiguration().getEngine();
+            }
+        }
+        if (StringUtils.isBlank(engine)) {
+            engine = cascadingPlatform;
+        }
+        return engine;
     }
 
     private Properties getJobProperties() {
@@ -96,10 +138,19 @@ public abstract class AbstractTransformationDataFlowService {
         jobProperties.put("tez.runtime.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(taskMem * 1024));
         jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(taskVcores));
+        jobProperties.put(FlinkConstants.JM_HEAP_CONF, String.valueOf(flinkJmMem * 1024));
+        jobProperties.put(FlinkConstants.TM_HEAP_CONF, String.valueOf(flinkTmMem * 1024));
+        jobProperties.put(FlinkConstants.TM_SLOTS, String.valueOf(flinkTmSlots));
+        jobProperties.put(FlinkConstants.NUM_CONTAINERS, String.valueOf(flinkContainers));
         return jobProperties;
     }
 
-    protected String getCascadingPlatform() {
-        return cascadingPlatform;
+    private void overwriteJobProperties(Properties jobProps, Map<String, String> properties) {
+        if (properties != null) {
+            for (Map.Entry<String, String> entry: properties.entrySet()) {
+                jobProps.put(entry.getKey(), entry.getValue());
+            }
+        }
     }
+
 }

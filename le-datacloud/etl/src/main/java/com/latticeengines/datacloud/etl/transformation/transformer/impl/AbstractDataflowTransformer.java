@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters.ENGINE_CONFIG;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,10 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
@@ -22,9 +28,10 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P extends TransformationFlowParameters>
-                                   extends AbstractTransformer<T> {
+        extends AbstractTransformer<T> {
 
     private static final Log log = LogFactory.getLog(AbstractDataflowTransformer.class);
+    private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
     protected SimpleTransformationDataFlowService dataFlowService;
@@ -44,16 +51,29 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     }
 
     protected P getParameters(TransformationProgress progress, Source[] baseSources, Source[] baseTemplates,
-            Source targetTemplate, T configuration,
-                            String confJson) {
+            Source targetTemplate, T configuration, String confJson) {
         P parameters;
         try {
             parameters = getDataFlowParametersClass().newInstance();
-        } catch (IllegalAccessException|InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException("Failed construct a new progress object by empty constructor", e);
         }
 
         parameters.setConfJson(confJson);
+
+        if (StringUtils.isNotBlank(confJson)) {
+            JsonNode jsonNode = JsonUtils.deserialize(confJson, JsonNode.class);
+            try {
+                if (jsonNode.has(ENGINE_CONFIG)) {
+                    TransformationFlowParameters.EngineConfiguration engineConfig = OM.treeToValue(
+                            jsonNode.get(ENGINE_CONFIG), TransformationFlowParameters.EngineConfiguration.class);
+                    parameters.setEngineConfiguration(engineConfig);
+                    log.info("Loaded engine configuration: " + engineConfig);
+                }
+            } catch (Exception e) {
+                log.error("Failed to parse " + ENGINE_CONFIG + " from conf json.", e);
+            }
+        }
 
         parameters.setTimestampField(targetTemplate.getTimestampField());
         try {
@@ -67,13 +87,13 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
         List<String> baseTables = new ArrayList<String>();
         for (Source baseSource : baseSources) {
-                baseTables.add(baseSource.getSourceName());
+            baseTables.add(baseSource.getSourceName());
         }
         parameters.setBaseTables(baseTables);
         String[] primaryKey = targetTemplate.getPrimaryKey();
         if (primaryKey == null) {
             parameters.setPrimaryKeys(new ArrayList<String>());
-        } else{
+        } else {
             parameters.setPrimaryKeys(Arrays.asList(targetTemplate.getPrimaryKey()));
         }
 
@@ -90,8 +110,9 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     }
 
     @Override
-    protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources, List<String> baseSourceVersions,
-                                Source[] baseTemplates, Source targetTemplate, T configuration, String confStr) {
+    protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources,
+            List<String> baseSourceVersions, Source[] baseTemplates, Source targetTemplate, T configuration,
+            String confStr) {
         try {
             // The order of base sources in the source object should match with
             // the order of base versions in the configuration
@@ -111,7 +132,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);
         } catch (Exception e) {
-            log.error ("Failed to transform data", e);
+            log.error("Failed to transform data", e);
             return false;
         }
 

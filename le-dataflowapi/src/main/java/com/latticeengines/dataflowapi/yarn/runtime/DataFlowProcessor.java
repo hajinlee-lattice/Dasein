@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.flink.FlinkConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
@@ -56,6 +57,21 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
     @Value("${dataflowapi.engine}")
     private String engine;
+
+    @Value("${dataflowapi.flink.mode}")
+    private String flinkMode;
+
+    @Value("${dataflowapi.flink.yarn.containers}")
+    private Integer flinkYarnContainers;
+
+    @Value("${dataflowapi.flink.yarn.slots}")
+    private Integer flinkYarnSlots;
+
+    @Value("${dataflowapi.flink.yarn.tm.mem.mb}")
+    private Integer flinkYarnTmMem;
+
+    @Value("${dataflowapi.flink.yarn.jm.mem.mb}")
+    private Integer flinkYarnJmMem;
 
     public DataFlowProcessor() {
         super();
@@ -134,6 +150,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         } else {
             ctx.setProperty(DataFlowProperty.ENGINE, engine);
         }
+        ctx.setProperty(DataFlowProperty.FLINKMODE, flinkMode);
         ctx.setProperty(DataFlowProperty.APPCTX, appContext);
         ctx.setProperty(DataFlowProperty.PARAMETERS, dataFlowConfig.getDataFlowParameters());
         Integer partitions = dataFlowConfig.getPartitions();
@@ -143,6 +160,23 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         if (dataFlowConfig.getJobProperties() != null) {
             ctx.setProperty(DataFlowProperty.JOBPROPERTIES, dataFlowConfig.getJobProperties());
         }
+
+        if ("yarn".equals(flinkMode)) {
+            org.apache.flink.configuration.Configuration flinkConf = new org.apache.flink.configuration.Configuration();
+            flinkConf.setString(FlinkConstants.JM_HEAP_CONF, String.valueOf(flinkYarnJmMem));
+            flinkConf.setString(FlinkConstants.TM_HEAP_CONF, String.valueOf(flinkYarnTmMem));
+            flinkConf.setString(FlinkConstants.NUM_CONTAINERS, String.valueOf(flinkYarnContainers));
+            flinkConf.setString(FlinkConstants.TM_SLOTS, String.valueOf(flinkYarnSlots));
+            if (dataFlowConfig.getJobProperties() != null) {
+                for (Map.Entry<Object, Object> entry : dataFlowConfig.getJobProperties().entrySet()) {
+                    if (entry.getKey() instanceof String && entry.getValue() != null) {
+                        flinkConf.setString((String) entry.getKey(), String.valueOf(entry.getValue()));
+                    }
+                }
+            }
+            ctx.setProperty(DataFlowProperty.FLINKCONF, flinkConf);
+        }
+
         return ctx;
     }
 

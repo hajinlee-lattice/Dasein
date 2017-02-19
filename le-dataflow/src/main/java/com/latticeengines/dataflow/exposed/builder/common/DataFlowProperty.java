@@ -23,4 +23,6 @@ public class DataFlowProperty {
     public static final String DEBUG = "DEBUG";
     public static final String ENFORCEGLOBALORDERING = "ENFORCEGLOBALORDERING";
     public static final String FLINKENV = "FLINKENV";
+    public static final String FLINKMODE = "FLINKMODE";
+    public static final String FLINKCONF = "FLINKCONF";
 }

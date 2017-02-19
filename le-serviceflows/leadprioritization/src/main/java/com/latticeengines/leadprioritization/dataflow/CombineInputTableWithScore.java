@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.dataflow;
 
+import com.latticeengines.dataflow.runtime.cascading.leadprioritization.AddRatingColumnFunction;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;

@@ -28,6 +28,7 @@ public class FlinkExecutionEngine extends ExecutionEngine {
                 ExecutionEnvironment.class);
         if (environment == null) {
             environment = ExecutionEnvironment.getExecutionEnvironment();
+            environment.setParallelism(getPartitions(dataFlowCtx));
         }
         return new FlinkConnector(environment, properties);
     }

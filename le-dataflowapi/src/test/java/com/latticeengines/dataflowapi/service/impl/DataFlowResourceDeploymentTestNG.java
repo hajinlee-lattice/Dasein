@@ -92,7 +92,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiDeploymentTestN
 
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void submitDataFlow() throws Exception {
         DataFlowConfiguration config = getDataFlowConfiguration();
         AppSubmission submission = submitDataFlow(config);

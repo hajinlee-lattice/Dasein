@@ -349,29 +349,9 @@
             <version>${le.transform.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${tez.guava.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-java</artifactId>
-            <version>${flink.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.flink</groupId>
-                    <artifactId>flink-shaded-hadoop2</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.dropwizard.metrics</groupId>
-                    <artifactId>metrics-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-clients_2.11</artifactId>
-            <version>${flink.version}</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-flink</artifactId>
+            <version>${le.domain.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.flink</groupId>
@@ -386,6 +366,11 @@
                     <artifactId>metrics-jvm</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${tez.guava.version}</version>
         </dependency>
         <dependency>
             <groupId>org.clapper</groupId>

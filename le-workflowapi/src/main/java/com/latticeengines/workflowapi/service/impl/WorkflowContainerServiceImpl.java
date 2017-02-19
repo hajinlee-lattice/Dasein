@@ -70,11 +70,14 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Value("${datacloud.etl.cascading.platform}")
     private String datacloudCascadingEngine;
 
-    @Value("${dataflowapi.flink.vcores}")
+    @Value("${dataflowapi.flink.local.vcores}")
     private Integer flinkVcores;
 
-    @Value("${dataflowapi.flink.mem}")
+    @Value("${dataflowapi.flink.local.mem}")
     private Integer flinkMemory;
+
+    @Value("${datacloud.etl.cascading.flink.mode}")
+    private String etlFlinkMode;
 
     @Override
     public ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfig) {
@@ -124,7 +127,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
-        if ("FLINK".equalsIgnoreCase(datacloudCascadingEngine) && isDataCloudEtlJob(workflowConfig)) {
+        if ("local".equals(etlFlinkMode) && "FLINK".equalsIgnoreCase(datacloudCascadingEngine)
+                && isDataCloudEtlJob(workflowConfig)) {
             appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
             appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkVcores));
             containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));

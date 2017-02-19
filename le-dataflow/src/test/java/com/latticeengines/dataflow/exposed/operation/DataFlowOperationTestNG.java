@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -46,8 +47,12 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         }
         for (GenericRecord record : output) {
             String email = record.get("Email").toString();
-            if (lastEmail != null) {
-                Assert.assertTrue(email.compareTo(lastEmail) >= 0);
+            if (StringUtils.isBlank(email)) {
+                Assert.assertTrue(StringUtils.isBlank(lastEmail),
+                        "If this email is blan, last email should also be blank, but it is " + lastEmail + " instead.");
+            } else {
+                Assert.assertTrue(StringUtils.isBlank(lastEmail) || email.compareTo(lastEmail) >= 0,
+                        email + " should not be after " + lastEmail);
             }
             lastEmail = email;
         }

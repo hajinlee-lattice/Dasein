@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.dataflow;
+package com.latticeengines.dataflow.runtime.cascading.leadprioritization;
 
 import java.util.ArrayList;
 import java.util.List;

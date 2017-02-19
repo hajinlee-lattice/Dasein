@@ -4,11 +4,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import org.apache.commons.lang3.StringUtils;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransformationFlowParameters extends DataFlowParameters {
+
+    public static final String ENGINE_CONFIG = "EngineConfig";
 
     @JsonProperty("ConfJsonPath")
     private String confJsonPath;
@@ -36,6 +43,9 @@ public class TransformationFlowParameters extends DataFlowParameters {
 
     @JsonProperty("TemplateSourceMap")
     private Map<String, String> templateSourceMap;
+
+    @JsonProperty(ENGINE_CONFIG)
+    private EngineConfiguration engineConfiguration;
 
     public String getConfJsonPath() {
         return confJsonPath;
@@ -107,5 +117,40 @@ public class TransformationFlowParameters extends DataFlowParameters {
 
     public void setBaseSourceColumns(List<List<SourceColumn>> baseSourceColumns) {
         this.baseSourceColumns = baseSourceColumns;
+    }
+
+    public EngineConfiguration getEngineConfiguration() {
+        return engineConfiguration;
+    }
+
+    public void setEngineConfiguration(EngineConfiguration engineConfiguration) {
+        this.engineConfiguration = engineConfiguration;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class EngineConfiguration {
+
+        @JsonProperty("Engine")
+        private String engine;
+
+        @JsonProperty("JobProps")
+        private Map<String, String> jobProperties;
+
+        public String getEngine() {
+            return engine;
+        }
+
+        public void setEngine(String engine) {
+            this.engine = engine;
+        }
+
+        public Map<String, String> getJobProperties() {
+            return jobProperties;
+        }
+
+        public void setJobProperties(Map<String, String> jobProperties) {
+            this.jobProperties = jobProperties;
+        }
     }
 }

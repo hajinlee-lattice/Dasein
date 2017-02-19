@@ -28,11 +28,26 @@ public class DataFlowServiceImpl implements DataFlowService {
     @Value("${dataflowapi.engine}")
     private String cascadingEngine;
 
-    @Value("${dataflowapi.flink.vcores}")
-    private Integer flinkVcores;
+    @Value("${dataflowapi.flink.mode}")
+    private String flinkMode;
 
-    @Value("${dataflowapi.flink.mem}")
-    private Integer flinkMemory;
+    @Value("${dataflowapi.flink.local.vcores}")
+    private Integer flinkLocalVcores;
+
+    @Value("${dataflowapi.flink.local.mem}")
+    private Integer flinkLocalMemory;
+
+    @Value("${dataflowapi.flink.yarn.containers}")
+    private Integer flinkYarnContainers;
+
+    @Value("${dataflowapi.flink.yarn.slots}")
+    private Integer flinkYarnSlots;
+
+    @Value("${dataflowapi.flink.yarn.tm.mem.mb}")
+    private Integer flinkYarnTmMem;
+
+    @Value("${dataflowapi.flink.yarn.jm.mem.mb}")
+    private Integer flinkYarnJmMem;
 
     @Override
     public ApplicationId submitDataFlow(DataFlowConfiguration dataFlowConfig) {
@@ -64,10 +79,12 @@ public class DataFlowServiceImpl implements DataFlowService {
 
         if ("FLINK".equalsIgnoreCase(cascadingEngine) && (dataFlowConfig.getDataFlowParameters() != null
                 && !dataFlowConfig.getDataFlowParameters().noFlink)) {
-            appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
-            appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkMemory));
-            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
-            containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkMemory));
+            if ("local".equals(flinkMode)) {
+                appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkLocalVcores));
+                appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkLocalMemory));
+                containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkLocalVcores));
+                containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkLocalMemory));
+            }
         }
 
         dataFlowJob.setAppMasterPropertiesObject(appMasterProperties);

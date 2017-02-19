@@ -189,7 +189,7 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration>
 			client = new StandaloneClusterClient(config);
 			client.setPrintStatusDuringExecution(env.getConfig().isSysoutLoggingEnabled());
 
-		} else if (isRemoteExecution()) {
+		} else {
 
 			flowStep.logInfo("Executing in cluster mode.");
 

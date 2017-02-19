@@ -13,6 +13,7 @@
     <import resource="classpath:dataflow-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
     <import resource="classpath:metadata-hive-context.xml"/>
+    <import resource="classpath:hadoop-config-context.xml" />
 
     <bean id="simpleCascadingExecutor" class="com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor">
         <constructor-arg name="yarnConfiguration" ref="yarnConfiguration" />

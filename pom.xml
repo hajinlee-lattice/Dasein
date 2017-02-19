@@ -46,6 +46,7 @@
         <module>le-dataflowapi</module>
         <module>le-api</module>
         <module>le-perf</module>
+        <module>le-flink</module>
         <module>le-dataflow</module>
         <module>le-serviceflows</module>
         <module>le-matchapi</module>

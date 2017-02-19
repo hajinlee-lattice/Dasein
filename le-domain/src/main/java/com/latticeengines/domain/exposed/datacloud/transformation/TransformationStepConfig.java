@@ -2,12 +2,19 @@ package com.latticeengines.domain.exposed.datacloud.transformation;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransformationStepConfig {
 
     @JsonProperty("Transformer")
-    private String transformer;
+    private String transformer = "{\"Transfomer\":\"TransformerBase\"}";
 
     @JsonProperty("InputSteps")
     private List<Integer> inputSteps;
@@ -30,7 +37,7 @@ public class TransformationStepConfig {
     @JsonProperty("TargetTemplate")
     private String targetTemplate;
 
-    @JsonProperty("Configuration")
+    @JsonIgnore
     private String configuration;
 
     public String getTransformer() {
@@ -41,12 +48,24 @@ public class TransformationStepConfig {
         this.transformer = transformer;
     }
 
+    @JsonIgnore
     public String getConfiguration() {
         return configuration;
     }
 
+    @JsonIgnore
     public void setConfiguration(String configuration) {
         this.configuration = configuration;
+    }
+
+    @JsonProperty("Configuration")
+    private JsonNode getConfigurationAsJson() {
+        return JsonUtils.deserialize(configuration, JsonNode.class);
+    }
+
+    @JsonProperty("Configuration")
+    private void setConfigurationViaJson(JsonNode configJson) {
+        this.configuration = JsonUtils.serialize(configJson);
     }
 
     public List<String> getBaseSources() {

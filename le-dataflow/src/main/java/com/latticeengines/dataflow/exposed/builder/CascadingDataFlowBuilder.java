@@ -20,9 +20,12 @@ import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.flink.client.program.ContextEnvironment;
+import org.apache.flink.yarn.AbstractYarnClusterDescriptor;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.joda.time.DateTime;
 import org.springframework.data.hadoop.fs.HdfsResourceLoader;
@@ -34,6 +37,7 @@ import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.exposed.builder.engine.FlinkExecutionEngine;
 import com.latticeengines.dataflow.exposed.builder.operations.DebugOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.Operation;
@@ -53,6 +57,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
+import com.latticeengines.flink.FlinkYarnCluster;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -955,17 +961,39 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             properties.putAll(jobProperties);
         }
 
-        AppProps.setApplicationJarClass(properties, getClass());
-        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
-        Flow<?> flow = flowConnector.connect(flowDef);
+        if (engine instanceof FlinkExecutionEngine) {
+            String flinkMode = dataFlowCtx.getProperty(DataFlowProperty.FLINKMODE, String.class, "local");
+            log.info("Flink mode: " + flinkMode);
+            if ("yarn".endsWith(flinkMode)) {
+                String queue = dataFlowCtx.getProperty(DataFlowProperty.QUEUE, String.class);
+                String name = "Flink Cluster ["
+                        + dataFlowCtx.getProperty(DataFlowProperty.FLOWNAME, String.class, "Cascading Dataflow") + "]";
+                YarnConfiguration yarnConf = (YarnConfiguration) config;
+                org.apache.flink.configuration.Configuration flinkConf = dataFlowCtx
+                        .getProperty(DataFlowProperty.FLINKCONF, org.apache.flink.configuration.Configuration.class);
+                AbstractYarnClusterDescriptor yarnDescriptor = FlinkYarnCluster.createDescriptor(yarnConf, flinkConf,
+                        name, queue);
+                yarnDescriptor.setExtraJars(extraJarsForFlink);
+                FlinkYarnCluster.launch(yarnDescriptor);
+                ContextEnvironment flinkEnv = FlinkYarnCluster.getExecutionEnvironment();
+                dataFlowCtx.setProperty(DataFlowProperty.FLINKENV, flinkEnv);
+            }
+        }
 
-        flow.writeDOT("dot/wcr.dot");
-        flow.addListener(dataFlowListener);
-        flow.addStepListener(dataFlowStepListener);
-        flow.complete();
-        return getTableMetadata(dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
-                targetPath, //
-                pipesAndOutputSchemas.get(lastOperator).getValue());
+        try {
+            AppProps.setApplicationJarClass(properties, getClass());
+            FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
+            Flow<?> flow = flowConnector.connect(flowDef);
+            flow.writeDOT("dot/wcr.dot");
+            flow.addListener(dataFlowListener);
+            flow.addStepListener(dataFlowStepListener);
+            flow.complete();
+            return getTableMetadata(dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
+                    targetPath, //
+                    pipesAndOutputSchemas.get(lastOperator).getValue());
+        } finally {
+            FlinkYarnCluster.shutdown();
+        }
     }
 
     private Tap<?, ?, ?> createCheckpointSink(String name) {
