@@ -8,11 +8,14 @@ import static com.latticeengines.flink.FlinkConstants.TM_SLOTS;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.client.program.ContextEnvironment;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.yarn.AbstractYarnClusterDescriptor;
@@ -27,6 +30,8 @@ public class FlinkYarnCluster {
     private static YarnClusterClient yarnCluster;
     private static ContextEnvironment executionEnvironment;
     private static int parallelism = 1;
+    private static YarnConfiguration yarnConf;
+    private static Configuration flinkConf;
 
     public static AbstractYarnClusterDescriptor createDescriptor(YarnConfiguration yarnConf, Configuration flinkConf,
             String appName, String queue) {
@@ -74,6 +79,9 @@ public class FlinkYarnCluster {
         yarnClusterDescriptor.setConfigurationDirectory(new File(configFile.getAbsolutePath()).getParent());
         yarnClusterDescriptor.setConfigurationFilePath(new Path(configFile.getPath()));
 
+        FlinkYarnCluster.yarnConf = yarnConf;
+        FlinkYarnCluster.flinkConf = flinkConf;
+
         return yarnClusterDescriptor;
     }
 
@@ -101,11 +109,19 @@ public class FlinkYarnCluster {
 
     public static ContextEnvironment getExecutionEnvironment() {
         if (executionEnvironment == null) {
-            String host = yarnCluster.getJobManagerAddress().getAddress().getHostName();
-            int port = yarnCluster.getJobManagerAddress().getPort();
             executionEnvironment = new ContextEnvironment(yarnCluster, Collections.emptyList(), Collections.emptyList(),
                     Thread.currentThread().getContextClassLoader(), null);
             executionEnvironment.setParallelism(parallelism);
+
+            Map<String, String> jobParams = new HashMap<>();
+            yarnConf.forEach((entry) -> {
+                jobParams.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+            });
+            flinkConf.toMap().entrySet().forEach((entry) -> {
+                jobParams.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+            });
+            ParameterTool params = ParameterTool.fromMap(jobParams);
+            executionEnvironment.getConfig().setGlobalJobParameters(params);
         }
         return executionEnvironment;
     }

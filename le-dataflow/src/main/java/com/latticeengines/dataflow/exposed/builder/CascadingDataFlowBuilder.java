@@ -966,7 +966,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             log.info("Flink mode: " + flinkMode);
             if ("yarn".endsWith(flinkMode)) {
                 String queue = dataFlowCtx.getProperty(DataFlowProperty.QUEUE, String.class);
-                String name = "Flink Cluster ["
+                String name = "Flink Session ["
                         + dataFlowCtx.getProperty(DataFlowProperty.FLOWNAME, String.class, "Cascading Dataflow") + "]";
                 YarnConfiguration yarnConf = (YarnConfiguration) config;
                 org.apache.flink.configuration.Configuration flinkConf = dataFlowCtx
