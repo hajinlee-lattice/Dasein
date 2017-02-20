@@ -165,7 +165,7 @@ public class SqlServerHelper implements DbHelper {
         }
 
         String sql;
-        if (Boolean.TRUE.equals(context.getInput().getFetchOnly())) {
+        if (context.getInput().getFetchOnly()) {
             Set<String> latticeAccountIds = new HashSet<>();
             for (InternalOutputRecord record : context.getInternalResults()) {
                 if (StringUtils.isNotEmpty(record.getLatticeAccountId())) {

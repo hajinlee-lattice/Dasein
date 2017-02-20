@@ -72,7 +72,7 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("RequestSource")
     private String requestSource;   // scoring|modeling
 
-    // if not provided, pick latest
+    // legacy configuration to be removed
     @JsonIgnore
     private static final String predefinedVersion = "1.0";
 
@@ -110,13 +110,13 @@ public class MatchInput implements Fact, Dimension {
     private Boolean excludeUnmatchedWithPublicDomain;
 
     @JsonProperty("PublicDomainAsNormalDomain")
-    private Boolean publicDomainAsNormalDomain;
+    private boolean publicDomainAsNormalDomain;
 
     @JsonProperty("FetchOnly")
-    private Boolean fetchOnly;
+    private boolean fetchOnly;
 
     @JsonProperty("SkipKeyResolution")
-    private Boolean skipKeyResolution;
+    private boolean skipKeyResolution;
 
     // if not provided, first check DnB cache before going to DnB api
     @JsonProperty("UseDnBCache")
@@ -138,6 +138,9 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("DisableDunsValidation")
     private boolean disableDunsValidation;
+
+    @JsonProperty("PrepareForDedupe")
+    private boolean prepareForDedupe;
 
     // use cascading bulk match
     @JsonProperty("BulkOnly")
@@ -181,28 +184,36 @@ public class MatchInput implements Fact, Dimension {
         this.excludeUnmatchedWithPublicDomain = Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
     }
 
-    public Boolean getFetchOnly() {
-        return Boolean.TRUE.equals(fetchOnly);
+    public boolean getFetchOnly() {
+        return fetchOnly;
     }
 
-    public void setFetchOnly(Boolean fetchOnly) {
+    public void setFetchOnly(boolean fetchOnly) {
         this.fetchOnly = fetchOnly;
     }
 
-    public Boolean getPublicDomainAsNormalDomain() {
-        return Boolean.TRUE.equals(publicDomainAsNormalDomain);
+    public boolean isPublicDomainAsNormalDomain() {
+        return publicDomainAsNormalDomain;
     }
 
-    public void setPublicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
+    public void setPublicDomainAsNormalDomain(boolean publicDomainAsNormalDomain) {
         this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
     }
 
-    public Boolean getSkipKeyResolution() {
+    public boolean isSkipKeyResolution() {
         return skipKeyResolution;
     }
 
-    public void setSkipKeyResolution(Boolean skipKeyResolution) {
+    public void setSkipKeyResolution(boolean skipKeyResolution) {
         this.skipKeyResolution = skipKeyResolution;
+    }
+
+    public boolean isPrepareForDedupe() {
+        return prepareForDedupe;
+    }
+
+    public void setPrepareForDedupe(boolean prepareForDedupe) {
+        this.prepareForDedupe = prepareForDedupe;
     }
 
     public String getDecisionGraph() {

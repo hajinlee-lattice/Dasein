@@ -109,7 +109,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
                     input.getFields().size(), keyPositionMap, domainSet, nameLocationSet,
-                    input.getExcludeUnmatchedWithPublicDomain(), input.getPublicDomainAsNormalDomain());
+                    input.getExcludeUnmatchedWithPublicDomain(), input.isPublicDomainAsNormalDomain());
             if (record != null) {
                 record.setColumnMatched(new ArrayList<>());
                 records.add(record);

@@ -192,6 +192,8 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         }
 
         public Builder skipDedupStep(boolean skipDedupStep) {
+            match.setSkipDedupe(skipDedupStep);
+            matchResult.setSkipDedupe(skipDedupStep);
             dedupEventTable.setSkipStep(skipDedupStep);
             model.addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain, !skipDedupStep);
             return this;

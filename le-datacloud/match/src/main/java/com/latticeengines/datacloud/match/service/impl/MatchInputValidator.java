@@ -90,7 +90,7 @@ public class MatchInputValidator {
 
     private static Map<MatchKey, List<String>> resolveKeyMap(MatchInput input) {
         Map<MatchKey, List<String>> keyMap = input.getKeyMap();
-        if (!Boolean.TRUE.equals(input.getSkipKeyResolution())) {
+        if (!input.isSkipKeyResolution()) {
             keyMap = MatchKeyUtils.resolveKeyMap(input.getFields());
             if (input.getKeyMap() != null && !input.getKeyMap().keySet().isEmpty()) {
                 for (Map.Entry<MatchKey, List<String>> entry : input.getKeyMap().entrySet()) {

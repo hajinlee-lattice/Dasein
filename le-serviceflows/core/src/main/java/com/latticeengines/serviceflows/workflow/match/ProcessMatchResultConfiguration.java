@@ -5,20 +5,29 @@ import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfigurati
 
 public class ProcessMatchResultConfiguration extends DataFlowStepConfiguration {
 
+    @JsonProperty("data_cloud_version")
     private String dataCloudVersion;
+
+    @JsonProperty("skip_dedupe")
+    private boolean skipDedupe;
 
     public ProcessMatchResultConfiguration() {
         setBeanName("parseMatchResult");
     }
 
-    @JsonProperty("data_cloud_version")
     public String getDataCloudVersion() {
         return dataCloudVersion;
     }
 
-    @JsonProperty("data_cloud_version")
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
     }
 
+    public boolean isSkipDedupe() {
+        return skipDedupe;
+    }
+
+    public void setSkipDedupe(boolean skipDedupe) {
+        this.skipDedupe = skipDedupe;
+    }
 }

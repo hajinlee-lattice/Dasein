@@ -389,11 +389,7 @@ public class Node {
     }
 
     public String[] getFieldNamesArray() {
-        List<String> names = new ArrayList<>();
-        List<FieldMetadata> fields = getSchema();
-        for (FieldMetadata field : fields) {
-            names.add(field.getFieldName());
-        }
+        List<String> names = getFieldNames();
         return names.toArray(new String[names.size()]);
     }
 

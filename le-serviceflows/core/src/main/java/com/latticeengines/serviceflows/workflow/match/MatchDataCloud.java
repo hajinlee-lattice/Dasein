@@ -173,14 +173,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             }
         }
         matchInput.setKeyMap(matchInputKeys);
-
-        switch (configuration.getMatchJoinType()) {
-        case OUTER_JOIN:
-            break;
-        default:
-            throw new UnsupportedOperationException(
-                    "Unknown join type " + configuration.getMatchJoinType());
-        }
+        matchInput.setPrepareForDedupe(!getConfiguration().isSkipDedupe());
 
         String avroDir = ExtractUtils.getSingleExtractPath(yarnConfiguration, preMatchEventTable);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();

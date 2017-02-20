@@ -176,12 +176,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE)
                 //
-                .matchClientDocument(matchClientDocument)
-                //
-                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
-                //
-                .matchDestTables("DerivedColumnsCache")
-                //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion())
                 // null
                 // means
@@ -216,7 +210,12 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .runTimeParams(parameters.runTimeParams) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
-                .bucketMetadata(null);
+                .bucketMetadata(null)
+                //
+                // TODO: legacy SQL based match engine configurations
+                .matchClientDocument(matchClientDocument)
+                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
+                .matchDestTables("DerivedColumnsCache");
 
         if (parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) {
             builder.dedupTargetTableName(sourceFile.getTableName() + "_deduped");

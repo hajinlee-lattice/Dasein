@@ -262,7 +262,7 @@ public class ProcessorContext {
 
         returnUnmatched = true;
         excludeUnmatchedWithPublicDomain = jobConfiguration.getMatchInput().getExcludeUnmatchedWithPublicDomain();
-        publicDomainAsNormalDomain = jobConfiguration.getMatchInput().getPublicDomainAsNormalDomain();
+        publicDomainAsNormalDomain = jobConfiguration.getMatchInput().isPublicDomainAsNormalDomain();
         HdfsPodContext.changeHdfsPodId(podId);
         log.info("Use PodId=" + podId);
 

@@ -57,6 +57,8 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     private String sourceSchemaInterpretation;
 
+    @JsonProperty("skip_dedupe")
+    private boolean skipDedupe;
 
     @JsonProperty("db_url")
     public String getDbUrl() {
@@ -226,5 +228,13 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("source_schema_interpretation")
     public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {
         this.sourceSchemaInterpretation = sourceSchemaInterpretation;
+    }
+
+    public boolean isSkipDedupe() {
+        return skipDedupe;
+    }
+
+    public void setSkipDedupe(boolean skipDedupe) {
+        this.skipDedupe = skipDedupe;
     }
 }
