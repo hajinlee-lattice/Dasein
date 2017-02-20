@@ -197,6 +197,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         fms.add(new FieldMetadata(AccountMasterSeedDomainRankBuffer.MIN_RANK_DOMAIN, String.class));
         Node minRankDomain = hasAlexaRankAndLoc.groupByAndBuffer(new FieldList(DUNS), buffer, fms);
         minRankDomain.renamePipe("minRankDomain");
+        hasAlexaRankAndLoc.renamePipe("hasAlexaRankAndLoc");
         Node popularDomain = hasAlexaRankAndLoc.leftOuterJoin(new FieldList(DUNS), minRankDomain, new FieldList(DUNS));
         Fields joinNodeFields = new Fields(
                 popularDomain.getFieldNames().toArray(new String[popularDomain.getFieldNames().size()]));
