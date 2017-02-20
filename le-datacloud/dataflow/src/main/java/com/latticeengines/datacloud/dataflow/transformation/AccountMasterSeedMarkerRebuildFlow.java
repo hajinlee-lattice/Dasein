@@ -158,9 +158,8 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
                         new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN));
 
         // one of them apply DomainRankBuffer
-        Fields fieldDeclarationExpanded = new Fields(
-                hasAlexaRankAndLoc.getFieldNames().toArray(new String[hasAlexaRankAndLoc.getFieldNames().size()]));
-        AccountMasterSeedDomainRankBuffer buffer = new AccountMasterSeedDomainRankBuffer(fieldDeclarationExpanded);
+        AccountMasterSeedDomainRankBuffer buffer = new AccountMasterSeedDomainRankBuffer(
+                new Fields(DUNS, AccountMasterSeedDomainRankBuffer.MIN_RANK_DOMAIN));
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(DUNS, String.class));
         fms.add(new FieldMetadata(AccountMasterSeedDomainRankBuffer.MIN_RANK_DOMAIN, String.class));
@@ -169,8 +168,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         Node popularDomain = hasAlexaRankAndLoc.leftOuterJoin(new FieldList(DUNS), minRankDomain, new FieldList(DUNS));
         Fields joinNodeFields = new Fields(
                 popularDomain.getFieldNames().toArray(new String[popularDomain.getFieldNames().size()]));
-        popularDomain = popularDomain.groupByAndBuffer(new FieldList(DUNS),
-                new FillPrimaryDomainBuffer(joinNodeFields)) //
+        popularDomain = popularDomain.groupByAndBuffer(new FieldList(DUNS), new FillPrimaryDomainBuffer(joinNodeFields)) //
                 .retain(new FieldList(hasAlexaRankAndLoc.getFieldNames()));
 
         // final merge
