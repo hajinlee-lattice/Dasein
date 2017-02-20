@@ -84,6 +84,7 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private void returnTuplesAsIs(BufferCall bufferCall) {
         Iterator<TupleEntry> iter = bufferCall.getArgumentsIterator();
         while (iter.hasNext()) {
