@@ -1,9 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import cascading.flow.FlowProcess;
@@ -25,6 +23,8 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
     private int domainLoc;
     private int latticeIdLoc;
 
+    // TODO: this buffer probably need to change: keep at lease one non-orphan for each DUNS
+    // if not, the current impl can be changed to a function
     public AccountMasterSeedOrphanRecordWithDomainBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
@@ -33,24 +33,20 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
     @SuppressWarnings("unchecked")
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
         Iterator<TupleEntry> argumentsInGroup = bufferCall.getArgumentsIterator();
-        List<Tuple> tuples = new ArrayList<>();
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
-            tuples.add(arguments.getTupleCopy());
-        }
-
-        if (tuples.size() == 1) {
-            bufferCall.getOutputCollector().add(tuples.get(0));
-        } else {
-            for (Tuple tuple : tuples) {
-                Integer currentNumberOfLocations = tuple.getInteger(namePositionMap.get(LE_NUMBER_OF_LOCATIONS));
-
-                if (currentNumberOfLocations != null && currentNumberOfLocations.intValue() <= 0) {
+            Object value = arguments.getObject(LE_NUMBER_OF_LOCATIONS);
+            if (value != null) {
+                int currentNumberOfLocations = arguments.getInteger(LE_NUMBER_OF_LOCATIONS);
+                if (currentNumberOfLocations == 0) {
+                    bufferCall.getOutputCollector().add(arguments);
+                } else {
+                    Tuple tuple = arguments.getTupleCopy();
                     tuple.setInteger(namePositionMap.get(FLAG_DROP_ORPHAN_ENTRY), 1);
                     bufferCall.getOutputCollector().add(tuple);
-                    continue;
                 }
-                bufferCall.getOutputCollector().add(tuple);
+            } else {
+                bufferCall.getOutputCollector().add(arguments);
             }
         }
     }

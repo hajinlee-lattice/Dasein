@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -12,6 +13,7 @@ import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedDomainRankBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedOrphanRecordSmallCompaniesBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedOrphanRecordWithDomainBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.FillPrimaryDomainBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -58,9 +60,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         Node node = accountMasterIntermediateSeed.filter(DUNS + " != null", new FieldList(DUNS));
 
         // one of them do many things
-        node = node.discard(new FieldList(FLAG_DROP_OOB_ENTRY));
         node = markOOBEntries(node);
-        node = node.retain(new FieldList(fieldNames));
         node = markLessPopularDomainsForDUNS(node, alexaMostRecentNode);
         node = markOrphanRecordWithDomain(node, fieldDeclaration);
         node = markRecordsWithIncorrectIndustryRevenueEmployeeData(node);
@@ -76,7 +76,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         accountMasterIntermediateSeed = accountMasterIntermediateSeed.addColumnWithFixedValue(FLAG_DROP_OOB_ENTRY, 0,
                 Integer.class);
         accountMasterIntermediateSeed = accountMasterIntermediateSeed.addColumnWithFixedValue(FLAG_DROP_SMALL_BUSINESS,
-                0, Integer.class);
+                1, Integer.class);
         accountMasterIntermediateSeed = accountMasterIntermediateSeed.addColumnWithFixedValue(FLAG_DROP_INCORRECT_DATA,
                 0, Integer.class);
         accountMasterIntermediateSeed = accountMasterIntermediateSeed
@@ -96,9 +96,9 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
                         new FieldList(LE_EMPLOYEE_RANGE));
         Node remainingRecordNode = node//
                 .filter(LE_EMPLOYEE_RANGE + " == null || " //
-                                + "(!" + LE_EMPLOYEE_RANGE + ".equals(\"0\") && " //
-                                + "!" + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") && "//
-                                + "!" + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
+                        + "(!" + LE_EMPLOYEE_RANGE + ".equals(\"0\") && " //
+                        + "!" + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") && "//
+                        + "!" + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
                         new FieldList(LE_EMPLOYEE_RANGE));
 
         // apply buffer to one of them
@@ -120,8 +120,8 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         // split by domain and loc
         Node checkOrphan = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
                 LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
-        Node notCheckOrphan = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)", DOMAIN,
-                LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
+        Node notCheckOrphan = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)",
+                DOMAIN, LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
 
         // apply buffer
         AccountMasterSeedOrphanRecordWithDomainBuffer buffer = new AccountMasterSeedOrphanRecordWithDomainBuffer(
@@ -140,8 +140,8 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         // split by domain and loc
         Node toJoinAlexa = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
                 LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
-        Node notToJoinAlexa = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)", DOMAIN,
-                LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
+        Node notToJoinAlexa = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)",
+                DOMAIN, LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
 
         // on of them join with alexa
         alexaMostRecentNode = alexaMostRecentNode.retain(new FieldList(URL_FIELD, ALEXA_RANK));
@@ -161,7 +161,17 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         Fields fieldDeclarationExpanded = new Fields(
                 hasAlexaRankAndLoc.getFieldNames().toArray(new String[hasAlexaRankAndLoc.getFieldNames().size()]));
         AccountMasterSeedDomainRankBuffer buffer = new AccountMasterSeedDomainRankBuffer(fieldDeclarationExpanded);
-        Node popularDomain = hasAlexaRankAndLoc.groupByAndBuffer(new FieldList(DUNS), buffer);
+        List<FieldMetadata> fms = new ArrayList<>();
+        fms.add(new FieldMetadata(DUNS, String.class));
+        fms.add(new FieldMetadata(AccountMasterSeedDomainRankBuffer.MIN_RANK_DOMAIN, String.class));
+        Node minRankDomain = hasAlexaRankAndLoc.groupByAndBuffer(new FieldList(DUNS), buffer, fms);
+        minRankDomain.renamePipe("minRankDomain");
+        Node popularDomain = hasAlexaRankAndLoc.leftOuterJoin(new FieldList(DUNS), minRankDomain, new FieldList(DUNS));
+        Fields joinNodeFields = new Fields(
+                popularDomain.getFieldNames().toArray(new String[popularDomain.getFieldNames().size()]));
+        popularDomain = popularDomain.groupByAndBuffer(new FieldList(DUNS),
+                new FillPrimaryDomainBuffer(joinNodeFields)) //
+                .retain(new FieldList(hasAlexaRankAndLoc.getFieldNames()));
 
         // final merge
         notHasAlexaAndLoc = notHasAlexaAndLoc.retain(fieldsInNode);

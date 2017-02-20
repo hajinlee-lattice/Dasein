@@ -1,10 +1,10 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -29,43 +29,55 @@ public class AccountMasterSeedOrphanRecordSmallCompaniesBuffer extends BaseOpera
 
     @SuppressWarnings("unchecked")
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
-        Iterator<TupleEntry> argumentsInGroup = bufferCall.getArgumentsIterator();
-        List<Tuple> tuples = new ArrayList<>();
-        while (argumentsInGroup.hasNext()) {
-            TupleEntry arguments = argumentsInGroup.next();
-            tuples.add(arguments.getTupleCopy());
-        }
-
-        if (tuples.size() == 1) {
-            bufferCall.getOutputCollector().add(tuples.get(0));
+        String duns = bufferCall.getGroup().getString("DUNS");
+        if (StringUtils.isBlank(duns)) {
+            returnTuplesAsIs(bufferCall);
         } else {
-            Tuple mostPopulatedTuple = null;
-            int maxNonNullFieldsSize = 0;
-            for (Tuple tuple : tuples) {
-                int fieldsSize = tuple.size();
-                int nonNullFieldsSize = 0;
-                for (int i = 0; i < fieldsSize; i++) {
-                    if (tuple.getObject(i) != null) {
-                        nonNullFieldsSize++;
-                    }
-                }
-
+            Iterator<TupleEntry> argumentsInGroup = bufferCall.getArgumentsIterator();
+            TupleEntry mostPopulatedTupleEntry = null;
+            int maxNonNullFieldsSize = -1;
+            while (argumentsInGroup.hasNext()) {
+                TupleEntry arguments = argumentsInGroup.next();
+                int nonNullFieldsSize = countNotNullFields(arguments);
                 if (maxNonNullFieldsSize < nonNullFieldsSize) {
                     maxNonNullFieldsSize = nonNullFieldsSize;
-                    mostPopulatedTuple = tuple;
+                    // release previous candidate
+                    if (mostPopulatedTupleEntry != null) {
+                        bufferCall.getOutputCollector().add(mostPopulatedTupleEntry);
+                    }
+                    // update candidate
+                    mostPopulatedTupleEntry = arguments;
+                } else {
+                    // if not a candidate, directly output
+                    bufferCall.getOutputCollector().add(arguments);
                 }
             }
-            bufferCall.getOutputCollector().add(mostPopulatedTuple);
-
-            for (Tuple tuple : tuples) {
-                if (tuple == mostPopulatedTuple) {
-                    continue;
-                }
-
-                tuple.setInteger(namePositionMap.get(FLAG_DROP_SMALL_BUSINESS), 1);
+            if (mostPopulatedTupleEntry != null) {
+                // change flag and release most populated tuple
+                Tuple tuple = mostPopulatedTupleEntry.getTupleCopy();
+                tuple.setInteger(namePositionMap.get(FLAG_DROP_SMALL_BUSINESS), 0);
                 bufferCall.getOutputCollector().add(tuple);
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void returnTuplesAsIs(BufferCall bufferCall) {
+        Iterator<TupleEntry> iter = bufferCall.getArgumentsIterator();
+        while (iter.hasNext()) {
+            bufferCall.getOutputCollector().add(iter.next());
+        }
+    }
+
+    private int countNotNullFields(TupleEntry tuple) {
+        int fieldsSize = tuple.size();
+        int nonNullFieldsSize = 0;
+        for (int i = 0; i < fieldsSize; i++) {
+            if (tuple.getObject(i) != null) {
+                nonNullFieldsSize++;
+            }
+        }
+        return nonNullFieldsSize;
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
