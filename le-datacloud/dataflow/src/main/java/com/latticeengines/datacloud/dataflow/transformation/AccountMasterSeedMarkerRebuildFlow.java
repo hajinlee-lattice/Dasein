@@ -68,11 +68,11 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
         node = node.renamePipe("hasduns").discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
         node = node //
-                .innerJoin(new FieldList(LATTICE_ID), oobMkrd, new FieldList(LATTICE_ID)) //
-                .innerJoin(new FieldList(LATTICE_ID), alexaMrkd, new FieldList(LATTICE_ID)) //
-                .innerJoin(new FieldList(LATTICE_ID), orphanMrkd, new FieldList(LATTICE_ID)) //
                 .innerJoin(new FieldList(LATTICE_ID), badDataMrkd, new FieldList(LATTICE_ID)) //
+                .innerJoin(new FieldList(LATTICE_ID), oobMkrd, new FieldList(LATTICE_ID)) //
+                .innerJoin(new FieldList(LATTICE_ID), orphanMrkd, new FieldList(LATTICE_ID)) //
                 .innerJoin(new FieldList(LATTICE_ID), smBusiMrkd, new FieldList(LATTICE_ID)) //
+                .innerJoin(new FieldList(LATTICE_ID), alexaMrkd, new FieldList(LATTICE_ID)) //
                 .retain(finalFields);
 
         // the other directly populate default values
