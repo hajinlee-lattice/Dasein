@@ -71,6 +71,7 @@ public class FlinkYarnCluster {
         setConfIfNotAlready(flinkConf, "akka.ask.timeout", "30s");
         setConfIfNotAlready(flinkConf, "akka.lookup.timeout", "30s");
         setConfIfNotAlready(flinkConf, "restart-strategy.fixed-delay.attempts", "5");
+        setConfIfNotAlready(flinkConf, "restart-strategy.fixed-delay.delay", "10s");
 
         AbstractYarnClusterDescriptor yarnClusterDescriptor = new FlinkYarnClusterDescriptor(yarnConf);
         // queue
