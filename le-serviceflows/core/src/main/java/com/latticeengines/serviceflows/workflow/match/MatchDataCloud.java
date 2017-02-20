@@ -136,18 +136,21 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         if (configuration.getSourceSchemaInterpretation() != null
                 && configuration.getSourceSchemaInterpretation()
                         .equals(SchemaInterpretation.SalesforceAccount.toString())) {
-            if (preMatchEventTable.getAttribute("Website") != null && preMatchEventTable
-                    .getAttribute("Website").getApprovedUsage() != null && preMatchEventTable
-                    .getAttribute("Website").getApprovedUsage().contains("Ignored")) {
+            if (preMatchEventTable.getAttribute("Website") != null
+                    && preMatchEventTable.getAttribute("Website").getApprovedUsage() != null
+                    && preMatchEventTable.getAttribute("Website").getApprovedUsage()
+                            .contains("Ignored")) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
                 matchInputKeys.put(MatchKey.Domain, Collections.singletonList("Website"));
             }
-        } else if (configuration.getSourceSchemaInterpretation()
-                .equals(SchemaInterpretation.SalesforceLead.toString())) {
-            if (preMatchEventTable.getAttribute("Email") != null&& preMatchEventTable
-                    .getAttribute("Email").getApprovedUsage() != null && preMatchEventTable
-                    .getAttribute("Email").getApprovedUsage().contains("Ignored")) {
+        } else if (configuration.getSourceSchemaInterpretation() != null
+                && configuration.getSourceSchemaInterpretation()
+                        .equals(SchemaInterpretation.SalesforceLead.toString())) {
+            if (preMatchEventTable.getAttribute("Email") != null
+                    && preMatchEventTable.getAttribute("Email").getApprovedUsage() != null
+                    && preMatchEventTable.getAttribute("Email").getApprovedUsage()
+                            .contains("Ignored")) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
                 matchInputKeys.put(MatchKey.Domain, Collections.singletonList("Email"));

@@ -82,6 +82,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
         public Builder skipMatchingStep(boolean skipMatchingStep) {
             match.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);

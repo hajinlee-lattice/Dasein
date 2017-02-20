@@ -151,6 +151,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            scoreWorkflowConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
             scoreWorkflowConfigurationBuilder.bucketMetadata(bucketMetadata);
             return this;

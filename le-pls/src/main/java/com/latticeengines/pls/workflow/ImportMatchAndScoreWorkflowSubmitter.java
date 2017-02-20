@@ -134,6 +134,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort)//
                 .reportNamePrefix(sourceFile.getName() + "_Report") //
                 .modelId(modelId) //
+                .sourceSchemaInterpretation(modelSummary.getSourceSchemaInterpretation()) //
                 .inputTableName(sourceFile.getTableName()) //
                 .skipMatchingStep(modelSummary.getModelSummaryConfiguration()
                         .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
