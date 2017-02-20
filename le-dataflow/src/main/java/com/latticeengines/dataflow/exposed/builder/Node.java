@@ -388,6 +388,15 @@ public class Node {
         return names;
     }
 
+    public String[] getFieldNamesArray() {
+        List<String> names = new ArrayList<>();
+        List<FieldMetadata> fields = getSchema();
+        for (FieldMetadata field : fields) {
+            names.add(field.getFieldName());
+        }
+        return names.toArray(new String[names.size()]);
+    }
+
     public String getIdentifier() {
         return identifier;
     }
