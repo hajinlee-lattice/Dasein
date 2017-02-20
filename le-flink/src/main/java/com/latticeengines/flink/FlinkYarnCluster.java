@@ -7,8 +7,10 @@ import static com.latticeengines.flink.FlinkConstants.TM_SLOTS;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -37,6 +39,15 @@ public class FlinkYarnCluster {
     private static int parallelism = 1;
     private static YarnConfiguration yarnConf;
     private static Configuration flinkConf;
+
+    private static final String YARN_DYNAMIC_PROPERTIES_SEPARATOR = "@@"; // this
+                                                                          // has
+                                                                          // to
+                                                                          // be
+                                                                          // a
+                                                                          // regex
+                                                                          // for
+                                                                          // String.split()
 
     public static AbstractYarnClusterDescriptor createDescriptor(YarnConfiguration yarnConf, Configuration flinkConf,
             String appName, String queue) {
@@ -89,6 +100,13 @@ public class FlinkYarnCluster {
         }
         yarnClusterDescriptor.setConfigurationDirectory(new File(configFile.getAbsolutePath()).getParent());
         yarnClusterDescriptor.setConfigurationFilePath(new Path(configFile.getPath()));
+
+        List<String> dynamicOpts = new ArrayList<>();
+        flinkConf.toMap().entrySet().forEach(entry -> {
+            dynamicOpts.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
+        });
+        yarnClusterDescriptor
+                .setDynamicPropertiesEncoded(StringUtils.join(dynamicOpts, YARN_DYNAMIC_PROPERTIES_SEPARATOR));
 
         FlinkYarnCluster.yarnConf = yarnConf;
         FlinkYarnCluster.flinkConf = flinkConf;
