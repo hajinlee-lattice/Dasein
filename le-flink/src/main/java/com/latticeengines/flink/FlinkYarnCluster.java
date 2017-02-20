@@ -66,11 +66,18 @@ public class FlinkYarnCluster {
         flinkConf.setString(TM_SLOTS, String.valueOf(tmSlots));
         flinkConf.setString(NUM_CONTAINERS, String.valueOf(numContainers));
 
-        int numBuffers = Math.max(tmSlots * tmSlots * numContainers * 4, 1024);
-        flinkConf.setString("taskmanager.network.numberOfBuffers", String.valueOf(numBuffers));
+        if (!flinkConf.containsKey("taskmanager.network.numberOfBuffers")) {
+            int numBuffers = Math.max(tmSlots * tmSlots * numContainers * 4, 1024);
+            flinkConf.setString("taskmanager.network.numberOfBuffers", String.valueOf(numBuffers));
+        }
 
-        flinkConf.setString("akka.ask.timeout", "30s");
-        flinkConf.setString("akka.lookup.timeout", "30s");
+        if (!flinkConf.containsKey("akka.ask.timeout")) {
+            flinkConf.setString("akka.ask.timeout", "30s");
+        }
+
+        if (!flinkConf.containsKey("akka.lookup.timeout")) {
+            flinkConf.setString("akka.lookup.timeout", "30s");
+        }
 
         AbstractYarnClusterDescriptor yarnClusterDescriptor = new FlinkYarnClusterDescriptor(yarnConf);
         // queue
