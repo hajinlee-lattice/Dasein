@@ -67,6 +67,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         node = markOrphanRecordsForSmallBusiness(node, fieldDeclaration);
 
         // merge back
+        nodeWithNullDUNS.renamePipe("nullduns");
         node.renamePipe("mergeFinalResult");
         return nodeWithNullDUNS.merge(node).retain(new FieldList(fieldNames));
     }
@@ -108,20 +109,29 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         // merge back
         orphanRecordWithDomainNode.renamePipe("checkorphansmallbusi");
         remainingRecordNode.renamePipe("notcheckorphansmallbusi");
-        Node toReturn = remainingRecordNode.merge(orphanRecordWithDomainNode);
-        return toReturn.renamePipe("markOrphanRecordsForSmallBusiness");
+        return remainingRecordNode.merge(orphanRecordWithDomainNode);
     }
 
     private Node markRecordsWithIncorrectIndustryRevenueEmployeeData(Node node) {
-        node.renamePipe("wrongIndMkrd");
         return node;
     }
 
     private Node markOrphanRecordWithDomain(Node node, Fields fieldDeclaration) {
+        // split by domain and loc
+        Node checkOrphan = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
+                LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
+        Node notCheckOrphan = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)", DOMAIN,
+                LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
+
+        // apply buffer
         AccountMasterSeedOrphanRecordWithDomainBuffer buffer = new AccountMasterSeedOrphanRecordWithDomainBuffer(
                 fieldDeclaration);
-        Node checkOrphan = node.groupByAndBuffer(new FieldList(COUNTRY, DOMAIN), buffer);
-        return checkOrphan.renamePipe("orphanWithDomMkrd");
+        checkOrphan = checkOrphan.groupByAndBuffer(new FieldList(COUNTRY, DOMAIN), buffer);
+
+        // merge
+        checkOrphan.renamePipe("checkorphan");
+        notCheckOrphan.renamePipe("notcheckorphan");
+        return notCheckOrphan.merge(checkOrphan);
     }
 
     private Node markLessPopularDomainsForDUNS(Node node, Node alexaMostRecentNode) {
@@ -159,10 +169,9 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         notToJoinAlexa.renamePipe("notjoinalexa");
         popularDomain.renamePipe("popdomainbyalexa");
         notHasAlexaAndLoc.renamePipe("nothasalexarank");
-        Node toReturn = notHasAlexaAndLoc//
+        return notHasAlexaAndLoc//
                 .merge(popularDomain)//
                 .merge(notToJoinAlexa);
-        return toReturn.renamePipe("markLessPopularDomainsForDUNS");
     }
 
     private Node markOOBEntries(Node node) {
@@ -172,7 +181,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         node = node.addFunction(markExpression + " ? 1 : 0 ", //
                 new FieldList(OUT_OF_BUSINESS_INDICATOR), //
                 new FieldMetadata(FLAG_DROP_OOB_ENTRY, Integer.class));
-        return node.renamePipe("markOOBEntries");
+        return node;
     }
 
     @Override
