@@ -92,7 +92,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiDeploymentTestN
 
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void submitDataFlow() throws Exception {
         DataFlowConfiguration config = getDataFlowConfiguration();
         AppSubmission submission = submitDataFlow(config);
@@ -125,6 +125,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiDeploymentTestN
         config.setName("DataFlowServiceImpl_submitDataFlow");
         config.setCustomerSpace(CUSTOMERSPACE);
         config.setDataFlowBeanName("createEventTable");
+        config.setTargetTableName("DataFlowServiceImplTarget");
 
         List<DataFlowSource> sources = new ArrayList<>();
         sources.add(createDataFlowSource("Account"));
