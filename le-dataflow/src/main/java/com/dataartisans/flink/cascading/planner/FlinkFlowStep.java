@@ -16,6 +16,8 @@
 
 package com.dataartisans.flink.cascading.planner;
 
+import static cascading.flow.FlowRuntimeProps.GATHER_PARTITIONS;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.FlowRuntimeProps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.flink.api.common.Plan;
@@ -390,7 +391,7 @@ public class FlinkFlowStep extends BaseFlowStep<Configuration> {
 		Configuration sinkConfig = this.getNodeConfig(node);
 		tap.sinkConfInit(flowProcess, sinkConfig);
 
-		int desiredDop = FlowRuntimeProps.flowRuntimeProps().getGatherPartitions();
+		Integer desiredDop = Integer.valueOf(getConfig().get(GATHER_PARTITIONS, String.valueOf(env.getParallelism())));
 		int inputDop = ((Operator)input).getParallelism();
 		int dop;
 
@@ -412,6 +413,8 @@ public class FlinkFlowStep extends BaseFlowStep<Configuration> {
 				dop = inputDop;
 			}
 		}
+
+		LOG.info("Set sink parallelism to " + dop);
 
 		input
 				.output(new TapOutputFormat(node))
