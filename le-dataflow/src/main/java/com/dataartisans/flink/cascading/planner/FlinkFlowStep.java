@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.FlowRuntimeProps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.flink.api.common.Plan;
@@ -389,7 +390,7 @@ public class FlinkFlowStep extends BaseFlowStep<Configuration> {
 		Configuration sinkConfig = this.getNodeConfig(node);
 		tap.sinkConfInit(flowProcess, sinkConfig);
 
-		int desiredDop = tap.getScheme().getNumSinkParts();
+		int desiredDop = FlowRuntimeProps.flowRuntimeProps().getGatherPartitions();
 		int inputDop = ((Operator)input).getParallelism();
 		int dop;
 
