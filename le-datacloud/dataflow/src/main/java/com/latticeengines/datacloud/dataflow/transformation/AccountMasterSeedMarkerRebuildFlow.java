@@ -66,7 +66,8 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         allFields.add(FLAG_DROP_ORPHAN_ENTRY);
         FieldList finalFields = new FieldList(allFields.toArray(new String[allFields.size()]));
 
-        node = node.discard(new FieldList(LE_IS_PRIMARY_DOMAIN)) //
+        node = node.renamePipe("hasduns").discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
+        node = node //
                 .innerJoin(new FieldList(LATTICE_ID), oobMkrd, new FieldList(LATTICE_ID)) //
                 .innerJoin(new FieldList(LATTICE_ID), alexaMrkd, new FieldList(LATTICE_ID)) //
                 .innerJoin(new FieldList(LATTICE_ID), orphanMrkd, new FieldList(LATTICE_ID)) //
