@@ -123,7 +123,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .targetPath(targetPath) //
                 .partitions(cascadingPartitions) //
                 .jobProperties(getJobProperties(input)) //
-                .engine("MR") //
+                .engine("TEZ") //
                 .queue(queueName) //
                 .setBeanName("cascadingBulkMatchDataflow");
 
