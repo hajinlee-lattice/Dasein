@@ -66,18 +66,11 @@ public class FlinkYarnCluster {
         flinkConf.setString(TM_SLOTS, String.valueOf(tmSlots));
         flinkConf.setString(NUM_CONTAINERS, String.valueOf(numContainers));
 
-        if (!flinkConf.containsKey("taskmanager.network.numberOfBuffers")) {
-            int numBuffers = Math.max(tmSlots * tmSlots * numContainers * 4, 1024);
-            flinkConf.setString("taskmanager.network.numberOfBuffers", String.valueOf(numBuffers));
-        }
-
-        if (!flinkConf.containsKey("akka.ask.timeout")) {
-            flinkConf.setString("akka.ask.timeout", "30s");
-        }
-
-        if (!flinkConf.containsKey("akka.lookup.timeout")) {
-            flinkConf.setString("akka.lookup.timeout", "30s");
-        }
+        int numBuffers = Math.max(tmSlots * tmSlots * numContainers * 4, 1024);
+        setConfIfNotAlready(flinkConf, "taskmanager.network.numberOfBuffers", String.valueOf(numBuffers));
+        setConfIfNotAlready(flinkConf, "akka.ask.timeout", "30s");
+        setConfIfNotAlready(flinkConf, "akka.lookup.timeout", "30s");
+        setConfIfNotAlready(flinkConf, "restart-strategy.fixed-delay.attempts", "5");
 
         AbstractYarnClusterDescriptor yarnClusterDescriptor = new FlinkYarnClusterDescriptor(yarnConf);
         // queue
@@ -176,6 +169,12 @@ public class FlinkYarnCluster {
             } catch (Exception e) {
                 log.error("Failed to shutdown yarn application", e);
             }
+        }
+    }
+
+    private static void setConfIfNotAlready(Configuration flinkConf, String key, String value) {
+        if (!flinkConf.containsKey(key)) {
+            flinkConf.setString(key, value);
         }
     }
 
