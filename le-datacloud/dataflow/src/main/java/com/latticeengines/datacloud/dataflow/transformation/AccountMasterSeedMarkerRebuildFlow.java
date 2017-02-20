@@ -78,8 +78,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         // the other directly populate default values
         nodeWithNullDUNS = addFlagColumnsWithDefaultValues(nodeWithNullDUNS);
 
-        // merge back
-        nodeWithNullDUNS.renamePipe("nullduns");
+        // merge
         return nodeWithNullDUNS.merge(node);
     }
 
@@ -121,8 +120,6 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         orphanRecordWithDomainNode = orphanRecordWithDomainNode.groupByAndBuffer(new FieldList(DUNS), buffer);
 
         // merge back
-        orphanRecordWithDomainNode.renamePipe("checkorphansmallbusi");
-        remainingRecordNode.renamePipe("notcheckorphansmallbusi");
         Node result = remainingRecordNode.merge(orphanRecordWithDomainNode);
         return result.retain(new FieldList(LATTICE_ID, FLAG_DROP_SMALL_BUSINESS));
     }
@@ -154,8 +151,6 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
                 .retain(new FieldList(LATTICE_ID, FLAG_DROP_ORPHAN_ENTRY));
 
         // merge
-        checkOrphan.renamePipe("checkorphan");
-        notCheckOrphan.renamePipe("notcheckorphan");
         return notCheckOrphan.merge(checkOrphan);
     }
 
@@ -164,7 +159,6 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         node = node.retain(new FieldList(LATTICE_ID, DUNS, DOMAIN, LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_DOMAIN)) //
                 .addColumnWithFixedValue(FLAG_DROP_LESS_POPULAR_DOMAIN, null, String.class);
 
-        FieldList fieldsInNode = new FieldList(node.getFieldNames());
         // split by domain and loc
         Node toJoinAlexa = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
                 LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
@@ -196,8 +190,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         fms.add(new FieldMetadata(DUNS, String.class));
         fms.add(new FieldMetadata(AccountMasterSeedDomainRankBuffer.MIN_RANK_DOMAIN, String.class));
         Node minRankDomain = hasAlexaRankAndLoc.groupByAndBuffer(new FieldList(DUNS), buffer, fms);
-        minRankDomain.renamePipe("minRankDomain");
-        hasAlexaRankAndLoc.renamePipe("hasAlexaRankAndLoc");
+        minRankDomain = minRankDomain.renamePipe("minRankDomain");
         Node popularDomain = hasAlexaRankAndLoc.leftOuterJoin(new FieldList(DUNS), minRankDomain, new FieldList(DUNS));
         Fields joinNodeFields = new Fields(
                 popularDomain.getFieldNames().toArray(new String[popularDomain.getFieldNames().size()]));
@@ -209,11 +202,6 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
                 .retain(new FieldList(LATTICE_ID, LE_IS_PRIMARY_DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN));
 
         // final merge
-        notHasAlexaAndLoc = notHasAlexaAndLoc.retain(fieldsInNode);
-        popularDomain = popularDomain.retain(fieldsInNode);
-        notToJoinAlexa.renamePipe("notjoinalexa");
-        popularDomain.renamePipe("popdomainbyalexa");
-        notHasAlexaAndLoc.renamePipe("nothasalexarank");
         return notHasAlexaAndLoc//
                 .merge(popularDomain)//
                 .merge(notToJoinAlexa);
