@@ -21,11 +21,13 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.impl.SimpleTransformationDataFlowService;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P extends TransformationFlowParameters>
         extends AbstractTransformer<T> {
@@ -110,10 +112,15 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     }
 
     @Override
-    protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources,
-            List<String> baseSourceVersions, Source[] baseTemplates, Source targetTemplate, T configuration,
-            String confStr) {
+    protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         try {
+            Source[] baseSources = step.getBaseSources();
+            List<String> baseSourceVersions = step.getBaseVersions();
+            Source[] baseTemplates = step.getBaseTemplates();
+            Source targetTemplate = step.getTargetTemplate();
+            String confStr = step.getConfig();
+            T configuration = getConfiguration(confStr);
+
             // The order of base sources in the source object should match with
             // the order of base versions in the configuration
             P parameters = getParameters(progress, baseSources, baseTemplates, targetTemplate, configuration, confStr);
@@ -123,14 +130,14 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
                 List<String> versionList = baseSourceVersionMap.get(baseSource);
                 if (versionList == null) {
-                    versionList = new ArrayList<String>();
+                    versionList = new ArrayList<>();
                     baseSourceVersionMap.put(baseSource, versionList);
                 }
                 versionList.add(baseSourceVersions.get(i));
             }
-
-            dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
+            Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);
+            step.setCount(result.getCount());
         } catch (Exception e) {
             log.error("Failed to transform data", e);
             return false;

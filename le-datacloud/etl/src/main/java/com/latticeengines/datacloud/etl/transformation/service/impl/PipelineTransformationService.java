@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
@@ -28,6 +29,7 @@ import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformerService;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.manage.PipelineTransformationReportByStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -114,14 +116,11 @@ public class PipelineTransformationService extends AbstractTransformationService
 
         TransformStep[] steps = initiateTransformSteps(progress, transConf);
         if (steps == null) {
-            updateStatusToFailed(progress, "Failed to initiate transfom steps", null);
+            updateStatusToFailed(progress, "Failed to initiate transform steps", null);
         } else {
             succeeded = executeTransformSteps(progress, steps, workflowDir, transConf);
-            log.info("Report pipe " + transConf.getName() + transConf.getVersion());
-            reportPipelineExec(progress, transConf, steps);
-            reportPipelineExecToDB(progress, transConf, steps);
             if (!transConf.getKeepTemp()) {
-                cleanupTempSources(progress, steps);
+                cleanupTempSources(steps);
             }
         }
         if (doPostProcessing(progress, workflowDir, false) & succeeded) {
@@ -133,14 +132,14 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     @Override
     public List<String> findUnprocessedBaseVersions() {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     private void cleanupWorkflowDir(TransformationProgress progress, String workflowDir) {
         deleteFSEntry(progress, workflowDir + "/*");
     }
 
-    private void cleanupTempSources(TransformationProgress progress, TransformStep[] steps) {
+    private void cleanupTempSources(TransformStep[] steps) {
 
         for (int i = steps.length - 1; i >= 0; i--) {
             log.info("Clean up temp source for step " + i);
@@ -277,11 +276,11 @@ public class PipelineTransformationService extends AbstractTransformationService
             }
 
             sourceVersions.put(target, targetVersion);
-            log.info("step " + stepIdx + " target " + target.getSourceName() + " template "
+            log.info("Step " + stepIdx + " target " + target.getSourceName() + " template "
                     + targetTemplate.getSourceName());
 
             String confStr = config.getConfiguration();
-            TransformStep step = new TransformStep(transformer, baseSources, baseVersions, baseTemplates, target,
+            TransformStep step = new TransformStep(String.valueOf(stepIdx), transformer, baseSources, baseVersions, baseTemplates, target,
                     targetVersion, targetTemplate, confStr);
             steps[stepIdx] = step;
         }
@@ -291,6 +290,28 @@ public class PipelineTransformationService extends AbstractTransformationService
     private boolean executeTransformSteps(TransformationProgress progress, TransformStep[] steps, String workflowDir,
             PipelineTransformationConfiguration transConf) {
         Long pipelineStarTime = System.currentTimeMillis();
+
+        String name = transConf.getName();
+        boolean reportEnabled = true;
+        if (StringUtils.isBlank(name)) {
+            log.info("Report will not be generated for anonymous pipeline");
+            reportEnabled = false;
+        }
+        String version = transConf.getVersion();
+        if (version == null) {
+            log.info("Report will not be generated for pipeline execution without version");
+            reportEnabled = false;
+        }
+
+        // initialize reports
+        PipelineTransformationReport report = new PipelineTransformationReport();
+        if (reportEnabled) {
+            reportEntityMgr.deleteReport(name, version);
+            report.setName(name);
+        }
+        List<TransformationStepReport> stepReports = new ArrayList<>();
+        List<TransformationStepConfig> stepConfigs = transConf.getSteps();
+
         for (int i = 0; i < steps.length; i++) {
             String slackMessage = String.format("Started step %d at %s", i, new Date().toString());
             sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, "", transConf);
@@ -303,11 +324,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                     log.info("Skip executed step " + i);
                 } else {
                     long startTime = System.currentTimeMillis();
-
-                    boolean succeeded = transformer.transform(progress, workflowDir, step.getBaseSources(),
-                            step.getBaseVersions(), step.getBaseTemplates(), step.getTargetTemplate(),
-                            step.getConfig());
-
+                    boolean succeeded = transformer.transform(progress, workflowDir, step);
                     long stepDuration = System.currentTimeMillis() - startTime;
                     step.setElapsedTime(stepDuration / 1000);
                     if (!succeeded) {
@@ -335,6 +352,25 @@ public class PipelineTransformationService extends AbstractTransformationService
                     saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
                     cleanupWorkflowDir(progress, workflowDir);
                 }
+
+                if (reportEnabled) {
+                    Source targetSource = step.getTarget();
+                    String targetVersion = step.getTargetVersion();
+                    if (step.getCount() != null) {
+                        log.info("Found count=" + step.getCount() + " from cascading counter. Lucky!");
+                    } else {
+                        Long targetRecords = hdfsSourceEntityMgr.count(targetSource, targetVersion);
+                        step.setCount(targetRecords);
+                    }
+                    TransformationStepConfig stepConfig = stepConfigs.get(i);
+                    TransformationStepReport stepReport = generateStepReport(step, stepConfig);
+                    stepReports.add(stepReport);
+                    report.setSteps(stepReports);
+                    hdfsSourceEntityMgr.saveReport(pipelineSource, name, version, JsonUtils.serialize(report));
+
+                    reportStepToDB(name, version, step, stepConfig);
+                }
+
             } catch (Exception e) {
                 updateStatusToFailed(progress, "Failed to transform data at step " + i, e);
                 return false;
@@ -343,97 +379,59 @@ public class PipelineTransformationService extends AbstractTransformationService
         return true;
     }
 
-    private void reportPipelineExec(TransformationProgress progress, PipelineTransformationConfiguration transConf,
-            TransformStep[] steps) {
-        String name = transConf.getName();
+    private TransformationStepReport generateStepReport(TransformStep step, TransformationStepConfig stepConfig) {
+        log.info("Generating report of step " + step.getName());
+        TransformationStepReport stepReport = new TransformationStepReport();
+        Source[] baseSources = step.getBaseSources();
+        List<String> baseVersions = step.getBaseVersions();
 
-        if (name == null) {
-            log.info("Report will not be generated for anonymous pipeline");
-            return;
+        stepReport.setTransformer(stepConfig.getTransformer());
+        Source targetSource = step.getTarget();
+        String targetVersion = step.getTargetVersion();
+        for (int j = 0; j < baseSources.length; j++) {
+            Source baseSource = baseSources[j];
+            stepReport.addBaseSource(baseSource.getSourceName(), baseVersions.get(j));
         }
-
-        PipelineTransformationReport report = new PipelineTransformationReport();
-        report.setName(name);
-        String version = transConf.getVersion();
-
-        List<TransformationStepConfig> stepConfigs = transConf.getSteps();
-        List<TransformationStepReport> stepReports = new ArrayList<TransformationStepReport>();
-        for (int i = 0; i < steps.length; i++) {
-            TransformationStepReport stepReport = new TransformationStepReport();
-            stepReports.add(stepReport);
-            TransformStep step = steps[i];
-            Source[] baseSources = step.getBaseSources();
-            List<String> baseVersions = step.getBaseVersions();
-            TransformationStepConfig stepConfig = stepConfigs.get(i);
-            stepReport.setTransformer(stepConfig.getTransformer());
-            Source targetSource = step.getTarget();
-            String targetVersion = step.getTargetVersion();
-            for (int j = 0; j < baseSources.length; j++) {
-                Source baseSource = baseSources[j];
-                stepReport.addBaseSource(baseSource.getSourceName(), baseVersions.get(j));
-            }
-
-            stepReport.setElapsedTime(step.getElapsedTime());
-            if (hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
-                stepReport.setExecuted(true);
-                Long targetRecords = hdfsSourceEntityMgr.count(targetSource, targetVersion);
-                stepReport.setTargetSource(targetSource.getSourceName(), targetVersion, targetRecords);
-            }
+        stepReport.setElapsedTime(step.getElapsedTime());
+        if (hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
+            stepReport.setExecuted(true);
+            Long targetRecords = step.getCount();
+            stepReport.setTargetSource(targetSource.getSourceName(), targetVersion, targetRecords);
         }
-        report.setSteps(stepReports);
-        hdfsSourceEntityMgr.saveReport(pipelineSource, name, version, JsonUtils.serialize(report));
+        return stepReport;
     }
 
-    private void reportPipelineExecToDB(TransformationProgress progress, PipelineTransformationConfiguration transConf,
-            TransformStep[] steps) {
-        String name = transConf.getName();
-        if (name == null) {
-            log.info("Report will not be generated for anonymous pipeline");
-            return;
+    private void reportStepToDB(String pipelineName, String pipelineVersion, TransformStep step, TransformationStepConfig stepConfig) {
+        PipelineTransformationReportByStep stepReport = new PipelineTransformationReportByStep();
+
+        stepReport.setPipeline(pipelineName);
+        stepReport.setVersion(pipelineVersion);
+        stepReport.setStepName(step.getName());
+        Source[] baseSources = step.getBaseSources();
+        List<String> baseVersions = step.getBaseVersions();
+        stepReport.setTransformer(stepConfig.getTransformer());
+
+        String baseSourceNames = "";
+        String baseSourceVersions = "";
+        for (int j = 0; j < baseSources.length; j++) {
+            Source baseSource = baseSources[j];
+            baseSourceNames = baseSourceNames + baseSource.getSourceName();
+            baseSourceVersions = baseSourceVersions + baseVersions.get(j);
         }
+        stepReport.setBaseSources(baseSourceNames);
+        stepReport.setBaseVersions(baseSourceVersions);
 
-        String version = transConf.getVersion();
-        if (version == null) {
-            log.info("Report will not be generated for pipeline execution without version");
-            return;
+        Source targetSource = step.getTarget();
+        String targetVersion = step.getTargetVersion();
+        if (hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
+            stepReport.setExecuted(true);
+            Long targetRecords = step.getCount();
+            stepReport.setTargetSource(targetSource.getSourceName(), targetVersion, targetRecords);
+            stepReport.setTempTarget(isTempSource(targetSource));
+            stepReport.setElapsedTime(step.getElapsedTime());
         }
-
-        reportEntityMgr.deleteReport(name, version);
-        List<TransformationStepConfig> stepConfigs = transConf.getSteps();
-        for (int i = 0; i < steps.length; i++) {
-            PipelineTransformationReportByStep stepReport = new PipelineTransformationReportByStep();
-
-            stepReport.setPipeline(name);
-            stepReport.setVersion(version);
-            stepReport.setStep(i);
-
-            TransformStep step = steps[i];
-            Source[] baseSources = step.getBaseSources();
-            List<String> baseVersions = step.getBaseVersions();
-            TransformationStepConfig stepConfig = stepConfigs.get(i);
-            stepReport.setTransformer(stepConfig.getTransformer());
-
-            String baseSourceNames = "";
-            String baseSourceVersions = "";
-            for (int j = 0; j < baseSources.length; j++) {
-                Source baseSource = baseSources[j];
-                baseSourceNames = baseSourceNames + baseSource.getSourceName();
-                baseSourceVersions = baseSourceVersions + baseVersions.get(j);
-            }
-            stepReport.setBaseSources(baseSourceNames);
-            stepReport.setBaseVersions(baseSourceVersions);
-
-            Source targetSource = step.getTarget();
-            String targetVersion = step.getTargetVersion();
-            if (hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
-                stepReport.setExecuted(true);
-                Long targetRecords = hdfsSourceEntityMgr.count(targetSource, targetVersion);
-                stepReport.setTargetSource(targetSource.getSourceName(), targetVersion, targetRecords);
-                stepReport.setTempTarget(isTempSource(targetSource));
-                stepReport.setElapsedTime(step.getElapsedTime());
-            }
-            reportEntityMgr.insertReportByStep(stepReport);
-        }
+        stepReport.setHdfsPod(HdfsPodContext.getHdfsPodId());
+        reportEntityMgr.insertReportByStep(stepReport);
     }
 
     @Override
@@ -614,70 +612,5 @@ public class PipelineTransformationService extends AbstractTransformationService
         attachments.add(attachment);
         objectNode.put("attachments", attachments);
         return JsonUtils.serialize(objectNode);
-    }
-
-    private class TransformStep {
-
-        private String config;
-        private Transformer transformer;
-        private Source[] baseSources;
-        private List<String> baseVersions;
-        private Source[] baseTemplates;
-        private Source target;
-        private String targetVersion;
-        private Source targetTemplate;
-        private long elapsedTime;
-
-        public TransformStep(Transformer transformer, Source[] baseSources, List<String> baseVersions,
-                Source[] baseTemplates, Source target, String targetVersion, Source targetTemplate, String config) {
-            this.transformer = transformer;
-            this.config = config;
-            this.baseSources = baseSources;
-            this.baseVersions = baseVersions;
-            this.baseTemplates = baseTemplates;
-            this.target = target;
-            this.targetVersion = targetVersion;
-            this.targetTemplate = targetTemplate;
-        }
-
-        public Transformer getTransformer() {
-            return transformer;
-        }
-
-        public String getConfig() {
-            return config;
-        }
-
-        public Source[] getBaseSources() {
-            return baseSources;
-        }
-
-        public List<String> getBaseVersions() {
-            return baseVersions;
-        }
-
-        public Source[] getBaseTemplates() {
-            return baseTemplates;
-        }
-
-        public Source getTarget() {
-            return target;
-        }
-
-        public Source getTargetTemplate() {
-            return targetTemplate;
-        }
-
-        public String getTargetVersion() {
-            return targetVersion;
-        }
-
-        public long getElapsedTime() {
-            return elapsedTime;
-        }
-
-        public void setElapsedTime(long elapsedTime) {
-            this.elapsedTime = elapsedTime;
-        }
     }
 }

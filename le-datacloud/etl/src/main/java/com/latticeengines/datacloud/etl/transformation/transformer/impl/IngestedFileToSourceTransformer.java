@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.etl.transformation.service.impl.IngestedFileToSourceDataFlowService;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IngestedFileToSourceParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
@@ -70,10 +71,14 @@ public class IngestedFileToSourceTransformer
     }
 
     @Override
-    protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources,
-            List<String> baseSourceVersions, Source[] baseTemplates, Source targetTemplate,
-            IngestedFileToSourceTransformerConfig configuration, String confStr) {
+    protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         try {
+            Source[] baseSources = step.getBaseSources();
+            List<String> baseSourceVersions = step.getBaseVersions();
+            Source[] baseTemplates = step.getBaseTemplates();
+            Source targetTemplate = step.getTargetTemplate();
+            String confStr = step.getConfig();
+            IngestedFileToSourceTransformerConfig configuration = getConfiguration(confStr);
             IngestedFileToSourceParameters parameters = getParameters(progress, baseSources, baseTemplates,
                     targetTemplate, configuration, confStr);
             dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersions.get(0), parameters);

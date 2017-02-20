@@ -29,7 +29,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
 
     private static final Log log = LogFactory.getLog(SimpleTransformationDataFlowService.class);
 
-    public <P extends TransformationFlowParameters> void executeDataFlow(Source source, String workflowDir,
+    public <P extends TransformationFlowParameters> Table executeDataFlow(Source source, String workflowDir,
             Map<Source, List<String>> baseSourceVersions, String flowBean, P parameters) {
 
         if (StringUtils.isEmpty(flowBean)) {
@@ -53,7 +53,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
 
         DataFlowContext ctx = dataFlowContext(source, sourceTables, parameters, workflowDir);
         ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, flowBean);
+        return dataTransformationService.executeNamedTransformation(ctx, flowBean);
     }
 
     private Map<String, Table> setupSourceTables(Map<Source, List<String>> baseSourceVersions) {

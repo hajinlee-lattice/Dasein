@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import java.util.List;
 
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
 
     private static final Log log = LogFactory.getLog(AbstractTransformer.class);
 
-
     @Autowired
     protected TransformationProgressEntityMgr progressEntityMgr;
 
@@ -27,11 +27,10 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
 
     abstract public String getName();
 
-
     abstract protected boolean validateConfig(T config, List<String> sourceNames);
 
-    abstract protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources, List<String> baseVersions,
-                             Source[] baseTemplates, Source targetTemplate, T configuration, String confStr);
+    abstract protected boolean transformInternal(TransformationProgress progress, String workflowDir,
+            TransformStep step);
 
     protected Log getLogger() {
         return log;
@@ -43,15 +42,15 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
 
     @Override
     public boolean validateConfig(String confStr, List<String> sourceNames) {
-         if (getConfigurationClass() == TransformerConfig.class) {
-             return true;
-         } else {
-             T config = getConfiguration(confStr);
-             if (config == null) {
-                 return false;
-             } else {
-                 return validateConfig(config, sourceNames);
-             }
+        if (getConfigurationClass() == TransformerConfig.class) {
+            return true;
+        } else {
+            T config = getConfiguration(confStr);
+            if (config == null) {
+                return false;
+            } else {
+                return validateConfig(config, sourceNames);
+            }
         }
     }
 
@@ -62,13 +61,13 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
         if (confStr == null) {
             if (configClass == TransformerConfig.class) {
                 try {
-                    configuration = (T)configClass.newInstance();
+                    configuration = (T) configClass.newInstance();
                 } catch (Exception e) {
                 }
             }
         } else {
             try {
-                configuration = (T)JsonUtils.deserialize(confStr, configClass);
+                configuration = (T) JsonUtils.deserialize(confStr, configClass);
             } catch (Exception e) {
                 log.error("Failed to convert tranformer config.", e);
             }
@@ -77,20 +76,19 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
     }
 
     @Override
-    public boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources, List<String> baseVersions,
-                             Source[] baseTemplates, Source targetTemplate, String confStr) {
+    public boolean transform(TransformationProgress pipelineProgress, String workflowDir, TransformStep step) {
         try {
             log.info("Start in transformer");
-            T configuration = getConfiguration(confStr);
+            T configuration = getConfiguration(step.getConfig());
             if (configuration == null) {
                 log.error("Invalid transformer configuration");
-                updateStatusToFailed(progress, "Failed to transform data.", null);
+                updateStatusToFailed(pipelineProgress, "Failed to transform data.", null);
                 return false;
             }
-            return transform(progress, workflowDir, baseSources, baseVersions, baseTemplates, targetTemplate, configuration, confStr);
+            return transformInternal(pipelineProgress, workflowDir, step);
         } catch (Exception e) {
             log.error("Transformer failed to transform", e);
-            updateStatusToFailed(progress, "Failed to transform data.", e);
+            updateStatusToFailed(pipelineProgress, "Failed to transform data.", e);
             return false;
         }
     }

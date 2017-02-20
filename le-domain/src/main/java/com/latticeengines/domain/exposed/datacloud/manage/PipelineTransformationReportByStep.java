@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "PipelineTransformationReport", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "Pipeline", "Version", "Step" }) })
+uniqueConstraints = { @UniqueConstraint(columnNames = { "Pipeline", "Version", "StepName" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
 public class PipelineTransformationReportByStep implements HasPid {
@@ -36,9 +36,9 @@ public class PipelineTransformationReportByStep implements HasPid {
     @JsonProperty("Version")
     private String version;
 
-    @Column(name = "Step", nullable = false)
-    @JsonProperty("Step")
-    private int step;
+    @Column(name = "StepName", nullable = false)
+    @JsonProperty("StepName")
+    private String stepName;
 
     @Column(name = "TempTarget")
     @JsonProperty("TempTarget")
@@ -106,12 +106,12 @@ public class PipelineTransformationReportByStep implements HasPid {
         this.version = version;
     }
 
-    public int getStep() {
-        return step;
+    public String getStepName() {
+        return stepName;
     }
 
-    public void setStep(int step) {
-        this.step = step;
+    public void setStepName(String stepName) {
+        this.stepName = stepName;
     }
 
     public boolean getTempTarget() {

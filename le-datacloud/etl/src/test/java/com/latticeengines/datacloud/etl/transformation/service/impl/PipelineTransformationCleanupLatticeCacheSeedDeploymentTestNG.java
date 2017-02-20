@@ -134,7 +134,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         
         int stepSource = 0;
         step = new TransformationStepConfig();
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(stepSource++);
         step.setInputSteps(inputSteps);
         step.setBaseSources(Arrays.asList("DomainValidation"));
@@ -143,7 +143,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         steps.add(step);
 
         step = new TransformationStepConfig();
-        inputSteps = new ArrayList<Integer>();
+        inputSteps = new ArrayList<>();
         inputSteps.add(stepSource++);
         step.setInputSteps(inputSteps);
         step.setTransformer("standardizationTransformer");
@@ -153,7 +153,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         
         step = new TransformationStepConfig();
         // step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
-        inputSteps = new ArrayList<Integer>();
+        inputSteps = new ArrayList<>();
         inputSteps.add(stepSource++);
         step.setInputSteps(inputSteps);
         step.setTransformer("bulkMatchTransformer");
@@ -161,7 +161,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         steps.add(step);
 
         step = new TransformationStepConfig();
-        inputSteps = new ArrayList<Integer>();
+        inputSteps = new ArrayList<>();
         inputSteps.add(stepSource++);
         step.setInputSteps(inputSteps);
         // step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
@@ -170,7 +170,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         steps.add(step);
 
         step = new TransformationStepConfig();
-        inputSteps = new ArrayList<Integer>();
+        inputSteps = new ArrayList<>();
         inputSteps.add(stepSource++);
         step.setInputSteps(inputSteps);
         // step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
@@ -181,7 +181,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
         step = new TransformationStepConfig();
         step.setBaseSources(Arrays.asList("DnBCacheSeed"));
-        inputSteps = new ArrayList<Integer>();
+        inputSteps = new ArrayList<>();
         inputSteps.add(stepSource++);
         step.setInputSteps(inputSteps);
         step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);

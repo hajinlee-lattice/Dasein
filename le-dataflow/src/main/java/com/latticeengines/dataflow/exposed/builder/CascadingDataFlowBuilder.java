@@ -57,13 +57,14 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.flink.FlinkYarnCluster;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
+import cascading.flow.FlowStep;
+import cascading.flow.StepCounters;
 import cascading.operation.NoOp;
 import cascading.operation.aggregator.First;
 import cascading.operation.expression.ExpressionFilter;
@@ -988,9 +989,25 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             flow.addListener(dataFlowListener);
             flow.addStepListener(dataFlowStepListener);
             flow.complete();
-            return getTableMetadata(dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
+
+            List steps = flow.getFlowSteps();
+            Long tuplesWritten = null;
+            try {
+                if (steps != null && !steps.isEmpty()) {
+                    FlowStep lastStep = (FlowStep) steps.get(steps.size() - 1);
+                    tuplesWritten = lastStep.getFlowStepStats().getCounterValue(StepCounters.Tuples_Written);
+                    log.info("Wrote " + tuplesWritten + " in last step.");
+                }
+            } catch (Exception e) {
+                log.error("Failed to read final count", e);
+            }
+            Table resultTable = getTableMetadata(dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
                     targetPath, //
                     pipesAndOutputSchemas.get(lastOperator).getValue());
+            if (tuplesWritten != null && tuplesWritten > 0) {
+                resultTable.setCount(tuplesWritten);
+            }
+            return resultTable;
         } finally {
             FlinkYarnCluster.shutdown();
         }

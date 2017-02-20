@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -34,14 +35,14 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
     }
 
     @Override
-    protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources, List<String> baseSourceVersions,
-                                Source[] baseTemplates, Source targetTemplate, MatchTransformerConfig config, String confStr) {
-
-         String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(baseSources[0], baseSourceVersions.get(0)).toString();
-
-         return match(sourceDirInHdfs, workflowDir, config);
+    protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
+        Source[] baseSources = step.getBaseSources();
+        List<String> baseSourceVersions = step.getBaseVersions();
+        String confStr = step.getConfig();
+        String sourceDirInHdfs = hdfsPathBuilder
+                .constructTransformationSourceDir(baseSources[0], baseSourceVersions.get(0)).toString();
+        return match(sourceDirInHdfs, workflowDir, getConfiguration(confStr));
     }
 
     abstract boolean match(String inputAvroPath, String outputAvroPath, MatchTransformerConfig config);
 }
-

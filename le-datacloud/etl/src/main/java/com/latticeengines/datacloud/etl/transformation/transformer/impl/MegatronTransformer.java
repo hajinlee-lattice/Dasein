@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.avro.Schema;
@@ -18,11 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MegatronConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 @Component("megatron")
 class Megatron extends AbstractTransformer<MegatronConfig> {
@@ -61,18 +61,20 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
     @Override
     public String getName() {
-         return "megatron";
+        return "megatron";
     }
 
     @SuppressWarnings("finally")
-	@Override
-    protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources, List<String> baseSourceVersions,
-                                Source[] baseTemplates, Source targetTemplate, MegatronConfig config, String confStr) {
+    @Override
+    protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
+        String confStr = step.getConfig();
+        MegatronConfig configuration = getConfiguration(confStr);
 
         Schema seedSchema;
 
         try {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("schema/MockAmSeed.avsc");
+            InputStream is = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("schema/MockAmSeed.avsc");
             Schema.Parser parser = new Schema.Parser();
             seedSchema = parser.parse(is);
         } catch (IOException e) {
@@ -80,33 +82,35 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             seedSchema = null;
         }
 
-        MegatronContext context = new MegatronContext(config, seedSchema);
+        MegatronContext context = new MegatronContext(configuration, seedSchema);
 
         try {
             createAccounts(context);
         } catch (Exception e) {
-             log.error("Failed to create accounts", e);
+            log.error("Failed to create accounts", e);
         } finally {
-            if (context.getNumAccounts() == config.getNumAccounts()) {
+            if (context.getNumAccounts() == configuration.getNumAccounts()) {
                 try {
 
                     List<GenericData.Record> accounts = context.getAllAccounts();
                     List<GenericRecord> finalAccounts = new ArrayList<GenericRecord>();
                     for (GenericData.Record account : accounts) {
-                        String domain = (String)account.get("Domain");
+                        String domain = (String) account.get("Domain");
                         if (domain != null) {
                             account.put("Domain", domain + ".com");
                         }
                         finalAccounts.add(account);
                     }
                     log.info("flushing " + finalAccounts.size() + " acounts");
-                    AvroUtils.writeToHdfsFile(yarnConfiguration, context.getSchema(), workflowDir + avroName, finalAccounts);
+                    AvroUtils.writeToHdfsFile(yarnConfiguration, context.getSchema(), workflowDir + avroName,
+                            finalAccounts);
                 } catch (Exception e) {
                     log.error("Failed to write to avro file", e);
                 }
                 return true;
             } else {
-                log.error("Not all accounts are created" + context.getNumAccounts() + " " + config.getNumAccounts());
+                log.error("Not all accounts are created" + context.getNumAccounts() + " "
+                        + configuration.getNumAccounts());
                 return false;
             }
         }
@@ -157,27 +161,27 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
     private void messupSomePDs(MegatronContext context) {
         List<GenericData.Record> accounts = context.getAllAccounts();
         for (GenericData.Record account : accounts) {
-             List<GenericData.Record> domains = context.getDomains(account);
-             if (domains == null) {
-                 if (!context.checkFlag(MISSINGPD)) {
-                     continue;
-                 }
-                 if (random.nextInt(16) == 8) {
-                     account.put("Domain", null);
-                     tagAccount(account, MISSINGPD);
-                 }
-                 continue;
-             }
-             if (!context.checkFlag(DUPPD)) {
-                 continue;
-             }
-             if (random.nextInt(16) != 8) {
-                 continue;
-             }
-             for (GenericData.Record domain : domains) {
-                 domain.put("LE_IS_PRIMARY_DOMAIN", "Y");
-                 tagAccount(domain, DUPPD);
-             }
+            List<GenericData.Record> domains = context.getDomains(account);
+            if (domains == null) {
+                if (!context.checkFlag(MISSINGPD)) {
+                    continue;
+                }
+                if (random.nextInt(16) == 8) {
+                    account.put("Domain", null);
+                    tagAccount(account, MISSINGPD);
+                }
+                continue;
+            }
+            if (!context.checkFlag(DUPPD)) {
+                continue;
+            }
+            if (random.nextInt(16) != 8) {
+                continue;
+            }
+            for (GenericData.Record domain : domains) {
+                domain.put("LE_IS_PRIMARY_DOMAIN", "Y");
+                tagAccount(domain, DUPPD);
+            }
         }
     }
 
@@ -188,7 +192,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
         int orphans = random.nextInt(6);
         orphans = (orphans < 3) ? 0 : orphans - 3;
         for (int i = 0; i < orphans; i++) {
-            GenericData.Record orphan  = context.cloneAccountWithNewDUNS(dmHQ);
+            GenericData.Record orphan = context.cloneAccountWithNewDUNS(dmHQ);
             orphan.put("LE_NUMBER_OF_LOCATIONS", 0);
             tagAccount(orphan, ORPHAN);
             context.addAccount(null, orphan);
@@ -209,25 +213,24 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             return;
         }
 
-        String employeeStr = (String)dmHQ.get("LE_EMPLOYEE_RANGE");
-        Integer location = (Integer)dmHQ.get("LE_NUMBER_OF_LOCATIONS");
-        String revenueStr =  (String)dmHQ.get("LE_REVENUE_RANGE");
-        String industryStr =  (String)dmHQ.get("LE_INDUSTRY");
-
+        String employeeStr = (String) dmHQ.get("LE_EMPLOYEE_RANGE");
+        Integer location = (Integer) dmHQ.get("LE_NUMBER_OF_LOCATIONS");
+        String revenueStr = (String) dmHQ.get("LE_REVENUE_RANGE");
+        String industryStr = (String) dmHQ.get("LE_INDUSTRY");
 
         for (GenericData.Record account : accounts) {
-             int employees =  random.nextInt(12);
-             account.put("LE_EMPLOYEE_RANGE", employees + "");
-             int locations = (employees == 1) ? 1 : random.nextInt(16);
-             account.put("LE_NUMBER_OF_LOCATIONS", ((locations < 4) ? 1 : locations - 3));
-             account.put("LE_REVENUE_RANGE", random.nextInt(16) + "");
-             account.put("LE_INDUSTRY", random.nextInt(16) + "");
-             if (!(employeeStr.equals((String)account.get("LE_EMPLOYEE_RANGE"))) ||
-                 !(location == ((Integer)account.get("LE_NUMBER_OF_LOCATIONS"))) ||
-                 !(revenueStr.equals((String)account.get("LE_REVENUE_RANGE"))) ||
-                 !(industryStr.equals((String)account.get("LE_INDUSTRY")))) {
-                 tagAccount(account, WRONGDU);
-             }
+            int employees = random.nextInt(12);
+            account.put("LE_EMPLOYEE_RANGE", employees + "");
+            int locations = (employees == 1) ? 1 : random.nextInt(16);
+            account.put("LE_NUMBER_OF_LOCATIONS", ((locations < 4) ? 1 : locations - 3));
+            account.put("LE_REVENUE_RANGE", random.nextInt(16) + "");
+            account.put("LE_INDUSTRY", random.nextInt(16) + "");
+            if (!(employeeStr.equals((String) account.get("LE_EMPLOYEE_RANGE")))
+                    || !(location == ((Integer) account.get("LE_NUMBER_OF_LOCATIONS")))
+                    || !(revenueStr.equals((String) account.get("LE_REVENUE_RANGE")))
+                    || !(industryStr.equals((String) account.get("LE_INDUSTRY")))) {
+                tagAccount(account, WRONGDU);
+            }
         }
     }
 
@@ -238,7 +241,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
     }
 
     private boolean domainOnly(MegatronContext context, GenericData.Record account) {
-        if (random.nextInt(5) == 1)  {
+        if (random.nextInt(5) == 1) {
             account.put("DUNS", null);
             return true;
         } else {
@@ -247,7 +250,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
     }
 
     private boolean dunsOnly(MegatronContext context, GenericData.Record account) {
-        if (random.nextInt(5) == 1)  {
+        if (random.nextInt(5) == 1) {
             account.put("Domain", null);
             return true;
         } else {
@@ -260,11 +263,11 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
         numDomains = (numDomains <= 4 ? 0 : numDomains - 4);
 
-        String domain = (String)account.get("Domain");
+        String domain = (String) account.get("Domain");
 
         for (int i = 0; i < numDomains; i++) {
-            GenericData.Record child  = context.cloneAccount(account);
-            child.put("Domain", domain + "_" +  sub + "_" + i);
+            GenericData.Record child = context.cloneAccount(account);
+            child.put("Domain", domain + "_" + sub + "_" + i);
             child.put("LE_IS_PRIMARY_DOMAIN", "N");
             context.addDomain(account, child);
         }
@@ -272,7 +275,8 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
     public void addSomeSubs(MegatronContext context, GenericData.Record dmHQ) throws Exception {
 
-        if ((((String)dmHQ.get("LE_EMPLOYEE_RANGE")).equals("0")) || (((String)dmHQ.get("LE_EMPLOYEE_RANGE")).equals("1"))) {
+        if ((((String) dmHQ.get("LE_EMPLOYEE_RANGE")).equals("0"))
+                || (((String) dmHQ.get("LE_EMPLOYEE_RANGE")).equals("1"))) {
             return;
         }
 
@@ -281,7 +285,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
         List<GenericData.Record> domains = context.getDomains(dmHQ);
 
         for (int i = 0; i < numSubs; i++) {
-            GenericData.Record sub  = context.cloneAccountWithNewDUNS(dmHQ);
+            GenericData.Record sub = context.cloneAccountWithNewDUNS(dmHQ);
             sub.put("LE_IS_PRIMARY_LOCATION", "N");
             context.addAccount(dmHQ, sub);
 
@@ -305,7 +309,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
     }
 
     private void tagAccount(GenericData.Record account, int flag) {
-        int origFlag = (Integer)account.get("MockFlag");
+        int origFlag = (Integer) account.get("MockFlag");
         account.put("MockFlag", flag | origFlag);
     }
 
@@ -375,7 +379,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
         public void addAccount(GenericData.Record parent, GenericData.Record child) {
 
             if (parent != null) {
-                Long pid = (Long)parent.get("LatticeID");
+                Long pid = (Long) parent.get("LatticeID");
                 List<GenericData.Record> childList = hqMap.get(parent);
                 if (childList == null) {
                     childList = new ArrayList<GenericData.Record>();
@@ -389,7 +393,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
         public void addDomain(GenericData.Record parent, GenericData.Record child) {
 
-            Long pid = (Long)parent.get("LatticeID");
+            Long pid = (Long) parent.get("LatticeID");
             List<GenericData.Record> childList = domainMap.get(pid);
             if (childList == null) {
                 childList = new ArrayList<GenericData.Record>();
@@ -400,7 +404,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             accounts.add(child);
         }
 
-        public List<GenericData.Record>  getAllAccounts() {
+        public List<GenericData.Record> getAllAccounts() {
             return accounts;
 
         }
@@ -410,13 +414,13 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
         }
 
         public List<GenericData.Record> getChildren(GenericData.Record dmHQ) {
-            Long pid = (Long)dmHQ.get("LatticeID");
+            Long pid = (Long) dmHQ.get("LatticeID");
             List<GenericData.Record> childList = domainMap.get(pid);
             return childList;
         }
 
         public List<GenericData.Record> getDomains(GenericData.Record account) {
-            Long pid = (Long)account.get("LatticeID");
+            Long pid = (Long) account.get("LatticeID");
             return domainMap.get(pid);
         }
 
@@ -427,18 +431,17 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
 
             GenericData.Record account = new GenericData.Record(schema);
 
-            boolean sameGlobalDuns = (currentDuns == 0) ? false : ((random.nextInt(2) == 0) ? true : false); 
-
+            boolean sameGlobalDuns = (currentDuns == 0) ? false : ((random.nextInt(2) == 0) ? true : false);
 
             if (!sameGlobalDuns) {
                 currentGDuns = currentDuns;
             }
- 
+
             account.put("LatticeID", currentAccountId);
 
             account.put("LE_PRIMARY_DUNS", currentDuns + "");
             account.put("DUNS", currentDuns + "");
-            account.put("GLOBAL_ULTIMATE_DUNS_NUMBER", currentGDuns +"");
+            account.put("GLOBAL_ULTIMATE_DUNS_NUMBER", currentGDuns + "");
 
             account.put("Domain", "Domain" + currentDomain);
             account.put("LE_IS_PRIMARY_DOMAIN", "Y");
@@ -452,14 +455,14 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             account.put("City", random.nextInt(4096) + "");
             String state;
             switch (random.nextInt(6)) {
-                case 0:
-                    state = "NY";
-                    break;
-                case 1:
-                    state = "NH";
-                    break;
-                default:
-                    state = "CA";
+            case 0:
+                state = "NY";
+                break;
+            case 1:
+                state = "NH";
+                break;
+            default:
+                state = "CA";
             }
             account.put("State", state);
             account.put("Country", "USA");
@@ -470,13 +473,13 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             account.put("LE_EMPLOYEE_RANGE", employees + "");
             int locations = (employees == 1) ? 1 : random.nextInt(16);
             account.put("LE_NUMBER_OF_LOCATIONS", ((locations < 4) ? 1 : (locations - 3)));
-            account.put("LE_REVENUE_RANGE", random.nextInt(16) + ""); 
+            account.put("LE_REVENUE_RANGE", random.nextInt(16) + "");
 
             account.put("LE_INDUSTRY", random.nextInt(16) + "");
 
             account.put("LE_COMPANY_DESCRIPTION", "What So ever");
             account.put("LE_SIC_CODE", random.nextInt(4096) + "");
-            account.put("LE_NAICS_CODE", + random.nextInt(4096) + "");
+            account.put("LE_NAICS_CODE", +random.nextInt(4096) + "");
             account.put("LE_Last_Upload_Date", System.currentTimeMillis());
 
             account.put("MockFlag", 0);
@@ -489,7 +492,7 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             return account;
         }
 
-       public GenericData.Record cloneAccount(GenericData.Record other) throws Exception {
+        public GenericData.Record cloneAccount(GenericData.Record other) throws Exception {
             if (getNumAccounts() >= config.getNumAccounts()) {
                 throw new Exception("Enough accounts");
             }
@@ -497,9 +500,9 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             GenericData.Record account = new GenericData.Record(other, false);
             account.put("LatticeID", currentAccountId++);
             return account;
-       }
+        }
 
-       public GenericData.Record cloneAccountWithNewDUNS(GenericData.Record other) throws Exception  {
+        public GenericData.Record cloneAccountWithNewDUNS(GenericData.Record other) throws Exception {
             if (getNumAccounts() >= config.getNumAccounts()) {
                 throw new Exception("Enough accounts");
             }
@@ -509,6 +512,6 @@ class Megatron extends AbstractTransformer<MegatronConfig> {
             account.put("DUNS", currentDuns + "");
             currentDuns++;
             return account;
-       }
-   }
+        }
+    }
 }

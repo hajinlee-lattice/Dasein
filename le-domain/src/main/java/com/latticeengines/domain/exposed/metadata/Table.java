@@ -160,6 +160,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @Column(name = "NAMESPACE", nullable = true)
     private String namespace;
 
+    @JsonProperty("count")
+    @Transient
+    private Long count;
+
     public Table() {
     }
 
@@ -718,6 +722,14 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     public List<TableTag> getTableTags() {
         return tableTags;
+    }
+
+    public Long getCount() {
+        return count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
     }
 
     @Override

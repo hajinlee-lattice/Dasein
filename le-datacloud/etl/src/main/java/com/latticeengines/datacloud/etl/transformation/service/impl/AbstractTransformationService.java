@@ -233,7 +233,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     protected void setAdditionalDetails(String newLatestVersion, List<SourceColumn> sourceColumns, T configuration) {
         configuration.setSourceName(getSource().getSourceName());
-        configuration.setSourceConfigurations(new HashMap<String, String>());
+        configuration.setSourceConfigurations(new HashMap<>());
         configuration.setVersion(newLatestVersion);
         configuration.setSourceColumns(sourceColumns);
     }
