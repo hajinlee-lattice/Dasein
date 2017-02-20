@@ -53,26 +53,20 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
             log.info("Field in input schema " + fieldName);
         }
 
-        Node nodeWithNullDUNS = accountMasterIntermediateSeed//
-                .filter(DUNS + " == null", new FieldList(DUNS));
+        // split by duns
+        Node nodeWithNullDUNS = accountMasterIntermediateSeed.filter(DUNS + " == null", new FieldList(DUNS));
+        Node node = accountMasterIntermediateSeed.filter(DUNS + " != null", new FieldList(DUNS));
 
-        Node node = accountMasterIntermediateSeed//
-                .filter(DUNS + " != null", new FieldList(DUNS));
-
+        // one of them do many things
         node = node.discard(new FieldList(FLAG_DROP_OOB_ENTRY));
-
-        node = markOOBEntries(node, fieldDeclaration);
-
+        node = markOOBEntries(node);
         node = node.retain(new FieldList(fieldNames));
-
-        node = markLessPopularDomainsForDUNS(node, fieldDeclaration, alexaMostRecentNode);
-
+        node = markLessPopularDomainsForDUNS(node, alexaMostRecentNode);
         node = markOrphanRecordWithDomain(node, fieldDeclaration);
-
         node = markRecordsWithIncorrectIndustryRevenueEmployeeData(node);
-
         node = markOrphanRecordsForSmallBusiness(node, fieldDeclaration);
 
+        // merge back
         node.renamePipe("mergeFinalResult");
         return nodeWithNullDUNS.merge(node).retain(new FieldList(fieldNames));
     }
@@ -92,133 +86,93 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
     }
 
     private Node markOrphanRecordsForSmallBusiness(Node node, Fields fieldDeclaration) {
-        node.renamePipe("markOrphanRecordsForSmallBusiness");
-
-        Node nonNullEmployeeRange = node//
-                .filter(LE_EMPLOYEE_RANGE + " != null", new FieldList(LE_EMPLOYEE_RANGE));
-
-        Node orphanRecordWithDomainNode = nonNullEmployeeRange//
-                .filter(LE_EMPLOYEE_RANGE + ".equals(\"0\") || " //
+        // split by emp range
+        Node orphanRecordWithDomainNode = node//
+                .filter(LE_EMPLOYEE_RANGE + " != null && " //
+                        + "(" + LE_EMPLOYEE_RANGE + ".equals(\"0\") || " //
                         + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") || "//
-                        + LE_EMPLOYEE_RANGE + ".equals(\"11-50\")", //
+                        + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
+                        new FieldList(LE_EMPLOYEE_RANGE));
+        Node remainingRecordNode = node//
+                .filter(LE_EMPLOYEE_RANGE + " == null || " //
+                                + "(!" + LE_EMPLOYEE_RANGE + ".equals(\"0\") && " //
+                                + "!" + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") && "//
+                                + "!" + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
                         new FieldList(LE_EMPLOYEE_RANGE));
 
+        // apply buffer to one of them
         AccountMasterSeedOrphanRecordSmallCompaniesBuffer buffer = new AccountMasterSeedOrphanRecordSmallCompaniesBuffer(
                 fieldDeclaration);
-        orphanRecordWithDomainNode = orphanRecordWithDomainNode//
-                .groupByAndBuffer(new FieldList(DUNS), buffer);
+        orphanRecordWithDomainNode = orphanRecordWithDomainNode.groupByAndBuffer(new FieldList(DUNS), buffer);
 
-        Node remainingRecordNode = node//
-                .filter(LE_EMPLOYEE_RANGE + " == null", new FieldList(LE_EMPLOYEE_RANGE));
-        remainingRecordNode = remainingRecordNode.merge(nonNullEmployeeRange//
-                .filter("!" + LE_EMPLOYEE_RANGE + ".equals(\"0\") && " //
-                        + "!" + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") && "//
-                        + "!" + LE_EMPLOYEE_RANGE + ".equals(\"11-50\")", //
-                        new FieldList(LE_EMPLOYEE_RANGE)));
-
-        node = remainingRecordNode.merge(orphanRecordWithDomainNode);
-        return node;
+        // merge back
+        orphanRecordWithDomainNode.renamePipe("checkorphansmallbusi");
+        remainingRecordNode.renamePipe("notcheckorphansmallbusi");
+        Node toReturn = remainingRecordNode.merge(orphanRecordWithDomainNode);
+        return toReturn.renamePipe("markOrphanRecordsForSmallBusiness");
     }
 
     private Node markRecordsWithIncorrectIndustryRevenueEmployeeData(Node node) {
-        node.renamePipe("markRecordsWithIncorrectIndustryRevenueEmployeeData");
-
+        node.renamePipe("wrongIndMkrd");
         return node;
     }
 
     private Node markOrphanRecordWithDomain(Node node, Fields fieldDeclaration) {
-        node.renamePipe("markOrphanRecordWithDomain");
-
-        Node nonNullDomainNode = node//
-                .filter(DOMAIN + " != null", new FieldList(DOMAIN));
-        Node nonNullLocationNode = nonNullDomainNode//
-                .filter(LE_IS_PRIMARY_LOCATION + " != null", new FieldList(LE_IS_PRIMARY_LOCATION));
-        Node orphanRecordWithDomainNode = nonNullLocationNode//
-                .filter("\"Y\"" + ".equalsIgnoreCase(" + LE_IS_PRIMARY_LOCATION + ")",
-                        new FieldList(LE_IS_PRIMARY_LOCATION));
         AccountMasterSeedOrphanRecordWithDomainBuffer buffer = new AccountMasterSeedOrphanRecordWithDomainBuffer(
                 fieldDeclaration);
-        orphanRecordWithDomainNode = orphanRecordWithDomainNode//
-                .groupByAndBuffer(new FieldList(COUNTRY, DOMAIN), buffer);
-
-        Node remainingRecordNode = node//
-                .filter(DOMAIN + " == null", new FieldList(DOMAIN));
-        remainingRecordNode = remainingRecordNode.merge(nonNullDomainNode//
-                .filter(LE_IS_PRIMARY_LOCATION + " == null", new FieldList(LE_IS_PRIMARY_LOCATION)));
-        remainingRecordNode = remainingRecordNode.merge(nonNullLocationNode//
-                .filter("! \"Y\"" + ".equalsIgnoreCase(" + LE_IS_PRIMARY_LOCATION + ")",
-                        new FieldList(LE_IS_PRIMARY_LOCATION)));
-
-        node = remainingRecordNode.merge(orphanRecordWithDomainNode);
-        return node;
+        Node checkOrphan = node.groupByAndBuffer(new FieldList(COUNTRY, DOMAIN), buffer);
+        return checkOrphan.renamePipe("orphanWithDomMkrd");
     }
 
-    private Node markLessPopularDomainsForDUNS(Node node, Fields fieldDeclaration, Node alexaMostRecentNode) {
-        node.renamePipe("markLessPopularDomainsForDUNS");
-
+    private Node markLessPopularDomainsForDUNS(Node node, Node alexaMostRecentNode) {
         FieldList fieldsInNode = new FieldList(node.getFieldNames());
-        Node nonNullLocationNode = node//
-                .filter(DOMAIN + " != null && " + LE_IS_PRIMARY_DOMAIN + " != null",
-                        new FieldList(DOMAIN, LE_IS_PRIMARY_DOMAIN));
-        Node nodeForJoiningWithAlexaMostRecent = nonNullLocationNode//
-                .filter("\"Y\"" + ".equalsIgnoreCase(" + LE_IS_PRIMARY_DOMAIN + ")",
-                        new FieldList(LE_IS_PRIMARY_DOMAIN));
 
-        Node nodeNotForJoiningWithAlexaMostRecent = node//
-                .filter(DOMAIN + " == null || " + LE_IS_PRIMARY_DOMAIN + " == null",
-                        new FieldList(DOMAIN, LE_IS_PRIMARY_DOMAIN));
-        nodeNotForJoiningWithAlexaMostRecent = //
-                nodeNotForJoiningWithAlexaMostRecent.merge(nonNullLocationNode.filter(
-                        "! \"Y\"" + //
-                                ".equalsIgnoreCase(" + LE_IS_PRIMARY_DOMAIN + ")", //
-                        new FieldList(LE_IS_PRIMARY_DOMAIN)));
+        // split by domain and loc
+        Node toJoinAlexa = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
+                LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
+        Node notToJoinAlexa = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)", DOMAIN,
+                LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
 
+        // on of them join with alexa
         alexaMostRecentNode = alexaMostRecentNode.retain(new FieldList(URL_FIELD, ALEXA_RANK));
+        toJoinAlexa = toJoinAlexa.join(new FieldList(DOMAIN), alexaMostRecentNode, new FieldList(URL_FIELD),
+                JoinType.LEFT);
 
-        nodeForJoiningWithAlexaMostRecent = nodeForJoiningWithAlexaMostRecent.join(new FieldList(DOMAIN),
-                alexaMostRecentNode, new FieldList(URL_FIELD), JoinType.LEFT);
-
-        Node nonNullAlexaRankAndLocationnodeForJoiningWithAlexaMostRecent = //
-                nodeForJoiningWithAlexaMostRecent//
-                        .filter(ALEXA_RANK + " != null && " + LE_IS_PRIMARY_DOMAIN + " != null ",
-                                new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN));
-        Node accountMasterSeedPopularDomainRecordNode = nonNullAlexaRankAndLocationnodeForJoiningWithAlexaMostRecent//
-                .filter("\"Y\"" + ".equalsIgnoreCase(" + LE_IS_PRIMARY_DOMAIN + ")",
-                        new FieldList(LE_IS_PRIMARY_DOMAIN));
-
-        Fields fieldDeclarationExpanded = new Fields(accountMasterSeedPopularDomainRecordNode.getFieldNames()
-                .toArray(new String[accountMasterSeedPopularDomainRecordNode.getFieldNames().size()]));
-        AccountMasterSeedDomainRankBuffer buffer = new AccountMasterSeedDomainRankBuffer(fieldDeclarationExpanded);
-        accountMasterSeedPopularDomainRecordNode = accountMasterSeedPopularDomainRecordNode//
-                .groupByAndBuffer(new FieldList(DUNS), buffer);
-
-        Node remainingRecordNode = nodeForJoiningWithAlexaMostRecent//
-                .filter(ALEXA_RANK + " == null || " + LE_IS_PRIMARY_DOMAIN + " == null ",
+        // split by rank and domain
+        Node hasAlexaRankAndLoc = toJoinAlexa//
+                .filter(ALEXA_RANK + " != null && " + LE_IS_PRIMARY_DOMAIN + " != null && \"Y\"" + ".equalsIgnoreCase("
+                        + LE_IS_PRIMARY_DOMAIN + ")", new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN));
+        Node notHasAlexaAndLoc = toJoinAlexa//
+                .filter(ALEXA_RANK + " == null || " + LE_IS_PRIMARY_DOMAIN + " == null || ! \"Y\""
+                        + ".equalsIgnoreCase(" + LE_IS_PRIMARY_DOMAIN + ")",
                         new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN));
-        remainingRecordNode = remainingRecordNode.merge(//
-                nonNullAlexaRankAndLocationnodeForJoiningWithAlexaMostRecent//
-                        .filter("! \"Y\"" + ".equalsIgnoreCase(" + LE_IS_PRIMARY_DOMAIN + ")",
-                                new FieldList(LE_IS_PRIMARY_DOMAIN)));
 
-        remainingRecordNode = remainingRecordNode.retain(fieldsInNode);
-        accountMasterSeedPopularDomainRecordNode = accountMasterSeedPopularDomainRecordNode.retain(fieldsInNode);
+        // one of them apply DomainRankBuffer
+        Fields fieldDeclarationExpanded = new Fields(
+                hasAlexaRankAndLoc.getFieldNames().toArray(new String[hasAlexaRankAndLoc.getFieldNames().size()]));
+        AccountMasterSeedDomainRankBuffer buffer = new AccountMasterSeedDomainRankBuffer(fieldDeclarationExpanded);
+        Node popularDomain = hasAlexaRankAndLoc.groupByAndBuffer(new FieldList(DUNS), buffer);
 
-        return remainingRecordNode//
-                .merge(accountMasterSeedPopularDomainRecordNode)//
-                .merge(nodeNotForJoiningWithAlexaMostRecent);
+        // final merge
+        notHasAlexaAndLoc = notHasAlexaAndLoc.retain(fieldsInNode);
+        popularDomain = popularDomain.retain(fieldsInNode);
+        notToJoinAlexa.renamePipe("notjoinalexa");
+        popularDomain.renamePipe("popdomainbyalexa");
+        notHasAlexaAndLoc.renamePipe("nothasalexarank");
+        Node toReturn = notHasAlexaAndLoc//
+                .merge(popularDomain)//
+                .merge(notToJoinAlexa);
+        return toReturn.renamePipe("markLessPopularDomainsForDUNS");
     }
 
-    private Node markOOBEntries(Node node, Fields fieldDeclaration) {
-        node.renamePipe("markOOBEntries");
-
+    private Node markOOBEntries(Node node) {
         String markExpression = OUT_OF_BUSINESS_INDICATOR + " != null "//
                 + "&& " + OUT_OF_BUSINESS_INDICATOR//
                 + ".equals(\"1\") ";
         node = node.addFunction(markExpression + " ? 1 : 0 ", //
                 new FieldList(OUT_OF_BUSINESS_INDICATOR), //
                 new FieldMetadata(FLAG_DROP_OOB_ENTRY, Integer.class));
-
-        return node;
+        return node.renamePipe("markOOBEntries");
     }
 
     @Override
