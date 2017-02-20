@@ -55,8 +55,8 @@ public class FlinkYarnCluster {
         flinkConf.setString(TM_SLOTS, String.valueOf(tmSlots));
         flinkConf.setString(NUM_CONTAINERS, String.valueOf(numContainers));
 
-        flinkConf.setString("akka.ask.timeout", "30");
-        flinkConf.setString("akka.lookup.timeout", "30");
+        flinkConf.setString("akka.ask.timeout", "30s");
+        flinkConf.setString("akka.lookup.timeout", "30s");
 
         AbstractYarnClusterDescriptor yarnClusterDescriptor = new FlinkYarnClusterDescriptor(yarnConf);
         // queue
