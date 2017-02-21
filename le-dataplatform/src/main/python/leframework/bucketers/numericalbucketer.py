@@ -1,20 +1,23 @@
 from __future__ import division
-import math
-from numpy import floor, log10, ceil, sign
-from numpy.random import choice
+
 from bisect import bisect_left
 from itertools import compress, product
+import math
 from sklearn.metrics.cluster.supervised import entropy
+
+from numpy import floor, log10, ceil, sign
+from numpy.random import choice
 from scipy.stats import kurtosis
 
+
 # generates the ordering of column data so we can sort event vector the same way
-def orderedIndicies(x, descending = False):
+def orderedIndicies(x, descending=False):
     """
     generates the ordering of column data so we can sort event vector the same way
     x: column data
     returns: list of positions for elements in x in a sorted list
     """
-    return [y[0] for y in sorted(enumerate(x), key = lambda x: x[1], reverse = descending)]
+    return [y[0] for y in sorted(enumerate(x), key=lambda x: x[1], reverse=descending)]
 
 # significance of difference in conversation rates between two neighboring buckets
 def getSig(sub, overall):
@@ -28,11 +31,11 @@ def getSig(sub, overall):
     oaCnt, oaPos = overall
     subRate = float(subPos) / subCnt
     oaRate = float(oaPos) / oaCnt
-    r = (subCnt*subRate + oaCnt*oaRate)/(subCnt+oaCnt)
+    r = (subCnt * subRate + oaCnt * oaRate) / (subCnt + oaCnt)
     if r in [0, 1]:
         return 0
     else:
-        return abs(subRate-oaRate)/(math.sqrt(r*(1.0-r)*(1.0/subCnt + 1.0/oaCnt)))
+        return abs(subRate - oaRate) / (math.sqrt(r * (1.0 - r) * (1.0 / subCnt + 1.0 / oaCnt)))
 
 # generates sample and event count for in a bucket
 def getCountsTuple(eventCol):
@@ -59,7 +62,7 @@ def roundTo(x, sigDigits=2):
     """
     round a value to certain significant digits
     """
-    if x==0:
+    if x == 0:
         return 0
     else:
         return round(x, sigDigits - 1 - int(floor(log10(abs(x)))))
@@ -73,7 +76,7 @@ def getBound(y, boundaries):
     returns: the largest boundary value that's still equal or less than y
     """
     for idx in range(len(boundaries) - 1):
-        if boundaries[idx+1] > y:
+        if boundaries[idx + 1] > y:
             return boundaries[idx]
 
 def truncateToFixedBoundaries(x):
@@ -93,9 +96,9 @@ def truncateToFixedBoundaries(x):
     multipliers = [1, 2, 5]
     maxInput = max(max(x), 10)
     maxBase = int(floor(log10(abs(maxInput))))
-    bases = [math.pow(10,b) for b in range(maxBase + 1)]
+    bases = [math.pow(10, b) for b in range(maxBase + 1)]
     combinations = list(product(multipliers, bases))
-    boundaries = sorted(c[0]*c[1] for c in combinations)
+    boundaries = sorted(c[0] * c[1] for c in combinations)
     boundaries.append(math.pow(10, maxBase + 1))
     xTruncated = [getBound(y, boundaries) for y in x]
     maxVal = min([b for b in boundaries if b > getBound(maxInput, boundaries)])
@@ -144,14 +147,14 @@ def findWhereValueChanges(xList, xListLen, idx, direction):
     if direction not in [-1, 1]:
         print "invalid searching direction"
         return idx
-    while idx + direction > 0 and idx + direction <xListLen:
+    while idx + direction > 0 and idx + direction < xListLen:
         if xList[idx + direction] == xList[idx]:
             idx = idx + direction
         else:
             break
     # return the index of first occurence of a different x value
     # if already at the end, return the end point
-    return min( max(idx + direction, 0), xListLen - 1)
+    return min(max(idx + direction, 0), xListLen - 1)
 
 # split into roughly equally sized buckets
 def createBinsBySampleCount(xList, rawSplits):    
@@ -167,9 +170,9 @@ def createBinsBySampleCount(xList, rawSplits):
     """
     xListLen = len(xList)
     divider = 3
-    stepSize = int(xListLen/(rawSplits*divider))
+    stepSize = int(xListLen / (rawSplits * divider))
     numPtsInBin = stepSize * divider
-    #if there is not enough data, no bucketing is needed
+    # if there is not enough data, no bucketing is needed
     if stepSize == 0:
         binIdx = [0, len(xList)]
         return binIdx
@@ -193,7 +196,7 @@ def createBinsBySampleCount(xList, rawSplits):
         # when a new bucket is possible, check the new boundary point
         # if values at each side of the boundary point are different
         # create a new bucket
-        elif xList[posCurr] > xList[posCurr-1]:
+        elif xList[posCurr] > xList[posCurr - 1]:
             binIdx.append(posCurr)
         # potential boundary separates the same value into two bins
         # need to move it
@@ -233,7 +236,7 @@ def createBinsByValueRange(xList, rawSplits, useGeometric, minRegBucketSize):
     returns: a list of index positions at boundaries of these bins
     """
     xListLen = len(xList)
-    #if there is not enough data, no bucketing is needed
+    # if there is not enough data, no bucketing is needed
     if xListLen <= minRegBucketSize:
         binIdx = [0, len(xList)]
         return binIdx
@@ -310,15 +313,15 @@ def processSpecialValues(columnData, eventVector, specialValues):
            dictionary of 4 lists of equal length. given the same index, 
            each item in list correspond to a bucket.
     """
-    #add special cases to stats
+    # add special cases to stats
     bandsDict = {"min":[], "max":[], "sampleCount":[], "eventCount":[]}
     for sv in specialValues:
         if sv is None:
             svEvts = [x[0] for x in zip(eventVector, columnData) if math.isnan(x[1])]
         else:
-            svEvts = [x[0] for x in zip(eventVector, columnData) if x[1]==sv]
+            svEvts = [x[0] for x in zip(eventVector, columnData) if x[1] == sv]
         bandsDict = addBucketsToOutput(bandsDict, [sv], [sv], [len(svEvts)], [sum(svEvts)])
-    #get remaining values to bucket
+    # get remaining values to bucket
     xIdxToBucket = [not math.isnan(x) and x not in specialValues for x in columnData]
     xListToBucket = list(compress(columnData, xIdxToBucket))
     eventListToBucket = list(compress(eventVector, xIdxToBucket))
@@ -358,7 +361,7 @@ bucketMins - min of values in each bucket
 bucketMaxes - max of values in each bucket
     """
     minPtsToBucket = max(minPtsToBucket, minRegBucketSize * 2)
-    #all values are the same, or list empty
+    # all values are the same, or list empty
     if len(set(xListToBucket)) == 0:
         bktStats, bucketMins, bucketMaxes = [], [], []
     # single uniqe value, or not enough data to bucket
@@ -367,8 +370,8 @@ bucketMaxes - max of values in each bucket
         bucketMins, bucketMaxes = [min(xListToBucket)], [max(xListToBucket)]
     # bucket values
     else: 
-        if len(xListToBucket)/rawBinNumber < minRegBucketSize:
-            rawBinNumber = int((len(xListToBucket))/minRegBucketSize)
+        if len(xListToBucket) / rawBinNumber < minRegBucketSize:
+            rawBinNumber = int((len(xListToBucket)) / minRegBucketSize)
         # sort x List and event list
         idxOrdered = orderedIndicies(xListToBucket)
         xListToBucket_ord = [xListToBucket[i] for i in idxOrdered]
@@ -377,18 +380,18 @@ bucketMaxes - max of values in each bucket
         # generate roughly equally sized bins
         binIndex = createBinsBySampleCount(xListToBucket_ord, rawBinNumber)
         # calculate sample counts and event counts in each bin
-        bktStats = [getCountsTuple(eventListToBucket_ord[binIndex[b]:binIndex[b+1]]) for b in range(len(binIndex)-1)]
+        bktStats = [getCountsTuple(eventListToBucket_ord[binIndex[b]:binIndex[b + 1]]) for b in range(len(binIndex) - 1)]
         # combine bins
-        binIndex, bktStats = combineBuckets(binIndex, bktStats, sigThreshold, 
+        binIndex, bktStats = combineBuckets(binIndex, bktStats, sigThreshold,
                                             minNumBuckets, maxNumBuckets, forUI=False)
         # generate buckets
-        bucketMins = [xListToBucket_ord[binIndex[i]] for i in range(len(binIndex)-1)]
-        bucketMaxes = [xListToBucket_ord[binIndex[i+1]-1] for i in range(len(binIndex)-1)]
+        bucketMins = [xListToBucket_ord[binIndex[i]] for i in range(len(binIndex) - 1)]
+        bucketMaxes = [xListToBucket_ord[binIndex[i + 1] - 1] for i in range(len(binIndex) - 1)]
     return bktStats, bucketMins, bucketMaxes
 
 def createRegularBucketsForUI(xListToBucket, eventListToBucket, totalCnt, minPtsToBucket, sigThreshold,
-                         rawBinNumber, minRegBucketSize, minNumBuckets, maxNumBuckets, 
-                         kurtThreshold, tailSize, numTailBuckets, sizeThreshold, 
+                         rawBinNumber, minRegBucketSize, minNumBuckets, maxNumBuckets,
+                         kurtThreshold, tailSize, numTailBuckets, sizeThreshold,
                          liftThreshold, eventDiffThreshold):
     """
 Create buckets out of non-special values for UI.
@@ -435,7 +438,7 @@ bucketMins - min of values in each bucket
 bucketMaxes - max of values in each bucket
     """
     minPtsToBucket = max(minPtsToBucket, minRegBucketSize * 2)
-    #all values are the same, or list empty
+    # all values are the same, or list empty
     if len(set(xListToBucket)) == 0:
         bktStats, bucketMins, bucketMaxes = [], [], []
     # single uniqe value, or not enough data to bucket
@@ -452,13 +455,13 @@ bucketMaxes - max of values in each bucket
         # determine if we should use linear or geometric buckets
         useGeometric = checkGeometricDistribution(xListToBucket_ord)
         
-        #iterate over choices until we find one that satisfies shape criteria
-        for rawBinNumber in range(maxNumBuckets, minNumBuckets-1, -1):
+        # iterate over choices until we find one that satisfies shape criteria
+        for rawBinNumber in range(maxNumBuckets, minNumBuckets - 1, -1):
             # generate specified bins with linear or geometric distribution
             binIndex = createBinsByValueRange(xListToBucket_ord, rawBinNumber, useGeometric, minRegBucketSize)
             # calculate sample counts and event counts in each bin
-            bktStats = [getCountsTuple(eventListToBucket_ord[binIndex[b]:binIndex[b+1]]) 
-                        for b in range(len(binIndex)-1)]
+            bktStats = [getCountsTuple(eventListToBucket_ord[binIndex[b]:binIndex[b + 1]]) 
+                        for b in range(len(binIndex) - 1)]
             liftShapeOK = checkLiftShape(bktStats)
             liftDiffOK = checkLiftDifference(bktStats, liftThreshold, totalCnt, sizeThreshold)
             eventDiffOK = checkEventDifference(bktStats, eventDiffThreshold)
@@ -466,15 +469,15 @@ bucketMaxes - max of values in each bucket
                 break
 
         # generate buckets
-        bucketMins = [xListToBucket_ord[binIndex[i]] for i in range(len(binIndex)-1)]
-        bucketMaxes = [xListToBucket_ord[binIndex[i+1]-1] for i in range(len(binIndex)-1)]
+        bucketMins = [xListToBucket_ord[binIndex[i]] for i in range(len(binIndex) - 1)]
+        bucketMaxes = [xListToBucket_ord[binIndex[i + 1] - 1] for i in range(len(binIndex) - 1)]
 
     return bktStats, bucketMins, bucketMaxes
 
 def checkLiftShape(bktStats):
     if len(bktStats) <= 3:
         return True
-    lifts = [b[1]/b[0] for b in bktStats]
+    lifts = [b[1] / b[0] for b in bktStats]
     leftSign = [sign(current - left) for current, left in zip(lifts[1:-1], lifts[:-2])]
     rightSign = [sign(current - right) for current, right in zip(lifts[1:-1], lifts[2:])]
     isMinMax = [1 if lsign == rsign else 0 for lsign, rsign in zip(leftSign, rightSign)]
@@ -484,7 +487,7 @@ def checkLiftShape(bktStats):
 def checkLiftDifference(bktStats, liftThreshold, totalCnt, sizeThreshold):
     if len(bktStats) < 2:
         return True
-    liftDiffs = [getLiftDiff(bktStats[b],bktStats[b+1], liftThreshold) for b in range(len(bktStats)-1)]
+    liftDiffs = [getLiftDiff(bktStats[b], bktStats[b + 1], liftThreshold) for b in range(len(bktStats) - 1)]
     smallLiftDiff = [ld < liftThreshold for ld in liftDiffs]
     smallBucketLeft = [b[0] < sizeThreshold * totalCnt for b in bktStats[:-1]]
     smallBucketRight = [b[0] < sizeThreshold * totalCnt for b in bktStats[1:]]
@@ -495,7 +498,7 @@ def checkLiftDifference(bktStats, liftThreshold, totalCnt, sizeThreshold):
 def checkEventDifference(bktStats, eventDiffThreshold):
     if len(bktStats) < 2:
         return True
-    eventDiffs = [getEventDiff(bktStats[b],bktStats[b+1]) for b in range(len(bktStats)-1)]
+    eventDiffs = [getEventDiff(bktStats[b], bktStats[b + 1]) for b in range(len(bktStats) - 1)]
     eventDiffOK = min(eventDiffs) >= eventDiffThreshold
     return eventDiffOK
 
@@ -507,7 +510,7 @@ def addVariablesToOutput(bandsDict, eventVector):
     Expands the output data structure by adding a few calculated variables that
     the avro file needs.
     """
-    #global stats used for later calculation
+    # global stats used for later calculation
     entropyVal = entropy(eventVector)
     avgProbability = sum(eventVector) / float(len(eventVector))
     # calculate lift and mutual information for all buckets, regular and special
@@ -532,11 +535,11 @@ def deleteIndex(binIndex, bktStats, indexToDel):
     """
     # remove deleted bin index
     binIndex.pop(indexToDel + 1)
-    #update stats of adjacent buckets
+    # update stats of adjacent buckets
     newBucketSize = bktStats[indexToDel][0] + bktStats[indexToDel + 1][0]
     newBucketEvents = bktStats[indexToDel][1] + bktStats[indexToDel + 1][1]
     bktStats[indexToDel] = (newBucketSize, newBucketEvents)
-    #remove deleted bucket stats
+    # remove deleted bucket stats
     bktStats.pop(indexToDel + 1)
     return binIndex, bktStats
 
@@ -562,12 +565,12 @@ def combineBuckets(binIndex, bktStats, sigThreshold, minNumBuckets, maxNumBucket
     forUI: boolean indicating whether it's for the UI use case
     Returns: new binIndex and bktStats
     """
-    #check current number of buckets
+    # check current number of buckets
     currNumBuckets = len(bktStats)
     if currNumBuckets <= max(maxNumBuckets, 1):
         return binIndex, bktStats
         
-    sigList = [getSig(bktStats[b],bktStats[b+1]) for b in range(len(bktStats)-1)]
+    sigList = [getSig(bktStats[b], bktStats[b + 1]) for b in range(len(bktStats) - 1)]
     
     while currNumBuckets > minNumBuckets:
         minSig = min(sigList)
@@ -581,10 +584,10 @@ def combineBuckets(binIndex, bktStats, sigThreshold, minNumBuckets, maxNumBucket
             binIndex, bktStats = deleteIndex(binIndex, bktStats, indexToDel)
             # update prior sig if any
             if indexToDel > 0:
-                sigList[indexToDel - 1] = getSig(bktStats[indexToDel - 1],bktStats[indexToDel])
+                sigList[indexToDel - 1] = getSig(bktStats[indexToDel - 1], bktStats[indexToDel])
             # update next sig if any
             if indexToDel < len(sigList) - 1:
-                sigList[indexToDel + 1] = getSig(bktStats[indexToDel],bktStats[indexToDel + 1])
+                sigList[indexToDel + 1] = getSig(bktStats[indexToDel], bktStats[indexToDel + 1])
             # remove deleted sig value
             sigList.pop(indexToDel)
 
@@ -611,7 +614,7 @@ def getLiftDiff(bkta, bktb, threshold):
     elif rateA == 0:
         return threshold + 1
     else:
-        return rateB/rateA        
+        return rateB / rateA        
 
 def getEventDiff(bkta, bktb):
     """
@@ -632,7 +635,7 @@ def getEventDiff(bkta, bktb):
 def makeBoundariesContinuous(mins, maxes):
     for idx in range(len(mins) - 1):
         if maxes[idx] is not None:
-            maxes[idx] = mins[idx+1]
+            maxes[idx] = mins[idx + 1]
     return mins, maxes
 
 def calculateMutualInfoBinary(splCnts, posCnts):
@@ -642,21 +645,21 @@ def calculateMutualInfoBinary(splCnts, posCnts):
     poscnts: positive events in each bucket
     returns: mutual information in each bucket
     """
-    totalLength,totalPositives=sum(splCnts),sum(posCnts)
-    rate=[float(totalLength-totalPositives)/totalLength,float(totalPositives)/totalLength]
+    totalLength, totalPositives = sum(splCnts), sum(posCnts)
+    rate = [float(totalLength - totalPositives) / totalLength, float(totalPositives) / totalLength]
     def relative_dep(splCnt, posCnt):
-         joint_prob=[float(splCnt - posCnt)/totalLength,float(posCnt)/totalLength]
-         p_x = float(splCnt)/totalLength
-         returnVal=0.0
-         for yi in range(2):
+        joint_prob = [float(splCnt - posCnt) / totalLength, float(posCnt) / totalLength]
+        p_x = float(splCnt) / totalLength
+        returnVal = 0.0
+        for yi in range(2):
             returnVal += joint_prob[yi] * math.log(joint_prob[yi] / (p_x * rate[yi])) if joint_prob[yi] != 0.0 else 0.0
-         return returnVal
-    mi_components=[relative_dep(splCnt, posCnt) for splCnt, posCnt in zip(splCnts, posCnts)]
+        return returnVal
+    mi_components = [relative_dep(splCnt, posCnt) for splCnt, posCnt in zip(splCnts, posCnts)]
     return mi_components
     
-def getBucketsAndStats(columnData, eventVector, rawBinNumber = 200, minPtsToBucket = 50,
-                       minSpecialValRatio = 0.02, minRegBucketSize = 20, minRegBucketRatio = 0.01,
-                       sigThreshold = 8, minNumBuckets = 3, maxNumBuckets = 7, forUI = False,
+def getBucketsAndStats(columnData, eventVector, rawBinNumber=200, minPtsToBucket=50,
+                       minSpecialValRatio=0.02, minRegBucketSize=20, minRegBucketRatio=0.01,
+                       sigThreshold=8, minNumBuckets=3, maxNumBuckets=7, forUI=False,
                        kurtThreshold=3, numTailBuckets=2, tailSize=0.05, sizeThreshold=0.05,
                        liftThreshold=1.8, fixBoundaries=False, eventDiffThreshold=10):
     """
@@ -747,30 +750,30 @@ returns: a dictionary with everything we need to write to avro file
             maxValFixBound, xListToBucket = truncateToFixedBoundaries(xListToBucket)
         else:
             xListToBucket = [roundTo5(x) for x in xListToBucket]
-        bktStats, bucketMins, bucketMaxes = createRegularBucketsForUI(xListToBucket, 
+        bktStats, bucketMins, bucketMaxes = createRegularBucketsForUI(xListToBucket,
                          eventListToBucket, totalCnt, minPtsToBucket, sigThreshold,
-                         rawBinNumber, minRegBucketSize, minNumBuckets, maxNumBuckets, 
-                         kurtThreshold, tailSize, numTailBuckets, sizeThreshold, 
+                         rawBinNumber, minRegBucketSize, minNumBuckets, maxNumBuckets,
+                         kurtThreshold, tailSize, numTailBuckets, sizeThreshold,
                          liftThreshold, eventDiffThreshold)
         bandsDict = addBucketsToOutput(bandsDict
-                                   ,bucketMins
-                                   ,bucketMaxes
-                                   ,[x[0] for x in bktStats]
-                                   ,[x[1] for x in bktStats])
+                                   , bucketMins
+                                   , bucketMaxes
+                                   , [x[0] for x in bktStats]
+                                   , [x[1] for x in bktStats])
         # make boundaries continuous
         if fixBoundaries:
             bandsDict["max"][-1] = maxValFixBound
         bandsDict["min"], bandsDict["max"] = makeBoundariesContinuous(bandsDict["min"], bandsDict["max"])
         
-    else: # data science version for MI
-        bktStats, bucketMins, bucketMaxes = createRegularBucketsForMI(xListToBucket, 
+    else:  # data science version for MI
+        bktStats, bucketMins, bucketMaxes = createRegularBucketsForMI(xListToBucket,
                          eventListToBucket, totalCnt, minPtsToBucket, sigThreshold,
                          rawBinNumber, minRegBucketSize, minNumBuckets, maxNumBuckets)
         bandsDict = addBucketsToOutput(bandsDict
-                                   ,bucketMins
-                                   ,bucketMaxes
-                                   ,[x[0] for x in bktStats]
-                                   ,[x[1] for x in bktStats])
+                                   , bucketMins
+                                   , bucketMaxes
+                                   , [x[0] for x in bktStats]
+                                   , [x[1] for x in bktStats])
     # add additional variables such as uncertainty coefficient etc.
     bandsDict = addVariablesToOutput(bandsDict, eventVector)
     
