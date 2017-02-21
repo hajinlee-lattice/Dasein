@@ -12,11 +12,12 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({"rawtypes", "unused"})
+@SuppressWarnings({ "rawtypes", "unused" })
 public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation implements Buffer {
     private static final long serialVersionUID = 4217950767704131475L;
 
     private static final String LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
+    private static final String SALES_VOLUME_US_DOLLARS = "SALES_VOLUME_US_DOLLARS";
     private static final String FLAG_DROP_ORPHAN_ENTRY = "_FLAG_DROP_ORPHAN_ENTRY_";
 
     protected Map<String, Integer> namePositionMap;
@@ -28,25 +29,79 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
+    // 1. keep all num loc > 0, not flag
+    // 2. if none of them num loc > 0, keep one: use highest sales volume
     @SuppressWarnings("unchecked")
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
         Iterator<TupleEntry> argumentsInGroup = bufferCall.getArgumentsIterator();
+
+        // initialize state variables
+        boolean foundNonOrphan = false;
+        TupleEntry highestSalesTuple = null;
+        long highestSales = -1;
+
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
-            Object value = arguments.getObject(LE_NUMBER_OF_LOCATIONS);
-            boolean shouldDrop = false;
-            if (value != null) {
-                int currentNumberOfLocations = arguments.getInteger(LE_NUMBER_OF_LOCATIONS);
-                shouldDrop = (currentNumberOfLocations <= 0);
-            }
-            if (shouldDrop) {
-                Tuple tuple = arguments.getTupleCopy();
-                tuple.setInteger(namePositionMap.get(FLAG_DROP_ORPHAN_ENTRY), 1);
-                bufferCall.getOutputCollector().add(tuple);
+            if (isOrphan(arguments)) {
+                if (foundNonOrphan) {
+                    // if there is already loc > 0
+                    // all orphan ones should be flagged
+                    // no need for further check
+                    Tuple tuple = flagTheTuple(arguments);
+                    bufferCall.getOutputCollector().add(tuple);
+                } else {
+                    // still need to keep track highest sales, as there is
+                    // possibility to keep one of the (loc==0) record
+                    long thisSales = findSalesVolume(arguments);
+                    if (thisSales > highestSales) {
+                        if (highestSalesTuple != null) {
+                            // release previous candidate
+                            Tuple tuple = flagTheTuple(arguments);
+                            bufferCall.getOutputCollector().add(tuple);
+                        }
+                        // update state variables
+                        highestSales = thisSales;
+                        highestSalesTuple = arguments;
+                    } else {
+                        // it won't even be a candidate, flag and release
+                        Tuple tuple = flagTheTuple(arguments);
+                        bufferCall.getOutputCollector().add(tuple);
+                    }
+                }
             } else {
+                // definitely return with no flag
                 bufferCall.getOutputCollector().add(arguments);
+                // update state variable
+                foundNonOrphan = true;
             }
         }
+
+        // release the final highest sales candidate
+        if (!foundNonOrphan) {
+            if (highestSalesTuple == null) {
+                throw new IllegalArgumentException(
+                        "There is neither loc > 1 record nor highest sales candidate for the group "
+                                + bufferCall.getGroup());
+            }
+            bufferCall.getOutputCollector().add(highestSalesTuple);
+        }
+
+    }
+
+    private boolean isOrphan(TupleEntry tupleEntry) {
+        Object value = tupleEntry.getObject(LE_NUMBER_OF_LOCATIONS);
+        return value != null && tupleEntry.getInteger(LE_NUMBER_OF_LOCATIONS) == 0;
+    }
+
+    private Long findSalesVolume(TupleEntry tupleEntry) {
+        Object value = tupleEntry.getObject(SALES_VOLUME_US_DOLLARS);
+        return value == null ? 0 : tupleEntry.getLong(SALES_VOLUME_US_DOLLARS);
+    }
+
+    private Tuple flagTheTuple(TupleEntry tupleEntry) {
+        Tuple tuple = tupleEntry.getTupleCopy();
+        tuple.setInteger(namePositionMap.get(FLAG_DROP_ORPHAN_ENTRY), 1);
+        return tuple;
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
