@@ -5,10 +5,7 @@ Created on Tue Oct 13 11:28:46 2015
 @author: jhu
 """
 
-from collections import Counter
 import math
-import csv
-from sklearn.metrics.cluster.supervised import entropy
 
 def getSig(sub, overall):
     """
@@ -37,7 +34,7 @@ def getTuple(xList, eventList, k=None):
     if count == 0:
         rate = 0.0
     else:
-        rate = sum([eventList[i] for i in ind]) * 1.0 / count    
+        rate = sum([eventList[i] for i in ind]) * 1.0 / count
     return (count, rate)    
 
 def getGroupingResults(xList, eventList, popCount, popRate):
@@ -92,12 +89,12 @@ def calculateMutualInfoBinary(splCnts, posCnts):
     totalLength, totalPositives = sum(splCnts), sum(posCnts)
     rate = [float(totalLength - totalPositives) / totalLength, float(totalPositives) / totalLength]
     def relative_dep(splCnt, posCnt):
-         joint_prob = [float(splCnt - posCnt) / totalLength, float(posCnt) / totalLength]
-         p_x = float(splCnt) / totalLength
-         returnVal = 0.0
-         for yi in range(2):
+        joint_prob = [float(splCnt - posCnt) / totalLength, float(posCnt) / totalLength]
+        p_x = float(splCnt) / totalLength
+        returnVal = 0.0
+        for yi in range(2):
             returnVal += joint_prob[yi] * math.log(joint_prob[yi] / (p_x * rate[yi])) if joint_prob[yi] != 0.0 else 0.0
-         return returnVal
+        return returnVal
     mi_components = [relative_dep(splCnt, posCnt) for splCnt, posCnt in zip(splCnts, posCnts)]
     return mi_components
     
@@ -191,7 +188,7 @@ def getCatGroupingAndStatsForDisplay(groupingResultsModel, thresholdNumValDispla
     '''
     groupedTuple = groupingResultsModel.items()
     
-    popRate = sum(x[1] for k, x in groupedTuple) * 1.0 / sum(x[0] for k, x in groupedTuple)
+    popRate = sum(x[1] for _, x in groupedTuple) * 1.0 / sum(x[0] for _, x in groupedTuple)
     
     miscValue = 'Misc.'
     if 'Misc.' in groupingResultsModel:
