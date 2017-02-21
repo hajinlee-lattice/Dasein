@@ -171,22 +171,22 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                 } else {
                     upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
 
-                    toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
+                    toReturn = ResourceUtility.getString('ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL', [upperValue]);
 
                 }
             } else {
                 upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
 
-                toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
+                toReturn = ResourceUtility.getString('ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL', [upperValue]);
             }
         } else if (bucket.LowerInclusive == null && bucket.UpperExclusive == null) {
-            toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_ALL_VALUES_LABEL");
+            toReturn = ResourceUtility.getString('ANALYTIC_ATTRIBUTE_ALL_VALUES_LABEL');
         } else if (bucket.LowerInclusive != null) {
             lowerValue = this.FormatBucketValue(bucket.LowerInclusive, attributeMetadata);
-            toReturn = '>= ' + lowerValue;
+            toReturn = ResourceUtility.getString('ANALYTIC_ATTRIBUTE_GREATER_THAN_LABEL', [lowerValue]);
         } else {
             upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
-            toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
+            toReturn = ResourceUtility.getString('ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL', [upperValue]);
         }
         return String(toReturn);
     };
@@ -194,7 +194,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
     this.FormatIntegerBucket = function (lower, upper, attributeMetadata) {
         var upperValue = this.FormatBucketValue(upper, attributeMetadata);
 
-        return ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
+        return ResourceUtility.getString('ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL', [upperValue]);
     };
 
     this.AbbreviateNumber = function (realValue, fundamentalType) {
