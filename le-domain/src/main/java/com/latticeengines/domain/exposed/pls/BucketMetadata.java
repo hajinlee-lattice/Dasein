@@ -148,7 +148,6 @@ public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializa
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
         return tenant;
     }
