@@ -24,6 +24,9 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String ATTR_COUNT_3_KEY = "AttrCount3";
     public static final String ATTR_COUNT_4_KEY = "AttrCount4";
     public static final String PID_KEY = "PID";
+    public static final String DATA_CLOUD_VERSION = "DataCloudVersion";
+    public static final String ENCODED_NO = "NO";
+    public static final String ENCODED_YES = "YES";
     public static final Integer DEFAULT_MAX_BUCKET_COUNT = 5;
 
     private Map<String, List<String>> dimensionDefinitionMap;
@@ -48,11 +51,13 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     private int maxBucketCount = DEFAULT_MAX_BUCKET_COUNT;
 
-    private List<String> setAttrsForSplunk;
+    private List<String> columnsForStatsCalculation;
 
-    private List<Integer> setAttrIdsForSplunk;
+    private List<Integer> columnIdsForStatsCalculation;
 
     private boolean numericalBucketsRequired;
+
+    private String dataCloudVersion;
 
     public Map<String, List<String>> getDimensionDefinitionMap() {
         return dimensionDefinitionMap;
@@ -143,20 +148,20 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
         this.encodedColumns = encodedColumns;
     }
 
-    public List<String> getAttrsForSplunk() {
-        return setAttrsForSplunk;
+    public List<String> getColumnsForStatsCalculation() {
+        return columnsForStatsCalculation;
     }
 
-    public void setAttrsForSplunk(List<String> setAttrsForSplunk) {
-        this.setAttrsForSplunk = setAttrsForSplunk;
+    public void setColumnsForStatsCalculation(List<String> columnsForStatsCalculation) {
+        this.columnsForStatsCalculation = columnsForStatsCalculation;
     }
 
-    public List<Integer> getAttrIdsForSplunk() {
-        return setAttrIdsForSplunk;
+    public List<Integer> getColumnIdsForStatsCalculation() {
+        return columnIdsForStatsCalculation;
     }
 
-    public void setAttrIdsForSplunk(List<Integer> setAttrIdsForSplunk) {
-        this.setAttrIdsForSplunk = setAttrIdsForSplunk;
+    public void setColumnIdsForStatsCalculation(List<Integer> columnIdsForStatsCalculation) {
+        this.columnIdsForStatsCalculation = columnIdsForStatsCalculation;
     }
 
     public boolean isNumericalBucketsRequired() {
@@ -165,6 +170,14 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     public void setNumericalBucketsRequired(boolean numericalBucketsRequired) {
         this.numericalBucketsRequired = numericalBucketsRequired;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
 }

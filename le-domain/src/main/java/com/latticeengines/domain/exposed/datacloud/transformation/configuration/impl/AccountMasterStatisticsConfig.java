@@ -13,6 +13,8 @@ public class AccountMasterStatisticsConfig extends TransformerConfig {
     private List<String> dimensions;
     
     private boolean numericalBucketsRequired;
+    
+    private String dataCloudVersion;
 
     public Map<String, String> getAttributeCategoryMap() {
         return attributeCategoryMap;
@@ -52,6 +54,14 @@ public class AccountMasterStatisticsConfig extends TransformerConfig {
 
     public void setNumericalBucketsRequired(boolean numericalBucketsRequired) {
         this.numericalBucketsRequired = numericalBucketsRequired;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
 }

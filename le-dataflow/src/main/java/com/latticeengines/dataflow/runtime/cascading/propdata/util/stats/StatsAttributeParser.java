@@ -44,26 +44,29 @@ public class StatsAttributeParser {
             Map<String, Map<String, Long>> attributeValueBuckets, Map<String, List<String>> bucketLblOrderMap,
             Map<String, List<Object>> bucketOrderMap, Map<String, Map<String, Long[]>> binaryCodedBuckets,
             Map<String, List<Object>> minMaxInfo, int i, Object obj, String fieldName, int maxBucketCount,
-            String encodedNoKey, String encodedYesKey, boolean numericalBucketsRequired) {
+            String encodedNoKey, String encodedYesKey, boolean numericalBucketsRequired,
+            Map<String, Map<String, Long>> nAttributeBucketIds) {
+
         if (obj instanceof Boolean) {
             Boolean objVal = (Boolean) obj;
-            booleanHandler.handleBooleanAttribute(attributeValueBuckets, fieldName, objVal);
+            booleanHandler.handleBooleanAttribute(attributeValueBuckets, fieldName, objVal, nAttributeBucketIds);
         } else if (obj instanceof Long //
                 || obj instanceof Integer //
                 || obj instanceof Double) {
             if (numericalBucketsRequired) {
                 if (minMaxInfo != null && minMaxInfo.get(fieldName) != null)
                     numericHandler.handleNumericalAttribute(attributeValueBuckets, obj, fieldName, bucketLblOrderMap,
-                            minMaxInfo.get(fieldName), bucketOrderMap, maxBucketCount);
+                            minMaxInfo.get(fieldName), bucketOrderMap, maxBucketCount, nAttributeBucketIds);
             }
         } else {
             List<String> booleanFields = typeFieldMap.get(FundamentalType.BOOLEAN);
             if (booleanFields.contains(fieldName)) {
                 String objVal = (String) obj;
-                booleanTextHandler.handleBooleanTextAttribute(attributeValueBuckets, fieldName, objVal);
+                booleanTextHandler.handleBooleanTextAttribute(attributeValueBuckets, fieldName, objVal,
+                        nAttributeBucketIds);
             } else if (encodedColumnsPos.contains(i)) {
                 encodedAttributeHandler.handleEncodedAttribute(binaryCodedBuckets, obj, fieldName, encodedNoKey,
-                        encodedYesKey);
+                        encodedYesKey, nAttributeBucketIds);
             }
         }
     }

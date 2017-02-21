@@ -13,7 +13,7 @@ public class EncodedAttributeHandler {
     private static final Log log = LogFactory.getLog(EncodedAttributeHandler.class);
 
     public void handleEncodedAttribute(Map<String, Map<String, Long[]>> binaryCodedBuckets, Object obj,
-            String fieldName, String encodedNoKey, String encodedYesKey) {
+            String fieldName, String encodedNoKey, String encodedYesKey, Map<String, Map<String, Long>> nAttributeBucketIds) {
         try {
             boolean[] decodedBooleanArray = BitCodecUtils.decodeAll((String) obj);
 

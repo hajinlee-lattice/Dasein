@@ -87,11 +87,14 @@ public class AccountMasterStatsTransformer
             finalDimensionColumns.add(dimension.getDimension());
             if (dimensions.contains(dimension.getDimension())) {
                 requiredDimensions.put(dimension.getDimension(), dimension);
-                List<CategoricalAttribute> dimensionAttrDetails = getAllAttributes(dimension.getRootAttrId());
+                List<CategoricalAttribute> dimensionAttrDetails = //
+                        getAllAttributes(dimension.getRootAttrId());
                 List<String> dimensionDetails = new ArrayList<>();
                 dimensionDetails.add(dimensionAttrDetails.get(0).getAttrName());
-                dimensionDefinitionMap.put(AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX
-                        + dimension.getDimension() + AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX,
+                dimensionDefinitionMap.put(//
+                        AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX //
+                                + dimension.getDimension()//
+                                + AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX, //
                         dimensionDetails);
 
                 Map<String, CategoricalAttribute> dimensionValuesMap = new HashMap<>();
@@ -107,53 +110,54 @@ public class AccountMasterStatsTransformer
             }
         }
 
-        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        List<ColumnMetadata> columnMetadatas = columnMetadataProxy.columnSelection(Predefined.Enrichment,
-                currentDataCloudVersion);
+        String dataCloudVersion = config.getDataCloudVersion();
+        if (dataCloudVersion == null) {
+            String currentDataCloudVersion = //
+                    columnMetadataProxy.latestVersion(null).getVersion();
+            dataCloudVersion = currentDataCloudVersion;
+        }
+        List<ColumnMetadata> columnMetadatas = //
+                columnMetadataProxy.columnSelection(Predefined.Enrichment, dataCloudVersion);
+
         Map<FundamentalType, List<String>> typeFieldMap = new HashMap<>();
         Set<String> encodedColumns = new HashSet<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
         typeFieldMap.put(FundamentalType.BOOLEAN, new ArrayList<>());
         typeFieldMap.put(FundamentalType.ENUM, new ArrayList<>());
+
+        Set<FundamentalType> uniqueTypes = new HashSet<>();
+
         for (ColumnMetadata meta : columnMetadatas) {
             FundamentalType type = meta.getFundamentalType();
             String name = meta.getColumnName();
+            uniqueTypes.add(type);
             List<String> fieldList = typeFieldMap.get(type);
             if (type == FundamentalType.BOOLEAN || type == FundamentalType.ENUM) {
-                if (meta.getDecodeStrategy() == null) {
+                if (StringUtils.isEmpty(meta.getDecodeStrategy())) {
                     fieldList.add(name);
                 } else {
-                    String decodeStrategyStr = meta.getDecodeStrategy();
-                    if (StringUtils.isEmpty(decodeStrategyStr)) {
-                        continue;
-                    }
-                    JsonNode jsonNode;
-                    try {
-                        jsonNode = objectMapper.readTree(decodeStrategyStr);
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to parse decodeStrategy " + decodeStrategyStr);
-                    }
-                    String encodedColumn = jsonNode.has("EncodedColumn") ? jsonNode.get("EncodedColumn").asText()
-                            : null;
-
-                    encodedColumns.add(encodedColumn);
+                    parseEncodedColumnsMetadata(encodedColumns, objectMapper, meta);
                 }
             }
         }
+
         parameters.setTypeFieldMap(typeFieldMap);
         parameters.setEncodedColumns(new ArrayList<String>(encodedColumns));
 
-        String originalBaseSourceName = accountMasterReport.getBaseSources()[0].getSourceName();
+        String originalBaseSourceName = //
+                accountMasterReport.getBaseSources()[0].getSourceName();
+
         HashSet<String> excludeCols = new HashSet<String>();
         String[] excludeAttrs = accountMasterReport.getExcludeAttrs();
         for (int i = 0; i < excludeAttrs.length; i++) {
             excludeCols.add(excludeAttrs[i]);
         }
 
-        List<String> attrs = new ArrayList<String>();
-        List<Integer> attrIds = new ArrayList<Integer>();
-        List<SourceColumn> sourceColumns = sourceColumnEntityMgr.getSourceColumns(originalBaseSourceName);
+        List<String> columnsForStatsCalculation = new ArrayList<String>();
+        List<Integer> columnIdsForStatsCalculation = new ArrayList<Integer>();
+        List<SourceColumn> sourceColumns = //
+                sourceColumnEntityMgr.getSourceColumns(originalBaseSourceName);
 
         for (int i = 0; i < sourceColumns.size(); i++) {
             SourceColumn col = sourceColumns.get(i);
@@ -167,12 +171,12 @@ public class AccountMasterStatsTransformer
                 continue;
             }
 
-            attrs.add(attr);
-            attrIds.add(attrId);
+            columnsForStatsCalculation.add(attr);
+            columnIdsForStatsCalculation.add(attrId);
         }
-        parameters.setAttrsForSplunk(attrs);
-        parameters.setAttrIdsForSplunk(attrIds);
 
+        parameters.setColumnsForStatsCalculation(columnsForStatsCalculation);
+        parameters.setColumnIdsForStatsCalculation(columnIdsForStatsCalculation);
         parameters.setAttributeCategoryMap(config.getAttributeCategoryMap());
         parameters.setCubeColumnName(config.getCubeColumnName());
         parameters.setDimensionDefinitionMap(dimensionDefinitionMap);
@@ -182,15 +186,33 @@ public class AccountMasterStatsTransformer
         parameters.setRequiredDimensionsValuesMap(requiredDimensionsValuesMap);
         parameters.setRootIdsForNonRequiredDimensions(rootIdsForNonRequiredDimensions);
         parameters.setNumericalBucketsRequired(config.isNumericalBucketsRequired());
+        parameters.setDataCloudVersion(dataCloudVersion);
+    }
+
+    private void parseEncodedColumnsMetadata(Set<String> encodedColumns, //
+            ObjectMapper objectMapper, ColumnMetadata meta) {
+        String decodeStrategyStr = meta.getDecodeStrategy();
+        JsonNode jsonNode;
+        try {
+            jsonNode = objectMapper.readTree(decodeStrategyStr);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to parse decodeStrategy " + decodeStrategyStr);
+        }
+        String encodedColumn = jsonNode.has("EncodedColumn") //
+                ? jsonNode.get("EncodedColumn").asText() : null;
+
+        encodedColumns.add(encodedColumn);
     }
 
     private List<CategoricalDimension> getAllDimensions() {
-        List<CategoricalDimension> allDimensions = dimensionAttributeProxy.getAllDimensions();
+        List<CategoricalDimension> allDimensions = //
+                dimensionAttributeProxy.getAllDimensions();
         return allDimensions;
     }
 
     private List<CategoricalAttribute> getAllAttributes(Long rootId) {
-        List<CategoricalAttribute> allAttributes = dimensionAttributeProxy.getAllAttributes(rootId);
+        List<CategoricalAttribute> allAttributes = //
+                dimensionAttributeProxy.getAllAttributes(rootId);
         return allAttributes;
     }
 

@@ -17,11 +17,9 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsLeafFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsMinMaxBuffer;
-import com.latticeengines.dataflow.runtime.cascading.propdata.DimensionExpandFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -35,6 +33,8 @@ import cascading.tuple.Fields;
 public class AccountMasterStatsMinMaxFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, AccountMasterStatsParameters> {
     private static final String RENAMED_PREFIX = "_RENAMED_";
+    private static final String MIN_MAX_JOIN_FIELD = "_JoinFieldMinMax_";
+    private static final String MIN_MAX_JOIN_FIELD_RENAMED = RENAMED_PREFIX + "_JoinFieldMinMax_";
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
@@ -46,9 +46,9 @@ public class AccountMasterStatsMinMaxFlow
 
     @Override
     public Node construct(AccountMasterStatsParameters parameters) {
-        DataCloudVersion latestAMVersion = columnMetadataProxy.latestVersion(null);
+        String dataCloudVersion = parameters.getDataCloudVersion();
         List<ColumnMetadata> columnMetadatas = columnMetadataProxy.columnSelection(Predefined.Enrichment,
-                latestAMVersion.getVersion());
+                dataCloudVersion);
 
         Map<String, ColumnMetadata> columnMetadatasMap = new HashMap<>();
 
@@ -88,12 +88,7 @@ public class AccountMasterStatsMinMaxFlow
                 dimensionDefinitionMap, leafSchemaNewColumns, inputSchemaDimensionColumns, fields, applyToFieldList,
                 outputFieldList);
 
-        Fields groupByFields = new Fields();
-
         String[] dimensionIdFieldNames = new String[dimensionDefinitionMap.keySet().size()];
-
-        node = createDimensionBasedExpandNodes(requiredDimensionsValuesMap, node, dimensionDefinitionMap,
-                leafSchemaAllOutputColumns, groupByFields, dimensionIdFieldNames);
 
         leafSchemaAllOutputColumns.add(new FieldMetadata(getMinMaxKey(), String.class));
 
@@ -112,7 +107,7 @@ public class AccountMasterStatsMinMaxFlow
             List<FieldMetadata> leafSchemaNewColumns, List<FieldMetadata> inputSchemaDimensionColumns, Fields fields,
             FieldList applyToFieldList, FieldList outputFieldList) {
         AccountMasterStatsLeafFunction.Params functionParams = new AccountMasterStatsLeafFunction.Params(fields,
-                leafSchemaNewColumns, inputSchemaDimensionColumns, dimensionDefinitionMap, requiredDimensions,
+                inputSchemaDimensionColumns, dimensionDefinitionMap, requiredDimensions,
                 columnMetadatasMap, requiredDimensionsValuesMap,
                 AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX);
         AccountMasterStatsLeafFunction leafCreationFunction = new AccountMasterStatsLeafFunction(functionParams);
@@ -131,7 +126,7 @@ public class AccountMasterStatsMinMaxFlow
             boolean shouldRetain = false;
             for (String dimensionId : dimensionIdFieldNames) {
                 if (fieldMeta.getFieldName().equals(dimensionId)) {
-                    shouldRetain = true;
+                    shouldRetain = false;
                     break;
                 }
             }
@@ -149,60 +144,20 @@ public class AccountMasterStatsMinMaxFlow
             }
         }
 
+        minMaxResultFields = minMaxResultFields.append(new Fields(MIN_MAX_JOIN_FIELD, Integer.class));
+
         AccountMasterStatsMinMaxBuffer.Params functionParams = new AccountMasterStatsMinMaxBuffer.Params(
                 minMaxResultFields, getMinMaxKey());
         AccountMasterStatsMinMaxBuffer buffer = new AccountMasterStatsMinMaxBuffer(functionParams);
+        node = node.addColumnWithFixedValue(MIN_MAX_JOIN_FIELD, 0, Integer.class);
 
-        Node minMaxNode = node.groupByAndBuffer(new FieldList(dimensionIdFieldNames), //
-                buffer, fms);
+        fms.add(new FieldMetadata(MIN_MAX_JOIN_FIELD, Integer.class));
 
-        String[] renamedDimensionFieldNames = new String[dimensionIdFieldNames.length];
-        int i = 0;
-        for (String id : dimensionIdFieldNames) {
-            renamedDimensionFieldNames[i++] = RENAMED_PREFIX + id;
-        }
+        Node minMaxNode = node.groupByAndBuffer(new FieldList(MIN_MAX_JOIN_FIELD), buffer, fms);
 
-        minMaxNode = minMaxNode.rename(new FieldList(dimensionIdFieldNames), new FieldList(renamedDimensionFieldNames));
+        minMaxNode = minMaxNode.rename(new FieldList(MIN_MAX_JOIN_FIELD), new FieldList(MIN_MAX_JOIN_FIELD_RENAMED));
 
         return minMaxNode;
-    }
-
-    protected Node createDimensionBasedExpandNodes(
-            Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap, Node accountMaster,
-            Map<String, List<String>> dimensionDefinitionMap, List<FieldMetadata> finalLeafSchema, Fields groupByFields,
-            String[] dimensionIdFieldNames) {
-        int i = 0;
-        for (String dimensionKey : dimensionDefinitionMap.keySet()) {
-            groupByFields = groupByFields.append(new Fields(dimensionKey));
-            dimensionIdFieldNames[i++] = dimensionKey;
-
-            Fields expandFields = new Fields();
-            List<FieldMetadata> targetField = new ArrayList<>();
-            String[] allFields = new String[finalLeafSchema.size()];
-
-            int pos = 0;
-            int idx = 0;
-            for (FieldMetadata s : finalLeafSchema) {
-                expandFields = expandFields.append(new Fields(s.getFieldName()));
-                if (s.getFieldName().equals(dimensionKey)) {
-                    pos = idx;
-                }
-                allFields[idx++] = s.getFieldName();
-                targetField.add(s);
-            }
-
-            FieldList fieldsToApply = new FieldList(allFields);
-            FieldList outputFields = new FieldList(allFields);
-
-            DimensionExpandFunction.Params functionParams = new DimensionExpandFunction.Params(expandFields.size(),
-                    dimensionKey, new HashMap<String, List<String>>(), expandFields, pos, requiredDimensionsValuesMap,
-                    AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX);
-            DimensionExpandFunction dimensionExpandFunction = new DimensionExpandFunction(functionParams);
-
-            accountMaster = accountMaster.apply(dimensionExpandFunction, fieldsToApply, targetField, outputFields,
-                    Fields.RESULTS);
-        }
-        return accountMaster;
     }
 
     private List<FieldMetadata> resultSchema(List<FieldMetadata> leafSchemaAllOutputColumns) {

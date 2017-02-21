@@ -10,6 +10,9 @@ public class Bucket {
 
     @JsonProperty("Cnt")
     private Long count;
+    
+    @JsonProperty("Id")
+    private Long id;
 
     @JsonProperty("En")
     @JsonInclude(Include.NON_NULL)
@@ -29,6 +32,14 @@ public class Bucket {
 
     public void setCount(Long count) {
         this.count = count;
+    }
+    
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long[] getEncodedCountList() {
