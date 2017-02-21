@@ -60,6 +60,7 @@ public class HdfsToRedshiftService {
     }
 
     public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
+        redshiftService.dropTable(configuration.getTableName());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
             RedshiftUtils.generateJsonPathsFile(schema, outputStream);

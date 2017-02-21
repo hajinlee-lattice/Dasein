@@ -57,7 +57,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private String testTable;
 
-    @BeforeClass(groups = "aws")
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         testTable = leStack + "_" + TEST_TABLE;
         hdfsToRedshiftService.setS3Bucket(s3Bucket);
@@ -68,12 +68,12 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, avroStream, HDFS_DIR + "/" + FILENAME);
     }
 
-    @AfterClass(groups = "aws")
+    @AfterClass(groups = "functional")
     public void teardown() throws Exception {
         cleanup();
     }
 
-    @Test(groups = "aws")
+    @Test(groups = "functional")
     public void testUploadToRedshift() throws Exception {
         HdfsToRedshiftConfiguration configuration = getExportConfiguration();
         hdfsToRedshiftService.uploadDataObjectToS3(configuration);

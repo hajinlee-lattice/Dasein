@@ -10,23 +10,6 @@
     <properties>
         <component-name>workflowapi</component-name>
         <spring.security.oauth.version>2.0.10.RELEASE</spring.security.oauth.version>
-        <le.baton.version>3.3.0-SNAPSHOT</le.baton.version>
-        <le.common.version>3.3.0-SNAPSHOT</le.common.version>
-        <le.dataplatform.version>3.3.0-SNAPSHOT</le.dataplatform.version>
-        <le.microservice.version>3.3.0-SNAPSHOT</le.microservice.version>
-        <le.security.version>3.3.0-SNAPSHOT</le.security.version>
-        <le.serviceflows.core.version>3.3.0-SNAPSHOT</le.serviceflows.core.version>
-        <le.serviceflows.prospectdiscovery.version>3.3.0-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
-        <le.serviceflows.leadprioritization.version>3.3.0-SNAPSHOT</le.serviceflows.leadprioritization.version>
-        <le.workflow.version>3.3.0-SNAPSHOT</le.workflow.version>
-        <le.oauth2.db.version>3.3.0-SNAPSHOT</le.oauth2.db.version>
-        <le.scoringapi.version>3.3.0-SNAPSHOT</le.scoringapi.version>
-        <le.network.version>3.3.0-SNAPSHOT</le.network.version>
-        <le.metadata.version>3.3.0-SNAPSHOT</le.metadata.version>
-        <le.dataflow.version>3.3.0-SNAPSHOT</le.dataflow.version>
-        <le.proxy.version>3.3.0-SNAPSHOT</le.proxy.version>
-        <le.pls.version>3.3.0-SNAPSHOT</le.pls.version>
-        <le.testframework.version>3.3.0-SNAPSHOT</le.testframework.version>
     </properties>
 
     <parent>
@@ -40,17 +23,17 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
-            <version>${le.serviceflows.core.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-prospectdiscovery</artifactId>
-            <version>${le.serviceflows.prospectdiscovery.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-leadprioritization</artifactId>
-            <version>${le.serviceflows.leadprioritization.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -60,33 +43,33 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-workflow</artifactId>
-            <version>${le.workflow.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scoringapi</artifactId>
-            <version>${le.scoringapi.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-workflow</artifactId>
-            <version>${le.workflow.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-workflow</artifactId>
-            <version>${le.workflow.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -134,7 +117,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>
@@ -182,14 +165,14 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
-            <version>${le.dataflow.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -217,7 +200,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
-            <version>${le.dataflow.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>
@@ -241,31 +224,31 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-network</artifactId>
-            <version>${le.network.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
-            <version>${le.baton.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -296,30 +279,30 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-metadata</artifactId>
-            <version>${le.metadata.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-pls</artifactId>
-            <version>${le.pls.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-oauth2db</artifactId>
-            <version>${le.oauth2.db.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -351,7 +334,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
-            <version>${le.testframework.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
