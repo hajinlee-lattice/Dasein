@@ -849,7 +849,7 @@ public abstract class AbstractYarnClusterDescriptor implements ClusterDescriptor
 		}
 
 		appContext.setApplicationName(name); // application name
-		appContext.setApplicationType("Apache Flink");
+		appContext.setApplicationType("FLINK");
 		appContext.setAMContainerSpec(amContainer);
 		appContext.setResource(capability);
 		if(yarnQueue != null) {
