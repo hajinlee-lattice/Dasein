@@ -45,20 +45,17 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node accountMasterIntermediateSeed = addSource(parameters.getBaseTables().get(0));
+        Node am = addSource(parameters.getBaseTables().get(0));
         Node alexaMostRecentNode = addSource(parameters.getBaseTables().get(1));
-        // split by duns
-        Node nodeWithNullDUNS = accountMasterIntermediateSeed.filter(DUNS + " == null", new FieldList(DUNS));
-        Node node = accountMasterIntermediateSeed.filter(DUNS + " != null", new FieldList(DUNS));
 
         // one of them do many things
-        Node oobMkrd = markOOBEntries(node).renamePipe("oobMkrd");
-        Node alexaMrkd = markLessPopularDomainsForDUNS(node, alexaMostRecentNode).renamePipe("alexaMrkd");
-        Node orphanMrkd = markOrphanRecordWithDomain(node).renamePipe("orphanMrkd");
-        Node badDataMrkd = markRecordsWithIncorrectIndustryRevenueEmployeeData(node).renamePipe("badDataMrkd");
-        Node smBusiMrkd = markOrphanRecordsForSmallBusiness(node).renamePipe("smBusiMrkd");
+        Node oobMkrd = markOOBEntries(am).renamePipe("oobMkrd");
+        Node alexaMrkd = markLessPopularDomainsForDUNS(am, alexaMostRecentNode).renamePipe("alexaMrkd");
+        Node orphanMrkd = markOrphanRecordWithDomain(am).renamePipe("orphanMrkd");
+        Node badDataMrkd = markRecordsWithIncorrectIndustryRevenueEmployeeData(am).renamePipe("badDataMrkd");
+        Node smBusiMrkd = markOrphanRecordsForSmallBusiness(am).renamePipe("smBusiMrkd");
 
-        List<String> allFields = node.getFieldNames();
+        List<String> allFields = am.getFieldNames();
         allFields.add(FLAG_DROP_OOB_ENTRY);
         allFields.add(FLAG_DROP_SMALL_BUSINESS);
         allFields.add(FLAG_DROP_INCORRECT_DATA);
@@ -66,34 +63,14 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         allFields.add(FLAG_DROP_ORPHAN_ENTRY);
         FieldList finalFields = new FieldList(allFields.toArray(new String[allFields.size()]));
 
-        node = node.renamePipe("hasduns").discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
-        node = node //
+        am = am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
+        return am //
                 .innerJoin(new FieldList(LATTICE_ID), badDataMrkd, new FieldList(LATTICE_ID)) //
                 .innerJoin(new FieldList(LATTICE_ID), oobMkrd, new FieldList(LATTICE_ID)) //
                 .innerJoin(new FieldList(LATTICE_ID), orphanMrkd, new FieldList(LATTICE_ID)) //
                 .innerJoin(new FieldList(LATTICE_ID), smBusiMrkd, new FieldList(LATTICE_ID)) //
                 .innerJoin(new FieldList(LATTICE_ID), alexaMrkd, new FieldList(LATTICE_ID)) //
                 .retain(finalFields);
-
-        // the other directly populate default values
-        nodeWithNullDUNS = addFlagColumnsWithDefaultValues(nodeWithNullDUNS);
-
-        // merge
-        return nodeWithNullDUNS.merge(node);
-    }
-
-    private Node addFlagColumnsWithDefaultValues(Node accountMasterIntermediateSeed) {
-        accountMasterIntermediateSeed = accountMasterIntermediateSeed.addColumnWithFixedValue(FLAG_DROP_OOB_ENTRY, 0,
-                Integer.class);
-        accountMasterIntermediateSeed = accountMasterIntermediateSeed.addColumnWithFixedValue(FLAG_DROP_SMALL_BUSINESS,
-                1, Integer.class);
-        accountMasterIntermediateSeed = accountMasterIntermediateSeed.addColumnWithFixedValue(FLAG_DROP_INCORRECT_DATA,
-                0, Integer.class);
-        accountMasterIntermediateSeed = accountMasterIntermediateSeed
-                .addColumnWithFixedValue(FLAG_DROP_LESS_POPULAR_DOMAIN, null, String.class);
-        accountMasterIntermediateSeed = accountMasterIntermediateSeed.addColumnWithFixedValue(FLAG_DROP_ORPHAN_ENTRY, 0,
-                Integer.class);
-        return accountMasterIntermediateSeed;
     }
 
     // (LID, FLAG_DROP_SMALL_BUSINESS)
@@ -103,17 +80,19 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
         // split by emp range
         Node orphanRecordWithDomainNode = node//
-                .filter(LE_EMPLOYEE_RANGE + " != null && " //
+                .filter(DUNS + " != null &&" //
+                        + LE_EMPLOYEE_RANGE + " != null && " //
                         + "(" + LE_EMPLOYEE_RANGE + ".equals(\"0\") || " //
                         + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") || "//
                         + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
-                        new FieldList(LE_EMPLOYEE_RANGE));
+                        new FieldList(DUNS, LE_EMPLOYEE_RANGE));
         Node remainingRecordNode = node//
-                .filter(LE_EMPLOYEE_RANGE + " == null || " //
+                .filter(DUNS + " == null || " //
+                        + LE_EMPLOYEE_RANGE + " == null || " //
                         + "(!" + LE_EMPLOYEE_RANGE + ".equals(\"0\") && " //
                         + "!" + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") && "//
                         + "!" + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
-                        new FieldList(LE_EMPLOYEE_RANGE));
+                        new FieldList(DUNS, LE_EMPLOYEE_RANGE));
         // apply buffer to one of them
         AccountMasterSeedOrphanRecordSmallCompaniesBuffer buffer = new AccountMasterSeedOrphanRecordSmallCompaniesBuffer(
                 new Fields(orphanRecordWithDomainNode.getFieldNamesArray()));
@@ -132,14 +111,19 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
     // (LID, FLAG_DROP_ORPHAN_ENTRY)
     private Node markOrphanRecordWithDomain(Node node) {
-        node = node.retain(new FieldList(LATTICE_ID, DOMAIN, COUNTRY, LE_IS_PRIMARY_LOCATION, LE_NUMBER_OF_LOCATIONS));
+        node = node.retain(
+                new FieldList(LATTICE_ID, DUNS, DOMAIN, COUNTRY, LE_IS_PRIMARY_LOCATION, LE_NUMBER_OF_LOCATIONS));
         node = node.addColumnWithFixedValue(FLAG_DROP_ORPHAN_ENTRY, 0, Integer.class);
 
         // split by domain and loc
-        Node checkOrphan = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
-                LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
-        Node notCheckOrphan = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)",
-                DOMAIN, LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
+        Node checkOrphan = node.filter(
+                String.format("%s != null && %s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DUNS, DOMAIN,
+                        LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION),
+                new FieldList(DUNS, DOMAIN, LE_IS_PRIMARY_LOCATION));
+        Node notCheckOrphan = node.filter(
+                String.format("%s == null || %s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)", DUNS, DOMAIN,
+                        LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION),
+                new FieldList(DUNS, DOMAIN, LE_IS_PRIMARY_LOCATION));
 
         // one directly retain
         notCheckOrphan = notCheckOrphan.retain(new FieldList(LATTICE_ID, FLAG_DROP_ORPHAN_ENTRY));
