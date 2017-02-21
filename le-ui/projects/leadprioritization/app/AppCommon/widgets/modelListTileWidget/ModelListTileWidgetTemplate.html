@@ -7,7 +7,9 @@
     <div class="model-title" data-ng-if="!nameStatus.editing">
         <h2 data-type="text" data-placement="right" class="editable editable-click" title="{{::data.DisplayName}}">{{::data.DisplayName | limitTo: 36 }}{{::data.DisplayName.length > 36 ? '&hellip;' : ''}}</h2>
         <h2 class="edit">
+            <!-- for each item added to menu, MUST add to button's ng-if boolean expression and simplify-->
             <button
+                    ng-if="(mayChangeModelNames) || (mayDeleteModels && !isActive) || (showRefineAndClone && !data.Uploaded) || (data.ModelType && (canRemodel || (showReviewModel && isNotPmmlModel)))"
                     type="button"
                     ng-click="customMenuClick($event)"
                     ng-class="{ 'open': showCustomMenu }">
@@ -39,7 +41,7 @@
 
                 <li
                     ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })"
-                    data-ng-if="data.ModelType && showRefineAndClone && data.ModelFileType != 'PmmlModel' && !data.Uploaded"
+                    data-ng-if="data.ModelType && showRefineAndClone && isNotPmmlModel && !data.Uploaded"
                     data-ng-click="refineAndCloneClick($event)">
                     <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
                     <i class="fa fa-copy"></i>
@@ -55,7 +57,7 @@
 
                 <li
                     ui-sref="home.model.review.columns({ modelId: '{{ data.Id | escape }}' })"
-                    data-ng-if="data.ModelType && showReviewModel && data.ModelFileType != 'PmmlModel'"
+                    data-ng-if="data.ModelType && showReviewModel && isNotPmmlModel"
                     data-ng-click="reviewClick($event)">
                     <a href="javascript:void(0)">Review Model</a>
                     <i class="fa fa-eye"></i>
