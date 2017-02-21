@@ -75,8 +75,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
     // (LID, FLAG_DROP_SMALL_BUSINESS)
     private Node markOrphanRecordsForSmallBusiness(Node node) {
-        node = node.retain(new FieldList(LATTICE_ID, DUNS, LE_EMPLOYEE_RANGE)) //
-                .addColumnWithFixedValue(FLAG_DROP_SMALL_BUSINESS, 1, Integer.class);
+        node = node.retain(new FieldList(LATTICE_ID, DUNS, LE_EMPLOYEE_RANGE));
 
         // split by emp range
         Node orphanRecordWithDomainNode = node//
@@ -85,14 +84,16 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
                         + "(" + LE_EMPLOYEE_RANGE + ".equals(\"0\") || " //
                         + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") || "//
                         + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
-                        new FieldList(DUNS, LE_EMPLOYEE_RANGE));
+                        new FieldList(DUNS, LE_EMPLOYEE_RANGE))
+                .addColumnWithFixedValue(FLAG_DROP_SMALL_BUSINESS, 1, Integer.class);
         Node remainingRecordNode = node//
                 .filter(DUNS + " == null || " //
                         + LE_EMPLOYEE_RANGE + " == null || " //
                         + "(!" + LE_EMPLOYEE_RANGE + ".equals(\"0\") && " //
                         + "!" + LE_EMPLOYEE_RANGE + ".equals(\"1-10\") && "//
                         + "!" + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
-                        new FieldList(DUNS, LE_EMPLOYEE_RANGE));
+                        new FieldList(DUNS, LE_EMPLOYEE_RANGE))
+                .addColumnWithFixedValue(FLAG_DROP_SMALL_BUSINESS, 0, Integer.class);
         // apply buffer to one of them
         AccountMasterSeedOrphanRecordSmallCompaniesBuffer buffer = new AccountMasterSeedOrphanRecordSmallCompaniesBuffer(
                 new Fields(orphanRecordWithDomainNode.getFieldNamesArray()));
