@@ -11,7 +11,7 @@ import io.swagger.annotations.Api;
 
 @Api(value = "query", description = "REST resource for query")
 @RestController
-@RequestMapping("/querys")
+@RequestMapping("/queries")
 public class QueryResource implements QueryInterface {
 
     @SuppressWarnings("unused")
