@@ -2,12 +2,17 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.avro.Schema.Field;
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,7 +154,7 @@ public class AccountMasterSeedRebuildServiceImplTestNG
             steps.add(step1);
             steps.add(step2);
             steps.add(step3);
-            // steps.add(step4);
+            //steps.add(step4);
             steps.add(step5);
             // -----------
             configuration.setSteps(steps);
@@ -192,7 +197,7 @@ public class AccountMasterSeedRebuildServiceImplTestNG
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
-        int rowNum = 0;
+
         Object[][] expectedData = {
                 { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
                         "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
@@ -242,38 +247,78 @@ public class AccountMasterSeedRebuildServiceImplTestNG
                         "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
                         "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
                         "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "b.com", "N", "0", 5L, 1485366555040L } };
+
+        String[] fieldNames = new String[] {
+                "LE_PRIMARY_DUNS", //
+                "LE_COUNTRY", //
+                "LE_COMPANY_PHONE", //
+                "LE_EMPLOYEE_RANGE", //
+                "LE_COMPANY_DESCRIPTION", //
+                "ZipCode", //
+                "LE_NUMBER_OF_LOCATIONS", //
+                "LE_SIC_CODE", //
+                "LE_IS_PRIMARY_LOCATION", //
+                "City", //
+                "LE_INDUSTRY", //
+                "Name", //
+                "GLOBAL_ULTIMATE_DUNS_NUMBER", //
+                "DUNS", //
+                "State", //
+                "LE_NAICS_CODE", //
+                "LE_REVENUE_RANGE", //
+                "Street", //
+                "Country", //
+                "Domain", //
+                "LE_IS_PRIMARY_DOMAIN", //
+                "OUT_OF_BUSINESS_INDICATOR", //
+                "LatticeID", //
+                "LE_Last_Upload_Date" //
+        };
+
+        Map<Long, Map<String, Object>> latticeIdToData = new HashMap<>();
+        for (Object[] data: expectedData) {
+            Long latticeId = (Long) data[data.length - 2];
+            Map<String, Object> row = new HashMap<>();
+            for (int i = 0; i < fieldNames.length; i++) {
+                row.put(fieldNames[i], data[i]);
+            }
+            latticeIdToData.put(latticeId, row);
+        }
+
+        int numRows = 0;
+        boolean hasFieldMismatchInRecord = false;
+        Set<Long> distinctIds = new HashSet<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
+            Long latticeId = (Long) record.get(LATTICEID);
+            distinctIds.add(latticeId);
 
-            boolean foundMatchingRecord = false;
-            for (Object[] data : expectedData) {
-                int idx = 0;
-                boolean hasFieldMismatchInRecord = false;
-                for (Field field : record.getSchema().getFields()) {
-                    Object val = record.get(field.name());
-                    if (val instanceof Utf8) {
-                        val = ((Utf8) val).toString();
-                    }
-                    Object expectedVal = data[idx];
-                    System.out.print("[" + val + " - " + expectedVal + "], ");
-                    if ((val == null && expectedVal != null) //
-                            || (val != null && !val.equals(expectedVal))) {
-                        hasFieldMismatchInRecord = true;
-                        break;
-                    }
-                    idx++;
+            Map<String, Object> data = latticeIdToData.get(latticeId);
+
+            List<String> misMatched = new ArrayList<>();
+            for (Schema.Field field : record.getSchema().getFields()) {
+                Object val = record.get(field.name());
+                if (val instanceof Utf8) {
+                    val = val.toString();
                 }
-
-                if (!hasFieldMismatchInRecord //
-                        || idx == record.getSchema().getFields().size()) {
-                    foundMatchingRecord = true;
-                    break;
+                Object expectedVal = data.get(field.name());
+                if ((val == null && expectedVal != null) //
+                        || (val != null && !val.equals(expectedVal))) {
+                    misMatched.add(field.name() + "=[" + val + " - " + expectedVal + "]");
+                    hasFieldMismatchInRecord = true;
                 }
             }
-            Assert.assertTrue(foundMatchingRecord);
-            rowNum++;
+            if (hasFieldMismatchInRecord) {
+                log.warn(StringUtils.join(misMatched, ", "));
+            }
+
+            System.out.println(latticeId + ":" + record);
+            numRows++;
         }
-        Assert.assertEquals(rowNum, 12);
+
+        Assert.assertEquals(numRows, 12, "There should be 12 rows in the result.");
+        Assert.assertEquals(distinctIds.size(), 12, "There should be 12 distinct lattice ids.");
+        Assert.assertFalse(hasFieldMismatchInRecord, "There are incorrect results, see logs above.");
 
     }
 }

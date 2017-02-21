@@ -64,12 +64,12 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         allFields.add(FLAG_DROP_ORPHAN_ENTRY);
         FieldList finalFields = new FieldList(allFields.toArray(new String[allFields.size()]));
 
-        am = am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
         FieldList idField = new FieldList(LATTICE_ID);
-        return am.coGroup(idField,
-                Arrays.asList(badDataMrkd, oobMkrd, orphanMrkd, smBusiMrkd, alexaMrkd),
-                Arrays.asList(idField, idField, idField, idField, idField),
-                JoinType.INNER) //
+        return am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN)) //
+                .coGroup(idField, //
+                        Arrays.asList(badDataMrkd, oobMkrd, orphanMrkd, smBusiMrkd, alexaMrkd), //
+                        Arrays.asList(idField, idField, idField, idField, idField), //
+                        JoinType.INNER) //
                 .retain(finalFields);
     }
 
