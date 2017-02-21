@@ -23,8 +23,6 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
     private int domainLoc;
     private int latticeIdLoc;
 
-    // TODO: this buffer probably need to change: keep at lease one non-orphan for each DUNS
-    // if not, the current impl can be changed to a function
     public AccountMasterSeedOrphanRecordWithDomainBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
@@ -36,15 +34,15 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
             Object value = arguments.getObject(LE_NUMBER_OF_LOCATIONS);
+            boolean shouldDrop = false;
             if (value != null) {
                 int currentNumberOfLocations = arguments.getInteger(LE_NUMBER_OF_LOCATIONS);
-                if (currentNumberOfLocations == 0) {
-                    bufferCall.getOutputCollector().add(arguments);
-                } else {
-                    Tuple tuple = arguments.getTupleCopy();
-                    tuple.setInteger(namePositionMap.get(FLAG_DROP_ORPHAN_ENTRY), 1);
-                    bufferCall.getOutputCollector().add(tuple);
-                }
+                shouldDrop = (currentNumberOfLocations <= 0);
+            }
+            if (shouldDrop) {
+                Tuple tuple = arguments.getTupleCopy();
+                tuple.setInteger(namePositionMap.get(FLAG_DROP_ORPHAN_ENTRY), 1);
+                bufferCall.getOutputCollector().add(tuple);
             } else {
                 bufferCall.getOutputCollector().add(arguments);
             }
