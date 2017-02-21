@@ -141,29 +141,29 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
     // (LID, LE_IS_PRIMARY_DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN)
     private Node markLessPopularDomainsForDUNS(Node node, Node alexaMostRecentNode) {
-        node = node.retain(new FieldList(LATTICE_ID, DUNS, DOMAIN, LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_DOMAIN)) //
+        node = node.retain(new FieldList(LATTICE_ID, DUNS, DOMAIN, LE_IS_PRIMARY_DOMAIN)) //
                 .addColumnWithFixedValue(FLAG_DROP_LESS_POPULAR_DOMAIN, null, String.class);
 
-        // split by domain and loc
-        Node toJoinAlexa = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
-                LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
+        // split by domain and duns
+        Node primaryDomains = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
+                LE_IS_PRIMARY_DOMAIN, LE_IS_PRIMARY_DOMAIN), new FieldList(DOMAIN, LE_IS_PRIMARY_DOMAIN));
         Node notToJoinAlexa = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)",
-                DOMAIN, LE_IS_PRIMARY_LOCATION, LE_IS_PRIMARY_LOCATION), new FieldList(DOMAIN, LE_IS_PRIMARY_LOCATION));
+                DOMAIN, LE_IS_PRIMARY_DOMAIN, LE_IS_PRIMARY_DOMAIN), new FieldList(DOMAIN, LE_IS_PRIMARY_DOMAIN));
 
         // one directly filter out fields
         notToJoinAlexa = notToJoinAlexa
                 .retain(new FieldList(LATTICE_ID, LE_IS_PRIMARY_DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN));
 
-        // on of them join with alexa
+        // the other join with alexa
         alexaMostRecentNode = alexaMostRecentNode.retain(new FieldList(URL_FIELD, ALEXA_RANK));
-        toJoinAlexa = toJoinAlexa.join(new FieldList(DOMAIN), alexaMostRecentNode, new FieldList(URL_FIELD),
+        primaryDomains = primaryDomains.join(new FieldList(DOMAIN), alexaMostRecentNode, new FieldList(URL_FIELD),
                 JoinType.LEFT);
 
         // split by rank and domain
-        Node hasAlexaRankAndLoc = toJoinAlexa//
+        Node hasAlexaRankAndLoc = primaryDomains//
                 .filter(ALEXA_RANK + " != null && " + LE_IS_PRIMARY_DOMAIN + " != null && \"Y\"" + ".equalsIgnoreCase("
                         + LE_IS_PRIMARY_DOMAIN + ")", new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN));
-        Node notHasAlexaAndLoc = toJoinAlexa//
+        Node notHasAlexaAndLoc = primaryDomains//
                 .filter(ALEXA_RANK + " == null || " + LE_IS_PRIMARY_DOMAIN + " == null || ! \"Y\""
                         + ".equalsIgnoreCase(" + LE_IS_PRIMARY_DOMAIN + ")",
                         new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN));
