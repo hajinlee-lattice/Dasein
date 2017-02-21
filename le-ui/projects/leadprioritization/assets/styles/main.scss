@@ -19,8 +19,8 @@ body {
   }
 
   &.not-initialized {
-    opacity: 0; 
-    
+    opacity: 0;
+
     &.open-nav nav.primary-nav {
       -webkit-transition: none;
       -moz-transition: none;
@@ -75,7 +75,7 @@ span.logo {
 
 .local-error {
   border-radius: 4px;
-} 
+}
 
 .tab-contents > .tab-pane {
   display: none;
@@ -104,7 +104,7 @@ span.logo {
     -ms-transform: translateY(-50%);
     -o-transform: translateY(-50%);
     transform: translateY(-50%);
-    z-index: 1;
+    z-index: 11;
 }
 
 a#back-to-summary-link:hover {
