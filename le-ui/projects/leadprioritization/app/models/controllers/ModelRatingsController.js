@@ -4,7 +4,7 @@ angular.module('lp.models.ratings', [
     'mainApp.models.services.ModelService'
 ])
 .controller('ModelRatingsController', function ($scope, $rootScope, $stateParams,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, MostRecentConfiguration, BucketSummary) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService) {
 
     var vm = this;
     angular.extend(vm, {
@@ -16,25 +16,31 @@ angular.module('lp.models.ratings', [
         saveInProgress: false,
         showSaveBucketsError: false,
         ResourceUtility: ResourceUtility,
-        currentConfiguration: MostRecentConfiguration,
-        summary: BucketSummary
+        workingBuckets: []
     });
 
+
     vm.init = function() {
+
         $scope.data = ModelStore.data;
         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-
         $scope.Math = window.Math;
 
+        ModelRatingsService.MostRecentConfiguration(vm.modelId).then(function(result) { 
+            vm.currentConfiguration = result;
+        });
+        ModelRatingsService.GetBucketedScoresSummary(vm.modelId).then(function(result) {  
+            var summary = result; 
+            vm.summary = summary;
+            renderChart(summary);
+        });
+        
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
         } else {
             vm.modelType = "Accounts";
         }
-
-        console.log(vm.modelType, vm.currentConfiguration);
-
-        renderChart();
+        
     }
 
     vm.publishConfiguration = function() {
@@ -50,23 +56,21 @@ angular.module('lp.models.ratings', [
         });
     }
 
-    function renderChart(){
+    function renderChart(summary){
         
         var verticalAxis = document.getElementById("verticalAxis");
 
         // Get tallest bar in set
-        vm.largestLiftInSet = Math.max.apply(Math,vm.summary.bar_lifts.map(function(o){return o;}));
+        vm.largestLiftInSet = Math.max.apply(null, summary.bar_lifts);
 
         // Set height of chart components based off tallest bar
         vm.relativeHeightOfTallest = Math.round((12*vm.largestLiftInSet) + 10);
         if(vm.relativeHeightOfTallest < 150){
             vm.chartContainerHeight = Math.round((25*vm.largestLiftInSet) + 10);
             vm.barMultiplier = 25;
-            console.log("small");
         } else {
             vm.chartContainerHeight = Math.round((15*vm.largestLiftInSet) + 10);
             vm.barMultiplier = 15;
-            console.log("large");
         }
 
         // Define height of dugout
@@ -82,70 +86,55 @@ angular.module('lp.models.ratings', [
 
         vm.getNumber = function(num) {return new Array(num);}
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
-
-        console.log(vm.largestLiftInSet, vm.yAxisNumber, 25*vm.largestLiftInSet+10, vm.chartContainerHeight); 
  
     }
 
+    // setTimeout(function(){ initSliders(); }, 3000);
+
     function initSliders(){
 
-        var vanilla = document.getElementById("sliders"),
-            vListItems = vanilla.getElementsByClassName("slider"),
-            vDragItem,
-            vDropItem;
+        var elem = document.getElementsByClassName('slider');
 
-        console.log(vListItems);
+        console.log(elem);
 
-        for (var i = 0; i < vListItems.length; i++) {
-          var el = vListItems.item(i);
-          el.draggable = true;
+        //* toggle direction (remove first slash)
+        var direction = 'left', coord = 'X' /*/
+        var direction = 'top', coord = 'Y' //*/
+        elem.onmousedown = function (evt) {
+          evt.stopPropagation()
+          evt.preventDefault()
+          evt = evt || window.event
+          var start = 0, diff = 0
+          if ( evt['page' + coord] ) { start = evt['page' + coord] }
+          else if ( evt['client' + coord] ) { start = evt['client' + coord] }
 
-          dataRegistry[getId(el)] = "data: " + el.textContent;
-          
-          el.addEventListener("dragstart", function(e) {
-            e.dataTransfer.setData(dataType, e.target.textContent);
-            e.dataTransfer.effectAllowed = "move";
-            vDragItem = e.target;
-          });
-          
-          el.addEventListener("dragend", function(e) {
-            if (vDropItem) {
-              vDropItem.classList.remove("dropzone");
-            }
-            vDragItem = vDropItem = null;
-          });
-          
-          el.addEventListener("dragenter", function(e) {
-            e.preventDefault();
-            if (e.dataTransfer.types.indexOf(dataType) != -1) {
-              e.target.classList.add("dropzone");      
-            }
-            vDropItem = e.target;
-          });
-          
-          el.addEventListener("dragover", function(e) {
-            e.preventDefault();
-          });
-          
-          el.addEventListener("drop", function(e) {
-            e.preventDefault();
-            var data = e.dataTransfer.getData(dataType);
-            var text = data + " dropped on " + e.target.textContent;
-            setData(text || "[no data]");
-          });
-          
-          el.addEventListener("dragleave", function(e) {
-            e.target.classList.remove("dropzone");
-            if (vDropItem === e.target) {
-              vDropItem = null;
-            }
-          });
+          elem.style.position = 'relative'
+          document.body.onmousemove = function (evt) {
+            evt.stopPropagation()
+            evt.preventDefault()
+            evt = evt || window.event
+            var end = 0
+            if ( evt['page' + coord] ) { end = evt['page' + coord] }
+            else if ( evt['client' + coord] ) { end = evt['client' + coord] }
+
+            diff = end - start
+            elem.style[direction] = diff + 'px'
+          }
+          document.body.onmouseup = function () {
+            evt.stopPropagation()
+            evt.preventDefault()
+            // do something with the action here
+            // elem has been moved by diff pixels in the X axis
+            elem.style.position = 'static'
+            document.body.onmousemove = document.body.onmouseup = null
+          }
         }
 
     }
 
     function adjustColors(){
         console.log("adjust colors");
+        adjustWorkingBuckets();
     }
     function adjustWorkingBuckets(){
         console.log("adjust working buckets");

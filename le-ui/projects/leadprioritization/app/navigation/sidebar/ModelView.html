@@ -30,14 +30,23 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}</span>
             </a>
         </li>
-        <!-- <li ng-if="!IsPmml" role="rating" ui-sref-active="active">
+        <li ng-if="!IsPmml && CheckForRatings" role="rating" ui-sref-active="active">
             <a ui-sref="home.model.ratings" analytics-on="click" analytics-event="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
                     <span class="ico ico-ratings ico-light-gray"></span>
                 </span>
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}</span>
             </a>
-        </li> -->
+        </li>
+
+        <li ng-if="!IsPmml && !CheckForRatings" role="rating" ui-sref-active="active">
+            <a ui-sref="home.model.ratings.demo" analytics-on="click" analytics-event="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
+                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
+                    <span class="ico ico-ratings ico-light-gray"></span>
+                </span>
+                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}</span>
+            </a>
+        </li>
         <li ng-if="showSampleLeads && !IsPmml" role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.leads" analytics-on="click" analytics-event="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}" data-ng-if='sourceType=="SalesforceLead"'>
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}">
