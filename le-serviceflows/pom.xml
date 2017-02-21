@@ -38,6 +38,7 @@
         <module>datacloud</module>
         <module>prospectdiscovery</module>
         <module>leadprioritization</module>
+        <module>cdl</module>
     </modules>
 
     <build>

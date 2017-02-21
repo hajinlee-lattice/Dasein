@@ -96,6 +96,11 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "STATE")
     @Enumerated(EnumType.STRING)
     private SourceFileState state;
+    
+    @JsonProperty("entity_external_type")
+    @Column(name = "ENTITY_EXTERNAL_TYPE", nullable = true)
+    @Enumerated(EnumType.STRING)
+    private EntityExternalType entityExternalType;
 
     @Override
     public String getName() {
@@ -217,4 +222,13 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     public void setState(SourceFileState state) {
         this.state = state;
     }
+
+    public EntityExternalType getEntityExternalType() {
+        return entityExternalType;
+    }
+
+    public void setEntityExternalType(EntityExternalType entityExternalType) {
+        this.entityExternalType = entityExternalType;
+    }
+
 }

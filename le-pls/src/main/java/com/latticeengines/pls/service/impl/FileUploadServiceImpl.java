@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
@@ -46,8 +47,11 @@ public class FileUploadServiceImpl implements FileUploadService {
     private MetadataProxy metadataProxy;
 
     @Override
-    public SourceFile uploadFile(String outputFileName, SchemaInterpretation schemaInterpretation, String displayName,
-                                 InputStream inputStream) {
+    public SourceFile uploadFile(String outputFileName, //
+            SchemaInterpretation schemaInterpretation, // 
+            EntityExternalType entityExternalType, //
+            String displayName, //
+            InputStream inputStream) {
         log.info(String.format(
                 "Uploading file (outputFileName=%s, schemaInterpretation=%s, displayName=%s, customer=%s)",
                 outputFileName, schemaInterpretation, displayName, MultiTenantContext.getCustomerSpace()));
@@ -61,11 +65,11 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
             file.setSchemaInterpretation(schemaInterpretation);
+            file.setEntityExternalType(entityExternalType);
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(displayName);
 
-            HdfsUtils
-                    .copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
+            HdfsUtils.copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileService.create(file);
             return sourceFileService.findByName(file.getName());
         } catch (IOException e) {
@@ -91,8 +95,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(displayName);
 
-            HdfsUtils
-                    .copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
+            HdfsUtils.copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileService.create(file);
             return sourceFileService.findByName(file.getName());
         } catch (IOException e) {

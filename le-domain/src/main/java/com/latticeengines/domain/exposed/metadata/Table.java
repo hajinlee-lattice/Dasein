@@ -99,6 +99,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonProperty("attributes")
     private List<Attribute> attributes = new ArrayList<>();
 
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("level_hierarchies")
+    private List<LevelBasedHierarchy> hierarchies = new ArrayList<>();
+
     @JsonIgnore
     @Transient
     private Schema schema;
@@ -754,4 +759,13 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         tags.add(name);
         setTags(tags);
     }
+
+    public List<LevelBasedHierarchy> getHierarchies() {
+        return hierarchies;
+    }
+
+    public void setHierarchies(List<LevelBasedHierarchy> hierarchies) {
+        this.hierarchies = hierarchies;
+    }
+
 }

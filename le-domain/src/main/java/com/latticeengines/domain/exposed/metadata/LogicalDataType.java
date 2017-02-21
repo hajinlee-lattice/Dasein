@@ -11,6 +11,7 @@ public enum LogicalDataType {
     Reference, //
     RowId, //
     Opportunity, //
+    Metric, //
     Timestamp;
 
     private static EnumSet<LogicalDataType> typesExcludedFromRealTimeMetadata = EnumSet.of(LogicalDataType.InternalId,

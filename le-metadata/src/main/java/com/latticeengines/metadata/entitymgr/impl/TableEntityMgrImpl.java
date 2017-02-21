@@ -215,6 +215,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             Hibernate.initialize(table.getExtracts());
             Hibernate.initialize(table.getPrimaryKey());
             Hibernate.initialize(table.getLastModifiedKey());
+            Hibernate.initialize(table.getHierarchies());
             Hibernate.initialize(table.getDataRules());
         }
     }

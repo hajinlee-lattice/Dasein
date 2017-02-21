@@ -1,0 +1,19 @@
+package com.latticeengines.domain.exposed.dataflow.flows.cdl;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+
+public class ResolveStagingAndRuntimeTableParameters extends DataFlowParameters {
+
+    @JsonProperty("field_load_strategy")
+    public FieldLoadStrategy fieldLoadStrategy;
+    
+    @JsonProperty("key_load_strategy")
+    public KeyLoadStrategy keyLoadStrategy;
+    
+    @JsonProperty("stage_table")
+    public String stageTableName;
+    
+    @JsonProperty("runtime_table")
+    public String runtimeTableName;
+}

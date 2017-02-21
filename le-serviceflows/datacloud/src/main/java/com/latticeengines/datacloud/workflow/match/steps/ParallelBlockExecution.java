@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
@@ -150,6 +151,10 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             }
 
             String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
+            
+            if (!StringUtils.isEmpty(configuration.getResultLocation())) {
+                avroDir = configuration.getResultLocation();
+            }
             Long count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
             log.info("Generated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
 
@@ -366,6 +371,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             String blockResultAvro = hdfsPathBuilder.constructMatchBlockAvro(rootOperationUid, blockOperationUid)
                     .toString();
             String matchAvro = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
+            
+            if (!StringUtils.isEmpty(configuration.getResultLocation())) {
+                matchAvro = configuration.getResultLocation();
+            }
+
             if (!HdfsUtils.fileExists(yarnConfiguration, matchAvro)) {
                 HdfsUtils.mkdir(yarnConfiguration, matchAvro);
             }

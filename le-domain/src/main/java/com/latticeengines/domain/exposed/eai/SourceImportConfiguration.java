@@ -11,28 +11,34 @@ import com.latticeengines.domain.exposed.source.SourceCredentialType;
 
 public class SourceImportConfiguration {
 
+    @JsonProperty("source_type")
     private SourceType sourceType;
+    
+    @JsonProperty("tables")
     private List<Table> tables;
+    
+    @JsonProperty("filters")
     private Map<String, String> filters = new HashMap<>();
+    
+    @JsonProperty("properties")
     private Map<String, String> properties = new HashMap<>();
+    
+    @JsonProperty("source_cred_type")
     private SourceCredentialType sourceCredentialType = SourceCredentialType.PRODUCTION;
 
-    @JsonProperty("source_type")
+    
     public SourceType getSourceType() {
         return sourceType;
     }
 
-    @JsonProperty("source_type")
     public void setSourceType(SourceType sourceType) {
         this.sourceType = sourceType;
     }
 
-    @JsonProperty("tables")
     public List<Table> getTables() {
         return tables;
     }
 
-    @JsonProperty("tables")
     public void setTables(List<Table> tables) {
         this.tables = tables;
     }
@@ -41,7 +47,7 @@ public class SourceImportConfiguration {
         filters.put(tableName, expression);
     }
 
-    @JsonProperty("filters")
+    
     public Map<String, String> getFilters() {
         return filters;
     }
@@ -55,12 +61,11 @@ public class SourceImportConfiguration {
         return JsonUtils.serialize(this);
     }
 
-    @JsonProperty("properties")
+    
     public Map<String, String> getProperties() {
         return properties;
     }
 
-    @JsonProperty("properties")
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
@@ -69,12 +74,10 @@ public class SourceImportConfiguration {
         properties.put(propertyName, propertyValue);
     }
 
-    @JsonProperty("source_cred_type")
     public SourceCredentialType getSourceCredentialType() {
         return sourceCredentialType;
     }
 
-    @JsonProperty("source_cred_type")
     public void setSourceCredentialType(SourceCredentialType sourceCredentialType) {
         this.sourceCredentialType = sourceCredentialType;
     }

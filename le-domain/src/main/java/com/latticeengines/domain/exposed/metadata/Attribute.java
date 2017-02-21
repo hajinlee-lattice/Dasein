@@ -116,6 +116,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
     private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
+    
+    @JsonProperty("default_value")
+    private String defaultValue;
 
     @Override
     public Long getPid() {
@@ -886,5 +889,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (getInterfaceName() != null)
             return false;
         return true;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
     }
 }

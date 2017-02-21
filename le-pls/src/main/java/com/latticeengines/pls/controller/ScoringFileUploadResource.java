@@ -98,7 +98,7 @@ public class ScoringFileUploadResource {
 
                 sourceFile = fileUploadService.uploadFile(
                         "file_" + DateTime.now().getMillis() + ".csv",
-                        SchemaInterpretation.TestingData, displayName, stream);
+                        SchemaInterpretation.TestingData, null, displayName, stream);
             } else {
                 if (!stream.markSupported()) {
                     stream = new BufferedInputStream(stream);
@@ -115,7 +115,7 @@ public class ScoringFileUploadResource {
                 }
                 sourceFile = fileUploadService.uploadFile(
                         "file_" + DateTime.now().getMillis() + ".csv",
-                        SchemaInterpretation.TestingData, displayName, stream);
+                        SchemaInterpretation.TestingData, null, displayName, stream);
                 Table table = new Table();
                 table.setPrimaryKey(null);
                 table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));

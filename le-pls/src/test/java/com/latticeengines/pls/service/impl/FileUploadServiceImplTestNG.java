@@ -68,7 +68,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation.SalesforceAccount, null,
+        fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation.SalesforceAccount, null, null,
                 fileInputStream);
 
         String contents = HdfsUtils

@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -60,6 +61,7 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "compressed", required = false) boolean compressed, //
             @RequestParam(value = "displayName", required = true) String csvFileName, //
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
+            @RequestParam(value = "entityExternalType", required = false) EntityExternalType entityExternalType, //
             @RequestParam("file") MultipartFile file) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
@@ -80,7 +82,7 @@ public class ModelingFileUploadResource {
                     csvFileName);
 
             return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName,
-                    schemaInterpretation, csvFileName, stream));
+                    schemaInterpretation, entityExternalType, csvFileName, stream));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
         } finally {
@@ -99,9 +101,10 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "compressed", required = false) boolean compressed, //
             @RequestParam(value = "displayName", required = true) String csvFileName, //
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
+            @RequestParam(value = "entityExternalType", required = false) EntityExternalType entityExternalType, //
             @RequestParam("file") MultipartFile file) {
         return uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName,
-                schemaInterpretation, file);
+                schemaInterpretation, entityExternalType, file);
     }
 
     @RequestMapping(value = "{sourceFileName}/fieldmappings", method = RequestMethod.POST)

@@ -28,6 +28,7 @@ import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
@@ -66,16 +67,16 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDep
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, headers);
         if (unnamed) {
-            String uri = String.format("/pls/models/uploadfile/unnamed?schema=%s&compressed=%s&displayName=%s",
-                    SchemaInterpretation.SalesforceAccount, compressed, displayName);
+            String uri = String.format("/pls/models/uploadfile/unnamed?schema=%s&compressed=%s&displayName=%s&entityExternalType=%s",
+                    SchemaInterpretation.SalesforceAccount, compressed, displayName, EntityExternalType.Account);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,
                     requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {
             });
         } else {
             String filename = DateTime.now().getMillis() + ".csv";
-            String uri = String.format("/pls/models/uploadfile?fileName=%s&schema=%s&compressed=%s&displayName=%s",
-                    filename, SchemaInterpretation.SalesforceAccount, compressed, displayName);
+            String uri = String.format("/pls/models/uploadfile?fileName=%s&schema=%s&compressed=%s&displayName=%s&entityExternalType=%s",
+                    filename, SchemaInterpretation.SalesforceAccount, compressed, displayName, EntityExternalType.Account);
             System.out.println(uri);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,
                     requestEntity, String.class);

@@ -37,6 +37,11 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-cdl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-datacloud</artifactId>
             <version>${project.version}</version>
         </dependency>

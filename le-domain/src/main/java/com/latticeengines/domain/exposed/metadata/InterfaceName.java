@@ -3,8 +3,12 @@ package com.latticeengines.domain.exposed.metadata;
 public enum InterfaceName {
     Id, //
     InternalId, //
+    DUNS, //
     Event, //
     Domain, //
+    AccountId, //
+    CategoryId, //
+    SubcategoryId, //
 
     LastModifiedDate, //
     CreatedDate, //
@@ -13,6 +17,8 @@ public enum InterfaceName {
     LastName, //
     Title, //
     Email, //
+    Salutation, //
+    BirthDate, //
 
     City, //
     State, //
@@ -29,5 +35,8 @@ public enum InterfaceName {
     StageName, //
     AnnualRevenue, //
     NumberOfEmployees, //
-    YearStarted
+    YearStarted, //
+    
+    Quantity, //
+    Amount
 }

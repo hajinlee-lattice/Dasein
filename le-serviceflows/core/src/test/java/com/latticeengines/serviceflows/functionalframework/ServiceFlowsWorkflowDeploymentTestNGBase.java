@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -63,7 +64,7 @@ public abstract class ServiceFlowsWorkflowDeploymentTestNGBase extends WorkflowT
     }
 
     @SuppressWarnings("rawtypes")
-    public SourceFile uploadFile(String resourceBase, String fileName) {
+    public SourceFile uploadFile(String resourceBase, String fileName, EntityExternalType entityExternalType) {
         log.info("Uploading file " + fileName);
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
@@ -73,7 +74,8 @@ public abstract class ServiceFlowsWorkflowDeploymentTestNGBase extends WorkflowT
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/models/uploadfile/unnamed?displayName=%s", plsUrl, fileName), //
+                String.format("%s/pls/models/uploadfile/unnamed?displayName=%s&entityExternalType=%s", //
+                        plsUrl, fileName, entityExternalType.name()), //
                 requestEntity, ResponseDocument.class);
         SourceFile sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
@@ -81,7 +83,7 @@ public abstract class ServiceFlowsWorkflowDeploymentTestNGBase extends WorkflowT
     }
 
     @SuppressWarnings("rawtypes")
-    public void resolveMetadata(SourceFile sourceFile, SchemaInterpretation schemaInterpretation) {
+    public void resolveMetadata(SourceFile sourceFile, SchemaInterpretation schemaInterpretation, EntityExternalType entityExternalType) {
         log.info("Resolving metadata for modeling ...");
         ModelingParameters parameters = new ModelingParameters();
         parameters.setDescription("Test");
@@ -89,8 +91,8 @@ public abstract class ServiceFlowsWorkflowDeploymentTestNGBase extends WorkflowT
 
         sourceFile.setSchemaInterpretation(schemaInterpretation);
         ResponseDocument response = restTemplate.postForObject(
-                String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", plsUrl,
-                        sourceFile.getName(), schemaInterpretation.name()),
+                String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s&entityExternalType=%s", plsUrl,
+                        sourceFile.getName(), schemaInterpretation.name(), entityExternalType.name()),
                 parameters, ResponseDocument.class);
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);

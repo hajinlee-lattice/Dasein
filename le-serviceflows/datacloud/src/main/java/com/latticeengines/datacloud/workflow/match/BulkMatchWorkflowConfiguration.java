@@ -2,13 +2,13 @@ package com.latticeengines.datacloud.workflow.match;
 
 import java.util.Map;
 
+import com.latticeengines.datacloud.workflow.match.steps.ParallelBlockExecutionConfiguration;
+import com.latticeengines.datacloud.workflow.match.steps.PrepareBulkMatchInputConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.datacloud.workflow.match.steps.ParallelBlockExecutionConfiguration;
-import com.latticeengines.datacloud.workflow.match.steps.PrepareBulkMatchInputConfiguration;
 
 public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
 
@@ -34,6 +34,7 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             customerSpace = CustomerSpace.parse(matchInput.getTenant().getId());
             prepareConfig.setCustomerSpace(customerSpace);
             parallelExecConfig.setCustomerSpace(customerSpace);
+            parallelExecConfig.setResultLocation(matchInput.getMatchResultPath());
             prepareConfig.setMatchInput(matchInput);
             InputBuffer inputBuffer = matchInput.getInputBuffer();
             if (inputBuffer instanceof AvroInputBuffer) {

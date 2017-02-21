@@ -135,6 +135,8 @@ public class MatchInput implements Fact, Dimension {
     // Flag to add DnB columns match output file
     @JsonProperty("matchDebugEnabled")
     private boolean matchDebugEnabled;
+    
+    private String matchResultPath;
 
     @JsonProperty("DisableDunsValidation")
     private boolean disableDunsValidation;
@@ -452,6 +454,16 @@ public class MatchInput implements Fact, Dimension {
 
     public void setDisableDunsValidation(boolean disableDunsValidation) {
         this.disableDunsValidation = disableDunsValidation;
+    }
+
+    @JsonProperty("MatchResultLocation")
+    public String getMatchResultPath() {
+        return matchResultPath;
+    }
+
+    @JsonProperty("MatchResultLocation")
+    public void setMatchResultPath(String matchResultPath) {
+        this.matchResultPath = matchResultPath;
     }
 
     @Override

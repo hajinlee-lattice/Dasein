@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.importdata.ImportListOfEntities;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -13,16 +14,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class CDLImportWorkflow extends AbstractWorkflow<CDLImportWorkflowConfiguration> {
 
     @Autowired
-    private ImportAccountData importAccountData;
-
-    @Autowired
-    private ImportContactData importContactData;
-    
-    @Autowired
-    private ImportTimeSeriesData importTimeSeriesData;
-    
-    @Autowired
-    private ImportCategoryData importCategoryData;
+    private ImportListOfEntities importListOfEntities;
 
     @Bean
     public Job cdlImportWorkflowJob() throws Exception {
@@ -32,10 +24,7 @@ public class CDLImportWorkflow extends AbstractWorkflow<CDLImportWorkflowConfigu
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(importAccountData) //
-                .next(importContactData) //
-                .next(importTimeSeriesData) //
-                .next(importCategoryData) //
+                .next(importListOfEntities) //
                 .build();
     }
 

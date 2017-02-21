@@ -141,11 +141,12 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
         attributes.add(attribute);
     }
     
-    
+    @JsonIgnore
     public String getAttributesAsStr() {
         return attributesAsString;
     }
     
+    @JsonIgnore
     public void setAttributesAsStr(String attributesAsString) {
         this.attributesAsString = attributesAsString;
     }
