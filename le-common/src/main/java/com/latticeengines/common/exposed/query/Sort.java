@@ -7,41 +7,41 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Sort {
-    private List<SingleReferenceLookup> lookups;
+    @JsonProperty("lookups")
+    private List<ColumnLookup> lookups;
+    @JsonProperty("descending")
     private boolean descending;
 
-    public Sort(List<SingleReferenceLookup> lookups, boolean descending) {
+    public Sort(List<ColumnLookup> lookups, boolean descending) {
         this.lookups = lookups;
         this.descending = descending;
     }
 
-    public Sort(List<SingleReferenceLookup> lookups) {
+    public Sort(List<ColumnLookup> lookups) {
         this.lookups = lookups;
     }
 
     public Sort() {
-        this(new ArrayList<SingleReferenceLookup>());
+        this(new ArrayList<ColumnLookup>());
     }
 
-    @JsonProperty("lookups")
-    public List<SingleReferenceLookup> getLookups() {
+    public List<ColumnLookup> getLookups() {
         return lookups;
     }
 
-    @JsonProperty("lookups")
-    public void setLookups(List<SingleReferenceLookup> lookups) {
+    public void setLookups(List<ColumnLookup> lookups) {
         this.lookups = lookups;
     }
 
-    @JsonProperty("descending")
     public boolean getDescending() {
         return descending;
     }
 
-    @JsonProperty("descending")
     public void setDescending(boolean descending) {
         this.descending = descending;
     }

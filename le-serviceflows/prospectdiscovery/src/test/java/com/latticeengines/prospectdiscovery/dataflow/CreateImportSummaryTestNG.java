@@ -3,10 +3,10 @@ package com.latticeengines.prospectdiscovery.dataflow;
 import java.util.List;
 
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
-import junit.framework.Assert;
 
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })

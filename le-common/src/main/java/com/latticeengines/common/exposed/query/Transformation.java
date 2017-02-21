@@ -4,11 +4,18 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Transformation {
+    @JsonProperty("type")
     private TransformationType type;
+
+    @JsonProperty("range_start")
     private Integer rangeStart;
+
+    @JsonProperty("range_end")
     private Integer rangeEnd;
 
     public Transformation(TransformationType type, Integer rangeStart, Integer rangeEnd) {
@@ -17,32 +24,26 @@ public class Transformation {
         this.rangeEnd = rangeEnd;
     }
 
-    @JsonProperty("type")
     public TransformationType getType() {
         return type;
     }
 
-    @JsonProperty("type")
     public void setType(TransformationType type) {
         this.type = type;
     }
 
-    @JsonProperty("range_start")
     public Integer getRangeStart() {
         return rangeStart;
     }
 
-    @JsonProperty("range_start")
     public void setRangeStart(Integer rangeStart) {
         this.rangeStart = rangeStart;
     }
 
-    @JsonProperty("range_end")
     public Integer getRangeEnd() {
         return rangeEnd;
     }
 
-    @JsonProperty("range_end")
     public void setRangeEnd(Integer rangeEnd) {
         this.rangeEnd = rangeEnd;
     }

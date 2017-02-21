@@ -3,19 +3,17 @@ package com.latticeengines.prospectdiscovery.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.query.ReferenceInterpretation;
-import com.latticeengines.common.exposed.query.SingleReferenceLookup;
+import com.latticeengines.common.exposed.query.ColumnLookup;
 import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.dataflow.exposed.builder.Node;
+import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.Node;
-import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.pls.IntentScore;
@@ -170,9 +168,8 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
     }
 
     private Node sortByFit(Node last, String modelId) {
-        SingleReferenceLookup lookup = new SingleReferenceLookup(String.format("Score_%s", modelId),
-                ReferenceInterpretation.COLUMN);
-        List<SingleReferenceLookup> lookups = new ArrayList<>();
+        ColumnLookup lookup = new ColumnLookup(String.format("Score_%s", modelId));
+        List<ColumnLookup> lookups = new ArrayList<>();
         lookups.add(lookup);
         Sort sort = new Sort(lookups, true);
         return last.sort(sort);

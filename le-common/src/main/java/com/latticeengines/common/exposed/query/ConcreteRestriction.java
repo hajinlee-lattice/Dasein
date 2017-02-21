@@ -7,15 +7,21 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ConcreteRestriction extends Restriction {
+    @JsonProperty("negate")
     private boolean negate;
+    @JsonProperty("lhs")
     private Lookup lhs;
+    @JsonProperty("relation")
     private ComparisonType relation;
+    @JsonProperty("rhs")
     private Lookup rhs;
 
     public ConcreteRestriction(boolean negate, Lookup lhs, ComparisonType relation, Lookup rhs) {
@@ -25,42 +31,34 @@ public class ConcreteRestriction extends Restriction {
         this.rhs = rhs;
     }
 
-    @JsonProperty("lhs")
     public Lookup getLhs() {
         return lhs;
     }
 
-    @JsonProperty("lhs")
     public void setLhs(Lookup lhs) {
         this.lhs = lhs;
     }
 
-    @JsonProperty("relation")
     public ComparisonType getRelation() {
         return relation;
     }
 
-    @JsonProperty("relation")
     public void setRelation(ComparisonType relation) {
         this.relation = relation;
     }
 
-    @JsonProperty("rhs")
     public Lookup getRhs() {
         return rhs;
     }
 
-    @JsonProperty("rhs")
     public void setRhs(Lookup rhs) {
         this.rhs = rhs;
     }
 
-    @JsonProperty("negate")
     public boolean getNegate() {
         return negate;
     }
 
-    @JsonProperty("negate")
     public void setNegate(boolean negate) {
         this.negate = negate;
     }

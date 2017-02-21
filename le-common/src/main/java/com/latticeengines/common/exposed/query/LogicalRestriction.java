@@ -8,13 +8,17 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LogicalRestriction extends Restriction {
+    @JsonProperty("connective")
     private Connective connective;
+    @JsonProperty("restrictions")
     private List<Restriction> restrictions;
 
     public LogicalRestriction(Connective connective, List<Restriction> restrictions) {
@@ -22,22 +26,18 @@ public class LogicalRestriction extends Restriction {
         this.restrictions = restrictions;
     }
 
-    @JsonProperty("connective")
     public Connective getConnective() {
         return connective;
     }
 
-    @JsonProperty("connective")
     public void setConnective(Connective connective) {
         this.connective = connective;
     }
 
-    @JsonProperty("restrictions")
     public List<Restriction> getRestrictions() {
         return restrictions;
     }
 
-    @JsonProperty("restrictions")
     public void setRestrictions(List<Restriction> restrictions) {
         this.restrictions = restrictions;
     }

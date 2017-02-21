@@ -14,8 +14,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.latticeengines.common.exposed.query.ReferenceInterpretation;
-import com.latticeengines.common.exposed.query.SingleReferenceLookup;
+import com.latticeengines.common.exposed.query.ColumnLookup;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
@@ -33,8 +32,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             @Override
             public Node construct(DataFlowParameters parameters) {
                 Node lead = addSource("Lead");
-                List<SingleReferenceLookup> lookups = new ArrayList<>();
-                lookups.add(new SingleReferenceLookup("Email", ReferenceInterpretation.COLUMN));
+                List<ColumnLookup> lookups = new ArrayList<>();
+                lookups.add(new ColumnLookup("Email"));
                 Sort sort = new Sort(lookups);
                 return lead.sort(sort);
             }

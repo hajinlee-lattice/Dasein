@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=As.WRAPPER_OBJECT, property="property")
 @JsonSubTypes({
     @Type(value=MathematicalLookup.class, name="mathematicalLookup"),
-    @Type(value=SingleReferenceLookup.class, name="singleReferenceLookup"),
+    @Type(value=ColumnLookup.class, name="columnLookup"),
 })
 public abstract class Lookup {
 }
