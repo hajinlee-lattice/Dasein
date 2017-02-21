@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -64,12 +65,11 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         FieldList finalFields = new FieldList(allFields.toArray(new String[allFields.size()]));
 
         am = am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
-        return am //
-                .innerJoin(new FieldList(LATTICE_ID), badDataMrkd, new FieldList(LATTICE_ID)) //
-                .innerJoin(new FieldList(LATTICE_ID), oobMkrd, new FieldList(LATTICE_ID)) //
-                .innerJoin(new FieldList(LATTICE_ID), orphanMrkd, new FieldList(LATTICE_ID)) //
-                .innerJoin(new FieldList(LATTICE_ID), smBusiMrkd, new FieldList(LATTICE_ID)) //
-                .innerJoin(new FieldList(LATTICE_ID), alexaMrkd, new FieldList(LATTICE_ID)) //
+        FieldList idField = new FieldList(LATTICE_ID);
+        return am.coGroup(idField,
+                Arrays.asList(badDataMrkd, oobMkrd, orphanMrkd, smBusiMrkd, alexaMrkd),
+                Arrays.asList(idField, idField, idField, idField, idField),
+                JoinType.INNER) //
                 .retain(finalFields);
     }
 
