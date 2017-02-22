@@ -21,7 +21,7 @@ public class DenormalizeIntoListBuffer extends BaseGroupbyBuffer {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
+    protected Tuple setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
         List<Tuple> list = new ArrayList<>();
         while (argumentsInGroup.hasNext()) {
             
@@ -37,6 +37,7 @@ public class DenormalizeIntoListBuffer extends BaseGroupbyBuffer {
             list.add(tuple);
         }
         result.set(namePositionMap.get(listFeatureName.toLowerCase()), list);
+        return result;
     }
 
 }

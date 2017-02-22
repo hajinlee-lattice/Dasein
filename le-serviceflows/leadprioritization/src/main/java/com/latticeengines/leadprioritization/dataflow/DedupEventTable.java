@@ -1,5 +1,8 @@
 package com.latticeengines.leadprioritization.dataflow;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -79,6 +82,7 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
 
             last = last.merge(emptyDomains);
         }
+        last = removeInternalAttrs(last);
         return last;
     }
 
@@ -97,6 +101,17 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
                     lastModifiedField, eventColumn, eventColumn, lastModifiedField, optimalCreationTime);
             return last.addFunction(expression, new FieldList(eventColumn, lastModifiedField), targetField);
         }
+    }
+
+    private Node removeInternalAttrs(Node node) {
+        List<String> internalAttrs = new ArrayList<>();
+        if (node.getFieldNames().contains(INT_LDC_DEDUPE_ID)) {
+            internalAttrs.add(INT_LDC_DEDUPE_ID);
+        }
+        if (!internalAttrs.isEmpty()) {
+            node = node.discard(new FieldList(internalAttrs));
+        }
+        return node;
     }
 
 }

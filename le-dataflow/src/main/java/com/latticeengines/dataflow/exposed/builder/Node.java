@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.exposed.builder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.BitDecodeOperation
 import com.latticeengines.dataflow.exposed.builder.operations.BitEncodeOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.DepivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndAggOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndBufferOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.JythonFunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
@@ -39,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
+import cascading.operation.Aggregator;
 import cascading.operation.Buffer;
 import cascading.operation.Function;
 import cascading.operation.buffer.FirstNBuffer;
@@ -163,6 +166,30 @@ public class Node {
                 fieldMetadatas)), builder);
     }
 
+    @SuppressWarnings("rawtypes")
+    public Node groupByAndAggregate(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer, boolean descending) {
+        return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Node groupByAndAggregate(FieldList groupByFieldList, FieldList sortFieldList, Aggregator aggregator,
+                                 boolean descending, boolean caseInsensitive) {
+        return new Node(builder.register(new GroupByAndAggOperation(opInput(identifier), groupByFieldList,
+                sortFieldList, aggregator, descending, caseInsensitive)), builder);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Node groupByAndAggregate(FieldList groupByFieldList, Aggregator aggregator) {
+        return new Node(builder.register(new GroupByAndAggOperation(opInput(identifier), groupByFieldList, aggregator)),
+                builder);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Node groupByAndAggregate(FieldList groupByFieldList, Aggregator aggregator, List<FieldMetadata> fieldMetadatas) {
+        return new Node(builder.register(new GroupByAndAggOperation(opInput(identifier), groupByFieldList, aggregator,
+                fieldMetadatas)), builder);
+    }
+
     public Node groupByAndExpand(FieldList groupByFieldList, String expandField, List<String> expandFormats, //
             FieldList argumentsFieldList, FieldList declaredFieldList) {
         return new Node(builder.addGroupByAndExpand(identifier, groupByFieldList, expandField, //
@@ -231,8 +258,11 @@ public class Node {
     }
 
     public Node apply(Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply,
-                targetField)), builder);
+        return apply(function, fieldsToApply, Collections.singletonList(targetField), null);
+    }
+
+    public Node apply(Function<?> function, FieldList fieldsToApply, FieldMetadata targetField, FieldList outputFields) {
+        return apply(function, fieldsToApply, Collections.singletonList(targetField), outputFields);
     }
 
     public Node apply(Function<?> function, FieldList fieldsToApply, List<FieldMetadata> targetFields,
@@ -305,6 +335,15 @@ public class Node {
 
     public Node merge(Node rhs) {
         return new Node(builder.register(new MergeOperation(opInput(identifier), opInput(rhs.identifier))), builder);
+    }
+
+    public Node merge(List<Node> rhs) {
+        Operation.Input[] seeds = new Operation.Input[rhs.size() + 1];
+        seeds[0] = opInput(identifier);
+        for (int i = 0; i < rhs.size(); i++) {
+            seeds[i + 1] = opInput(rhs.get(i).identifier);
+        }
+        return new Node(builder.register(new MergeOperation(seeds)), builder);
     }
 
     public Node limit(int count) {

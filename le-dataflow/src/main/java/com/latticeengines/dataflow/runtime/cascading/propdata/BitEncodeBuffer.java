@@ -50,7 +50,8 @@ public class BitEncodeBuffer extends BaseGroupbyBuffer implements Buffer, Serial
         this.encodeFieldPos = namePositionMap.get(encodedField.toLowerCase());
     }
 
-    protected void setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
+    @Override
+    protected Tuple setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
         List<Integer> trueBits = new ArrayList<>();
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
@@ -63,6 +64,7 @@ public class BitEncodeBuffer extends BaseGroupbyBuffer implements Buffer, Serial
         } catch (IOException e) {
             log.error("Failed to encode " + encodedField, e);
         }
+        return result;
     }
 
     private List<Integer> trueBits(TupleEntry arguments, BitCodeBook codeBook) {

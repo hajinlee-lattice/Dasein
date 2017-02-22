@@ -21,6 +21,7 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowF
 public class DedupEventTableDP3288TestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void test() {
+        initialize();
         verifySource();
 
         DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable", "PublicDomain");

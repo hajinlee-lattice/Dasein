@@ -1,5 +1,20 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_ADDRESS;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CACHE_HIT;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CITY;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CONFIDENCE_CODE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_COUNTRY_CODE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_DUNS;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_MATCH_GRADE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_NAME;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_PHONE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_STATE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_ZIPCODE;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
@@ -335,9 +350,15 @@ public class ProcessorContext {
         outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                 jobConfiguration.getMatchInput().getDataCloudVersion());
 
+        // sequence is very important in outputschema
+        // am output attr -> dedupe -> debug
+        // the same sequence will be used in writeDataToAvro
         matchDebugEnabled = jobConfiguration.getMatchInput().isMatchDebugEnabled();
+        log.info("Need to prepare for dedupe: " + originalInput.isPrepareForDedupe());
+        if (originalInput.isPrepareForDedupe()) {
+            outputSchema = appendDedupeHelpers(outputSchema);
+        }
         log.info("Match Debug Enabled=" + matchDebugEnabled);
-        ;
         if (matchDebugEnabled) {
             outputSchema = appendDebugSchema(outputSchema);
         }
@@ -350,19 +371,28 @@ public class ProcessorContext {
 
     private Schema appendDebugSchema(Schema schema) {
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
-        fieldMap.put("__Matched_DUNS__", String.class);
-        fieldMap.put("__Matched_Confidence_Code__", String.class);
-        fieldMap.put("__Matched_Match_Grade__", String.class);
-        fieldMap.put("__Matched_Cache_Hit__", String.class);
-        fieldMap.put("__Matched_Name__", String.class);
-        fieldMap.put("__Matched_Address__", String.class);
-        fieldMap.put("__Matched_City__", String.class);
-        fieldMap.put("__Matched_State__", String.class);
-        fieldMap.put("__Matched_Country_Code__", String.class);
-        fieldMap.put("__Matched_Zipcode__", String.class);
-        fieldMap.put("__Matched_Phone__", String.class);
+        fieldMap.put(INT_MATCHED_DUNS, String.class);
+        fieldMap.put(INT_MATCHED_CONFIDENCE_CODE, String.class);
+        fieldMap.put(INT_MATCHED_MATCH_GRADE, String.class);
+        fieldMap.put(INT_MATCHED_CACHE_HIT, String.class);
+        fieldMap.put(INT_MATCHED_NAME, String.class);
+        fieldMap.put(INT_MATCHED_ADDRESS, String.class);
+        fieldMap.put(INT_MATCHED_CITY, String.class);
+        fieldMap.put(INT_MATCHED_STATE, String.class);
+        fieldMap.put(INT_MATCHED_COUNTRY_CODE, String.class);
+        fieldMap.put(INT_MATCHED_ZIPCODE, String.class);
+        fieldMap.put(INT_MATCHED_PHONE, String.class);
         Schema debugSchema = AvroUtils.constructSchema(schema.getName(), fieldMap);
         return (Schema) AvroUtils.combineSchemas(schema, debugSchema)[0];
+    }
+
+    private Schema appendDedupeHelpers(Schema schema) {
+        Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
+        fieldMap.put(INT_LDC_PREMATCH_DOMAIN, String.class);
+        fieldMap.put(INT_LDC_LOC_CHECKSUM, String.class);
+        fieldMap.put(INT_LDC_POPULATED_ATTRS, Integer.class);
+        Schema dedupeSchema = AvroUtils.constructSchema(schema.getName(), fieldMap);
+        return (Schema) AvroUtils.combineSchemas(schema, dedupeSchema)[0];
     }
 
     private void cleanup() throws IOException {

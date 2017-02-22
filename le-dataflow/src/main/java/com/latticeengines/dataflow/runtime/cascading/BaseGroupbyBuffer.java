@@ -37,10 +37,19 @@ public abstract class BaseGroupbyBuffer extends BaseOperation implements Buffer 
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
         Tuple result = Tuple.size(getFieldDeclaration().size());
         TupleEntry group = bufferCall.getGroup();
-        setupTupleForGroup(result, group);
-        Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
-        setupTupleForArgument(result, arguments);
-        bufferCall.getOutputCollector().add(result);
+        if (shouldSkipGroup(group)) {
+            return;
+        }
+        if (shouldFlushGroup(group)) {
+            flushGroup(bufferCall);
+        } else {
+            setupTupleForGroup(result, group);
+            Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
+            result = setupTupleForArgument(result, arguments);
+            if (result != null) {
+                bufferCall.getOutputCollector().add(result);
+            }
+        }
     }
 
     private void setupTupleForGroup(Tuple result, TupleEntry group) {
@@ -56,6 +65,22 @@ public abstract class BaseGroupbyBuffer extends BaseOperation implements Buffer 
         }
     }
 
-    protected abstract void setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup);
+    protected boolean shouldSkipGroup(TupleEntry group) {
+        return false;
+    }
+
+    protected boolean shouldFlushGroup(TupleEntry group) {
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void flushGroup(BufferCall bufferCall) {
+        Iterator<TupleEntry> iter = bufferCall.getArgumentsIterator();
+        while (iter.hasNext()) {
+            bufferCall.getOutputCollector().add(iter.next());
+        }
+    }
+
+    protected abstract Tuple setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup);
 
 }

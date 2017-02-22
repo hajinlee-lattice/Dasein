@@ -57,8 +57,9 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
 
     @Override
     public Workflow defineWorkflow() {
-        return new WorkflowBuilder().next(dedupEventTable) //
+        return new WorkflowBuilder() //
                 .next(matchDataCloudWorkflow) //
+                .next(dedupEventTable) //
                 .next(addStandardAttributes) //
                 .next(resolveMetadataFromUserRefinedAttributes) //
                 .next(modelWorkflow) //

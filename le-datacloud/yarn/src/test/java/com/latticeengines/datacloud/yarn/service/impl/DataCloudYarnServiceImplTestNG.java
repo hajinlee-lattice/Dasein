@@ -23,6 +23,7 @@ import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.datacloud.yarn.testframework.DataCloudYarnFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
@@ -33,7 +34,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestNGBase {
 
     private static final String avroDir = "/tmp/PropDataYarnServiceTestNG";
-    private static final String fileName = "BulkMatchInput.avro";
     private static final String podId = "PropDataYarnServiceImplTestNG";
 
     @Autowired
@@ -55,36 +55,19 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
 
     @Test(groups = "functional")
     public void testMatchBlockInYarnContainer() throws Exception {
+        String fileName = "BulkMatchInput.avro";
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
-
         String avroPath = avroDir + "/" + fileName;
-        String latestDataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
 
-        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
-        Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(schema);
-
-        MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant("DCTest"));
-        matchInput.setPredefinedSelection(Predefined.RTS);
-        matchInput.setDataCloudVersion(latestDataCloudVersion);
-        matchInput.setKeyMap(keyMap);
-
-        DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
-        jobConfiguration.setHdfsPodId(podId);
-        jobConfiguration.setName("DataCloudMatchBlock");
-        jobConfiguration.setCustomerSpace(CustomerSpace.parse("DCTest"));
-        jobConfiguration.setAvroPath(avroPath);
-        jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
-        jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
-        jobConfiguration.setBlockOperationUid(UUID.randomUUID().toString().toUpperCase());
-        jobConfiguration.setThreadPoolSize(4);
-        jobConfiguration.setGroupSize(10);
-        jobConfiguration.setMatchInput(matchInput);
+        DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
+        jobConfiguration.getMatchInput().setPrepareForDedupe(true);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        verifyDedupeHelpers(jobConfiguration);
     }
 
     @Test(groups = "functional")
@@ -92,23 +75,44 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         String fileName = "BulkMatchInput_NoMatch.avro";
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
-
         String avroPath = avroDir + "/" + fileName;
-        String latestDataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
+        DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
+        ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
 
+    private void verifyDedupeHelpers(DataCloudJobConfiguration jobConfiguration) throws Exception {
+        String rootUid = jobConfiguration.getRootOperationUid();
+        String blockUid = jobConfiguration.getBlockOperationUid();
+        String blockDir = hdfsPathBuilder.constructMatchBlockDir(rootUid, blockUid).toString();
+        AvroUtils.iterator(yarnConfiguration, blockDir + "/*.avro").forEachRemaining(record -> {
+            Object dom = record.get(MatchConstants.INT_LDC_PREMATCH_DOMAIN);
+            Object loc = record.get(MatchConstants.INT_LDC_LOC_CHECKSUM);
+            Object pop = record.get(MatchConstants.INT_LDC_POPULATED_ATTRS);
+            System.out.println(record.get("ID") + " : " + dom + " - " + loc + " - " + pop);
+            Assert.assertNotNull(loc);
+            String checksum = loc.toString();
+            Assert.assertNotNull(checksum);
+            Assert.assertNotNull(pop);
+            Assert.assertTrue(pop instanceof Integer);
+        });
+    }
+
+    private DataCloudJobConfiguration jobConfiguration(String avroPath) {
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(schema);
 
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant("DCTest"));
         matchInput.setPredefinedSelection(Predefined.RTS);
-        matchInput.setDataCloudVersion(latestDataCloudVersion);
+        matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         matchInput.setKeyMap(keyMap);
 
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);
         jobConfiguration.setName("DataCloudMatchBlock");
-        jobConfiguration.setCustomerSpace(CustomerSpace.parse("DCTest"));
+        jobConfiguration.setCustomerSpace(CustomerSpace.parse("LDCTest"));
         jobConfiguration.setAvroPath(avroPath);
         jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
         jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
@@ -117,9 +121,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         jobConfiguration.setGroupSize(10);
         jobConfiguration.setMatchInput(matchInput);
 
-        ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
-        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        return jobConfiguration;
     }
 
 }

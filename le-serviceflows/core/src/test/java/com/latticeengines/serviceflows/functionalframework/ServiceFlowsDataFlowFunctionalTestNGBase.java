@@ -17,6 +17,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -51,7 +52,7 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
     private boolean local = getenv("SERVICEFLOWS_LOCAL", true, Boolean.class);
     private String engine = getenv("SERVICEFLOWS_ENGINE", "FLINK", String.class);
     protected static final String AVRO_INPUT = "AvroInput";
-    private static final String AVRO_DIR = "/tmp/avro/";
+    protected static final String AVRO_DIR = "/tmp/avro";
 
     private static final Log log = LogFactory.getLog(ServiceFlowsDataFlowFunctionalTestNGBase.class);
 
@@ -65,10 +66,6 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
     protected abstract String getFlowBeanName();
 
     protected String getScenarioName() {
-        return null;
-    }
-
-    protected String getSharedInputDir() {
         return null;
     }
 
@@ -107,30 +104,49 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/checkpoints");
         HdfsUtils.rmdir(yarnConfiguration, AVRO_DIR);
 
+    }
+
+    protected void initialize() {
+        try {
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources(getDirectory() + "/*/*.avro");
-            if (getSharedInputDir() != null) {
-                Resource[] sharedResources = resolver.getResources(getSharedInputDir() + "/*.avro");
-                ArrayUtils.addAll(resources, sharedResources);
+            Resource[] sourceResources = new Resource[] {};
+            try {
+                sourceResources = resolver.getResources(getDirectory() + "/*/*.avro");
+                log.info("Resolved resources for " + getDirectory());
+            } catch (Exception e) {
+                log.warn("Cannot resolve resource for " + getDirectory());
             }
+
             sourcePaths = new HashMap<>();
-            for (Resource resource : resources) {
+            for (Resource resource : sourceResources) {
                 String path = resource.getFile().getAbsolutePath();
                 String[] parts = path.split("\\/");
                 sourcePaths.put(parts[parts.length - 2], path);
             }
-
             if (!local) {
                 List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
                 Map<String, String> modifiedSourcePaths = new HashMap<>();
                 for (String key : sourcePaths.keySet()) {
-                    String hdfsDestination = AVRO_DIR + key + ".avro";
+                    String hdfsDestination = AVRO_DIR + "/" + key + ".avro";
                     entries.add(new AbstractMap.SimpleEntry<>(sourcePaths.get(key), hdfsDestination));
                     modifiedSourcePaths.put(key, hdfsDestination);
                 }
                 copy(entries);
                 sourcePaths = modifiedSourcePaths;
+            }
+            if (HdfsUtils.fileExists(yarnConfiguration, AVRO_DIR + "/" + AVRO_INPUT + ".avro")) {
+                sourcePaths.put(AVRO_INPUT, AVRO_DIR + "/" + AVRO_INPUT + ".avro");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -138,9 +154,15 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
 
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources(getDirectory() + "/*/*.json");
+            Resource[] templateResources = new Resource[] {};
+            try {
+                templateResources = resolver.getResources(getDirectory() + "/*/*.json");
+            } catch (Exception e) {
+                log.warn("Cannot resolve template for " + getDirectory());
+            }
+
             templatePaths = new HashMap<>();
-            for (Resource resource : resources) {
+            for (Resource resource : templateResources) {
                 String path = resource.getFile().getAbsolutePath();
                 String[] parts = path.split("\\/");
                 templatePaths.put(parts[parts.length - 2], path);
@@ -151,10 +173,12 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
     }
 
     protected Table executeDataFlow() {
+        initialize();
         return executeDataFlow(new DataFlowParameters());
     }
 
     protected Table executeDataFlow(DataFlowParameters parameters) {
+        initialize();
         DataFlowContext context = createDataFlowContext(parameters);
         String beanName = getFlowBeanName();
         return dataTransformationService.executeNamedTransformation(context, beanName);
@@ -259,26 +283,26 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
         throw new RuntimeException(String.format("Could not find source with name %s", source));
     }
 
-    protected void uploadDataToSharedAvroInput(Object[][] data, List<String> colNames, List<Class<?>> colTypes) {
+    protected void uploadDataToSharedAvroInput(Object[][] data, List<Pair<String, Class<?>>> columns) {
         Map<String, Class<?>> schemaMap = new HashMap<>();
-        for (int i = 0; i < colNames.size(); i++) {
-            schemaMap.put(colNames.get(i), colTypes.get(i));
+        for (int i = 0; i < columns.size(); i++) {
+            schemaMap.put(columns.get(i).getKey(), columns.get(i).getValue());
         }
         Schema schema = AvroUtils.constructSchema(AVRO_INPUT, schemaMap);
         List<GenericRecord> records = new ArrayList<>();
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         for (Object[] tuple : data) {
-            for (int i = 0; i < colNames.size(); i++) {
-                builder.set(colNames.get(i), tuple[i]);
+            for (int i = 0; i < columns.size(); i++) {
+                builder.set(columns.get(i).getKey(), tuple[i]);
             }
             records.add(builder.build());
         }
         String fileName = AVRO_INPUT + ".avro";
         try {
-            if (HdfsUtils.fileExists(yarnConfiguration, AVRO_DIR + fileName)) {
-                HdfsUtils.rmdir(yarnConfiguration, AVRO_DIR + fileName);
+            if (HdfsUtils.fileExists(yarnConfiguration, AVRO_DIR + "/" + fileName)) {
+                HdfsUtils.rmdir(yarnConfiguration, AVRO_DIR + "/" + fileName);
             }
-            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, AVRO_DIR + fileName, records);
+            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, AVRO_DIR + "/" + fileName, records);
         } catch (Exception e) {
             Assert.fail("Failed to upload " + fileName, e);
         }
@@ -345,7 +369,8 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
         });
     }
 
-    protected boolean identicalSets(List<GenericRecord> left, String leftId, List<GenericRecord> right, String rightId) {
+    protected boolean identicalSets(List<GenericRecord> left, String leftId, List<GenericRecord> right,
+            String rightId) {
         return allEntriesExist(left, leftId, right, rightId) && allEntriesExist(right, rightId, left, leftId);
     }
 
