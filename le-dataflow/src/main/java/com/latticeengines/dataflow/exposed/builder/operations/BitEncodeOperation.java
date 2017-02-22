@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.dataflow.runtime.cascading.propdata.BitEncodeBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.BitEncodeAggregator;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
-import cascading.operation.Buffer;
+import cascading.operation.Aggregator;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.tuple.Fields;
@@ -25,7 +25,7 @@ public class BitEncodeOperation extends Operation {
             fieldNames[i] = field.getFieldName();
         }
 
-        Buffer<?> buffer = new BitEncodeBuffer(new Fields(fieldNames), keyField, valueField, encodedField, codeBook);
+        Aggregator<?> aggregator = new BitEncodeAggregator(new Fields(fieldNames), keyField, valueField, encodedField, codeBook);
 
         Fields fieldsWithComparator = new Fields(groupyByFields);
         List<String> groupByKeys = Arrays.asList(groupyByFields);
@@ -36,7 +36,7 @@ public class BitEncodeOperation extends Operation {
         }
         GroupBy groupby = new GroupBy(prior.pipe, fieldsWithComparator);
 
-        this.pipe = new Every(groupby, buffer, Fields.RESULTS);
+        this.pipe = new Every(groupby, aggregator, Fields.RESULTS);
     }
 
     private List<FieldMetadata> constructMetadata(List<FieldMetadata> originalMetadataList, String[] groupyByFields,

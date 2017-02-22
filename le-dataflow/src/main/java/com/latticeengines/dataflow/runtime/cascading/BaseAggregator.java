@@ -38,6 +38,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
+    @Override
     public void start( FlowProcess flowProcess,
                        AggregatorCall<T> aggregatorCall )
     {
@@ -48,6 +49,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         aggregatorCall.setContext( context );
     }
 
+    @Override
     public void aggregate(FlowProcess flowProcess,
                           AggregatorCall<T> aggregatorCall )
     {
@@ -59,6 +61,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         }
     }
 
+    @Override
     public void complete(FlowProcess flowProcess,
                          AggregatorCall<T> aggregatorCall )
     {
@@ -70,6 +73,19 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
             }
         } else {
             aggregatorCall.getOutputCollector().add( dummyTuple(context) );
+        }
+    }
+
+    protected void setupTupleForGroup(Tuple result, TupleEntry group) {
+        Fields fields = group.getFields();
+        for (Object field : fields) {
+            String fieldName = (String) field;
+            Integer loc = namePositionMap.get(fieldName.toLowerCase());
+            if (loc != null && loc >= 0) {
+                result.set(loc, group.getObject(fieldName));
+            } else {
+                System.out.println("Warning: can not find field name=" + fieldName);
+            }
         }
     }
 

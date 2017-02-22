@@ -4,9 +4,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -14,30 +12,34 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
-import com.latticeengines.dataflow.runtime.cascading.BaseGroupbyBuffer;
+import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
-import cascading.operation.Buffer;
+import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings("rawtypes")
-public class BitEncodeBuffer extends BaseGroupbyBuffer implements Buffer, Serializable {
+public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Context>
+        implements Aggregator<BitEncodeAggregator.Context> {
+
+    public static class Context extends BaseAggregator.Context {
+        List<Integer> trueBits = new ArrayList<>();
+    }
 
     private static final long serialVersionUID = -8024820880116725433L;
-    private static final Log log = LogFactory.getLog(BitEncodeBuffer.class);
+    private static final Log log = LogFactory.getLog(BitEncodeAggregator.class);
 
     private final BitCodeBook codeBook;
     private final String encodedField;
     private final String keyField;
 
     @SuppressWarnings("unused")
-	private final String valueField;
+    private final String valueField;
 
     private final int encodeFieldPos;
 
-    public BitEncodeBuffer(Fields fieldDeclaration, String keyField, String valueField, String encodedField,
+    public BitEncodeAggregator(Fields fieldDeclaration, String keyField, String valueField, String encodedField,
             BitCodeBook codeBook) {
         super(fieldDeclaration);
         if (codeBook.getEncodeAlgo() == null) {
@@ -50,14 +52,24 @@ public class BitEncodeBuffer extends BaseGroupbyBuffer implements Buffer, Serial
         this.encodeFieldPos = namePositionMap.get(encodedField.toLowerCase());
     }
 
-    @Override
-    protected Tuple setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
-        List<Integer> trueBits = new ArrayList<>();
-        while (argumentsInGroup.hasNext()) {
-            TupleEntry arguments = argumentsInGroup.next();
-            trueBits.addAll(trueBits(arguments, codeBook));
-        }
+    protected boolean isDummyGroup(TupleEntry group) {
+        return false;
+    }
+
+    protected Context initializeContext() {
+        return new Context();
+    }
+
+    protected Context updateContext(Context context, TupleEntry arguments) {
+        context.trueBits.addAll(trueBits(arguments, codeBook));
+        return context;
+    }
+
+    protected Tuple finalizeContext(Context context) {
+        Tuple result = Tuple.size(fieldDeclaration.size());
+        setupTupleForGroup(result, context.groupTuple);
         try {
+            List<Integer> trueBits = context.trueBits;
             int[] trueBitsArray = ArrayUtils.toPrimitive(trueBits.toArray(new Integer[trueBits.size()]));
             String value = BitCodecUtils.encode(trueBitsArray);
             result.set(encodeFieldPos, value);
