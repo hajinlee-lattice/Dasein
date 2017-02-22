@@ -135,7 +135,6 @@
                             </ul>
                         </div>
                     </span>
-                    <!-- disabled for now since it's not actually in the spec, though it seems like it should be
                     <ul class="controls noselect" ng-if="!vm.lookupMode && !vm.category">
                         <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[vm.category] = {}">
                             <div class="button"
@@ -148,7 +147,6 @@
                             </div>
                         </li>
                     </ul>
-                    -->
                 </div>
             </li>
         </ul>
@@ -335,7 +333,9 @@
                                 <div class="button"
                                         ng-class="{'selected': openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}"
                                         ng-click="openHighlighter[enrichment.FieldName].open = !openHighlighter[enrichment.FieldName].open">
-                                    <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">{{openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}</span>
+                                    <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">
+                                        {{openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}
+                                    </span>
                                     <ul ng-class="{open: openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
                                         <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}" ng-click="openHighlighter[enrichment.FieldName].state = vm.setFlags(type, enrichment)">{{label}}</li>
                                     </ul>

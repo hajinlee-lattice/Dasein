@@ -120,7 +120,7 @@ angular.module('common.datacloud.explorer', [
             notify: false 
         });
     }
-    
+
     var clearFilters = function() {
         for(var i in vm.metadata.toggle) {
             for(var j in vm.metadata.toggle[i]) {
@@ -577,18 +577,12 @@ angular.module('common.datacloud.explorer', [
 
     vm.setFlagsByCategory = function(type, category, subcategory){
         var opts = {
-                categoryName: category,
-                subcategoryName: subcategory
-            },
-            flags = {
-                hidden: (type === 'enabled' ? false : true),
-            },
-            label = vm.highlightTypesCategory[type] || 'unknown type',
-            enabled = false;
-
-        if(type === 'disabled') {
-            flags.highlighted = false;
-        }
+            categoryName: category,
+            subcategoryName: subcategory
+        },
+        flags = {
+            hidden: (type === 'enabled' ? false : true),
+        };
 
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
@@ -600,15 +594,33 @@ angular.module('common.datacloud.explorer', [
             }
             for(var i in enrichments) {
                 var enrichment = enrichments[i],
-                    _flags = flags;
-                if(flags.highlighted !== false) {
-                    flags.highlighted = enrichment.AttributeFlagsMap.CompanyProfile.highlighted;
-                }
-                vm.enrichments.find(function(i){return i.FieldName === enrichment.FieldName;}).AttributeFlagsMap.CompanyProfile = _flags;
+                flags = {},
+                label = (enrichment.HighlightHighlighted ? enrichment.HighlightState.label : vm.highlightTypes[type]),
+                wasHighlighted = enrichment.HighlightHighlighted,
+                _type = type;
 
-                enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: _flags.highlighted};
+                if(type === 'disabled') {
+                    label = vm.highlightTypes[type];
+                    flags.highlighted = false;
+                    flags.hidden = true;
+                    enrichment.HighlightHighlighted = false;
+                    enrichment.HighlightState.highlighted = false;
+                }
+                
+                if(type === 'enabled') {
+                    flags.hidden = false;
+                    if(wasHighlighted) {
+                        _type = 'highlighted';
+                    }
+                }
+
+                enrichment.AttributeFlagsMap.CompanyProfile.hidden = flags.hidden
                 enrichment.HighlightHidden = flags.hidden;
-                enrichment.HighlightHighlighted = _flags.highlighted;
+                enrichment.HighlightState.type = _type;
+                enrichment.HighlightState.label = label;
+                enrichment.HighlightState.enabled = !flags.hidden;
+
+                flags = {};
             }
             DataCloudStore.updateEnrichments(vm.enrichments);
 
