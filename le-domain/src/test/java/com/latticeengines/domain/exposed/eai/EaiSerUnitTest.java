@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 
 public class EaiSerUnitTest {
     @Test(groups = "unit")
@@ -43,5 +44,19 @@ public class EaiSerUnitTest {
         EaiJobConfiguration jobConfig = JsonUtils.deserialize(s, EaiJobConfiguration.class);
         assertEquals(((SftpToHdfsRouteConfiguration) jobConfig).getFileName(), "aaa");
         assertEquals(((SftpToHdfsRouteConfiguration) jobConfig).getSftpDir(), "bbb");
+    }
+
+    @Test(groups = "unit")
+    public void testSer4() {
+        HdfsToRedshiftConfiguration conf = new HdfsToRedshiftConfiguration();
+        RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
+        redshiftTableConfig.setTableName("aaa");
+        conf.setRedshiftTableConfiguration(redshiftTableConfig);
+        conf.setJsonPathPrefix("bbb");
+        String s = JsonUtils.serialize(conf);
+        System.out.println(s);
+        EaiJobConfiguration jobConfig = JsonUtils.deserialize(s, EaiJobConfiguration.class);
+        assertEquals(((HdfsToRedshiftConfiguration) jobConfig).getRedshiftTableConfiguration().getTableName(), "aaa");
+        assertEquals(((HdfsToRedshiftConfiguration) jobConfig).getJsonPathPrefix(), "bbb");
     }
 }

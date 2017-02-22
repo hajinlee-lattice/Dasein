@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -97,7 +98,9 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
 
     @Test(groups = "functional", dependsOnMethods = "loadDataToS3")
     public void loadDataToRedshift() {
-        redshiftService.createTable(TABLE_NAME, schema);
+        RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
+        redshiftTableConfig.setTableName(TABLE_NAME);
+        redshiftService.createTable(redshiftTableConfig, schema);
         redshiftService.loadTableFromAvroInS3(TABLE_NAME, s3Bucket, avroPrefix, jsonPathPrefix);
     }
 

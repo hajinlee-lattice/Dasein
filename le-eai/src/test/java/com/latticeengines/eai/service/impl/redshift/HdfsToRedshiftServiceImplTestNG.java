@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
@@ -50,7 +51,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private RedshiftService redshiftService;
-    
+
     @SuppressWarnings("unused")
     @Autowired
     private EaiService eaiService;
@@ -78,12 +79,12 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsToRedshiftConfiguration configuration = getExportConfiguration();
         hdfsToRedshiftService.uploadDataObjectToS3(configuration);
         hdfsToRedshiftService.copyToRedshift(configuration);
-        //eaiService.exportDataFromHdfs(configuration);
+        // eaiService.exportDataFromHdfs(configuration);
         verify(configuration);
     }
 
     private void verify(HdfsToRedshiftConfiguration configuration) {
-        String table = configuration.getTableName();
+        String table = configuration.getRedshiftTableConfiguration().getTableName();
         String sql = String.format("SELECT * FROM %s LIMIT 10", table);
         List<Map<String, Object>> results = redshiftJdbcTemplate.queryForList(sql);
         Assert.assertTrue(results.size() > 0, "Got 0 result by querying [" + sql + "]");
@@ -97,7 +98,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, HDFS_DIR);
         HdfsToRedshiftConfiguration configuration = getExportConfiguration();
         hdfsToRedshiftService.cleanupS3(configuration);
-        String table = configuration.getTableName();
+        String table = configuration.getRedshiftTableConfiguration().getTableName();
         redshiftService.dropTable(table);
         FileUtils.deleteQuietly(new File("tmp"));
     }
@@ -105,7 +106,9 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
     private HdfsToRedshiftConfiguration getExportConfiguration() {
         HdfsToRedshiftConfiguration configuration = new HdfsToRedshiftConfiguration();
         configuration.setExportInputPath(HDFS_DIR + "/*.avro");
-        configuration.setTableName(testTable);
+        RedshiftTableConfiguration redshiftTableConfiguration = new RedshiftTableConfiguration();
+        redshiftTableConfiguration.setTableName(testTable);
+        configuration.setRedshiftTableConfiguration(redshiftTableConfiguration);
         configuration.setJsonPathPrefix("camel.jsonpath");
         return configuration;
     }

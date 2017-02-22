@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -31,11 +32,11 @@ public class RedshiftServiceImpl implements RedshiftService {
     private String awsRegion;
 
     @Override
-    public void createTable(String tableName, Schema schema) {
+    public void createTable(RedshiftTableConfiguration redshiftTableConfig, Schema schema) {
         try {
-            redshiftJdbcTemplate.execute(RedshiftUtils.getCreateTableStatement(tableName, schema));
+            redshiftJdbcTemplate.execute(RedshiftUtils.getCreateTableStatement(redshiftTableConfig, schema));
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Could not create table %s in Redshift", tableName), e);
+            throw new RuntimeException(String.format("Could not create table %s in Redshift", redshiftTableConfig.getTableName()), e);
         }
     }
 

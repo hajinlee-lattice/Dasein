@@ -1,11 +1,12 @@
 package com.latticeengines.domain.exposed.eai;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 
 public class HdfsToRedshiftConfiguration extends ExportConfiguration {
 
-    @JsonProperty("table_name")
-    private String tableName;
+    @JsonProperty("redshift_table_config")
+    private RedshiftTableConfiguration redshiftTableConfiguration;
 
     @JsonProperty("concrete_table")
     private boolean concreteTable = false;
@@ -16,12 +17,12 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
     @JsonProperty("json_path_prefix")
     private String jsonPathPrefix;
 
-    public String getTableName() {
-        return tableName;
+    public RedshiftTableConfiguration getRedshiftTableConfiguration() {
+        return redshiftTableConfiguration;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setRedshiftTableConfiguration(RedshiftTableConfiguration redshiftTableConfiguration) {
+        this.redshiftTableConfiguration = redshiftTableConfiguration;
     }
 
     public boolean isConcreteTable() {
@@ -41,10 +42,11 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
     }
 
     public String getJsonPathPrefix() {
-        return this.jsonPathPrefix;
+        return jsonPathPrefix;
     }
 
     public void setJsonPathPrefix(String jsonPathPrefix) {
         this.jsonPathPrefix = jsonPathPrefix;
     }
+
 }

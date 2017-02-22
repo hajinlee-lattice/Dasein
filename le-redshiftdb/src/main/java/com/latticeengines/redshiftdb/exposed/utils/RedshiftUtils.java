@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections.CollectionUtils;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistKeyStyle;
 
 public class RedshiftUtils {
     public static final String AVRO_STAGE = "redshift_avro_stage";
@@ -22,15 +25,26 @@ public class RedshiftUtils {
         JsonUtils.serialize(root, outputStream);
     }
 
-    public static String getCreateTableStatement(String tableName, Schema schema) {
-        return String.format( //
+    public static String getCreateTableStatement(RedshiftTableConfiguration redshiftTableConfig, Schema schema) {
+        String statement = String.format( //
                 "CREATE TABLE IF NOT EXISTS %s (%s)", //
-                tableName, //
+                redshiftTableConfig.getTableName(), //
                 String.join( //
                         ",", //
                         schema.getFields().stream() //
                                 .map(RedshiftUtils::getColumnSQLStatement) //
                                 .collect(Collectors.toList())));
+        if (CollectionUtils.isNotEmpty(redshiftTableConfig.getSortKeys())) {
+            statement = String.format("%s %s sortkey (%s)", statement, redshiftTableConfig.getSortKeyType().getName(),
+                    String.join(",", redshiftTableConfig.getSortKeys()));
+        }
+        if (redshiftTableConfig.getDistStyle() != null) {
+            statement = String.format("%s diststyle %s", statement, redshiftTableConfig.getDistStyle().getName());
+        }
+        if (redshiftTableConfig.getDistStyle() == DistKeyStyle.Key && redshiftTableConfig.getDistKey() != null) {
+            statement = String.format("%s (%s)", statement, String.join(",", redshiftTableConfig.getDistKey()));
+        }
+        return statement;
     }
 
     public static String getColumnSQLStatement(Schema.Field field) {

@@ -17,6 +17,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.eai.service.impl.s3.HdfsToS3ExportService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
@@ -47,12 +48,13 @@ public class HdfsToRedshiftService {
             cleanupS3(configuration);
         }
 
+        RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         HdfsToS3Configuration s3Configuration = new HdfsToS3Configuration();
         s3Configuration.setSplitSize(100L * 1024 * 1024);
         s3Configuration.setS3Bucket(s3Bucket);
-        s3Configuration.setS3Prefix(s3Prefix(configuration));
+        s3Configuration.setS3Prefix(s3Prefix(redshiftTableConfig));
         s3Configuration.setExportInputPath(configuration.getExportInputPath());
-        s3Configuration.setTargetFilename(s3FileName(configuration));
+        s3Configuration.setTargetFilename(s3FileName(redshiftTableConfig));
 
         hdfsToS3ExportService.downloadToLocal(s3Configuration);
         hdfsToS3ExportService.upload(s3Configuration);
@@ -60,20 +62,21 @@ public class HdfsToRedshiftService {
     }
 
     public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
-        redshiftService.dropTable(configuration.getTableName());
+        RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
+        redshiftService.dropTable(redshiftTableConfig.getTableName());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
             RedshiftUtils.generateJsonPathsFile(schema, outputStream);
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
                 s3Service.uploadInputStream(s3Bucket, configuration.getJsonPathPrefix(), inputStream, true);
             }
-            redshiftService.createTable(configuration.getTableName(), schema);
+            redshiftService.createTable(redshiftTableConfig, schema);
         } catch (IOException e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new RuntimeException(e);
         }
-        redshiftService.loadTableFromAvroInS3(configuration.getTableName(), s3Bucket, s3Prefix(configuration),
-                configuration.getJsonPathPrefix());
+        redshiftService.loadTableFromAvroInS3(redshiftTableConfig.getTableName(), s3Bucket,
+                s3Prefix(redshiftTableConfig), configuration.getJsonPathPrefix());
 
     }
 
@@ -83,16 +86,16 @@ public class HdfsToRedshiftService {
     }
 
     public void cleanupS3(HdfsToRedshiftConfiguration configuration) {
-        String prefix = s3Prefix(configuration);
+        String prefix = s3Prefix(configuration.getRedshiftTableConfiguration());
         s3Service.cleanupPrefix(s3Bucket, prefix);
         s3Service.cleanupPrefix(s3Bucket, configuration.getJsonPathPrefix());
     }
 
-    private String s3FileName(HdfsToRedshiftConfiguration configuration) {
+    private String s3FileName(RedshiftTableConfiguration configuration) {
         return configuration.getTableName().toLowerCase() + ".avro";
     }
 
-    private String s3Prefix(HdfsToRedshiftConfiguration configuration) {
+    private String s3Prefix(RedshiftTableConfiguration configuration) {
         return RedshiftUtils.AVRO_STAGE + "/" + configuration.getTableName();
     }
 
