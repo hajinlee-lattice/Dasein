@@ -152,7 +152,7 @@
         </ul>
         <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && !vm.subcategory">
             <div class="subcategory-back" ng-if="vm.category">
-                <span ng-click="vm.category = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span>
+                <span ng-click="vm.setCategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns">
@@ -246,7 +246,7 @@
 
         <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length > 1 && vm.subcategory">
-                <span ng-click="vm.subcategory = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
+                <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">

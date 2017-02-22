@@ -45,7 +45,7 @@
                     border-bottom-color: transparent;
                     background: #fafafa;
                     z-index: 1;
-                    cursor: default;
+                    //cursor: default;
                 }
             }
             .count {
@@ -114,6 +114,9 @@
                 }
             }
             &.tab-lookup {
+                &.active {
+                    pointer-events: none;
+                }
                 h2 {
                     position: relative;
                     top: 50%;

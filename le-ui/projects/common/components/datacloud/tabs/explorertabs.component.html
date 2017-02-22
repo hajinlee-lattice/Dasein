@@ -1,5 +1,6 @@
 <section id="ExplorerTabsView" class="containerx">
     <ul>
+        <!--
         <li class="tab-browse" 
             ng-click="vm.setStateParams('browse')"
             ng-class="{ 'active': vm.section == 'browse' }">
@@ -8,13 +9,14 @@
                 <div class="count" ng-if="vm.DataCloudStore.metadata.enrichmentsTotal">{{vm.DataCloudStore.metadata.enrichmentsTotal|number}}</div>
             </div>
         </li>
+        -->
         <li ng-click="vm.setStateParams('edit')"
             ng-class="{ 'active': vm.section == 'edit' }" 
             class="tab-edit info noselect-children" 
             ng-if="!vm.DataCloudStore.metadata.lookupMode || 1">
             <div class="tab-container">
                 <h2>
-                    Enrichment
+                    Lattice Data Cloud
                     <span class="more-info">&#105;
                         <div class="tooltip_">
                             <div class="cover">
@@ -30,7 +32,7 @@
                     </span>
                 </h2>
                 <div class="enrichmentCounts">
-                    <span class="count">{{vm.DataCloudStore.metadata.generalSelectedTotal||0}} of {{vm.DataCloudStore.metadata.generalSelectLimit}}</span> enabled
+                    <span class="count">{{vm.DataCloudStore.metadata.generalSelectedTotal||0}} of {{vm.DataCloudStore.metadata.generalSelectLimit}}</span> enrichment
                     <span class="count">{{vm.DataCloudStore.metadata.premiumSelectedTotal||0}} of {{vm.DataCloudStore.metadata.premiumSelectLimit}}</span> premium 
                 </div>
             </div>

@@ -15,8 +15,19 @@ angular.module('common.datacloud.explorertabs', [
     });
 
     vm.setStateParams = function(section) {
+        var goHome = false;
+        if(section && section == vm.section && section) {
+            goHome = true;
+        }
         vm.section = section;
-        $state.go('home.datacloud.explorer', { section: vm.section }, { notify: true });
+        var params = {
+            section: vm.section   
+        }
+        if(goHome) {
+            params.category = '';
+            params.subcategory = '';
+        }
+        $state.go('home.datacloud.explorer', params, { notify: true });
     }
 
     vm.init = function() {

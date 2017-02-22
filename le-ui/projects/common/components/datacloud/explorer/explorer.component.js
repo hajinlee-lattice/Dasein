@@ -112,6 +112,17 @@ angular.module('common.datacloud.explorer', [
         return false;
     }
 
+    vm.setCategory = function(category) {
+        vm.category = category;
+        DataCloudStore.setMetadata('category', category);
+    }
+
+    vm.setSubcategory = function(subcategory) {
+        vm.subcategory = subcategory;
+        DataCloudStore.setMetadata('subcategory', subcategory);
+    }
+
+
     vm.updateStateParams = function() {
         $state.go('.', { 
             category: vm.category, 
@@ -166,7 +177,7 @@ angular.module('common.datacloud.explorer', [
             // debounce timeout to speed things up
             vm.queryTimeout = $timeout(function() {
                 if(!vm.category && newvalue) {
-                    vm.category = vm.categories[0];
+                    vm.setCategory(vm.categories[0]);
                     vm.updateStateParams();
                 }
 
@@ -182,7 +193,7 @@ angular.module('common.datacloud.explorer', [
                 });
 
                 if (categories.length == 1) {
-                    vm.category = categories[0];
+                    vm.setCategory(categories[0]);
                 }
 
                 vm.filterEmptySubcategories(); // ben:note this is breaking
@@ -1012,7 +1023,7 @@ angular.module('common.datacloud.explorer', [
         if(target.closest("[ng-click]")[0] !== currentTarget[0]) {
             // do nothing, user is clicking something with it's own click event
         } else {
-            vm.subcategory = (vm.subcategory === subcategory ? '' : subcategory); 
+            vm.setSubcategory((vm.subcategory === subcategory ? '' : subcategory)); 
             vm.metadata.current = 1; 
             vm.updateStateParams();
         }
@@ -1063,7 +1074,7 @@ angular.module('common.datacloud.explorer', [
             }
         }
         if(categories.length <= 1) {
-            vm.category = categories[0]; //ben
+            vm.setCategory(categories[0]); //ben
         }
     }
 
@@ -1084,19 +1095,19 @@ angular.module('common.datacloud.explorer', [
         } else {
             var category = category || '';
             if(vm.subcategory && vm.category == category) {
-                vm.subcategory = '';
+                vm.setSubcategory('');
                 if(subcategoriesExclude.indexOf(category)) { // don't show subcategories
-                    vm.subcategory = vm.subcategories[category][0];
+                    vm.setSubcategory(vm.subcategories[category][0]);
                 }
             } else if(vm.category == category) {
-                vm.subcategory = '';
+                vm.setSubcategory('');
                 //vm.category = '';
             } else {
-                vm.subcategory = '';
+                vm.setSubcategory('');
                 if(subcategoriesExclude.indexOf(category)) {
-                    vm.subcategory = vm.subcategories[category][0];
+                    vm.setSubcategory(vm.subcategories[category][0]);
                 }
-                vm.category = category;
+                vm.setCategory(category);
 
                 vm.filterEmptySubcategories();
             }
@@ -1184,12 +1195,12 @@ angular.module('common.datacloud.explorer', [
             if (newCategories.length <= 1) {
 
                 addUniqueToArray(subcategoriesExclude, vm.category);
-                vm.subcategory = newCategories[0];
+                vm.setSubcategory(newCategories[0]);
                 vm.updateStateParams();
             } else {
 
                 if (subcategoriesExclude.indexOf(vm.category)) {
-                    vm.subcategory = '';
+                    vm.setSubcategory('');
                     vm.updateStateParams();
                 }
                 removeFromArray(subcategoriesExclude, vm.category);
