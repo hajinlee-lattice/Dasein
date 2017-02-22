@@ -48,7 +48,7 @@ public class LevelBasedHierarchy implements HasPid, HasName, GraphNode {
     @JsonProperty("name")
     private String name;
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "hierarchy")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("levels")
     private List<Level> levels = new ArrayList<>();
@@ -56,6 +56,7 @@ public class LevelBasedHierarchy implements HasPid, HasName, GraphNode {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Table table;
 
     @Override
