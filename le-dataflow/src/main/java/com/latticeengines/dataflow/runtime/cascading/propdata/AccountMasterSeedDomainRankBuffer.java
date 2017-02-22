@@ -21,8 +21,6 @@ public class AccountMasterSeedDomainRankBuffer extends BaseOperation implements 
     public static final String MIN_RANK_DOMAIN = "_MinAlexaRankDomain_";
 
     private static final String ALEXA_RANK = "Rank";
-    private static final String LE_IS_PRIMARY_DOMAIN = "LE_IS_PRIMARY_DOMAIN";
-    private static final String FLAG_DROP_LESS_POPULAR_DOMAIN = "_FLAG_DROP_LESS_POPULAR_DOMAIN_";
     private static final String DOMAIN = "Domain";
     private static final String DUNS = "DUNS";
 
@@ -38,9 +36,7 @@ public class AccountMasterSeedDomainRankBuffer extends BaseOperation implements 
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
         String duns = bufferCall.getGroup().getString(DUNS);
         Iterator<TupleEntry> argumentsInGroup = bufferCall.getArgumentsIterator();
-        if (StringUtils.isBlank(duns)) {
-            flushGroup(argumentsInGroup);
-        } else {
+        if (!StringUtils.isBlank(duns)) {
             String minRankDomain = minRankDomainForDuns(argumentsInGroup);
             Tuple result = Tuple.size(2);
             result.set(0, duns);
@@ -62,12 +58,6 @@ public class AccountMasterSeedDomainRankBuffer extends BaseOperation implements 
             }
         }
         return minRankDomain;
-    }
-
-    private void flushGroup(Iterator<TupleEntry> argumentsInGroup) {
-        while (argumentsInGroup.hasNext()) {
-            argumentsInGroup.next();
-        }
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {

@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import cascading.operation.Aggregator;
 import cascading.operation.Buffer;
 import cascading.operation.Function;
+import cascading.operation.aggregator.First;
 import cascading.operation.buffer.FirstNBuffer;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
@@ -132,11 +133,13 @@ public class Node {
         return new Node(builder.addGroupBy(identifier, groupByFieldList, sortFieldList, aggregations), builder);
     }
 
+    // group by and limit is better to use buffer, because it stops iterating once it got first N tuples
     public Node groupByAndLimit(FieldList groupByFieldList, int count) {
         return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList,
                 new FirstNBuffer(count))), builder);
     }
 
+    // group by and limit is better to use buffer, because it stops iterating once it got first N tuples
     public Node groupByAndLimit(FieldList groupByFieldList, FieldList sortFieldList, int count, boolean descending,
             boolean caseInsensitive) {
         return groupByAndBuffer(groupByFieldList, sortFieldList, new FirstNBuffer(count), descending, caseInsensitive);
@@ -222,17 +225,6 @@ public class Node {
         return new Node(builder.register(operation), builder);
     }
 
-    public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
-                targetField)), builder);
-    }
-
-    public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField,
-            FieldList outputFields) {
-        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
-                targetField, outputFields)), builder);
-    }
-
     public Node renameBooleanField(String booleanField, BooleanType type) {
         String expression;
         FieldMetadata fm;
@@ -257,6 +249,11 @@ public class Node {
                 booleanField), fm)), builder);
     }
 
+    public Node apply(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
+        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
+                targetField)), builder);
+    }
+
     public Node apply(Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
         return apply(function, fieldsToApply, Collections.singletonList(targetField), null);
     }
@@ -274,6 +271,19 @@ public class Node {
             FieldList outputFields, Fields overrideFieldStrategy) {
         return new Node(builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply,
                 targetFields, outputFields, overrideFieldStrategy)), builder);
+    }
+
+    @Deprecated
+    public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
+        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
+                targetField)), builder);
+    }
+
+    @Deprecated
+    public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField,
+                            FieldList outputFields) {
+        return new Node(builder.register(new FunctionOperation(opInput(identifier), expression, fieldsToApply,
+                targetField, outputFields)), builder);
     }
 
     public Node addMD5(FieldList fieldsToApply, String targetFieldName) {
