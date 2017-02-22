@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistKeyStyle;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -68,7 +71,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     @AfterClass(groups = "functional")
     public void tearDown() {
         cleanupS3();
-        cleanupRedshift();
+        // cleanupRedshift();
     }
 
     private void cleanupS3() {
@@ -100,11 +103,35 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     public void loadDataToRedshift() {
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setTableName(TABLE_NAME);
+        redshiftTableConfig.setDistStyle(DistKeyStyle.Key);
+        redshiftTableConfig.setDistKey("lastmodifieddate");
+        redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
+        redshiftTableConfig.setSortKeys(Arrays.asList(new String[] { "id" }));
         redshiftService.createTable(redshiftTableConfig, schema);
         redshiftService.loadTableFromAvroInS3(TABLE_NAME, s3Bucket, avroPrefix, jsonPathPrefix);
     }
 
     @Test(groups = "functional", dependsOnMethods = "loadDataToRedshift")
+    public void queryTableSchema() {
+        List<Map<String, Object>> result = redshiftJdbcTemplate.queryForList(String.format(
+                "SELECT \"COLUMN\", TYPE, ENCODING, DISTKEY, SORTKEY FROM PG_TABLE_DEF WHERE TABLENAME = '%s';",
+                TABLE_NAME.toLowerCase()));
+        assertEquals(result.size(), 23);
+        for (Map<String, Object> row : result) {
+            if (row.get("column").equals("id")) {
+                assertEquals(row.get("sortkey"), 1);
+            } else {
+                assertEquals(row.get("sortkey"), 0);
+            }
+            if (row.get("column").equals("lastmodifieddate")) {
+                assertEquals(row.get("distkey"), Boolean.TRUE);
+            } else {
+                assertEquals(row.get("distkey"), Boolean.FALSE);
+            }
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "queryTableSchema")
     public void queryTable() {
         List<Map<String, Object>> result = redshiftJdbcTemplate
                 .queryForList(String.format("SELECT * FROM %s LIMIT 10", TABLE_NAME));

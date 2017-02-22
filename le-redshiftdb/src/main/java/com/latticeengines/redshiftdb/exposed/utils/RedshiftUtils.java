@@ -34,15 +34,16 @@ public class RedshiftUtils {
                         schema.getFields().stream() //
                                 .map(RedshiftUtils::getColumnSQLStatement) //
                                 .collect(Collectors.toList())));
-        if (CollectionUtils.isNotEmpty(redshiftTableConfig.getSortKeys())) {
-            statement = String.format("%s %s sortkey (%s)", statement, redshiftTableConfig.getSortKeyType().getName(),
-                    String.join(",", redshiftTableConfig.getSortKeys()));
-        }
+
         if (redshiftTableConfig.getDistStyle() != null) {
             statement = String.format("%s diststyle %s", statement, redshiftTableConfig.getDistStyle().getName());
         }
         if (redshiftTableConfig.getDistStyle() == DistKeyStyle.Key && redshiftTableConfig.getDistKey() != null) {
-            statement = String.format("%s (%s)", statement, String.join(",", redshiftTableConfig.getDistKey()));
+            statement = String.format("%s distkey (%s)", statement, String.join(",", redshiftTableConfig.getDistKey()));
+        }
+        if (CollectionUtils.isNotEmpty(redshiftTableConfig.getSortKeys())) {
+            statement = String.format("%s %s sortkey (%s)", statement, redshiftTableConfig.getSortKeyType().getName(),
+                    String.join(",", redshiftTableConfig.getSortKeys()));
         }
         return statement;
     }
