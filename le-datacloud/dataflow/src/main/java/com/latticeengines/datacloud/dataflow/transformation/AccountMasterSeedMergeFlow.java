@@ -73,13 +73,23 @@ public class AccountMasterSeedMergeFlow extends ConfigurableFlowBase<Transformer
         le = retainLeColumns(le);
 
         Node ams = dnb.join(new FieldList(dnbDunsColumn), le, new FieldList(leDunsColumn), JoinType.OUTER);
-        Node amsWithDuns = ams.filter(String.format("%s != null", dnbDunsColumn), new FieldList(dnbDunsColumn));
-        Node amsWithoutDuns = ams.filter(String.format("%s == null", dnbDunsColumn), new FieldList(dnbDunsColumn));
 
+        Node amsWithDuns = ams.filter(String.format("%s != null", dnbDunsColumn), new FieldList(dnbDunsColumn));
         amsWithDuns = processWithDuns(amsWithDuns);
+
+        Node amsWithoutDuns = ams.filter(String.format("%s == null", dnbDunsColumn), new FieldList(dnbDunsColumn));
+        Node amsWithDunsRenamed = amsWithDuns.renamePipe("AmsWithDuns").retain(new FieldList(amsDomainColumn));
+        amsWithoutDuns = amsWithoutDuns.join(new FieldList(leDomainColumn), amsWithDunsRenamed,
+                new FieldList(amsDomainColumn), JoinType.LEFT);
+        amsWithoutDuns = amsWithoutDuns
+                .filter(String.format("%s == null", "AmsWithDuns__" + amsDomainColumn),
+                        new FieldList("AmsWithDuns__" + amsDomainColumn))
+                .discard(new FieldList("AmsWithDuns__" + amsDomainColumn));
+
         amsWithoutDuns = processWithoutDuns(amsWithoutDuns);
 
         Node amsMerged = amsWithDuns.merge(amsWithoutDuns);
+        
         amsMerged = addColumnNode(amsMerged, parameters.getColumns());
 
         return amsMerged;
