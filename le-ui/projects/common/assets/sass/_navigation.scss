@@ -8,11 +8,11 @@ $slide-transition: 200ms;
     -o-transition: $args;
     transition: $args;
 }
- 
+
 @mixin flex-container($args...) {
     display: -ms-flexbox;
     display: -webkit-flex;
-    display: flex;  
+    display: flex;
 }
 
 @mixin flex-item($args...) {
@@ -108,7 +108,7 @@ nav.primary-nav {
     left: 0;
     bottom: 0;
     z-index: 5; // for tabs to hide left edge of first tab since this used to be position fixed
-    min-height: 100vh; // on page load make sure sidebar is 100% high
+    min-height: 100%; // on page load make sure sidebar is 100% high
     width: 60px;
     min-width: 60px; // protection for IE
     @media screen and (max-height: $max-height) {
@@ -204,10 +204,10 @@ nav.primary-nav {
         }
         ul {
             display: none;
-            margin: -12px 0 26px 47px;  
+            margin: -12px 0 26px 47px;
             a {
                 padding: 4px 0;
-            }  
+            }
         }
         li {
             white-space: nowrap;
@@ -257,7 +257,7 @@ nav.primary-nav {
             }
         }
         .fa-circle-thin, .fa-check-circle-o {
-            background-color: #222831; 
+            background-color: #222831;
         }
 
         &.progress-menu {
@@ -451,13 +451,13 @@ html.no-cssmask {
             &.active {
                 color: $saphire;
             }
-        } 
+        }
     }
 }
 
 // Secondary Nav (Hamburger and Profile Nav)
 .secondary-nav {
-    
+
     & > .ico {
         height: 40px;
         width: 40px;
@@ -514,7 +514,7 @@ html.no-cssmask {
         color: $dark-gray;
         background-image: url("/assets/images/ico-tenant.svg");
         background-size: 30px 30px;
-        background-repeat: no-repeat; 
+        background-repeat: no-repeat;
         background-position: 12px 50%;
         &:hover {
             cursor: default;
@@ -570,7 +570,7 @@ html.no-cssmask {
                 font-size: 14px;
                 text-overflow: ellipsis;
                 overflow: hidden;
-            }            
+            }
             .tenant-name {
                 font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
                 font-size: 12px;
@@ -625,7 +625,7 @@ html.no-cssmask {
 .profile-nav.dropdown>a.open {
     background-image: url("/assets/images/ico-user-profile.svg");
     background-size: 30px 30px;
-    background-repeat: no-repeat; 
+    background-repeat: no-repeat;
     background-position: 12px 50%;
 }
 body.open-nav .primary-nav [data-stooltip] {
@@ -645,17 +645,17 @@ body.open-nav .primary-nav [data-stooltip] {
         transform: rotateY(85deg); /* perspective makes 90deg too far */
         margin-top: -1.8em; /* this isn't great, but translatex(-50%) disables font smoothing/aliasing */
         margin-left: 13px;
-        padding: 10px 15px 10px 5px; 
+        padding: 10px 15px 10px 5px;
         border-radius: 0px;
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
 
         -webkit-transition: all 150ms ease-out 150ms, opacity 0ms linear 300ms;
         transition: all 150ms ease-out 150ms, opacity 0ms linear 300ms;
-        
+
         -webkit-transform-origin: 0% 50%;
         transform-origin: 0% 50%;
-        
+
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
 
@@ -666,7 +666,7 @@ body.open-nav .primary-nav [data-stooltip] {
         &:after {
             visibility: visible;
             opacity: 1;
-            
+
             -webkit-transition: none;
             transition: none;
 
