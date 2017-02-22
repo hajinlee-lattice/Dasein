@@ -27,55 +27,69 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-@Table(name = "BUCKET_METADATA")
+@Table(name = "BUCKET_ABCD_METADATA")
 @Entity
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializable {
+public class BucketMetadata implements HasPid, Serializable {
 
     private static final long serialVersionUID = 5914215732568807732L;
-    private Long pid;
-    private ModelSummary modelSummary;
-    private BucketName bucketName;
-    private int leftBoundScore;
-    private int rightBoundScore;
-    private int numLeads;
-    private double lift;
-    private long creationTimestamp;
-    private Tenant tenant;
-    private Long tenantId;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+
+    @ManyToOne
+    @JoinColumn(name = "MODEL_ID", nullable = false)
+    @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private ModelSummary modelSummary;
+
+    @JsonProperty("name")
+    @Column(name = "NAME", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BucketName bucketName;
+
+    @JsonProperty("left_bound_score")
+    @Column(name = "LEFT_BOUND_SCORE", nullable = false)
+    private int leftBoundScore;
+
+    @JsonProperty("right_bound_score")
+    @Column(name = "RIGHT_BOUND_SCORE", nullable = false)
+    private int rightBoundScore;
+
+    @JsonProperty("num_leads")
+    @Column(name = "NUM_LEADS", nullable = false)
+    private int numLeads;
+
+    @JsonProperty("lift")
+    @Column(name = "LIFT", nullable = false)
+    private double lift;
+
+    @JsonProperty("creation_timestamp")
+    @Column(name = "CREATION_TIMESTAMP", nullable = false)
+    private long creationTimestamp;
+
     @Override
     public Long getPid() {
         return pid;
     }
 
     @Override
-    @JsonIgnore
     public void setPid(Long pid) {
         this.pid = pid;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "MODEL_ID", nullable = false)
-    @JsonIgnore
-    @OnDelete(action = OnDeleteAction.CASCADE)
     public ModelSummary getModelSummary() {
         return this.modelSummary;
     }
 
-    @JsonIgnore
     public void setModelSummary(ModelSummary modelSummary) {
         this.modelSummary = modelSummary;
     }
 
-    @JsonProperty("name")
-    @Column(name = "NAME", nullable = false)
-    @Enumerated(EnumType.STRING)
     public BucketName getBucketName() {
         return bucketName;
     }
@@ -84,8 +98,6 @@ public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializa
         this.bucketName = bucketName;
     }
 
-    @JsonProperty("left_bound_score")
-    @Column(name = "LEFT_BOUND_SCORE", nullable = false)
     public int getLeftBoundScore() {
         return leftBoundScore;
     }
@@ -94,8 +106,6 @@ public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializa
         this.leftBoundScore = leftBoundScore;
     }
 
-    @JsonProperty("right_bound_score")
-    @Column(name = "RIGHT_BOUND_SCORE", nullable = false)
     public int getRightBoundScore() {
         return rightBoundScore;
     }
@@ -104,8 +114,6 @@ public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializa
         this.rightBoundScore = rightBoundScore;
     }
 
-    @JsonProperty("num_leads")
-    @Column(name = "NUM_LEADS", nullable = false)
     public int getNumLeads() {
         return numLeads;
     }
@@ -114,8 +122,6 @@ public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializa
         this.numLeads = numLeads;
     }
 
-    @JsonProperty("lift")
-    @Column(name = "LIFT", nullable = false)
     public double getLift() {
         return lift;
     }
@@ -124,45 +130,12 @@ public class BucketMetadata implements HasPid, HasTenantId, HasTenant, Serializa
         this.lift = lift;
     }
 
-    @JsonProperty("creation_timestamp")
-    @Column(name = "CREATION_TIMESTAMP", nullable = false)
     public long getCreationTimestamp() {
         return creationTimestamp;
     }
 
     public void setCreationTimestamp(long creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
-    }
-
-    @Override
-    @JsonIgnore
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-
-        if (tenant != null) {
-            setTenantId(tenant.getPid());
-        }
-    }
-
-    @Override
-    @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    @Override
-    @JsonIgnore
-    @Column(name = "TENANT_ID", nullable = false)
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    @JsonIgnore
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
     }
 
 }

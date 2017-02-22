@@ -23,15 +23,12 @@ import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("bucketedScoreService")
 public class BucketedScoreServiceImpl implements BucketedScoreService {
@@ -52,9 +49,6 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Autowired
     private BucketMetadataEntityMgr bucketMetadataEntityMgr;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
 
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
@@ -181,12 +175,10 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     public void createBucketMetadatas(String modelId, List<BucketMetadata> bucketMetadatas) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         Long creationTimestamp = System.currentTimeMillis();
-        Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
 
         for (BucketMetadata bucketMetadata : bucketMetadatas) {
             bucketMetadata.setCreationTimestamp(creationTimestamp);
             bucketMetadata.setModelSummary(modelSummary);
-            bucketMetadata.setTenant(tenant);
             bucketMetadataEntityMgr.create(bucketMetadata);
         }
     }
