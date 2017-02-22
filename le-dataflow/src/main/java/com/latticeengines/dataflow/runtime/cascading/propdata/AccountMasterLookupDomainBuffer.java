@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.common.exposed.util.LocationUtils;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
@@ -26,6 +28,7 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
     private String employeeField;
     private String salesVolumeField;
     private String isPrimaryLocationField;
+    private String countryField;
 
     private List<String> returnedFields;
     private Map<String, Object> comparedData = new HashMap<>(); // Field name -> Value
@@ -38,7 +41,7 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
 
     public AccountMasterLookupDomainBuffer(Fields fieldDeclaration, List<String> returnedFields, String dunsField,
             String duDunsField, String guDunsField, String employeeField, String salesVolumeField,
-            String isPrimaryLocationField) {
+            String isPrimaryLocationField, String countryField) {
         this(fieldDeclaration);
         this.dunsField = dunsField;
         this.duDunsField = duDunsField;
@@ -47,6 +50,7 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
         this.salesVolumeField = salesVolumeField;
         this.returnedFields = returnedFields;
         this.isPrimaryLocationField = isPrimaryLocationField;
+        this.countryField = countryField;
     }
 
     @SuppressWarnings("unchecked")
@@ -92,7 +96,7 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
             } else if (res < 0) {
                 continue;
             }
-            res = checkRuleStringsEqual(arguments, dunsField, duDunsField);
+            res = checkRuleLargerLongWithThreshold(arguments, salesVolumeField, 100000000, 10000000);
             if (res > 0) {
                 replaceComparedData(arguments);
                 replaceReturnedData(arguments);
@@ -100,7 +104,7 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
             } else if (res < 0) {
                 continue;
             }
-            res = checkRuleStringsEqual(arguments, dunsField, guDunsField);
+            res = checkRuleEqualStrings(arguments, dunsField, duDunsField);
             if (res > 0) {
                 replaceComparedData(arguments);
                 replaceReturnedData(arguments);
@@ -108,7 +112,7 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
             } else if (res < 0) {
                 continue;
             }
-            res = checkRuleIntegersEqual(arguments, employeeField);
+            res = checkRuleEqualStrings(arguments, dunsField, guDunsField);
             if (res > 0) {
                 replaceComparedData(arguments);
                 replaceReturnedData(arguments);
@@ -116,7 +120,7 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
             } else if (res < 0) {
                 continue;
             }
-            res = checkRuleLongsEqual(arguments, salesVolumeField);
+            res = checkRuleLargerLong(arguments, salesVolumeField);
             if (res > 0) {
                 replaceComparedData(arguments);
                 replaceReturnedData(arguments);
@@ -125,6 +129,22 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
                 continue;
             }
             res = checkRuleBooleanValuedStringIsTrue(arguments, isPrimaryLocationField);
+            if (res > 0) {
+                replaceComparedData(arguments);
+                replaceReturnedData(arguments);
+                continue;
+            } else if (res < 0) {
+                continue;
+            }
+            res = checkRuleCountry(arguments, countryField, LocationUtils.USA);
+            if (res > 0) {
+                replaceComparedData(arguments);
+                replaceReturnedData(arguments);
+                continue;
+            } else if (res < 0) {
+                continue;
+            }
+            res = checkRuleLargerIntegers(arguments, employeeField);
             if (res > 0) {
                 replaceComparedData(arguments);
                 replaceReturnedData(arguments);
@@ -148,8 +168,8 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
         comparedData.put(dunsField, arguments.getString(dunsField));
         comparedData.put(duDunsField, arguments.getString(duDunsField));
         comparedData.put(guDunsField, arguments.getString(guDunsField));
-        comparedData.put(employeeField, arguments.getInteger(employeeField));
-        comparedData.put(salesVolumeField, arguments.getLong(salesVolumeField));
+        comparedData.put(employeeField, arguments.getObject(employeeField));
+        comparedData.put(salesVolumeField, arguments.getObject(salesVolumeField));
         comparedData.put(isPrimaryLocationField, arguments.getString(isPrimaryLocationField));
     }
 
@@ -171,7 +191,7 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
         }
     }
 
-    private int checkRuleStringsEqual(TupleEntry arguments, String field1, String field2) {
+    private int checkRuleEqualStrings(TupleEntry arguments, String field1, String field2) {
         String checking1 = arguments.getString(field1);
         String checking2 = arguments.getString(field2);
         String checked1 = (String) comparedData.get(field1);
@@ -187,8 +207,8 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
         }
     }
 
-    private int checkRuleIntegersEqual(TupleEntry arguments, String field) {
-        Integer checking = arguments.getInteger(field);
+    private int checkRuleLargerIntegers(TupleEntry arguments, String field) {
+        Integer checking = (Integer) arguments.getObject(field);
         Integer checked = (Integer) comparedData.get(field);
         if (checking != null && (checked == null || checking.intValue() > checked.intValue())) {
             return 1;
@@ -199,8 +219,22 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
         }
     }
 
-    private int checkRuleLongsEqual(TupleEntry arguments, String field) {
-        Long checking = arguments.getLong(field);
+    private int checkRuleLargerLongWithThreshold(TupleEntry arguments, String field, long threshold, long gap) {
+        Long checking = (Long) arguments.getObject(field);
+        Long checked = (Long) comparedData.get(field);
+        if (checking != null && checking >= threshold
+                && (checked == null || checking.longValue() >= (checked.longValue() + gap))) {
+            return 1;
+        } else if (checked != null && checked >= threshold
+                && (checking == null || checked.longValue() >= (checking.longValue() + gap))) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    private int checkRuleLargerLong(TupleEntry arguments, String field) {
+        Long checking = (Long) arguments.getObject(field);
         Long checked = (Long) comparedData.get(field);
         if (checking != null && (checked == null || checking.longValue() > checked.longValue())) {
             return 1;
@@ -230,7 +264,20 @@ public class AccountMasterLookupDomainBuffer extends BaseOperation implements Bu
         } else {
             return 0;
         }
-        
+    }
+
+    private int checkRuleCountry(TupleEntry arguments, String field, String country) {
+        String checking = arguments.getString(field);
+        String checked = (String) comparedData.get(field);
+        if (StringUtils.isNotEmpty(checking) && checking.equalsIgnoreCase(country)
+                && (StringUtils.isEmpty(checked) || !checked.equalsIgnoreCase(country))) {
+            return 1;
+        } else if (StringUtils.isNotEmpty(checked) && checked.equalsIgnoreCase(country)
+                && (StringUtils.isEmpty(checking) || !checking.equalsIgnoreCase(country))) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
 
 }

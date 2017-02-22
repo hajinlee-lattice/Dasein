@@ -147,34 +147,24 @@ public class AccountMasterLookupRebuildServiceImplTestNG
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         Set<String> keys = new HashSet<String>();
-        Object[][] expectedData = { { "_DOMAIN_a.com_DUNS_NULL", 6L }, { "_DOMAIN_secondary.com_DUNS_NULL", 6L },
-                { "_DOMAIN_mailserver.com_DUNS_NULL", 6L },
+        Object[][] expectedData = { { "_DOMAIN_a.com_DUNS_NULL", 6L },
                 { "_DOMAIN_a.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_ZipCode1", 1L },
-                { "_DOMAIN_secondary.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_ZipCode1", 1L },
-                { "_DOMAIN_mailserver.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_ZipCode1", 1L },
                 { "_DOMAIN_a.com_DUNS_NULL_COUNTRY_Country1_STATE_State1_ZIPCODE_NULL", 1L },
-                { "_DOMAIN_secondary.com_DUNS_NULL_COUNTRY_Country1_STATE_State1_ZIPCODE_NULL", 1L },
-                { "_DOMAIN_mailserver.com_DUNS_NULL_COUNTRY_Country1_STATE_State1_ZIPCODE_NULL", 1L },
                 { "_DOMAIN_a.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_NULL", 1L },
-                { "_DOMAIN_secondary.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_NULL", 1L },
-                { "_DOMAIN_mailserver.com_DUNS_NULL_COUNTRY_Country1_STATE_NULL_ZIPCODE_NULL", 1L },
                 { "_DOMAIN_a.com_DUNS_NULL_COUNTRY_Country2_STATE_NULL_ZIPCODE_NULL", 6L },
-                { "_DOMAIN_secondary.com_DUNS_NULL_COUNTRY_Country2_STATE_NULL_ZIPCODE_NULL", 6L },
-                { "_DOMAIN_mailserver.com_DUNS_NULL_COUNTRY_Country2_STATE_NULL_ZIPCODE_NULL", 6L },
                 { "_DOMAIN_b.com_DUNS_NULL", 8L }, { "_DOMAIN_c.com_DUNS_NULL", 9L },
-                { "_DOMAIN_d.com_DUNS_NULL", 10L }, { "_DOMAIN_NULL_DUNS_01", 10L }, { "_DOMAIN_NULL_DUNS_02", 2L },
-                { "_DOMAIN_NULL_DUNS_03", 3L }, { "_DOMAIN_NULL_DUNS_04", 4L }, { "_DOMAIN_NULL_DUNS_05", 5L },
-                { "_DOMAIN_NULL_DUNS_06", 6L }, { "_DOMAIN_NULL_DUNS_07", 8L }, { "_DOMAIN_a.com_DUNS_01", 1L },
-                { "_DOMAIN_secondary.com_DUNS_01", 1L }, { "_DOMAIN_mailserver.com_DUNS_01", 1L },
-                { "_DOMAIN_a.com_DUNS_02", 2L }, { "_DOMAIN_secondary.com_DUNS_02", 2L },
-                { "_DOMAIN_mailserver.com_DUNS_02", 2L }, { "_DOMAIN_a.com_DUNS_03", 3L },
-                { "_DOMAIN_secondary.com_DUNS_03", 3L }, { "_DOMAIN_mailserver.com_DUNS_03", 3L },
-                { "_DOMAIN_a.com_DUNS_04", 4L }, { "_DOMAIN_secondary.com_DUNS_04", 4L },
-                { "_DOMAIN_mailserver.com_DUNS_04", 4L }, { "_DOMAIN_a.com_DUNS_05", 5L },
-                { "_DOMAIN_secondary.com_DUNS_05", 5L }, { "_DOMAIN_mailserver.com_DUNS_05", 5L },
-                { "_DOMAIN_a.com_DUNS_06", 6L }, { "_DOMAIN_secondary.com_DUNS_06", 6L },
-                { "_DOMAIN_mailserver.com_DUNS_06", 6L },
-                { "_DOMAIN_b.com_DUNS_07", 8L }, { "_DOMAIN_d.com_DUNS_01", 10L }, };
+                { "_DOMAIN_d.com_DUNS_NULL", 10L }, { "_DOMAIN_e.com_DUNS_NULL", 15L },
+                { "_DOMAIN_e.com_DUNS_NULL_COUNTRY_USA_STATE_NULL_ZIPCODE_NULL", 15L },
+                { "_DOMAIN_e.com_DUNS_NULL_COUNTRY_England_STATE_NULL_ZIPCODE_NULL", 13L },
+                { "_DOMAIN_NULL_DUNS_01", 10L }, { "_DOMAIN_NULL_DUNS_02", 2L }, { "_DOMAIN_NULL_DUNS_03", 3L },
+                { "_DOMAIN_NULL_DUNS_04", 4L }, { "_DOMAIN_NULL_DUNS_05", 5L }, { "_DOMAIN_NULL_DUNS_06", 6L },
+                { "_DOMAIN_NULL_DUNS_07", 8L }, { "_DOMAIN_NULL_DUNS_11", 11L }, { "_DOMAIN_NULL_DUNS_12", 12L },
+                { "_DOMAIN_NULL_DUNS_13", 13L }, { "_DOMAIN_NULL_DUNS_14", 14L }, { "_DOMAIN_NULL_DUNS_15", 15L },
+                { "_DOMAIN_a.com_DUNS_01", 1L }, { "_DOMAIN_a.com_DUNS_02", 2L }, { "_DOMAIN_a.com_DUNS_03", 3L },
+                { "_DOMAIN_a.com_DUNS_04", 4L }, { "_DOMAIN_a.com_DUNS_05", 5L }, { "_DOMAIN_a.com_DUNS_06", 6L },
+                { "_DOMAIN_b.com_DUNS_07", 8L }, { "_DOMAIN_d.com_DUNS_01", 10L }, { "_DOMAIN_e.com_DUNS_11", 11L },
+                { "_DOMAIN_e.com_DUNS_12", 12L }, { "_DOMAIN_e.com_DUNS_13", 13L }, { "_DOMAIN_e.com_DUNS_14", 14L },
+                { "_DOMAIN_e.com_DUNS_15", 15L } };
         while (records.hasNext()) {
             GenericRecord record = records.next();
             Long latticeId = (Long) record.get(LATTICEID);
@@ -192,7 +182,7 @@ public class AccountMasterLookupRebuildServiceImplTestNG
             Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 23);
+        Assert.assertEquals(rowNum, 36);
     }
 
 }
