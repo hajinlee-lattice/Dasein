@@ -10,6 +10,8 @@ public class SourceDomainCleanupByDuTransformerConfig extends TransformerConfig 
     private String dunsField;
     @JsonProperty("duField")
     private String duField;
+    @JsonProperty("alexaRankField")
+    private String alexaRankField;
     
     public String getDomainField() {
         return domainField;
@@ -29,5 +31,11 @@ public class SourceDomainCleanupByDuTransformerConfig extends TransformerConfig 
     public void setDuField(String duField) {
         this.duField = duField;
     }
-
+    public String getAlexaRankField() {
+        return alexaRankField;
+    }
+    public void setAlexaRankField(String alexaRankField) {
+        this.alexaRankField = alexaRankField;
+    }
+    
 }

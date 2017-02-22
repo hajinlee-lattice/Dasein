@@ -3,8 +3,10 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -111,6 +113,7 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
         config.setDuField("LE_PRIMARY_DUNS");
         config.setDunsField("DUNS");
         config.setDomainField("Domain");
+        config.setAlexaRankField("AlexaRank");;
         return JsonUtils.serialize(config);
     }
 
@@ -126,11 +129,22 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
+        Map<String, GenericRecord> recordMap = new HashMap<>();
         while (records.hasNext()) {
-            records.next();
+            GenericRecord record = records.next();
+            String id = String.valueOf(record.get("LatticeID"));
+            recordMap.put(id, record);
             rowNum++;
         }
+        
         log.info("Total result records " + rowNum);
-        Assert.assertEquals(rowNum, 9);
+        Assert.assertEquals(rowNum, 14);
+        
+        GenericRecord record = recordMap.get("3");
+        Assert.assertEquals(record.get("Domain").toString(), "google.com");
+        record = recordMap.get("5");
+        Assert.assertEquals(record.get("Domain").toString(), "lattice.com");
+        record = recordMap.get("14");
+        Assert.assertEquals(record.get("Domain").toString(), "oracle1.com");
     }
 }

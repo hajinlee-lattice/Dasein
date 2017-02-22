@@ -27,18 +27,22 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
     private String duField;
     private String dunsField;
     private String domainField;
+    private String alexaRankField;
     protected Map<String, Integer> namePositionMap;
 
     private int duArgIdx = -1;
     private int dunsArgIdx = -1;
     private int domainArgIdx = -1;
+    private int alexaRankArgIdx = -1;
 
     // output (DU, PrimaryDomain)
-    public DomainCleanupByDuBuffer(Fields fieldDeclaration, String duField, String dunsField, String domainField) {
+    public DomainCleanupByDuBuffer(Fields fieldDeclaration, String duField, String dunsField, String domainField,
+            String alexaRankField) {
         super(fieldDeclaration);
         this.duField = duField;
         this.dunsField = dunsField;
         this.domainField = domainField;
+        this.alexaRankField = alexaRankField;
         namePositionMap = getPositionMap(fieldDeclaration);
     }
 
@@ -89,6 +93,8 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
         int numTuples = 0;
         String du = null;
         Iterator<TupleEntry> argumentsIter = bufferCall.getArgumentsIterator();
+        String maxAlexaRankDomain = null;
+        Integer maxAlexaRank = Integer.MAX_VALUE;
         while (argumentsIter.hasNext()) {
             numTuples++;
             TupleEntry arguments = argumentsIter.next();
@@ -115,16 +121,27 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
                     break;
                 }
             }
+
+            Object alexaRank = arguments.getObject(alexaRankArgIdx);
+            if (alexaRank != null && StringUtils.isNotBlank(alexaRank.toString())) {
+                Integer alexRankInt = Integer.valueOf(alexaRank.toString());
+                if (alexRankInt < maxAlexaRank && StringUtils.isNotBlank(domain)) {
+                    maxAlexaRank = alexRankInt;
+                    maxAlexaRankDomain = domain;
+                }
+            }
         }
         if (numTuples >= 100000) {
             if (primaryDomain == null) {
                 log.warn("The group of DU=" + du + " has " + numTuples + " tuples. No primary domain.");
             } else {
-                log.warn("Found a primary domain for the group of DU=" + du + " after scanning " + numTuples + " tuples.");
+                log.warn("Found a primary domain for the group of DU=" + du + " after scanning " + numTuples
+                        + " tuples.");
             }
         }
 
-        return primaryDomain == null ? mostUsedDomain : primaryDomain;
+        return primaryDomain == null ? (maxAlexaRankDomain == null ? mostUsedDomain : maxAlexaRankDomain)
+                : primaryDomain;
     }
 
     private String getStringAt(TupleEntry arguments, int pos) {
@@ -139,7 +156,7 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
     }
 
     private void setArgPosMap(TupleEntry arguments) {
-        if (duArgIdx == -1 || domainArgIdx == -1 || dunsArgIdx == -1) {
+        if (duArgIdx == -1 || domainArgIdx == -1 || dunsArgIdx == -1 || alexaRankArgIdx == -1) {
             Fields fields = arguments.getFields();
             if (duArgIdx == -1) {
                 duArgIdx = fields.getPos(duField);
@@ -149,6 +166,9 @@ public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
             }
             if (dunsArgIdx == -1) {
                 dunsArgIdx = fields.getPos(dunsField);
+            }
+            if (alexaRankArgIdx == -1) {
+                alexaRankArgIdx = fields.getPos(alexaRankField);
             }
         }
     }

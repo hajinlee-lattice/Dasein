@@ -7,6 +7,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import cascading.tuple.Fields;
+
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupByDuBuffer;
@@ -15,8 +17,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceDomainCleanupByDuTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-
-import cascading.tuple.Fields;
 
 @Component("sourceDomainCleanupByDuFlow")
 public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDomainCleanupByDuTransformerConfig> {
@@ -28,19 +28,20 @@ public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDoma
         SourceDomainCleanupByDuTransformerConfig config = getTransformerConfig(parameters);
         Node source = addSource(parameters.getBaseTables().get(0));
 
-        Fields duAndDomain = new Fields(
-                new String[] { config.getDuField(), DomainCleanupByDuBuffer.DU_PRIMARY_DOMAIN });
+        Fields duAndDomain = new Fields(new String[] { config.getDuField(), DomainCleanupByDuBuffer.DU_PRIMARY_DOMAIN });
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(config.getDuField(), String.class));
         fms.add(new FieldMetadata(DomainCleanupByDuBuffer.DU_PRIMARY_DOMAIN, String.class));
-        Node duDomain = source.groupByAndBuffer(new FieldList(config.getDuField()), new DomainCleanupByDuBuffer(
-                duAndDomain, config.getDuField(), config.getDunsField(), config.getDomainField()), fms);
+        Node duDomain = source.groupByAndBuffer(
+                new FieldList(config.getDuField()),
+                new DomainCleanupByDuBuffer(duAndDomain, config.getDuField(), config.getDunsField(), config
+                        .getDomainField(), config.getAlexaRankField()), fms);
         duDomain = duDomain.renamePipe("dudomain");
 
         Node join = source.leftOuterJoin(config.getDuField(), duDomain, config.getDuField());
         Fields joinNodeFields = new Fields(join.getFieldNames().toArray(new String[join.getFieldNames().size()]));
-        Node domainFilled = join.groupByAndBuffer(new FieldList(config.getDuField()),
-                new FillBlankDomainBuffer(joinNodeFields, config.getDomainField()));
+        Node domainFilled = join.groupByAndBuffer(new FieldList(config.getDuField()), new FillBlankDomainBuffer(
+                joinNodeFields, config.getDomainField()));
         domainFilled = domainFilled.retain(new FieldList(source.getFieldNames()));
 
         return domainFilled;
