@@ -9,7 +9,7 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowF
 @ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
 public class DedupAccountEventTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void test() {
         DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable", "PublicDomain");
         executeDataFlow(parameters);
