@@ -76,6 +76,8 @@
             UseSalesforceSetting = True
             ValidateCredsUsingEai = True
             LatticeInsights = True
+            BypassDnbCache = True
+            EnableCdl = True
           /properties.json
             description = u'A PD solution for LocalTest'
             displayName = u'LocalTest Tenant'

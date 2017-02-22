@@ -25,7 +25,9 @@ public enum LatticeFeatureFlag {
             "Enable Internal Enrichment Attributes"), //
     ENABLE_DATA_PROFILING_V2("EnableDataProfilingV2", "Enable Data Profiling Version 2"), //
     ENABLE_FUZZY_MATCH("EnableFuzzyMatch", "Enable Fuzzy Match"), //
-    LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights");
+    LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights"), //
+    BYPASS_DNB_CACHE("BypassDnbCache", "Bypass DnB Cache"), //
+    ENABLE_CDL("EnableCdl", "Enable Customer Data Lake");
 
     private String name;
     private String documentation;
