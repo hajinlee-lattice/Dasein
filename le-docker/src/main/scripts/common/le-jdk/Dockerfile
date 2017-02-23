@@ -1,5 +1,5 @@
 FROM latticeengines/centos
-RUN yum install -y unzip  wget && yum clean all
+RUN yum install -y unzip wget && yum clean all
 RUN mkdir /usr/java && chmod 755 /usr/java
 WORKDIR /usr/java
 RUN wget -q http://10.41.1.10/tars/jdk-8u101-linux-x64.tar.gz  -O jdk-8u101-linux-x64.tar.gz \
