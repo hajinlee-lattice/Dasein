@@ -25,6 +25,10 @@ pushd le-centos
 build_docker latticeengines/centos
 popd
 
+pushd le-jdk
+bash build.sh
+popd
+
 pushd le-jre
 bash build.sh
 popd
