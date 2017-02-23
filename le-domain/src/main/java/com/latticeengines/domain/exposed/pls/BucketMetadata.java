@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-@Table(name = "BUCKET_ABCD_METADATA")
+@Table(name = "BUCKET_METADATA")
 @Entity
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class BucketMetadata implements HasPid, Serializable {
