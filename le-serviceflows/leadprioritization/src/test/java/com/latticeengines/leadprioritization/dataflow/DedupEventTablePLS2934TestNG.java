@@ -15,7 +15,7 @@ public class DedupEventTablePLS2934TestNG extends ServiceFlowsDataFlowFunctional
 
     @Test(groups = "functional", enabled = false)
     public void test() {
-        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable", "PublicDomain");
+        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable");
         executeDataFlow(parameters);
         List<GenericRecord> output = readOutput();
 

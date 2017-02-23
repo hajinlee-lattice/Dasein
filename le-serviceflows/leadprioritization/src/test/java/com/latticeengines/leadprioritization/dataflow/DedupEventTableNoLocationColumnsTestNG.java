@@ -14,7 +14,7 @@ public class DedupEventTableNoLocationColumnsTestNG extends ServiceFlowsDataFlow
 
     @Test(groups = "functional", enabled = false)
     public void test() {
-        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable", "PublicDomain");
+        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable");
         executeDataFlow(parameters);
     }
 

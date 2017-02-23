@@ -21,7 +21,7 @@ public class DedupLeadEventTableTestNG extends ServiceFlowsDataFlowFunctionalTes
         initialize();
         verifySource();
 
-        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable", "PublicDomain");
+        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable");
         executeDataFlow(parameters);
         List<GenericRecord> output = readOutput();
         final List<GenericRecord> publicDomains = readInput("PublicDomain");
