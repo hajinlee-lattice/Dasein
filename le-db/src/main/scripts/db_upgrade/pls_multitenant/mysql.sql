@@ -11,6 +11,7 @@ CREATE PROCEDURE `UpdateSchema`()
 
         alter table `METADATA_DATA_COLLECTION` add index FKF69DFD4336865BC (FK_TENANT_ID), add constraint FKF69DFD4336865BC foreign key (FK_TENANT_ID) references `TENANT` (`TENANT_PID`) on delete cascade;
         alter table `METADATA_SEGMENT` add index FK90C89E03382C8AE3 (FK_QUERY_SOURCE_ID), add constraint FK90C89E03382C8AE3 foreign key (FK_QUERY_SOURCE_ID) references `METADATA_DATA_COLLECTION` (`PID`) on delete cascade;
+        alter table `SOURCE_FILE` add `ENTITY_EXTERNAL_TYPE` varchar(255);
      COMMIT;
   END;
 
