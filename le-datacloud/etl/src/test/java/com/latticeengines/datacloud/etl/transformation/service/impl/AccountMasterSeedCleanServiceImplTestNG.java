@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang.StringUtils;
@@ -35,20 +34,20 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
-public class AccountMasterSeedRebuildServiceImplTestNG
+public class AccountMasterSeedCleanServiceImplTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(AccountMasterSeedRebuildServiceImplTestNG.class);
+    private static final Log log = LogFactory.getLog(AccountMasterSeedCleanServiceImplTestNG.class);
 
     private static final String LATTICEID = "LatticeID";
-    private static final String KEY = "Key";
+
     @Autowired
     PipelineSource source;
 
     @Autowired
-    AccountMasterSeedMerged baseSource;
+    AccountMasterSeedMerged amsMerged;
 
     @Autowired
-    AlexaMostRecent baseSource2;
+    AlexaMostRecent alexa;
 
     @Autowired
     AccountMasterSeed accountMasterSeedSource;
@@ -67,13 +66,10 @@ public class AccountMasterSeedRebuildServiceImplTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTransformation() {
-        uploadBaseSourceFile(baseSource, "AccountMasterIntermediateSeed_TestAccountMasterSeed",
-                "2017-01-09_19-12-43_UTC");
-        uploadBaseSourceFile(baseSource2,
-                baseSource2.getSourceName() + "_Test" + accountMasterSeedSource.getSourceName(),
-                "2017-01-09_19-12-43_UTC");
+        uploadBaseSourceFile(amsMerged, "AMSeedMerged_TestAMSeedClean", baseSourceVersion);
+        uploadBaseSourceFile(alexa, "Alexa_TestAMSeedClean", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -93,19 +89,21 @@ public class AccountMasterSeedRebuildServiceImplTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(amsMerged.getSourceName(), baseSourceVersion).toString();
     }
 
     @Override
     PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+            configuration.setName("AccountMasterSeedClean");
+            configuration.setVersion(targetVersion);
 
             // -----------
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();
-            baseSources.add(baseSource.getSourceName());
-            baseSources.add(baseSource2.getSourceName());
+            baseSources.add(amsMerged.getSourceName());
+            baseSources.add(alexa.getSourceName());
             step1.setBaseSources(baseSources);
             step1.setTransformer("accountMasterSeedMarkerTransformer");
             step1.setTargetSource("AccountMasterSeedMarked");
@@ -199,85 +197,41 @@ public class AccountMasterSeedRebuildServiceImplTestNG
         log.info("Start to verify records one by one.");
 
         Object[][] expectedData = {
-                { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
-                        "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
-                        "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
-                        "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "c.com", "Y", "0", 7L, 1485366555040L },
-                { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
-                        "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
-                        "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
-                        "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "e.com", "N", "0", 8L, 1485366555040L },
-                { null, null, null, null, null, null, 1, null, "Y", "LE_NULL_CITY_2", null, "LE_NULL_NAME_2", null,
-                        null, "LE_NULL_STATE_2", null, null, null, "BRAZIL", "d.com", "Y", null, 3L, 1485366555040L },
-                { null, null, null, null, null, null, 1, null, "Y", "LE_NULL_CITY_2", null, "LE_NULL_NAME_2", null,
-                        null, "LE_NULL_STATE_2", null, null, null, "BRAZIL", "T_d.com", "Y", null, 11L,
-                        1485366555040L },
-                { "2DnB_2_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_2_01_COMPANY_PHONE",
-                        "DnB_2_01_EMPLOYEE_RANGE", "DnB_2_01_COMPANY_DESCRIPTION", "DnB_2_01_ZIPCODE", 3,
-                        "DnB_2_01_SIC_CODE", "Y", "DnB_2_01_CITY", "DnB_2_01_INDUSTRY", "DnB_2_01_NAME", null, "201",
-                        "DnB_2_01_STATE", "DnB_2_01_NAICS_CODE", "DnB_2_01_REVENUE_RANGE", "DnB_2_01_ADDR", "USA",
-                        "T_b.com", "N", "0", 13L, 1485366555040L },
-                { "DnB_04_PRIMARY_DUNS", "germany", "DnB_04_COMPANY_PHONE", "DnB_04_EMPLOYEE_RANGE",
-                        "DnB_04_COMPANY_DESCRIPTION", "DnB_04_ZIPCODE", 6, "DnB_04_SIC_CODE", "Y", "DnB_04_CITY",
-                        "DnB_04_INDUSTRY", "DnB_04_NAME", null, "04", "DnB_04_STATE", "DnB_04_NAICS_CODE",
-                        "DnB_04_REVENUE_RANGE", "DnB_04_ADDR", "GERMANY", null, "N", "0", 6L, 1485366555040L },
-                { "2DnB_2_04_PRIMARY_DUNS", "germany", "DnB_2_04_COMPANY_PHONE", "DnB_2_04_EMPLOYEE_RANGE",
-                        "DnB_2_04_COMPANY_DESCRIPTION", "DnB_2_04_ZIPCODE", 6, "DnB_2_04_SIC_CODE", "Y",
-                        "DnB_2_04_CITY", "DnB_2_04_INDUSTRY", "DnB_2_04_NAME", null, "204", "DnB_2_04_STATE",
-                        "DnB_2_04_NAICS_CODE", "DnB_2_04_REVENUE_RANGE", "DnB_2_04_ADDR", "GERMANY", null, "N", "0",
-                        14L, 1485366555040L },
-                { "DnB_02_PRIMARY_DUNS", "ca", "DnB_02_COMPANY_PHONE", "DnB_02_EMPLOYEE_RANGE",
-                        "DnB_02_COMPANY_DESCRIPTION", "DnB_02_ZIPCODE", 4, "DnB_02_SIC_CODE", "Y", "DnB_02_CITY",
-                        "DnB_02_INDUSTRY", "DnB_02_NAME", null, "02", "DnB_02_STATE", "DnB_02_NAICS_CODE",
-                        "DnB_02_REVENUE_RANGE", "DnB_02_ADDR", "CANADA", "a.com", "Y", "0", 2L, 1485366555040L },
-                { "DnB_03_PRIMARY_DUNS", "people's republic of china", "DnB_03_COMPANY_PHONE", "DnB_03_EMPLOYEE_RANGE",
-                        "DnB_03_COMPANY_DESCRIPTION", "DnB_03_ZIPCODE", 5, "DnB_03_SIC_CODE", "Y", "DnB_03_CITY",
-                        "DnB_03_INDUSTRY", "DnB_03_NAME", null, "03", "DnB_03_STATE", "DnB_03_NAICS_CODE",
-                        "DnB_03_REVENUE_RANGE", "DnB_03_ADDR", "CHINA", "a.com", "Y", "0", 1L, 1485366555040L },
-                { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
-                        "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
-                        "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
-                        "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "a.com", "N", "0", 4L, 1485366555040L },
-                { "2DnB_2_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_2_01_COMPANY_PHONE",
-                        "DnB_2_01_EMPLOYEE_RANGE", "DnB_2_01_COMPANY_DESCRIPTION", "DnB_2_01_ZIPCODE", 3,
-                        "DnB_2_01_SIC_CODE", "Y", "DnB_2_01_CITY", "DnB_2_01_INDUSTRY", "DnB_2_01_NAME", null, "201",
-                        "DnB_2_01_STATE", "DnB_2_01_NAICS_CODE", "DnB_2_01_REVENUE_RANGE", "DnB_2_01_ADDR", "USA",
-                        "T_a.com", "Y", "0", 12L, 1485366555040L },
-                { "DnB_01_PRIMARY_DUNS", "unITED STAtes 425@%#$@", "DnB_01_COMPANY_PHONE", "DnB_01_EMPLOYEE_RANGE",
-                        "DnB_01_COMPANY_DESCRIPTION", "DnB_01_ZIPCODE", 3, "DnB_01_SIC_CODE", "Y", "DnB_01_CITY",
-                        "DnB_01_INDUSTRY", "DnB_01_NAME", null, "01", "DnB_01_STATE", "DnB_01_NAICS_CODE",
-                        "DnB_01_REVENUE_RANGE", "DnB_01_ADDR", "USA", "b.com", "N", "0", 5L, 1485366555040L } };
+                // Test markLessPopularDomainsForDUNS
+                { 1L, "a.com", "01", "Name1", "Country1", "LE", "N", "Y", "0", ">10,000", 100, 100, 100000000L },
+                { 2L, "b.com", "01", "Name1", "Country1", "DnB", "Y", "Y", "0", ">10,000", 100, 10, 100000000L },
+                { 3L, "c.com", "01", "Name1", "Country1", "LE", "N", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 4L, "d.com", "02", "Name2", "Country2", "LE", "Y", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 5L, "e.com", "02", "Name2", "Country2", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 6L, "f.com", "03", "Name3", "Country3", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 7L, "g.com", "03", "Name3", "Country3", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 8L, "h.com", null, "NameNull", "CountryNull", "LE", "Y", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 9L, "i.com", null, "NameNull", "CountryNull", "LE", "Y", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 10L, null, "04", "Name4", "Country4", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 11L, null, "05", "Name5", "Country5", null, "N", "Y", "0", ">10,000", 100, null, 100000000L },
+                // Test markOOBEntries
+                // LatticeID = 12 is removed
+                { 13L, null, "07", "Name7", "Country7", "DnB", "N", "Y", null, ">10,000", 100, null, 100000000L }, };
 
-        String[] fieldNames = new String[] {
-                "LE_PRIMARY_DUNS", //
-                "LE_COUNTRY", //
-                "LE_COMPANY_PHONE", //
-                "LE_EMPLOYEE_RANGE", //
-                "LE_COMPANY_DESCRIPTION", //
-                "ZipCode", //
-                "LE_NUMBER_OF_LOCATIONS", //
-                "LE_SIC_CODE", //
-                "LE_IS_PRIMARY_LOCATION", //
-                "City", //
-                "LE_INDUSTRY", //
-                "Name", //
-                "GLOBAL_ULTIMATE_DUNS_NUMBER", //
-                "DUNS", //
-                "State", //
-                "LE_NAICS_CODE", //
-                "LE_REVENUE_RANGE", //
-                "Street", //
-                "Country", //
-                "Domain", //
-                "LE_IS_PRIMARY_DOMAIN", //
-                "OUT_OF_BUSINESS_INDICATOR", //
+        String[] fieldNames = new String[] { //
                 "LatticeID", //
-                "LE_Last_Upload_Date" //
+                "Domain", //
+                "DUNS", //
+                "Name", //
+                "Country", //
+                "DomainSource", //
+                "LE_IS_PRIMARY_DOMAIN", //
+                "LE_IS_PRIMARY_LOCATION", //
+                "OUT_OF_BUSINESS_INDICATOR", //
+                "LE_EMPLOYEE_RANGE", //
+                "LE_NUMBER_OF_LOCATIONS", //
+                "AlexaRank", //
+                "SALES_VOLUME_US_DOLLARS"
         };
 
         Map<Long, Map<String, Object>> latticeIdToData = new HashMap<>();
         for (Object[] data: expectedData) {
-            Long latticeId = (Long) data[data.length - 2];
+            Long latticeId = (Long) data[0];
             Map<String, Object> row = new HashMap<>();
             for (int i = 0; i < fieldNames.length; i++) {
                 row.put(fieldNames[i], data[i]);
@@ -291,20 +245,21 @@ public class AccountMasterSeedRebuildServiceImplTestNG
         while (records.hasNext()) {
             GenericRecord record = records.next();
             Long latticeId = (Long) record.get(LATTICEID);
+            log.info(latticeId);
             distinctIds.add(latticeId);
 
             Map<String, Object> data = latticeIdToData.get(latticeId);
 
             List<String> misMatched = new ArrayList<>();
-            for (Schema.Field field : record.getSchema().getFields()) {
-                Object val = record.get(field.name());
+            for (String field : fieldNames) {
+                Object val = record.get(field);
                 if (val instanceof Utf8) {
                     val = val.toString();
                 }
-                Object expectedVal = data.get(field.name());
+                Object expectedVal = data.get(field);
                 if ((val == null && expectedVal != null) //
                         || (val != null && !val.equals(expectedVal))) {
-                    misMatched.add(field.name() + "=[" + val + " - " + expectedVal + "]");
+                    misMatched.add(field + "=[" + val + " - " + expectedVal + "]");
                     hasFieldMismatchInRecord = true;
                 }
             }
