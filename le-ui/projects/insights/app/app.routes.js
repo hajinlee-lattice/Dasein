@@ -45,8 +45,6 @@ angular.module('insightsApp')
                         parent.postMessage("init", '*');
 
                         window.addEventListener("message", function (event){
-                            console.log('message from LPI:', event.data);
-
                             var data = ((typeof event.data).toLowerCase() == 'string')
                                 ? JSON.parse(event.data)
                                 : event.data;
@@ -57,10 +55,17 @@ angular.module('insightsApp')
                             LookupStore.add('request', data.request);
                             AuthStore.set('Bearer ' + data.Authentication);
                             
-                            console.log('request', LookupStore.get('request'), AuthStore.get())
                             $state.go('home.datacloud.insights');
                         }, false);
                     }
+                }
+            }
+        })
+        .state('home.error', {
+            url: '/error',
+            views: {
+                "main": {
+                    template: ''
                 }
             }
         });

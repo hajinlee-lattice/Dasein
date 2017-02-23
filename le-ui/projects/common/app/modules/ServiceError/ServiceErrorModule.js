@@ -11,6 +11,14 @@ angular
         return response || $q.when(response);
     };
 
+    this.request = function(response) {
+        //console.log('request', response.status, response);
+        var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
+        ServiceErrorUtility.process(response);
+
+        return response || $q.when(response);
+    };
+
     this.responseError = function(rejection) {
         //console.log('responseError', rejection);
         var ServiceErrorUtility = $injector.get('ServiceErrorUtility');

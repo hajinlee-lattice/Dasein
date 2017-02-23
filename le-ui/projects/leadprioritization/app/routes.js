@@ -163,6 +163,7 @@ angular
                         id = $stateParams.modelId;
                     
                     ModelStore.getModel(id).then(function(result) {
+                        console.log('getModel', id, result);
                         deferred.resolve(result);
                     });
 
@@ -1358,10 +1359,12 @@ angular
                 "main@": {
                     controller: function(LookupStore, $stateParams) {
                         var host = "/insights/";
+
                         $('#sureshot_iframe_container')
-                            .html('<iframe id="insights_iframe" src="' + host + '" style="border: 1px inset"></iframe><div id="insights_console"></div>');
+                            .html('<iframe id="insights_iframe" src="' + host + '" style="border: 1px inset"></iframe>');
 
                         var childWindow = document.getElementById('insights_iframe').contentWindow;
+
                         window.addEventListener("message", function (event){
                             console.log('message from Insights:', event.data);
                             if (event.data == 'init') {

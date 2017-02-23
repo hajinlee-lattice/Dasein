@@ -10,6 +10,7 @@ angular.module('common.datacloud.explorer', [
     var vm = this,
         enrichment_chunk_size = 5000,
         flags = FeatureFlagService.Flags();
+    
     angular.extend(vm, {
         debug: (window.location.search.indexOf('debug=1') > 0),
         label: {
@@ -102,13 +103,19 @@ angular.module('common.datacloud.explorer', [
 
     /* some rules that might hide the page */
     vm.hidePage = function() {
+        if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
+            return true;
+        }
+
         if (vm.section == 'insights' || vm.section == 'team') {
-            if(vm.show_lattice_insights) {
+            if (vm.show_lattice_insights || vm.section == 'insights') {
                 return false;
             }
+
             return true;
 
-        } 
+        }
+
         return false;
     }
 
@@ -273,6 +280,12 @@ angular.module('common.datacloud.explorer', [
             vm.metadata.toggle.show.enabled = true;
         } else {
             vm.metadata.toggle.show.enabled = '';
+        }
+
+        if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
+            vm.status_alert.show = true;
+            vm.status_alert.type = 'no_results';
+            vm.status_alert.message = 'No results to show';
         }
     }
 

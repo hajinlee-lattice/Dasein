@@ -1,9 +1,10 @@
-<div class="enrichment-wizard-container container section-{{vm.section}}" ng-if="!vm.hidePage()">
-        <div class="status-alert-box {{vm.status_alert.type}}" ng-show="vm.status_alert.show">
-            <div class="icon"></div>
-            <div class="message" ng-bind-html="vm.status_alert.message"></div>
-            <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
-        </div>
+<div class="enrichment-wizard-container container section-{{vm.section}}">
+    <div class="status-alert-box {{vm.status_alert.type}}" ng-if="vm.status_alert.show">
+        <div class="icon"></div>
+        <div class="message">{{vm.status_alert.message}}</div>
+        <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
+    </div>
+    <div ng-if="!vm.hidePage()">
         <div class="filters-container">
             <ul class="filters" >
                 <li class="query">
@@ -361,4 +362,5 @@
                 </div>
             </div>
         </div>
+    </div>
 </div>

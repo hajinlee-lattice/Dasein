@@ -51,11 +51,14 @@ var mainApp = angular.module('insightsApp', [
             return config;
         },
         response: function(response) {
+            return response || $q.when(response);
+        },
+        responseError: function(response) {
             if (response.status === 401) {
-                // handle the case where the user is not authenticated
+                $('.loading-spinner').hide();
             }
 
-            return response || $q.when(response);
+            return $q.reject(response)
         }
     };
 });
