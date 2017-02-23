@@ -33,4 +33,8 @@ pushd le-tomcat
 bash build.sh
 popd
 
+pushd le-mysql
+build_docker latticeengines/mysql
+popd
+
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
