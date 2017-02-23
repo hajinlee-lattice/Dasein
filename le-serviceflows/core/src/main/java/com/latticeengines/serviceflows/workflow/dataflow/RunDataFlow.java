@@ -31,7 +31,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
     private DataFlowApiProxy dataFlowApiProxy;
 
     @Autowired
-    private MetadataProxy metadataProxy;
+    protected MetadataProxy metadataProxy;
 
     @Override
     public void execute() {

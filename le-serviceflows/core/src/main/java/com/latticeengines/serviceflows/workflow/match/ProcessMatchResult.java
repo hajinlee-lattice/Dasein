@@ -64,6 +64,7 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         putObjectInContext(EVENT_TABLE, eventTable);
+        putObjectInContext(MATCH_RESULT_TABLE, eventTable);
         if (!isCascadingFlow) {
             metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), resultTableName);
         }

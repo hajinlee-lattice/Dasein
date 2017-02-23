@@ -17,7 +17,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
-import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -149,7 +148,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .sourceFileName(sourceFile.getName())
                 //
-                .eventTableReportSourceFileName(sourceFile.getTableName())
+                .matchInputTableName(sourceFile.getTableName())
                 //
                 .sourceType(SourceType.FILE)
                 //
@@ -160,13 +159,10 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport")
                 //
                 .dedupDataFlowBeanName("dedupEventTable")
-                .dedupDataFlowParams( //
-                        new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain",
-                                parameters.getDeduplicationType()))
                 //
                 .dedupFlowExtraSources(extraSources)
                 //
-                .dedupTargetTableName(sourceFile.getTableName() + "_deduped")
+                .dedupType(parameters.getDeduplicationType())
                 //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
                 //
@@ -213,15 +209,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .bucketMetadata(null)
                 //
                 // TODO: legacy SQL based match engine configurations
-                .matchClientDocument(matchClientDocument)
-                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
+                .matchClientDocument(matchClientDocument).matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
                 .matchDestTables("DerivedColumnsCache");
-
-        if (parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) {
-            builder.dedupTargetTableName(sourceFile.getTableName() + "_deduped");
-        } else if (parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) {
-            builder.dedupTargetTableName(sourceFile.getTableName());
-        }
         return builder.build();
     }
 

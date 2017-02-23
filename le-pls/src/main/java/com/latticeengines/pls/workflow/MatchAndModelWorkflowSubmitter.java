@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
-import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -117,8 +116,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                         .getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled, false)) //
                 .sourceModelSummary(modelSummary) //
                 .dedupDataFlowBeanName("dedupEventTable") //
-                .dedupDataFlowParams(new DedupEventTableParameters(cloneTableName, "PublicDomain",
-                        parameters.getDeduplicationType())) //
+                .dedupType(parameters.getDeduplicationType()) //
                 .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
                 .excludeUnmatchedWithPublicDomain(parameters.isExcludeUnmatchedWithPublicDomain()) //
@@ -135,11 +133,6 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //
                 .userRefinedAttributes(userRefinedAttributes);
-        if (parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) {
-            builder.dedupTargetTableName(cloneTableName + "_deduped");
-        } else if (parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) {
-            builder.dedupTargetTableName(cloneTableName);
-        }
         return builder.build();
     }
 

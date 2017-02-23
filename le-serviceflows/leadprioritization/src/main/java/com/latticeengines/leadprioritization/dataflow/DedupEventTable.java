@@ -73,7 +73,6 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         }
     }
 
-    @SuppressWarnings({ "unchecked" })
     private Node removeInternalAttrs(final Node node) {
         List<String> internalAttrs = new ArrayList<>();
         Arrays.asList(INT_LDC_DEDUPE_ID, SORT_EVENT, SORT_HAS_LM, SORT_LM_DIST).forEach(n -> {

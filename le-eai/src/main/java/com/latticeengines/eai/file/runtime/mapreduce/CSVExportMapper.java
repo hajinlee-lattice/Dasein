@@ -1,5 +1,6 @@
 package com.latticeengines.eai.file.runtime.mapreduce;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -116,6 +117,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
 
     private static boolean outputField(Field field) {
         return field.name() != null && !field.name().equals(InterfaceName.InternalId.toString())
-                && !field.name().equals(ScoreResultField.RawScore.displayName);
+                && !field.name().equals(ScoreResultField.RawScore.displayName)
+                && !field.name().endsWith(INT_LDC_DEDUPE_ID);
     }
 }

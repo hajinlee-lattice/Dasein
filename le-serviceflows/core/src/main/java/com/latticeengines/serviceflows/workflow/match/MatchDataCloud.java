@@ -74,8 +74,10 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     @Override
     public void skipStep() {
         log.info("skipping matching step and registering event table now:");
-        putObjectInContext(EVENT_TABLE, metadataProxy.getTable(
-                configuration.getCustomerSpace().toString(), configuration.getInputTableName()));
+        Table table = metadataProxy.getTable(
+                configuration.getCustomerSpace().toString(), configuration.getInputTableName());
+        putObjectInContext(EVENT_TABLE, table);
+        putObjectInContext(MATCH_RESULT_TABLE, table);
     }
 
     private Table preMatchEventTable() {

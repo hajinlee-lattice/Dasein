@@ -6,8 +6,8 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -121,6 +121,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder trainingTableName(String trainingTableName) {
+            match.setInputTableName(trainingTableName);
             model.setTrainingTableName(trainingTableName);
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, trainingTableName));
             return this;
@@ -144,19 +145,13 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder dedupTargetTableName(String targetTableName) {
-            dedupEventTable.setTargetTableName(targetTableName);
-            match.setInputTableName(targetTableName);
+        public Builder dedupType(DedupType dedupType) {
+            dedupEventTable.setDedupType(dedupType);
             return this;
         }
 
         public Builder dedupDataFlowBeanName(String beanName) {
             dedupEventTable.setBeanName(beanName);
-            return this;
-        }
-
-        public Builder dedupDataFlowParams(DataFlowParameters dataFlowParameters) {
-            dedupEventTable.setDataFlowParams(dataFlowParameters);
             return this;
         }
 

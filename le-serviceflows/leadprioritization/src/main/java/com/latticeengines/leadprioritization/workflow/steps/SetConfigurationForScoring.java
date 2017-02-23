@@ -8,9 +8,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
-import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
-import com.latticeengines.serviceflows.workflow.match.ProcessMatchResultConfiguration;
-import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 
 @Component("setConfigurationForScoring")
@@ -21,24 +18,9 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
         DedupEventTableConfiguration dedupStepConfig = getConfigurationFromJobParameters(
                 DedupEventTableConfiguration.class);
         if (!dedupStepConfig.isSkipStep()) {
-            MatchStepConfiguration matchStepConfig = getConfigurationFromJobParameters(MatchStepConfiguration.class);
-            ModelStepConfiguration modelStepConfiguration = getConfigurationFromJobParameters(
-                    ModelStepConfiguration.class);
-            matchStepConfig.setInputTableName(modelStepConfiguration.getTrainingTableName());
-
-            putObjectInContext(MatchStepConfiguration.class.getName(), matchStepConfig);
+            Table eventTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
+            putObjectInContext(EVENT_TABLE, eventTable);
         } else {
-            MatchStepConfiguration matchStepConfig = getConfigurationFromJobParameters(MatchStepConfiguration.class);
-            Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
-            matchStepConfig.setInputTableName(eventTable.getName());
-            matchStepConfig.setSkipStep(true);
-            putObjectInContext(MatchStepConfiguration.class.getName(), matchStepConfig);
-
-            ProcessMatchResultConfiguration processMatchResultStepConfig = getConfigurationFromJobParameters(
-                    ProcessMatchResultConfiguration.class);
-            processMatchResultStepConfig.setSkipStep(true);
-            putObjectInContext(ProcessMatchResultConfiguration.class.getName(), processMatchResultStepConfig);
-
             AddStandardAttributesConfiguration addStandardAttrStepConfig = getConfigurationFromJobParameters(
                     AddStandardAttributesConfiguration.class);
             addStandardAttrStepConfig.setSkipStep(true);
