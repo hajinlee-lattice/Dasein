@@ -10,20 +10,15 @@ public class DedupEventTableParameters extends DataFlowParameters {
     @SourceTableName
     public String eventTable;
 
-    @JsonProperty("public_domain")
-    @SourceTableName
-    public String publicDomain;
-
     @JsonProperty("deduplication_type")
     public DedupType deduplicationType;
 
-    public DedupEventTableParameters(String eventTable, String publicDomain) {
-        this(eventTable, publicDomain, DedupType.ONELEADPERDOMAIN);
+    public DedupEventTableParameters(String eventTable) {
+        this(eventTable, DedupType.ONELEADPERDOMAIN);
     }
 
-    public DedupEventTableParameters(String eventTable, String publicDomain, DedupType deduplicationType) {
+    public DedupEventTableParameters(String eventTable, DedupType deduplicationType) {
         this.eventTable = eventTable;
-        this.publicDomain = publicDomain;
         this.deduplicationType = deduplicationType;
     }
 

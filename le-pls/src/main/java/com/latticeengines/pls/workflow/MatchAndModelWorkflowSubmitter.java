@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -48,9 +47,6 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @Autowired
     private PlsFeatureFlagService plsFeatureFlagService;
 
-    @Value("${pls.fitflow.stoplist.path}")
-    private String stoplistPath;
-
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
@@ -87,9 +83,6 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
                 sourceFile != null ? sourceFile.getDisplayName() : cloneTableName);
 
-        Map<String, String> extraSources = new HashMap<>();
-        extraSources.put("PublicDomain", stoplistPath);
-
         List<DataRule> dataRules = parameters.getDataRules();
         if (parameters.getDataRules() == null || parameters.getDataRules().isEmpty()) {
             Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
@@ -117,7 +110,6 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .sourceModelSummary(modelSummary) //
                 .dedupDataFlowBeanName("dedupEventTable") //
                 .dedupType(parameters.getDeduplicationType()) //
-                .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
                 .excludeUnmatchedWithPublicDomain(parameters.isExcludeUnmatchedWithPublicDomain()) //
                 .treatPublicDomainAsNormalDomain(false) // TODO: hook up to UI

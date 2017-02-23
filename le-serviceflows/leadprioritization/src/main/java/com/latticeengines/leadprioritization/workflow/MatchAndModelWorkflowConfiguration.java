@@ -155,11 +155,6 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder dedupFlowExtraSources(Map<String, String> extraSources) {
-            dedupEventTable.setExtraSources(extraSources);
-            return this;
-        }
-
         public Builder skipMatchingStep(boolean skipMatchingStep) {
             match.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);

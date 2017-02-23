@@ -76,9 +76,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Value("${pls..modeling.validation.min.negativerows:250}")
     private long minNegativeEvents;
 
-    @Value("${pls.fitflow.stoplist.path}")
-    private String stoplistPath;
-
     public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
 
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
@@ -103,9 +100,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importMatchAndModelWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, parameters.getDisplayName());
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceFile.getDisplayName());
-
-        Map<String, String> extraSources = new HashMap<>();
-        extraSources.put("PublicDomain", stoplistPath);
 
         Predefined predefinedSelection = Predefined.getDefaultSelection();
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
@@ -159,8 +153,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport")
                 //
                 .dedupDataFlowBeanName("dedupEventTable")
-                //
-                .dedupFlowExtraSources(extraSources)
                 //
                 .dedupType(parameters.getDeduplicationType())
                 //
