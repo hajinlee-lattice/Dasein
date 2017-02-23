@@ -70,6 +70,6 @@ $ANACONDA_HOME/bin/conda install -y \
     tk=8.5.18=0 \
     wheel=0.29.0=py27_0 \
     zlib=1.2.8=3
-    
+
 source $ANACONDA_HOME/bin/deactivate
 
