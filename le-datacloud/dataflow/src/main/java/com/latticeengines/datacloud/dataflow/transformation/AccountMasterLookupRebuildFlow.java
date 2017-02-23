@@ -78,8 +78,8 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
         List<FieldMetadata> returnedMetadata = prepareFieldsMetadataForSearchByDomain();
         node = node.groupByAndBuffer(new FieldList(config.getDomainField()), new AccountMasterLookupDomainBuffer(
                 new Fields(returnedFields.toArray(new String[returnedFields.size()])), returnedFields,
-                config.getDunsField(), config.getDuDunsField(), config.getGuDunsField(), config.getEmployeeField(),
- config.getSalesVolumeUsDollars(), config.getIsPrimaryLocationField(),
+                        config.getDunsField(), config.getDuDunsField(), config.getGuDunsField(),
+                        config.getEmployeeField(), config.getSalesVolumeUsDollars(), config.getIsPrimaryLocationField(),
                         config.getCountryField()),
                         returnedMetadata);
         node = node.apply(
@@ -100,8 +100,7 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
                 new AccountMasterLookupDomainBuffer(
                         new Fields(returnedFields.toArray(new String[returnedFields.size()])), returnedFields,
                         config.getDunsField(), config.getDuDunsField(), config.getGuDunsField(),
-                        config.getEmployeeField(), config.getSalesVolumeUsDollars(),
- config.getIsPrimaryLocationField(),
+                        config.getEmployeeField(), config.getSalesVolumeUsDollars(), config.getIsPrimaryLocationField(),
                         config.getCountryField()),
                 returnedMetadata);
         node = node.apply(
@@ -122,8 +121,7 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
                 new AccountMasterLookupDomainBuffer(
                         new Fields(returnedFields.toArray(new String[returnedFields.size()])), returnedFields,
                         config.getDunsField(), config.getDuDunsField(), config.getGuDunsField(),
-                        config.getEmployeeField(), config.getSalesVolumeUsDollars(),
- config.getIsPrimaryLocationField(),
+                        config.getEmployeeField(), config.getSalesVolumeUsDollars(), config.getIsPrimaryLocationField(),
                         config.getCountryField()),
                 returnedMetadata);
         node = node.apply(
@@ -142,8 +140,7 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
                 new AccountMasterLookupDomainBuffer(
                         new Fields(returnedFields.toArray(new String[returnedFields.size()])), returnedFields,
                         config.getDunsField(), config.getDuDunsField(), config.getGuDunsField(),
-                        config.getEmployeeField(), config.getSalesVolumeUsDollars(),
- config.getIsPrimaryLocationField(),
+                        config.getEmployeeField(), config.getSalesVolumeUsDollars(), config.getIsPrimaryLocationField(),
                         config.getCountryField()),
                 returnedMetadata);
         node = node.apply(

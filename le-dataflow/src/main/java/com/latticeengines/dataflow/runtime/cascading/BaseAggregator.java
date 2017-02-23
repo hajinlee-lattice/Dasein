@@ -38,6 +38,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void start( FlowProcess flowProcess,
                        AggregatorCall<T> aggregatorCall )
@@ -49,6 +50,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         aggregatorCall.setContext( context );
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void aggregate(FlowProcess flowProcess,
                           AggregatorCall<T> aggregatorCall )
@@ -61,6 +63,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void complete(FlowProcess flowProcess,
                          AggregatorCall<T> aggregatorCall )

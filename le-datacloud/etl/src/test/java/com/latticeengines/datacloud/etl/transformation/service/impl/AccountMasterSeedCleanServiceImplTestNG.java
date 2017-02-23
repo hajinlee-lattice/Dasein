@@ -66,7 +66,7 @@ public class AccountMasterSeedCleanServiceImplTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTransformation() {
         uploadBaseSourceFile(amsMerged, "AMSeedMerged_TestAMSeedClean", baseSourceVersion);
         uploadBaseSourceFile(alexa, "Alexa_TestAMSeedClean", baseSourceVersion);

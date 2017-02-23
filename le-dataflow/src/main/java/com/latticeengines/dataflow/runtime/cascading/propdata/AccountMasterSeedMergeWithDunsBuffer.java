@@ -25,6 +25,9 @@ public class AccountMasterSeedMergeWithDunsBuffer extends BaseOperation implemen
 
     private static final long serialVersionUID = -5435451652686146347L;
 
+    public static final String LE = "LE";
+    public static final String DNB = "DnB";
+
     private Map<String, Integer> namePositionMap;
     private Map<String, String> attrsFromDnB;
 
@@ -110,7 +113,7 @@ public class AccountMasterSeedMergeWithDunsBuffer extends BaseOperation implemen
                 for (String attr : attrsFromDnB.keySet()) {
                     result.set(namePositionMap.get(attr), entry.getValue().get(attr));
                 }
-                result.set(amsDomainSourceLoc, "LE");
+                result.set(amsDomainSourceLoc, LE);
                 result.set(amsDomainLoc, leDomain);
                 result.set(amsIsPrimaryDomainLoc, "Y");
                 bufferCall.getOutputCollector().add(result);
@@ -122,7 +125,7 @@ public class AccountMasterSeedMergeWithDunsBuffer extends BaseOperation implemen
                     for (String attr : attrsFromDnB.keySet()) {
                         result.set(namePositionMap.get(attr), entry.getValue().get(attr));
                     }
-                    result.set(amsDomainSourceLoc, "DnB");
+                    result.set(amsDomainSourceLoc, DNB);
                     result.set(amsDomainLoc, dnbDomainTuple.getKey());
                     if (domainsFromLe.size() > 0) {
                         result.set(amsIsPrimaryDomainLoc, "N");
