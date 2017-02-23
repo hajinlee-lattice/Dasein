@@ -10,8 +10,8 @@
 
 
     <context:annotation-config/>
-    <context:component-scan base-package="com.latticeengines.queryapi">
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.queryapi.controller.*" />
+    <context:component-scan base-package="com.latticeengines.objectapi">
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.objectapi.controller.*" />
     </context:component-scan>
 
     <import resource="classpath:query-context.xml"/>

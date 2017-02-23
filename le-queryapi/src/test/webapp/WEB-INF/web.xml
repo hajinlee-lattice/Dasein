@@ -5,17 +5,17 @@
 <web-app>
 
     <display-name>LEDP Source REST API</display-name>
-    <description>Lattice Engines Workflow REST API</description>
+    <description>Lattice Engines Query REST API</description>
 
     <servlet>
-        <servlet-name>queryapi</servlet-name>
+        <servlet-name>objectapi</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>queryapi</servlet-name>
-        <url-pattern>/queryapi/*</url-pattern>
+        <servlet-name>objectapi</servlet-name>
+        <url-pattern>/objectapi/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

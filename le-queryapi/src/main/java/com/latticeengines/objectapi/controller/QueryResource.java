@@ -1,11 +1,11 @@
-package com.latticeengines.queryapi.controller;
+package com.latticeengines.objectapi.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.network.exposed.queryapi.QueryInterface;
+import com.latticeengines.network.exposed.objectapi.QueryInterface;
 
 import io.swagger.annotations.Api;
 
