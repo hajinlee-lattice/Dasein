@@ -32,6 +32,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
     private static final String LE_IS_PRIMARY_LOCATION = "LE_IS_PRIMARY_LOCATION";
     private static final String LE_IS_PRIMARY_DOMAIN = "LE_IS_PRIMARY_DOMAIN";
     private static final String LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
+    private static final String SALES_VOLUME_US_DOLLARS = "SALES_VOLUME_US_DOLLARS";
     private static final String ALEXA_RANK = "Rank";
     private static final String COUNTRY = "Country";
     private static final String LE_EMPLOYEE_RANGE = "LE_EMPLOYEE_RANGE";
@@ -112,8 +113,8 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
     // (LID, FLAG_DROP_ORPHAN_ENTRY)
     private Node markOrphanRecordWithDomain(Node node) {
-        node = node.retain(
-                new FieldList(LATTICE_ID, DUNS, DOMAIN, COUNTRY, LE_IS_PRIMARY_LOCATION, LE_NUMBER_OF_LOCATIONS));
+        node = node.retain(new FieldList(LATTICE_ID, DUNS, DOMAIN, COUNTRY, LE_IS_PRIMARY_LOCATION,
+                LE_NUMBER_OF_LOCATIONS, SALES_VOLUME_US_DOLLARS));
         node = node.addColumnWithFixedValue(FLAG_DROP_ORPHAN_ENTRY, 0, Integer.class);
 
         // split by domain and loc
@@ -145,8 +146,8 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
                 .addColumnWithFixedValue(FLAG_DROP_LESS_POPULAR_DOMAIN, null, String.class);
 
         // split by domain and duns
-        Node primaryDomains = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)", DOMAIN,
-                LE_IS_PRIMARY_DOMAIN, LE_IS_PRIMARY_DOMAIN), new FieldList(DOMAIN, LE_IS_PRIMARY_DOMAIN));
+        Node primaryDomains = node.filter(String.format("%s != null && %s != null && \"Y\".equalsIgnoreCase(%s)",
+                DOMAIN, LE_IS_PRIMARY_DOMAIN, LE_IS_PRIMARY_DOMAIN), new FieldList(DOMAIN, LE_IS_PRIMARY_DOMAIN));
         Node notToJoinAlexa = node.filter(String.format("%s == null || %s == null || !\"Y\".equalsIgnoreCase(%s)",
                 DOMAIN, LE_IS_PRIMARY_DOMAIN, LE_IS_PRIMARY_DOMAIN), new FieldList(DOMAIN, LE_IS_PRIMARY_DOMAIN));
 

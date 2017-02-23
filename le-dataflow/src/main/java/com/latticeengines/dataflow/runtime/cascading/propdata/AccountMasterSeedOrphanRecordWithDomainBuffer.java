@@ -21,12 +21,12 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
     private static final String FLAG_DROP_ORPHAN_ENTRY = "_FLAG_DROP_ORPHAN_ENTRY_";
 
     protected Map<String, Integer> namePositionMap;
-    private int domainLoc;
-    private int latticeIdLoc;
+    private int flagLoc;
 
     public AccountMasterSeedOrphanRecordWithDomainBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
+        this.flagLoc = this.namePositionMap.get(FLAG_DROP_ORPHAN_ENTRY);
     }
 
     // 1. keep all num loc > 0, not flag
@@ -100,7 +100,7 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
 
     private Tuple flagTheTuple(TupleEntry tupleEntry) {
         Tuple tuple = tupleEntry.getTupleCopy();
-        tuple.setInteger(namePositionMap.get(FLAG_DROP_ORPHAN_ENTRY), 1);
+        tuple.setInteger(flagLoc, 1);
         return tuple;
     }
 
