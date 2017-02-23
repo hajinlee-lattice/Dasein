@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 		watch: {
 			js: {
 				files: [
-                    '<%= dir.app %>/**/*.js', 
+                    '<%= dir.app %>/**/*.js',
                     '<%= dir.components %>/**/*.js'
                 ],
 				tasks: [
@@ -50,7 +50,10 @@ module.exports = function(grunt) {
         uglify: {
             vendor: {
                 options: {
-                    mangle: false
+                    mangle: true,
+                    compress: {
+                        drop_console: true
+                    }
                 },
                 files: {
                     '<%= dir.assets %>/vendor.min.js': [
@@ -60,7 +63,10 @@ module.exports = function(grunt) {
             },
             production: {
                 options: {
-                    mangle: false
+                    mangle: true,
+                    compress: {
+                        drop_console: true
+                    }
                 },
                 files: {
                     '<%= dir.assets %>/lattice.min.js': [

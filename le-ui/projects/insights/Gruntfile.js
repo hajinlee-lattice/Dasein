@@ -2,7 +2,7 @@
 
 module.exports = function (grunt) {
     // version of our software. This should really be in the package.json
-    // but it gets passed in through 
+    // but it gets passed in through
     var versionStringConfig = grunt.option('versionString') || new Date().getTime();
 
     // Define the configuration for all the tasks
@@ -214,7 +214,10 @@ module.exports = function (grunt) {
         uglify: {
             dist: {
                 options: {
-                    mangle: false
+                    mangle: true,
+                    compress: {
+                        drop_console: true
+                    }
                 },
                 files: {
                     '<%= pls.app %>/app/production_<%= versionString %>.min.js': [
@@ -228,7 +231,10 @@ module.exports = function (grunt) {
             },
             production: {
                 options: {
-                    mangle: false
+                    mangle: true,
+                    compress: {
+                        drop_console: true
+                    }
                 },
                 files: {
                     '<%= pls.dist %>/app.js': [
