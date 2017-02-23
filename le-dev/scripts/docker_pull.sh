@@ -6,10 +6,12 @@ IMAGE=$1
 
 if [ -z "${IMAGE}" ]; then
 
-    for img in 'centos', 'mysql', 'tomcat'
+    for img in 'mysql', 'zookeeper'
     do
         echo "pulling ${img}"
+        python -m latticeengines.ecr.docker pull ${img} &
     done
+    wait;
 
 else
 

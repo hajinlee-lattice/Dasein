@@ -1,4 +1,4 @@
-FROM latticeengines/centos
+FROM latticeengines/jre
 
 ENV ZK_LOG_DIR /usr/zookeeper/logs
 ENV ZOOKEEPER_HOME /usr/zookeeper
