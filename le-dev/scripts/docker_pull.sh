@@ -6,7 +6,7 @@ IMAGE=$1
 
 if [ -z "${IMAGE}" ]; then
 
-    for img in 'httpd' 'zookeeper' 'observer' 'kafka' 'schema-registry' 'kafka-connect' 'tomcat' 'matchapi' 'express'
+    for img in 'centos', 'mysql', 'tomcat'
     do
         echo "pulling ${img}"
     done
