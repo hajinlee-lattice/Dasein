@@ -1,6 +1,7 @@
 package com.latticeengines.serviceflows.dataflow;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
@@ -37,7 +38,7 @@ public class ParseMatchResultDedupeIdTestNG extends ServiceFlowsDataFlowFunction
     private ParseMatchResultParameters prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("ID", Integer.class), //
-                Pair.of(LID_FIELD, Long.class), //
+                Pair.of(INT_LDC_LID, String.class), //
                 Pair.of(INT_LDC_PREMATCH_DOMAIN, String.class), //
                 Pair.of(INT_LDC_LOC_CHECKSUM, String.class), //
                 Pair.of(INT_LDC_POPULATED_ATTRS, Integer.class), //
@@ -54,12 +55,12 @@ public class ParseMatchResultDedupeIdTestNG extends ServiceFlowsDataFlowFunction
 
     private Object[][] getData() {
         return new Object[][] { //
-                { 1, 1L, "dom1.com", "a", 10, "1" }, //
-                { 2, 2L, "dom2.com", "b", 10, "2" }, //
-                { 3, 3L, "dom3.com", "c", 10, "3" }, //
-                { 4, 4L, "dom3.com", "d", 5, "4" }, //
-                { 5, 5L, null, "c", 10, "5" }, //
-                { 6, 6L, "dom4.com", "b", 5, "6" }, //
+                { 1, "1", "dom1.com", "a", 10, "1" }, //
+                { 2, "2", "dom2.com", "b", 10, "2" }, //
+                { 3, "3", "dom3.com", "c", 10, "3" }, //
+                { 4, "4", "dom3.com", "d", 5, "4" }, //
+                { 5, "5", null, "c", 10, "5" }, //
+                { 6, "6", "dom4.com", "b", 5, "6" }, //
 
                 // domain same as a matched row
                 { 7, null, "dom1.com", "b", 0, "1" }, //

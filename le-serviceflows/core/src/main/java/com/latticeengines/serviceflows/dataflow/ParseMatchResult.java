@@ -1,10 +1,10 @@
 package com.latticeengines.serviceflows.dataflow;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.LID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.SOURCE_PREFIX;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TMP_BEST_DEDUPE_ID;
 
@@ -111,16 +111,16 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
 
     private Node generateDedupeId(Node node) {
         node = initializeDedupeId(node);
-        Node matched = node.filter(LID_FIELD + " != null", new FieldList(LID_FIELD)).renamePipe("matched");
+        Node matched = node.filter(INT_LDC_LID + " != null", new FieldList(INT_LDC_LID)).renamePipe("matched");
 
         // find best dedupe id for each matched domain
-        Node unmatchedDomain = node.filter(LID_FIELD + " == null && " + INT_LDC_PREMATCH_DOMAIN + " != null",
-                new FieldList(LID_FIELD, INT_LDC_PREMATCH_DOMAIN));
+        Node unmatchedDomain = node.filter(INT_LDC_LID + " == null && " + INT_LDC_PREMATCH_DOMAIN + " != null",
+                new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN));
         unmatchedDomain = updateByBestIdInGroup(unmatchedDomain, matched, INT_LDC_PREMATCH_DOMAIN);
 
         // find best dedupe id for each match location, without domain
-        Node unmatchedLocOnly = node.filter(LID_FIELD + " == null && " + INT_LDC_PREMATCH_DOMAIN + " == null",
-                new FieldList(LID_FIELD, INT_LDC_PREMATCH_DOMAIN));
+        Node unmatchedLocOnly = node.filter(INT_LDC_LID + " == null && " + INT_LDC_PREMATCH_DOMAIN + " == null",
+                new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN));
         unmatchedLocOnly = updateByBestIdInGroup(unmatchedLocOnly, matched, INT_LDC_LOC_CHECKSUM);
 
         return matched.merge(Arrays.asList(unmatchedDomain, unmatchedLocOnly));
@@ -131,15 +131,15 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
                 "%s == null ? " + //
                         "(%s == null ? \"\" : %s) + \"\" + (%s == null ? \"\" : %s) : " + //
                         "String.valueOf(%s)",
-                LID_FIELD, //
+                INT_LDC_LID, //
                 INT_LDC_PREMATCH_DOMAIN, INT_LDC_PREMATCH_DOMAIN, //
                 INT_LDC_LOC_CHECKSUM, INT_LDC_LOC_CHECKSUM, //
-                LID_FIELD);
+                INT_LDC_LID);
         Function function = new ExpressionFunction(new Fields(INT_LDC_DEDUPE_ID), //
                 expression, //
-                new String[] { LID_FIELD, INT_LDC_PREMATCH_DOMAIN, INT_LDC_LOC_CHECKSUM }, //
+                new String[] { INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN, INT_LDC_LOC_CHECKSUM }, //
                 new Class<?>[] { Long.class, String.class, String.class });
-        return node.apply(function, new FieldList(LID_FIELD, INT_LDC_PREMATCH_DOMAIN, INT_LDC_LOC_CHECKSUM),
+        return node.apply(function, new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN, INT_LDC_LOC_CHECKSUM),
                 new FieldMetadata(INT_LDC_DEDUPE_ID, String.class));
     }
 
@@ -167,6 +167,9 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
 
     private Node removeInternalAttrs(Node node) {
         List<String> internalAttrs = new ArrayList<>();
+        if (node.getFieldNames().contains(INT_LDC_LID)) {
+            internalAttrs.add(INT_LDC_LID);
+        }
         if (node.getFieldNames().contains(INT_LDC_POPULATED_ATTRS)) {
             internalAttrs.add(INT_LDC_POPULATED_ATTRS);
         }

@@ -195,6 +195,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     }
 
     private void appendDedupeHelpers(ProcessorContext processorContext, List<Object> allValues, OutputRecord outputRecord) {
+        allValues.add(outputRecord.getMatchedLatticeAccountId());
+
         String domain = null;
         try {
             domain = outputRecord.getPreMatchDomain();

@@ -34,6 +34,7 @@ public final class MatchConstants {
     public static final String AM_COUNTRY_CODE_FIELD = "CURRENCY_CODE";
 
     // those are the internal avro attributes
+    public static final String INT_LDC_LID = "__LDC_LID__";
     public static final String INT_LDC_PREMATCH_DOMAIN = "__LDC_PrematchDomain__";
     public static final String INT_LDC_LOC_CHECKSUM = "__LDC_LocChecksum__";
     public static final String INT_LDC_POPULATED_ATTRS = "__LDC_PopulatedAttrs__";
