@@ -1,5 +1,6 @@
-package com.latticeengines.common.exposed.query;
+package com.latticeengines.domain.exposed.query;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,10 @@ public class LogicalRestriction extends Restriction {
         this.restrictions = restrictions;
     }
 
+    public LogicalRestriction() {
+        this.restrictions = new ArrayList<>();
+    }
+
     public Connective getConnective() {
         return connective;
     }
@@ -38,15 +43,12 @@ public class LogicalRestriction extends Restriction {
         return restrictions;
     }
 
-    public void setRestrictions(List<Restriction> restrictions) {
-        this.restrictions = restrictions;
+    public void addRestriction(Restriction restriction) {
+        restrictions.add(restriction);
     }
 
-    /**
-     * Serialization constructor
-     */
-    @Deprecated
-    public LogicalRestriction() {
+    public void setRestrictions(List<Restriction> restrictions) {
+        this.restrictions = restrictions;
     }
 
     @Override
@@ -80,4 +82,5 @@ public class LogicalRestriction extends Restriction {
         // TODO Auto-generated method stub
         return null;
     }
+
 }

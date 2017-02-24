@@ -1,29 +1,49 @@
 package com.latticeengines.query.exposed.evaluator;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.query.Query;
-import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.impl.QueryProcessor;
+import com.querydsl.sql.SQLQuery;
 
 @Component("queryEvaluator")
 public class QueryEvaluator {
     @Autowired
     private List<QueryProcessor> processors;
 
-    public List<Map<String, Object>> getDataPage(DataCollection dataCollection, Query query) {
+    public SQLQuery<?> evaluate(DataCollection dataCollection, Query query) {
         QueryProcessor processor = getProcessor(dataCollection);
-        return processor.getDataPage(dataCollection, query);
+        return processor.process(dataCollection, query);
     }
 
-    public int getCount(DataCollection dataCollection, Restriction restriction) {
-        QueryProcessor processor = getProcessor(dataCollection);
-        return processor.getCount(dataCollection, restriction);
+    public List<Map<String, Object>> getResults(DataCollection dataCollection, Query query) {
+        SQLQuery<?> sqlquery = evaluate(dataCollection, query);
+        List<Map<String, Object>> toReturn = new ArrayList<>();
+        try (ResultSet results = sqlquery.getResults()) {
+            ResultSetMetaData metadata = results.getMetaData();
+            while (results.next()) {
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 0; i < metadata.getColumnCount(); ++i) {
+                    String columnName = metadata.getColumnName(i);
+                    row.put(columnName, results.getObject(columnName));
+                }
+                toReturn.add(row);
+            }
+            return toReturn;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(String.format("Failed to retrieve data for object %s", query.getObjectType()), e);
+        }
     }
 
     private QueryProcessor getProcessor(DataCollection dataCollection) {

@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.query;
+package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
 import java.util.List;

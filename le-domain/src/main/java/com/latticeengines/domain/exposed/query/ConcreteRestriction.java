@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.query;
+package com.latticeengines.domain.exposed.query;
 
 import java.util.Collection;
 import java.util.Map;
@@ -31,6 +31,9 @@ public class ConcreteRestriction extends Restriction {
         this.rhs = rhs;
     }
 
+    public ConcreteRestriction() {
+    }
+
     public Lookup getLhs() {
         return lhs;
     }
@@ -61,13 +64,6 @@ public class ConcreteRestriction extends Restriction {
 
     public void setNegate(boolean negate) {
         this.negate = negate;
-    }
-
-    /**
-     * Serialization constructor
-     */
-    @Deprecated
-    public ConcreteRestriction() {
     }
 
     @Override

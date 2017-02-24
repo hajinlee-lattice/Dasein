@@ -29,8 +29,8 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.query.ExistsRestriction;
-import com.latticeengines.common.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.ExistsRestriction;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.IntentScore;

@@ -6,8 +6,8 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.query.ColumnLookup;
-import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;

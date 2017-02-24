@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.query;
+package com.latticeengines.domain.exposed.query;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -24,6 +24,9 @@ public class Transformation {
         this.rangeEnd = rangeEnd;
     }
 
+    public Transformation() {
+    }
+
     public TransformationType getType() {
         return type;
     }
@@ -46,13 +49,6 @@ public class Transformation {
 
     public void setRangeEnd(Integer rangeEnd) {
         this.rangeEnd = rangeEnd;
-    }
-
-    /**
-     * Serialization constructor
-     */
-    @Deprecated
-    public Transformation() {
     }
 
     @Override

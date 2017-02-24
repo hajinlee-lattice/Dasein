@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.query;
+package com.latticeengines.domain.exposed.query;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,20 +13,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExistsRestriction extends Restriction {
+    @JsonProperty("object_type")
+    private SchemaInterpretation objectType;
     @JsonProperty("negate")
     private boolean negate;
-    @JsonProperty("association")
-    private String association;
     @JsonProperty("restrictions")
     private List<Restriction> restrictions;
 
-    public ExistsRestriction(boolean negate, String association, List<Restriction> restrictions) {
+    public ExistsRestriction(SchemaInterpretation objectType, boolean negate, List<Restriction> restrictions) {
+        this.objectType = objectType;
         this.negate = negate;
-        this.association = association;
         this.restrictions = restrictions;
+    }
+
+    public ExistsRestriction(SchemaInterpretation objectType) {
+        this.objectType = objectType;
+    }
+
+    public ExistsRestriction(SchemaInterpretation objectType, boolean negate) {
+        this.objectType = objectType;
+        this.negate = negate;
     }
 
     public boolean getNegate() {
@@ -37,12 +47,12 @@ public class ExistsRestriction extends Restriction {
         this.negate = negate;
     }
 
-    public String getAssociation() {
-        return association;
+    public SchemaInterpretation getobjectName() {
+        return objectType;
     }
 
-    public void setAssociation(String association) {
-        this.association = association;
+    public void setobjectName(SchemaInterpretation objectName) {
+        this.objectType = objectName;
     }
 
     public List<Restriction> getRestrictions() {
@@ -51,13 +61,6 @@ public class ExistsRestriction extends Restriction {
 
     public void setRestrictions(List<Restriction> restrictions) {
         this.restrictions = restrictions;
-    }
-
-    /**
-     * Serialization constructor
-     */
-    @Deprecated
-    public ExistsRestriction() {
     }
 
     @Override

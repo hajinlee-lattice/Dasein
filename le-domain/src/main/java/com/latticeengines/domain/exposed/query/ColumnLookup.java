@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.query;
+package com.latticeengines.domain.exposed.query;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -6,29 +6,33 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ColumnLookup extends Lookup {
     @JsonProperty("column_name")
     private String columnName;
-    @JsonProperty("table_name")
-    private String tableName;
+    @JsonProperty("object_type")
+    private SchemaInterpretation objectType;
 
     public ColumnLookup(String columnName) {
         this.columnName = columnName;
     }
 
-    public ColumnLookup(String tableName, String columnName) {
-        this.tableName = tableName;
+    public ColumnLookup(SchemaInterpretation objectType, String columnName) {
+        this.objectType = objectType;
         this.columnName = columnName;
     }
 
-    public String getTableName() {
-        return tableName;
+    public ColumnLookup() {
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public SchemaInterpretation getObjectType() {
+        return objectType;
+    }
+
+    public void setObjectType(SchemaInterpretation objectType) {
+        this.objectType = objectType;
     }
 
     public String getColumnName() {
@@ -37,13 +41,6 @@ public class ColumnLookup extends Lookup {
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
-    }
-
-    /**
-     * Serialization constructor
-     */
-    @Deprecated
-    public ColumnLookup() {
     }
 
     @Override

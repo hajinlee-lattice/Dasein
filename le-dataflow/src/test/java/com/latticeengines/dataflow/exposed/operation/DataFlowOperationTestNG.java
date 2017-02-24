@@ -14,8 +14,8 @@ import org.testng.annotations.Test;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.latticeengines.common.exposed.query.ColumnLookup;
-import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;

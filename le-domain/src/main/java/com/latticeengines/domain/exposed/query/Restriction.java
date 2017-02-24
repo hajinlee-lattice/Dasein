@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.query;
+package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,9 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 @JsonSubTypes({ //
         @Type(value = ConcreteRestriction.class, name = "concreteRestriction"),
         @Type(value = ExistsRestriction.class, name = "existsRestriction"),
-        @Type(value = LogicalRestriction.class, name = "logicalRestriction"), })
+        @Type(value = LogicalRestriction.class, name = "logicalRestriction"),
+        @Type(value = LogicalRestriction.class, name = "bucketRestriction"),
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Restriction implements GraphNode {
 

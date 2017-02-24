@@ -9,8 +9,8 @@ import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Retain;
 import cascading.tuple.Fields;
 
-import com.latticeengines.common.exposed.query.ColumnLookup;
-import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;

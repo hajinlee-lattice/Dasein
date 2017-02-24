@@ -33,8 +33,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.Listeners;
 
-import com.latticeengines.common.exposed.query.ExistsRestriction;
-import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.IntentScore;
@@ -45,6 +43,8 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
+import com.latticeengines.domain.exposed.query.ExistsRestriction;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
@@ -76,10 +76,10 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
     protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
     protected static final Boolean IS_DEFAULT = false;
-    protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account",
-            new ArrayList<Restriction>());
-    protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact",
-            new ArrayList<Restriction>());
+    protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction("account",
+            false, new ArrayList<Restriction>());
+    protected static final Restriction CONTACT_FILTER = new ExistsRestriction("contact",
+            false, new ArrayList<Restriction>());
     protected static final Integer OFFSET = 1;
     protected static final List<String> SELECTED_INTENT = new ArrayList<>(Arrays.asList("Intent1", "Intent2"));
     protected static final Integer MAX_PROSPECTS_PER_ACCOUNT = 3;

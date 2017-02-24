@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.query;
+package com.latticeengines.domain.exposed.query;
 
 import java.util.List;
 
@@ -8,9 +8,12 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Query {
+    @JsonProperty("object_type")
+    private SchemaInterpretation objectType;
     @JsonProperty("lookups")
     private List<Lookup> lookups;
     @JsonProperty("restriction")
@@ -19,12 +22,20 @@ public class Query {
     private Sort sort;
     @JsonProperty("page_filter")
     private PageFilter pageFilter;
+    @JsonProperty("free_form_restriction")
+    private String freeFormRestriction;
 
-    public Query(List<Lookup> lookups, Restriction restriction, Sort sort, PageFilter pageFilter) {
+    public Query(SchemaInterpretation objectType, List<Lookup> lookups, Restriction restriction, Sort sort,
+            PageFilter pageFilter, String freeFromRestriction) {
+        this.objectType = objectType;
         this.lookups = lookups;
         this.restriction = restriction;
         this.sort = sort;
         this.pageFilter = pageFilter;
+        this.freeFormRestriction = freeFromRestriction;
+    }
+
+    public Query() {
     }
 
     public Restriction getRestriction() {
@@ -59,11 +70,20 @@ public class Query {
         this.pageFilter = pageFilter;
     }
 
-    /**
-     * Serialization constructor
-     */
-    @Deprecated
-    public Query() {
+    public SchemaInterpretation getObjectType() {
+        return objectType;
+    }
+
+    public void setObjectType(SchemaInterpretation objectType) {
+        this.objectType = objectType;
+    }
+
+    public String getFreeFormRestriction() {
+        return freeFormRestriction;
+    }
+
+    public void setFreeFormRestriction(String freeFormRestriction) {
+        this.freeFormRestriction = freeFormRestriction;
     }
 
     @Override

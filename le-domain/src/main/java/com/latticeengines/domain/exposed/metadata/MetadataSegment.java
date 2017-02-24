@@ -21,12 +21,12 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.metadata.frontend.query.FrontEndFilter;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FlattenedRestriction;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_SEGMENT")
@@ -49,9 +49,9 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     @Type(type = "text")
     private String restrictionString;
 
-    @JsonProperty("front_end_filter")
+    @JsonProperty("simple_restriction")
     @Transient
-    private FrontEndFilter frontEndFilter;
+    private FlattenedRestriction simpleRestriction;
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
@@ -97,12 +97,12 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
         this.restrictionString = JsonUtils.serialize(restriction);
     }
 
-    public FrontEndFilter getFrontEndFilter() {
-        return frontEndFilter;
+    public FlattenedRestriction getSimpleRestriction() {
+        return simpleRestriction;
     }
 
-    public void setFrontEndFilter(FrontEndFilter frontEndFilter) {
-        this.frontEndFilter = frontEndFilter;
+    public void setSimpleRestriction(FlattenedRestriction simpleRestriction) {
+        this.simpleRestriction = simpleRestriction;
     }
 
     public DataCollection getDataCollection() {

@@ -25,7 +25,7 @@ import org.joda.time.DateTimeZone;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;

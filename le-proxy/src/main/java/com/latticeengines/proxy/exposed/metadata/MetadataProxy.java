@@ -1,6 +1,8 @@
 package com.latticeengines.proxy.exposed.metadata;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +24,7 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
 public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataInterface, ArtifactInterface,
-        RuleResultInterface, ModuleInterface {
+        RuleResultInterface, ModuleInterface, DataCollectionInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -193,5 +195,30 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         String url = constructUrl("/customerspaces/{customerSpace}/segments/{segmentName}?tableName={tableName}", //
                 customerSpace, segmentName, tableName);
         return post("createSegment", url, null, MetadataSegment.class);
+    }
+
+    @Override
+    public List<DataCollection> getDataCollections(String customerSpace) {
+        return null;
+    }
+
+    @Override
+    public DataCollection getDefaultDataCollection(String customerSpace) {
+        return null;
+    }
+
+    @Override
+    public DataCollection createDefaultDataCollection(String customerSpace, String statisticsId, List<String> tableNames) {
+        return null;
+    }
+
+    @Override
+    public DataCollection getDataCollection(String customerSpace, String DataCollectionName) {
+        return null;
+    }
+
+    @Override
+    public DataCollection createDataCollection(String customerSpace, String statisticsId, List<String> tableNames) {
+        return null;
     }
 }
