@@ -14,5 +14,5 @@ public final class EngineConstants {
     public static final String OUT_GZ = ".OUT.gz";
     public static final String GZ = ".gz";
     public static final String AVRO = ".avro";
-
+    public static final String UNCOMPRESSED = "Uncompressed";
 }

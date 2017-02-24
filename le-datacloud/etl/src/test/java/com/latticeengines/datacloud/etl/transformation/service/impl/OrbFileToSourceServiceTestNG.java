@@ -25,6 +25,7 @@ import com.latticeengines.datacloud.etl.transformation.service.TransformationSer
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -49,14 +50,17 @@ public class OrbFileToSourceServiceTestNG
     @Autowired
     private PipelineTransformationService pipelineTransformationService;
 
+    // @Autowired
+    // private IngestedFileToSourceDataFlowService zddService;
+
     String targetSourceName = "OrbCompanyRaw";
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTransformation() {
         baseSource.setIngetionName(IngestionNames.ORB_INTELLIGENCE);
-        uploadBaseSourceFile(baseSource, "orb-db2-export-sample/orb_companies.csv", baseSourceVersion);
+        uploadBaseSourceFile(baseSource, "orb-db2-export-sample.zip", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -113,7 +117,9 @@ public class OrbFileToSourceServiceTestNG
     private String getIngestedFileToSourceTransformerConfig() throws JsonProcessingException {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
         conf.setIngetionName(IngestionNames.ORB_INTELLIGENCE);
-        conf.setFileName("orb_companies.csv");
+        conf.setFileNameOrExtension("orb_companies.csv");
+        conf.setCompressedFileNameOrExtension("orb-db2-export-sample.zip");
+        conf.setCompressType(CompressType.ZIP);
         return om.writeValueAsString(conf);
     }
 
@@ -128,9 +134,10 @@ public class OrbFileToSourceServiceTestNG
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
-        String[] expectedDuns = new String[] { "8129065", "12438907", "12221764", "17145445", "11780445", "11417478",
-                "13262799", "17149076", "8825824", "116109312", "117155602", "126441554", "133303900", "117155600",
-                "117155604", "109785854" };
+        String[] expectedDuns = new String[] { "13262799", "12221764", "51040422", "8129065", "11417478", "17145445",
+                "17149076", "12438907", "8825824", "117155600", "126441554", "117155602", "117155604", "133303900",
+                "136492131", "141925778", "142109806", "137396383", "118386803", "138412260", "109785854",
+                "116109312" };
         Set<String> expectedDunsSet = new HashSet<>(Arrays.asList(expectedDuns));
         int rowNum = 0;
         while (records.hasNext()) {
@@ -139,7 +146,7 @@ public class OrbFileToSourceServiceTestNG
             Assert.assertTrue(expectedDunsSet.contains(orbNum));
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 16);
+        Assert.assertEquals(rowNum, 22);
     }
 
 }

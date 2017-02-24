@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -18,9 +20,12 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapping;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMappingImpl;
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
+import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IngestedFileToSourceParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+
 
 @Component("ingestedFileToSourceDataFlowService")
 public class IngestedFileToSourceDataFlowService extends AbstractTransformationDataFlowService {
@@ -40,16 +45,92 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
         log.info("Ingestion Directory: " + ingestionDir);
         
         try {
-            if (parameters.getFileName() != null) {
-                String filePath = scanDir(ingestionDir,
-                        parameters.getFileName() != null ? parameters.getFileName() : parameters.getExtension(), true,
-                        true).get(0);
-                convertCsvToAvro(fieldTypeMapping, filePath, workflowDir, parameters);
+            boolean foundFiles = false;
+            String searchDir = ingestionDir;
+            List<String> files = null;
+            Path uncompressedDir = new Path(ingestionDir, EngineConstants.UNCOMPRESSED);
+            if (StringUtils.isNotEmpty(parameters.getCompressedFileNameOrExtension())
+                    && !HdfsUtils.isDirectory(yarnConfiguration, uncompressedDir.toString())) {
+                log.info("Uncompressed dir " + uncompressedDir.toString() + " does not exist. Create one.");
+                HdfsUtils.mkdir(yarnConfiguration, uncompressedDir.toString());
+                searchDir = uncompressedDir.toString();
+                log.info("Searching compressed files with name/extension as "
+                        + parameters.getCompressedFileNameOrExtension() + " in directory " + ingestionDir);
+                List<String> compressedFiles = scanDir(ingestionDir, parameters.getCompressedFileNameOrExtension(),
+                        true, false);
+                log.info("Found " + compressedFiles.size() + " compressed files.");
+                uncompress(compressedFiles, uncompressedDir, parameters.getCompressType());
+            } else if (StringUtils.isNotEmpty(parameters.getCompressedFileNameOrExtension())
+                    && HdfsUtils.isDirectory(yarnConfiguration, uncompressedDir.toString())) {
+                log.info("Uncompressed dir " + uncompressedDir.toString() + " already exists.");
+                searchDir = uncompressedDir.toString();
+                log.info("Searching if target files with name/extension " + parameters.getFileNameOrExtension()
+                        + " exist in dir " + searchDir);
+                files = scanDir(searchDir, parameters.getFileNameOrExtension(), true, true);
+                if (!CollectionUtils.isEmpty(files)) {
+                    log.info("Target files exist already.");
+                    foundFiles = true;
+                }
+                if (!foundFiles) {
+                    log.info("Target files do not exist. Remove " + uncompressedDir.toString()
+                            + " and create a new one.");
+                    HdfsUtils.rmdir(yarnConfiguration, uncompressedDir.toString());
+                    HdfsUtils.mkdir(yarnConfiguration, uncompressedDir.toString());
+                    log.info("Searching compressed files with name/extension as "
+                            + parameters.getCompressedFileNameOrExtension() + " in directory " + ingestionDir);
+                    List<String> compressedFiles = scanDir(ingestionDir, parameters.getCompressedFileNameOrExtension(),
+                            true, false);
+                    log.info("Found " + compressedFiles.size() + " compressed files.");
+                    uncompress(compressedFiles, uncompressedDir, parameters.getCompressType());
+                }
             }
+            if (!foundFiles) {
+                log.info("Searching if target files with name/extension " + parameters.getFileNameOrExtension()
+                        + " exist in dir " + searchDir);
+                files = scanDir(searchDir, parameters.getFileNameOrExtension(), true, true);
+                if (!CollectionUtils.isEmpty(files)) {
+                    foundFiles = true;
+                }
+            }
+            if (foundFiles) {
+                log.info("Found target files.");
+                Path path = new Path(files.get(0));
+                String searchWildCard = new Path(path.getParent(), "*" + parameters.getFileNameOrExtension())
+                        .toString();
+                log.info("SearchWildCard: " + searchWildCard);
+                convertCsvToAvro(fieldTypeMapping, searchWildCard, workflowDir, parameters);
+            } else {
+                log.error("Fail to find any target files!");
+            }
+
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
         }
+    }
 
+    private void uncompress(List<String> compressedFiles, Path uncompressedDir, CompressType type)
+            throws IOException {
+        for (String compressedFile : compressedFiles) {
+            Path compressedPath = new Path(compressedFile);
+            log.info("CompressedPath: " + compressedFile);
+            switch (type) {
+            case GZ:
+                String compressedNameOnly = compressedPath.getName();
+                String uncompressedNameOnly = StringUtils.endsWithIgnoreCase(compressedNameOnly, EngineConstants.GZ)
+                        ? compressedNameOnly.substring(0, compressedNameOnly.length() - EngineConstants.GZ.length())
+                        : compressedNameOnly;
+                Path uncompressedPath = new Path(uncompressedDir, uncompressedNameOnly);
+                log.info("UncompressedPath for gz file: " + uncompressedPath.toString());
+                HdfsUtils.uncompressGZFileWithinHDFS(yarnConfiguration, compressedFile, uncompressedPath.toString());
+                break;
+            case ZIP:
+                log.info("UncompressedPath for zip file: " + uncompressedDir.toString());
+                HdfsUtils.uncompressZipFileWithinHDFS(yarnConfiguration, compressedFile, uncompressedDir.toString());
+                break;
+            default:
+                throw new RuntimeException("CompressType " + type.name() + "  is not supported");
+            }
+        }
     }
 
     private List<String> scanDir(String inputDir, final String suffix, boolean recursive, boolean returnFirstMatch)
@@ -64,9 +145,9 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
 
         List<String> files = null;
         if (recursive) {
-            files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, inputDir, filter, returnFirstMatch);
+            files = HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, inputDir, filter, returnFirstMatch);
         } else {
-            files = HdfsUtils.getFilesForDir(yarnConfiguration, inputDir, filter);
+            files = HdfsUtils.onlyGetFilesForDir(yarnConfiguration, inputDir, filter);
         }
         List<String> resultFiles = new ArrayList<String>();
 

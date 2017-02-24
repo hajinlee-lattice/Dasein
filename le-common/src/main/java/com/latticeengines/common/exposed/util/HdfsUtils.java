@@ -272,6 +272,28 @@ public class HdfsUtils {
         }
     }
 
+    // Only return files. Exclude all the sub directory paths
+    public static final List<String> onlyGetFilesForDir(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
+            List<String> filePaths = new ArrayList<String>();
+            for (FileStatus status : statuses) {
+                if (!status.isDirectory()) {
+                    Path filePath = status.getPath();
+                    boolean accept = true;
+                    if (filter != null) {
+                        accept = filter.accept(status);
+                    }
+                    if (accept) {
+                        filePaths.add(filePath.toString());
+                    }
+                }
+            }
+            return filePaths;
+        }
+    }
+
     public static final List<FileStatus> getFileStatusesForDir(Configuration configuration, String hdfsDir,
             HdfsFileFilter filter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
@@ -312,6 +334,41 @@ public class HdfsUtils {
                 }
             }
             return new ArrayList<>(filePaths);
+        }
+    }
+
+    // Only return files. Exclude all the sub directory paths
+    public static final List<String> onlyGetFilesForDirRecursive(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
+        Set<String> filePaths = new HashSet<String>();
+        onlyGetFilesForDirRecursiveHelper(configuration, hdfsDir, filter, returnFirstMatch, filePaths);
+        return new ArrayList<>(filePaths);
+    }
+
+    public static final void onlyGetFilesForDirRecursiveHelper(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter, boolean returnFirstMatch, Set<String> filePaths) throws IOException {
+        if (returnFirstMatch && filePaths.size() > 0) {
+            return;
+        }
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
+            for (FileStatus status : statuses) {
+                if (status.isDirectory()) {
+                    onlyGetFilesForDirRecursiveHelper(configuration, status.getPath().toString(), filter,
+                            returnFirstMatch, filePaths);
+                } else {
+                    boolean accept = true;
+                    if (filter != null) {
+                        accept = filter.accept(status);
+                    }
+                    if (accept) {
+                        filePaths.add(status.getPath().toString());
+                    }
+                }
+                if (returnFirstMatch && filePaths.size() > 0) {
+                    return;
+                }
+            }
         }
     }
 

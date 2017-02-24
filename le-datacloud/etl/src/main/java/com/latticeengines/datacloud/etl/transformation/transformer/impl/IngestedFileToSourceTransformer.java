@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,10 @@ public class IngestedFileToSourceTransformer
             log.error("Process one ingestion at a time");
             return false;
         }
+        if (StringUtils.isEmpty(config.getFileNameOrExtension())) {
+            log.error("Please provide file name or extension");
+            return false;
+        }
         return true;
     }
 
@@ -65,9 +70,10 @@ public class IngestedFileToSourceTransformer
         parameters.setIngetionName(config.getIngetionName());
         parameters.setQualifier(config.getQualifier());
         parameters.setDelimiter(config.getDelimiter());
-        parameters.setExtension(config.getExtension());
         parameters.setCharset(config.getCharset());
-        parameters.setFileName(config.getFileName());
+        parameters.setFileNameOrExtension(config.getFileNameOrExtension());
+        parameters.setCompressedFileNameOrExtension(config.getCompressedFileNameOrExtension());
+        parameters.setCompressType(config.getCompressType());
     }
 
     @Override

@@ -13,14 +13,17 @@ public class IngestedFileToSourceTransformerConfig extends TransformerConfig {
     @JsonProperty("Delimiter")
     private String delimiter = ",";
 
-    @JsonProperty("Extension")
-    private String extension = ".csv";
-
     @JsonProperty("Charset")
     private String charset;
 
-    @JsonProperty("FileName")
-    private String fileName;
+    @JsonProperty("FileNameOrExtension")
+    private String fileNameOrExtension;
+
+    @JsonProperty("CompressedFileNameOrExtension")
+    private String compressedFileNameOrExtension;
+
+    @JsonProperty("CompressType")
+    private CompressType compressType;
 
     public String getIngetionName() {
         return ingetionName;
@@ -46,14 +49,6 @@ public class IngestedFileToSourceTransformerConfig extends TransformerConfig {
         this.delimiter = delimiter;
     }
 
-    public String getExtension() {
-        return extension;
-    }
-
-    public void setExtension(String extension) {
-        this.extension = extension;
-    }
-
     public String getCharset() {
         return charset;
     }
@@ -62,12 +57,32 @@ public class IngestedFileToSourceTransformerConfig extends TransformerConfig {
         this.charset = charset;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getFileNameOrExtension() {
+        return fileNameOrExtension;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setFileNameOrExtension(String fileNameOrExtension) {
+        this.fileNameOrExtension = fileNameOrExtension;
+    }
+
+    public String getCompressedFileNameOrExtension() {
+        return compressedFileNameOrExtension;
+    }
+
+    public void setCompressedFileNameOrExtension(String compressedFileNameOrExtension) {
+        this.compressedFileNameOrExtension = compressedFileNameOrExtension;
+    }
+
+    public CompressType getCompressType() {
+        return compressType;
+    }
+
+    public void setCompressType(CompressType compressType) {
+        this.compressType = compressType;
+    }
+
+    public enum CompressType {
+        GZ, ZIP
     }
 
 }
