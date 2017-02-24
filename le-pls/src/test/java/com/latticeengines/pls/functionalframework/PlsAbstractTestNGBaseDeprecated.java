@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
@@ -87,8 +88,8 @@ public abstract class PlsAbstractTestNGBaseDeprecated extends SecurityFunctional
     protected static final String STRING_VALUE = "VALUE";
     protected static final String STRING_VALUE_1 = "VALUE_1";
     protected static final String DOUBLE_VALUE = "2.5";
-//    protected static final ProspectDiscoveryConfiguration PROSPECT_DISCOVERY_CONFIGURATION = new ProspectDiscoveryConfiguration(
-//            Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
+    protected static final ProspectDiscoveryProperty PROSPECT_DISCOVERY_PROPERTIES = new ProspectDiscoveryProperty(
+            Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
 
     protected static HashMap<AccessLevel, UserDocument> testingUserSessions;
     protected static List<Tenant> testingTenants;

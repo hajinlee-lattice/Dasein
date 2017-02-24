@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
@@ -92,8 +93,8 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String STRING_VALUE = "VALUE";
     protected static final String STRING_VALUE_1 = "VALUE_1";
     protected static final String DOUBLE_VALUE = "2.5";
-    // protected static final ProspectDiscoveryConfiguration PROSPECT_DISCOVERY_CONFIGURATION = new ProspectDiscoveryConfiguration(
-    //        Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
+    protected static final ProspectDiscoveryProperty PROSPECT_DISCOVERY_PROPERTIES = new ProspectDiscoveryProperty(
+            Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
 
     protected GlobalAuthTestBed testBed;
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
