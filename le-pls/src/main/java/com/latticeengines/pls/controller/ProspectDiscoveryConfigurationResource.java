@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.pls.service.ProspectDiscoveryConfigurationService;
 
@@ -35,9 +35,9 @@ public class ProspectDiscoveryConfigurationResource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    public ProspectDiscoveryConfiguration findProspectDiscoveryConfiguration() {
+    public ProspectDiscoveryProperty findProspectDiscoveryConfiguration() {
         List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryConfigurationService.findAllProspectDiscoveryOptions();
-        return new ProspectDiscoveryConfiguration(prospectDiscoveryOptions);
+        return new ProspectDiscoveryProperty(prospectDiscoveryOptions);
     }
 
     @RequestMapping(value = "/{option}", method = RequestMethod.PUT, headers = "Accept=application/json")

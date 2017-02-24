@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
@@ -69,7 +69,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         TARGET_MARKET.setOffset(OFFSET);
         TARGET_MARKET.setSelectedIntent(SELECTED_INTENT);
 
-        TargetMarketDataFlowConfiguration configuration = TARGET_MARKET.getDataFlowConfiguration();
+        TargetMarketDataFlowProperty configuration = TARGET_MARKET.getDataFlowConfiguration();
         configuration.setInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends,
                 NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS);
         configuration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, INTENT_SCORE_THRESHOLD.toString());
@@ -201,7 +201,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
         assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
 
-        TargetMarketDataFlowConfiguration configuration = targetMarket.getDataFlowConfiguration();
+        TargetMarketDataFlowProperty configuration = targetMarket.getDataFlowConfiguration();
         assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends),
                 NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS.intValue());
         assertEquals(configuration.getString(TargetMarketDataFlowOptionName.IntentScoreThreshold),

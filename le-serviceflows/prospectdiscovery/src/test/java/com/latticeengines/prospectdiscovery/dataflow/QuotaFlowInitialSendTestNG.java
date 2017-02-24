@@ -14,11 +14,11 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.IntentScore;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
@@ -27,7 +27,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
 
     private QuotaFlowParameters getStandardParameters() {
         TargetMarket market = new TargetMarket();
-        TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
+        TargetMarketDataFlowProperty marketConfiguration = market.getDataFlowConfiguration();
         marketConfiguration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.LOW.toString());
         marketConfiguration.setDouble(TargetMarketDataFlowOptionName.FitScoreThreshold, 0.0);
         marketConfiguration.set(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, 365);
@@ -40,7 +40,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
         intent.add("Intent2");
         market.setSelectedIntent(intent);
         market.setOffset(1);
-        ProspectDiscoveryConfiguration configuration = new ProspectDiscoveryConfiguration();
+        ProspectDiscoveryProperty configuration = new ProspectDiscoveryProperty();
         configuration.setDouble(ProspectDiscoveryOptionName.IntentPercentage, 50);
         Quota quota = new Quota();
         quota.setBalance(100);
@@ -65,7 +65,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
     public void testOnlyFitSent() {
         setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
-        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket()
                 .getDataFlowConfiguration();
         dataFlowConfiguration.set(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.MAX.toString());
 
@@ -85,7 +85,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsDataFlowFunctionalTe
     public void testOnlyIntentSent() {
         setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
-        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket()
                 .getDataFlowConfiguration();
         dataFlowConfiguration.setDouble(TargetMarketDataFlowOptionName.FitScoreThreshold, 100.0);
 

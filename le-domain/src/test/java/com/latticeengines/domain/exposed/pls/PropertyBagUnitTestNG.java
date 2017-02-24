@@ -7,10 +7,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.db.ConfigurationBag;
+import com.latticeengines.domain.exposed.db.PropertyBag;
 import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 
-public class ConfigurationBagUnitTestNG {
+public class PropertyBagUnitTestNG {
     public enum OptionName {
         testInt, //
         testString, //
@@ -18,7 +18,7 @@ public class ConfigurationBagUnitTestNG {
         testNotExists
     }
 
-    private ConfigurationBag<TestOption, OptionName> bag;
+    private PropertyBag<TestOption, OptionName> bag;
 
     public class TestOption implements HasOptionAndValue {
         private String option;
@@ -61,7 +61,7 @@ public class ConfigurationBagUnitTestNG {
         option = new TestOption(OptionName.testDouble.toString(), "123.123");
         options.add(option);
 
-        bag = new ConfigurationBag<TestOption, OptionName>(List.class.cast(options));
+        bag = new PropertyBag<TestOption, OptionName>(List.class.cast(options));
     }
 
     @Test(groups = "unit")

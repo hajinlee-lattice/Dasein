@@ -302,13 +302,13 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
 
     @Transient
     @JsonIgnore
-    public TargetMarketDataFlowConfiguration getDataFlowConfiguration() {
-        return new TargetMarketDataFlowConfiguration(rawDataFlowConfiguration);
+    public TargetMarketDataFlowProperty getDataFlowConfiguration() {
+        return new TargetMarketDataFlowProperty(rawDataFlowConfiguration);
     }
 
     @Transient
     @JsonIgnore
-    public void setDataFlowConfiguration(TargetMarketDataFlowConfiguration configuration) {
+    public void setDataFlowConfiguration(TargetMarketDataFlowProperty configuration) {
         this.rawDataFlowConfiguration = configuration.getBag();
     }
 

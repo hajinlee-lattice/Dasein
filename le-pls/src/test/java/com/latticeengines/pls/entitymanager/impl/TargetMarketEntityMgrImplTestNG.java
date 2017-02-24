@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
@@ -62,7 +62,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         TARGET_MARKET.setSelectedIntent(SELECTED_INTENT);
         TARGET_MARKET.setReports(TARGET_MARKET_REPORTS);
 
-        TargetMarketDataFlowConfiguration configuration = TARGET_MARKET.getDataFlowConfiguration();
+        TargetMarketDataFlowProperty configuration = TARGET_MARKET.getDataFlowConfiguration();
         configuration.setInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends,
                 NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS);
         configuration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, INTENT_SCORE_THRESHOLD.toString());
@@ -97,7 +97,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
         assertEquivalent(targetMarket.getReports(), TARGET_MARKET_REPORTS);
 
-        TargetMarketDataFlowConfiguration configuration = targetMarket.getDataFlowConfiguration();
+        TargetMarketDataFlowProperty configuration = targetMarket.getDataFlowConfiguration();
         assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends),
                 NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS.intValue());
         assertEquals(configuration.getString(TargetMarketDataFlowOptionName.IntentScoreThreshold),

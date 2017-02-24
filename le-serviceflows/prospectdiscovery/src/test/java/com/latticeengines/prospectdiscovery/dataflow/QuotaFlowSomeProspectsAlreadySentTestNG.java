@@ -12,11 +12,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.IntentScore;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
@@ -25,7 +25,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
     protected QuotaFlowParameters getStandardParameters() {
         setEngine("TEZ");
         TargetMarket market = new TargetMarket();
-        TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
+        TargetMarketDataFlowProperty marketConfiguration = market.getDataFlowConfiguration();
         marketConfiguration.setString(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.LOW.toString());
         marketConfiguration.setDouble(TargetMarketDataFlowOptionName.FitScoreThreshold, 20.0);
         marketConfiguration.set(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, 365);
@@ -38,7 +38,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
         intent.add("Intent2");
         market.setSelectedIntent(intent);
         market.setOffset(1);
-        ProspectDiscoveryConfiguration configuration = new ProspectDiscoveryConfiguration();
+        ProspectDiscoveryProperty configuration = new ProspectDiscoveryProperty();
         configuration.setDouble(ProspectDiscoveryOptionName.IntentPercentage, 100);
         Quota quota = new Quota();
         quota.setBalance(100);
@@ -64,7 +64,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
         QuotaFlowParameters parameters = getStandardParameters();
         // This should filter out everything so that only the single contact
         // that was never sent out is sent.
-        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket()
                 .getDataFlowConfiguration();
         dataFlowConfiguration.set(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, null);
         Table result = executeDataFlow(parameters);
@@ -83,7 +83,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
     public void testFilterExistingAccounts() {
         setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
-        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket()
                 .getDataFlowConfiguration();
         dataFlowConfiguration.setBoolean( //
                 TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts, false);

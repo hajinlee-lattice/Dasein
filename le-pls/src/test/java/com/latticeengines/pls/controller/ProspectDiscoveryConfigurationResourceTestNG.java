@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
 public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
@@ -35,7 +35,7 @@ public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalT
         restTemplate.put(getRestAPIHostPort() + PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL + OPTION_1.toString(), STRING_VALUE);
         restTemplate.put(getRestAPIHostPort() + PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL + OPTION_2.toString(), DOUBLE_VALUE);
         
-        ProspectDiscoveryConfiguration configuration = restTemplate.getForObject(getRestAPIHostPort() + PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL, ProspectDiscoveryConfiguration.class );
+        ProspectDiscoveryProperty configuration = restTemplate.getForObject(getRestAPIHostPort() + PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL, ProspectDiscoveryProperty.class );
         assertNotNull(configuration);
         assertEquals(configuration.getString(OPTION_1, "SHOULD NOT RETURN ME"), STRING_VALUE);
         assertEquals(configuration.getDouble(OPTION_2, 0), Double.parseDouble(DOUBLE_VALUE));
@@ -45,7 +45,7 @@ public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalT
     public void updateProspectDiscoveryConfiguration_calledWithParams_assertConfigurationIsUpdated() {
         restTemplate.put(getRestAPIHostPort() + PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL + OPTION_1.toString(), STRING_VALUE_1);
 
-        ProspectDiscoveryConfiguration configuration = restTemplate.getForObject(getRestAPIHostPort() + PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL, ProspectDiscoveryConfiguration.class );
+        ProspectDiscoveryProperty configuration = restTemplate.getForObject(getRestAPIHostPort() + PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL, ProspectDiscoveryProperty.class );
         assertNotNull(configuration);
         assertEquals(configuration.getString(OPTION_1, "SHOULD NOT RETURN ME"), STRING_VALUE_1);
     }

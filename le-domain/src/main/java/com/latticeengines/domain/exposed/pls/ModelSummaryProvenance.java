@@ -5,10 +5,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.db.ConfigurationBag;
+import com.latticeengines.domain.exposed.db.PropertyBag;
 
 public class ModelSummaryProvenance
-        extends ConfigurationBag<ModelSummaryProvenanceProperty, ProvenancePropertyName> {
+        extends PropertyBag<ModelSummaryProvenanceProperty, ProvenancePropertyName> {
 
     @SuppressWarnings("unchecked")
     public ModelSummaryProvenance(

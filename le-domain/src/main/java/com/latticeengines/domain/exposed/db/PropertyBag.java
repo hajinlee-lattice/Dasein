@@ -8,10 +8,10 @@ import javax.annotation.Nullable;
 
 import com.google.common.base.Function;
 
-public class ConfigurationBag<T extends HasOptionAndValue, E extends Enum<E>> {
+public class PropertyBag<T extends HasOptionAndValue, E extends Enum<E>> {
     protected List<T> bag;
 
-    public ConfigurationBag(List<T> bag) {
+    public PropertyBag(List<T> bag) {
         this.bag = bag;
     }
 

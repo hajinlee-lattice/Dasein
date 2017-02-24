@@ -17,11 +17,11 @@ import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.pls.IntentScore;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 
 @Component("quotaFlow")
@@ -41,9 +41,9 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         account = account.leftOuterJoin(LatticeAccountID, accountIntent, LatticeAccountID);
 
         TargetMarket market = parameters.getTargetMarket();
-        ProspectDiscoveryConfiguration configuration = parameters.getConfiguration();
+        ProspectDiscoveryProperty configuration = parameters.getConfiguration();
         Quota quota = parameters.getQuota();
-        TargetMarketDataFlowConfiguration marketConfiguration = market.getDataFlowConfiguration();
+        TargetMarketDataFlowProperty marketConfiguration = market.getDataFlowConfiguration();
 
         account = account.innerJoin(LatticeAccountID, scores, LatticeAccountID);
 
@@ -133,7 +133,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         // Remove intent generated prospects if they were generated more
         // than NumDaysBetweenIntentProspecResends days ago.
 
-        TargetMarketDataFlowConfiguration dataFlowConfiguration = market.getDataFlowConfiguration();
+        TargetMarketDataFlowProperty dataFlowConfiguration = market.getDataFlowConfiguration();
         Integer numDaysBetweenResends = dataFlowConfiguration.get(
                 TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, null, Integer.class);
 
