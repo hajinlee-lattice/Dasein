@@ -124,6 +124,12 @@ public abstract class AbstractTransformationDataFlowService {
         }
         if (StringUtils.isBlank(engine)) {
             engine = cascadingPlatform;
+            if (parameters instanceof TransformationFlowParameters) {
+                TransformationFlowParameters tfParameters = (TransformationFlowParameters) parameters;
+                if (tfParameters.getEngineConfiguration() != null) {
+                    tfParameters.getEngineConfiguration().setEngine(engine);
+                }
+            }
         }
         return engine;
     }

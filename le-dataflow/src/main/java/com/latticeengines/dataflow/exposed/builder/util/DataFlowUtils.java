@@ -1,11 +1,14 @@
 package com.latticeengines.dataflow.exposed.builder.util;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.pipe.Pipe;
 import org.apache.hadoop.conf.Configuration;
 
 import com.google.common.base.Joiner;
@@ -72,6 +75,46 @@ public class DataFlowUtils {
 
     public static Fields convertToFields(String field) {
         return new Fields(field);
+    }
+
+    public static List<FieldMetadata> combineFields(String pipeName, List<FieldMetadata> lhsFields,
+                                              List<FieldMetadata> rhsFields) {
+        List<FieldMetadata> declaredFields = new ArrayList<>();
+        Set<String> seenFields = new HashSet<>();
+
+        List<String> outputFields = new ArrayList<>();
+        outputFields.addAll(DataFlowUtils.getFieldNames(lhsFields));
+        Map<String, FieldMetadata> nameToFieldMetadataMap = DataFlowUtils.getFieldMetadataMap(lhsFields);
+        for (String fieldName : outputFields) {
+            seenFields.add(fieldName);
+            declaredFields.add(nameToFieldMetadataMap.get(fieldName));
+        }
+
+        outputFields = new ArrayList<>();
+        outputFields.addAll(DataFlowUtils.getFieldNames(rhsFields));
+        nameToFieldMetadataMap = DataFlowUtils.getFieldMetadataMap(rhsFields);
+        for (String fieldName : outputFields) {
+            String originalFieldName = fieldName;
+
+            if (seenFields.contains(fieldName)) {
+                fieldName = joinFieldName(pipeName, fieldName);
+                if (seenFields.contains(fieldName)) {
+                    throw new RuntimeException(String.format(
+                            "Cannot create joinFieldName %s from field name %s because a field with that name already exists.  Discard the field to avoid this error",
+                            fieldName, originalFieldName));
+                }
+            }
+            seenFields.add(fieldName);
+            FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
+            FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName,
+                    origfm.getField(), origfm.getProperties(), null);
+            declaredFields.add(fm);
+        }
+        return declaredFields;
+    }
+
+    protected static String joinFieldName(String pipeName, String fieldName) {
+        return pipeName.replaceAll("\\*|-", "__") + "__" + fieldName;
     }
 
     public static Aggregator<?> getAggregator(String aggregatedFieldName, AggregationType aggregationType) {

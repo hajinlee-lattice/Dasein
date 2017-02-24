@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeed;
@@ -29,6 +30,7 @@ import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
@@ -107,7 +109,7 @@ public class AccountMasterSeedCleanServiceImplTestNG
             step1.setBaseSources(baseSources);
             step1.setTransformer("accountMasterSeedMarkerTransformer");
             step1.setTargetSource("AccountMasterSeedMarked");
-            String confParamStr1 = getMarkerConfig();
+            String confParamStr1 = getMarkerConfig(true);
             step1.setConfiguration(confParamStr1);
             // -----------
             TransformationStepConfig step2 = new TransformationStepConfig();
@@ -180,9 +182,15 @@ public class AccountMasterSeedCleanServiceImplTestNG
         return om.writeValueAsString(conf);
     }
 
-    private String getMarkerConfig() throws JsonProcessingException {
+    private String getMarkerConfig(boolean useTez) throws JsonProcessingException {
         AccountMasterSeedMarkerConfig conf = new AccountMasterSeedMarkerConfig();
-        return om.writeValueAsString(conf);
+        ObjectNode on = om.valueToTree(conf);
+        if (useTez) {
+            TransformationFlowParameters.EngineConfiguration engineConfiguration = new TransformationFlowParameters.EngineConfiguration();
+            engineConfiguration.setEngine("TEZ");
+            on.set("EngineConfig", om.valueToTree(engineConfiguration));
+        }
+        return om.writeValueAsString(on);
     }
 
     @Override

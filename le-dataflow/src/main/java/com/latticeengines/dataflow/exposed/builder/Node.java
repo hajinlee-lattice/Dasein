@@ -15,10 +15,12 @@ import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.AggregationOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.BitDecodeOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.BitEncodeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.CheckPointOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.DepivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndAggOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndBufferOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.HashJoinOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.JythonFunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
@@ -44,7 +46,6 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import cascading.operation.Aggregator;
 import cascading.operation.Buffer;
 import cascading.operation.Function;
-import cascading.operation.aggregator.First;
 import cascading.operation.buffer.FirstNBuffer;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
@@ -76,6 +77,18 @@ public class Node {
         fieldLists.addAll(groupFieldLists);
 
         return new Node(builder.addCoGroup(identifiers, fieldLists, joinType), builder);
+    }
+
+    public Node hashJoin(FieldList lhsFields, List<Node> joinNodes, List<FieldList> joinFields, JoinType joinType) {
+        List<Operation.Input> inputs = new ArrayList<>();
+        List<FieldList> joinFieldList = new ArrayList<>();
+        inputs.add(opInput(identifier));
+        joinFieldList.add(lhsFields);
+        joinFieldList.addAll(joinFields);
+        for (Node node: joinNodes) {
+            inputs.add(opInput(node.identifier));
+        }
+        return new Node(builder.register(new HashJoinOperation(inputs, joinFieldList, joinType)), builder);
     }
 
     public Node innerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
@@ -321,6 +334,10 @@ public class Node {
 
     public Node discard(FieldList toDiscard) {
         return new Node(builder.addDiscard(identifier, toDiscard), builder);
+    }
+
+    public Node checkpoint() {
+        return new Node(builder.register(new CheckPointOperation(opInput(identifier))), builder);
     }
 
     public Node checkpoint(String name) {

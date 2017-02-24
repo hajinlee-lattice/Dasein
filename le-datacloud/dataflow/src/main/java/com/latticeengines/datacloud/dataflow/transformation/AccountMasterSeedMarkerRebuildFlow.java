@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -71,19 +72,28 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         FieldList finalFields = new FieldList(allFields.toArray(new String[allFields.size()]));
 
         FieldList idField = new FieldList(LATTICE_ID);
+        am = am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
 
-        /*
-        return am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN)) //
-                .coGroup(idField, //
+        if ("tez".equalsIgnoreCase(parameters.getEngineConfiguration().getEngine())) {
+            am = am.checkpoint();
+            badDataMrkd = badDataMrkd.checkpoint();
+            oobMkrd = oobMkrd.checkpoint();
+            alexaMrkd = alexaMrkd.checkpoint();
+            smBusiMrkd = smBusiMrkd.checkpoint();
+            orphanMrkd = orphanMrkd.checkpoint();
+        }
+
+        return am.hashJoin(idField, //
                         Arrays.asList(badDataMrkd, oobMkrd, alexaMrkd, orphanMrkd, smBusiMrkd), //
                         Arrays.asList(idField, idField, idField, idField, idField), //
                         JoinType.INNER).retain(finalFields);
-                */
-        
-        return am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN)).join(idField, oobMkrd, idField, JoinType.INNER)
-                .join(idField, badDataMrkd, idField, JoinType.INNER).join(idField, orphanMrkd, idField, JoinType.INNER)
-                .join(idField, smBusiMrkd, idField, JoinType.INNER).join(idField, alexaMrkd, idField, JoinType.INNER)
-                .retain(finalFields);
+
+//        return am.join(idField, oobMkrd, idField, JoinType.INNER) //
+//                .join(idField, badDataMrkd, idField, JoinType.INNER) //
+//                .join(idField, orphanMrkd, idField, JoinType.INNER) //
+//                .join(idField, smBusiMrkd, idField, JoinType.INNER) //
+//                .join(idField, alexaMrkd, idField, JoinType.INNER) //
+//                .retain(finalFields);
 
     }
 
@@ -175,7 +185,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         node = node.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
         // No domain || domain != primary domain: IsPrimaryDomain = N
         // Has domain, no primary domain || domain = primary domain: IsPrimaryDomain = Y
-        node = node.addFunction(
+        node = node.apply(
                 String.format("%s == null ? \"N\" : ((%s == null || %s.equals(%s)) ? \"Y\" : \"N\")", DOMAIN,
                         FLAG_DROP_LESS_POPULAR_DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN), //
                 new FieldList(DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN), //
@@ -190,7 +200,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
         String markExpression = OUT_OF_BUSINESS_INDICATOR + " != null "//
                 + "&& " + OUT_OF_BUSINESS_INDICATOR//
                 + ".equals(\"1\") ";
-        node = node.addFunction(markExpression + " ? 1 : 0 ", //
+        node = node.apply(markExpression + " ? 1 : 0 ", //
                 new FieldList(OUT_OF_BUSINESS_INDICATOR), //
                 new FieldMetadata(FLAG_DROP_OOB_ENTRY, Integer.class));
         return node.retain(new FieldList(LATTICE_ID, FLAG_DROP_OOB_ENTRY));
