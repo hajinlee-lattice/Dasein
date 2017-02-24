@@ -55,14 +55,15 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
             bucket.setUpperConfidence(7);
             bucket.addRule("A", "*", "*", "A");
             bucket.addRule("A", "ABZ", "ABZ", "BZ");
+            bucket.addRule("B", "ABZ", "AZ", "ABZ");
             matchCriteria.addBucket(bucket);
 
             bucket  = new DnBMatchBucket();
             bucket.setLowerConfidence(4);
             bucket.setUpperConfidence(5);
             bucket.addRule("A", "A", "AB", "ABZ");
-            bucket.addRule("A", "AB", "A", "ABZ");
-            bucket.addRule("B", "A", "A", "ABZ");
+            bucket.addRule("A", "B", "A", "ABZ");
+            bucket.addRule("AB", "AZ", "A", "ABZ");
             matchCriteria.addBucket(bucket);
         }
 
