@@ -96,8 +96,6 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
     // (LID, FLAG_DROP_SMALL_BUSINESS)
     private Node markOrphanRecordsForSmallBusiness(Node node) {
-        node = node.retain(new FieldList(LATTICE_ID, DUNS, LE_EMPLOYEE_RANGE));
-
         // split by emp range
         Node orphanRecordWithDomainNode = node//
                 .filter(DUNS + " != null &&" //
@@ -115,7 +113,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
                         + "!" + LE_EMPLOYEE_RANGE + ".equals(\"11-50\"))", //
                         new FieldList(DUNS, LE_EMPLOYEE_RANGE))
                 .addColumnWithFixedValue(FLAG_DROP_SMALL_BUSINESS, 0, Integer.class);
-        // apply buffer to one of them
+        // apply buffer to one of them. this buffer needs all the attributes in ams. do not retain fields in the node beforehand
         AccountMasterSeedOrphanRecordSmallCompaniesBuffer buffer = new AccountMasterSeedOrphanRecordSmallCompaniesBuffer(
                 new Fields(orphanRecordWithDomainNode.getFieldNamesArray()));
         orphanRecordWithDomainNode = orphanRecordWithDomainNode.groupByAndBuffer(new FieldList(DUNS), buffer);

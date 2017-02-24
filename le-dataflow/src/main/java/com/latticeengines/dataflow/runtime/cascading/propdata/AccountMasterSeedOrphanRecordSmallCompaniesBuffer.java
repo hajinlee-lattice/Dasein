@@ -46,7 +46,7 @@ public class AccountMasterSeedOrphanRecordSmallCompaniesBuffer extends BaseOpera
                         bufferCall.getOutputCollector().add(mostPopulatedTupleEntry);
                     }
                     // update candidate
-                    mostPopulatedTupleEntry = arguments;
+                    mostPopulatedTupleEntry = arguments.selectEntryCopy(Fields.ALL);
                 } else {
                     // if not a candidate, directly output
                     bufferCall.getOutputCollector().add(arguments);

@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
@@ -14,6 +17,8 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "unused" })
 public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation implements Buffer {
+    private static final Log log = LogFactory.getLog(AccountMasterSeedOrphanRecordWithDomainBuffer.class);
+
     private static final long serialVersionUID = 4217950767704131475L;
 
     private static final String LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
@@ -56,12 +61,12 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
                     if (thisSales > highestSales) {
                         if (highestSalesTuple != null) {
                             // release previous candidate
-                            Tuple tuple = flagTheTuple(arguments);
+                            Tuple tuple = flagTheTuple(highestSalesTuple);
                             bufferCall.getOutputCollector().add(tuple);
                         }
                         // update state variables
                         highestSales = thisSales;
-                        highestSalesTuple = arguments;
+                        highestSalesTuple = arguments.selectEntryCopy(Fields.ALL);
                     } else {
                         // it won't even be a candidate, flag and release
                         Tuple tuple = flagTheTuple(arguments);

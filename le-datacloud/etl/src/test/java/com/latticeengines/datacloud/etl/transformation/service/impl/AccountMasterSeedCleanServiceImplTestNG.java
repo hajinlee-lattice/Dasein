@@ -211,7 +211,24 @@ public class AccountMasterSeedCleanServiceImplTestNG
                 { 11L, null, "05", "Name5", "Country5", null, "N", "Y", "0", ">10,000", 100, null, 100000000L },
                 // Test markOOBEntries
                 // LatticeID = 12 is removed
-                { 13L, null, "07", "Name7", "Country7", "DnB", "N", "Y", null, ">10,000", 100, null, 100000000L }, };
+                { 13L, null, "07", "Name7", "Country7", "DnB", "N", "Y", null, ">10,000", 100, null, 100000000L }, 
+                // Test markOrphanRecordWithDomain
+                { 14L, "aa.com", "11", "Name11", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 15L, "aa.com", "12", "Name12", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 16L, "bb.com", "13", "Name13", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 17L, "bb.com", "14", "Name14", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L },
+                // LatticeID = 18, 19, 21 are removed
+                { 20L, "cc.com", "17", "Name17", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, 100000000L },
+                { 22L, "dd.com", "19", "Name19", "CountryDD", "DnB", "Y", "Y", "0", ">10,000", 0, null, null },
+                // LatticeID = 23 and 24 will only be left one
+                { 23L, "ee.com", "20", "Name20", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, null },
+                { 24L, "ee.com", "21", "Name21", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, null },
+                // Test markOrphanRecordsForSmallBusiness
+                // LatticeID = 25, 27 are removed
+                { 26L, "aaa.com", "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, null, 100000000L },
+                { 28L, null, "31", "Name31", "Country31", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L },
+                { 29L, "bbb.com", null, "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, null, 100000000L },
+        };
 
         String[] fieldNames = new String[] { //
                 "LatticeID", //
@@ -271,8 +288,8 @@ public class AccountMasterSeedCleanServiceImplTestNG
             numRows++;
         }
 
-        Assert.assertEquals(numRows, 12, "There should be 12 rows in the result.");
-        Assert.assertEquals(distinctIds.size(), 12, "There should be 12 distinct lattice ids.");
+        Assert.assertEquals(numRows, 22, "There should be 22 rows in the result.");
+        Assert.assertEquals(distinctIds.size(), 22, "There should be 22 distinct lattice ids.");
         Assert.assertFalse(hasFieldMismatchInRecord, "There are incorrect results, see logs above.");
 
     }
