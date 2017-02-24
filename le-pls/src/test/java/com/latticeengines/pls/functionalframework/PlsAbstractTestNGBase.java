@@ -1,5 +1,6 @@
 package com.latticeengines.pls.functionalframework;
 
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -76,9 +77,9 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
     protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
     protected static final Boolean IS_DEFAULT = false;
-    protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction("account",
+    protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(SchemaInterpretation.Account,
             false, new ArrayList<Restriction>());
-    protected static final Restriction CONTACT_FILTER = new ExistsRestriction("contact",
+    protected static final Restriction CONTACT_FILTER = new ExistsRestriction(SchemaInterpretation.Contact,
             false, new ArrayList<Restriction>());
     protected static final Integer OFFSET = 1;
     protected static final List<String> SELECTED_INTENT = new ArrayList<>(Arrays.asList("Intent1", "Intent2"));
