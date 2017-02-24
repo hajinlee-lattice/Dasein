@@ -1,5 +1,7 @@
 FROM latticeengines/tomcat
 
+RUN yum -y install nfs-utils nfs-utils-lib && yum clean all
+
 RUN rm -rf $CATALINA_HOME/webapps/ROOT \
     && rm -rf $CATALINA_HOME/webapps/examples \
     && rm -rf $CATALINA_HOME/webapps/docs \
