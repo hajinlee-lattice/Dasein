@@ -239,6 +239,15 @@
     </security:http>
 
     <security:http use-expressions="true"
+                   pattern="/pls/accounts/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+        <security:intercept-url pattern="pls/accounts/**" access="hasRole('View_PLS_CDL_Data')"/>
+    </security:http>
+
+    <security:http use-expressions="true"
                    pattern="/lp2/assets/resources/en-US/ResourceStrings.txt"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
@@ -247,3 +256,6 @@
     </security:http>
 
 </beans>
+
+
+
