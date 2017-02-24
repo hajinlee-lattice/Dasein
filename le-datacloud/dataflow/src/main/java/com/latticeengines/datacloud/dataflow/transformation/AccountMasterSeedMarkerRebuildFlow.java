@@ -83,10 +83,18 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
             orphanMrkd = orphanMrkd.checkpoint();
         }
 
-        return am.hashJoin(idField, //
+        return am.coGroup(idField, //
                         Arrays.asList(badDataMrkd, oobMkrd, alexaMrkd, orphanMrkd, smBusiMrkd), //
                         Arrays.asList(idField, idField, idField, idField, idField), //
-                        JoinType.INNER).retain(finalFields);
+                JoinType.INNER).retain(finalFields);
+        /*        
+        return am.join(idField, oobMkrd, idField, JoinType.OUTER) //
+                .join(idField, badDataMrkd, idField, JoinType.OUTER) //
+                .join(idField, orphanMrkd, idField, JoinType.OUTER) //
+                .join(idField, smBusiMrkd, idField, JoinType.OUTER) //
+                .join(idField, alexaMrkd, idField, JoinType.OUTER) //
+                .retain(finalFields);
+         */
 
 //        return am.join(idField, oobMkrd, idField, JoinType.INNER) //
 //                .join(idField, badDataMrkd, idField, JoinType.INNER) //

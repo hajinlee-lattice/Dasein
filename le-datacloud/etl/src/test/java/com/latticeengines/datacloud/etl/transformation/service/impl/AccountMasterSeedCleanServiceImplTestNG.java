@@ -189,6 +189,10 @@ public class AccountMasterSeedCleanServiceImplTestNG
             TransformationFlowParameters.EngineConfiguration engineConfiguration = new TransformationFlowParameters.EngineConfiguration();
             engineConfiguration.setEngine("TEZ");
             on.set("EngineConfig", om.valueToTree(engineConfiguration));
+        } else {
+            TransformationFlowParameters.EngineConfiguration engineConfiguration = new TransformationFlowParameters.EngineConfiguration();
+            engineConfiguration.setEngine("FLINK");
+            on.set("EngineConfig", om.valueToTree(engineConfiguration));
         }
         return om.writeValueAsString(on);
     }
