@@ -29,7 +29,7 @@ $HADOOP_HOME/sbin/kms.sh start
 CATALINA_HOME=$OLD_CATALINA_HOME
 
 if [ "${LE_USING_DOCKER}" = "true" ]; then
-    echo "You are in Docker environment, please use dk-start to start docker compose pod"
+    echo "You are in Docker environment, please use dk-start or dk-up to start docker compose pod"
 else
     ZOO_LOG_DIR=$ZOOKEEPER_HOME/logs $ZOOKEEPER_HOME/bin/zkServer.sh start
     echo "Starting Dynamo"
