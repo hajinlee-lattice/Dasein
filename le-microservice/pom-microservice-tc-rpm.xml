@@ -85,6 +85,10 @@
                                     <location>sqoop/target/le-sqoop-microservice-${le.rpm.version}.war</location>
                                     <destination>sqoop.war</destination>
                                 </source>
+                                <source>
+                                    <location>objectapi/target/le-objectapi-microservice-${le.rpm.version}.war</location>
+                                    <destination>objectapi.war</destination>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>

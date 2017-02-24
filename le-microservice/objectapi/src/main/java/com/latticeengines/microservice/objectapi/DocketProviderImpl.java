@@ -1,4 +1,4 @@
-package com.latticeengines.microservice.workflowapi;
+package com.latticeengines.microservice.objectapi;
 
 import org.springframework.stereotype.Component;
 
