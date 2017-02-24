@@ -77,7 +77,7 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         String idCol = getIdColumn(preMatchTable);
         cols.add(idCol);
         for (Attribute attr : preMatchTable.getAttributes()) {
-            if (cols.contains(attr.getName())) {
+            if (!idCol.equalsIgnoreCase(attr.getName())) {
                 cols.add(attr.getName());
             }
         }
