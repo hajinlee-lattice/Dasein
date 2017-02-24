@@ -142,5 +142,7 @@ alias dkpush='bash $WSHOME/le-dev/scripts/docker_push.sh'
 alias conda-on='source $ANACONDA_HOME/bin/activate lattice'
 alias conda-off='source $ANACONDA_HOME/bin/deactivate'
 
+alias dk-start='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml up -d --remove-orphan'
+alias dk-stop='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml down'
 alias dkrunui='docker run -itd --name le-ui --net=host -e LE_ENVIRONMENT=dev latticeengines/express'
 alias dkstopui='docker stop le-ui; dkrmc'

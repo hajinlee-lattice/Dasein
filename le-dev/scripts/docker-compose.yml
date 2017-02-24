@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+
+  zookeeper:
+    image: latticeengines/zookeeper
+    ports:
+      - '2181:2181'
+    volumes:
+      - $DOCKER_DATA_ROOT/zookeeper:/usr/zookeeper/data
+
+  mysql:
+    image: latticeengines/mysql
+    ports:
+      - '3306:3306'
+    volumes:
+      - $DOCKER_DATA_ROOT/mysql:/var/lib/mysql
+
+  dynamo:
+    image: latticeengines/dynamo
+    ports:
+      - '8000:8000'
+    volumes:
+      - $DOCKER_DATA_ROOT/dynamo:/var/lib/dynamo

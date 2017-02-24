@@ -1,7 +1,12 @@
+#!/bin/bash
+
 # Test for required env variables
 printf "%s\n" "${HADOOP_HOME:?You must set HADOOP_HOME}"
-printf "%s\n" "${ZOOKEEPER_HOME:?You must set ZOOKEEPER_HOME}"
-printf "%s\n" "${DYNAMO_HOME:?You must set DYNAMO_HOME}"
+
+if [ "${LE_USING_DOCKER}" != "true" ]; then
+    printf "%s\n" "${ZOOKEEPER_HOME:?You must set ZOOKEEPER_HOME}"
+    printf "%s\n" "${DYNAMO_HOME:?You must set DYNAMO_HOME}"
+fi
 
 rm -f /tmp/*.out
 rm -Rf $HADOOP_HOME/logs/*.log*
@@ -23,6 +28,11 @@ CATALINA_HOME=$HADOOP_HOME/share/hadoop/kms/tomcat
 $HADOOP_HOME/sbin/kms.sh start
 CATALINA_HOME=$OLD_CATALINA_HOME
 
-ZOO_LOG_DIR=$ZOOKEEPER_HOME/logs $ZOOKEEPER_HOME/bin/zkServer.sh start
-echo "Starting Dynamo"
-nohup java -Djava.library.path=${DYNAMO_HOME}/DynamoDBLocal_lib -jar ${DYNAMO_HOME}/DynamoDBLocal.jar -dbPath ${DYNAMO_HOME} -sharedDb > ${DYNAMO_HOME}/dynamo.log 2>&1 &
+if [ "${LE_USING_DOCKER}" = "true" ]; then
+    echo "You are in Docker environment, please use dk-start to start docker compose pod"
+else
+    ZOO_LOG_DIR=$ZOOKEEPER_HOME/logs $ZOOKEEPER_HOME/bin/zkServer.sh start
+    echo "Starting Dynamo"
+    nohup java -Djava.library.path=${DYNAMO_HOME}/DynamoDBLocal_lib -jar ${DYNAMO_HOME}/DynamoDBLocal.jar -dbPath ${DYNAMO_HOME} -sharedDb > ${DYNAMO_HOME}/dynamo.log 2>&1 &
+fi
+
