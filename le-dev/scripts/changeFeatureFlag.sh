@@ -42,6 +42,7 @@ def main(argv):
             for line in f:
                 contract = line.strip()
                 updateFeatureFlag(contract, parsedResult.env, parsedResult.featureFlags, zk)
+    zk.stop()
 
 def updateFeatureFlag(contract, env, newfeatureFlags, zk):
     znode = os.path.join("/Pods", env, "Contracts", contract, "Tenants", contract, "Spaces", "Production/feature-flags.json")
