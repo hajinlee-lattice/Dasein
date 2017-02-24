@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cat /usr/local/etc/haproxy/haproxy.cfg
-nohup /docker-entrypoint.sh haproxy -f /usr/local/etc/haproxy/haproxy.cfg &
+cat /etc/haproxy.conf
+nohup haproxy -f /etc/haproxy.conf & 2&>1 > /var/log/haproxy

@@ -20,7 +20,7 @@
     </GlobalNamingResources>
 
     <Service name="MS">
-        <Connector port="8080" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8080" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="MicroserviceEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -33,7 +33,7 @@
 
 
     <Service name="PLS">
-        <Connector port="8081" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8081" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="PlsEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -45,7 +45,7 @@
     </Service>
 
     <Service name="Admin">
-        <Connector port="8085" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8085" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="AdminEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -57,7 +57,7 @@
     </Service>
 
     <Service name="PlayMaker">
-        <Connector port="8071" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8071" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="PlayMakerEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -69,7 +69,7 @@
     </Service>
 
     <Service name="OAuth">
-        <Connector port="8072" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8072" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="OAuthEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -81,7 +81,7 @@
     </Service>
 
     <Service name="ScoringAPI">
-        <Connector port="8073" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8073" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="ScoringApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -93,7 +93,7 @@
     </Service>
 
     <Service name="SAML">
-        <Connector port="8087" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8087" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
 
         <Engine name="SAMLEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
@@ -106,7 +106,7 @@
     </Service>
 
     <Service name="API">
-        <Connector port="8074" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8074" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
 
         <Engine name="ApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
@@ -119,7 +119,7 @@
     </Service>
 
     <Service name="Ulysses">
-        <Connector port="8075" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8075" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="UlyssesEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
@@ -131,7 +131,7 @@
     </Service>
 
     <Service name="MatchAPI">
-        <Connector port="8076" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8076" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
 
         <Engine name="MatchApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
@@ -144,7 +144,7 @@
     </Service>
 
     <Service name="Job">
-        <Connector port="8077" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Connector port="8077" protocol="HTTP/1.1" address="0.0.0.0" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="JobEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"

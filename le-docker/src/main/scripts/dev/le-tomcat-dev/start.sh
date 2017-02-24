@@ -16,5 +16,18 @@ fi
 
 echo ${JAVA_OPTS}
 
+for d in 'ms' 'pls' 'admin' 'playmaker' 'oauth' 'scoringapi' 'mathcapi' 'ulysses' 'api'
+do
+    echo "checking webapps ${d} ..."
+    if [ ! -d "${CATALINA_HOME}/webapps/${d}" ]; then
+        echo "webapps/${d} not exists"
+        mkdir -p ${CATALINA_HOME}/webapps/${d}
+    fi
+    if [ ! -d "${CATALINA_HOME}/webapps/${d}/manager" ]; then
+        echo "webapps/${d}/manager not exists"
+        cp -r /manager ${CATALINA_HOME}/webapps/${d}/manager
+    fi
+done
+
 bash /start-proxy.sh
 ${CATALINA_HOME}/bin/catalina.sh run

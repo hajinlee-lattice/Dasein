@@ -1,48 +1,11 @@
-FROM haproxy:latest
+FROM latticeengines/tomcat
 
-RUN yum install -y unzip wget && yum clean all
-
-RUN mkdir /usr/java && chmod 755 /usr/java
-WORKDIR /usr/java
-RUN wget -q http://10.41.1.10/tars/server-jre-8u101-linux-x64.tar.gz -O server-jre-8u101-linux-x64.tar.gz \
-    && tar xvf server-jre-8u101-linux-x64.tar.gz \
-    && rm -f server-jre-8u101-linux-x64.tar.gz \
-    && wget -q http://10.41.1.10/tars/jce_policy-8.zip -O jce_policy-8.zip  \
-    && unzip jce_policy-8.zip \
-    && cp -a UnlimitedJCEPolicyJDK8/*  /usr/java/jdk1.8.0_101/jre/lib/security \
-    && rm -rf jce_policy-8.zip  UnlimitedJCEPolicyJDK8 \
-    && rm -f /usr/java/default /usr/java/latest \
-    && ln -s /usr/java/jdk1.8.0_101 /usr/java/latest \
-    && ln -s /usr/java/latest /usr/java/default  \
-    && echo 'export JAVA_HOME=/usr/java/default' >> /etc/profile \
-    && chown -R root.root /usr/java
-RUN update-alternatives --install /usr/bin/java java /usr/java/jdk1.8.0_101/bin/java  100 \
-    && update-alternatives --set java /usr/java/jdk1.8.0_101/bin/java \
-    && alternatives  --install /bin/java binjava /usr/java/latest/bin/java 1 \
-    && alternatives  --install /usr/bin/java java /usr/java/latest/bin/java 1 \
-    && alternatives  --install /usr/bin/javac  javac  /usr/java/latest/bin/javac 1 \
-    && alternatives  --install /usr/bin/jar  jar  /usr/java/latest/bin/jar 1 \
-    && alternatives  --install /usr/bin/jps  jps  /usr/java/latest/bin/jps 1 \
-    && alternatives --set binjava /usr/java/latest/bin/java \
-    && alternatives --set java /usr/java/latest/bin/java \
-    && alternatives --set javac /usr/java/latest/bin/javac \
-    && alternatives --set jar /usr/java/latest/bin/jar \
-    && alternatives --set jps /usr/java/latest/bin/jps
-
-RUN groupadd -r tomcat && useradd -r -g tomcat tomcat
-WORKDIR /opt
-
-ADD binaries/apache-tomcat-8.5.8.tar.gz /opt
-ADD binaries/apache-tomcat-8.5.8-deployer.tar.gz /opt
-ADD binaries/catalina-jmx-remote.jar /opt/apache-tomcat-8.5.8-deployer/lib/catalina-ws.jar
-RUN chown -R tomcat.tomcat /opt/apache-tomcat-8.5.8
-
-ENV CATALINA_HOME /opt/apache-tomcat-8.5.8
-ENV JAVA_HOME /usr/java/default
+RUN yum update && yum install -y haproxy && yum clean all
 
 RUN rm -rf $CATALINA_HOME/webapps/ROOT \
     && rm -rf $CATALINA_HOME/webapps/examples \
     && rm -rf $CATALINA_HOME/webapps/docs \
+    && cp -r $CATALINA_HOME/webapps/manager /manager \
     && mkdir -p /etc/pki/java
 
 EXPOSE 8071 8072 8073 8074 8075 8076 8080 8081 8085 1099
@@ -52,8 +15,12 @@ RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY cacerts /etc/pki/java/cacerts
 COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
+COPY context.xml /manager/META-INF/context.xml
 COPY server.xml $CATALINA_HOME/conf/server.xml
 COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
+
+COPY haproxy.cfg /etc/haproxy.conf
+
 COPY start.sh /
 
 CMD ["bash", "/start.sh"]
