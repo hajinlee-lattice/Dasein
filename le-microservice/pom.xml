@@ -247,6 +247,7 @@
         <module>quartz</module>
         <module>modelquality</module>
         <module>sqoop</module>
+        <module>objectapi</module>
     </modules>
 
 </project>
