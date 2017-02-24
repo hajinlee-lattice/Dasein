@@ -146,7 +146,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         parameters.setName("testWorkflowAccount_clone");
         parameters.setDisplayName("clone");
         parameters.setDeduplicationType(DedupType.MULTIPLELEADSPERDOMAIN);
-        parameters.setExcludePropDataAttributes(new Random().nextBoolean());
+        parameters.setExcludePropDataAttributes(Boolean.FALSE);
         parameters.setEnableTransformations(new Random().nextBoolean());
         MatchAndModelWorkflowConfiguration configuration = matchAndModelWorkflowSubmitter.generateConfiguration(
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
