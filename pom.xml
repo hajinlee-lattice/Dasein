@@ -24,6 +24,7 @@
         <module>le-app</module>
         <module>le-testframework</module>
         <module>le-network</module>
+        <module>le-objectapi</module>
         <module>le-microservice</module>
         <module>le-datafabric</module>
         <module>le-domain</module>
