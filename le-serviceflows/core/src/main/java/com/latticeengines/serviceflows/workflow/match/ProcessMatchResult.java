@@ -49,7 +49,9 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         ParseMatchResultParameters parameters = new ParseMatchResultParameters();
         parameters.sourceTableName = matchResultTable.getName();
         parameters.sourceColumns = sourceCols(preMatchTable);
+        parameters.excludeDataCloudAttrs = configuration.isExcludeDataCloudAttrs();
         configuration.setDataFlowParams(parameters);
+
     }
 
     @Override
@@ -75,7 +77,9 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         String idCol = getIdColumn(preMatchTable);
         cols.add(idCol);
         for (Attribute attr : preMatchTable.getAttributes()) {
-            cols.add(attr.getName());
+            if (cols.contains(attr.getName())) {
+                cols.add(attr.getName());
+            }
         }
         log.info("Found source columns: " + StringUtils.join(cols, ", "));
         return cols;

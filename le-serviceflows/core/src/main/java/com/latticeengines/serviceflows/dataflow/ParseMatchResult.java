@@ -49,6 +49,18 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
             source = generateDedupeId(source);
         }
 
+        if (parameters.excludeDataCloudAttrs) {
+            List<String> fieldsToRetain = new ArrayList<>(sourceCols);
+            List<String> allFields = source.getFieldNames();
+            if (allFields.contains(INT_LDC_DEDUPE_ID)) {
+                fieldsToRetain.add(INT_LDC_DEDUPE_ID);
+            }
+            source = source.retain(new FieldList(fieldsToRetain));
+            // There are other possible internal attributes, like DnB Match grade
+            // I belive those are only used in scoring, and this flag is only for modeling
+            // so it is safe assume, we never need to retain those debug internal attrs here.
+        }
+
         return removeInternalAttrs(source);
     }
 

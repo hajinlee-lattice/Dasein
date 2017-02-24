@@ -11,6 +11,9 @@ public class ProcessMatchResultConfiguration extends DataFlowStepConfiguration {
     @JsonProperty("skip_dedupe")
     private boolean skipDedupe;
 
+    @JsonProperty("exclude_dc_attrs")
+    private boolean excludeDataCloudAttrs;
+
     public ProcessMatchResultConfiguration() {
         setBeanName("parseMatchResult");
     }
@@ -29,5 +32,13 @@ public class ProcessMatchResultConfiguration extends DataFlowStepConfiguration {
 
     public void setSkipDedupe(boolean skipDedupe) {
         this.skipDedupe = skipDedupe;
+    }
+
+    public boolean isExcludeDataCloudAttrs() {
+        return excludeDataCloudAttrs;
+    }
+
+    public void setExcludeDataCloudAttrs(boolean excludeDataCloudAttrs) {
+        this.excludeDataCloudAttrs = excludeDataCloudAttrs;
     }
 }

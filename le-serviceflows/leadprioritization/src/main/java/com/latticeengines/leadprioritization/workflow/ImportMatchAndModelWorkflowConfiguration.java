@@ -174,10 +174,9 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder skipMatchingStep(boolean skipMatchingStep) {
-            match.setSkipStep(skipMatchingStep);
-            matchResult.setSkipStep(skipMatchingStep);
-            model.addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns, skipMatchingStep);
+        public Builder excludeDataCloudAttrs(boolean exclude) {
+            matchResult.setExcludeDataCloudAttrs(exclude);
+            model.addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns, exclude);
             return this;
         }
 

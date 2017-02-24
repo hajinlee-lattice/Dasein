@@ -114,7 +114,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .excludeUnmatchedWithPublicDomain(parameters.isExcludeUnmatchedWithPublicDomain()) //
                 .treatPublicDomainAsNormalDomain(false) // TODO: hook up to UI
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
-                .skipMatchingStep(parameters.isExcludePropDataAttributes()) //
+                .excludeDataCloudAttrs(parameters.isExcludePropDataAttributes()) //
                 .skipStandardTransform(!parameters.enableTransformation()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //

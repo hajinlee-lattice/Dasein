@@ -158,7 +158,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
                 //
-                .skipMatchingStep(parameters.getExcludePropDataColumns())
+                .excludeDataCloudAttrs(parameters.getExcludePropDataColumns())
                 //
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 //

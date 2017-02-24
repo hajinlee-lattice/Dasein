@@ -15,4 +15,7 @@ public class ParseMatchResultParameters extends DataFlowParameters {
     @JsonProperty
     public List<String> sourceColumns;
 
+    @JsonProperty
+    public boolean excludeDataCloudAttrs;
+
 }

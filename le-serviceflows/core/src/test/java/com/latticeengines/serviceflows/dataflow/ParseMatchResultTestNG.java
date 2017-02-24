@@ -58,6 +58,7 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
                 "State", //
                 "Country" //
         );
+        parameters.excludeDataCloudAttrs = true;
 
         return parameters;
     }
@@ -70,6 +71,7 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
             Assert.assertNull(record.get(INT_LDC_LOC_CHECKSUM),
                     "Internal attribute " + INT_LDC_LOC_CHECKSUM + " should be removed.");
             Assert.assertFalse("d.com".equals(record.get("Domain")));
+            Assert.assertNull(record.get(LID_FIELD));
             numRows++;
         }
         Assert.assertEquals(numRows, 3);
