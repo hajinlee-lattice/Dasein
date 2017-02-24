@@ -765,36 +765,52 @@ public class InternalResource extends InternalResourceBase {
         bucketMetadata1.setRightBoundScore(BUCKET_1);
         bucketMetadata1.setNumLeads(bucketedScores[BUCKET_1 - 1].getLeftNumLeads()
                 - bucketedScores[BUCKET_0].getLeftNumLeads());
-        bucketMetadata1.setLift(((bucketedScores[BUCKET_1 - 1].getLeftNumConverted()
-                - bucketedScores[BUCKET_0].getLeftNumConverted())
-                / (double) bucketMetadata1.getNumLeads()) / overallLift);
+        if (bucketMetadata1.getNumLeads() == 0 || overallLift == 0) {
+            bucketMetadata1.setLift(0);
+        } else {
+            bucketMetadata1.setLift(((bucketedScores[BUCKET_1 - 1].getLeftNumConverted()
+                    - bucketedScores[BUCKET_0].getLeftNumConverted())
+                    / (double) bucketMetadata1.getNumLeads()) / overallLift);
+        }
 
         bucketMetadata2.setBucketName(BucketName.B);
         bucketMetadata2.setLeftBoundScore(BUCKET_1 - 1);
         bucketMetadata2.setRightBoundScore(BUCKET_2);
         bucketMetadata2.setNumLeads(bucketedScores[BUCKET_2 - 1].getLeftNumLeads()
                 - bucketedScores[BUCKET_1 - 1].getLeftNumLeads());
-        bucketMetadata2.setLift(((bucketedScores[BUCKET_2 - 1].getLeftNumConverted()
-                - bucketedScores[BUCKET_1 - 1].getLeftNumConverted())
-                / (double) bucketMetadata2.getNumLeads()) / overallLift);
+        if (bucketMetadata2.getNumLeads() == 0 || overallLift == 0) {
+            bucketMetadata2.setLift(0);
+        } else {
+            bucketMetadata2.setLift(((bucketedScores[BUCKET_2 - 1].getLeftNumConverted()
+                    - bucketedScores[BUCKET_1 - 1].getLeftNumConverted())
+                    / (double) bucketMetadata2.getNumLeads()) / overallLift);
+        }
 
         bucketMetadata3.setBucketName(BucketName.C);
         bucketMetadata3.setLeftBoundScore(BUCKET_2 - 1);
         bucketMetadata3.setRightBoundScore(BUCKET_3);
         bucketMetadata3.setNumLeads(bucketedScores[BUCKET_3 - 1].getLeftNumLeads()
                 - bucketedScores[BUCKET_2 - 1].getLeftNumLeads());
-        bucketMetadata3.setLift(((bucketedScores[BUCKET_3 - 1].getLeftNumConverted()
-                - bucketedScores[BUCKET_2 - 1].getLeftNumConverted())
-                / (double) bucketMetadata3.getNumLeads()) / overallLift);
+        if (bucketMetadata3.getNumLeads() == 0 || overallLift == 0) {
+            bucketMetadata3.setLift(0);
+        } else {
+            bucketMetadata3.setLift(((bucketedScores[BUCKET_3 - 1].getLeftNumConverted()
+                    - bucketedScores[BUCKET_2 - 1].getLeftNumConverted())
+                    / (double) bucketMetadata3.getNumLeads()) / overallLift);
+        }
 
         bucketMetadata4.setBucketName(BucketName.D);
         bucketMetadata4.setLeftBoundScore(BUCKET_3 - 1);
         bucketMetadata4.setRightBoundScore(BUCKET_4);
         bucketMetadata4.setNumLeads(bucketedScores[BUCKET_4 - 1].getLeftNumLeads()
                 - bucketedScores[BUCKET_3 - 1].getLeftNumLeads());
-        bucketMetadata4.setLift(((bucketedScores[BUCKET_4 - 1].getLeftNumConverted()
-                - bucketedScores[BUCKET_3 - 1].getLeftNumConverted())
-                / (double) bucketMetadata4.getNumLeads()) / overallLift);
+        if (bucketMetadata4.getNumLeads() == 0 || overallLift == 0) {
+            bucketMetadata4.setLift(0);
+        } else {
+            bucketMetadata4.setLift(((bucketedScores[BUCKET_4 - 1].getLeftNumConverted()
+                    - bucketedScores[BUCKET_3 - 1].getLeftNumConverted())
+                    / (double) bucketMetadata4.getNumLeads()) / overallLift);
+        }
 
         bucketedScoreService.createBucketMetadatas(modelId,
                 Arrays.asList(bucketMetadata1, bucketMetadata2, bucketMetadata3, bucketMetadata4));
