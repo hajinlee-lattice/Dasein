@@ -28,6 +28,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.Operation;
 import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.RenameOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.RenamePipeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.RetainOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.SampleOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.TransformFunctionOperation;
@@ -35,6 +36,7 @@ import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddUUIDStrategy;
+import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -329,7 +331,15 @@ public class Node {
     }
 
     public Node retain(FieldList outputFields) {
-        return new Node(builder.addRetain(identifier, outputFields), builder);
+        return retain(outputFields, false);
+    }
+
+    public Node orderFields(FieldList orderedFields) {
+        return retain(orderedFields, true);
+    }
+
+    public Node retain(FieldList outputFields, boolean inOrder) {
+        return new Node(builder.register(new RetainOperation(opInput(identifier), outputFields, inOrder)), builder);
     }
 
     public Node discard(FieldList toDiscard) {

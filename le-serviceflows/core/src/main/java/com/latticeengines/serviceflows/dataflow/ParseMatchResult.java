@@ -135,6 +135,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
                 new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN));
         unmatchedLocOnly = updateByBestIdInGroup(unmatchedLocOnly, matched, INT_LDC_LOC_CHECKSUM);
 
+        unmatchedLocOnly.orderFields(new FieldList(unmatchedDomain.getFieldNames()));
         return matched.merge(Arrays.asList(unmatchedDomain, unmatchedLocOnly));
     }
 
