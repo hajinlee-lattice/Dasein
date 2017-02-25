@@ -13,6 +13,8 @@ public interface HdfsSourceEntityMgr {
 
     void setCurrentVersion(Source source, String version);
 
+    void setCurrentVersion(String source, String version);
+
     void setLatestTimestamp(IngestedRawSource source, Date timestamp);
 
     Date getLatestTimestamp(IngestedRawSource source);

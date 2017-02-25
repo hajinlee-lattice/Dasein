@@ -36,9 +36,11 @@ import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -807,5 +809,27 @@ public class AvroUtils {
             value = null;
         }
         return value;
+    }
+
+    public static void createAvroFileByData(Configuration yarnConfiguration, List<Pair<String, Class<?>>> columns,
+            Object[][] data, String avroDir, String avroFile) throws Exception {
+        Map<String, Class<?>> schemaMap = new HashMap<>();
+        for (int i = 0; i < columns.size(); i++) {
+            schemaMap.put(columns.get(i).getKey(), columns.get(i).getValue());
+        }
+        Schema schema = AvroUtils.constructSchema(avroFile, schemaMap);
+        List<GenericRecord> records = new ArrayList<>();
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        for (Object[] tuple : data) {
+            for (int i = 0; i < columns.size(); i++) {
+                builder.set(columns.get(i).getKey(), tuple[i]);
+            }
+            records.add(builder.build());
+        }
+        String fileName = avroFile + ".avro";
+        if (HdfsUtils.fileExists(yarnConfiguration, avroDir + "/" + fileName)) {
+            HdfsUtils.rmdir(yarnConfiguration, avroDir + "/" + fileName);
+        }
+        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, avroDir + "/" + fileName, records);
     }
 }

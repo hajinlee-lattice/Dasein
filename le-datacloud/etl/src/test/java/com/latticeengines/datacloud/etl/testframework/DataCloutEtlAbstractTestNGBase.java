@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -115,7 +116,7 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
             successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
                     .toString();
         }
-        
+
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
                 HdfsUtils.rmdir(yarnConfiguration, targetPath);
@@ -129,8 +130,24 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 
+    protected void uploadBaseSourceData(String baseSource, String baseSourceVersion,
+                                        List<Pair<String, Class<?>>> schema, Object[][] data) {
+        String targetDir = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion)
+                .toString();
+        String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion)
+                .append("_SUCCESS").toString();
+        try {
+            AvroUtils.createAvroFileByData(yarnConfiguration, schema, data, targetDir, "part-00000.avro");
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
+
     protected void uploadDataToHdfs(Object[][] data, List<String> colNames, List<Class<?>> colTypes,
-                                    String targetAvroPath, String recordName) {
+            String targetAvroPath, String recordName) {
         Map<String, Class<?>> schemaMap = new HashMap<>();
         for (int i = 0; i < colNames.size(); i++) {
             schemaMap.put(colNames.get(i), colTypes.get(i));

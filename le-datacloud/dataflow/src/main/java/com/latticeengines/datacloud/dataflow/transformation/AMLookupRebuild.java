@@ -1,12 +1,14 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupDomainBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupKeyFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -16,63 +18,61 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
-@Component("accountMasterLookupRebuildFlow")
-public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<AccountMasterLookupRebuildConfig> {
+@Component(AMLookupRebuild.DATAFLOW_BEAN_NAME)
+public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupRebuildConfig> {
 
     private AccountMasterLookupRebuildConfig config;
 
-    private static final String DATAFLOW_BEAN_NAME = "AMSeedJunkyard";
-    private static final String TRANSFORMER_NAME = "AMSeedJunkyardTransformer";
+    public static final String DATAFLOW_BEAN_NAME = "AMLookupRebuild";
+    public static final String TRANSFORMER_NAME = "AMLookupRebuildTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
 
-        Node accountMasterSeed = addSource(parameters.getBaseTables().get(0));
-        /*
-        Node orbCacheSeedSecondaryDomainMapping = addSource(parameters.getBaseTables().get(1));
+        Node amSeed = addSource(parameters.getBaseTables().get(0));
+        Node orbSeed = addSource(parameters.getBaseTables().get(1));
 
-        orbCacheSeedSecondaryDomainMapping = orbCacheSeedSecondaryDomainMapping.rename(
-                new FieldList(config.getDomainMappingPrimaryDomainField()),
-                new FieldList("_" + config.getDomainMappingPrimaryDomainField() + "_"));
+        amSeed = appendSecondaryDomain(amSeed, orbSeed);
 
-        Node accountMasterSeedSecondaryDomainCleaned = accountMasterSeed.join(new FieldList(config.getDomainField()),
-                orbCacheSeedSecondaryDomainMapping, new FieldList(config.getDomainMappingSecondaryDomainField()),
-                JoinType.LEFT);
-        accountMasterSeedSecondaryDomainCleaned = accountMasterSeedSecondaryDomainCleaned.filter(
-                config.getDomainMappingSecondaryDomainField() + " == null",
-                new FieldList(config.getDomainMappingSecondaryDomainField()));
-        accountMasterSeedSecondaryDomainCleaned = accountMasterSeedSecondaryDomainCleaned
-                .retain(new FieldList(accountMasterSeed.getFieldNames()));
+        Node searchByDuns = searchByDuns(amSeed.renamePipe("duns"));
+        Node searchByDomain = searchByDomain(amSeed.renamePipe("domain"));
+        Node searchByDomainCountryZipCode = searchByDomainCountryZipCode(amSeed.renamePipe("domaincountryzip"));
+        Node searchByDomainCountryState = searchByDomainCountryState(amSeed.renamePipe("domaincountrystate"));
+        Node searchByDomainCountry = searchByDomainCountry(amSeed.renamePipe("domaincountry"));
+        Node searchByBoth = searchByBoth(amSeed.renamePipe("both"));
 
-        Node accountMasterSeedWithSecondaryDomain1 = accountMasterSeed.join(new FieldList(config.getDomainField()),
-                orbCacheSeedSecondaryDomainMapping,
-                new FieldList("_" + config.getDomainMappingPrimaryDomainField() + "_"),
-                JoinType.INNER);
+        return searchByDuns.merge(Arrays.asList( //
+                searchByDomain, //
+                searchByDomainCountryZipCode, //
+                searchByDomainCountryState, //
+                searchByDomainCountry, //
+                searchByBoth));
+    }
 
-        Node accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain1;
+    private Node appendSecondaryDomain(Node amSeed, Node orbSeed) {
+        String amDomain = config.getDomainField();
+        String orbPriDomain = config.getDomainMappingPrimaryDomainField();
+        String orbSecDomain = config.getDomainMappingSecondaryDomainField();
+        String latticeId = config.getLatticeIdField();
 
-        accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain.filter(
-                config.getDomainMappingSecondaryDomainField() + " != null",
-                new FieldList(config.getDomainMappingSecondaryDomainField()));
-        accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain.discard(
-                new FieldList(config.getDomainField(), "_" + config.getDomainMappingPrimaryDomainField() + "_"));
-        accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain
-                .rename(new FieldList(config.getDomainMappingSecondaryDomainField()), new FieldList(config.getDomainField()));
+        // join find sec domain for domain == pri domain
+        orbSeed = orbSeed.filter(orbPriDomain + " != null", new FieldList(orbPriDomain));
+        Node idDomain = amSeed.retain(new FieldList(latticeId, amDomain)).renamePipe("idDomain");
+        Node hasSd = idDomain.join(new FieldList(amDomain), orbSeed, new FieldList(orbPriDomain), JoinType.INNER);
+        hasSd = hasSd.filter(orbSecDomain + " != null", new FieldList(orbSecDomain));
 
-        accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain
-                .retain(new FieldList(accountMasterSeedSecondaryDomainCleaned.getFieldNames()));
-        Node accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain = accountMasterSeedSecondaryDomainCleaned
-                .merge(accountMasterSeedWithSecondaryDomain);
-        */
-        Node searchByDuns = searchByDuns(accountMasterSeed);
-        Node searchByDomain = searchByDomain(accountMasterSeed);
-        Node searchByDomainCountryZipCode = searchByDomainCountryZipCode(accountMasterSeed);
-        Node searchByDomainCountryState = searchByDomainCountryState(accountMasterSeed);
-        Node searchByDomainCountry = searchByDomainCountry(accountMasterSeed);
-        Node searchByBoth = searchByBoth(accountMasterSeed);
-        return searchByDomain.merge(searchByDomainCountryZipCode).merge(searchByDomainCountryState)
-                .merge(searchByDomainCountry).merge(searchByDuns).merge(searchByBoth);
+        hasSd = hasSd.renamePipe("hasSD") //
+                .leftOuterJoin(new FieldList(orbSecDomain), amSeed, new FieldList(amDomain));
+
+        // secondary not exist in am seed
+        Node toAppend = hasSd
+                .filter(orbSecDomain + " != null && " + amDomain + " == null", new FieldList(orbSecDomain, amDomain)) //
+                .discard(new FieldList(amDomain)) //
+                .rename(new FieldList(orbSecDomain), new FieldList(amDomain)) //
+                .retain(new FieldList(amSeed.getFieldNames()), true);
+
+        return amSeed.merge(toAppend);
     }
 
     private Node searchByDomain(Node node) {
@@ -80,21 +80,21 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
         List<String> returnedFields = prepareReturnedFieldsForSearchByDomain();
         List<FieldMetadata> returnedMetadata = prepareFieldsMetadataForSearchByDomain();
         node = node.groupByAndBuffer(new FieldList(config.getDomainField()), new AccountMasterLookupDomainBuffer(
-                new Fields(returnedFields.toArray(new String[returnedFields.size()])), returnedFields,
+                        new Fields(returnedFields.toArray(new String[returnedFields.size()])), returnedFields,
                         config.getDunsField(), config.getDuDunsField(), config.getGuDunsField(),
                         config.getEmployeeField(), config.getSalesVolumeUsDollars(), config.getIsPrimaryLocationField(),
                         config.getCountryField()),
-                        returnedMetadata);
+                returnedMetadata);
         node = node.apply(
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), null, null, null,
                         null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
     }
 
     private Node searchByDomainCountryZipCode(Node node) {
         node = node.filter(String.format("%s != null && %s != null && %s != null", config.getDomainField(),
-                        config.getCountryField(), config.getZipCodeField()),
+                config.getCountryField(), config.getZipCodeField()),
                 new FieldList(config.getDomainField(), config.getCountryField(), config.getZipCodeField()));
         List<String> returnedFields = prepareReturnedFieldsForSearchByDomain();
         List<FieldMetadata> returnedMetadata = prepareFieldsMetadataForSearchByDomain();
@@ -110,12 +110,12 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), null, config.getZipCodeField()),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
     }
 
     private Node searchByDomainCountryState(Node node) {
         node = node.filter(String.format("%s != null && %s != null && %s != null", config.getDomainField(),
-                        config.getCountryField(), config.getStateField()),
+                config.getCountryField(), config.getStateField()),
                 new FieldList(config.getDomainField(), config.getCountryField(), config.getStateField()));
         List<String> returnedFields = prepareReturnedFieldsForSearchByDomain();
         List<FieldMetadata> returnedMetadata = prepareFieldsMetadataForSearchByDomain();
@@ -131,7 +131,7 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), config.getStateField(), null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
     }
 
     private Node searchByDomainCountry(Node node) {
@@ -150,7 +150,7 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), null, null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
     }
 
     private List<String> prepareReturnedFieldsForSearchByDomain() {
@@ -180,7 +180,7 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
         node = node.apply(
                 new AccountMasterLookupKeyFunction(config.getKeyField(), null, config.getDunsField(), null, null, null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
     }
 
     private Node searchByBoth(Node node) {
@@ -191,17 +191,17 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), config.getDunsField(),
                         null, null, null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
     }
 
     @Override
     public String getDataFlowBeanName() {
-        return "accountMasterLookupRebuildFlow";
+        return DATAFLOW_BEAN_NAME;
     }
 
     @Override
     public String getTransformerName() {
-        return "accountMasterLookupRebuildTransformer";
+        return TRANSFORMER_NAME;
     }
 
     @Override

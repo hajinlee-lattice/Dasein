@@ -153,6 +153,11 @@ public class HdfsPathBuilder {
         return baseDir.append(VERSION_FILE);
     }
 
+    public Path constructVersionFile(String source) {
+        Path baseDir = constructSourceDir(source);
+        return baseDir.append(VERSION_FILE);
+    }
+
     public Path constructLatestFile(Source source) {
         Path baseDir = constructSourceDir(source);
         return baseDir.append(LATEST_FILE);

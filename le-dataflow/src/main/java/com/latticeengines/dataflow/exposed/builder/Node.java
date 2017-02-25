@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
@@ -21,6 +20,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndAggOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndBufferOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.HashJoinOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.JoinOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.JythonFunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
@@ -36,13 +36,13 @@ import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddUUIDStrategy;
-import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 import cascading.operation.Aggregator;
@@ -63,7 +63,8 @@ public class Node {
     }
 
     public Node join(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {
-        return new Node(builder.addJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType), builder);
+        return new Node(builder.register(new JoinOperation(opInput(identifier), lhsJoinFields,
+                opInput(rhs.identifier), rhsJoinFields, joinType, false)), builder);
     }
 
     public Node coGroup(FieldList lhsFields, List<Node> groupNodes, List<FieldList> groupFieldLists, JoinType joinType) {

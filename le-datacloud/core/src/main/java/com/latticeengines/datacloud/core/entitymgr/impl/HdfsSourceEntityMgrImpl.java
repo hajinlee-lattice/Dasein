@@ -75,6 +75,20 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
     }
 
+    // does not work with ingestion version files
+    @Override
+    public synchronized void setCurrentVersion(String source, String version) {
+        String versionFile = hdfsPathBuilder.constructVersionFile(source).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
+                HdfsUtils.rmdir(yarnConfiguration, versionFile);
+            }
+            HdfsUtils.writeToFile(yarnConfiguration, versionFile, version);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public Date getLatestTimestamp(IngestedRawSource source) {
         String versionFile = hdfsPathBuilder.constructLatestFile(source).toString();
