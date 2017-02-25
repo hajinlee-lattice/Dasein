@@ -67,7 +67,7 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
                         }
                         // update state variables
                         highestSales = thisSales;
-                        highestSalesTuple = arguments;
+                        highestSalesTuple = new TupleEntry(arguments);
                     } else {
                         // it won't even be a candidate, flag and release
                         Tuple tuple = flagTheTuple(arguments);
