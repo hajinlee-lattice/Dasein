@@ -70,7 +70,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
                 .filter(orbSecDomain + " != null && " + amDomain + " == null", new FieldList(orbSecDomain, amDomain)) //
                 .discard(new FieldList(amDomain)) //
                 .rename(new FieldList(orbSecDomain), new FieldList(amDomain)) //
-                .retain(new FieldList(amSeed.getFieldNames()), true);
+                .retain(new FieldList(amSeed.getFieldNames()));
 
         return amSeed.merge(toAppend);
     }
@@ -89,7 +89,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), null, null, null,
                         null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
     }
 
     private Node searchByDomainCountryZipCode(Node node) {
@@ -110,7 +110,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), null, config.getZipCodeField()),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
     }
 
     private Node searchByDomainCountryState(Node node) {
@@ -131,7 +131,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), config.getStateField(), null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
     }
 
     private Node searchByDomainCountry(Node node) {
@@ -150,7 +150,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), null,
                         config.getCountryField(), null, null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
     }
 
     private List<String> prepareReturnedFieldsForSearchByDomain() {
@@ -180,7 +180,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
         node = node.apply(
                 new AccountMasterLookupKeyFunction(config.getKeyField(), null, config.getDunsField(), null, null, null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
     }
 
     private Node searchByBoth(Node node) {
@@ -191,7 +191,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
                 new AccountMasterLookupKeyFunction(config.getKeyField(), config.getDomainField(), config.getDunsField(),
                         null, null, null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(config.getKeyField(), String.class));
-        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()), true);
+        return node.retain(new FieldList(config.getLatticeIdField(), config.getKeyField()));
     }
 
     @Override

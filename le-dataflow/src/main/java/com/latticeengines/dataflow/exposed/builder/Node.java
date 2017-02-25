@@ -332,15 +332,7 @@ public class Node {
     }
 
     public Node retain(FieldList outputFields) {
-        return retain(outputFields, false);
-    }
-
-    public Node orderFields(FieldList orderedFields) {
-        return retain(orderedFields, true);
-    }
-
-    public Node retain(FieldList outputFields, boolean inOrder) {
-        return new Node(builder.register(new RetainOperation(opInput(identifier), outputFields, inOrder)), builder);
+        return new Node(builder.register(new RetainOperation(opInput(identifier), outputFields)), builder);
     }
 
     public Node discard(FieldList toDiscard) {

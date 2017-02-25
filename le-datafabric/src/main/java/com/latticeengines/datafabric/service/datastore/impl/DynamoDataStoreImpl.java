@@ -392,34 +392,12 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             Item item = buildItem(entry.getKey(), entry.getValue());
             writeItems = writeItems.addItemToPut(item);
         }
-
-        int retries = 0;
-        long startTime = System.currentTimeMillis();
-        long interval = 500L;
-
-        while (System.currentTimeMillis() - startTime < TIMEOUT) {
-            try {
-                if (retries > 0) {
-                    log.info(String.format("Attempt %d to submit batch write item.", retries));
-                }
-                submitBatchWrite(dynamoDB, writeItems);
-                return;
-            } catch (Exception e) {
-                try {
-                    Thread.sleep(interval);
-                    interval *= 2;
-                    retries++;
-                } catch (Exception e1) {
-                    log.warn("Failed to sleep. Ignoring the error.");
-                }
-            }
-        }
-
-        throw new RuntimeException("Failed to successfully finish batch write request within timeout.");
+        submitBatchWrite(dynamoDB, writeItems);
     }
 
-    private void submitBatchWrite(DynamoDB dynamoDB, TableWriteItems writeItems) throws NoSuchMethodError {
+    private void submitBatchWrite(DynamoDB dynamoDB, TableWriteItems writeItems) {
         BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
+        long startTime = System.currentTimeMillis();
         do {
             try {
                 // Check for unprocessed keys which could happen if you exceed
@@ -432,7 +410,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 log.error("Unable to batch create records " + tableName, e);
             }
 
-        } while (outcome.getUnprocessedItems().size() > 0);
+        } while (outcome.getUnprocessedItems().size() > 0 && System.currentTimeMillis() - startTime < TIMEOUT);
+        throw new RuntimeException("Failed to finish a batch write within timeout");
     }
 
     @Override
