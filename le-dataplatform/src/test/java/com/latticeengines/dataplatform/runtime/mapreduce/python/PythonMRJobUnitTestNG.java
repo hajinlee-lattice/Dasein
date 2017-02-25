@@ -1,5 +1,8 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import java.net.URL;
 import java.util.Properties;
 
