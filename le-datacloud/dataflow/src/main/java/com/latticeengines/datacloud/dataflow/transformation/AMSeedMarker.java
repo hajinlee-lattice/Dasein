@@ -40,10 +40,10 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
 
         // one of them do many things
         Node oobMkrd = markOOBEntries(am).renamePipe("oobMkrd");
-        Node alexaMrkd = markLessPopularDomainsForDUNS(am).renamePipe("alexaMrkd");
         Node orphanMrkd = markOrphanRecordWithDomain(am).renamePipe("orphanMrkd");
         Node badDataMrkd = markRecordsWithIncorrectIndustryRevenueEmployeeData(am).renamePipe("badDataMrkd");
         Node smBusiMrkd = markOrphanRecordsForSmallBusiness(am).renamePipe("smBusiMrkd");
+        Node alexaMrkd = markLessPopularDomainsForDUNS(am).renamePipe("alexaMrkd");
 
         List<String> allFields = am.getFieldNames();
         allFields.add(FLAG_DROP_OOB_ENTRY);
@@ -57,16 +57,16 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         am = am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
 
         if ("tez".equalsIgnoreCase(parameters.getEngineConfiguration().getEngine())) {
-            am = am.checkpoint();
             badDataMrkd = badDataMrkd.checkpoint();
             oobMkrd = oobMkrd.checkpoint();
-            alexaMrkd = alexaMrkd.checkpoint();
             smBusiMrkd = smBusiMrkd.checkpoint();
             orphanMrkd = orphanMrkd.checkpoint();
+            am = am.checkpoint();
+            alexaMrkd = alexaMrkd.checkpoint();
         }
 
         return am.coGroup(idField, //
-                        Arrays.asList(badDataMrkd, oobMkrd, alexaMrkd, orphanMrkd, smBusiMrkd), //
+                Arrays.asList(badDataMrkd, oobMkrd, orphanMrkd, smBusiMrkd, alexaMrkd), //
                         Arrays.asList(idField, idField, idField, idField, idField), //
                 JoinType.INNER).retain(finalFields);
         /*        
@@ -82,9 +82,14 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
 
     private Node addAlexaRank(Node ams, Node alexa) {
         alexa = alexa.retain(new FieldList(ALEXA_URL, ALEXA_RANK));
-        ams = ams.join(new FieldList(DOMAIN), alexa, new FieldList(ALEXA_URL), JoinType.LEFT);
-        ams = ams.discard(new FieldList(ALEXA_URL)).rename(new FieldList(ALEXA_RANK), new FieldList(ALEXA_RANK_AMSEED));
-        return ams;
+        Node amsDomain = ams.filter(String.format("%s != null", DOMAIN), new FieldList(DOMAIN));
+        Node amsNoDomain = ams.filter(String.format("%s == null", DOMAIN), new FieldList(DOMAIN));
+        amsNoDomain = amsNoDomain.addColumnWithFixedValue(ALEXA_RANK_AMSEED, null, Integer.class);
+
+        amsDomain = amsDomain.join(new FieldList(DOMAIN), alexa, new FieldList(ALEXA_URL), JoinType.LEFT);
+        amsDomain = amsDomain.discard(new FieldList(ALEXA_URL)).rename(new FieldList(ALEXA_RANK),
+                new FieldList(ALEXA_RANK_AMSEED));
+        return amsDomain.merge(amsNoDomain);
     }
 
     // (LID, FLAG_DROP_SMALL_BUSINESS)
@@ -157,12 +162,13 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         node = node.retain(
                 new FieldList(LATTICE_ID, DUNS, DOMAIN, LE_IS_PRIMARY_DOMAIN, ALEXA_RANK_AMSEED, DOMAIN_SOURCE));
 
+        Node withDuns = node.filter(String.format("%s != null", DUNS), new FieldList(DUNS));
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(DUNS, String.class));
         fms.add(new FieldMetadata(FLAG_DROP_LESS_POPULAR_DOMAIN, String.class));
         Aggregator agg = new AccountMasterSeedPrimaryDomainAggregator(new Fields(DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN),
                 DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN, ALEXA_RANK_AMSEED, DOMAIN_SOURCE, LE_IS_PRIMARY_DOMAIN);
-        Node primaryDomain = node.groupByAndAggregate(new FieldList(DUNS), agg, fms).renamePipe("PrimaryDomain");
+        Node primaryDomain = withDuns.groupByAndAggregate(new FieldList(DUNS), agg, fms).renamePipe("PrimaryDomain");
 
         node = node.join(new FieldList(DUNS), primaryDomain, new FieldList(DUNS), JoinType.LEFT);
         node = node.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
