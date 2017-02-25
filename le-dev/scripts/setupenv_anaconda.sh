@@ -4,7 +4,6 @@ if [ "${ANACONDA_HOME}" = "" ]; then
 fi
 
 CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
-mkdir -p $CONDA_ARTIFACT_DIR
 
 UNAME=`uname`
 if [[ "${UNAME}" == 'Darwin' ]]; then
@@ -13,7 +12,7 @@ if [[ "${UNAME}" == 'Darwin' ]]; then
     NUMPY_VERSION="1.8.2"
 else
     echo "You are on ${UNAME}"
-    ANACONDA_REPO=Anaconda2-4.3.0-Linux-x86_64.sh
+    ANACONDA_SH=Anaconda2-4.3.0-Linux-x86_64.sh
     NUMPY_VERSION="1.8.2=py27_1"
 fi
 
@@ -22,6 +21,7 @@ if [ -f $CONDA_ARTIFACT_DIR/$ANACONDA_SH ]; then
 else
     echo "Downloading Anaconda"
     pushd $CONDA_ARTIFACT_DIR
+    echo "https://repo.continuum.io/archive/$ANACONDA_SH"
     wget https://repo.continuum.io/archive/$ANACONDA_SH
     popd
 fi
