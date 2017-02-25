@@ -1,15 +1,14 @@
 package com.latticeengines.dataflow.exposed.builder.util;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import cascading.pipe.Pipe;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 
 import com.google.common.base.Joiner;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
@@ -47,20 +46,11 @@ public class DataFlowUtils {
     }
 
     public static Map<String, FieldMetadata> getFieldMetadataMap(List<FieldMetadata> fieldMetadata) {
-        Map<String, FieldMetadata> nameToFieldMetadataMap = new HashMap<>();
-
-        for (FieldMetadata fieldMetadatum : fieldMetadata) {
-            nameToFieldMetadataMap.put(fieldMetadatum.getFieldName(), fieldMetadatum);
-        }
-        return nameToFieldMetadataMap;
+        return fieldMetadata.stream().collect(Collectors.toMap(fm -> fm.getFieldName(), fm -> fm));
     }
 
     public static List<String> getFieldNames(List<FieldMetadata> fieldMetadata) {
-        List<String> fieldNames = new ArrayList<>();
-        for (FieldMetadata fieldMetadatum : fieldMetadata) {
-            fieldNames.add(fieldMetadatum.getFieldName());
-        }
-        return fieldNames;
+        return fieldMetadata.stream().map(a -> a.getFieldName()).collect(Collectors.toList());
     }
 
     public static Fields convertToFields(List<String> fields) {
@@ -78,7 +68,7 @@ public class DataFlowUtils {
     }
 
     public static List<FieldMetadata> combineFields(String pipeName, List<FieldMetadata> lhsFields,
-                                              List<FieldMetadata> rhsFields) {
+            List<FieldMetadata> rhsFields) {
         List<FieldMetadata> declaredFields = new ArrayList<>();
         Set<String> seenFields = new HashSet<>();
 
@@ -206,6 +196,6 @@ public class DataFlowUtils {
             path = Joiner.on("/").join(partsSkipped);
         }
 
-        return configuration.get("fs.defaultFS") + path;
+        return configuration.get(FileSystem.FS_DEFAULT_NAME_KEY) + path;
     }
 }
