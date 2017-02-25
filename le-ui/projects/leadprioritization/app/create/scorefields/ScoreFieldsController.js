@@ -4,11 +4,12 @@ angular
     $scope, $state, $stateParams, $timeout, $rootScope, $anchorScroll, ResourceUtility, FeatureFlagService,
     ScoreLeadEnrichmentModal, ImportService, ImportStore, FileHeaders, FieldDocument, CancelJobModal, Model
 ) {
-    var vm = this;
 
+    var vm = this;
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
         modelId: $stateParams.modelId,
+        isRTS: Model.EventTableProvenance && !Model.EventTableProvenance.hasOwnProperty('Data_Cloud_Version'),
         csvFileName: $stateParams.csvFileName,
         schema: Model.ModelDetails.SourceSchemaInterpretation,
         fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
@@ -33,7 +34,7 @@ angular
         vm.standardFieldsList[1] = (vm.schema === 'SalesforceAccount') ? 'Website' : 'Email';
         vm.requiredFieldsMissing[vm.standardFieldsList[1]] = true;
 
-        if (vm.fuzzyMatchEnabled) {
+        if (vm.fuzzyMatchEnabled && !vm.isRTS) {
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
 
@@ -170,7 +171,7 @@ angular
             }
         }
 
-        if (vm.fuzzyMatchEnabled) {
+        if (vm.fuzzyMatchEnabled && !vm.isRTS) {
             if (vm.schema === 'SalesforceAccount') {
                 if (!vm.requiredFieldsMissing['Website']) {
                     vm.requiredFieldsMissing['CompanyName'] = false;
