@@ -13,7 +13,7 @@
 		text-transform: none;
 		text-align: center;
 		color: #222222;
-		background: url('/assets/images/ico-ratings-published.png') 31% center no-repeat;
+		background: url('/assets/images/ico-ratings-published.png') 276px center no-repeat;
 	}
 }
 .chart-header {
@@ -92,7 +92,7 @@
 }	
 .slider-dugout {
 	width: 20px;
-	margin-right: 20px;
+	margin-right: 9px;
 	/* min-height: 150px; */
 	background: #e8e8e8;
 	border: #dedada solid 1px;
@@ -120,6 +120,11 @@
 		}
 	}
 }
+[draggable] {
+	user-select: none;
+}
+
+
 .horizontal-axis {
 	position: absolute;
 	display: flex;

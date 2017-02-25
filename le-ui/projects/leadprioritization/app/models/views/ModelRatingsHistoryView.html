@@ -21,10 +21,6 @@
 		                    <dl>
 		                        <dt>Lift</dt>
 		                        <dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>
-		                        <dt>{{vm.modelType}} %</dt>
-		                        <dd>{{ Math.round(100*bucket.num_leads / vm.historyTotalLeads) }}%</dd>
-		                        <dt>{{vm.modelType}}</dt>
-		                        <dd>{{bucket.num_leads | number}}</dd>
 		                        <dt>Score Range</dt>
 		                        <dd>{{bucket.left_bound_score}}-{{bucket.right_bound_score}}</dd>
 		                    </dl>

@@ -3,10 +3,10 @@ angular
 .service('ModelRatingsService', function($http, $q, $state) {
     
     this.MostRecentConfiguration = function(id) {
-        var deferred = $q.defer();
-        var result;
-        var id = id || '';
-        var url = '/pls/bucketedscore/abcdbuckets/uptodate/' + id;
+        var deferred = $q.defer(),
+            result,
+            id = id || '',
+            url = '/pls/bucketedscore/abcdbuckets/uptodate/' + id;
 
         $http({
             method: 'GET',
@@ -32,11 +32,12 @@ angular
         return deferred.promise;
     }
 
+
     this.HistoricalABCDBuckets = function(id) {
-        var deferred = $q.defer();
-        var result;
-        var id = id || '';
-        var url = '/pls/bucketedscore/abcdbuckets/' + id;
+        var deferred = $q.defer(),
+            result,
+            id = id || '',
+            url = '/pls/bucketedscore/abcdbuckets/' + id;
 
         $http({
             method: 'GET',
@@ -81,6 +82,7 @@ angular
                 deferred.resolve(result);
 
             }, function onError(response) {
+                
                 if (!response.data) {
                     response.data = {};
                 }
@@ -112,8 +114,6 @@ angular
                     success: true
                 };
                 
-                console.log(result);
-
                 deferred.resolve(result);
 
             }, function onError(response) {
@@ -122,7 +122,6 @@ angular
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                console.log(errorMsg);
                 deferred.resolve(errorMsg);
             }
         );

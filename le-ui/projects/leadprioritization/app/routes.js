@@ -172,27 +172,16 @@ angular
                 IsPmml: function(Model) {
                     return Model.ModelDetails.ModelType == 'PmmlModel';
                 },
-                CheckForRatings: function(Model, ModelRatingsService){
-                    var id = Model.ModelDetails.ModelID;
-                    return ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) { return JSON.stringify(result); });
-                },
                 loadAlaSQL: function($ocLazyLoad) {
                     return $ocLazyLoad.load('lib/js/alasql.min.js');
                 }
             },
             views: {
                 "navigation@": {
-                    controller: function($scope, $rootScope, Model, IsPmml, CheckForRatings, FeatureFlagService) {
+                    controller: function($scope, $rootScope, Model, IsPmml, FeatureFlagService) {
                         $scope.IsPmml = IsPmml;
-                        $scope.CheckForRatings = CheckForRatings;
                         $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
                         $scope.Uploaded = Model.ModelDetails.Uploaded;
-
-                        if($scope.CheckForRatings == "{}"){
-                            $scope.CheckForRatings = false;
-                        } else {
-                            $scope.CheckForRatings = true;
-                        }
 
                         $scope.canRemodel = !$scope.IsPmml && !$scope.Uploaded;
 
@@ -258,7 +247,29 @@ angular
             }
         })
         .state('home.model.ratings', {
-            url: '/ratings',
+            url: '/ratings',           
+            resolve: {
+                CurrentConfiguration: function($q, $stateParams, ModelRatingsService) {
+                    var deferred = $q.defer(),
+                        id = $stateParams.modelId;
+                    
+                    ModelRatingsService.MostRecentConfiguration(id).then(function(result) { 
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                RatingsSummary: function($q, $stateParams, ModelRatingsService) {
+                    var deferred = $q.defer(),
+                        id = $stateParams.modelId;
+                    
+                    ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {  
+                        deferred.resolve(result);
+                    }); 
+
+                    return deferred.promise;
+                }
+            },
             params: {
                 pageIcon: 'ico-ratings',
                 pageTitle: ''

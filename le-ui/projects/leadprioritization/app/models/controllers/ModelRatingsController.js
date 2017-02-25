@@ -4,7 +4,7 @@ angular.module('lp.models.ratings', [
     'mainApp.models.services.ModelService'
 ])
 .controller('ModelRatingsController', function ($scope, $rootScope, $stateParams,
-    ResourceUtility, Model, ModelStore, ModelRatingsService) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
 
     var vm = this;
     angular.extend(vm, {
@@ -16,52 +16,33 @@ angular.module('lp.models.ratings', [
         saveInProgress: false,
         showSaveBucketsError: false,
         ResourceUtility: ResourceUtility,
+        currentConfiguration: CurrentConfiguration,
+        ratingsSummary: RatingsSummary,
         workingBuckets: []
     });
-
 
     vm.init = function() {
 
         $scope.data = ModelStore.data;
-        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+        $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         $scope.Math = window.Math;
-
-        ModelRatingsService.MostRecentConfiguration(vm.modelId).then(function(result) { 
-            vm.currentConfiguration = result;
-        });
-        ModelRatingsService.GetBucketedScoresSummary(vm.modelId).then(function(result) {  
-            var summary = result; 
-            vm.summary = summary;
-            renderChart(summary);
-        });
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
         } else {
             vm.modelType = "Accounts";
         }
-        
+
+        renderChart();
+
     }
 
-    vm.publishConfiguration = function() {
-        vm.chartNotUpdated = false;
-        ModelRatingsService.CreateABCDBuckets().then(function(result){
-            if (result != null && result.success === true) {
-                $state.go('home.model.ratings', {}, { reload: true });
-            } else {
-                vm.saveInProgress = false;
-                vm.createBucketsErrorMessage = result;
-                vm.showSaveBucketsError = true;
-            }
-        });
-    }
-
-    function renderChart(summary){
+    function renderChart(){
         
         var verticalAxis = document.getElementById("verticalAxis");
 
         // Get tallest bar in set
-        vm.largestLiftInSet = Math.max.apply(null, summary.bar_lifts);
+        vm.largestLiftInSet = Math.max.apply(null, vm.ratingsSummary.bar_lifts);
 
         // Set height of chart components based off tallest bar
         vm.relativeHeightOfTallest = Math.round((12*vm.largestLiftInSet) + 10);
@@ -86,59 +67,77 @@ angular.module('lp.models.ratings', [
 
         vm.getNumber = function(num) {return new Array(num);}
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
- 
+
+        refreshChartData();
+        refreshSliders();
+
     }
 
-    // setTimeout(function(){ initSliders(); }, 3000);
+    vm.eleMouseDown = function(ev) {
+        var slider = ev.currentTarget;
+        slider.addEventListener('mousemove', function(){ eleMouseMove(slider, ev); }, false);
+    }
+    function eleMouseMove(slider, ev) {
 
-    function initSliders(){
+        var sliderPosition = slider.style.right,
+            offsetLeft = slider.offsetLeft,
+            container = document.getElementById("sliders"),
+            containerWidth = parseInt(document.defaultView.getComputedStyle(container, null).getPropertyValue("width")),
+            relativeSliderChartPosition = 100 - Math.round((offsetLeft / containerWidth) * 100),
+            positionOfMouse = "";
 
-        var elem = document.getElementsByClassName('slider');
+        console.log(relativeSliderChartPosition);
 
-        console.log(elem);
+        // slider.style.right = positionOfMouse;
 
-        //* toggle direction (remove first slash)
-        var direction = 'left', coord = 'X' /*/
-        var direction = 'top', coord = 'Y' //*/
-        elem.onmousedown = function (evt) {
-          evt.stopPropagation()
-          evt.preventDefault()
-          evt = evt || window.event
-          var start = 0, diff = 0
-          if ( evt['page' + coord] ) { start = evt['page' + coord] }
-          else if ( evt['client' + coord] ) { start = evt['client' + coord] }
+        slider.addEventListener('onmouseup', function(){ eleMouseMove(slider); }, false);
 
-          elem.style.position = 'relative'
-          document.body.onmousemove = function (evt) {
-            evt.stopPropagation()
-            evt.preventDefault()
-            evt = evt || window.event
-            var end = 0
-            if ( evt['page' + coord] ) { end = evt['page' + coord] }
-            else if ( evt['client' + coord] ) { end = evt['client' + coord] }
+    }
+    function eleMouseUp(slider){
+        var slider = ev.currentTarget;
 
-            diff = end - start
-            elem.style[direction] = diff + 'px'
-          }
-          document.body.onmouseup = function () {
-            evt.stopPropagation()
-            evt.preventDefault()
-            // do something with the action here
-            // elem has been moved by diff pixels in the X axis
-            elem.style.position = 'static'
-            document.body.onmousemove = document.body.onmouseup = null
-          }
+        slider.removeEventListener('mousemove', eleMouseMove, false);
+
+        console.log("mouse up");
+    }
+    function refreshChartData(){
+        // adjust colors
+        vm.workingBuckets = vm.currentConfiguration;
+    }
+    function refreshSliders(){
+
+        // Add bucket sliders and any needed in the dugout
+        var slidersToAdd = 
+                {
+                    creation_timestamp: null,
+                    left_bound_score: 2,
+                    lift: null,
+                    name: null,
+                    num_leads: null,
+                    right_bound_score: 2,
+                },
+            templatesToAdd = 5 - vm.currentConfiguration.length;
+
+        if(vm.currentConfiguration.length <= 4) {
+            for (var i = 0; i < templatesToAdd; i++) {
+                vm.currentConfiguration.push(slidersToAdd);
+            }
         }
 
     }
+    vm.publishConfiguration = function() {
+        vm.chartNotUpdated = false;
+        ModelRatingsService.CreateABCDBuckets().then(function(result){
+            if (result != null && result.success === true) {
+                $state.go('home.model.ratings', {}, { reload: true });
+            } else {
+                vm.saveInProgress = false;
+                vm.createBucketsErrorMessage = result;
+                vm.showSaveBucketsError = true;
+            }
+        });
+    }
 
-    function adjustColors(){
-        console.log("adjust colors");
-        adjustWorkingBuckets();
-    }
-    function adjustWorkingBuckets(){
-        console.log("adjust working buckets");
-    }
 
     vm.init();
 })
@@ -160,8 +159,6 @@ angular.module('lp.models.ratings', [
         $scope.Math = window.Math;
 
         vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
-        // console.log(vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty);
-        console.log($stateParams);
 
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";

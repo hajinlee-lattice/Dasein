@@ -9,18 +9,19 @@
             </ul>
 
             <div class="chart-header">
-                <div class="list-data pull-left">All {{vm.modelType}}: <strong>{{vm.summary.total_num_leads | number}}</strong></div>
+                <div class="list-data pull-left">All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number}}</strong></div>
                 <div class="actions pull-right">
                 	<button 
                 		type="button" 
                 		class="button orange-button"
-                		data-ng-click="vm.publishConfiguration()"
+                		data-ng-click="vm.publishConfiguration($event)"
                 		ng-disabled="vm.chartNotUpdated"
                 	>Publish Configuration</button>
                 </div>
             </div><!-- End .chart-header -->
 
             <div 
+                id="ratingsChart"
                 class="ratings-chart"
                 ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}">
                 <div 
@@ -30,32 +31,29 @@
                     <div 
                         class="slider"
                         ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;right: '+ bucket.right_bound_score +'%'}}"
-                        ng-repeat="bucket in vm.currentConfiguration"
-                        draggable>
+                        ng-repeat="bucket in vm.workingBuckets"
+                        ng-mousedown="vm.eleMouseDown($event)">
                         <div class="handle">&nbsp;</div>
                     </div>
-
-                    <div 
-                        class="slider-dugout"
-                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">&nbsp;</div>
-
-                </div><!-- End .sliders-container -->
-
+                </div><!-- End .sliders-container -->                
+                <div 
+                    class="slider-dugout"
+                    ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">&nbsp;
+                </div>
                 <ul id="verticalAxis" class="vertical-axis" ng-attr-class="vertical-axis">
                     <li 
                         ng-repeat="i in vm.getNumber(vm.yAxisNumber) track by $index"
                         ng-attr-style="{{'height: '+ vm.axisItemHeight +'px;'}}">
-                        <span>{{$index+1}}x</span></li>
+                        <span>{{$index+1}}x</span>
+                    </li>
                 </ul>
-
                 <ul class="data">
                     <li 
-                        ng-repeat="data in vm.summary.bar_lifts track by $index"
+                        ng-repeat="data in vm.ratingsSummary.bar_lifts track by $index"
                         ng-attr-style="{{'height: '+ Math.round(vm.barMultiplier * data) +'px;'}}"
-                        ng-attr-title="{{data}}"
-                        >&nbsp;</li>
+                        ng-attr-title="{{data}}">&nbsp;
+                    </li>
                 </ul>
-
                 <div 
                     id="" 
                     class="bar-colors" 
@@ -69,7 +67,6 @@
                         ng-repeat="bucket in vm.currentConfiguration">
                     </div>
                 </div><!-- End .bar-colors -->
-
                 <ul class="horizontal-axis">
                     <li class="hidden"></li>
                     <li class="mark"><span>99</span></li>
@@ -107,13 +104,14 @@
             </div><!-- End .ratings-chart -->
 
             <ul class="bucket-tiles large-buckets">
-            	<li ng-repeat="bucket in vm.currentConfiguration">
+            	<li ng-repeat="bucket in vm.workingBuckets"
+                    ng-if="bucket.right_bound_score!=2">
             		<div class="bucket-label">{{bucket.name}}</div>
             		<dl>
             			<dt>Lift</dt>
             			<dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>
             			<dt>{{vm.modelType}} %</dt>
-            			<dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
+            			<dd>{{Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%</dd>
             			<dt>{{vm.modelType}}</dt>
             			<dd>{{bucket.num_leads | number}}</dd>
             		</dl>
@@ -130,7 +128,7 @@
                         <dt>Lift</dt>
                         <dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>
                         <dt>{{vm.modelType}} %</dt>
-                        <dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
+                        <dd>{{Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%</dd>
                         <dt>{{vm.modelType}}</dt>
                         <dd>{{bucket.num_leads | number}}</dd>
                     </dl>
