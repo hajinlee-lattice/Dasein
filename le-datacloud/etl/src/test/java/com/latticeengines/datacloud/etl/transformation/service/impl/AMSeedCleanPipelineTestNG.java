@@ -28,6 +28,10 @@ import com.latticeengines.datacloud.core.source.impl.AccountMasterSeedMerged;
 import com.latticeengines.datacloud.core.source.impl.AlexaMostRecent;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.dataflow.transformation.AMSeedCleanup;
+import com.latticeengines.datacloud.dataflow.transformation.AMSeedJunkyard;
+import com.latticeengines.datacloud.dataflow.transformation.AMSeedMarker;
+import com.latticeengines.datacloud.dataflow.transformation.AMSeedReport;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -36,9 +40,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
-public class AccountMasterSeedCleanServiceImplTestNG
+public class AMSeedCleanPipelineTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(AccountMasterSeedCleanServiceImplTestNG.class);
+    private static final Log log = LogFactory.getLog(AMSeedCleanPipelineTestNG.class);
 
     private static final String LATTICEID = "LatticeID";
 
@@ -107,7 +111,7 @@ public class AccountMasterSeedCleanServiceImplTestNG
             baseSources.add(amsMerged.getSourceName());
             baseSources.add(alexa.getSourceName());
             step1.setBaseSources(baseSources);
-            step1.setTransformer("accountMasterSeedMarkerTransformer");
+            step1.setTransformer(AMSeedMarker.TRANSFORMER_NAME);
             step1.setTargetSource("AccountMasterSeedMarked");
             String confParamStr1 = getMarkerConfig(true);
             step1.setConfiguration(confParamStr1);
@@ -117,7 +121,7 @@ public class AccountMasterSeedCleanServiceImplTestNG
             inputSteps.add(0);
             step2.setInputSteps(inputSteps);
             step2.setTargetSource(targetSourceName);
-            step2.setTransformer("accountMasterSeedCleanupTransformer");
+            step2.setTransformer(AMSeedCleanup.TRANSFORMER_NAME);
 
             String confParamStr2 = getCleanupConfig();
 
@@ -126,36 +130,27 @@ public class AccountMasterSeedCleanServiceImplTestNG
             TransformationStepConfig step3 = new TransformationStepConfig();
             step3.setInputSteps(inputSteps);
             step3.setTargetSource("AccountMasterSeedReport");
-            step3.setTransformer("accountMasterSeedReportTransformer");
+            step3.setTransformer(AMSeedReport.TRANSFORMER_NAME);
 
             String confParamStr3 = getReportConfig();
 
             step3.setConfiguration(confParamStr3);
-            // // -----------
-            // TransformationStepConfig step4 = new TransformationStepConfig();
-            // step4.setInputSteps(inputSteps);
-            // step4.setTargetSource("AccountMasterSeedSecondaryDomain");
-            // step4.setTransformer("accountMasterSeedSecondaryDomainTransformer");
-            //
-            // String confParamStr4 = getReportConfig();
-            //
-            // step4.setConfiguration(confParamStr4);
+
             // -----------
-            TransformationStepConfig step5 = new TransformationStepConfig();
-            step5.setInputSteps(inputSteps);
-            step5.setTargetSource("AccountMasterSeedJunkyard");
-            step5.setTransformer("accountMasterSeedJunkyardTransformer");
+            TransformationStepConfig step4 = new TransformationStepConfig();
+            step4.setInputSteps(inputSteps);
+            step4.setTargetSource("AccountMasterSeedJunkyard");
+            step4.setTransformer(AMSeedJunkyard.TRANSFORMER_NAME);
 
             String confParamStr5 = getJunkyardConfig();
 
-            step5.setConfiguration(confParamStr5);
+            step4.setConfiguration(confParamStr5);
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
             steps.add(step2);
             steps.add(step3);
-            //steps.add(step4);
-            steps.add(step5);
+            steps.add(step4);
             // -----------
             configuration.setSteps(steps);
 

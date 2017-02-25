@@ -8,12 +8,11 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("accountMasterSeedJunkyardTransformerFlow")
-public class AccountMasterSeedJunkyardRebuildFlow extends ConfigurableFlowBase<AccountMasterSeedMarkerConfig> {
-    private static final String FLAG_DROP_OOB_ENTRY = "_FLAG_DROP_OOB_ENTRY_";
-    private static final String FLAG_DROP_SMALL_BUSINESS = "_FLAG_DROP_SMALL_BUSINESS_";
-    private static final String FLAG_DROP_INCORRECT_DATA = "_FLAG_DROP_INCORRECT_DATA_";
-    private static final String FLAG_DROP_ORPHAN_ENTRY = "_FLAG_DROP_ORPHAN_ENTRY_";
+@Component(AMSeedJunkyard.DATAFLOW_BEAN_NAME)
+public class AMSeedJunkyard extends AccountMasterBase<AccountMasterSeedMarkerConfig> {
+
+    public static final String DATAFLOW_BEAN_NAME = "AMSeedJunkyard";
+    public static final String TRANSFORMER_NAME = "AMSeedJunkyardTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -34,12 +33,12 @@ public class AccountMasterSeedJunkyardRebuildFlow extends ConfigurableFlowBase<A
 
     @Override
     public String getDataFlowBeanName() {
-        return "accountMasterSeedJunkyardTransformerFlow";
+        return DATAFLOW_BEAN_NAME;
     }
 
     @Override
     public String getTransformerName() {
-        return "accountMasterSeedJunkyardTransformer";
+        return TRANSFORMER_NAME;
 
     }
 }

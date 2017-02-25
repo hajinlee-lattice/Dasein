@@ -8,25 +8,23 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("accountMasterSeedSecondaryDomainFlowTransformerFlow")
-public class AccountMasterSeedSecondaryDomainRebuildFlow extends ConfigurableFlowBase<AccountMasterSeedMarkerConfig> {
+@Component(AMSeedCleanup.DATAFLOW_BEAN_NAME)
+public class AMSeedCleanup extends AccountMasterBase<AccountMasterSeedMarkerConfig> {
 
-    private static final String DOMAIN = "Domain";
-    private static final String PRIMARY_DOMAIN = "PrimaryDomain";
-    private static final String SECONDARY_DOMAIN = "SecondaryDomain";
-    private static final String FLAG_DROP_LESS_POPULAR_DOMAIN = "_FLAG_DROP_LESS_POPULAR_DOMAIN_";
+    public static final String DATAFLOW_BEAN_NAME = "AMSeedCleanup";
+    public static final String TRANSFORMER_NAME = "AMSeedCleanupTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         Node node = addSource(parameters.getBaseTables().get(0));
 
-        FieldList fieldList = new FieldList(FLAG_DROP_LESS_POPULAR_DOMAIN);
+        FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY, FLAG_DROP_SMALL_BUSINESS, FLAG_DROP_INCORRECT_DATA,
+                FLAG_DROP_LESS_POPULAR_DOMAIN, FLAG_DROP_ORPHAN_ENTRY);
 
-        node = node.filter(FLAG_DROP_LESS_POPULAR_DOMAIN + " != null", fieldList);
+        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 0 && " + FLAG_DROP_SMALL_BUSINESS + " == 0 && "
+                + FLAG_DROP_INCORRECT_DATA + " == 0 && " + FLAG_DROP_ORPHAN_ENTRY + " == 0 ", fieldList);
 
-        node = node.retain(new FieldList(DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN));
-        node = node.rename(new FieldList(DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN),
-                new FieldList(SECONDARY_DOMAIN, PRIMARY_DOMAIN));
+        node = node.discard(fieldList);
         return node;
     }
 
@@ -37,12 +35,11 @@ public class AccountMasterSeedSecondaryDomainRebuildFlow extends ConfigurableFlo
 
     @Override
     public String getDataFlowBeanName() {
-        return "accountMasterSeedSecondaryDomainFlowTransformerFlow";
+        return DATAFLOW_BEAN_NAME;
     }
 
     @Override
     public String getTransformerName() {
-        return "accountMasterSeedSecondaryDomainTransformer";
-
+        return TRANSFORMER_NAME;
     }
 }

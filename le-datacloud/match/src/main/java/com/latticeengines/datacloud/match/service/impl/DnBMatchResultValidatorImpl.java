@@ -56,6 +56,8 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
             bucket.addRule("A", "*", "*", "A");
             bucket.addRule("A", "ABZ", "ABZ", "BZ");
             bucket.addRule("B", "ABZ", "AZ", "ABZ");
+            bucket.addRule("AB", "A", "A", "F");
+            bucket.addRule("A", "F", "A", "AB");
             matchCriteria.addBucket(bucket);
 
             bucket  = new DnBMatchBucket();

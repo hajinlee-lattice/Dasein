@@ -22,31 +22,13 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
-@Component("accountMasterSeedMarkerTransformerFlow")
-public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<AccountMasterSeedMarkerConfig> {
+@Component(AMSeedMarker.DATAFLOW_BEAN_NAME)
+public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfig> {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(AccountMasterSeedMarkerRebuildFlow.class);
+    private static final Log log = LogFactory.getLog(AMSeedMarker.class);
 
-    private static final String DUNS = "DUNS";
-    private static final String DOMAIN = "Domain";
-    private static final String LATTICE_ID = "LatticeID";
-    private static final String LE_IS_PRIMARY_LOCATION = "LE_IS_PRIMARY_LOCATION";
-    private static final String LE_IS_PRIMARY_DOMAIN = "LE_IS_PRIMARY_DOMAIN";
-    private static final String LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
-    private static final String SALES_VOLUME_US_DOLLARS = "SALES_VOLUME_US_DOLLARS";
-    private static final String ALEXA_RANK = "Rank";
-    private static final String ALEXA_URL = "URL";
-    private static final String ALEXA_RANK_AMSEED = "AlexaRank";
-    private static final String COUNTRY = "Country";
-    private static final String LE_EMPLOYEE_RANGE = "LE_EMPLOYEE_RANGE";
-    private static final String OUT_OF_BUSINESS_INDICATOR = "OUT_OF_BUSINESS_INDICATOR";
-    private static final String DOMAIN_SOURCE = "DomainSource";
-
-    private static final String FLAG_DROP_OOB_ENTRY = "_FLAG_DROP_OOB_ENTRY_";
-    private static final String FLAG_DROP_SMALL_BUSINESS = "_FLAG_DROP_SMALL_BUSINESS_";
-    private static final String FLAG_DROP_INCORRECT_DATA = "_FLAG_DROP_INCORRECT_DATA_";
-    private static final String FLAG_DROP_LESS_POPULAR_DOMAIN = "_FLAG_DROP_LESS_POPULAR_DOMAIN_";
-    private static final String FLAG_DROP_ORPHAN_ENTRY = "_FLAG_DROP_ORPHAN_ENTRY_";
+    public static final String DATAFLOW_BEAN_NAME = "AMSeedMarker";
+    public static final String TRANSFORMER_NAME = "AMSeedMarkerTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -214,12 +196,12 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
     @Override
     public String getDataFlowBeanName() {
-        return "accountMasterSeedMarkerTransformerFlow";
+        return DATAFLOW_BEAN_NAME;
     }
 
     @Override
     public String getTransformerName() {
-        return "accountMasterSeedMarkerTransformer";
-
+        return TRANSFORMER_NAME;
     }
+
 }

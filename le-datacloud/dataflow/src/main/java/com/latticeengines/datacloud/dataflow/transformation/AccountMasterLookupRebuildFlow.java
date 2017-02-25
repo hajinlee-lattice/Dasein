@@ -21,6 +21,9 @@ public class AccountMasterLookupRebuildFlow extends ConfigurableFlowBase<Account
 
     private AccountMasterLookupRebuildConfig config;
 
+    private static final String DATAFLOW_BEAN_NAME = "AMSeedJunkyard";
+    private static final String TRANSFORMER_NAME = "AMSeedJunkyardTransformer";
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);

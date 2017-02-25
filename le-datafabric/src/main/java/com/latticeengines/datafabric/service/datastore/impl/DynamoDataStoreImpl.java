@@ -379,7 +379,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         try {
             table.putItem(item);
         } catch (NoSuchMethodError e) {
-            throw new RuntimeException(ERRORMESSAGE, e);
+            log.error(ERRORMESSAGE, e);
         } catch (Exception e) {
             log.error("Unable to save record " + tableName + " id " + id, e);
         }
@@ -404,8 +404,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 }
                 submitBatchWrite(dynamoDB, writeItems);
                 return;
-            } catch (NoSuchMethodError e) {
-                log.warn(ERRORMESSAGE);
+            } catch (Exception e) {
                 try {
                     Thread.sleep(interval);
                     interval *= 2;
@@ -420,21 +419,20 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     private void submitBatchWrite(DynamoDB dynamoDB, TableWriteItems writeItems) throws NoSuchMethodError {
-        try {
-            BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
-            do {
+        BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
+        do {
+            try {
                 // Check for unprocessed keys which could happen if you exceed
                 // provisioned throughput
                 Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
-
                 if (outcome.getUnprocessedItems().size() != 0) {
                     outcome = dynamoDB.batchWriteItemUnprocessed(unprocessedItems);
                 }
+            } catch (Exception e) {
+                log.error("Unable to batch create records " + tableName, e);
+            }
 
-            } while (outcome.getUnprocessedItems().size() > 0);
-        } catch (Exception e) {
-            log.error("Unable to batch create records " + tableName, e);
-        }
+        } while (outcome.getUnprocessedItems().size() > 0);
     }
 
     @Override

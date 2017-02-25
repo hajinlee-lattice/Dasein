@@ -33,6 +33,12 @@ public class TestMatchInputService {
         return input;
     }
 
+    public MatchInput prepareSimpleAMMatchInput(Object[][] data, String[] fields) {
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, fields);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        return input;
+    }
+
     public ColumnSelection enrichmentSelection() {
         return constructColumnSelection(Arrays.asList( //
                 "TechIndicator_AddThis", //
