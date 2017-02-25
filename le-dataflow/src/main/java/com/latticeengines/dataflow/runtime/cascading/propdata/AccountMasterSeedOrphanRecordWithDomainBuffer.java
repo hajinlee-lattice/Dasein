@@ -26,6 +26,7 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
     private static final String FLAG_DROP_ORPHAN_ENTRY = "_FLAG_DROP_ORPHAN_ENTRY_";
 
     protected Map<String, Integer> namePositionMap;
+
     private int flagLoc;
 
     public AccountMasterSeedOrphanRecordWithDomainBuffer(Fields fieldDeclaration) {
@@ -66,7 +67,7 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
                         }
                         // update state variables
                         highestSales = thisSales;
-                        highestSalesTuple = arguments.selectEntryCopy(Fields.ALL);
+                        highestSalesTuple = arguments;
                     } else {
                         // it won't even be a candidate, flag and release
                         Tuple tuple = flagTheTuple(arguments);
@@ -81,14 +82,15 @@ public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation
             }
         }
 
-        // release the final highest sales candidate
-        if (!foundNonOrphan) {
-            if (highestSalesTuple == null) {
-                throw new IllegalArgumentException(
-                        "There is neither loc > 1 record nor highest sales candidate for the group "
-                                + bufferCall.getGroup());
+        // handle the last tuple
+        if (highestSalesTuple != null) {
+            if (!foundNonOrphan) {
+                bufferCall.getOutputCollector().add(highestSalesTuple);
+            } else {
+                // flag and release
+                Tuple tuple = flagTheTuple(highestSalesTuple);
+                bufferCall.getOutputCollector().add(tuple);
             }
-            bufferCall.getOutputCollector().add(highestSalesTuple);
         }
 
     }
