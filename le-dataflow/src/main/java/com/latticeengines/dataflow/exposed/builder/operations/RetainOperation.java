@@ -26,10 +26,7 @@ public class RetainOperation extends Operation {
         List<FieldMetadata> orderedFms = new ArrayList<>();
         for (int i = 0; i < retainedFields.getFields().length; i++) {
             String tgtField = retainedFields.getFields()[i];
-            String srcField = input.metadata.get(i).getFieldName();
-            if (!srcField.equalsIgnoreCase(tgtField)) {
-                orderedFms.add(fmMap.get(tgtField));
-            }
+            orderedFms.add(fmMap.get(tgtField));
         }
         this.pipe = new Each(retain, new NoOp(), DataFlowUtils.convertToFields(retainedFields.getFields()));
         this.metadata = orderedFms;
