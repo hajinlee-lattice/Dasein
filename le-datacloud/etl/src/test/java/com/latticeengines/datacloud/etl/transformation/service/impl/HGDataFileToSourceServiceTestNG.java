@@ -1,12 +1,11 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.IngestionNames;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.HGDataRaw;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
-import com.latticeengines.datacloud.core.source.impl.OrbCompanyRaw;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -28,15 +27,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
-
-public class OrbFileToSourceServiceTestNG
+public class HGDataFileToSourceServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-
     private static final Log log = LogFactory.getLog(OrbFileToSourceServiceTestNG.class);
 
     @Autowired
-    OrbCompanyRaw source;
+    HGDataRaw source;
 
     @Autowired
     IngestionSource baseSource;
@@ -50,14 +46,14 @@ public class OrbFileToSourceServiceTestNG
     @Autowired
     private PipelineTransformationService pipelineTransformationService;
 
-    String targetSourceName = "OrbCompanyRaw";
+    String targetSourceName = "HGDataRaw";
 
     ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        baseSource.setIngetionName(IngestionNames.ORB_INTELLIGENCE);
-        uploadBaseSourceFile(baseSource, "orb-db2-export-sample.zip", baseSourceVersion);
+        baseSource.setIngetionName(IngestionNames.HGDATA);
+        uploadBaseSourceFile(baseSource, "Lattice_Engines_2017-02-14.zip", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -85,7 +81,7 @@ public class OrbFileToSourceServiceTestNG
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
-            configuration.setName("OrbCompanyFileToSource");
+            configuration.setName("HGDataFileToSource");
             configuration.setVersion(targetVersion);
 
             // -----------
@@ -113,37 +109,49 @@ public class OrbFileToSourceServiceTestNG
 
     private String getIngestedFileToSourceTransformerConfig() throws JsonProcessingException {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
-        conf.setIngetionName(IngestionNames.ORB_INTELLIGENCE);
-        conf.setFileNameOrExtension("orb_companies.csv");
-        conf.setCompressedFileNameOrExtension("orb-db2-export-sample.zip");
+        conf.setIngetionName(IngestionNames.HGDATA);
+        conf.setFileNameOrExtension("7330 Lattice Engines.csv");
+        conf.setCompressedFileNameOrExtension("Lattice_Engines_2017-02-14.zip");
         conf.setCompressType(CompressType.ZIP);
         return om.writeValueAsString(conf);
     }
 
     @Override
     String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+        return hdfsPathBuilder.constructTransformationSourceDir(source, targetVersion).toString();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
-        String[] expectedIds = new String[] { "13262799", "12221764", "51040422", "8129065", "11417478", "17145445",
-                "17149076", "12438907", "8825824", "117155600", "126441554", "117155602", "117155604", "133303900",
-                "136492131", "141925778", "142109806", "137396383", "118386803", "138412260", "109785854",
-                "116109312" };
-        Set<String> expectedIdSet = new HashSet<>(Arrays.asList(expectedIds));
+        String[][] expectedData = new String[][] { { "gersonco.com", "Louis M. Gerson Co. Inc." },
+                { null, "Boston Steel Fabricators Inc." }, { "eckelacoustic.com", "Eckel Industries" },
+                { "nationalnonwovens.com", "National Nonwovens" }, { null, "Banc One Capital Markets" },
+                { "byersimports.com", "Byers Imports" } };
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            String orbNum = record.get("OrbNum").toString();
-            Assert.assertTrue(expectedIdSet.contains(orbNum));
+            Object domain = record.get("URL");
+            if (domain instanceof Utf8) {
+                domain = domain.toString();
+            }
+            Object company = record.get("Company");
+            if (company instanceof Utf8) {
+                company = company.toString();
+            }
+            log.info(String.format("URL = %s, Company = %s", String.valueOf(domain), String.valueOf(company)));
+            boolean flag = false;
+            for (String[] data : expectedData) {
+                if (((domain == null && data[0] == null) || (domain != null && domain.equals(data[0])))
+                        && ((company == null && data[1] == null) || (company != null && company.equals(data[1])))) {
+                    flag = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 22);
+        Assert.assertEquals(rowNum, 9);
     }
-
 }

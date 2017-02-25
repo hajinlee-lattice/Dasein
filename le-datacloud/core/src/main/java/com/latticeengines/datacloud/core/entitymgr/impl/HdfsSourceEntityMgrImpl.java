@@ -285,7 +285,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     public Long count(Source source, String version) {
         try {
             String avroDir;
-            if (source instanceof CollectedSource) {
+            if (source instanceof CollectedSource || source instanceof IngestedRawSource) {
                 String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
                 avroDir = rawDir + HDFS_PATH_SEPARATOR + version;
             } else {
