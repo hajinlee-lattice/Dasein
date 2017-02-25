@@ -23,9 +23,9 @@ public class PythonInvoker {
     public void callLauncher(Configuration config) {
         int exitValue = 0;
         try {
-            PythonMRUtils.writeMetedataJsonToLocal(classifier);
+            PythonMRUtils.writeMetadataJsonToLocal(classifier);
 
-            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("/usr/local/bin/python2.7", "launcher.py",
+            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", "lattice", "launcher.py",
                     "metadata.json", "None");
             setupEnvironment(pb.environment(), config);
 
@@ -34,7 +34,7 @@ public class PythonInvoker {
             p.waitFor();
             exitValue = p.exitValue();
             log.info("Python process finished successfully");
-            PythonMRUtils.copyMetedataJsonToHdfs(config, classifier.getModelHdfsDir());
+            PythonMRUtils.copyMetadataJsonToHdfs(config, classifier.getModelHdfsDir());
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_12011, e);

@@ -50,6 +50,7 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
+@SuppressWarnings("deprecation")
 public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     private static final Log log = LogFactory.getLog(GlobalAuthDeploymentTestBed.class);

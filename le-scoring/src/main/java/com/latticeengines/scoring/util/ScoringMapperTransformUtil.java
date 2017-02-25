@@ -57,6 +57,7 @@ public class ScoringMapperTransformUtil {
 
             if (p.getName().equals("scoring.py")) {
                 scoringScriptProvided = true;
+            } else if (p.getName().equals("pythonlauncher.sh")) {
             } else if (!p.getName().endsWith(".jar") && !p.getName().endsWith("_scorederivation")) {
                 String uuid = p.getName();
                 JsonNode modelJsonObj = parseFileContentToJsonNode(p);

@@ -116,6 +116,7 @@ alias runjettyjobpd='source $WSHOME/le-dev/latticerc && cd $WSHOME/le-job && bas
 alias runjettymatchapi='runtest matchapi -p jetty -c jetty:run'
 alias runjettyulysses='bash -c "rm -f /var/log/ledp/le-ulysses*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4007,server=y,suspend=n -Xmx4048m -XX:MaxPermSize=512m" mvn -Djetty.port=8075 -Pfunctional jetty:run'
 alias runprecheckintest='$WSHOME/le-dev/scripts/runPreCheckInTest.sh'
+alias precheckin='cd $WSHOME/le-pls && mvn -Pdeployment -Ddeployment.groups=precheckin -DDIFFCOUNT=0 -DargLine="" -Dtest=com.latticeengines.pls.end2end.SelfServiceModelingEndToEndDeploymentTestNG verify'
 
 alias replacePropertyTokens='python $WSHOME/le-config/updateProperty.py'
 

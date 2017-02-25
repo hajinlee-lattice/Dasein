@@ -44,6 +44,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
     private static final String jarDependencyPath = "/scoring/lib";
 
     private static final String scoringPythonPath = "/scoring/scripts/scoring.py";
+    
+    private static final String pythonLauncherPath = "/dataplatform/scripts/pythonlauncher.sh";
 
     public EventDataScoringJob(Configuration config) {
         setConf(config);
@@ -110,6 +112,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             MRJobUtil.setLocalizedResources(mrJob, properties);
             mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersionInStack(stackName)
                     + scoringPythonPath));
+            mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersionInStack(stackName)
+                    + pythonLauncherPath));
             List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), dependencyPath
                     + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {

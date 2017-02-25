@@ -59,6 +59,7 @@ public class PythonMRUtils {
         paths.add(String.format("/app/%s/dataplatform/scripts/launcher.py", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/pipelinefwk.py", version));
         paths.add(String.format("/app/%s/dataplatform/scripts/rulefwk.py", version));
+        paths.add(String.format("/app/%s/dataplatform/scripts/pythonlauncher.sh", version));
         paths.add(classifier.getTestDataHdfsPath());
         paths.add(classifier.getSchemaHdfsPath());
         paths.add(classifier.getPythonScriptHdfsPath());
@@ -85,13 +86,13 @@ public class PythonMRUtils {
         return StringUtils.join(paths, ",");
     }
 
-    public static void writeMetedataJsonToLocal(Classifier classifier) throws IOException {
+    public static void writeMetadataJsonToLocal(Classifier classifier) throws IOException {
         String metadata = JsonUtils.serialize(classifier);
         File metadataFile = new File(METADATA_JSON_PATH);
         FileUtils.writeStringToFile(metadataFile, metadata);
     }
 
-    public static void copyMetedataJsonToHdfs(Configuration config, String hdfsPath) throws Exception {
+    public static void copyMetadataJsonToHdfs(Configuration config, String hdfsPath) throws Exception {
         HdfsUtils.copyLocalToHdfs(config, METADATA_JSON_PATH, hdfsPath);
     }
 

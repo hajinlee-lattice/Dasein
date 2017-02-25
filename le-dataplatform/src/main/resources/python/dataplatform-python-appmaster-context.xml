@@ -47,8 +47,8 @@
 
         <yarn:container-command>
                         <![CDATA[
-                        /usr/local/bin/python2.7
-                        launcher.py metadata.json ${dataplatform.yarn.job.runtime.config} 
+                        ./pythonlauncher.sh
+                        lattice launcher.py metadata.json ${dataplatform.yarn.job.runtime.config}
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

@@ -110,6 +110,9 @@
                                 <source>
                                     <location>src/main/python/datarules/rulepipeline.json</location>
                                 </source>
+                                <source>
+                                    <location>src/main/scripts/pythonlauncher.sh</location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
