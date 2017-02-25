@@ -65,7 +65,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         aggregations.add(new Aggregation("ContactDomain", "ContactDomain", AggregationType.MAX));
         Node resolveTies = retrieveBestDomain.groupBy(new FieldList("AccountId"), aggregations);
 
-        Node joinedWithAccounts = account.leftOuterJoin(new FieldList("Id"), //
+        Node joinedWithAccounts = account.leftJoin(new FieldList("Id"), //
                 resolveTies, //
                 new FieldList("AccountId"));
 
@@ -118,7 +118,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         // Left outer join with that
-        Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
+        Node joined = account.leftJoin("Id", grouped, "AccountId");
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_IsWon");
@@ -149,7 +149,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
-        Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
+        Node joined = account.leftJoin("Id", grouped, "AccountId");
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_StageIsClosedWon");
@@ -177,7 +177,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         aggregations.add(new Aggregation("Revenue_IsClosed", "Revenue_IsClosed", AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
-        Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
+        Node joined = account.leftJoin("Id", grouped, "AccountId");
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_IsClosed");
@@ -196,7 +196,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         aggregations.add(new Aggregation("Amount", "Revenue_OpportunityCreated", AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
-        Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
+        Node joined = account.leftJoin("Id", grouped, "AccountId");
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_OpportunityCreated");
@@ -214,7 +214,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         aggregations.add(new Aggregation("AccountId", "Count", AggregationType.COUNT));
         Node grouped = contact.groupBy(new FieldList("AccountId"), aggregations);
 
-        Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
+        Node joined = account.leftJoin("Id", grouped, "AccountId");
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("HasContacts");

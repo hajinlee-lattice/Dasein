@@ -42,7 +42,7 @@ public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceF
 
         List<String> newFieldNames = getNewFields(enrichedFields, latticeSeedFieldNames);
         
-        Node source = sourceLatticeSeed.leftOuterJoin(leftMatchField, sourceDnbSeed, rightMatchField);
+        Node source = sourceLatticeSeed.leftJoin(leftMatchField, sourceDnbSeed, rightMatchField);
 
         for (int i = 0; i < enrichedFields.size(); i++) {
             String enrichedField = enrichedFields.get(i);

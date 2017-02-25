@@ -22,6 +22,12 @@ public class JoinOperation extends Operation {
     public JoinOperation(Input lhs, FieldList lhsJoinFields, Input rhs, FieldList rhsJoinFields, JoinType joinType,
             boolean hashJoin) {
 
+        if (lhs.pipe.getName().equals(rhs.pipe.getName())) {
+            throw new IllegalArgumentException(
+                    String.format("Input pipes of join must have different names: lhs=%s, rhs=%s", lhs.pipe.getName(),
+                            rhs.pipe.getName()));
+        }
+
         List<FieldMetadata> declaredFields = DataFlowUtils.combineFields(rhs.pipe.getName(), lhs.metadata,
                 rhs.metadata);
 

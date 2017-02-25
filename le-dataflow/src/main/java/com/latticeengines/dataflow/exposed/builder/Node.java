@@ -62,6 +62,11 @@ public class Node {
         this.builder = builder;
     }
 
+    public Node join(String lhsJoinField, Node rhs, String rhsJoinField, JoinType joinType) {
+        return new Node(builder.register(new JoinOperation(opInput(identifier), new FieldList(lhsJoinField),
+                opInput(rhs.identifier), new FieldList(rhsJoinField), joinType, false)), builder);
+    }
+
     public Node join(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {
         return new Node(builder.register(new JoinOperation(opInput(identifier), lhsJoinFields,
                 opInput(rhs.identifier), rhsJoinFields, joinType, false)), builder);
@@ -95,50 +100,27 @@ public class Node {
     }
 
     public Node innerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
-        Node join = new Node(builder.addInnerJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields), builder);
-
-        List<String> fieldList = new ArrayList<>();
-        for (FieldMetadata fm : this.getSchema()) {
-            if (!fieldList.contains(fm.getFieldName())) {
-                fieldList.add(fm.getFieldName());
-            }
-        }
-        for (FieldMetadata fm : rhs.getSchema()) {
-            if (!fieldList.contains(fm.getFieldName())) {
-                fieldList.add(fm.getFieldName());
-            }
-        }
-
-        join = join.retain(new FieldList(fieldList.toArray(new String[fieldList.size()])));
-        return join;
+        return join(lhsJoinFields, rhs, rhsJoinFields, JoinType.INNER);
     }
 
     public Node innerJoin(String lhsField, Node rhs, String rhsField) {
         return innerJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
     }
 
-    public Node leftOuterJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
-        Node join = new Node(builder.addLeftOuterJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields),
-                builder);
-
-        List<String> fieldList = new ArrayList<>();
-        for (FieldMetadata fm : this.getSchema()) {
-            if (!fieldList.contains(fm.getFieldName())) {
-                fieldList.add(fm.getFieldName());
-            }
-        }
-        for (FieldMetadata fm : rhs.getSchema()) {
-            if (!fieldList.contains(fm.getFieldName())) {
-                fieldList.add(fm.getFieldName());
-            }
-        }
-
-        join = join.retain(new FieldList(fieldList.toArray(new String[fieldList.size()])));
-        return join;
+    public Node leftJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
+        return join(lhsJoinFields, rhs, rhsJoinFields, JoinType.LEFT);
     }
 
-    public Node leftOuterJoin(String lhsField, Node rhs, String rhsField) {
-        return leftOuterJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
+    public Node leftJoin(String lhsField, Node rhs, String rhsField) {
+        return leftJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
+    }
+
+    public Node outerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
+        return join(lhsJoinFields, rhs, rhsJoinFields, JoinType.OUTER);
+    }
+
+    public Node outerJoin(String lhsField, Node rhs, String rhsField) {
+        return leftJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
     }
 
     public Node groupBy(FieldList groupByFieldList, List<Aggregation> aggregations) {

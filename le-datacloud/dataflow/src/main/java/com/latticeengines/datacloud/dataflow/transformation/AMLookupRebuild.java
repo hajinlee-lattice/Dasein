@@ -63,7 +63,7 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
         hasSd = hasSd.filter(orbSecDomain + " != null", new FieldList(orbSecDomain));
 
         hasSd = hasSd.renamePipe("hasSD") //
-                .leftOuterJoin(new FieldList(orbSecDomain), amSeed, new FieldList(amDomain));
+                .leftJoin(new FieldList(orbSecDomain), amSeed, new FieldList(amDomain));
 
         // secondary not exist in am seed
         Node toAppend = hasSd

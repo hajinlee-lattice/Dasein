@@ -1,11 +1,11 @@
 package com.latticeengines.leadprioritization.dataflow;
 
-import com.latticeengines.dataflow.runtime.cascading.leadprioritization.AddRatingColumnFunction;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.leadprioritization.AddRatingColumnFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -18,6 +18,7 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
     public Node construct(CombineInputTableWithScoreParameters parameters) {
         Node inputTable = addSource(parameters.getInputTableName());
         Node scoreTable = addSource(parameters.getScoreResultsTableName());
+
         Node scoreWithRating = scoreTable;
         if (scoreWithRating.getSourceAttribute(ScoreResultField.Rating.displayName) == null) {
             scoreWithRating = scoreTable.apply(
@@ -29,10 +30,9 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
 
         Node combinedResultTable = null;
         if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {
-            combinedResultTable = inputTable.leftOuterJoin(InterfaceName.Id.name(), scoreWithRating,
-                    InterfaceName.Id.name());
+            combinedResultTable = inputTable.leftJoin(InterfaceName.Id.name(), scoreWithRating, InterfaceName.Id.name());
         } else {
-            combinedResultTable = inputTable.leftOuterJoin(InterfaceName.InternalId.name(), scoreWithRating,
+            combinedResultTable = inputTable.leftJoin(InterfaceName.InternalId.name(), scoreWithRating,
                     InterfaceName.InternalId.name());
         }
 

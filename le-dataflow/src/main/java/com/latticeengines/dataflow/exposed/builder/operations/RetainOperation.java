@@ -26,9 +26,13 @@ public class RetainOperation extends Operation {
         List<FieldMetadata> orderedFms = new ArrayList<>();
         for (int i = 0; i < retainedFields.getFields().length; i++) {
             String tgtField = retainedFields.getFields()[i];
-            orderedFms.add(fmMap.get(tgtField));
+            if (fmMap.containsKey(tgtField)) {
+                orderedFms.add(fmMap.get(tgtField));
+            } else {
+                throw new IllegalArgumentException("The input metadata does not have the requested field " + tgtField);
+            }
         }
-        this.pipe = new Each(retain, new NoOp(), DataFlowUtils.convertToFields(retainedFields.getFields()));
+        this.pipe = new Each(retain, new NoOp(), DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(orderedFms)));
         this.metadata = orderedFms;
     }
 

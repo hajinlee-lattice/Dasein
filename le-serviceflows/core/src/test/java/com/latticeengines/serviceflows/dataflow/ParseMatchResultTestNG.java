@@ -33,7 +33,7 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
 
     private ParseMatchResultParameters prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
-                Pair.of(SOURCE_PREFIX + "Domain", String.class), //
+                Pair.of(SOURCE_PREFIX + "Domain", Integer.class), //
                 Pair.of("Name", String.class), //
                 Pair.of("City", String.class), //
                 Pair.of("State", String.class), //
@@ -43,9 +43,9 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
                 Pair.of(INT_LDC_LOC_CHECKSUM, String.class) //
         );
         Object[][] data = new Object[][] { //
-                { "dom1.com", "Name1", "City1", "State1", "Country1", 1L, "d.com", "a" }, //
-                { "dom2.com", "Name2", "City2", "State2", "Country2", 2L, "d.com", "b" }, //
-                { "dom3.com", "Name3", "City3", "State3", "Country3", 3L, "d.com", "c" }
+                { 1, "Name1", "City1", "State1", "Country1", 1L, "d.com", "a" }, //
+                { 2, "Name2", "City2", "State2", "Country2", 2L, "d.com", "b" }, //
+                { 3, "Name3", "City3", "State3", "Country3", 3L, "d.com", "c" }
         };
         uploadDataToSharedAvroInput(data, fields);
 
@@ -71,6 +71,7 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
             Assert.assertNull(record.get(INT_LDC_LOC_CHECKSUM),
                     "Internal attribute " + INT_LDC_LOC_CHECKSUM + " should be removed.");
             Assert.assertFalse("d.com".equals(record.get("Domain")));
+            Assert.assertTrue(record.get("Domain") instanceof Integer);
             Assert.assertNull(record.get(LID_FIELD));
             numRows++;
         }

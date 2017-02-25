@@ -135,8 +135,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
                 new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN));
         unmatchedLocOnly = updateByBestIdInGroup(unmatchedLocOnly, matched, INT_LDC_LOC_CHECKSUM);
 
-        unmatchedLocOnly.retain(new FieldList(matched.getFieldNames()));
-        unmatchedDomain.retain(new FieldList(matched.getFieldNames()));
+        matched = matched.retain(new FieldList(matched.getFieldNames()));
         return matched.merge(Arrays.asList(unmatchedDomain, unmatchedLocOnly));
     }
 
@@ -164,7 +163,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         bufferFms.add(new FieldMetadata(TMP_BEST_DEDUPE_ID, String.class));
         Node bestIdInGroup = matched.groupByAndAggregate(new FieldList(grpField), aggregator, bufferFms)
                 .renamePipe("bestidfor" + grpField);
-        unmatched = unmatched.leftOuterJoin(new FieldList(grpField), bestIdInGroup, new FieldList(grpField));
+        unmatched = unmatched.leftJoin(new FieldList(grpField), bestIdInGroup, new FieldList(grpField));
 
         String tmpField = UUID.randomUUID().toString().replace("-", "");
         Function updateIdByDomain = new ExpressionFunction(new Fields(tmpField), //

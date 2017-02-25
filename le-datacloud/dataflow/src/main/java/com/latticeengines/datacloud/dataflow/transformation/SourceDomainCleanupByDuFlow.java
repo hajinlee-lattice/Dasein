@@ -38,7 +38,7 @@ public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDoma
                         .getDomainField(), config.getAlexaRankField()), fms);
         duDomain = duDomain.renamePipe("dudomain");
 
-        Node join = source.leftOuterJoin(config.getDuField(), duDomain, config.getDuField());
+        Node join = source.leftJoin(config.getDuField(), duDomain, config.getDuField());
         Fields joinNodeFields = new Fields(join.getFieldNames().toArray(new String[join.getFieldNames().size()]));
         Node domainFilled = join.groupByAndBuffer(new FieldList(config.getDuField()), new FillBlankDomainBuffer(
                 joinNodeFields, config.getDomainField()));

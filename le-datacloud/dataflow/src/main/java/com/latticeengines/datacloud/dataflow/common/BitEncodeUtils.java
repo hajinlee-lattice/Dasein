@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
@@ -45,8 +44,7 @@ public class BitEncodeUtils {
             if (join == null) {
                 join = encodedNode.renamePipe("join-encoded");
             } else {
-                join = join.join(new FieldList(groupByFields), encodedNode, new FieldList(groupByFields),
-                        JoinType.OUTER);
+                join = join.outerJoin(new FieldList(groupByFields), encodedNode, new FieldList(groupByFields));
             }
         }
 

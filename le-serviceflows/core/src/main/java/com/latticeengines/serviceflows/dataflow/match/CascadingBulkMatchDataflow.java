@@ -261,8 +261,8 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
                     return publicDomainNode;
                 }
 
-                parsedDomainNode = parsedDomainNode.join(new FieldList(PUBLIC_DOMAIN_ROW_ID), publicDomainNode,
-                        new FieldList(PUBLIC_DOMAIN_ROW_ID), JoinType.LEFT);
+                parsedDomainNode = parsedDomainNode.leftJoin(new FieldList(PUBLIC_DOMAIN_ROW_ID), publicDomainNode,
+                        new FieldList(PUBLIC_DOMAIN_ROW_ID));
                 parsedDomainNode = parsedDomainNode.addFunction("IsPublicDomain == null ? true : false", new FieldList(
                         IS_PUBLIC_DOMAIN), new FieldMetadata(IS_PUBLIC_DOMAIN, Boolean.class));
 

@@ -6,23 +6,22 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.query.ColumnLookup;
-import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.pls.IntentScore;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
+import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.Sort;
 
 @Component("quotaFlow")
 public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
@@ -38,7 +37,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         Node scores = addSource("Scores");
         Node accountIntent = addSource("Intent");
 
-        account = account.leftOuterJoin(LatticeAccountID, accountIntent, LatticeAccountID);
+        account = account.leftJoin(LatticeAccountID, accountIntent, LatticeAccountID);
 
         TargetMarket market = parameters.getTargetMarket();
         ProspectDiscoveryProperty configuration = parameters.getConfiguration();
@@ -141,7 +140,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
             String removeUnmatchedExpression = String.format("!(Email == null && %s != null)",
                     joinFieldName("ExistingProspect", "Email"));
             intent = intent //
-                    .join(new FieldList("Email"), existingProspect, new FieldList("Email"), JoinType.OUTER) //
+                    .outerJoin(new FieldList("Email"), existingProspect, new FieldList("Email")) //
                     .filter(removeUnmatchedExpression,
                             new FieldList("Email", joinFieldName("ExistingProspect", "Email")));
 

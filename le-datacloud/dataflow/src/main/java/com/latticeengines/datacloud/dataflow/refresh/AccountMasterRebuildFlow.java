@@ -65,13 +65,13 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
         Node domainConverged = convergeSources(seed, domainBased, domainKey, id, joinKeyMap);
 
         if (domainConverged != null) {
-            joined = joined.leftOuterJoin(new FieldList(id), domainConverged, new FieldList(id));
+            joined = joined.leftJoin(new FieldList(id), domainConverged, new FieldList(id));
         }
 
 
         Node dunsConverged = convergeSources(seed, dunsBased, dunsKey, id, joinKeyMap);
         if (dunsConverged != null) {
-            joined = joined.leftOuterJoin(new FieldList(id), dunsConverged, new FieldList(joinKeyMap.get(dunsConverged)));
+            joined = joined.leftJoin(new FieldList(id), dunsConverged, new FieldList(joinKeyMap.get(dunsConverged)));
         }
 
         FieldList joinFields = getJoinFields(joined);
