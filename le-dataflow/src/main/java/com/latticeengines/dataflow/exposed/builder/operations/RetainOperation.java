@@ -22,7 +22,7 @@ public class RetainOperation extends Operation {
 
         boolean needRetain = false;
         for (String field: retainedFields.getFields()) {
-            if (fmMap.containsKey(field)) {
+            if (!fmMap.containsKey(field)) {
                 needRetain = true;
                 break;
             }
