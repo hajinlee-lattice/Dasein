@@ -56,6 +56,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         FieldList idField = new FieldList(LATTICE_ID);
         am = am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
 
+        /*
         if ("tez".equalsIgnoreCase(parameters.getEngineConfiguration().getEngine())) {
             badDataMrkd = badDataMrkd.checkpoint();
             oobMkrd = oobMkrd.checkpoint();
@@ -64,6 +65,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
             am = am.checkpoint();
             alexaMrkd = alexaMrkd.checkpoint();
         }
+        */
 
         return am.coGroup(idField, //
                 Arrays.asList(badDataMrkd, oobMkrd, orphanMrkd, smBusiMrkd, alexaMrkd), //
