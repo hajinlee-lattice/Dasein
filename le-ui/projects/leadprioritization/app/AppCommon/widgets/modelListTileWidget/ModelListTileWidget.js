@@ -1,5 +1,6 @@
 angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.services.FeatureFlagService',
     'mainApp.models.services.ModelService',
@@ -16,7 +17,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         },
         templateUrl: 'app/AppCommon/widgets/modelListTileWidget/ModelListTileWidgetTemplate.html',
         controller: function(
-            $scope, $state, $rootScope, $document, $element, ResourceUtility, 
+            $scope, $state, $rootScope, $document, $element, ResourceUtility, BrowserStorageUtility,
             NavUtility, DeleteModelModal, StaleModelModal, DeactivateModelModal, 
             FeatureFlagService, ModelService, CopyModelToTenantModal
         ) {
@@ -33,6 +34,14 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
             $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
             $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
+            $scope.mayActivateModels = true;
+            if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
+                && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
+                var accessLevel = BrowserStorageUtility.getSessionDocument().User.AccessLevel;
+                if (accessLevel == "EXTERNAL_USER") {
+                    $scope.mayActivateModels = false;
+                }
+            }
 
             $scope.isNotPmmlModel = $scope.data.ModelFileType !== 'PmmlModel';
             $scope.canRemodel = ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;

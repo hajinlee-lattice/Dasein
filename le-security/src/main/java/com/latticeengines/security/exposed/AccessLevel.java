@@ -18,6 +18,7 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.EDIT_PLS_DATA, //
             GrantedRight.VIEW_PLS_MODELS, //
+            GrantedRight.EDIT_PLS_MODELS, //
             GrantedRight.VIEW_PLS_CONFIGURATIONS, //
             GrantedRight.EDIT_PLS_CONFIGURATIONS, //
             GrantedRight.VIEW_PLS_JOBS, //

@@ -157,7 +157,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertDeleteModelSummaryGet500();
 
         switchToExternalUser();
-        assertDeleteModelSummaryGet403();
+        assertDeleteModelSummaryGet500();
     }
 
     private void assertDeleteModelSummaryGet500() {
@@ -227,7 +227,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertChangeModelDisplayNameSuccess();
 
         switchToExternalUser();
-        assertChangeModelDisplayNameGet403();
+        assertChangeModelDisplayNameSuccess();
     }
 
     @Test(groups = { "functional" }, dependsOnMethods = { "testUpdateModelSummary" })
@@ -245,7 +245,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertUpdatePredictorsSuccess();
 
         switchToExternalUser();
-        assertUpdatePredictorsGet403();
+        assertUpdatePredictorsSuccess();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
