@@ -47,6 +47,14 @@ sed -i".orig" "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|"
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     hadoop namenode -format
+    hdfs dfsadmin -safemode leave
+
+    for app in 'dataplatform' 'sqoop' 'eai' 'dataflow' 'dataflowapi' 'datacloud' 'workflowapi' 'scoring' 'dellebi'
+    do
+        hdfs dfs -mkdir -p /app/${app} || true &
+    done
+    wait
+
 fi
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
