@@ -19,6 +19,8 @@ fi
 
 cp $WSHOME/le-dev/tomcat/server.xml $CATALINA_HOME/conf/server.xml
 
+mkdir -p $CATALINA_HOME/webapps/ms || true
+
 sudo mkdir -p /var/log/ledp || true
 sudo chmod a+w /var/log/ledp
 
