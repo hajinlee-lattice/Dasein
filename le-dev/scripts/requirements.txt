@@ -1,3 +1,4 @@
+avro
 boto3
 pexpect
 psutil

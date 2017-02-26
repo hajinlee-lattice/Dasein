@@ -25,7 +25,7 @@ $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver
 
 OLD_CATALINA_HOME=$CATALINA_HOME
 CATALINA_HOME=$HADOOP_HOME/share/hadoop/kms/tomcat
-$HADOOP_HOME/sbin/kms.sh start
+pushd $HADOOP_HOME && $HADOOP_HOME/sbin/kms.sh start && popd
 CATALINA_HOME=$OLD_CATALINA_HOME
 
 if [ "${LE_USING_DOCKER}" = "true" ]; then

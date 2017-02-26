@@ -1,42 +1,50 @@
+#!/usr/bin/env bash
+
 if [ "${ANACONDA_HOME}" = "" ]; then
     echo "Must specify ANACONDA_HOME to be a non-existing folder and also the current user has the privilege to create it"
     exit 1
 fi
 
-CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
+BOOTSTRAP_MODE=$1
 
-UNAME=`uname`
-if [[ "${UNAME}" == 'Darwin' ]]; then
-    echo "You are on Mac"
-    ANACONDA_SH=Anaconda2-4.3.0-MacOSX-x86_64.sh
-    NUMPY_VERSION="1.8.2"
-else
-    echo "You are on ${UNAME}"
-    ANACONDA_SH=Anaconda2-4.3.0-Linux-x86_64.sh
-    NUMPY_VERSION="1.8.2=py27_1"
+if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
+    ARTIFACT_DIR=$WSHOME/le-dev/artifacts
+
+    UNAME=`uname`
+    if [[ "${UNAME}" == 'Darwin' ]]; then
+        echo "You are on Mac"
+        ANACONDA_SH=Anaconda2-4.3.0-MacOSX-x86_64.sh
+        NUMPY_VERSION="1.8.2"
+    else
+        echo "You are on ${UNAME}"
+        ANACONDA_SH=Anaconda2-4.3.0-Linux-x86_64.sh
+        NUMPY_VERSION="1.8.2=py27_1"
+    fi
+
+    if [ -f $ARTIFACT_DIR/$ANACONDA_SH ]; then
+        echo "Skipping download of Anaconda"
+    else
+        echo "Downloading Anaconda"
+        wget https://repo.continuum.io/archive/$ANACONDA_SH -O $ARTIFACT_DIR/$ANACONDA_SH
+    fi
+
+    if [ -d $ANACONDA_HOME ]; then
+        echo "Skipping installation of Anaconda"
+    else
+        echo "Downloading Anaconda"
+        pushd $ARTIFACT_DIR
+        bash $ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
+        popd
+    fi
+
+    sudo rm -rf $ANACONDA_HOME/envs/lattice || true
+    $ANACONDA_HOME/bin/conda create -n lattice -y python=2.7.13 pip
+
+    CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
+    cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/lattice/lib
+    ln -s $ANACONDA_HOME/envs/lattice/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/lattice/lib/libgcrypt.so.11
 fi
 
-if [ -f $CONDA_ARTIFACT_DIR/$ANACONDA_SH ]; then
-    echo "Skipping download of Anaconda"
-else
-    echo "Downloading Anaconda"
-    pushd $CONDA_ARTIFACT_DIR
-    echo "https://repo.continuum.io/archive/$ANACONDA_SH"
-    wget https://repo.continuum.io/archive/$ANACONDA_SH
-    popd
-fi
-
-if [ -d $ANACONDA_HOME ]; then
-    echo "Skipping installation of Anaconda"
-else
-    echo "Downloading Anaconda"
-    pushd $CONDA_ARTIFACT_DIR
-    bash $CONDA_ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
-    popd
-fi
-$ANACONDA_HOME/bin/conda create -n lattice -y python=2.7.13 pip
-cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/lattice/lib
-ln -s $ANACONDA_HOME/envs/lattice/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/lattice/lib/libgcrypt.so.11
 source $ANACONDA_HOME/bin/activate lattice
 
 pip install \

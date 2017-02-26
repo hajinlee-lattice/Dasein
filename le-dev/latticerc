@@ -1,6 +1,5 @@
 export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
 export LE_ENVIRONMENT=dev
-export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
 
 if [ -f $WSHOME/le-dev/aliases ]; then
     . $WSHOME/le-dev/aliases
