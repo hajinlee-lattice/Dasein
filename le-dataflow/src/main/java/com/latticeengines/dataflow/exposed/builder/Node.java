@@ -122,8 +122,12 @@ public class Node {
         return leftJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
     }
 
-    public Node leftJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, boolean hashJoin) {
-        return join(lhsJoinFields, rhs, rhsJoinFields, JoinType.LEFT, hashJoin);
+    public Node leftHashJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
+        return join(lhsJoinFields, rhs, rhsJoinFields, JoinType.LEFT, true);
+    }
+
+    public Node leftHashJoin(String lhsField, Node rhs, String rhsField) {
+        return leftHashJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
     }
 
     public Node outerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
@@ -329,8 +333,16 @@ public class Node {
         return new Node(builder.register(new RetainOperation(opInput(identifier), outputFields)), builder);
     }
 
+    public Node retain(String ... outputFields) {
+        return new Node(builder.register(new RetainOperation(opInput(identifier), new FieldList(outputFields))), builder);
+    }
+
     public Node discard(FieldList toDiscard) {
         return new Node(builder.addDiscard(identifier, toDiscard), builder);
+    }
+
+    public Node discard(String ... toDiscard) {
+        return new Node(builder.addDiscard(identifier, new FieldList(toDiscard)), builder);
     }
 
     public Node checkpoint() {
