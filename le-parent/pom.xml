@@ -167,6 +167,15 @@
                                     </excludes>
                                 </filter>
                                 <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>license/*</exclude>
+                                        <exclude>licenses/*</exclude>
+                                        <exclude>license.*</exclude>
+                                        <exclude>META-INF/license/*</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
                                     <artifact>*:spring-yarn-batch</artifact>
                                     <excludes>
                                         <exclude>org/springframework/yarn/batch/am/BatchAppmaster*</exclude>
