@@ -14,6 +14,7 @@ fi
 BOOTSTRAP_MODE=$1
 
 pip install -r $WSHOME/le-dev/scripts/requirements.txt || true
+echo "REVIEWBOARD_URL='http://bodcdevvrvw65.lattice.local/rb'" > ~/.reviewboardrc
 
 bash $WSHOME/le-dev/scripts/setupenv_hdp.sh $BOOTSTRAP_MODE || true
 bash $WSHOME/le-dev/scripts/setupenv_tomcat.sh $BOOTSTRAP_MODE || true
@@ -21,6 +22,15 @@ bash $WSHOME/le-dev/scripts/setupenv_dynamo.sh $BOOTSTRAP_MODE || true
 bash $WSHOME/le-dev/scripts/setupenv_anaconda.sh $BOOTSTRAP_MODE || true
 
 bash $WSHOME/le-dev/scripts/start-cluster.sh || true
+
+if [ "${BOOTSTRAP_MODE}" = "true" ]; then
+    for app in 'dataplatform' 'sqoop' 'eai' 'dataflow' 'dataflowapi' 'datacloud' 'workflowapi' 'scoring' 'dellebi'
+    do
+        hdfs dfs -mkdir -p /app/${app} || true &
+    done
+    wait
+fi
+
 existing=$(hadoop key list | grep master)
 if [ -z "$existing" ]; then
     hadoop key create master

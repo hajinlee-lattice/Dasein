@@ -79,5 +79,8 @@ $ANACONDA_HOME/bin/conda install -y \
     wheel=0.29.0=py27_0 \
     zlib=1.2.8=3
 
+sudo mkdir -p /usr/local/bin || true
+sudo ln -sf $ANACONDA_HOME/envs/lattice/bin/python /usr/local/bin/python2.7
+
 source $ANACONDA_HOME/bin/deactivate
 

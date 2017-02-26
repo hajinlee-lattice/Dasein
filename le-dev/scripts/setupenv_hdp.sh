@@ -26,12 +26,13 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         ln -s $HADOOP_HOME/lib/native-linux $HADOOP_HOME/lib/native
     fi
 
-    ssh-keygen -t rsa -P '' -y -f ~/.ssh/id_rsa
-    cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
-    chmod 0600 ~/.ssh/authorized_keys
-
     mkdir -p $HADOOP_NAMENODE_DATA_DIR
     mkdir -p $HADOOP_DATANODE_DATA_DIR
+
+    sudo mkdir -p /opt/java
+    sudo rm -f /opt/java/default || true
+    sudo ln -s $JAVA_HOME /opt/java/default
+	
 fi
 
 echo "Configuring HDP ..."
@@ -46,18 +47,8 @@ sed -i".orig" "s|[$][{]HADOOP_NAMENODE_DATA_DIR[}]|${HADOOP_NAMENODE_DATA_DIR}|"
 sed -i".orig" "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
-    hadoop namenode -format
-    hdfs dfsadmin -safemode leave
-
-    for app in 'dataplatform' 'sqoop' 'eai' 'dataflow' 'dataflowapi' 'datacloud' 'workflowapi' 'scoring' 'dellebi'
-    do
-        hdfs dfs -mkdir -p /app/${app} || true &
-    done
-    wait
-
-fi
-
-if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
+    hdfs namenode -format
+    
     echo "Bootstrapping up sqoop ..."
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
 
