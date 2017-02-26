@@ -159,7 +159,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         Node amsNoDomain = ams.filter(String.format("%s == null", DOMAIN), new FieldList(DOMAIN));
         amsNoDomain = amsNoDomain.addColumnWithFixedValue(ALEXA_RANK_AMSEED, null, Integer.class);
 
-        amsDomain = amsDomain.leftHashJoin(DOMAIN, alexa, ALEXA_URL);
+        amsDomain = amsDomain.leftJoin(DOMAIN, alexa, ALEXA_URL);
         amsDomain = amsDomain.discard(ALEXA_URL).rename(new FieldList(ALEXA_RANK), new FieldList(ALEXA_RANK_AMSEED));
         return amsDomain.merge(amsNoDomain);
     }
