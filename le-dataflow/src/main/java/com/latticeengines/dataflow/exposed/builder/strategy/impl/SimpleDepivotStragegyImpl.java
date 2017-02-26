@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.dataflow.exposed.builder.strategy.DepivotStrategy;
 
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 public class SimpleDepivotStragegyImpl implements DepivotStrategy {
@@ -23,8 +24,8 @@ public class SimpleDepivotStragegyImpl implements DepivotStrategy {
     }
 
     @Override
-    public List<List<Object>> depivot(TupleEntry arguments) {
-        List<List<Object>> result = new ArrayList<>();
+    public Iterable<Tuple> depivot(TupleEntry arguments) {
+        List<Tuple> result = new ArrayList<>();
         for (List<String> sourceTuple : sourceFieldTuples) {
             List<Object> valueTuple = new ArrayList<>();
             boolean hasNotNull = false;
@@ -40,7 +41,8 @@ public class SimpleDepivotStragegyImpl implements DepivotStrategy {
 
             if (hasNotNull) {
                 // skip all null tuple
-                result.add(valueTuple);
+                Tuple tuple = new Tuple(valueTuple.toArray(new Object[valueTuple.size()]));
+                result.add(tuple);
             }
         }
         return result;

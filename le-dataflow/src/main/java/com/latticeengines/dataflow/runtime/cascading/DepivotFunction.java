@@ -31,15 +31,9 @@ public class DepivotFunction extends BaseOperation implements Function {
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        List<List<Object>> valueTuples = depivotStrategy.depivot(arguments);
-        if (valueTuples != null) {
-            for (List<Object> valueTuple : valueTuples) {
-                Tuple tuple = new Tuple();
-                for (Object value : valueTuple) {
-                    tuple.add(value);
-                }
-                functionCall.getOutputCollector().add(tuple);
-            }
+        Iterable<Tuple> valueTuples = depivotStrategy.depivot(arguments);
+        for (Tuple valueTuple : valueTuples) {
+            functionCall.getOutputCollector().add( valueTuple );
         }
     }
 

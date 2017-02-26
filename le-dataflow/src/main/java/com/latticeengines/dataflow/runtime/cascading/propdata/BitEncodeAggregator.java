@@ -49,14 +49,14 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         this.encodedField = encodedField;
         this.keyField = keyField;
         this.valueField = valueField;
-        this.encodeFieldPos = namePositionMap.get(encodedField.toLowerCase());
+        this.encodeFieldPos = namePositionMap.get(encodedField);
     }
 
     protected boolean isDummyGroup(TupleEntry group) {
         return false;
     }
 
-    protected Context initializeContext() {
+    protected Context initializeContext(TupleEntry group) {
         return new Context();
     }
 

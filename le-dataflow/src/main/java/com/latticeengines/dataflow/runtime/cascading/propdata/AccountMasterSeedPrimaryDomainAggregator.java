@@ -42,8 +42,8 @@ public class AccountMasterSeedPrimaryDomainAggregator
         this.alexaRankField = alexaRankField;
         this.domainSourceField = domainSourceField;
         this.isPrimaryDomainField = isPrimaryDomainField;
-        this.dunsLoc = namePositionMap.get(dunsField.toLowerCase());
-        this.primaryDomainLoc = namePositionMap.get(primaryDomainField.toLowerCase());
+        this.dunsLoc = namePositionMap.get(dunsField);
+        this.primaryDomainLoc = namePositionMap.get(primaryDomainField);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class AccountMasterSeedPrimaryDomainAggregator
     }
 
     @Override
-    protected Context initializeContext() {
+    protected Context initializeContext(TupleEntry group) {
         return new Context();
     }
 

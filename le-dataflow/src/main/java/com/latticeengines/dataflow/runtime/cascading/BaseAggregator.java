@@ -28,7 +28,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         int pos = 0;
         for (Object field : fieldDeclaration) {
             String fieldName = (String) field;
-            positionMap.put(fieldName.toLowerCase(), pos++);
+            positionMap.put(fieldName, pos++);
         }
         return positionMap;
     }
@@ -43,8 +43,8 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
     public void start( FlowProcess flowProcess,
                        AggregatorCall<T> aggregatorCall )
     {
-        T context = initializeContext();
         TupleEntry group = aggregatorCall.getGroup();
+        T context = initializeContext(aggregatorCall.getGroup());
         context.dummyGroup = isDummyGroup(group);
         context.groupTuple = new TupleEntry(group);
         aggregatorCall.setContext( context );
@@ -83,7 +83,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         Fields fields = group.getFields();
         for (Object field : fields) {
             String fieldName = (String) field;
-            Integer loc = namePositionMap.get(fieldName.toLowerCase());
+            Integer loc = namePositionMap.get(fieldName);
             if (loc != null && loc >= 0) {
                 result.set(loc, group.getObject(fieldName));
             } else {
@@ -94,7 +94,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
 
     protected abstract boolean isDummyGroup(TupleEntry group);
 
-    protected abstract T initializeContext();
+    protected abstract T initializeContext(TupleEntry group);
 
     protected abstract T updateContext(T context, TupleEntry arguments);
 

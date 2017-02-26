@@ -52,7 +52,7 @@ public class MatchDedupeIdAggregator //
     }
 
     @Override
-    protected Context initializeContext() {
+    protected Context initializeContext(TupleEntry group) {
         return new Context();
     }
 
@@ -74,8 +74,8 @@ public class MatchDedupeIdAggregator //
         TupleEntry group = context.groupTuple;
         if (context.highestPopId != null) {
             Tuple result = Tuple.size(2);
-            result.set(namePositionMap.get(grpField.toLowerCase()), group.getObject(grpField));
-            result.set(namePositionMap.get(tmpIdField.toLowerCase()), context.highestPopId);
+            result.set(namePositionMap.get(grpField), group.getObject(grpField));
+            result.set(namePositionMap.get(tmpIdField), context.highestPopId);
             return result;
         } else {
             return null;

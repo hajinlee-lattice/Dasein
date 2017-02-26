@@ -14,7 +14,11 @@ public class RenameOperation extends Operation {
     public RenameOperation(Input prior, FieldList previousNames, FieldList newNames) {
         Pipe rename = new Rename(prior.pipe, DataFlowUtils.convertToFields(previousNames.getFields()),
                 DataFlowUtils.convertToFields(newNames.getFields()));
-        List<FieldMetadata> metadata = new ArrayList<>(prior.metadata);
+        // deep copy
+        List<FieldMetadata> metadata = new ArrayList<>();
+        for (FieldMetadata fm : prior.metadata) {
+            metadata.add(new FieldMetadata(fm.getFieldName(), fm.getJavaType()));
+        }
         renameFields(previousNames, newNames, metadata);
         this.pipe = rename;
         this.metadata = metadata;
