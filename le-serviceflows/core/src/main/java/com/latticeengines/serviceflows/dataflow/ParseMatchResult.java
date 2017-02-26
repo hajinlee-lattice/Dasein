@@ -50,30 +50,30 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         }
 
         if (parameters.excludeDataCloudAttrs) {
-            List<String> fieldsToRetain = new ArrayList<>(sourceCols);
-            List<String> allFields = source.getFieldNames();
-            if (allFields.contains(INT_LDC_DEDUPE_ID)) {
-                fieldsToRetain.add(INT_LDC_DEDUPE_ID);
-            }
+            List<String> fieldFilter = new ArrayList<>(sourceCols);
+            fieldFilter.add(INT_LDC_DEDUPE_ID);
+            List<String> fieldsToRetain = new ArrayList<>(source.getFieldNames());
+            fieldsToRetain.retainAll(fieldFilter);
             source = source.retain(new FieldList(fieldsToRetain));
             // There are other possible internal attributes, like DnB Match grade
             // I believe those are only used in scoring, and this flag is only for modeling
             // so it is safe assume, we never need to retain those debug internal attrs here.
+        } else {
+            source = removeInternalAttrs(source);
         }
 
-        return removeInternalAttrs(source);
+        return source;
     }
 
     private Node resolveConflictingFields(Node node) {
         List<String> conflictingFields = findConflictingFields(node);
         log.warn("Found conflicting fields: " + StringUtils.join(conflictingFields, ", "));
         if (!conflictingFields.isEmpty()) {
-            FieldList retainFields = retainFields(node, conflictingFields);
-            node = node.retain(retainFields);
-        }
-        FieldList[] renameFieldLists = renameFields(conflictingFields);
-        if (renameFieldLists[0].getFields().length > 0) {
-            node = node.rename(renameFieldLists[0], renameFieldLists[1]);
+            node = node.discard(new FieldList(conflictingFields));
+            FieldList[] renameFieldLists = renameFields(conflictingFields);
+            if (renameFieldLists[0].getFields().length > 0) {
+                node = node.rename(renameFieldLists[0], renameFieldLists[1]);
+            }
         }
         return node;
     }
@@ -92,17 +92,6 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
             }
         }
         return conflictingFields;
-    }
-
-    private FieldList retainFields(Node node, List<String> conflictingFields) {
-        List<FieldMetadata> fms = node.getSchema();
-        List<String> retainFieldNames = new ArrayList<>();
-        for (FieldMetadata fm : fms) {
-            if (!conflictingFields.contains(fm.getFieldName())) {
-                retainFieldNames.add(fm.getFieldName());
-            }
-        }
-        return new FieldList(retainFieldNames.toArray(new String[retainFieldNames.size()]));
     }
 
     private FieldList[] renameFields(List<String> conflictingFields) {
@@ -135,7 +124,9 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
                 new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN));
         unmatchedLocOnly = updateByBestIdInGroup(unmatchedLocOnly, matched, INT_LDC_LOC_CHECKSUM);
 
-        matched = matched.retain(new FieldList(matched.getFieldNames()));
+        unmatchedDomain = unmatchedDomain.renamePipe("p1");
+        unmatchedLocOnly = unmatchedLocOnly.renamePipe("p2");
+
         return matched.merge(Arrays.asList(unmatchedDomain, unmatchedLocOnly));
     }
 
@@ -157,15 +148,15 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
     }
 
     private Node updateByBestIdInGroup(Node unmatched, Node matched, String grpField) {
-        Aggregator aggregator = new MatchDedupeIdAggregator(new Fields(grpField, TMP_BEST_DEDUPE_ID));
+        Aggregator aggregator = new MatchDedupeIdAggregator(grpField, TMP_BEST_DEDUPE_ID);
         List<FieldMetadata> bufferFms = new ArrayList<>();
         bufferFms.add(new FieldMetadata(INT_LDC_PREMATCH_DOMAIN, String.class));
         bufferFms.add(new FieldMetadata(TMP_BEST_DEDUPE_ID, String.class));
         Node bestIdInGroup = matched.groupByAndAggregate(new FieldList(grpField), aggregator, bufferFms)
                 .renamePipe("bestidfor" + grpField);
-        unmatched = unmatched.leftJoin(new FieldList(grpField), bestIdInGroup, new FieldList(grpField));
+        unmatched = unmatched.leftJoin(grpField, bestIdInGroup, grpField);
 
-        String tmpField = UUID.randomUUID().toString().replace("-", "");
+        String tmpField = "tmp" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
         Function updateIdByDomain = new ExpressionFunction(new Fields(tmpField), //
                 String.format("%s == null ? %s : %s", TMP_BEST_DEDUPE_ID, INT_LDC_DEDUPE_ID, TMP_BEST_DEDUPE_ID), //
                 new String[] { TMP_BEST_DEDUPE_ID, INT_LDC_DEDUPE_ID }, //
@@ -174,7 +165,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
                 new FieldMetadata(tmpField, String.class));
         unmatched = unmatched.discard(new FieldList(INT_LDC_DEDUPE_ID)) //
                 .rename(new FieldList(tmpField), new FieldList(INT_LDC_DEDUPE_ID)) //
-                .retain(new FieldList(matched.getFieldNamesArray())).renamePipe("unmatched" + grpField);
+                .retain(new FieldList(matched.getFieldNames())).renamePipe("unmatched" + grpField);
         return unmatched;
     }
 

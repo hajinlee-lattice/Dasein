@@ -46,7 +46,7 @@ public abstract class BaseAggregator<T extends BaseAggregator.Context> //
         T context = initializeContext();
         TupleEntry group = aggregatorCall.getGroup();
         context.dummyGroup = isDummyGroup(group);
-        context.groupTuple = group;
+        context.groupTuple = new TupleEntry(group);
         aggregatorCall.setContext( context );
     }
 

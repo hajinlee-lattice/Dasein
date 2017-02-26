@@ -56,17 +56,6 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         FieldList idField = new FieldList(LATTICE_ID);
         am = am.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
 
-        /*
-        if ("tez".equalsIgnoreCase(parameters.getEngineConfiguration().getEngine())) {
-            badDataMrkd = badDataMrkd.checkpoint();
-            oobMkrd = oobMkrd.checkpoint();
-            smBusiMrkd = smBusiMrkd.checkpoint();
-            orphanMrkd = orphanMrkd.checkpoint();
-            am = am.checkpoint();
-            alexaMrkd = alexaMrkd.checkpoint();
-        }
-        */
-
         return am.coGroup(idField, //
                 Arrays.asList(badDataMrkd, oobMkrd, orphanMrkd, smBusiMrkd, alexaMrkd), //
                         Arrays.asList(idField, idField, idField, idField, idField), //
@@ -88,7 +77,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         Node amsNoDomain = ams.filter(String.format("%s == null", DOMAIN), new FieldList(DOMAIN));
         amsNoDomain = amsNoDomain.addColumnWithFixedValue(ALEXA_RANK_AMSEED, null, Integer.class);
 
-        amsDomain = amsDomain.join(new FieldList(DOMAIN), alexa, new FieldList(ALEXA_URL), JoinType.LEFT);
+        amsDomain = amsDomain.leftJoin(DOMAIN, alexa, ALEXA_URL);
         amsDomain = amsDomain.discard(new FieldList(ALEXA_URL)).rename(new FieldList(ALEXA_RANK),
                 new FieldList(ALEXA_RANK_AMSEED));
         return amsDomain.merge(amsNoDomain);
@@ -172,7 +161,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
                 DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN, ALEXA_RANK_AMSEED, DOMAIN_SOURCE, LE_IS_PRIMARY_DOMAIN);
         Node primaryDomain = withDuns.groupByAndAggregate(new FieldList(DUNS), agg, fms).renamePipe("PrimaryDomain");
 
-        node = node.join(new FieldList(DUNS), primaryDomain, new FieldList(DUNS), JoinType.LEFT);
+        node = node.leftJoin(DUNS, primaryDomain, DUNS);
         node = node.discard(new FieldList(LE_IS_PRIMARY_DOMAIN));
         // No domain || domain != primary domain: IsPrimaryDomain = N
         // Has domain, no primary domain || domain = primary domain: IsPrimaryDomain = Y

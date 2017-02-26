@@ -63,13 +63,16 @@ public class Node {
     }
 
     public Node join(String lhsJoinField, Node rhs, String rhsJoinField, JoinType joinType) {
-        return new Node(builder.register(new JoinOperation(opInput(identifier), new FieldList(lhsJoinField),
-                opInput(rhs.identifier), new FieldList(rhsJoinField), joinType, false)), builder);
+        return join(new FieldList(lhsJoinField), rhs, new FieldList(rhsJoinField), joinType);
     }
 
     public Node join(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {
+        return join(lhsJoinFields, rhs, rhsJoinFields, joinType, false);
+    }
+
+    public Node join(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType, boolean hashJoin) {
         return new Node(builder.register(new JoinOperation(opInput(identifier), lhsJoinFields,
-                opInput(rhs.identifier), rhsJoinFields, joinType, false)), builder);
+                opInput(rhs.identifier), rhsJoinFields, joinType, hashJoin)), builder);
     }
 
     public Node coGroup(FieldList lhsFields, List<Node> groupNodes, List<FieldList> groupFieldLists, JoinType joinType) {
@@ -107,12 +110,20 @@ public class Node {
         return innerJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
     }
 
+    public Node innerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, boolean hashJoin) {
+        return join(lhsJoinFields, rhs, rhsJoinFields, JoinType.INNER, hashJoin);
+    }
+
     public Node leftJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
         return join(lhsJoinFields, rhs, rhsJoinFields, JoinType.LEFT);
     }
 
     public Node leftJoin(String lhsField, Node rhs, String rhsField) {
         return leftJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
+    }
+
+    public Node leftJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, boolean hashJoin) {
+        return join(lhsJoinFields, rhs, rhsJoinFields, JoinType.LEFT, hashJoin);
     }
 
     public Node outerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
@@ -210,7 +221,8 @@ public class Node {
     }
 
     public Node filter(String expression, FieldList filterFieldList) {
-        return new Node(builder.addFilter(identifier, expression, filterFieldList), builder);
+        Node filtered = new Node(builder.addFilter(identifier, expression, filterFieldList), builder);
+        return filtered.retain(new FieldList(this.getFieldNames()));
     }
 
     public Node pivot(String[] groupyByFields, PivotStrategy pivotStrategy) {

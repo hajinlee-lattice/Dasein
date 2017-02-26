@@ -21,14 +21,19 @@ public class MatchDedupeIdAggregator //
         implements Aggregator<MatchDedupeIdAggregator.Context> {
     private static final long serialVersionUID = 1L;
 
+    private final String grpField;
+    private final String tmpIdField;
+
     public static class Context extends BaseAggregator.Context
     {
         String highestPopId = null;
         Integer highestPopulation = -1;
     }
 
-    public MatchDedupeIdAggregator(Fields fieldDeclaration) {
-        super(fieldDeclaration);
+    public MatchDedupeIdAggregator(String grpField, String tmpIdField) {
+        super(new Fields(grpField, tmpIdField));
+        this.grpField = grpField;
+        this.tmpIdField = tmpIdField;
     }
 
     @Override
@@ -69,8 +74,8 @@ public class MatchDedupeIdAggregator //
         TupleEntry group = context.groupTuple;
         if (context.highestPopId != null) {
             Tuple result = Tuple.size(2);
-            result.set(0, group.getObject(0));
-            result.set(1, context.highestPopId);
+            result.set(namePositionMap.get(grpField.toLowerCase()), group.getObject(grpField));
+            result.set(namePositionMap.get(tmpIdField.toLowerCase()), context.highestPopId);
             return result;
         } else {
             return null;
