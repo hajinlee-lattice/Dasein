@@ -11,13 +11,19 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo chown -R $USER ${CATALINA_HOME} || true
 
     if [ ! -f "${ARTIFACT_DIR}/apache-tomcat-8.5.11.tar.gz" ]; then
-        wget https://s3.amazonaws.com/latticeengines-dev/apache-tomcat-8.5.11.tar.gz -O $ARTIFACT_DIR/apache-tomcat-8.5.11.tar.gz
+        wget http://apache.claz.org/tomcat/tomcat-8/v8.5.11/bin/apache-tomcat-8.5.11.tar.gz -O $ARTIFACT_DIR/apache-tomcat-8.5.11.tar.gz
     fi
-
-    tar xzf $ARTIFACT_DIR/apache-tomcat-8.5.11.tar.gz -C $CATALINA_HOME
+    rm -rf $ARTIFACT_DIR/apache-tomcat-8.5.11 || true
+    tar xzf $ARTIFACT_DIR/apache-tomcat-8.5.11.tar.gz -C $ARTIFACT_DIR
+    cp -rf $ARTIFACT_DIR/apache-tomcat-8.5.11/* $CATALINA_HOME
+    rm -rf $CATALINA_HOME/webapps/examples
+    rm -rf $CATALINA_HOME/webapps/host-manager
+    rm -rf $CATALINA_HOME/webapps/docs
+    rm -rf $CATALINA_HOME/webapps/ROOT
 fi
 
 cp $WSHOME/le-dev/tomcat/server.xml $CATALINA_HOME/conf/server.xml
+cp $WSHOME/le-dev/tomcat/catalina.sh $CATALINA_HOME/bin/catalina.sh
 
 mkdir -p $CATALINA_HOME/webapps/ms || true
 
