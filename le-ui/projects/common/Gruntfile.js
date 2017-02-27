@@ -1,48 +1,48 @@
 module.exports = function(grunt) {
-	grunt.initConfig({
-		pkg: grunt.file.readJSON('package.json'),
-		dir: {
-			assets: './assets',
+    grunt.initConfig({
+        pkg: grunt.file.readJSON('package.json'),
+        dir: {
+            assets: './assets',
             app: './app',
-			components: './components',
-			bower: './lib/bower',
-			dist: './assets'
-		},
-		sass: {
-			dist: {
-				options: {
-					style: 'compressed'
-				},
-				files: {
-					'<%= dir.dist %>/lattice.css' : './assets/sass/lattice.scss'
-				}
-			}
-		},
-		watch: {
-			js: {
-				files: [
+            components: './components',
+            bower: './lib/bower',
+            dist: './assets'
+        },
+        sass: {
+            dist: {
+                options: {
+                    style: 'compressed'
+                },
+                files: {
+                    '<%= dir.dist %>/lattice.css' : './assets/sass/lattice.scss'
+                }
+            }
+        },
+        watch: {
+            js: {
+                files: [
                     '<%= dir.app %>/**/*.js',
                     '<%= dir.components %>/**/*.js'
                 ],
-				tasks: [
-					'concat:production',
-					'uglify:production',
-					'concat:dist',
-				]
-			},
-			css: {
-				files: [
+                tasks: [
+                    'concat:production',
+                    'uglify:production',
+                    'concat:dist',
+                ]
+            },
+            css: {
+                files: [
                     '<%= dir.assets %>/sass/*.scss',
                     '<%= dir.components %>/**/*.scss'
                 ],
-				tasks: [ 'sass:dist' ]
-			}
-		},
+                tasks: [ 'sass:dist' ]
+            }
+        },
         ngAnnotate: {
             production: {
                 files: {
                     '<%= dir.assets %>/lattice.min.js': [
-                    	'<%= dir.assets %>/lattice.min.js'
+                        '<%= dir.assets %>/lattice.min.js'
                     ]
                 }
             }
@@ -76,49 +76,51 @@ module.exports = function(grunt) {
             }
         },
         concat: {
-			vendor: {
-				src: [
-					'<%= dir.bower %>/webfontloader.js',
-					'<%= dir.bower %>/min/jquery*.js',
-					'<%= dir.bower %>/min/angular.min.js',
-					'<%= dir.bower %>/min/*.js',
-					'<%= dir.bower %>/*.js'
-				],
-				dest: '<%= dir.assets %>/vendor.min.js'
-			},
-			production: {
-				src: [
+            vendor: {
+                src: [
+                    '<%= dir.bower %>/webfontloader.js',
+                    '<%= dir.bower %>/min/jquery*.js',
+                    '<%= dir.bower %>/min/angular.min.js',
+                    '<%= dir.bower %>/min/*.js',
+                    '<%= dir.bower %>/*.js'
+                ],
+                dest: '<%= dir.assets %>/vendor.min.js'
+            },
+            production: {
+                src: [
                     '<%= dir.app %>/**/*.js',
-					'<%= dir.components %>/**/*.js'
-				],
-				dest: '<%= dir.assets %>/lattice.min.js'
-			}
-		},
+                    '<%= dir.components %>/**/*.js',
+                    '!<%= dir.app %>/utilities/EvergageUtility.js',
+                    '!<%= dir.app %>/utilities/TrackingConstantsUtility.js'
+                ],
+                dest: '<%= dir.assets %>/lattice.min.js'
+            }
+        },
         concurrent: {
             sentry: [
                 'watch:js',
                 'watch:css'
             ]
         }
-	});
+    });
 
-	grunt.loadNpmTasks('grunt-contrib-sass');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-ng-annotate');
 
-	grunt.registerTask('build',[
-		'concat:vendor',
-		//'uglify:vendor',
-		'concat:production',
+    grunt.registerTask('build',[
+        'concat:vendor',
+        //'uglify:vendor',
+        'concat:production',
         'ngAnnotate:production',
-		'uglify:production',
-		'sass:dist'
-	]);
+        'uglify:production',
+        'sass:dist'
+    ]);
 
-	grunt.registerTask('sentry',[
-		'concurrent:sentry'
-	]);
+    grunt.registerTask('sentry',[
+        'concurrent:sentry'
+    ]);
 };
