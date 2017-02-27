@@ -14,10 +14,12 @@ import java.util.Set;
 
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.strategy.DepivotStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.KVAttrPicker;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.dataflow.runtime.cascading.DepivotFunction;
 import com.latticeengines.dataflow.runtime.cascading.KVReconstuctAggregator;
+import com.latticeengines.dataflow.runtime.cascading.leadprioritization.KVAttrPickAggregator;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.operation.Aggregator;
@@ -50,6 +52,17 @@ public class KVOperation extends Operation {
 
         this.pipe = new Each(prior, function, Fields.RESULTS);
         this.metadata = fms;
+    }
+
+    // this is to pick
+    public KVOperation(Input input, String rowIdField, KVAttrPicker picker) {
+        Pipe prior = input.pipe;
+        Fields fields = DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(input.metadata));
+        String valAttr = KVDepivotStrategy.valueAttr(picker.valClzSimpleName());
+        Aggregator agg = new KVAttrPickAggregator(fields, picker);
+        Pipe groupBy  = new GroupBy(prior, new Fields(rowIdField, valAttr));
+        this.pipe = new Every(groupBy, agg, Fields.RESULTS);
+        this.metadata = input.metadata;
     }
 
     // this is to pivot

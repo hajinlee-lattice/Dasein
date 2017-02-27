@@ -18,14 +18,9 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.strategy.KVAttrPicker;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy;
-import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
-import com.latticeengines.dataflow.runtime.cascading.leadprioritization.KVAttrPickAggregator;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-
-import cascading.operation.Aggregator;
-import cascading.tuple.Fields;
 
 public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
 
@@ -37,7 +32,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
             @Override
             public Node construct(DataFlowParameters parameters) {
                 Node node = addSource(DYNAMIC_SOURCE);
-                return node.depivotToKV(new FieldList("RowId"), new FieldList("RowId", "Timestamp"));
+                return node.kvDepivot(new FieldList("RowId"), new FieldList("RowId", "Timestamp"));
             }
         });
 
@@ -95,14 +90,14 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
             @Override
             public Node construct(DataFlowParameters parameters) {
                 Node node = addSource(DYNAMIC_SOURCE);
-                Node kv = node.depivotToKV(new FieldList("RowId"), new FieldList("RowId", "Timestamp"));
+                Node kv = node.kvDepivot(new FieldList("RowId"), new FieldList("RowId", "Timestamp"));
                 List<FieldMetadata> fms = Arrays.asList( //
                         new FieldMetadata("Attr5", String.class), //
                         new FieldMetadata("Attr4", Boolean.class), //
                         new FieldMetadata("Attr3", Integer.class), //
                         new FieldMetadata("Attr2", Double.class), //
                         new FieldMetadata("Attr1", String.class));
-                return kv.reconstructFromKV("RowId", fms);
+                return kv.kvReconstruct("RowId", fms);
             }
         });
 
@@ -145,8 +140,8 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                         .discard("AttrA1", "AttrA2", "AttrA3", "AttrA4");
 
                 // depivot
-                Node kv1 = src1.depivotToKV(new FieldList("RowId"), new FieldList("RowId"));
-                Node kv2 = src2.depivotToKV(new FieldList("RowId"), new FieldList("RowId"));
+                Node kv1 = src1.kvDepivot(new FieldList("RowId"), new FieldList("RowId"));
+                Node kv2 = src2.kvDepivot(new FieldList("RowId"), new FieldList("RowId"));
 
                 // mark origin
                 kv1 = kv1.addColumnWithFixedValue("SourceTable", "Table1", String.class);
@@ -166,11 +161,11 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                 Node attr4 = kv.filter(String.format("%s.equals(\"%s\")", KVDepivotStrategy.KEY_ATTR, "Attr4"),
                         new FieldList(KVDepivotStrategy.KEY_ATTR)).renamePipe("attr4");
 
-                // pick
-                attr1 = pickAttr(attr1, String.class);
-                attr2 = pickAttr(attr2, Double.class);
-                attr3 = pickAttr(attr3, Integer.class);
-                attr4 = pickAttr(attr4, Boolean.class);
+                // pick (discarding help fields is optional)
+                attr1 = attr1.kvPickAttr("RowId", new ExampleAttrPicker(String.class)).discard("SourceTable");
+                attr2 = attr2.kvPickAttr("RowId", new ExampleAttrPicker(Double.class)).discard("SourceTable");
+                attr3 = attr3.kvPickAttr("RowId", new ExampleAttrPicker(Integer.class)).discard("SourceTable");
+                attr4 = attr4.kvPickAttr("RowId", new ExampleAttrPicker(Boolean.class)).discard("SourceTable");
 
                 // merge
                 Node attr = attr1.merge(Arrays.asList(attr2, attr3, attr4));
@@ -180,7 +175,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                         new FieldMetadata("Attr2", Double.class), //
                         new FieldMetadata("Attr3", Integer.class), //
                         new FieldMetadata("Attr4", Boolean.class));
-                return attr.reconstructFromKV("RowId", fms);
+                return attr.kvReconstruct("RowId", fms);
             }
         });
 
@@ -260,15 +255,6 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
 
         cleanupDyanmicSource();
         uploadDynamicSourceAvro(data, schema);
-    }
-
-    private <T> Node pickAttr(Node attr, Class<T> attrType) {
-        String valAttr = KVDepivotStrategy.valueAttr(attrType);
-        Fields fields = DataFlowUtils.convertToFields(attr.getFieldNames());
-        KVAttrPicker picker = new ExampleAttrPicker(attrType);
-        Aggregator agg = new KVAttrPickAggregator(fields, picker);
-        return attr.groupByAndAggregate(new FieldList("RowId", valAttr), agg) //
-                .discard("SourceTable");
     }
 
     private static class ExampleAttrPicker implements KVAttrPicker {

@@ -34,6 +34,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.RetainOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.SampleOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.TransformFunctionOperation;
+import com.latticeengines.dataflow.exposed.builder.strategy.KVAttrPicker;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
@@ -465,12 +466,16 @@ public class Node {
                 builder);
     }
 
-    public Node depivotToKV(FieldList fieldsToAppend, FieldList fieldsNotToPivot) {
+    public Node kvDepivot(FieldList fieldsToAppend, FieldList fieldsNotToPivot) {
         return new Node(builder.register(new KVOperation(opInput(identifier), fieldsToAppend, fieldsNotToPivot)),
                 builder);
     }
 
-    public Node reconstructFromKV(String rowIdField, List<FieldMetadata> outputFields) {
+    public Node kvPickAttr(String rowIdField, KVAttrPicker picker) {
+        return new Node(builder.register(new KVOperation(opInput(identifier), rowIdField, picker)), builder);
+    }
+
+    public Node kvReconstruct(String rowIdField, List<FieldMetadata> outputFields) {
         return new Node(builder.register(new KVOperation(opInput(identifier), rowIdField, outputFields)), builder);
     }
 
