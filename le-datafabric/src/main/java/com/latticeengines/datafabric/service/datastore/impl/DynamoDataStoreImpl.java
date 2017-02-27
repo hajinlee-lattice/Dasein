@@ -411,7 +411,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             }
 
         } while (outcome.getUnprocessedItems().size() > 0 && System.currentTimeMillis() - startTime < TIMEOUT);
-        throw new RuntimeException("Failed to finish a batch write within timeout");
+        if (outcome.getUnprocessedItems().size() > 0) {
+            throw new RuntimeException("Failed to finish a batch write within timeout");
+        }
     }
 
     @Override
