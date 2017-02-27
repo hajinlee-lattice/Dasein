@@ -36,9 +36,10 @@ public class EventDataSamplingJobUnitTestNG {
     private String outputDir = null;
     private SamplingConfiguration samplingConfig = null;
 
-    @BeforeClass(groups = "unit")
+    @BeforeClass(groups = "unit", enabled = false)
     public void setup() throws Exception {
-        URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE");
+        URL inputUrl = ClassLoader
+                .getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE");
         inputDir = inputUrl.getPath();
         outputDir = inputDir + "/samples";
         FileUtils.deleteDirectory(new File(outputDir));
@@ -66,18 +67,19 @@ public class EventDataSamplingJobUnitTestNG {
         });
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void run() throws Exception {
         File[] inputAvroFiles = getAvroFilesForDir(inputDir);
         Map<Object, Integer> histogram = new HashMap<Object, Integer>();
         int numRows = 0;
         for (File avroFile : inputAvroFiles) {
-            Pair<Map<Object, Integer>, Integer> retval = computeDistribution(avroFile.getAbsolutePath(), "Event_Latitude_Customer", histogram);
+            Pair<Map<Object, Integer>, Integer> retval = computeDistribution(avroFile.getAbsolutePath(),
+                    "Event_Latitude_Customer", histogram);
             numRows += retval.value();
         }
 
-
-        int res = ToolRunner.run(new EventDataSamplingJob(new Configuration()), new String[] { inputDir, outputDir, samplingConfig.toString(), LedpQueueAssigner.getModelingQueueNameForSubmission() });
+        int res = ToolRunner.run(new EventDataSamplingJob(new Configuration()), new String[] { inputDir, outputDir,
+                samplingConfig.toString(), LedpQueueAssigner.getModelingQueueNameForSubmission() });
         assertEquals(0, res);
 
         File[] avroFiles = getAvroFilesForDir(outputDir);
@@ -97,7 +99,8 @@ public class EventDataSamplingJobUnitTestNG {
         System.out.println("**************************");
         for (File avroFile : avroFiles) {
             histogram = new HashMap<Object, Integer>();
-            Pair<Map<Object, Integer>, Integer> retval = computeDistribution(avroFile.getAbsolutePath(), "Event_Latitude_Customer", histogram);
+            Pair<Map<Object, Integer>, Integer> retval = computeDistribution(avroFile.getAbsolutePath(),
+                    "Event_Latitude_Customer", histogram);
             System.out.println("**************************");
             System.out.println("File = " + avroFile.getName());
             System.out.println("Number of rows = " + retval.value());
@@ -126,18 +129,19 @@ public class EventDataSamplingJobUnitTestNG {
         return DataFileReader.openReader(input, fileReader);
     }
 
-    private Pair<Map<Object, Integer>, Integer> computeDistribution(String filename, String column, Map<Object, Integer> histogram) throws Exception {
+    private Pair<Map<Object, Integer>, Integer> computeDistribution(String filename, String column,
+            Map<Object, Integer> histogram) throws Exception {
         if (histogram == null) {
             histogram = new HashMap<Object, Integer>();
         }
 
         FileReader<GenericRecord> reader = getAvroReader(filename);
         int numRows = 0;
-        for (Iterator<GenericRecord> it = reader.iterator(); it.hasNext(); ) {
+        for (Iterator<GenericRecord> it = reader.iterator(); it.hasNext();) {
             GenericRecord record = it.next();
             Object value = record.get(column);
             if (histogram.containsKey(value)) {
-                histogram.put(value, histogram.get(value)+1);
+                histogram.put(value, histogram.get(value) + 1);
             } else {
                 histogram.put(value, 1);
             }
