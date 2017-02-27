@@ -96,11 +96,23 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
-        ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
         ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
         ctx.setProperty(DataFlowProperty.FLINKMODE, flinkMode);
         ctx.setProperty(DataFlowProperty.APPCTX, appCtx);
 
+        // partitions
+        ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
+        if (parameters instanceof TransformationFlowParameters) {
+            TransformationFlowParameters tfParameters = (TransformationFlowParameters) parameters;
+            if (tfParameters.getEngineConfiguration() != null && tfParameters.getEngineConfiguration().getPartitions() != null) {
+                Integer configuredPartitions = tfParameters.getEngineConfiguration().getPartitions();
+                if (configuredPartitions > 1) {
+                    ctx.setProperty(DataFlowProperty.PARTITIONS, configuredPartitions);
+                }
+            }
+        }
+
+        // job properties
         Properties jobProps = getJobProperties();
         org.apache.flink.configuration.Configuration flinkConf = getFlinkConf();
         if (parameters instanceof TransformationFlowParameters) {
@@ -111,6 +123,7 @@ public abstract class AbstractTransformationDataFlowService {
         }
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, jobProps);
         ctx.setProperty(DataFlowProperty.FLINKCONF, flinkConf);
+
         return ctx;
     }
 

@@ -31,10 +31,6 @@
                             <httpConnector>
                                 <port>8076</port>
                             </httpConnector>
-                            <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
-                                </extraClasspath>
-                            </webAppConfig>
                             <systemProperties>
                                 <systemProperty>
                                     <name>log4j.configuration</name>
@@ -46,6 +42,25 @@
                             <stopKey>STOP</stopKey>
                             <stopWait>10</stopWait>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-jetty</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                                <configuration>
+                                    <scanIntervalSeconds>0</scanIntervalSeconds>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-jetty</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                         <dependencies>
                             <dependency>
                                 <groupId>org.ow2.asm</groupId>

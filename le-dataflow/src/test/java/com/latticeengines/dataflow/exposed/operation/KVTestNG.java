@@ -128,7 +128,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
             public Node construct(DataFlowParameters parameters) {
                 Node node = addSource(DYNAMIC_SOURCE);
 
-                // mimic two tables
+                // mimic two tables, or in real case, splitting an already join table
                 Node src1 = node
                         .rename(new FieldList("AttrA1", "AttrA2", "AttrA3", "AttrA4"),
                                 new FieldList("Attr1", "Attr2", "Attr3", "Attr4")) //
@@ -170,6 +170,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                 // merge
                 Node attr = attr1.merge(Arrays.asList(attr2, attr3, attr4));
 
+                // reconstruct
                 List<FieldMetadata> fms = Arrays.asList( //
                         new FieldMetadata("Attr1", String.class), //
                         new FieldMetadata("Attr2", Double.class), //

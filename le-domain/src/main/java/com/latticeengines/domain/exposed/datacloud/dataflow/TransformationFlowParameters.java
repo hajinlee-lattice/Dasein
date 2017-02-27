@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import org.apache.commons.lang3.StringUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -137,6 +136,9 @@ public class TransformationFlowParameters extends DataFlowParameters {
         @JsonProperty("JobProps")
         private Map<String, String> jobProperties;
 
+        @JsonProperty("Partitions")
+        private Integer partitions;
+
         public String getEngine() {
             return engine;
         }
@@ -151,6 +153,14 @@ public class TransformationFlowParameters extends DataFlowParameters {
 
         public void setJobProperties(Map<String, String> jobProperties) {
             this.jobProperties = jobProperties;
+        }
+
+        public Integer getPartitions() {
+            return partitions;
+        }
+
+        public void setPartitions(Integer partitions) {
+            this.partitions = partitions;
         }
     }
 }
