@@ -55,11 +55,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("DiscardFields")
     private String[] discardFields;
 
-    @JsonProperty("AddNullFields")
-    private String[] addNullFields;
+    @JsonProperty("AddFields")
+    private String[] addFields;
 
-    @JsonProperty("AddNullFieldTypes")
-    private FieldType[] addNullFieldTypes;
+    @JsonProperty("AddFieldValues")
+    private Object[] addFieldValues;
+
+    @JsonProperty("AddFieldTypes")
+    private FieldType[] addFieldTypes;
 
     @JsonProperty("IsValidDomainField")
     private String isValidDomainField;
@@ -98,7 +101,7 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private String[] rangeMapFileNames;
 
     public enum StandardizationStrategy {
-        DOMAIN, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_NULL_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
+        DOMAIN, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
     }
 
     public enum FieldType {
@@ -241,20 +244,28 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         this.sequence = sequence;
     }
 
-    public String[] getAddNullFields() {
-        return addNullFields;
+    public String[] getAddFields() {
+        return addFields;
     }
 
-    public void setAddNullFields(String[] addNullFields) {
-        this.addNullFields = addNullFields;
+    public void setAddFields(String[] addFields) {
+        this.addFields = addFields;
     }
 
-    public FieldType[] getAddNullFieldTypes() {
-        return addNullFieldTypes;
+    public Object[] getAddFieldValues() {
+        return addFieldValues;
     }
 
-    public void setAddNullFieldTypes(FieldType[] addNullFieldTypes) {
-        this.addNullFieldTypes = addNullFieldTypes;
+    public void setAddFieldValues(Object[] addFieldValues) {
+        this.addFieldValues = addFieldValues;
+    }
+
+    public FieldType[] getAddFieldTypes() {
+        return addFieldTypes;
+    }
+
+    public void setAddFieldTypes(FieldType[] addFieldTypes) {
+        this.addFieldTypes = addFieldTypes;
     }
 
     public String getIsValidDomainField() {

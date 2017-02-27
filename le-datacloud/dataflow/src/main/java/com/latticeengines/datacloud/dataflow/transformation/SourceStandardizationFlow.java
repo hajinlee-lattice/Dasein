@@ -78,8 +78,9 @@ public class SourceStandardizationFlow
             case RETAIN:
                 source = retain(source, parameters.getRetainFields());
                 break;
-            case ADD_NULL_FIELD:
-                source = addNullField(source, parameters.getAddNullFields(), parameters.getAddNullFieldTypes());
+            case ADD_FIELD:
+                source = addFields(source, parameters.getAddFields(), parameters.getAddFieldValues(),
+                        parameters.getAddFieldTypes());
                 break;
             case VALID_DOMAIN:
                 Node domainValidation = addSource(parameters.getBaseTables().get(1));
@@ -281,28 +282,28 @@ public class SourceStandardizationFlow
         return node.getPipeName() + "_" + originalName;
     }
 
-    private Node addNullField(Node source, String[] addNullFields,
-            StandardizationTransformerConfig.FieldType[] addNullFieldTypes) {
-        if (addNullFields != null && addNullFields.length > 0) {
-            for (int i = 0; i < addNullFields.length; i++) {
-                switch (addNullFieldTypes[i]) {
+    private Node addFields(Node source, String[] addFields, Object[] addFieldValues,
+            StandardizationTransformerConfig.FieldType[] addFieldTypes) {
+        if (addFields != null && addFields.length > 0) {
+            for (int i = 0; i < addFields.length; i++) {
+                switch (addFieldTypes[i]) {
                 case STRING:
-                    source = source.addColumnWithFixedValue(addNullFields[i], null, String.class);
+                    source = source.addColumnWithFixedValue(addFields[i], addFieldValues[i], String.class);
                     break;
                 case INT:
-                    source = source.addColumnWithFixedValue(addNullFields[i], null, Integer.class);
+                    source = source.addColumnWithFixedValue(addFields[i], addFieldValues[i], Integer.class);
                     break;
                 case LONG:
-                    source = source.addColumnWithFixedValue(addNullFields[i], null, Long.class);
+                    source = source.addColumnWithFixedValue(addFields[i], addFieldValues[i], Long.class);
                     break;
                 case BOOLEAN:
-                    source = source.addColumnWithFixedValue(addNullFields[i], null, Boolean.class);
+                    source = source.addColumnWithFixedValue(addFields[i], addFieldValues[i], Boolean.class);
                     break;
                 case FLOAT:
-                    source = source.addColumnWithFixedValue(addNullFields[i], null, Float.class);
+                    source = source.addColumnWithFixedValue(addFields[i], addFieldValues[i], Float.class);
                     break;
                 case DOUBLE:
-                    source = source.addColumnWithFixedValue(addNullFields[i], null, Double.class);
+                    source = source.addColumnWithFixedValue(addFields[i], addFieldValues[i], Double.class);
                     break;
                 default:
                     break;

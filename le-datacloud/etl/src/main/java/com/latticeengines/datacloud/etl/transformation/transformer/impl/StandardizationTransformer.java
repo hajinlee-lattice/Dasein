@@ -171,16 +171,18 @@ public class StandardizationTransformer
                     }
                 }
                 break;
-            case ADD_NULL_FIELD:
-                if (config.getAddNullFields() == null || config.getAddNullFieldTypes() == null
-                        || config.getAddNullFields().length == 0 || config.getAddNullFieldTypes().length == 0
-                        || config.getAddNullFields().length != config.getAddNullFieldTypes().length) {
-                    log.error("AddNullFields and AddNullFieldTypes are both required for adding new null columns");
+            case ADD_FIELD:
+                if (config.getAddFields() == null || config.getAddFieldValues() == null
+                        || config.getAddFieldTypes() == null || config.getAddFields().length == 0
+                        || config.getAddFieldValues().length == 0 || config.getAddFieldTypes().length == 0
+                        || config.getAddFields().length != config.getAddFieldValues().length
+                        || config.getAddFields().length != config.getAddFieldTypes().length) {
+                    log.error("AddFields, AddFieldValues and AddFieldTypes are all required for adding new columns");
                     return false;
                 }
-                for (int i = 0; i < config.getAddNullFields().length; i++) {
-                    if (StringUtils.isEmpty(config.getAddNullFields()[i]) || config.getAddNullFieldTypes()[i] == null) {
-                        log.error("Empty value or null is not allowed for AddNullField and AddNullFieldType");
+                for (int i = 0; i < config.getAddFields().length; i++) {
+                    if (StringUtils.isEmpty(config.getAddFields()[i]) || config.getAddFieldTypes()[i] == null) {
+                        log.error("Empty value or null is not allowed for AddField and AddFieldType");
                         return false;
                     }
                 }
@@ -339,8 +341,9 @@ public class StandardizationTransformer
         parameters.setRenameFields(config.getRenameFields());
         parameters.setRetainFields(config.getRetainFields());
         parameters.setSequence(config.getSequence());
-        parameters.setAddNullFields(config.getAddNullFields());
-        parameters.setAddNullFieldTypes(config.getAddNullFieldTypes());
+        parameters.setAddFields(config.getAddFields());
+        parameters.setAddFieldValues(config.getAddFieldValues());
+        parameters.setAddFieldTypes(config.getAddFieldTypes());
         parameters.setIsValidDomainField(config.getIsValidDomainField());
         parameters.setValidDomainCheckField(config.getValidDomainCheckField());
         parameters.setAddConsolidatedIndustryField(config.getAddConsolidatedIndustryField());

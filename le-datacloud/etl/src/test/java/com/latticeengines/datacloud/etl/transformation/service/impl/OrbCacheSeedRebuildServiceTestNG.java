@@ -282,13 +282,14 @@ public class OrbCacheSeedRebuildServiceTestNG
                 { "ConsolidateEmployeeRange", "EmployeeRange" } };
         conf.setRenameFields(renameFields);
 
-        String[] addNullFields = { "DUNS" };
-        conf.setAddNullFields(addNullFields);
-        StandardizationTransformerConfig.FieldType[] addNullFieldTypes = { FieldType.STRING };
-        conf.setAddNullFieldTypes(addNullFieldTypes);
+        String[] addFields = { "DUNS" };
+        conf.setAddFields(addFields);
+        Object[] addFieldValues = { null };
+        conf.setAddFieldValues(addFieldValues);
+        StandardizationTransformerConfig.FieldType[] addFieldTypes = { FieldType.STRING };
+        conf.setAddFieldTypes(addFieldTypes);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
-                StandardizationStrategy.RETAIN, StandardizationStrategy.RENAME,
-                StandardizationStrategy.ADD_NULL_FIELD };
+                StandardizationStrategy.RETAIN, StandardizationStrategy.RENAME, StandardizationStrategy.ADD_FIELD };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
