@@ -72,12 +72,13 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
         if (matchKeyTuple.getDuns() != null || matchKeyTuple.getDomain() != null) {
             AccountLookupRequest accountLookupRequest = new AccountLookupRequest(
                     request.getMatchTravelerContext().getDataCloudVersion());
-            if (request.getCallerMicroEngineReference() != null && (request.getCallerMicroEngineReference()
-                    .indexOf(DomainCountryBasedMicroEngineActor.class.getSimpleName()) >= 0
-                    || request.getCallerMicroEngineReference()
-                            .indexOf(DomainCountryZipCodeBasedMicroEngineActor.class.getSimpleName()) >= 0
-                    || request.getCallerMicroEngineReference()
-                            .indexOf(DomainCountryStateBasedMicroEngineActor.class.getSimpleName()) >= 0)) {
+            if (request.getCallerMicroEngineReference() != null
+                    && (StringUtils.contains(request.getCallerMicroEngineReference(),
+                            DomainCountryBasedMicroEngineActor.class.getSimpleName())
+                    || StringUtils.contains(request.getCallerMicroEngineReference(),
+                            DomainCountryZipCodeBasedMicroEngineActor.class.getSimpleName())
+                    || StringUtils.contains(request.getCallerMicroEngineReference(),
+                            DomainCountryStateBasedMicroEngineActor.class.getSimpleName()))) {
                 accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns(),
                         matchKeyTuple.getCountry(), matchKeyTuple.getState(), matchKeyTuple.getZipcode());
             } else {
@@ -163,12 +164,13 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                         if (!reqIdsWithVersion.containsKey(dataCloudVersion)) {
                             reqIdsWithVersion.put(dataCloudVersion, new ArrayList<>());
                         }
-                        if (req.getCallerMicroEngineReference() != null && (req.getCallerMicroEngineReference()
-                                .indexOf(DomainCountryBasedMicroEngineActor.class.getSimpleName()) >= 0
-                                || req.getCallerMicroEngineReference()
-                                        .indexOf(DomainCountryZipCodeBasedMicroEngineActor.class.getSimpleName()) >= 0
-                                || req.getCallerMicroEngineReference()
-                                        .indexOf(DomainCountryStateBasedMicroEngineActor.class.getSimpleName()) >= 0)) {
+                        if (req.getCallerMicroEngineReference() != null
+                                && (StringUtils.contains(req.getCallerMicroEngineReference(),
+                                        DomainCountryBasedMicroEngineActor.class.getSimpleName())
+                                || StringUtils.contains(req.getCallerMicroEngineReference(),
+                                        DomainCountryZipCodeBasedMicroEngineActor.class.getSimpleName())
+                                || StringUtils.contains(req.getCallerMicroEngineReference(),
+                                        DomainCountryStateBasedMicroEngineActor.class.getSimpleName()))) {
                             lookupReqWithVersion.get(dataCloudVersion).addLookupPair(matchKeyTuple.getDomain(),
                                     matchKeyTuple.getDuns(), matchKeyTuple.getCountry(), matchKeyTuple.getState(),
                                     matchKeyTuple.getZipcode());
