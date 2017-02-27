@@ -520,7 +520,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
         }));
 
-        compareRtsScoreWithModeling(clonedModelSummary, 843, secondTenant.getId());
+        compareRtsScoreWithModeling(clonedModelSummary, 730, secondTenant.getId());
         assertABCDBucketsCreated(clonedModelSummary.getId());
     }
 
