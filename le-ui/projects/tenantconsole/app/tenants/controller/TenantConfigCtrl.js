@@ -520,7 +520,8 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             featureFlag.DisplayName === "UseMarketoSettings" ||
             featureFlag.DisplayName === "UseEloquaSettings" ||
             featureFlag.DisplayName === "EnablePocTransform" ||
-            featureFlag.DisplayName === "EnableLatticeMarketoCredentialPage") {
+            featureFlag.DisplayName === "EnableLatticeMarketoCredentialPage" ||
+            featureFlag.DisplayName === "EnableDataProfilingV2") {
             return true;
         }
         if (!featureFlag.Configurable) {
