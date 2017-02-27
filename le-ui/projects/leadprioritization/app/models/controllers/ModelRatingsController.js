@@ -74,29 +74,33 @@ angular.module('lp.models.ratings', [
     }
 
     vm.eleMouseDown = function(ev) {
-        var slider = ev.currentTarget;
-        slider.addEventListener('mousemove', function(){ eleMouseMove(slider, ev); }, false);
-    }
-    function eleMouseMove(slider, ev) {
+        vm.slider = ev.currentTarget;
 
-        var sliderPosition = slider.style.right,
+        document.addEventListener('mousemove', eleMouseMove, false);
+        document.addEventListener('mouseup', eleMouseUp, false);
+    }
+    function eleMouseMove(ev) {
+
+        var slider = vm.slider,
+            sliderPosition = slider.style.right,
             offsetLeft = slider.offsetLeft,
             container = document.getElementById("sliders"),
-            containerWidth = parseInt(document.defaultView.getComputedStyle(container, null).getPropertyValue("width")),
-            relativeSliderChartPosition = 100 - Math.round((offsetLeft / containerWidth) * 100),
-            positionOfMouse = "";
+            containerOffset = container.getBoundingClientRect(),
+            relativeSliderChartPosition = 100 - Math.round((ev.clientX - containerOffset.left) / (containerOffset.width - containerOffset.left)) * 100,
+            positionOfMouse = ev.clientX; // container.offsetLeft + (container.offsetWidth * (relativeSliderPosition / 100))
 
-        console.log(relativeSliderChartPosition);
+        console.log(ev.clientX, relativeSliderChartPosition/ 100, containerOffset, ev);
 
-        // slider.style.right = positionOfMouse;
 
-        slider.addEventListener('onmouseup', function(){ eleMouseMove(slider); }, false);
-
+        slider.style.right = "";
+        // slider.style.left =  Math.round(positionOfMouse - containerOffset.left) + 'px';
+        slider.style.left = containerOffset.left + (containerOffset.width * (relativeSliderChartPosition / 100)) + 'px';
     }
-    function eleMouseUp(slider){
-        var slider = ev.currentTarget;
+    function eleMouseUp(ev){
+        delete vm.slider;
 
-        slider.removeEventListener('mousemove', eleMouseMove, false);
+        document.removeEventListener('mousemove', eleMouseMove, false);
+        document.removeEventListener('mouseup', eleMouseUp, false);
 
         console.log("mouse up");
     }

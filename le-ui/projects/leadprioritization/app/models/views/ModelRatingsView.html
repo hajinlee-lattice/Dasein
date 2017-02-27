@@ -30,7 +30,7 @@
                     ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
                     <div 
                         class="slider"
-                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;right: '+ bucket.right_bound_score +'%'}}"
+                        ng-attr-style="{{'height: '+ vm.dugoutHeight +'px; right: '+ bucket.right_bound_score +'%'}}"
                         ng-repeat="bucket in vm.workingBuckets"
                         ng-mousedown="vm.eleMouseDown($event)">
                         <div class="handle">&nbsp;</div>
@@ -122,7 +122,8 @@
 
             <h3>Currently published configuration</h3>
             <ul class="bucket-tiles published">
-                <li ng-repeat="bucket in vm.currentConfiguration">
+                <li ng-repeat="bucket in vm.currentConfiguration"
+                    ng-if="bucket.right_bound_score!=2">
                     <div class="bucket-label">{{bucket.name}}</div>
                     <dl>
                         <dt>Lift</dt>
