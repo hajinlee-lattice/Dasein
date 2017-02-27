@@ -1,9 +1,10 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -35,6 +36,7 @@ import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.metric.DnBMatchHistory;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
+import com.latticeengines.datacloud.match.service.DnBBulkLookupStatusChecker;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
@@ -52,8 +54,15 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     private static final Log log = LogFactory.getLog(DnBLookupServiceImpl.class);
 
-    @Value("${datacloud.dnb.bulk.request.expire.duration.minute}")
-    private int requestExpireDuration;
+    @Value("${datacould.dnb.realtime.timeout.minute}")
+    private long realtimeTimeoutMinute;
+
+    @Value("${datacloud.dnb.bulk.timeout.minute}")
+    private long bulkTimeoutMinute;
+
+    private long realtimeTimeout;
+
+    private long bulkTimeout;
 
     @Value("${datacloud.dnb.bulk.request.maximum}")
     private int maximumBatchSize;
@@ -77,6 +86,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     private DnBBulkLookupFetcher dnbBulkLookupFetcher;
 
     @Autowired
+    private DnBBulkLookupStatusChecker dnbBulkLookupStatusChecker;
+
+    @Autowired
     private DnBCacheService dnbCacheService;
 
     @Autowired
@@ -92,12 +104,19 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     private final List<DnBBatchMatchContext> unsubmittedReqs = Collections.synchronizedList(new ArrayList<>());
     @SuppressWarnings("unchecked")
     private final List<DnBBatchMatchContext> submittedReqs = Collections.synchronizedList(new ArrayList<>());
+    @SuppressWarnings("unchecked")
+    private final List<DnBBatchMatchContext> finishedReqs = Collections.synchronizedList(new ArrayList<>());
+    @SuppressWarnings({ "unchecked", "unused" })
+    private final Map<String, DnBBatchMatchContext> lookupReqIdToBatchMap = Collections
+            .synchronizedMap(new HashMap<>());
 
     private static AtomicInteger previousUnsubmittedNum = new AtomicInteger(0);
 
     @PostConstruct
     public void postConstruct() {
         initDnBDataSourceThreadPool();
+        realtimeTimeout = realtimeTimeoutMinute * 60 * 1000;
+        bulkTimeout = bulkTimeoutMinute * 60 * 1000;
     }
 
     @PreDestroy
@@ -112,9 +131,15 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setLookupRequestId(lookupRequestId);
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        MatchTraveler traveler = request.getMatchTravelerContext();
         boolean readyToReturn = false;
-        if (traveler.getMatchInput().isUseDnBCache()) {
+        // Check timeout
+        if ((System.currentTimeMillis() - request.getTimestamp()) >= realtimeTimeout) {
+            context.setDnbCode(DnBReturnCode.UNMATCH_TIMEOUT);
+            readyToReturn = true;
+        }
+
+        MatchTraveler traveler = request.getMatchTravelerContext();
+        if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBCache cache = dnbCacheService.lookupCache(context);
             if (cache != null) {
@@ -124,27 +149,29 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                             || isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
-                        context.setDuration(System.currentTimeMillis() - startTime);
-                        if (log.isDebugEnabled()) {
-                            log.debug(String.format(
-                                    "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
-                                    context.getLookupRequestId(), context.getDnbCode().getMessage(),
-                                    context.getDuration()));
-                        }
+                        log.info(String.format(
+                                "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
+                                        + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s, Duration = %d",
+                                context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
+                                context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
+                                context.getInputNameLocation().getZipcode(),
+                                context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
+                                context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
+                                System.currentTimeMillis() - startTime));
                         readyToReturn = true;
                     } else {
-                        log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS=" + cache.getDuns());
+                        log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS = " + cache.getDuns());
                         dnbCacheService.removeCache(cache);
                     }
                 } else {
                     context.copyResultFromCache(cache);
-                    context.setDuration(System.currentTimeMillis() - startTime);
-                    if (log.isDebugEnabled()) {
-                        log.debug(String.format(
-                                "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
-                                context.getLookupRequestId(), context.getDnbCode().getMessage(),
-                                context.getDuration()));
-                    }
+                    log.info(String.format(
+                            "Found DnB match context in black cache: Name = %s, Country = %s, State = %s, City = %s, "
+                                    + "ZipCode = %s, PhoneNumber = %s, Duration = %d",
+                            context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
+                            context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
+                            context.getInputNameLocation().getZipcode(),
+                            context.getInputNameLocation().getPhoneNumber(), System.currentTimeMillis() - startTime));
                     readyToReturn = true;
                 }
 
@@ -173,7 +200,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             dnBMatchHistories.add(new DnBMatchHistory(context));
             writeDnBMatchHistory(dnBMatchHistories);
         }
-
+        context.setDuration(System.currentTimeMillis() - request.getTimestamp());
         return context;
     }
 
@@ -194,9 +221,17 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setLookupRequestId(lookupRequestId);
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
+        boolean readyToReturn = false;
+        // Check timeout
+        if ((System.currentTimeMillis() - request.getTimestamp()) >= bulkTimeout) {
+            context.setDnbCode(DnBReturnCode.UNMATCH_TIMEOUT);
+            readyToReturn = true;
+        }
+        context.setTimestamp(request.getTimestamp());
+
         MatchTraveler traveler = request.getMatchTravelerContext();
         context.setLogDnBBulkResult(traveler.getMatchInput().isLogDnBBulkResult());
-        if (traveler.getMatchInput().isUseDnBCache()) {
+        if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBCache cache = dnbCacheService.lookupCache(context);
             if (cache != null) {
@@ -206,62 +241,46 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                             || isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
-                        context.setDuration(System.currentTimeMillis() - startTime);
-                        sendResponse(lookupRequestId, context, returnAddress);
-                        if (log.isDebugEnabled()) {
-                            log.debug(String.format(
-                                    "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
-                                    context.getLookupRequestId(), context.getDnbCode().getMessage(),
-                                    context.getDuration()));
-                        } else if (context.getLogDnBBulkResult()) {
+                        if (context.getLogDnBBulkResult()) {
                             log.info(String.format(
                                     "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                            + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s",
+                                            + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s,Duration = %d",
                                     context.getInputNameLocation().getName(),
                                     context.getInputNameLocation().getCountry(),
                                     context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                                     context.getInputNameLocation().getZipcode(),
                                     context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
-                                    context.getConfidenceCode(), context.getMatchGrade().getRawCode()));
+                                    context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
+                                    System.currentTimeMillis() - startTime));
                         }
-                        return;
+                        readyToReturn = true;
                     } else {
-                        log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS=" + cache.getDuns());
+                        log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS = " + cache.getDuns());
                         dnbCacheService.removeCache(cache);
                     }
                 } else {
                     context.copyResultFromCache(cache);
-                    context.setDuration(System.currentTimeMillis() - startTime);
-                    sendResponse(lookupRequestId, context, returnAddress);
-                    if (log.isDebugEnabled()) {
-                        log.debug(String.format(
-                                "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
-                                context.getLookupRequestId(), context.getDnbCode().getMessage(),
-                                context.getDuration()));
-                    } else if (context.getLogDnBBulkResult()) {
+                    if (context.getLogDnBBulkResult()) {
                         log.info(String.format(
                                 "Found DnB match context in black cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                        + "ZipCode = %s, PhoneNumber = %s",
+                                        + "ZipCode = %s, PhoneNumber = %s, Duration = %d",
                                 context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
                                 context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                                 context.getInputNameLocation().getZipcode(),
-                                context.getInputNameLocation().getPhoneNumber()));
+                                context.getInputNameLocation().getPhoneNumber(),
+                                System.currentTimeMillis() - startTime));
                     }
-                    return;
+                    readyToReturn = true;
                 }
 
             }
         }
 
-        if (Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
+        if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             saveReq(lookupRequestId, returnAddress, request);
             comingContexts.offer(context);
-            if (log.isDebugEnabled()) {
-                log.debug("Accepted request " + context.getLookupRequestId());
-            }
         } else {
-            Long startTime = System.currentTimeMillis();
-            context.setDuration(System.currentTimeMillis() - startTime);
+            context.setDuration(System.currentTimeMillis() - request.getTimestamp());
             sendResponse(lookupRequestId, context, returnAddress);
         }
     }
@@ -314,14 +333,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                 batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
                             }
                             switch (batchContext.getDnbCode()) {
-                            case OK:
+                            case SUBMITTED:
                                 submittedReqs.add(batchContext);
                                 break;
-                            case UNSUBMITTED:
-                                // Too many requests are waiting for results.
-                                // This request is not submitted.
-                                // Put it back to unsubmittedReqs list. Maintain
-                                // the same order in the unsubmittedReqs
+                            case RATE_LIMITING:
+                            case EXCEED_REQUEST_NUM:
+                            case EXCEED_CONCURRENT_NUM:
+                                // Not allow to submit this request due to rate limiting
+                                // Put it back to unsubmittedReqs list. Maintain the same order in the unsubmittedReqs
                                 unsubmittedReqs.add(unsubmittedReqs.size() - num, batchContext);
                                 break;
                             default:
@@ -338,44 +357,52 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                     previousUnsubmittedNum.set(unsubmittedNum);
                 }
                 break;
-            case FETCHER:
+            case STATUS:
                 synchronized (submittedReqs) {
+                    dnbBulkLookupStatusChecker.checkStatus(submittedReqs);
                     Iterator<DnBBatchMatchContext> iter = submittedReqs.iterator();
                     while (iter.hasNext()) {
                         DnBBatchMatchContext submittedReq = iter.next();
-                        if (log.isDebugEnabled()) {
-                            log.debug("Fetching status for batched request " + submittedReq.getServiceBatchId());
+                        switch (submittedReq.getDnbCode()) {
+                        case OK:
+                            finishedReqs.add(submittedReq);
+                            iter.remove();
+                            break;
+                        case SUBMITTED:
+                        case IN_PROGRESS:
+                        case RATE_LIMITING:
+                        case EXCEED_CONCURRENT_NUM:
+                        case EXCEED_REQUEST_NUM:
+                            break;
+                        default:
+                            processBulkMatchResult(submittedReq, false);
+                            iter.remove();
+                            break;
                         }
+                    }
+                }
+                break;
+            case FETCHER:
+                synchronized (finishedReqs) {
+                    Iterator<DnBBatchMatchContext> iter = finishedReqs.iterator();
+                    while (iter.hasNext()) {
+                        DnBBatchMatchContext finishedReq = iter.next();
                         try {
-                            submittedReq = dnbBulkLookupFetcher.getResult(submittedReq);
+                            finishedReq = dnbBulkLookupFetcher.getResult(finishedReq);
                         } catch (Exception ex) {
                             log.error(String.format(
                                     "Fail to poll match result for request %s from DnB bulk matchc service: %s",
-                                    submittedReq.getServiceBatchId(), ex.getMessage()));
-                            submittedReq.setDnbCode(DnBReturnCode.UNKNOWN);
+                                    finishedReq.getServiceBatchId(), ex.getMessage()));
+                            finishedReq.setDnbCode(DnBReturnCode.UNKNOWN);
                         }
-                        if (submittedReq.getDnbCode() == DnBReturnCode.OK) {
-                            processBulkMatchResult(submittedReq, true);
+                        switch (finishedReq.getDnbCode()) {
+                        case OK:
+                            processBulkMatchResult(finishedReq, true);
                             iter.remove();
-                        } else if (submittedReq.getDnbCode() == DnBReturnCode.IN_PROGRESS
-                                || submittedReq.getDnbCode() == DnBReturnCode.RATE_LIMITING) {
-                            // Do nothing
-                        } else if (submittedReq.getDnbCode() == DnBReturnCode.EXCEED_CONCURRENT_NUM
-                                || submittedReq.getDnbCode() == DnBReturnCode.EXCEED_REQUEST_NUM) {
-                            Date now = new Date();
-                            if (submittedReq.getTimestamp() == null
-                                    || (now.getTime() - submittedReq.getTimestamp().getTime()) / 1000
-                                            / 60 > requestExpireDuration) {
-                                processBulkMatchResult(submittedReq, false);
-                                iter.remove();
-                            }
-                        } else {
-                            processBulkMatchResult(submittedReq, false);
+                            break;
+                        default:
+                            processBulkMatchResult(finishedReq, false);
                             iter.remove();
-                        }
-                        if (log.isDebugEnabled()) {
-                            log.debug("Status for batched request " + submittedReq.getServiceBatchId() + ": "
-                                    + submittedReq.getDnbCode().getMessage());
                         }
                     }
                 }

@@ -4,6 +4,7 @@ public class DataSourceLookupRequest {
     private Object inputData;
     private MatchTraveler matchTravelerContext;
     private String callerMicroEngineReference;
+    private long timestamp;
 
     public Object getInputData() {
         return inputData;
@@ -27,6 +28,14 @@ public class DataSourceLookupRequest {
 
     public void setCallerMicroEngineReference(String callerMicroEngineReference) {
         this.callerMicroEngineReference = callerMicroEngineReference;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
 }

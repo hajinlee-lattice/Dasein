@@ -43,6 +43,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
             @Override
             public void run() {
                 if (request instanceof DataSourceLookupRequest) {
+                    ((DataSourceLookupRequest) request).setTimestamp(System.currentTimeMillis());
                     asyncLookupFromService(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
                 } else {
                     sendResponse(lookupRequestId, null, returnAddress);
@@ -57,6 +58,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     public Response syncLookup(Object request) {
         Response response = new Response();
         if (request instanceof DataSourceLookupRequest) {
+            ((DataSourceLookupRequest) request).setTimestamp(System.currentTimeMillis());
             Object result = lookupFromService(null, (DataSourceLookupRequest) request);
             response.setResult(result);
         }

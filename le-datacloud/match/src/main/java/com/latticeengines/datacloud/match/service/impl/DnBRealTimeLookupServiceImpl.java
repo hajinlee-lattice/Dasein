@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-@Component
+@Component("dnbRealTimeLookupService")
 public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMatchContext>
         implements DnBRealTimeLookupService {
     private static final Log log = LogFactory.getLog(DnBRealTimeLookupServiceImpl.class);
@@ -74,7 +74,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     @Value("${datacloud.dnb.realtime.email.duns.jsonpath}")
     private String emailDunsJsonPath;
 
-    @Value("${datacloud.dnb.realtime.retry.maxattempts}")
+    @Value("${datacloud.dnb.retry.maxattempts}")
     private int retries;
 
     @Value("${datacloud.dnb.realtime.reasoncode.de}")
@@ -86,7 +86,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             Long startTime = System.currentTimeMillis();
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_ENTITY);
             context.setDuration(System.currentTimeMillis() - startTime);
-            if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
+            if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
                 log.info(String.format("DnB realtime entity matching request %s: Status = %s, Duration = %d",
                         context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
                 break;

@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-@Component
+@Component("dnbBulkLookupFetcher")
 public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchMatchContext>
         implements DnBBulkLookupFetcher {
 
@@ -52,7 +52,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     @Value("${datacloud.dnb.application.id}")
     private String applicationId;
 
-    @Value("${datacloud.dnb.realtime.retry.maxattempts}")
+    @Value("${datacloud.dnb.retry.maxattempts}")
     private int retries;
 
     @Value("${datacloud.dnb.bulk.output.content.object.xpath}")
@@ -67,9 +67,6 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     @Value("${datacloud.dnb.bulk.complete.timestamp.xpath}")
     private String completeTimestampXpath;
 
-    @Value("${datacloud.dnb.bulk.query.interval}")
-    private int queryInterval;
-
     @Value("${datacloud.dnb.bulk.office.id}")
     private int officeID;
 
@@ -79,40 +76,24 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     @Value("${datacloud.dnb.bulk.getresult.url.format}")
     private String getResultUrlFormat;
 
-    private static Date timeAnchor = new Date(1);
-
-    private boolean preValidation() {
-        Date now = new Date();
-        if ((now.getTime() - timeAnchor.getTime()) / (1000 * 60) < queryInterval) {
-            return false;
-        }
-        timeAnchor = now;
-        return true;
-    }
-
     @Override
     public DnBBatchMatchContext getResult(DnBBatchMatchContext batchContext) {
-
-        if (!preValidation()) {
-            batchContext.setDnbCode(DnBReturnCode.RATE_LIMITING);
-            return batchContext;
-        }
-
         for (int i = 0; i < retries; i++) {
             executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_FETCH);
-            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Fetched result from DnB bulk match api. Status=" + batchContext.getDnbCode());
-                }
+            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
                 if (batchContext.getDnbCode() == DnBReturnCode.OK) {
-                    log.info("Successfully fetched results from dnb. Size= " + batchContext.getContexts().size()
+                    log.info("Successfully fetched batch results from dnb. Size= " + batchContext.getContexts().size()
                             + " Timestamp=" + batchContext.getTimestamp() + " ServiceId="
                             + batchContext.getServiceBatchId());
+                } else {
+                    log.info("Encountered issue in fetching batch results from dnb. DnBCode="
+                            + batchContext.getDnbCode().getMessage());
                 }
-                break;
+                return batchContext;
             }
             dnBAuthenticationService.refreshToken(DnBKeyType.BATCH);
         }
+        log.error("Fail to fetch batch results from dnb because API token expires and fails to refresh");
         return batchContext;
     }
 
@@ -188,6 +169,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
         case "BC005":
         case "BC007":
             return DnBReturnCode.IN_PROGRESS;
+        case "BC001":
         case "CM000":
             return DnBReturnCode.OK;
         default:

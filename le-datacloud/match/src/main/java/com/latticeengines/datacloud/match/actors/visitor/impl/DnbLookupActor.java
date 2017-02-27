@@ -41,6 +41,12 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
     @Value("${datacloud.dnb.fetcher.timer.frequency.unit:SECONDS}")
     private TimeUnit fetcherTimerFrequencyUnit;
 
+    @Value("${datacloud.dnb.status.timer.frequency:120}")
+    private int statusTimerFrequency;
+
+    @Value("${datacloud.dnb.status.timer.frequency.unit:SECONDS}")
+    private TimeUnit statusTimerFrequencyUnit;
+
     @Autowired
     @Qualifier("dnBLookupService")
     private DataSourceLookupServiceBase dnBLookupService;
@@ -56,10 +62,15 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
         fetcherTimerMessage.setContext(BulkLookupStrategy.FETCHER);
         TimerRegistrationRequest fetcherTimerRequest = new TimerRegistrationRequest(fetcherTimerFrequency,
                 fetcherTimerFrequencyUnit, fetcherTimerMessage);
+        TimerMessage statusTimerMessage = new TimerMessage(DnbLookupActor.class);
+        statusTimerMessage.setContext(BulkLookupStrategy.STATUS);
+        TimerRegistrationRequest statusTimerRequest = new TimerRegistrationRequest(statusTimerFrequency,
+                statusTimerFrequencyUnit, statusTimerMessage);
 
         List<TimerRegistrationRequest> requests = new ArrayList<>();
         requests.add(dispatcherTimerRequest);
         requests.add(fetcherTimerRequest);
+        requests.add(statusTimerRequest);
 
         timerRegistrationHelper.register(//
                 context().system(), //

@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
-@Component
+@Component("dnbAuthenticationService")
 public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private static final Log log = LogFactory.getLog(DnBAuthenticationServiceImpl.class);
 
@@ -120,7 +120,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     @Override
     public void refreshToken(DnBKeyType type) {
         tokenCache.refresh(type);
-        log.info("DnB token is expired, retry it.");
+        log.info("DnB token is expired, refresh it.");
     }
 
     private String requestTokenFromDnB(DnBKeyType type) {

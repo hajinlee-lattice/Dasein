@@ -23,6 +23,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jayway.jsonpath.JsonPath;
+import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
@@ -61,7 +62,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
 
     protected String sendRequest(String url, HttpEntity<String> entity, DnBAPIType apiType) {
         if (apiType == DnBAPIType.REALTIME_ENTITY || apiType == DnBAPIType.REALTIME_EMAIL
-                || apiType == DnBAPIType.BATCH_FETCH) {
+                || apiType == DnBAPIType.BATCH_FETCH || apiType == DnBAPIType.BATCH_STATUS) {
             return dnbClient.get(entity, url);
         } else {
             return dnbClient.post(entity, url);
@@ -144,5 +145,32 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         }
 
         return result;
+    }
+
+    protected void logRateLimitingRejection(RateLimitedAcquisition rlAcq, DnBAPIType apiType) {
+        StringBuilder sb1 = new StringBuilder();
+        if (rlAcq.getRejectionReasons() != null) {
+            for (String rejectionReason : rlAcq.getRejectionReasons()) {
+                sb1.append(rejectionReason + " ");
+            }
+        }
+        StringBuilder sb2 = new StringBuilder();
+        if (rlAcq.getExceedingQuotas() != null) {
+            for (String exceedingQuota : rlAcq.getExceedingQuotas()) {
+                sb2.append(exceedingQuota + " ");
+            }
+        }
+        switch (apiType) {
+        case BATCH_DISPATCH:
+            log.error("Fail to submit batched request. Rejection reasons: " + sb1.toString() + ". Exceeding quotas: "
+                    + sb2.toString());
+            break;
+        case BATCH_STATUS:
+            log.error("Fail to get status for batched requests. Rejection reasons: " + sb1.toString()
+                    + ". Exceeding quotas: " + sb2.toString());
+            break;
+        default:
+            break;
+        }
     }
 }

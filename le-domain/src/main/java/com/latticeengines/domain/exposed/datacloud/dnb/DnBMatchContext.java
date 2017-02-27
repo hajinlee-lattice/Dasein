@@ -42,6 +42,8 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private Boolean patched;
 
+    private long timestamp;
+
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
         matchedNameLocation = new NameLocation();
@@ -249,6 +251,14 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setPatched(Boolean patched) {
         this.patched = patched;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public enum DnBMatchStrategy {
