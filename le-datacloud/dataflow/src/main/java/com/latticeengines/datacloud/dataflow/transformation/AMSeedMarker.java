@@ -139,7 +139,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
                 DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN, ALEXA_RANK_AMSEED, DOMAIN_SOURCE, LE_IS_PRIMARY_DOMAIN);
         Node primaryDomain = node.groupByAndAggregate(new FieldList(DUNS), agg, fms).renamePipe("PrimaryDomain");
 
-        node = node.leftHashJoin(DUNS, primaryDomain, DUNS);
+        node = node.leftJoin(DUNS, primaryDomain, DUNS);
         node = node.discard(LE_IS_PRIMARY_DOMAIN);
         // No domain || domain != primary domain: IsPrimaryDomain = N
         // Has domain, no primary domain || domain = primary domain:
