@@ -12,6 +12,8 @@
         <le.dataplatform.version>3.3.0-SNAPSHOT</le.dataplatform.version>
         <le.domain.version>3.3.0-SNAPSHOT</le.domain.version>
         <le.monitor.version>3.3.0-SNAPSHOT</le.monitor.version>
+        <jetty.port>8080</jetty.port>
+        <jett.stop.port>10980</jett.stop.port>
     </properties>
 
     <parent>

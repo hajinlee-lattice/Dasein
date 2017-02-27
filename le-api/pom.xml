@@ -14,6 +14,8 @@
         <le.domain.version>3.3.0-SNAPSHOT</le.domain.version>
         <le.monitor.version>3.3.0-SNAPSHOT</le.monitor.version>
         <le.security.version>3.3.0-SNAPSHOT</le.security.version>
+        <jetty.port>8074</jetty.port>
+        <jett.stop.port>10974</jett.stop.port>
     </properties>
 
     <parent>
@@ -22,77 +24,6 @@
         <version>3.3.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
-
-    <profiles>
-        <profile>
-            <id>functional</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${maven.surefire.version}</version>
-                        <executions>
-                            <execution>
-                                <id>unit-test</id>
-                                <configuration>
-                                    <skip>true</skip>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>default-test</id>
-                                <configuration>
-                                    <skip>true</skip>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>functional-test</id>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                                <phase>integration-test</phase>
-                                <configuration>
-                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
-                                    <skip>false</skip>
-                                    <includes>
-                                        <include>${functional.classes.include}</include>
-                                        <exclude>${functional.classes.exclude}</exclude>
-                                    </includes>
-                                    <groups>${functional.groups}</groups>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                        <configuration>
-                            <httpConnector>
-                                <port>8074</port>
-                            </httpConnector>
-                            <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
-                                </extraClasspath>
-                            </webAppConfig>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-commons</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencies>
         <dependency>

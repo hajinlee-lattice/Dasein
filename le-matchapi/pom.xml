@@ -9,6 +9,8 @@
 
     <properties>
         <component-name>matchapi</component-name>
+        <jetty.port>8076</jetty.port>
+        <jetty.stop.port>10976</jetty.stop.port>
     </properties>
 
     <parent>
@@ -17,67 +19,6 @@
         <version>3.3.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
-
-    <profiles>
-        <profile>
-            <id>jetty</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                        <configuration>
-                            <httpConnector>
-                                <port>8076</port>
-                            </httpConnector>
-                            <systemProperties>
-                                <systemProperty>
-                                    <name>log4j.configuration</name>
-                                    <value>file:///${project.basedir}/src/test/resources/log4j.properties</value>
-                                </systemProperty>
-                            </systemProperties>
-                            <scanIntervalSeconds>0</scanIntervalSeconds>
-                            <stopPort>10976</stopPort>
-                            <stopKey>STOP</stopKey>
-                            <stopWait>10</stopWait>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>start-jetty</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>start</goal>
-                                </goals>
-                                <configuration>
-                                    <scanIntervalSeconds>0</scanIntervalSeconds>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>stop-jetty</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-commons</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencies>
         <dependency>
