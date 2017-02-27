@@ -13,9 +13,9 @@ import edu.emory.mathcs.backport.java.util.Arrays;
  */
 public class NameStringStandardizationUtils extends StringStandardizationUtils {
 
-    private Character[] removed = { '~', '@', '#', '$', '%', '^', '*', '+', '=', '<', '>', '’' };
-    private Character[] replacedBySpace = { '-', '_', '|', '\\', '/', '\t', '?', ';', ':', ',', '(', ')', '{', '}', '[',
-            ']', '.', '"' };
+    private Character[] removed = { '~', '@', '#', '$', '%', '^', '*', '+', '=', '<', '>' };
+    private Character[] replacedBySpace = { '_', '|', '\\', '/', '\t', '?', ';', ':', '(', ')', '{', '}', '[', ']',
+            '"' };
     String[][] replaced = { { "&", "AND" } };
     private static NameStringStandardizationUtils singletonUtil = new NameStringStandardizationUtils();
 

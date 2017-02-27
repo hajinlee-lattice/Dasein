@@ -18,8 +18,8 @@ public class StringStandardizationUtilsUnitTestNG {
     @DataProvider(name = "nameStringDataProvider")
     Object[][] nameStringDataProvider() {
         return new Object[][] { //
-                { "\"CarMax,    Inc's\"", "CARMAX INC'S" }, //
-                { "   CarMax, %@# & Inc.   ", "CARMAX AND INC" }, //
+                { "\"CarMax,    Inc's-\"", "CARMAX, INC'S-" }, //
+                { "   CarMax, %@# & Inc.   ", "CARMAX, AND INC." }, //
         };
     }
 
