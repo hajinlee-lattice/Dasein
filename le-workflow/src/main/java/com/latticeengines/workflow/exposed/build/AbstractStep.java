@@ -166,7 +166,9 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     protected <V> void putObjectInContext(String key, V val) {
-        executionContext.putString(key, JsonUtils.serialize(val));
+        String json = JsonUtils.serialize(val);
+        executionContext.putString(key, json);
+        log.info("Updating " + key + " in context to " + json);
     }
 
     protected void putStringValueInContext(String key, String val) {

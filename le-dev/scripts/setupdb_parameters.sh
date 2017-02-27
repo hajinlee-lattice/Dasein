@@ -14,7 +14,9 @@ if ! [ -z "$3" ]; then
     db_password=$3
 fi
 
-echo "Using hostname:$db_hostname user:$db_user password:$db_password"
+UNAME=`uname`
+
+echo "Using hostname:${db_hostname} user:${db_user} password:${db_password}"
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
     MYSQL_COMMAND='mysql -h $db_hostname -u $db_user -p$db_password --local-infile=1'

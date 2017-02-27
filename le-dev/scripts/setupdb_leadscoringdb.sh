@@ -15,9 +15,9 @@ else
     sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-dataplatform/ddl_leadscoringdb_mysql.sql
 fi
 
-(mysql_version=$(echo `mysqld --version` | sed 's/[[:alpha:]|(|[:space:]]//g' | cut -d \- -f 1 | cut -d \) -f 1) || 5.5) || true
-if [ "$mysql_version" = "" ]; then
-    mysql_version=5.7.17
+mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true
+if [ -z "${mysql_version}" ]; then
+    mysql_version=5.5
 fi
 if version_gt ${mysql_version} ${threshold_version}; then
     echo "MySQL version $mysql_version is greater than $threshold_version, replacing DATA by DATA LOCAL"

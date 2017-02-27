@@ -27,10 +27,18 @@ public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
         Table eventTable = getEventTable();
         Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
         List<Attribute> events = eventTable.getAttributes(LogicalDataType.Event);
+
+        if (events == null || events.isEmpty()) {
+            throw new IllegalStateException("There is no event to create a model on top of");
+        } else {
+            log.info("Found " + events.size() + " from event table");
+        }
+
         for (Attribute event : events) {
             try {
                 ModelingServiceExecutor modelExecutor = createModelingServiceExecutor(eventTable, event);
                 String modelAppId = modelExecutor.model();
+                log.info("Submitted a model job " + modelAppId);
                 modelApplicationIdToEventColumn.put(modelAppId, event.getName());
             } catch (LedpException e) {
                 throw e;

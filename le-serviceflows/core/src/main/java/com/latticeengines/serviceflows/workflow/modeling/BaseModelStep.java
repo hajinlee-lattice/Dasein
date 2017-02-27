@@ -31,8 +31,12 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
 
     protected Table getEventTable() {
         if (executionContext.containsKey(EVENT_TABLE)) {
-            return getObjectFromContext(EVENT_TABLE, Table.class);
+            Table table = getObjectFromContext(EVENT_TABLE, Table.class);
+            log.info("Getting an event table from workflow context: " + table.getName());
+            return table;
         } else {
+            log.info("Did not see an event table in workflow context. Get one from metadata proxy for event table name "
+                    + configuration.getEventTableName());
             return metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                     configuration.getEventTableName());
         }
@@ -89,7 +93,6 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
             log.info("No website attribute in this event table.");
         }
 
-
         Attribute id = eventTable.getAttribute(InterfaceName.Id);
         Attribute email = eventTable.getAttribute(InterfaceName.Email);
         Attribute creationDate = eventTable.getAttribute(InterfaceName.CreatedDate);
@@ -128,18 +131,16 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
             excludedColumns.add(event.getName());
         }
 
-        log.info("Exclude prop data columns = "
-                + configuration.getModelSummaryProvenance().getBoolean(ProvenancePropertyName.ExcludePropdataColumns,
-                        false));
+        log.info("Exclude prop data columns = " + configuration.getModelSummaryProvenance()
+                .getBoolean(ProvenancePropertyName.ExcludePropdataColumns, false));
 
         for (Attribute attr : eventTable.getAttributes()) {
             if (attr.getApprovedUsage() == null //
                     || attr.getApprovedUsage().size() == 0 //
                     || attr.getApprovedUsage().get(0).equals("None")) {
                 excludedColumns.add(attr.getName());
-            } else if (configuration.getModelSummaryProvenance().getBoolean(
-                    ProvenancePropertyName.ExcludePropdataColumns, false)
-                    && attr.getTags() != null) {
+            } else if (configuration.getModelSummaryProvenance()
+                    .getBoolean(ProvenancePropertyName.ExcludePropdataColumns, false) && attr.getTags() != null) {
                 Set<String> tags = new HashSet<>(attr.getTags());
 
                 if (tags.contains(Tag.EXTERNAL.getName()) || tags.contains(Tag.EXTERNAL_TRANSFORM.getName())) {
@@ -149,10 +150,8 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
 
             if (!(attr.getApprovedUsage() == null //
                     || attr.getApprovedUsage().size() == 0 //
-                    || attr.getApprovedUsage().get(0).equals("None"))
-                    && attr.getTags() != null
-                    && attr.getTags().contains(Tag.INTERNAL.getName())
-                    && attr.getIsCoveredByOptionalRule()) {
+                    || attr.getApprovedUsage().get(0).equals("None")) && attr.getTags() != null
+                    && attr.getTags().contains(Tag.INTERNAL.getName()) && attr.getIsCoveredByOptionalRule()) {
                 configuration.addProvenanceProperty(ProvenancePropertyName.ConflictWithOptionalRules, true);
             }
         }
@@ -193,7 +192,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
     }
 
     protected String getMetadataTableFolderName(Table eventTable, Attribute currentEvent) {
-        return String.format("%s-%s-Metadata", eventTable.getName().replaceAll("[^A-Za-z0-9_-]", "_"), currentEvent
-                .getDisplayName().replaceAll("[^A-Za-z0-9_-]", "_"));
+        return String.format("%s-%s-Metadata", eventTable.getName().replaceAll("[^A-Za-z0-9_-]", "_"),
+                currentEvent.getDisplayName().replaceAll("[^A-Za-z0-9_-]", "_"));
     }
 }

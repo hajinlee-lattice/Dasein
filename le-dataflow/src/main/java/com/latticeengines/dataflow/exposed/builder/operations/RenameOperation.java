@@ -17,7 +17,7 @@ public class RenameOperation extends Operation {
         // deep copy
         List<FieldMetadata> metadata = new ArrayList<>();
         for (FieldMetadata fm : prior.metadata) {
-            metadata.add(new FieldMetadata(fm.getFieldName(), fm.getJavaType()));
+            metadata.add(new FieldMetadata(fm));
         }
         renameFields(previousNames, newNames, metadata);
         this.pipe = rename;
