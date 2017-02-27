@@ -81,7 +81,8 @@ def deployApp(app, modules):
         os.makedirs(webappDir)
 
     if not os.path.isdir(os.path.join(webappDir, 'manager')):
-        copytree(os.path.join(CATALINA_HOME, 'webapps', 'manager'), os.path.join(webappDir, 'manager'))
+        if os.path.isdir(os.path.join(CATALINA_HOME, 'webapps', 'manager')):
+            copytree(os.path.join(CATALINA_HOME, 'webapps', 'manager'), os.path.join(webappDir, 'manager'))
 
     webappFile = os.path.join(webappDir, webappWar)
     copyfile(os.path.join(targetDir, appWar), webappFile + ".copy")
