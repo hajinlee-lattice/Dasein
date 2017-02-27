@@ -14,7 +14,8 @@ public enum FundamentalType {
     EMAIL("email"),
     PHONE("phone"),
     URI("uri"),
-    YEAR("year");
+    YEAR("year"),
+    DATE("date");
 
     private final String name;
     private static Map<String, FundamentalType> nameMap;
