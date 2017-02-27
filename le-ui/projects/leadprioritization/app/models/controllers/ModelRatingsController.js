@@ -70,39 +70,39 @@ angular.module('lp.models.ratings', [
 
         refreshChartData();
         refreshSliders();
-
     }
 
-    vm.eleMouseDown = function(ev) {
+    vm.eleMouseDown = function(ev, bucket, index) {
         vm.slider = ev.currentTarget;
+        vm.container = document.getElementById("sliders");
+        vm.containerBox = vm.container.getBoundingClientRect();
+        vm.bucket = bucket;
+        console.log('mousedown', bucket, index)
 
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);
+
+        ev.preventDefault();
     }
     function eleMouseMove(ev) {
-
-        var slider = vm.slider,
-            sliderPosition = slider.style.right,
-            offsetLeft = slider.offsetLeft,
-            container = document.getElementById("sliders"),
-            containerOffset = container.getBoundingClientRect(),
-            relativeSliderChartPosition = 100 - Math.round((ev.clientX - containerOffset.left) / (containerOffset.width - containerOffset.left)) * 100,
-            positionOfMouse = ev.clientX; // container.offsetLeft + (container.offsetWidth * (relativeSliderPosition / 100))
-
-        console.log(ev.clientX, relativeSliderChartPosition/ 100, containerOffset, ev);
-
-
-        slider.style.right = "";
-        // slider.style.left =  Math.round(positionOfMouse - containerOffset.left) + 'px';
-        slider.style.left = containerOffset.left + (containerOffset.width * (relativeSliderChartPosition / 100)) + 'px';
+        var relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
+        if (ev.clientY > vm.containerBox.top + 150) {
+            vm.slider.style.opacity = .25;
+        } else {
+            vm.slider.style.opacity = 1;
+        }
+        vm.slider.style.right = 100 - Math.round(relativeSliderChartPosition * 100) + '%';
+        ev.preventDefault();
     }
     function eleMouseUp(ev){
+        vm.slider.style.opacity = 1;
         delete vm.slider;
 
         document.removeEventListener('mousemove', eleMouseMove, false);
         document.removeEventListener('mouseup', eleMouseUp, false);
 
-        console.log("mouse up");
+        ev.preventDefault();
+        console.log("mouse up", vm.workingBuckets);
     }
     function refreshChartData(){
         // adjust colors
