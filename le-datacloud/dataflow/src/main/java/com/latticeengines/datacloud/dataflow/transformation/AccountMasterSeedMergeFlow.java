@@ -105,22 +105,62 @@ public class AccountMasterSeedMergeFlow extends ConfigurableFlowBase<Transformer
         return source;
     }
 
-    private Node processWithoutDuns(Node source) {
-        List<FieldMetadata> fieldMetadata = prepareAmsFieldMetadata();
-        source = source.apply(
-                new AccountMasterSeedMergeWithoutDunsFunction(new Fields(amsAttrs.toArray(new String[amsAttrs.size()])),
-                        attrsFromLe, amsDunsColumn, amsIsPrimaryDomainColumn, amsIsPrimaryLocationColumn,
-                        amsNumberOfLocationColumn, amsDomainSourceColumn),
-                new FieldList(source.getFieldNames()), fieldMetadata, new FieldList(amsAttrs), Fields.RESULTS);
-        return source;
-    }
-
     private List<FieldMetadata> prepareAmsFieldMetadata() {
         List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
         for (String attr : amsAttrs) {
             if (attr.equals(amsNumberOfLocationColumn) || attr.equals(amsEmployeesHere)) {
                 fieldMetadata.add(new FieldMetadata(attr, Integer.class));
             } else if (attr.equals(amsSalesVolumeUsDollars)) {
+                fieldMetadata.add(new FieldMetadata(attr, Long.class));
+            } else {
+                fieldMetadata.add(new FieldMetadata(attr, String.class));
+            }
+        }
+        return fieldMetadata;
+    }
+
+    private String getAmsAttrTmp(String name) {
+        return "AMS_" + name;
+    }
+
+    private List<String> getAmsAttrsTmp() {
+        List<String> amsAttrsTmp = new ArrayList<String>();
+        for (String amsAttr : amsAttrs) {
+            amsAttrsTmp.add(getAmsAttrTmp(amsAttr));
+        }
+        return amsAttrsTmp;
+    }
+
+    private Map<String, String> getAttrsFromLeTmp() {
+        Map<String, String> attrsFromLeTmp = new HashMap<>();
+        for (Map.Entry<String, String> entry : attrsFromLe.entrySet()) {
+            attrsFromLeTmp.put(getAmsAttrTmp(entry.getKey()), entry.getValue());
+        }
+        return attrsFromLeTmp;
+    }
+
+    private Node processWithoutDuns(Node source) {
+        List<String> amsAttrsTmp = getAmsAttrsTmp();
+        List<FieldMetadata> fieldMetadataTmp = prepareAmsFieldMetadataTmp(amsAttrsTmp);
+        Map<String, String> attrsFromLeTmp = getAttrsFromLeTmp();
+        source = source.apply(new AccountMasterSeedMergeWithoutDunsFunction(
+                        new Fields(amsAttrsTmp.toArray(new String[amsAttrsTmp.size()])), attrsFromLeTmp,
+                        getAmsAttrTmp(amsDunsColumn), getAmsAttrTmp(amsIsPrimaryDomainColumn),
+                        getAmsAttrTmp(amsIsPrimaryLocationColumn), getAmsAttrTmp(amsNumberOfLocationColumn),
+                        getAmsAttrTmp(amsDomainSourceColumn)),
+                new FieldList(source.getFieldNames()), fieldMetadataTmp, new FieldList(amsAttrsTmp));
+        for (String amsAttr : amsAttrs) {
+            source = source.rename(new FieldList(getAmsAttrTmp(amsAttr)), new FieldList(amsAttr));
+        }
+        return source;
+    }
+
+    private List<FieldMetadata> prepareAmsFieldMetadataTmp(List<String> amsAttrsTmp) {
+        List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
+        for (String attr : amsAttrsTmp) {
+            if (attr.equals(getAmsAttrTmp(amsNumberOfLocationColumn)) || attr.equals(getAmsAttrTmp(amsEmployeesHere))) {
+                fieldMetadata.add(new FieldMetadata(attr, Integer.class));
+            } else if (attr.equals(getAmsAttrTmp(amsSalesVolumeUsDollars))) {
                 fieldMetadata.add(new FieldMetadata(attr, Long.class));
             } else {
                 fieldMetadata.add(new FieldMetadata(attr, String.class));

@@ -11,6 +11,8 @@ import java.util.Scanner;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -37,6 +39,8 @@ import cascading.tuple.Fields;
 @Component("sourceStandardizationFlow")
 public class SourceStandardizationFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, StandardizationFlowParameter> {
+    private static final Log log = LogFactory.getLog(SourceStandardizationFlow.class);
+
     @Override
     public Class<? extends TransformationConfiguration> getTransConfClass() {
         return BasicTransformationConfiguration.class;
@@ -131,7 +135,7 @@ public class SourceStandardizationFlow
                                 new Fields(source.getFieldNames().toArray(new String[source.getFieldNames().size()])),
                                 countryField, stateField),
                         new FieldList(source.getFieldNames()), source.getSchema(),
-                        new FieldList(source.getFieldNames()), Fields.RESULTS);
+                        new FieldList(source.getFieldNames()), Fields.REPLACE);
             }
         }
         return source;
