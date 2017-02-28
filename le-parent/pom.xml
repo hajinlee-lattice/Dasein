@@ -104,6 +104,7 @@
         <jetty.dir>main</jetty.dir>
         <jetty.stop.port>10999</jetty.stop.port>
         <jetty.use.test.cp>true</jetty.use.test.cp>
+        <surefire.reuse.forks>true</surefire.reuse.forks>
     </properties>
 
     <!-- set up to use LE local Nexus Repository for dependencies -->
@@ -313,6 +314,10 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <version>${maven.surefire.version}</version>
+                        <configuration>
+                            <shutdown>kill</shutdown>
+                            <reuseForks>${surefire.reuse.forks}</reuseForks>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>unit-test</id>
