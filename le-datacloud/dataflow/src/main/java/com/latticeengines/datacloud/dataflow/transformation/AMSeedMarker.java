@@ -57,7 +57,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         return am.coGroup(idField, //
                 Arrays.asList(badDataMrkd, oobMkrd, orphanMrkd, smBusiMrkd, alexaMrkd), //
                 Arrays.asList(idField, idField, idField, idField, idField), //
-                JoinType.INNER).retain(finalFields);
+                JoinType.OUTER).retain(finalFields);
 
     }
 
