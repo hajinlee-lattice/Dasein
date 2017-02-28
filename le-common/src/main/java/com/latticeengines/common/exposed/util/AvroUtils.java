@@ -826,7 +826,9 @@ public class AvroUtils {
             }
             records.add(builder.build());
         }
-        String fileName = avroFile + ".avro";
+        String fileName = avroFile;
+        if (!fileName.endsWith(".avro"))
+            fileName = avroFile + ".avro";
         if (HdfsUtils.fileExists(yarnConfiguration, avroDir + "/" + fileName)) {
             HdfsUtils.rmdir(yarnConfiguration, avroDir + "/" + fileName);
         }
