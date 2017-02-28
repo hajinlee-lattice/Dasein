@@ -316,7 +316,7 @@
                         <version>${maven.surefire.version}</version>
                         <configuration>
                             <shutdown>kill</shutdown>
-                            <reuseForks>${surefire.reuse.forks}</reuseForks>
+                            <reuseForks>false</reuseForks>
                         </configuration>
                         <executions>
                             <execution>

@@ -34,7 +34,6 @@
         <jetty.port>8081</jetty.port>
         <jetty.stop.port>10981</jetty.stop.port>
         <jetty.use.test.cp>false</jetty.use.test.cp>
-        <surefire.reuse.forks>false</surefire.reuse.forks>
     </properties>
 
     <parent>
