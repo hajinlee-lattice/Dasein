@@ -23,7 +23,7 @@ public class DnBCache extends MatchCache<DnBCache> {
     private static final String PHONE_TOKEN = "_PHONE_";
     private static final String EMAIL_TOKEN = "_EMAIL_";
 
-    private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
+    public static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
 
     private String duns;
 

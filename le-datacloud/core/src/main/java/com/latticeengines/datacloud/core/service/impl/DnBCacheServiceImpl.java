@@ -29,6 +29,15 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     @Value("${datacloud.dnb.cache.version}")
     private String cacheVersion;
 
+    @Value("${datacloud.dnb.cache.white.expire.days}")
+    private long whiteCacheExpireDays;
+
+    @Value("${datacloud.dnb.cache.black.expire.days}")
+    private long blackCacheExpireDays;
+
+    @Value("${datacloud.dnb.cache.expire.factor}")
+    private double expireFactor;
+
     private Map<String, DnBCacheEntityMgr> cacheEntityMgrs = new HashMap<String, DnBCacheEntityMgr>();
 
     @Autowired
@@ -44,6 +53,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     public DnBCache lookupCache(DnBMatchContext context) {
         DnBCache input = initCacheEntity(context, true);
         DnBCache output = getCacheMgr().findByKey(input);
+        if (expire(output)) {
+            return null;
+        }
         if (output != null) {
             output.parseCacheContext();
         }
@@ -63,6 +75,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         Map<String, DnBCache> result = new HashMap<String, DnBCache>();
         for (int i = 0; i < outputs.size(); i++) {
             DnBCache output = outputs.get(i);
+            if (expire(output)) {
+                output = null;
+            }
             if (output != null) {
                 output.parseCacheContext();
                 result.put(lookupRequestIds.get(i), output);
@@ -179,6 +194,26 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         default:
             throw new UnsupportedOperationException(
                     "DnBCache.CacheType " + context.getMatchStrategy().name() + " is supported in DnB cache lookup");
+        }
+    }
+
+    private boolean expire(DnBCache cache) {
+        long currentDays = System.currentTimeMillis() / DnBCache.DAY_IN_MILLIS;
+        if (cache.isWhiteCache() && cache.getTimestamp() != null
+                && currentDays <= (cache.getTimestamp().longValue() + whiteCacheExpireDays)) {
+            return false;
+        }
+        if (!cache.isWhiteCache() && cache.getTimestamp() != null
+                && currentDays <= (cache.getTimestamp().longValue() + blackCacheExpireDays)) {
+            return false;
+        }
+        if (Math.random() <= expireFactor) {
+            log.info(
+                    String.format("Cache is expired: Id = %s, IsWhiteCache = %b", cache.getId(), cache.isWhiteCache()));
+            removeCache(cache);
+            return true;
+        } else {
+            return false;
         }
     }
 
