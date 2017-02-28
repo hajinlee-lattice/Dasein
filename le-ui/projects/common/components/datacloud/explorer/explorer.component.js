@@ -4,13 +4,13 @@ angular.module('common.datacloud.explorer', [
 ])
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
-    ApiHost, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount, 
+    ApiHost, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
 ){
     var vm = this,
         enrichment_chunk_size = 5000,
         flags = FeatureFlagService.Flags();
-    
+
     angular.extend(vm, {
         debug: (window.location.search.indexOf('debug=1') > 0),
         label: {
@@ -90,14 +90,14 @@ angular.module('common.datacloud.explorer', [
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
-    vm.download_button.items = [{ 
+    vm.download_button.items = [{
             href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
             label: vm.label.button_download,
-            icon: 'fa fa-file-o' 
+            icon: 'fa fa-file-o'
         },{
             href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=true&Authorization=' + vm.authToken,
             label: vm.label.button_download_selected,
-            icon: 'fa fa-file-o' 
+            icon: 'fa fa-file-o'
         }
     ];
 
@@ -131,11 +131,11 @@ angular.module('common.datacloud.explorer', [
 
 
     vm.updateStateParams = function() {
-        $state.go('.', { 
-            category: vm.category, 
-            subcategory: vm.subcategory 
-        }, { 
-            notify: false 
+        $state.go('.', {
+            category: vm.category,
+            subcategory: vm.subcategory
+        }, {
+            notify: false
         });
     }
 
@@ -150,16 +150,16 @@ angular.module('common.datacloud.explorer', [
     vm.init = function() {
         clearFilters();
         $scope.$watchGroup([
-                'vm.metadata.toggle.show.nulls', 
-                'vm.metadata.toggle.show.selected', 
-                'vm.metadata.toggle.hide.selected', 
-                'vm.metadata.toggle.show.premium', 
-                'vm.metadata.toggle.hide.premium', 
+                'vm.metadata.toggle.show.nulls',
+                'vm.metadata.toggle.show.selected',
+                'vm.metadata.toggle.hide.selected',
+                'vm.metadata.toggle.show.premium',
+                'vm.metadata.toggle.hide.premium',
                 'vm.metadata.toggle.show.internal',
-                'vm.metadata.toggle.show.enabled', 
+                'vm.metadata.toggle.show.enabled',
                 'vm.metadata.toggle.hide.enabled',
-                'vm.metadata.toggle.show.highlighted', 
-                'vm.metadata.toggle.hide.highlighted' 
+                'vm.metadata.toggle.show.highlighted',
+                'vm.metadata.toggle.hide.highlighted'
             ], function(newValues, oldValues, scope) {
 
             vm.filterEmptySubcategories();
@@ -194,7 +194,7 @@ angular.module('common.datacloud.explorer', [
                 if (vm.section != 'browse') {
                     vm.updateStateParams();
                 }
-                
+
                 var categories = Object.keys(vm.categoryCounts).filter(function(value, index) {
                     return vm.categoryCounts[value] > 0;
                 });
@@ -266,8 +266,8 @@ angular.module('common.datacloud.explorer', [
         vm.statusMessageBox = angular.element('.status-alert');
 
         if(vm.show_internal_filter) {
-            /* 
-             * this is the default for the internal filter 
+            /*
+             * this is the default for the internal filter
              * this also effectivly hides internal attributes when the filter is hidden
             */
             vm.metadata.toggle.show.internal = true;
@@ -291,7 +291,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.sortOrder = function() {
         var sortPrefix = vm.sortPrefix.replace('+','');
-        
+
         if (!vm.category) {
             return sortPrefix + vm.orders.category;
         } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
@@ -312,15 +312,18 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.filter = function(items, property, value, debug) {
-        for (var i=0, result=[]; i < items.length; i++) {
+    function walkObject(obj, j) {
+        if (obj && j) {
+            return obj[j];
+        }
+    }
 
-            function index(obj, j) {
-                if(obj && j) {
-                    return obj[j];
-                }
-            }
-            var item = property.split('.').reduce(index, items[i]);
+    vm.filter = function(items, property, value, debug) {
+        var propsList = property.split('.');
+
+        for (var i=0, result=[]; i < items.length; i++) {
+            var item = propsList.reduce(walkObject, items[i]);
+
             if (typeof item != 'undefined' && item == value) {
                 result.push(items[i]);
             }
@@ -498,7 +501,7 @@ angular.module('common.datacloud.explorer', [
             ret.enabled = true;
             return ret;
         }
-        
+
         ret.enabled = !enrichment.AttributeFlagsMap.CompanyProfile.hidden;
 
         if(enrichment.AttributeFlagsMap.CompanyProfile.hidden === true) {
@@ -630,7 +633,7 @@ angular.module('common.datacloud.explorer', [
                     enrichment.HighlightHighlighted = false;
                     enrichment.HighlightState.highlighted = false;
                 }
-                
+
                 if(type === 'enabled') {
                     flags.hidden = false;
                     if(wasHighlighted) {
@@ -658,7 +661,7 @@ angular.module('common.datacloud.explorer', [
     vm.filterLookupFiltered = function(item, type) {
         if (type === 'PERCENTAGE' && item != undefined) {
             var percentage = Math.round(item * 100);
-            
+
             return percentage !== NaN ? percentage + '%' : '';
         }
 
@@ -674,7 +677,7 @@ angular.module('common.datacloud.explorer', [
 
             Object.keys(category).forEach(function(subcategory) {
                 var items = category[subcategory];
-                
+
                 items.forEach(function(item) {
                     var enrichment = vm.enrichments[vm.enrichmentsMap[item.Attribute]];
 
@@ -739,7 +742,7 @@ angular.module('common.datacloud.explorer', [
                         }
                     }
 
-                    return isSubcategory; 
+                    return isSubcategory;
                 });
             }
         }
@@ -807,7 +810,7 @@ angular.module('common.datacloud.explorer', [
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
         var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
-        
+
         if(enrichment.IsPremium) {
             vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
             if(vm.premiumSelectedTotal > vm.premiumSelectLimit) {
@@ -828,7 +831,7 @@ angular.module('common.datacloud.explorer', [
             vm.statusMessage(vm.label.generalTotalSelectError);
             return false;
         }
-        
+
         if (enrichment.IsSelected){
             vm.userSelectedCount++;
             vm.statusMessage(vm.label.changed_alert);
@@ -959,7 +962,7 @@ angular.module('common.datacloud.explorer', [
             filter.Subcategory = vm.subcategory;
         }
 
-        if(vm.section == 'team' || vm.section == 'insights') { 
+        if(vm.section == 'team' || vm.section == 'insights') {
             filter.HighlightHidden = (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false);
             filter.HighlightHighlighted = (!vm.metadata.toggle.show.highlighted ? '' : true) || (!vm.metadata.toggle.hide.highlighted ? '' : false);
         }
@@ -1008,13 +1011,13 @@ angular.module('common.datacloud.explorer', [
         for (var i=0, result=[]; i < filtered.length; i++) {
             var item = filtered[i];
             if (item && vm.searchFields(item)) {
-                if ((item.Category != category) 
+                if ((item.Category != category)
                 || (item.Subcategory != subcategory)
-                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category)) 
-                || (vm.metadata.toggle.show.selected && !item.IsSelected) 
-                || (vm.metadata.toggle.hide.selected && item.IsSelected) 
-                || (vm.metadata.toggle.show.premium && !item.IsPremium) 
-                || (vm.metadata.toggle.hide.premium && item.IsPremium) 
+                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
+                || (vm.metadata.toggle.show.selected && !item.IsSelected)
+                || (vm.metadata.toggle.hide.selected && item.IsSelected)
+                || (vm.metadata.toggle.show.premium && !item.IsPremium)
+                || (vm.metadata.toggle.hide.premium && item.IsPremium)
                 || (!vm.metadata.toggle.show.internal && item.IsInternal)
                 || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
                 || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
@@ -1036,8 +1039,8 @@ angular.module('common.datacloud.explorer', [
         if(target.closest("[ng-click]")[0] !== currentTarget[0]) {
             // do nothing, user is clicking something with it's own click event
         } else {
-            vm.setSubcategory((vm.subcategory === subcategory ? '' : subcategory)); 
-            vm.metadata.current = 1; 
+            vm.setSubcategory((vm.subcategory === subcategory ? '' : subcategory));
+            vm.metadata.current = 1;
             vm.updateStateParams();
         }
     }
@@ -1053,11 +1056,11 @@ angular.module('common.datacloud.explorer', [
             var item = filtered[i];
             if (item && vm.searchFields(item)) {
                 if ((item.Category != category)
-                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category)) 
-                || (vm.metadata.toggle.show.selected && !item.IsSelected) 
-                || (vm.metadata.toggle.hide.selected && item.IsSelected) 
-                || (vm.metadata.toggle.show.premium && !item.IsPremium) 
-                || (vm.metadata.toggle.hide.premium && item.IsPremium) 
+                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
+                || (vm.metadata.toggle.show.selected && !item.IsSelected)
+                || (vm.metadata.toggle.hide.selected && item.IsSelected)
+                || (vm.metadata.toggle.show.premium && !item.IsPremium)
+                || (vm.metadata.toggle.hide.premium && item.IsPremium)
                 || (!vm.metadata.toggle.show.internal && item.IsInternal)
                 || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
                 || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
@@ -1138,7 +1141,7 @@ angular.module('common.datacloud.explorer', [
         }
         var value = value || '',
             info = vm.LookupResponse.companyInfo;
-        
+
         switch (type) {
             case 'address':
                 var address = [];
