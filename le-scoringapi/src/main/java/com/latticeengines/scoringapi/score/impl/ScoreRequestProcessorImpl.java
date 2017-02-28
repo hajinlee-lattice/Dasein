@@ -118,7 +118,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             }
             requestInfo.put("ModelType",
                     (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
-            shouldSkipMatching = shouldSkipMatching(scoringArtifacts);
+            shouldSkipMatching = shouldSkipMatching(scoringArtifacts, performFetchOnlyForMatching);
             fieldSchemas = scoringArtifacts.getFieldSchemas();
 
             split("retrieveModelArtifacts");
@@ -217,7 +217,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
 
         split("scoreRecord");
-        if(shouldPublish){
+        if (shouldPublish) {
             scoreHistoryEntityMgr.publish(request, scoreResponse);
             split("publishScoreHistory");
         }
@@ -254,7 +254,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             split("retrieveModelArtifacts");
 
             List<RecordModelTuple> originalOrderParsedTupleList = checkForMissingFields(uniqueScoringArtifactsMap,
-                    uniqueFieldSchemasMap, request);
+                    uniqueFieldSchemasMap, request, performFetchOnlyForMatching);
 
             split("parseRecord");
 
@@ -263,7 +263,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             List<RecordModelTuple> partiallyOrderedBadRecordList = new ArrayList<>();
 
             extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap, partiallyOrderedParsedTupleList,
-                    partiallyOrderedParsedRecordWithoutMatchReqList, partiallyOrderedBadRecordList);
+                    partiallyOrderedParsedRecordWithoutMatchReqList, partiallyOrderedBadRecordList,
+                    performFetchOnlyForMatching);
             List<ModelSummary> originalOrderModelSummaryList = extractModelSummaries(originalOrderParsedTupleList,
                     uniqueScoringArtifactsMap);
 
@@ -319,7 +320,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 log.info("Processed bulk score request for " + request.getRecords().size() + " records");
             }
             split("scoreRecord");
-            if(shouldPublish){
+            if (shouldPublish) {
                 scoreHistoryEntityMgr.publish(request.getRecords(), scoreResponse);
                 split("publishScoreHistory");
             }
@@ -391,23 +392,26 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<String, Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList, //
-            List<RecordModelTuple> partiallyOrderedBadRecordList) {
+            List<RecordModelTuple> partiallyOrderedBadRecordList, //
+            boolean performFetchOnlyForMatching) {
         for (RecordModelTuple tuple : parsedTupleList) {
             extractParsedTuple(scoringArtifactsMap, partiallyOrderedParsedTupleList,
-                    partiallyOrderedParsedRecordWithoutMatchReqList, partiallyOrderedBadRecordList, tuple);
+                    partiallyOrderedParsedRecordWithoutMatchReqList, partiallyOrderedBadRecordList, tuple,
+                    performFetchOnlyForMatching);
         }
     }
 
     private void extractParsedTuple(Map<String, Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList, //
-            List<RecordModelTuple> partiallyOrderedBadRecordList, RecordModelTuple tuple) {
+            List<RecordModelTuple> partiallyOrderedBadRecordList, RecordModelTuple tuple, //
+            boolean performFetchOnlyForMatching) {
         // put this tuple in either partiallyOrderedPmmlParsedRecordList or in
         // partiallyOrderedParsedTupleList based on model json type
 
         String modelId = tuple.getModelId();
         ScoringArtifacts scoringArtifacts = scoringArtifactsMap.get(modelId).getValue();
-        boolean shouldSkipMatching = shouldSkipMatching(scoringArtifacts);
+        boolean shouldSkipMatching = shouldSkipMatching(scoringArtifacts, performFetchOnlyForMatching);
 
         if (tuple.getException() != null || //
                 scoringArtifactsMap.get(tuple.getModelId()).getValue() == null) {
@@ -619,7 +623,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     protected List<RecordModelTuple> checkForMissingFields(
             Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
-            Map<String, Map<String, FieldSchema>> fieldSchemasMap, BulkRecordScoreRequest request) {
+            Map<String, Map<String, FieldSchema>> fieldSchemasMap, BulkRecordScoreRequest request, 
+            boolean performFetchOnlyForMatching) {
         List<RecordModelTuple> recordAndFieldList = new ArrayList<>();
         for (Record record : request.getRecords()) {
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
@@ -636,7 +641,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     ModelJsonTypeHandler modelJsonTypeHandler = getModelJsonTypeHandler(
                             scoringArtifact.getModelJsonType());
 
-                    if (!shouldSkipMatching(scoringArtifact)) {
+                    if (!shouldSkipMatching(scoringArtifact, performFetchOnlyForMatching)) {
                         missingEssentialFieldsOrBadModelException = checkForMissingFields(record.getRecordId(),
                                 scoringArtifact, fieldSchemas, attrValMap, modelJsonTypeHandler, modelId);
                     }
@@ -865,8 +870,11 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 : "[For ModelId - " + modelId + "] => ";
     }
 
-    private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts) {
+    private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts, boolean performFetchOnlyForMatching) {
         boolean shouldSkipMatching = false;
+        if (performFetchOnlyForMatching) {
+            return shouldSkipMatching;
+        }
         if (scoringArtifacts != null) {
             ModelSummaryProvenance provenance = scoringArtifacts.getModelSummary().getModelSummaryConfiguration();
             for (ModelSummaryProvenanceProperty property : scoringArtifacts.getModelSummary()

@@ -99,7 +99,7 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testFetchModelArtifacts" })
     public void testCheckForMissingFields() throws IOException {
         originalOrderParsedTupleList = scoreRequestProcessorImpl.checkForMissingFields(uniqueScoringArtifactsMap,
-                uniqueFieldSchemasMap, request);
+                uniqueFieldSchemasMap, request, false);
         Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, originalOrderParsedTupleList.size());
 
         int idx = 0;
@@ -126,7 +126,7 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
         partiallyOrderedParsedTupleList = new ArrayList<>();
         partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
         scoreRequestProcessorImpl.extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap,
-                partiallyOrderedParsedTupleList, partiallyOrderedPmmlParsedRecordList, partiallyOrderedBadRecordList);
+                partiallyOrderedParsedTupleList, partiallyOrderedPmmlParsedRecordList, partiallyOrderedBadRecordList, false);
 
     }
 

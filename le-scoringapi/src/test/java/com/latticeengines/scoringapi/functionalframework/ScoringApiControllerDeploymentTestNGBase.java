@@ -175,7 +175,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
         Assert.assertNotNull(selectedAttributes);
-        Assert.assertTrue(selectedAttributes.size() == 6);
+        Assert.assertEquals(selectedAttributes.size(), 6);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
