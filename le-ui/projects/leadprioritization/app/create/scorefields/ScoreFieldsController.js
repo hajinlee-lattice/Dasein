@@ -9,7 +9,10 @@ angular
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
         modelId: $stateParams.modelId,
-        isRTS: Model.EventTableProvenance && !Model.EventTableProvenance.hasOwnProperty('Data_Cloud_Version'),
+        isRTS: Model.EventTableProvenance &&
+            (!Model.EventTableProvenance.hasOwnProperty('Data_Cloud_Version') ||
+            Model.EventTableProvenance.Data_Cloud_Version === null ||
+            Model.EventTableProvenance.Data_Cloud_Version.substring(0,2) === '1.'),
         csvFileName: $stateParams.csvFileName,
         schema: Model.ModelDetails.SourceSchemaInterpretation,
         fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
