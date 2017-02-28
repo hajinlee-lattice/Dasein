@@ -39,10 +39,8 @@ public class JdbcQueryProcessor extends QueryProcessor {
             throw new RuntimeException(String.format("Could not locate BusinessObject for ObjectType %s",
                     query.getObjectType()));
         }
-        SQLQuery<?> from = businessObject.getFromClause(dataCollection, query);
         Predicate freeForm = businessObject.processFreeFormSearch(dataCollection, query.getFreeFormTextSearch());
-        return queryFactory.getQuery(dataCollection) //
-                .from(from) //
+        return businessObject.startQuery(dataCollection, query) //
                 .where(freeForm) //
                 .where(processRestriction(businessObject.getTable(dataCollection).getName(), query.getRestriction()));
     }

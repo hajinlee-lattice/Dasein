@@ -3,8 +3,6 @@ package com.latticeengines.query.evaluator.impl;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.AssertJUnit.assertEquals;
 
-import java.util.ArrayList;
-
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -16,7 +14,6 @@ import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Connective;
-import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.ValueLookup;
@@ -31,14 +28,7 @@ public class QueryProcessorTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testConcreteRestriction() {
-        DataCollection collection = new DataCollection();
-        Table table = new Table();
-        table.setName("querytest_table");
-        table.setInterpretation(SchemaInterpretation.Account.toString());
-        JdbcStorage storage = new JdbcStorage();
-        storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
-        table.setStorageMechanism(storage);
-        collection.getTables().add(table);
+        DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
         restriction.setConnective(Connective.AND);
         restriction.addRestriction(new ConcreteRestriction(false, new ColumnLookup(SchemaInterpretation.Account, "id"),
@@ -52,14 +42,7 @@ public class QueryProcessorTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testBucketRestriction() {
-        DataCollection collection = new DataCollection();
-        Table table = new Table();
-        table.setName("querytest_table");
-        table.setInterpretation(SchemaInterpretation.Account.toString());
-        JdbcStorage storage = new JdbcStorage();
-        storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
-        table.setStorageMechanism(storage);
-        collection.getTables().add(table);
+        DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
         restriction.setConnective(Connective.AND);
         restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
@@ -71,17 +54,16 @@ public class QueryProcessorTestNG extends QueryFunctionalTestNGBase {
         assertEquals(count, 21263);
     }
 
-    @Test(groups = "manual")
-    public void testAccountsThatHaveContacts() {
-        Query query = new Query();
-        query.setLookups(new ArrayList<>() /* account.column1, account.column2 */);
-        query.setRestriction(new ExistsRestriction(SchemaInterpretation.Contact));
-    }
-
-    @Test(groups = "manual")
-    public void testAccountsThatDoNotHaveContacts() {
-        Query query = new Query();
-        query.setLookups(new ArrayList<>() /* account.column1, account.column2 */);
-        query.setRestriction(new ExistsRestriction(SchemaInterpretation.Contact, true));
+    private DataCollection getDataCollection() {
+        DataCollection collection = new DataCollection();
+        Table table = new Table();
+        table.setName("querytest_table");
+        table.setInterpretation(SchemaInterpretation.Account.toString());
+        JdbcStorage storage = new JdbcStorage();
+        storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
+        storage.setTableNameInStorage("querytest_table");
+        table.setStorageMechanism(storage);
+        collection.getTables().add(table);
+        return collection;
     }
 }

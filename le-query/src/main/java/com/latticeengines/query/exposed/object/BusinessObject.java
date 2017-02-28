@@ -33,10 +33,10 @@ public abstract class BusinessObject {
 
     public abstract SchemaInterpretation getObjectType();
 
-    public SQLQuery<?> getFromClause(DataCollection dataCollection, Query query) {
+    public SQLQuery<?> startQuery(DataCollection dataCollection, Query query) {
         String tableName = getTableName(dataCollection);
         StringPath path = Expressions.stringPath(tableName);
-        return startQuery().from(path);
+        return queryFactory.getQuery(dataCollection).from(path);
     }
 
     public Predicate processFreeFormSearch(DataCollection dataCollection, String freeFormRestriction) {
@@ -70,10 +70,6 @@ public abstract class BusinessObject {
     public final List<Map<String, Object>> getData(Query query) {
         query.setObjectType(getObjectType());
         return queryEvaluator.getResults(getDefaultDataCollection(), query);
-    }
-
-    protected final SQLQuery<?> startQuery() {
-        return queryFactory.getQuery(getDefaultDataCollection());
     }
 
     protected final DataCollection getDefaultDataCollection() {
