@@ -75,8 +75,13 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     public DnBCache addCache(DnBMatchContext context) {
         DnBCache cache = null;
         if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
-            cache = initCacheEntity(context, false);
-            cache.setWhiteCache(true);
+            if (!context.isOutOfBusiness()) {
+                cache = initCacheEntity(context, false);
+                cache.setWhiteCache(true);
+            } else {
+                cache = initCacheEntity(context, true);
+                cache.setWhiteCache(false);
+            }
         } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
             cache = initCacheEntity(context, true);
             cache.setWhiteCache(false);
@@ -87,7 +92,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
             cache.setPatched(context.getPatched());
         }
         getCacheMgr().create(cache);
-        log.info(String.format("Added Id = %s to %s cache", cache.getId(), cache.isWhiteCache() ? "white" : "black"));
+        log.info(String.format("Added Id = %s to %s cache. DnBCode = %s. OutOfBusiness = %b", cache.getId(),
+                cache.isWhiteCache() ? "white" : "black", context.getDnbCode().getMessage(),
+                context.isOutOfBusiness()));
         return cache;
     }
 

@@ -31,7 +31,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "dnb", enabled = true)
     public void testDnBBulkLookup() {
         DnBBatchMatchContext batchContext = dnBBulkLookupDispatcher.sendRequest(generateInput());
-        Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.OK);
+        Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.SUBMITTED);
 
         batchContext = dnBBulkLookupFetcher.getResult(batchContext);
         while (batchContext.getDnbCode() == DnBReturnCode.IN_PROGRESS
@@ -41,7 +41,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
                 break;
             }
             try {
-                Thread.sleep(10000);
+                Thread.sleep(60000);
             } catch (InterruptedException e) {
                 break;
             }
@@ -61,11 +61,11 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
                     getEntityInputData()[Integer.valueOf(lookupRequestId)][5]);
             Assert.assertEquals(result.getMatchGrade(), getEntityInputData()[Integer.valueOf(lookupRequestId)][6]);
             log.info(String.format(
-                    "Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s",
+                    "Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %b",
                     result.getMatchedNameLocation().getName(), result.getMatchedNameLocation().getStreet(),
                     result.getMatchedNameLocation().getCity(), result.getMatchedNameLocation().getState(),
                     result.getMatchedNameLocation().getCountryCode(), result.getMatchedNameLocation().getZipcode(),
-                    result.getMatchedNameLocation().getPhoneNumber()));
+                    result.getMatchedNameLocation().getPhoneNumber(), result.isOutOfBusiness()));
             Assert.assertEquals(result.getMatchedNameLocation().getName(),
                     getEntityInputData()[Integer.valueOf(lookupRequestId)][7]);
             Assert.assertEquals(result.getMatchedNameLocation().getStreet(),
@@ -88,7 +88,10 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { "AMAZON INC", "CHICAGO", "ILLINOIS", "US", "013919572", 7, new DnBMatchGrade("AZZAAZZZFFZ"),
                         "AMAZON INC", "232 E OHIO ST FL 3", "CHICAGO", "IL", "US", "606113217", "(312) 642-5400" },
                 { "GOOGLE GERMANY", "HAMBURG", null, "DE", "330465266", 7, new DnBMatchGrade("AZZAZZZZZFZ"),
-                        "Google Germany GmbH", "ABC-Str. 19", "Hamburg", "DE", "DE", "20354", "040808179000" }
+                        "Google Germany GmbH", "ABC-Str. 19", "Hamburg", "DE", "DE", "20354", "040808179000" },
+                { "GORMAN MFG CO INC", "SACRAMENTO", "CA", "US", "009175688", 7, new DnBMatchGrade("AZZAAZZZFFZ"),
+                        "GORMAN MFG CO INC", "8129 JUNIPERO ST STE A", "SACRAMENTO", "CA", "US", "958281603",
+                        "(530) 662-0211" }
                 };
     }
 

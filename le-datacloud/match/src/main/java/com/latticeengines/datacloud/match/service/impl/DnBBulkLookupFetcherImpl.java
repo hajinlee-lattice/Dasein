@@ -215,6 +215,10 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             zipCode = StringUtils.isNotEmpty(zipCode) ? zipCode : null;
             String phoneNumber = StringUtils.strip(values[38]);
             phoneNumber = StringUtils.isNotEmpty(phoneNumber) ? phoneNumber : null;
+            String outOfBusiness = StringUtils.strip(values[40]);
+            if ("Y".equalsIgnoreCase(outOfBusiness) || "1".equalsIgnoreCase(outOfBusiness)) {
+                output.setOutOfBusiness(true);
+            }
 
             output.setDuns(duns);
             output.setConfidenceCode(confidenceCode);

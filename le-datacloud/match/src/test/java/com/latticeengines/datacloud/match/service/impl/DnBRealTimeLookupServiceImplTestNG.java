@@ -47,6 +47,12 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         context.setLookupRequestId(UUID.randomUUID().toString());
 
         DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(context);
+        log.info(String.format("Match duration: %d", res.getDuration()));
+        log.info(String.format(
+                "InputName = %s, DnBReturnCode = %s, ConfidenceCode = %d, MatchGrade = %s, OutOfBusiness = %b",
+                res.getInputNameLocation().getName(), res.getDnbCode().getMessage(), res.getConfidenceCode(),
+                res.getMatchGrade() != null ? res.getMatchGrade().getRawCode() : null, res.isOutOfBusiness()));
+
         Assert.assertEquals(res.getDnbCode(), dnbCode);
         if (duns != null) {
             Assert.assertEquals(res.getDuns(), duns);
@@ -130,6 +136,15 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         context.setLookupRequestId(UUID.randomUUID().toString());
 
         DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(context);
+        log.info(String.format("Match duration: %d", res.getDuration()));
+        log.info(String.format(
+                "MatchGrade = %s, Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %b",
+                res.getMatchGrade() != null ? res.getMatchGrade().getRawCode() : null,
+                res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
+                res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
+                res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
+                res.getMatchedNameLocation().getPhoneNumber(), res.isOutOfBusiness()));
+
         Assert.assertEquals(res.getDnbCode(), dnbCode);
         if (duns != null) {
             Assert.assertEquals(res.getDuns(), duns);
@@ -144,18 +159,6 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         Assert.assertEquals(res.getMatchedNameLocation().getCountryCode(), matchedCountryCode);
         Assert.assertEquals(res.getMatchedNameLocation().getZipcode(), matchedZipCode);
         Assert.assertEquals(res.getMatchedNameLocation().getPhoneNumber(), matchedPhoneNumber);
-
-        log.info(String.format("Match duration: %d", res.getDuration()));
-        log.info(String.format(
-                "Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s",
-                res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
-                res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
-                res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
-                res.getMatchedNameLocation().getPhoneNumber()));
-        if (res.getMatchGrade() != null) {
-            log.info(res.getMatchGrade().getRawCode());
-        }
-
     }
 
     @DataProvider(name = "entityInputData")
@@ -171,7 +174,9 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
                 { "GOOGLE", null, "CA", "USA", "US", DnBReturnCode.OK, "060902413", 6,
                         new DnBMatchGrade("AZZZAZZZFFZ") },
                 { "GOOGLE GERMANY", "HAMBURG", null, "GERMANY", "DE", DnBReturnCode.OK, "330465266", 7,
-                        new DnBMatchGrade("AZZAZZZZZFZ") } };
+                        new DnBMatchGrade("AZZAZZZZZFZ") },
+                { "GORMAN MFG CO INC", "SACRAMENTO", "CA", "USA", "US", DnBReturnCode.DISCARD, "009175688", 7,
+                        new DnBMatchGrade("AZZAAZZZFFZ") } };
     }
 
     @DataProvider(name = "emailInputData")
@@ -184,7 +189,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     public static Object[][] getEntityInputDataTestMatchedNameLocation() {
         return new Object[][] {
                 { "GOOGLE", "USA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZZZZZFZZ"),
-                "GOOGLE INC.", "1600 AMPHITHEATRE PKWY", "MOUNTAIN VIEW", "CA", "US", "94043", "6502530000" }
+                        "GOOGLE INC.", "1600 AMPHITHEATRE PKWY", "MOUNTAIN VIEW", "CA", "US", "94043", "6502530000" },
         };
     }
 }

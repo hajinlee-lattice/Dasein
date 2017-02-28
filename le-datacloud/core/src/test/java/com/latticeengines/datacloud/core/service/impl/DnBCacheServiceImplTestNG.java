@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +132,9 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
         Assert.assertEquals(whiteCache.getDuns(), (String) data[0][7]);
         Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[0][8]);
         Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), (String) data[0][9]);
+        Assert.assertNotNull(whiteCache.getTimestamp());
+        Date d = new Date(whiteCache.getTimestamp());
+        log.info(String.format("Timestamp of white cache: %s", d.toString()));
 
         DnBMatchContext emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[0][6]);
@@ -272,6 +276,9 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         DnBCache blackCache = dnbCacheService.lookupCache(entityContext);
         Assert.assertNotNull(blackCache);
+        Assert.assertNotNull(blackCache.getTimestamp());
+        Date d = new Date(blackCache.getTimestamp());
+        log.info(String.format("Timestamp of black cache: %s", d.toString()));
 
         DnBMatchContext emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[0][6]);

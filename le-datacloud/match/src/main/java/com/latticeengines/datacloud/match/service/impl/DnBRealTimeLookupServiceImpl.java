@@ -80,6 +80,12 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     @Value("${datacloud.dnb.realtime.reasoncode.de}")
     private String reasonCodeDe;
 
+    @Value("${datacloud.dnb.realtime.operatingstatus.jsonpath}")
+    private String operatingStatusJsonPath;
+
+    @Value("${datacloud.dnb.realtime.operatingstatus.outofbusiness}")
+    private String outOfBusinessValue;
+
     @Override
     public DnBMatchContext realtimeEntityLookup(DnBMatchContext context) {
         for (int i = 0; i < retries; i++) {
@@ -132,6 +138,10 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                     .setZipcode((String) retrieveJsonValueFromResponse(entityZipCodeJsonPath, response, false));
             matchedNameLocation
                     .setPhoneNumber((String) retrieveJsonValueFromResponse(entityPhoneNumberJsonPath, response, false));
+            String outOfBusiness = (String) retrieveJsonValueFromResponse(operatingStatusJsonPath, response, false);
+            if (outOfBusinessValue.equalsIgnoreCase(outOfBusiness)) {
+                context.setOutOfBusiness(true);
+            }
             break;
         case REALTIME_EMAIL:
             context.setDuns((String) retrieveJsonValueFromResponse(emailDunsJsonPath, response, false));

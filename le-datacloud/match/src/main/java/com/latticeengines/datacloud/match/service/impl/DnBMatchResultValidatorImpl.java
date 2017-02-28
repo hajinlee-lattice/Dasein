@@ -78,6 +78,11 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
             return true;
         }
 
+        if (res.isOutOfBusiness()) {
+            res.setDnbCode(DnBReturnCode.DISCARD);
+            return false;
+        }
+
         if (!matchCriteria.accept(res.getConfidenceCode(), res.getMatchGrade())) {
             res.setDnbCode(DnBReturnCode.DISCARD);
             return false;
