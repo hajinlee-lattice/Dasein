@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.service.DnBCacheService;
+import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -97,6 +98,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Autowired
     private DnBMatchResultValidator dnbMatchResultValidator;
 
+    @Autowired
+    private NameLocationService nameLocationService;
+
     private ExecutorService dnbDataSourceServiceExecutor;
 
     private final Queue<DnBMatchContext> comingContexts = new ConcurrentLinkedQueue<>();
@@ -130,6 +134,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         DnBMatchContext context = new DnBMatchContext();
         context.setLookupRequestId(lookupRequestId);
         context.setInputNameLocation(matchKeyTuple);
+        nameLocationService.setDefaultCountry(context.getInputNameLocation());
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         boolean readyToReturn = false;
         // Check timeout
@@ -220,6 +225,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         DnBMatchContext context = new DnBMatchContext();
         context.setLookupRequestId(lookupRequestId);
         context.setInputNameLocation(matchKeyTuple);
+        nameLocationService.setDefaultCountry(context.getInputNameLocation());
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
         boolean readyToReturn = false;
         // Check timeout

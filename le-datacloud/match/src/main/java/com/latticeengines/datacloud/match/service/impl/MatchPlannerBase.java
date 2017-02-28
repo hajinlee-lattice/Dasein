@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
-import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
@@ -227,9 +226,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 for (Integer countryPos : countryPosList) {
                     originalCountry = (String) inputRecord.get(countryPos);
                 }
-            }
-            if (StringUtils.isEmpty(originalCountry)) {
-                originalCountry = LocationUtils.USA;
             }
             String originalState = null;
             if (keyPositionMap.containsKey(MatchKey.State)) {

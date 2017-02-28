@@ -51,7 +51,7 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             return false;
         }
 
-        if (matchKeyTuple.getCountryCode() != null && matchKeyTuple.getName() != null) {
+        if (matchKeyTuple.getName() != null) {
             return true;
         }
 

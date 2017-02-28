@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class CountryCodeServiceImpl implements CountryCodeService {
     private ThreadPoolTaskScheduler scheduler;
 
     public String getCountryCode(String standardizedCountry) {
+        if (StringUtils.isEmpty(standardizedCountry)) {
+            return null;
+        }
         if (countryCodeWhiteCache.containsKey(standardizedCountry)) {
             return countryCodeWhiteCache.get(standardizedCountry);
         }

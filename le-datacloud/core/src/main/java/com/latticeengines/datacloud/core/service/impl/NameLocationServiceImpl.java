@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.core.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,15 @@ public class NameLocationServiceImpl implements NameLocationService {
 
         nameLocation.setZipcode(cleanZipCode);
         nameLocation.setPhoneNumber(cleanPhoneNumber);
+    }
+
+    @Override
+    public void setDefaultCountry(NameLocation nameLocation) {
+        if (StringUtils.isEmpty(nameLocation.getCountry())) {
+            nameLocation.setCountry(LocationUtils.USA);
+            nameLocation.setCountryCode(countryCodeService.getCountryCode(LocationUtils.USA));
+            nameLocation.setState(LocationUtils.getStandardState(nameLocation.getCountry(), nameLocation.getState()));
+        }
     }
 
 }

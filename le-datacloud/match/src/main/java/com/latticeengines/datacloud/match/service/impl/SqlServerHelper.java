@@ -278,6 +278,9 @@ public class SqlServerHelper implements DbHelper {
         sql += "\nWHERE p1.[" + MatchConstants.DOMAIN_FIELD + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
 
         for (NameLocation nameLocation : nameLocations) {
+            if (StringUtils.isEmpty(nameLocation.getCountry())) {
+                nameLocation.setCountry(LocationUtils.USA);
+            }
             if (StringUtils.isNotEmpty(nameLocation.getName()) && StringUtils.isNotEmpty(nameLocation.getState())) {
                 sql += " OR ( ";
                 sql += String.format("p1.[%s] = '%s'", MatchConstants.NAME_FIELD,
@@ -404,6 +407,9 @@ public class SqlServerHelper implements DbHelper {
                 NameLocation nameLocation = record.getParsedNameLocation();
                 if (nameLocation != null) {
                     String parsedName = nameLocation.getName();
+                    if (StringUtils.isEmpty(nameLocation.getCountry())) {
+                        nameLocation.setCountry(LocationUtils.USA);
+                    }
                     String parsedCountry = nameLocation.getCountry();
                     String parsedState = nameLocation.getState();
                     String parsedCity = nameLocation.getCity();

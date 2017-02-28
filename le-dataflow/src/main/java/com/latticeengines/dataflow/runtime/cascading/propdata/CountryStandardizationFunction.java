@@ -35,7 +35,7 @@ public class CountryStandardizationFunction extends BaseOperation implements Fun
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         String country = arguments.getString(countryField);
-        country = LocationUtils.getStandardCountryDefaultNull(country);
+        country = LocationUtils.getStandardCountry(country);
         if (standardCountries.containsKey(country)) {
             country = standardCountries.get(country);
         } else {
