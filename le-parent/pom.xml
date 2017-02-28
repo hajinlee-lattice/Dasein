@@ -99,6 +99,11 @@
         <jacoco.destfile>jacoco.exec</jacoco.destfile>
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
         <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize> <!-- for java 8 compatibility, where this variable is empty -->
+
+        <!-- these can be changed in child project -->
+        <jetty.dir>main</jetty.dir>
+        <jetty.stop.port>10999</jetty.stop.port>
+        <jetty.use.test.cp>true</jetty.use.test.cp>
     </properties>
 
     <!-- set up to use LE local Nexus Repository for dependencies -->
@@ -381,11 +386,11 @@
                                     <value>true</value>
                                 </systemProperty>
                             </systemProperties>
-                            <webXml>${basedir}/src/${jetty.dir:main}/webapp/WEB-INF/web.xml</webXml>
+                            <webXml>${basedir}/src/${jetty.dir}/webapp/WEB-INF/web.xml</webXml>
                             <webAppSourceDirectory>${basedir}/src/${jetty.dir:main}/webapp</webAppSourceDirectory>
-                            <useTestClasspath>${jetty.use.test.cp:true}</useTestClasspath>
+                            <useTestClasspath>${jetty.use.test.cp}</useTestClasspath>
                             <scanIntervalSeconds>0</scanIntervalSeconds>
-                            <stopPort>${jetty.stop.port:10999}</stopPort>
+                            <stopPort>${jetty.stop.port}</stopPort>
                             <stopKey>STOP</stopKey>
                             <stopWait>10</stopWait>
                         </configuration>
