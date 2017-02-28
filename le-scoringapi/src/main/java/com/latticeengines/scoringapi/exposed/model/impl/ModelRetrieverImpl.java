@@ -45,7 +45,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -89,6 +88,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String DATA_EXPORT_CSV = "_dataexport.csv";
     public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
     public static final String SCORED_TXT = "_scored.txt";
+    public static final String RTS_OR_NON_FUZZY_MATCH_VALIDATION_EXPRESSION = "((Email|Website)&&Id)";
+    public static final String FUZZY_MATCH_VALIDATION_EXPRESSION = "((CompanyName|Email|Website)&&Id)";
+    public static final String RTS_DATA_CLOUD_VERSION = "1.0";
 
     @VisibleForTesting
     static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
@@ -184,11 +186,16 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelSummary modelSummary = artifacts.getModelSummary();
         boolean fuzzyMatchEnabled = FeatureFlagClient.isEnabled(customerSpace,
                 LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName());
-        String schemaInterpretationStr = modelSummary.getSourceSchemaInterpretation();
-        if (schemaInterpretationStr == null) {
-            throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
+        String dataCloudVersion = modelSummary.getDataCloudVersion();
+        if (StringUtils.isEmpty(dataCloudVersion) || dataCloudVersion.equals(RTS_DATA_CLOUD_VERSION)) {
+            fields.setValidationExpression(RTS_OR_NON_FUZZY_MATCH_VALIDATION_EXPRESSION);
+        } else {
+            if (fuzzyMatchEnabled) {
+                fields.setValidationExpression(FUZZY_MATCH_VALIDATION_EXPRESSION);
+            } else {
+                fields.setValidationExpression(RTS_OR_NON_FUZZY_MATCH_VALIDATION_EXPRESSION);
+            }
         }
-        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
 
         if (!CollectionUtils.isEmpty(predictors)) {
             for (String fieldName : mapFields.keySet()) {
@@ -206,7 +213,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         }
                     }
 
-                    setField(fieldList, fieldName, displayName, fieldSchema, schemaInterpretation, fuzzyMatchEnabled);
+                    setField(fieldList, fieldName, displayName, fieldSchema);
                 }
             }
         } else {
@@ -228,7 +235,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         displayName = attributeMap.get(fieldName).getDisplayName();
                     }
 
-                    setField(fieldList, fieldName, displayName, fieldSchema, schemaInterpretation, fuzzyMatchEnabled);
+                    setField(fieldList, fieldName, displayName, fieldSchema);
                 }
             }
         }
@@ -237,35 +244,13 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     @VisibleForTesting
-    void setField(List<Field> fieldList, String fieldName, String displayName, FieldSchema fieldSchema,
-            SchemaInterpretation schemaInterpretation, boolean fuzzyMatchEnabled) {
+    void setField(List<Field> fieldList, String fieldName, String displayName, FieldSchema fieldSchema) {
         if (StringUtils.isEmpty(displayName)) {
             // by default use field name as display name
             displayName = fieldName;
         }
 
-        String requiredIdColumn = "";
-        if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-            requiredIdColumn = InterfaceName.Website.name();
-        } else {
-            requiredIdColumn = InterfaceName.Email.name();
-        }
-
         Field field = new Field(fieldName, fieldSchema.type, displayName);
-        // Mark fields as required for scoring according to model type and
-        // feature flag
-        if (fieldName.equals(InterfaceName.Id.name())) {
-            field.setRequiredForScoring(true);
-        } else if (fieldName.equals(requiredIdColumn)) {
-            field.setRequiredForScoring(true);
-        }
-
-        if (fuzzyMatchEnabled) {
-            if (fieldName.equals(InterfaceName.CompanyName.name())) {
-                field.setRequiredForScoring(true);
-            }
-        }
-
         // Mark Fuzzylogic fields as primary fields to enforce model field
         // mapping
         FieldInterpretation keyField = null;

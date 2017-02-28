@@ -27,10 +27,6 @@ public class Field {
     @ApiModelProperty(required = false, value = "Represents required field mapping for Model")
     private boolean isPrimaryField;
 
-    @JsonProperty("isRequiredForScoring")
-    @ApiModelProperty(required = false, value = "Represents required field for Scoring")
-    private boolean isRequiredForScoring;
-
     public Field() {
         super();
     }
@@ -67,12 +63,4 @@ public class Field {
         this.isPrimaryField = isPrimaryField;
     }
 
-    @JsonProperty("isRequiredForScoring")
-    public boolean isRequiredForScoring() {
-        return isRequiredForScoring;
-    }
-
-    public void setRequiredForScoring(boolean isRequiredForScoring) {
-        this.isRequiredForScoring = isRequiredForScoring;
-    }
 }

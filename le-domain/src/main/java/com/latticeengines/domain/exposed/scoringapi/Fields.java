@@ -16,6 +16,10 @@ public class Fields {
     @ApiModelProperty(required = true, value = "List of field")
     private List<Field> fields;
 
+    @JsonProperty("validation_expression")
+    @ApiModelProperty(required = true, value = "Validation Expression")
+    private String validationExpression;
+
     public Fields() {
         super();
     }
@@ -26,8 +30,15 @@ public class Fields {
         this.fields = fields;
     }
 
+    public Fields(String modelId, List<Field> fields, String validationExpression) {
+        this();
+        this.modelId = modelId;
+        this.fields = fields;
+        this.validationExpression = validationExpression;
+    }
+
     public String getModelId() {
-        return modelId;
+        return this.modelId;
     }
 
     public void setModelId(String modelId) {
@@ -35,11 +46,19 @@ public class Fields {
     }
 
     public List<Field> getFields() {
-        return fields;
+        return this.fields;
     }
 
     public void setFields(List<Field> fields) {
         this.fields = fields;
+    }
+
+    public String getValidationExpression() {
+        return this.validationExpression;
+    }
+
+    public void setValidationExpression(String validationExpression) {
+        this.validationExpression = validationExpression;
     }
 
 }
