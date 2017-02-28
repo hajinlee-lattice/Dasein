@@ -22,7 +22,7 @@ fi
 
 if [ -f "/etc/efsip.txt" ]; then
     EFS_IP=`cat /etc/efsip.txt`
-    echo "EFS_IP=${EFSI_IP}"
+    echo "EFS_IP=${EFS_IP}"
     echo "${EFS_IP}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
     mkdir -p /mnt/efs
     mount -a
