@@ -33,7 +33,8 @@ public class AccountMasterReport implements CharacterizationSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "LE_COUNTRY", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE", "LE_NUMBER_OF_LOCATIONS", "Version"};
+        return new String[] { "LDC_Country", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE",
+                "LE_NUMBER_OF_LOCATIONS", "Version" };
     }
 
     @Override
@@ -97,11 +98,13 @@ public class AccountMasterReport implements CharacterizationSource {
 
     @Override
     public String[] getGroupKeys() {
-        return new String[] {"LE_COUNTRY", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE", "LE_NUMBER_OF_LOCATIONS"};
+        return new String[] { "LDC_Country", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE",
+                "LE_NUMBER_OF_LOCATIONS" };
     }
 
     @Override
     public String[] getExcludeAttrs() {
-        return new String[] {"LE_COUNTRY", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE", "LE_NUMBER_OF_LOCATIONS"};
+        return new String[] { "LDC_Country", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE",
+                "LE_NUMBER_OF_LOCATIONS" };
     }
 }
