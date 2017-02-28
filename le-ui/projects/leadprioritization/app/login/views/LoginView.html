@@ -20,23 +20,23 @@
             <div class="login-wrap">
                 <div class="user-login-info">
                     <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
-                    <input  type="text" 
-                            id="username" 
-                            autocomplete="off" 
-                            data-ng-model="username" 
-                            data-ng-enter="loginClick()" 
-                            title="{{ResourceUtility.getString('LOGIN_USERNAME')}}" 
-                            placeholder="{{ResourceUtility.getString('LOGIN_USERNAME')}}" 
-                            class="form-control {{usernameInvalid ? 'error' : ''}}" 
+                    <input  type="text"
+                            id="username"
+                            autocomplete="off"
+                            data-ng-model="username"
+                            data-ng-enter="loginClick()"
+                            title="{{ResourceUtility.getString('LOGIN_USERNAME')}}"
+                            placeholder="{{ResourceUtility.getString('LOGIN_USERNAME')}}"
+                            class="form-control {{usernameInvalid ? 'error' : ''}}"
                             autofocus>
                     <label>{{ResourceUtility.getString('LOGIN_PASSWORD')}}</label>
-                    <input  type="password"  
+                    <input  type="password"
                             id="password"
-                            autocomplete="off" 
-                            data-ng-model="password" 
-                            data-ng-enter="loginClick()" 
-                            title="{{ResourceUtility.getString('LOGIN_PASSWORD')}}" 
-                            placeholder="{{ResourceUtility.getString('LOGIN_PASSWORD')}}" 
+                            autocomplete="off"
+                            data-ng-model="password"
+                            data-ng-enter="loginClick()"
+                            title="{{ResourceUtility.getString('LOGIN_PASSWORD')}}"
+                            placeholder="{{ResourceUtility.getString('LOGIN_PASSWORD')}}"
                             class="form-control {{passwordInvalid ? 'error' : ''}}">
                 </div>
                 <div class="user-login-info-buttonforgot">
@@ -51,7 +51,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Forgot Password form -->
         <div class="form-signin" data-ng-show="!showLoginForm && showForgotPassword">
             <h2 class="form-signin-heading">
@@ -61,8 +61,8 @@
             <div class="login-wrap">
                 <div class="user-login-info">
                     <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
-                    <input type="text" 
-                           class="form-control {{forgotPasswordUsernameInvalid ? 'error' : ''}}" 
+                    <input type="text"
+                           class="form-control {{forgotPasswordUsernameInvalid ? 'error' : ''}}"
                            placeholder="{{ResourceUtility.getString('LOGIN_USERNAME')}}"
                            autocomplete="off"
                            data-ng-model="forgotPasswordUsername"
@@ -88,6 +88,6 @@
             </div>
         </div>
 
-        <p class="footer login-footer">© {{copyrightString}} <a href="http://lattice-engines.com/about/privacy-policy">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}</a></p>
+        <p class="footer login-footer">© {{copyrightString}} <a href="http://lattice-engines.com/about-us/privacy-policy">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}</a></p>
     </div>
 </div>
