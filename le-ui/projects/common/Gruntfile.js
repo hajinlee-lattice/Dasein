@@ -89,9 +89,7 @@ module.exports = function(grunt) {
             production: {
                 src: [
                     '<%= dir.app %>/**/*.js',
-                    '<%= dir.components %>/**/*.js',
-                    '!<%= dir.app %>/utilities/EvergageUtility.js',
-                    '!<%= dir.app %>/utilities/TrackingConstantsUtility.js'
+                    '<%= dir.components %>/**/*.js'
                 ],
                 dest: '<%= dir.assets %>/lattice.min.js'
             }
