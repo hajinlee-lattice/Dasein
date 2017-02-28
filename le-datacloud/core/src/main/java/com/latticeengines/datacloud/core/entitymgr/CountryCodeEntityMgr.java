@@ -4,9 +4,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 public interface CountryCodeEntityMgr {
-    ConcurrentMap<String, String> findAll();
+    ConcurrentMap<String, String> findAllCountryCodes();
 
-    String findByCountry(String country);
+    String findCountryCode(String country);
+
+    String findCountry(String country);
 
     Map<String, String> findAllCountries();
+
+    ConcurrentMap<String, String> findAllCountriesSync();
 }

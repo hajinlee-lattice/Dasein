@@ -214,8 +214,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             for (int i = 1; i < csvRecords.size(); i++) {
                 CSVRecord record = csvRecords.get(i);
                 String country = record.get(FORTUNE1000_COUNTRY);
-                country = LocationUtils.getStandardCountry(country);
                 String countryCode = countryCodeService.getCountryCode(country);
+                country = countryCodeService.getStandardCountry(country);
                 String name = record.get(0);
                 name = NameStringStandardizationUtils.getStandardString(name);
                 String state = null;
@@ -265,8 +265,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                 for (int i = 1; i < csvRecords.size(); i++) {
                     CSVRecord record = csvRecords.get(i);
                     String country = record.get(FORTUNE1000_COUNTRY);
-                    country = LocationUtils.getStandardCountry(country);
                     String countryCode = countryCodeService.getCountryCode(country);
+                    country = countryCodeService.getStandardCountry(country);
                     String name = record.get(0);
                     name = NameStringStandardizationUtils.getStandardString(name);
                     String state = record.get(FORTUNE1000_STATE);

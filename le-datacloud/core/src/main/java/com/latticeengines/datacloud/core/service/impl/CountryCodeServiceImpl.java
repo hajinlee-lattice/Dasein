@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.core.entitymgr.CountryCodeEntityMgr;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 
@@ -32,33 +33,57 @@ public class CountryCodeServiceImpl implements CountryCodeService {
 
     private ConcurrentMap<String, String> countryCodeWhiteCache = new ConcurrentHashMap<>();
     private final ConcurrentSkipListSet<String> countryCodeBlackCache = new ConcurrentSkipListSet<>();
+    private ConcurrentMap<String, String> countryWhiteCache = new ConcurrentHashMap<>();
+    private final ConcurrentSkipListSet<String> countryBlackCache = new ConcurrentSkipListSet<>();
 
     @Autowired
     @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
-    public String getCountryCode(String standardizedCountry) {
-        if (StringUtils.isEmpty(standardizedCountry)) {
+    public String getCountryCode(String country) {
+        String cleanCountry = LocationUtils.getStandardCountry(country);
+        if (StringUtils.isEmpty(cleanCountry)) {
             return null;
         }
-        if (countryCodeWhiteCache.containsKey(standardizedCountry)) {
-            return countryCodeWhiteCache.get(standardizedCountry);
+        synchronized (countryCodeWhiteCache) {
+            if (countryCodeWhiteCache.containsKey(cleanCountry)) {
+                return countryCodeWhiteCache.get(cleanCountry);
+            }
         }
-        if (countryCodeBlackCache.contains(standardizedCountry)) {
+        if (countryCodeBlackCache.contains(cleanCountry)) {
             return null;
         }
-        String countryCode = countryCodeEntityMgr.findByCountry(standardizedCountry);
+        String countryCode = countryCodeEntityMgr.findCountryCode(cleanCountry);
         if (countryCode == null) {
-            log.info("Failed to map " + standardizedCountry + " to country code");
-            synchronized (countryCodeBlackCache) {
-                countryCodeBlackCache.add(standardizedCountry);
-            }
+            log.info("Failed to map " + cleanCountry + " to country code");
+            countryCodeBlackCache.add(cleanCountry);
         } else {
-            synchronized (countryCodeWhiteCache) {
-                countryCodeWhiteCache.putIfAbsent(standardizedCountry, countryCode);
-            }
+            countryCodeWhiteCache.putIfAbsent(cleanCountry, countryCode);
         }
         return countryCode;
+    }
+
+    public String getStandardCountry(String country) {
+        String cleanCountry = LocationUtils.getStandardCountry(country);
+        if (StringUtils.isEmpty(cleanCountry)) {
+            return null;
+        }
+        synchronized (countryWhiteCache) {
+            if (countryWhiteCache.containsKey(cleanCountry)) {
+                return countryWhiteCache.get(cleanCountry);
+            }
+        }
+        if (countryBlackCache.contains(cleanCountry)) {
+            return cleanCountry;
+        }
+        String standardCountry = countryCodeEntityMgr.findCountry(cleanCountry);
+        if (standardCountry == null) {
+            countryBlackCache.add(cleanCountry);
+            return cleanCountry;
+        } else {
+            countryWhiteCache.putIfAbsent(cleanCountry, standardCountry);
+            return standardCountry;
+        }
     }
 
     public Map<String, String> getStandardCountries() {
@@ -77,12 +102,16 @@ public class CountryCodeServiceImpl implements CountryCodeService {
     }
 
     private void loadCache() {
-        log.info("Start loading country code");
-        countryCodeWhiteCache = countryCodeEntityMgr.findAll();
+        log.info("Start loading country codes and standard countries");
+        countryCodeWhiteCache = countryCodeEntityMgr.findAllCountryCodes();
+        countryWhiteCache = countryCodeEntityMgr.findAllCountriesSync();
         synchronized (countryCodeBlackCache) {
             countryCodeBlackCache.clear();
         }
-        log.info("Finished loading country code");
+        synchronized (countryBlackCache) {
+            countryBlackCache.clear();
+        }
+        log.info("Finished loading country codes and standard countries");
     }
 
 }

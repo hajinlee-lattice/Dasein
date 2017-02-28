@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTestNGBase;
 
@@ -27,9 +28,7 @@ public class CountryCodeServiceImplTestNG extends DataCloudCoreFunctionalTestNGB
 
     @Test(groups = "functional")
     public void testSingleMapping() {
-        String standardizedCountry = LocationUtils.getStandardCountry("United States");
-        Assert.assertEquals(standardizedCountry, "USA");
-        String countryCode = countryCodeService.getCountryCode(standardizedCountry);
+        String countryCode = countryCodeService.getCountryCode("United States");
         Assert.assertEquals(countryCode, "US");
     }
 
@@ -41,8 +40,7 @@ public class CountryCodeServiceImplTestNG extends DataCloudCoreFunctionalTestNGB
         String countryName;
         try {
             while ((countryName = reader.readLine()) != null) {
-                String standardizedCountry = LocationUtils.getStandardCountry(countryName);
-                String countryCode = countryCodeService.getCountryCode(standardizedCountry);
+                String countryCode = countryCodeService.getCountryCode(countryName);
                 if (countryCode == null) {
                     log.info("Input: " + countryName);
                     res = false;
@@ -58,13 +56,17 @@ public class CountryCodeServiceImplTestNG extends DataCloudCoreFunctionalTestNGB
     public void testCountryStandardization() {
         InputStream fileStream = ClassLoader.getSystemResourceAsStream("datasource/" + FILENAME);
         BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream));
-        Map<String, String> standardCountries = countryCodeService.getStandardCountries();
+        Map<String, String> countryMap = countryCodeService.getStandardCountries();
+        Set<String> standardCountries = new HashSet<>();
+        for (String standardCountry : countryMap.values()) {
+            standardCountries.add(standardCountry);
+        }
         boolean res = true;
         String countryName;
         try {
             while ((countryName = reader.readLine()) != null) {
-                String standardizedCountry = LocationUtils.getStandardCountry(countryName);
-                if (!standardCountries.containsKey(standardizedCountry)) {
+                String standardizedCountry = countryCodeService.getStandardCountry(countryName);
+                if (!standardCountries.contains(standardizedCountry)) {
                     log.info(String.format("Fail to standardize country: standardizedCountry = %s, countryName = %s",
                             standardizedCountry, countryName));
                     res = false;

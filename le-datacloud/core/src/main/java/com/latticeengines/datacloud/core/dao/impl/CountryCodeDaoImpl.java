@@ -20,7 +20,7 @@ public class CountryCodeDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Co
 
     @SuppressWarnings("unchecked")
     @Override
-    public String findByCountry(String country) {
+    public String findCountryCode(String country) {
         Session session = getSessionFactory().getCurrentSession();
         Class<CountryCode> entityClz = getEntityClass();
         String queryStr = String.format("from %s where CountryName = :country", entityClz.getSimpleName());
@@ -31,6 +31,22 @@ public class CountryCodeDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Co
             return null;
         } else {
             return list.get(0).getIsoCountryCode2Char();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public String findCountry(String country) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<CountryCode> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where CountryName = :country", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("country", country);
+        List<CountryCode> list = query.list();
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        } else {
+            return list.get(0).getIsoCountryName();
         }
     }
 }

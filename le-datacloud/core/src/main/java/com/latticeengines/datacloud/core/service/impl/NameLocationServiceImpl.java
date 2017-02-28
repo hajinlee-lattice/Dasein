@@ -22,8 +22,8 @@ public class NameLocationServiceImpl implements NameLocationService {
     public void normalize(NameLocation nameLocation) {
 
         String cleanName = NameStringStandardizationUtils.getStandardString(nameLocation.getName());
-        String cleanCountry = LocationUtils.getStandardCountry(nameLocation.getCountry());
-        String countryCode = countryCodeService.getCountryCode(cleanCountry);
+        String cleanCountry = countryCodeService.getStandardCountry(nameLocation.getCountry());
+        String countryCode = countryCodeService.getCountryCode(nameLocation.getCountry());
         String cleanState = LocationUtils.getStandardState(cleanCountry, nameLocation.getState());
         String cleanCity = NameStringStandardizationUtils.getStandardString(nameLocation.getCity());
         String cleanPhoneNumber = PhoneNumberUtils.getStandardPhoneNumber(nameLocation.getPhoneNumber(), countryCode);
@@ -44,7 +44,7 @@ public class NameLocationServiceImpl implements NameLocationService {
         if (StringUtils.isEmpty(nameLocation.getCountry())) {
             nameLocation.setCountry(LocationUtils.USA);
             nameLocation.setCountryCode(countryCodeService.getCountryCode(LocationUtils.USA));
-            nameLocation.setState(LocationUtils.getStandardState(nameLocation.getCountry(), nameLocation.getState()));
+            nameLocation.setState(LocationUtils.getStandardState(LocationUtils.USA, nameLocation.getState()));
         }
     }
 

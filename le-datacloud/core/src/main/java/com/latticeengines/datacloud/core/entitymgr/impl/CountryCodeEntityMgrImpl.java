@@ -24,7 +24,7 @@ public class CountryCodeEntityMgrImpl implements CountryCodeEntityMgr {
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ConcurrentMap<String, String> findAll() {
+    public ConcurrentMap<String, String> findAllCountryCodes() {
         List<CountryCode> countryCodes = countryCodeDao.findAll();
         ConcurrentMap<String, String> countryCodeMap = new ConcurrentHashMap<>();
         for (CountryCode code : countryCodes) {
@@ -35,8 +35,14 @@ public class CountryCodeEntityMgrImpl implements CountryCodeEntityMgr {
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public String findByCountry(String country) {
-        return countryCodeDao.findByCountry(country);
+    public String findCountryCode(String country) {
+        return countryCodeDao.findCountryCode(country);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public String findCountry(String country) {
+        return countryCodeDao.findCountry(country);
     }
 
     @Override
@@ -44,6 +50,17 @@ public class CountryCodeEntityMgrImpl implements CountryCodeEntityMgr {
     public Map<String, String> findAllCountries() {
         List<CountryCode> countryCodes = countryCodeDao.findAll();
         Map<String, String> countryMap = new HashMap<>();
+        for (CountryCode code : countryCodes) {
+            countryMap.put(code.getCountryName(), code.getIsoCountryName());
+        }
+        return countryMap;
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ConcurrentMap<String, String> findAllCountriesSync() {
+        List<CountryCode> countryCodes = countryCodeDao.findAll();
+        ConcurrentMap<String, String> countryMap = new ConcurrentHashMap<>();
         for (CountryCode code : countryCodes) {
             countryMap.put(code.getCountryName(), code.getIsoCountryName());
         }
