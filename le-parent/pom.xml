@@ -349,8 +349,7 @@
                                     </excludes>
                                     <groups>${functional.groups}</groups>
                                     <additionalClasspathElements>
-                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop
-                                        </additionalClasspathElement>
+                                        <additionalClasspathElement>${env.HADOOP_CONF_DIR}</additionalClasspathElement>
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                 </configuration>
@@ -373,7 +372,7 @@
                                 <port>${jetty.port}</port>
                             </httpConnector>
                             <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
+                                <extraClasspath>${env.HADOOP_CONF_DIR};${env.JAVA_HOME}/lib/tools.jar
                                 </extraClasspath>
                             </webAppConfig>
                             <systemProperties>
@@ -473,10 +472,8 @@
                                         <include>${deployment.classes.include}</include>
                                     </includes>
                                     <groups>${deployment.groups}</groups>
-                                    <forkMode>always</forkMode>
                                     <additionalClasspathElements>
-                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop
-                                        </additionalClasspathElement>
+                                        <additionalClasspathElement>${env.HADOOP_CONF_DIR}</additionalClasspathElement>
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                     <runOrder>
