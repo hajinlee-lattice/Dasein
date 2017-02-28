@@ -14,6 +14,7 @@
         <le.monitor.version>3.3.0-SNAPSHOT</le.monitor.version>
         <jetty.port>8080</jetty.port>
         <jett.stop.port>10980</jett.stop.port>
+        <jetty.dir>test</jetty.dir>
     </properties>
 
     <parent>
