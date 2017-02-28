@@ -22,13 +22,17 @@ public class QueryTranslator {
 
         Restriction restriction = translateRestrictions();
         result.setRestriction(restriction);
-        result.setFreeFormRestriction(frontEndQuery.getFreeFormRestriction());
+        result.setFreeFormTextSearch(frontEndQuery.getFreeFormRestriction());
         result.setPageFilter(frontEndQuery.getPageFilter());
         result.setSort(frontEndQuery.getSort());
         return result;
     }
 
     private Restriction translateRestrictions() {
+        if (frontEndQuery.getRestriction() == null) {
+            return null;
+        }
+
         LogicalRestriction parent = new LogicalRestriction();
         parent.setConnective(Connective.AND);
 

@@ -1,7 +1,6 @@
 package com.latticeengines.monitor.exposed.metrics;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -18,7 +17,7 @@ public class PerformanceTimer implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         log.info(String.format("Metrics for %s ElapsedTime=%d ms", methodName, new Date().getTime() - start.getTime()));
     }
 }

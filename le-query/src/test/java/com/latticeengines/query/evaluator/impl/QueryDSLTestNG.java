@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.annotations.Test;
 
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
@@ -44,6 +45,17 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
                         .and(Expressions.stringPath(innerPath, "max2").eq("123"))) //
                 .fetchCount();
         System.out.println(count);
+    }
+
+    @Test(groups = "functional")
+    public void testCount() throws SQLException {
+        SQLTemplates templates = new PostgreSQLTemplates();
+        Configuration configuration = new Configuration(templates);
+        SQLQueryFactory factory = new SQLQueryFactory(configuration, redshiftDataSource);
+        StringPath tablePath = Expressions.stringPath("querytest_table");
+        try (PerformanceTimer timer = new PerformanceTimer("getCount")) {
+            long count = factory.query().from(tablePath).fetchCount();
+        }
     }
 
     @Test(groups = "functional", expectedExceptions = Exception.class)

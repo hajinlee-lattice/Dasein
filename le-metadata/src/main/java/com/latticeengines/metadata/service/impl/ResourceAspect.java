@@ -47,6 +47,11 @@ public class ResourceAspect {
         checkHeader(joinPoint);
     }
 
+    @Before("execution(* com.latticeengines.metadata.controller.DataCollectionResource.*(..))")
+    public void allMethodsForDataCollectionResource(JoinPoint joinPoint) {
+        checkHeader(joinPoint);
+    }
+
     private void checkHeader(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
 

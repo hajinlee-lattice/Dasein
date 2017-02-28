@@ -22,8 +22,8 @@ public class Query {
     private Sort sort;
     @JsonProperty("page_filter")
     private PageFilter pageFilter;
-    @JsonProperty("free_form_restriction")
-    private String freeFormRestriction;
+    @JsonProperty("free_form_text_search")
+    private String freeFormTextSearch;
 
     public Query(SchemaInterpretation objectType, List<Lookup> lookups, Restriction restriction, Sort sort,
             PageFilter pageFilter, String freeFromRestriction) {
@@ -32,7 +32,7 @@ public class Query {
         this.restriction = restriction;
         this.sort = sort;
         this.pageFilter = pageFilter;
-        this.freeFormRestriction = freeFromRestriction;
+        this.freeFormTextSearch = freeFromRestriction;
     }
 
     public Query() {
@@ -78,12 +78,12 @@ public class Query {
         this.objectType = objectType;
     }
 
-    public String getFreeFormRestriction() {
-        return freeFormRestriction;
+    public String getFreeFormTextSearch() {
+        return freeFormTextSearch;
     }
 
-    public void setFreeFormRestriction(String freeFormRestriction) {
-        this.freeFormRestriction = freeFormRestriction;
+    public void setFreeFormTextSearch(String freeFormTextSearch) {
+        this.freeFormTextSearch = freeFormTextSearch;
     }
 
     @Override

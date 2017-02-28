@@ -70,8 +70,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "METADATA_TABLE", //
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
 @Filters({ //
-    @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
-    @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
+        @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
 @EntityListeners(TableListener.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -349,7 +349,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
         return map;
     }
-
 
     public Schema getSchema() {
         return schema;

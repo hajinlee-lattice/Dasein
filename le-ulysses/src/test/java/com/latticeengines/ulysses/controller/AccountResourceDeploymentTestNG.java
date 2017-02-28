@@ -14,7 +14,6 @@ public class AccountResourceDeploymentTestNG extends UlyssesDeploymentTestNGBase
                     query, Long.class);
 
         } catch (Exception e) {
-            System.out.println(e);
             throw new RuntimeException(e);
         }
     }

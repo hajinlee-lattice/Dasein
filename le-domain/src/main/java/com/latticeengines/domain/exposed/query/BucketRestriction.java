@@ -1,13 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
-import java.util.Collection;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.graph.GraphNode;
-import com.latticeengines.common.exposed.visitor.Visitor;
-import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BucketRestriction extends Restriction {
@@ -38,14 +32,4 @@ public class BucketRestriction extends Restriction {
         this.value = value;
     }
 
-    @Override
-    public void accept(Visitor visitor, VisitorContext ctx) {
-        visitor.visit(this, ctx);
-    }
-
-    @Override
-    public Map<String, Collection<? extends GraphNode>> getChildMap() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

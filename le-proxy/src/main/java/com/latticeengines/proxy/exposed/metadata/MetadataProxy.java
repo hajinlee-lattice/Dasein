@@ -1,22 +1,24 @@
 package com.latticeengines.proxy.exposed.metadata;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.network.exposed.metadata.ArtifactInterface;
+import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
 import com.latticeengines.network.exposed.metadata.ModuleInterface;
 import com.latticeengines.network.exposed.metadata.RuleResultInterface;
@@ -199,26 +201,36 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @Override
     public List<DataCollection> getDataCollections(String customerSpace) {
-        return null;
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollections", customerSpace);
+        List list = get("getDataCollections", url, List.class);
+        return JsonUtils.convertList(list, DataCollection.class);
     }
 
     @Override
     public DataCollection getDefaultDataCollection(String customerSpace) {
-        return null;
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollections/default", customerSpace);
+        return get("getDefaultDataCollection", url, DataCollection.class);
     }
 
     @Override
     public DataCollection createDefaultDataCollection(String customerSpace, String statisticsId, List<String> tableNames) {
-        return null;
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollections/default?statisticsId={statisticsId}", //
+                customerSpace, statisticsId);
+        return post("createDefaultDataCollection", url, tableNames, DataCollection.class);
     }
 
     @Override
-    public DataCollection getDataCollection(String customerSpace, String DataCollectionName) {
-        return null;
+    public DataCollection getDataCollection(String customerSpace, String dataCollectionName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollections/names/{dataCollectionName}",
+                customerSpace, dataCollectionName);
+        return get("getDataCollection", url, DataCollection.class);
     }
 
     @Override
     public DataCollection createDataCollection(String customerSpace, String statisticsId, List<String> tableNames) {
-        return null;
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollections?statisticsId={statisticsId}", //
+                customerSpace, statisticsId);
+        return post("createDataCollection", url, tableNames, DataCollection.class);
     }
 }

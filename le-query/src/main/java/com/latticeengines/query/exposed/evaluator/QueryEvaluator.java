@@ -19,10 +19,9 @@ import com.querydsl.sql.SQLQuery;
 @Component("queryEvaluator")
 public class QueryEvaluator {
     @Autowired
-    private List<QueryProcessor> processors;
+    private QueryProcessor processor;
 
     public SQLQuery<?> evaluate(DataCollection dataCollection, Query query) {
-        QueryProcessor processor = getProcessor(dataCollection);
         return processor.process(dataCollection, query);
     }
 
@@ -44,15 +43,5 @@ public class QueryEvaluator {
         } catch (SQLException e) {
             throw new RuntimeException(String.format("Failed to retrieve data for object %s", query.getObjectType()), e);
         }
-    }
-
-    private QueryProcessor getProcessor(DataCollection dataCollection) {
-        for (QueryProcessor processor : processors) {
-            if (processor.canQuery(dataCollection)) {
-                return processor;
-            }
-        }
-        throw new IllegalStateException(String.format("Cannot find a QueryProcessor for dataCollection %s",
-                dataCollection));
     }
 }

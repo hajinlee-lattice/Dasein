@@ -1,13 +1,13 @@
 package com.latticeengines.query.evaluator.impl;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.JdbcStorage;
-import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -17,6 +17,8 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.exposed.object.BusinessObject;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
@@ -27,35 +29,30 @@ public class JdbcQueryProcessor extends QueryProcessor {
     @Autowired
     private QueryFactory queryFactory;
 
-    @Override
-    public boolean canQuery(DataCollection dataCollection) {
-        return dataCollection //
-                .getTables() //
-                .stream() //
-                .allMatch(table -> table.getStorageMechanism() instanceof JdbcStorage);
-    }
+    @Autowired
+    private List<BusinessObject> businessObjects;
 
     @Override
     public SQLQuery<?> process(DataCollection dataCollection, Query query) {
-        if (dataCollection.getTables().size() != 1) {
-            throw new RuntimeException("Only 1 table is supported at the moment");
+        BusinessObject businessObject = getBusinessObject(query.getObjectType());
+        if (businessObject == null) {
+            throw new RuntimeException(String.format("Could not locate BusinessObject for ObjectType %s",
+                    query.getObjectType()));
         }
-        Table table = dataCollection.getTables().stream() //
-                .filter(t -> query.getObjectType().toString().equals(t.getInterpretation())) //
-                .collect(Collectors.toList()).get(0);
-        StringPath tablePath = Expressions.stringPath(table.getName());
-        SQLQuery<?> result = queryFactory.getQuery(dataCollection) //
-                .from(tablePath) //
-                .where(getPredicate(table.getName(), query.getRestriction()));
-        processFreeFormRestriction(query.getFreeFormRestriction(), result);
-        return result;
+        SQLQuery<?> from = businessObject.getFromClause(dataCollection, query);
+        Predicate freeForm = businessObject.processFreeFormSearch(dataCollection, query.getFreeFormTextSearch());
+        return queryFactory.getQuery(dataCollection) //
+                .from(from) //
+                .where(freeForm) //
+                .where(processRestriction(businessObject.getTable(dataCollection).getName(), query.getRestriction()));
     }
 
-    private void processFreeFormRestriction(String freeFormText, SQLQuery<?> query) {
-
+    private BusinessObject getBusinessObject(SchemaInterpretation objectType) {
+        return businessObjects.stream().filter(o -> o.getObjectType().equals(objectType)) //
+                .findFirst().orElse(null);
     }
 
-    private BooleanExpression getPredicate(String tableName, Restriction restriction) {
+    private BooleanExpression processRestriction(String tableName, Restriction restriction) {
         if (restriction == null) {
             return Expressions.TRUE;
         }
@@ -65,7 +62,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
 
             BooleanExpression[] childExpressions = new BooleanExpression[logicalRestriction.getRestrictions().size()];
             childExpressions = logicalRestriction.getRestrictions().stream() //
-                    .map(r -> getPredicate(tableName, r)) //
+                    .map(r -> processRestriction(tableName, r)) //
                     .collect(Collectors.toList()) //
                     .toArray(childExpressions);
 

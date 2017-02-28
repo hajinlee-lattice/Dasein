@@ -42,6 +42,12 @@ public class SetTenantAspect {
         setSecurityContext(customerSpace);
     }
 
+    @Before("execution(* com.latticeengines.metadata.service.impl.DataCollectionServiceImpl.*(..))")
+    public void allMethodsDataCollectionService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setSecurityContext(customerSpace);
+    }
+
     private void setSecurityContext(String customerSpace) {
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
         if (tenant == null) {
