@@ -174,7 +174,9 @@ angular
             params: {
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Data Cloud Explorer',
-                section: 'edit'
+                section: 'edit',
+                category: {value: null, squash: true},
+                subcategory: {value: null, squash: true}
             },
             views: {
                 "navigation@": {
