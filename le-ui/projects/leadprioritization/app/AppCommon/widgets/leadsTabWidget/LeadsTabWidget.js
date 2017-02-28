@@ -1,13 +1,12 @@
 angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
-    'mainApp.appCommon.utilities.TenantIdParsingUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.core.services.FeatureFlagService',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility'
 ])
-.controller('LeadsTabWidgetController', function ($scope, $rootScope, ResourceUtility, TenantIdParsingUtility, BrowserStorageUtility, RightsUtility, FeatureFlagService, NavUtility) {
+.controller('LeadsTabWidgetController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, FeatureFlagService, NavUtility) {
     $scope.ResourceUtility = ResourceUtility;
     var clientSession = BrowserStorageUtility.getClientSession();
     var flags = FeatureFlagService.Flags();
