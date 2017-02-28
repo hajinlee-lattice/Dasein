@@ -387,7 +387,7 @@
                                 </systemProperty>
                             </systemProperties>
                             <webXml>${basedir}/src/${jetty.dir}/webapp/WEB-INF/web.xml</webXml>
-                            <webAppSourceDirectory>${basedir}/src/${jetty.dir:main}/webapp</webAppSourceDirectory>
+                            <webAppSourceDirectory>${basedir}/src/${jetty.dir}/webapp</webAppSourceDirectory>
                             <useTestClasspath>${jetty.use.test.cp}</useTestClasspath>
                             <scanIntervalSeconds>0</scanIntervalSeconds>
                             <stopPort>${jetty.stop.port}</stopPort>
