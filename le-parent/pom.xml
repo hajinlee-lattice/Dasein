@@ -313,11 +313,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <version>${maven.surefire.version}</version>
-                        <configuration>
-                            <forkCount>1</forkCount>  <!-- same as default, don't change -->
-                            <reuseForks>true</reuseForks> <!-- same as default, don't change -->
-                            <argLine>-Xmx1024m</argLine>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>unit-test</id>
