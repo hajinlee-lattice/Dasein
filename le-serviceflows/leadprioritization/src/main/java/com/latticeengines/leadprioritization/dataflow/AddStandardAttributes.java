@@ -66,7 +66,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         if (websiteOrEmail == null) {
             websiteOrEmail = eventTable.getSourceAttribute(InterfaceName.Email);
         }
-        log.info("websiteOrEmail is: " + websiteOrEmail != null ? websiteOrEmail.getName() : "null");
+        log.info("websiteOrEmail is: " + (websiteOrEmail != null ? websiteOrEmail.getName() : "null"));
         if (websiteOrEmail != null && !domainLength.arguments.isEmpty()) {
             domainLength.arguments.put("column", websiteOrEmail.getName());
             log.info("set domain_length arguments to: " + domainLength.arguments);
