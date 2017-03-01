@@ -4,6 +4,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,8 +22,6 @@ import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
-
 public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final Log log = LogFactory.getLog(CompanyProfileResourceDeploymentTestNG.class);
@@ -32,7 +31,6 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
     public void testGetCompanyProfile() {
         String url = getRestAPIHostPort() + "/pls/companyprofiles/?enforceFuzzyMatch=true";
