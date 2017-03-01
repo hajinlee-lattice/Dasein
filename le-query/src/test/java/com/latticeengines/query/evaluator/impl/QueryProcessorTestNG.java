@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.domain.exposed.query.Connective;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.ValueLookup;
@@ -30,7 +30,7 @@ public class QueryProcessorTestNG extends QueryFunctionalTestNGBase {
     public void testConcreteRestriction() {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
-        restriction.setConnective(Connective.AND);
+        restriction.setOperator(LogicalOperator.AND);
         restriction.addRestriction(new ConcreteRestriction(false, new ColumnLookup(SchemaInterpretation.Account, "id"),
                 ComparisonType.EQUAL, new ValueLookup("59129793")));
         Query query = new Query();
@@ -44,7 +44,7 @@ public class QueryProcessorTestNG extends QueryFunctionalTestNGBase {
     public void testBucketRestriction() {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
-        restriction.setConnective(Connective.AND);
+        restriction.setOperator(LogicalOperator.AND);
         restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
                 "number_of_family_members"), 1));
         Query query = new Query();

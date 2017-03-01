@@ -1,7 +1,7 @@
 package com.latticeengines.app.exposed.util;
 
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.Connective;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -34,13 +34,13 @@ public class QueryTranslator {
         }
 
         LogicalRestriction parent = new LogicalRestriction();
-        parent.setConnective(Connective.AND);
+        parent.setOperator(LogicalOperator.AND);
 
         LogicalRestriction and = new LogicalRestriction();
-        and.setConnective(Connective.AND);
+        and.setOperator(LogicalOperator.AND);
 
         LogicalRestriction or = new LogicalRestriction();
-        or.setConnective(Connective.OR);
+        or.setOperator(LogicalOperator.OR);
 
         parent.addRestriction(or);
         parent.addRestriction(and);

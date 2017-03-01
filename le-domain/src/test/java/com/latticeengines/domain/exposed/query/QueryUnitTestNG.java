@@ -13,7 +13,7 @@ public class QueryUnitTestNG {
      */
     @Test(groups = "unit")
     public void testStableInterface() {
-        String serialized = "{\"lookups\":null,\"restriction\":{\"logicalRestriction\":{\"connective\":\"AND\",\"restrictions\":[{\"logicalRestriction\":{\"connective\":\"OR\",\"restrictions\":[],\"childMap\":null,\"children\":[]}},{\"logicalRestriction\":{\"connective\":\"AND\",\"restrictions\":[],\"childMap\":null,\"children\":[]}}],\"childMap\":null,\"children\":[{\"connective\":\"OR\",\"restrictions\":[],\"childMap\":null,\"children\":[]},{\"connective\":\"AND\",\"restrictions\":[],\"childMap\":null,\"children\":[]}]}},\"sort\":null,\"object_type\":\"Account\",\"page_filter\":null,\"free_form_text_search\":null}";
+        String serialized = "{\"lookups\":null,\"restriction\":{\"logicalRestriction\":{\"operator\":\"AND\",\"restrictions\":[{\"logicalRestriction\":{\"operator\":\"OR\",\"restrictions\":[],\"childMap\":null,\"children\":[]}},{\"logicalRestriction\":{\"operator\":\"AND\",\"restrictions\":[],\"childMap\":null,\"children\":[]}}],\"childMap\":null,\"children\":[{\"operator\":\"OR\",\"restrictions\":[],\"childMap\":null,\"children\":[]},{\"operator\":\"AND\",\"restrictions\":[],\"childMap\":null,\"children\":[]}]}},\"sort\":null,\"object_type\":\"Account\",\"page_filter\":null,\"free_form_text_search\":null}";
         Query query = JsonUtils.deserialize(serialized, Query.class);
         assertNotNull(query);
     }

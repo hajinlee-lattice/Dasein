@@ -12,13 +12,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LogicalRestriction extends Restriction {
-    @JsonProperty("connective")
-    private Connective connective;
+    @JsonProperty("operator")
+    private LogicalOperator operator;
     @JsonProperty("restrictions")
     private List<Restriction> restrictions;
 
-    public LogicalRestriction(Connective connective, List<Restriction> restrictions) {
-        this.connective = connective;
+    public LogicalRestriction(LogicalOperator operator, List<Restriction> restrictions) {
+        this.operator = operator;
         this.restrictions = restrictions;
     }
 
@@ -26,12 +26,12 @@ public class LogicalRestriction extends Restriction {
         this.restrictions = new ArrayList<>();
     }
 
-    public Connective getConnective() {
-        return connective;
+    public LogicalOperator getOperator() {
+        return operator;
     }
 
-    public void setConnective(Connective connective) {
-        this.connective = connective;
+    public void setOperator(LogicalOperator operator) {
+        this.operator = operator;
     }
 
     public List<Restriction> getRestrictions() {

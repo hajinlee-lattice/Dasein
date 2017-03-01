@@ -9,7 +9,7 @@ import com.latticeengines.app.exposed.util.QueryTranslator;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
-import com.latticeengines.domain.exposed.query.Connective;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.frontend.FlattenedRestriction;
@@ -35,10 +35,10 @@ public class QueryTranslatorUnitTestNG {
         LogicalRestriction parent = (LogicalRestriction) result.getRestriction();
         assertEquals(parent.getRestrictions().size(), 2);
         assertTrue(parent.getRestrictions().stream()
-                .anyMatch(r -> ((LogicalRestriction) r).getConnective().equals(Connective.AND)));
+                .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.AND)));
         assertTrue(parent.getRestrictions().stream()
-                .anyMatch(r -> ((LogicalRestriction) r).getConnective().equals(Connective.OR)));
+                .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.OR)));
         assertTrue(parent.getRestrictions().stream()
-                .anyMatch(r -> ((LogicalRestriction) r).getConnective().equals(Connective.AND)));
+                .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.AND)));
     }
 }

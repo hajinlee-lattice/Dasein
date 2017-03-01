@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.domain.exposed.query.Connective;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -64,7 +64,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
                     .collect(Collectors.toList()) //
                     .toArray(childExpressions);
 
-            if (logicalRestriction.getConnective() == Connective.AND) {
+            if (logicalRestriction.getOperator() == LogicalOperator.AND) {
                 return Expressions.allOf(childExpressions);
             } else {
                 return Expressions.anyOf(childExpressions);

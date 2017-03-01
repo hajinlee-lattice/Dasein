@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.query;
 
-public enum Connective {
+public enum LogicalOperator {
     OR,
 
     AND
