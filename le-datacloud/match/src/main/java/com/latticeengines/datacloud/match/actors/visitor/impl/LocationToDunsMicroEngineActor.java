@@ -69,8 +69,8 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             String logMessage = String.format(
                     "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s.",
                     res.getDuns(), getClass().getSimpleName(),
-                    (res.getConfidenceCode() == null ? "null" : res.getConfidenceCode().toString()),
-                    (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode()),
+                    (res.getConfidenceCode() == null ? null : res.getConfidenceCode().toString()),
+                    (res.getMatchGrade() == null ? null : res.getMatchGrade().getRawCode()),
                     res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
                     res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
                     res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),

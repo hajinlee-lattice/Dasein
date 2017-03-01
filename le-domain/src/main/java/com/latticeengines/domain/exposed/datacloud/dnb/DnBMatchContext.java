@@ -59,6 +59,7 @@ public class DnBMatchContext implements Fact, Dimension {
         lookupRequestId = result.getLookupRequestId();
         cacheId = result.cacheId;
         matchedNameLocation = result.getMatchedNameLocation();
+        outOfBusiness = result.isOutOfBusiness();
     }
 
     public void copyResultFromCache(DnBCache cache) {
@@ -69,6 +70,7 @@ public class DnBMatchContext implements Fact, Dimension {
             matchGrade = cache.getMatchGrade();
             cacheId = cache.getId();
             matchedNameLocation = cache.getMatchedNameLocation();
+            outOfBusiness = cache.getOutOfBusiness();
             hitWhiteCache = true;
             patched = cache.getPatched();
         } else {

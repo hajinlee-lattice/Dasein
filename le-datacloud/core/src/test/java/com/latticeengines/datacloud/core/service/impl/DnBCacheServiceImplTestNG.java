@@ -64,6 +64,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
         entityContext.setDuns((String) data[0][7]);
         entityContext.setConfidenceCode((Integer) data[0][8]);
         entityContext.setMatchGrade((String) data[0][9]);
+        entityContext.setOutOfBusiness((Boolean) data[0][10]);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         entityContext.setDnbCode(DnBReturnCode.OK);
         whiteCaches.add(dnbCacheService.addCache(entityContext));
@@ -93,6 +94,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
             entityContext.setDuns((String) data[i][7]);
             entityContext.setConfidenceCode((Integer) data[i][8]);
             entityContext.setMatchGrade((String) data[i][9]);
+            entityContext.setOutOfBusiness((Boolean) data[i][10]);
             entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
             entityContext.setDnbCode(DnBReturnCode.OK);
             entityContexts.add(entityContext);
@@ -130,6 +132,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
         Assert.assertEquals(whiteCache.getDuns(), (String) data[0][7]);
         Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[0][8]);
         Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), (String) data[0][9]);
+        Assert.assertEquals(whiteCache.getOutOfBusiness(), (Boolean) data[0][10]);
         Assert.assertNotNull(whiteCache.getTimestamp());
         log.info(String.format("Timestamp of white cache: %d", whiteCache.getTimestamp()));
 
@@ -180,6 +183,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
             Assert.assertEquals(whiteCache.getDuns(), (String) data[i][7]);
             Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[i][8]);
             Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), (String) data[i][9]);
+            Assert.assertEquals(whiteCache.getOutOfBusiness(), (Boolean) data[i][10]);
         }
         Assert.assertTrue(!whiteCaches.containsKey(String.valueOf(data.length - 1)));
 
@@ -341,13 +345,13 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
 
     private static Object[][] getEntityInputData() {
         return new Object[][] {
-                { "DUMMY_NAME1", "DUMMY_COUNTRYCODE1", "DUMMY_STATE1", "DUMMY_CITY1", "DUMMY_PHONE1",
-                        "DUMMY_ZIPCODE1", "DUMMY_EMAIL1", "DUMMY_DUNS1", 7, "DUMMY_MATCHGRADE1" },
-                { "DUMMY_NAME2", "DUMMY_COUNTRYCODE2", "DUMMY_STATE2", "DUMMY_CITY2", "DUMMY_PHONE2",
-                        "DUMMY_ZIPCODE2", "DUMMY_EMAIL2", "DUMMY_DUNS2", 5, "DUMMY_MATCHGRADE2" },
+                { "DUMMY_NAME1", "DUMMY_COUNTRYCODE1", "DUMMY_STATE1", "DUMMY_CITY1", "DUMMY_PHONE1", "DUMMY_ZIPCODE1",
+                        "DUMMY_EMAIL1", "DUMMY_DUNS1", 7, "DUMMY_MATCHGRADE1", Boolean.TRUE },
+                { "DUMMY_NAME2", "DUMMY_COUNTRYCODE2", "DUMMY_STATE2", "DUMMY_CITY2", "DUMMY_PHONE2", "DUMMY_ZIPCODE2",
+                        "DUMMY_EMAIL2", "DUMMY_DUNS2", 5, "DUMMY_MATCHGRADE2", Boolean.FALSE },
                 { "DUMMY_NAME3", "DUMMY_COUNTRYCODE3", "DUMMY_STATE3", "DUMMY_CITY3", "DUMMY_PHONE3", "DUMMY_ZIPCODE3",
-                        "DUMMY_EMAIL3", "DUMMY_DUNS3", 6, "DUMMY_MATCHGRADE3" },
+                        "DUMMY_EMAIL3", "DUMMY_DUNS3", 6, "DUMMY_MATCHGRADE3", null },
                 { "DUMMY_NAME4", "DUMMY_COUNTRYCODE4", "DUMMY_STATE4", "DUMMY_CITY4", "DUMMY_PHONE4", "DUMMY_ZIPCODE4",
-                        "DUMMY_EMAIL4", "DUMMY_DUNS4", 6, "DUMMY_MATCHGRADE4" } };
+                        "DUMMY_EMAIL4", "DUMMY_DUNS4", 6, "DUMMY_MATCHGRADE4", null } };
     }
 }

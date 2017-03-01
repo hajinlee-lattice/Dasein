@@ -90,13 +90,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     public DnBCache addCache(DnBMatchContext context) {
         DnBCache cache = null;
         if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
-            if (Boolean.TRUE.equals(context.isOutOfBusiness())) {    // Out of business, add to black cache
-                cache = initCacheEntity(context, true);
-                cache.setWhiteCache(false);
-            } else {
-                cache = initCacheEntity(context, false);
-                cache.setWhiteCache(true);
-            }
+            cache = initCacheEntity(context, false);
+            cache.setWhiteCache(true);
         } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
             cache = initCacheEntity(context, true);
             cache.setWhiteCache(false);
@@ -119,13 +114,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         for (DnBMatchContext context : contexts) {
             DnBCache cache = null;
             if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
-                if (Boolean.TRUE.equals(context.isOutOfBusiness())) {    // Out of business, add to black cache
-                    cache = initCacheEntity(context, true);
-                    cache.setWhiteCache(false);
-                } else {
-                    cache = initCacheEntity(context, false);
-                    cache.setWhiteCache(true);
-                }
+                cache = initCacheEntity(context, false);
+                cache.setWhiteCache(true);
             } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
                 cache = initCacheEntity(context, true);
                 cache.setWhiteCache(false);
@@ -182,7 +172,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 return new DnBCache(context.getInputNameLocation());
             } else {
                 return new DnBCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade(), context.getMatchedNameLocation());
+                        context.getMatchGrade(), context.getMatchedNameLocation(), context.isOutOfBusiness());
             }
         case EMAIL:
             if (noMatchedContext) {
@@ -195,7 +185,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 return new DnBCache(context.getInputNameLocation());
             } else {
                 return new DnBCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade(), context.getMatchedNameLocation());
+                        context.getMatchGrade(), context.getMatchedNameLocation(), context.isOutOfBusiness());
             }
         default:
             throw new UnsupportedOperationException(
