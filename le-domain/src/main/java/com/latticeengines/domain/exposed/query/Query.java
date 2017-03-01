@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -9,6 +11,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Query {
@@ -52,6 +55,13 @@ public class Query {
 
     public void setLookups(List<Lookup> lookups) {
         this.lookups = lookups;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setLookups(SchemaInterpretation objectType, String... columnNames) {
+        this.lookups = new ArrayList<String>(Arrays.asList(columnNames)).stream() //
+                .map((columnName) -> new ColumnLookup(objectType, columnName)) //
+                .collect(Collectors.toList());
     }
 
     public Sort getSort() {

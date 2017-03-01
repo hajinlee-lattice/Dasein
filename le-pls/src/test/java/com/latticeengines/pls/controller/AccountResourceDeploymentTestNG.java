@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.frontend.FlattenedRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -24,24 +25,48 @@ public class AccountResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
-        Table table = new Table();
-        table.setInterpretation(SchemaInterpretation.Account.toString());
-        table.setName("querytest_table");
-        table.setDisplayName("Foo");
-        JdbcStorage storage = new JdbcStorage();
-        storage.setTableNameInStorage("querytest_table");
-        storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
-        table.setStorageMechanism(storage);
+        Table table = createTestTable();
         metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
         metadataProxy.createDefaultDataCollection(mainTestTenant.getId(), "",
                 Collections.singletonList("querytest_table"));
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testGetCount() {
         FrontEndQuery query = new FrontEndQuery();
-        query.setRestriction(new FlattenedRestriction());
-        long count = restTemplate.postForObject(getRestAPIHostPort() + "/pls/accounts/count", query, Long.class);
-        assertTrue(count > 0);
+        try (PerformanceTimer timer = new PerformanceTimer("testGetCount")) {
+            long count = restTemplate.postForObject(getRestAPIHostPort() + "/pls/accounts/count", query, Long.class);
+            assertTrue(count > 0);
+        }
+    }
+
+    private Table createTestTable() {
+        Table table = new Table();
+        table.setInterpretation(SchemaInterpretation.Account.toString());
+        table.setName("querytest_table");
+        table.setDisplayName("querytest_table");
+        Attribute companyName = createAttribute("companyname");
+        table.addAttribute(companyName);
+        Attribute city = createAttribute("city");
+        table.addAttribute(city);
+        Attribute state = createAttribute("state");
+        table.addAttribute(state);
+        Attribute lastName = createAttribute("lastname");
+        table.addAttribute(lastName);
+        Attribute familyMembers = createAttribute("number_of_family_members");
+        table.addAttribute(familyMembers);
+        JdbcStorage storage = new JdbcStorage();
+        storage.setTableNameInStorage("querytest_table");
+        storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
+        table.setStorageMechanism(storage);
+        return table;
+    }
+
+    private Attribute createAttribute(String name) {
+        Attribute attribute = new Attribute();
+        attribute.setName(name);
+        attribute.setDisplayName(name);
+        attribute.setPhysicalDataType("String");
+        return attribute;
     }
 }

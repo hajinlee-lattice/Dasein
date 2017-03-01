@@ -19,6 +19,7 @@ public class AccountObject extends BusinessObject {
     @Override
     public Predicate processFreeFormSearch(DataCollection dataCollection, String freeFormRestriction) {
         // Just check whether name LIKE '%freeFormRestriction%'
+        // TODO Use QueryUtils
         StringPath table = Expressions.stringPath(getTableName(dataCollection));
         StringPath column = Expressions.stringPath(table, "name");
         return column.contains(Expressions.stringPath(freeFormRestriction));

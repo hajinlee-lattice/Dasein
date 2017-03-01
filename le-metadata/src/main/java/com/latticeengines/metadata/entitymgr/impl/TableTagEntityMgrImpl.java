@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableTag;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.metadata.dao.TableTagDao;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
 
 @Component("tableTagEntityMgr")
@@ -21,7 +22,10 @@ public class TableTagEntityMgrImpl extends BaseEntityMgrImpl<TableTag> implement
 
     @Autowired
     private TableTagDao tableTagDao;
-    
+
+    @Autowired
+    private TableEntityMgr tableEntityMgr;
+
     @Override
     public BaseDao<TableTag> getDao() {
         return tableTagDao;
@@ -31,8 +35,12 @@ public class TableTagEntityMgrImpl extends BaseEntityMgrImpl<TableTag> implement
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<Table> getTablesForTag(String tagName) {
         List<TableTag> tags = tableTagDao.findAll();
-        return tags.stream().filter(x -> x.getName().equals(tagName) && x.getTable().getTableType() == TableType.DATATABLE) //
-                .map(x -> x.getTable()).collect(Collectors.toList());
+        List<Table> tables = tags.stream()
+                .filter(x -> x.getName().equals(tagName) && x.getTable().getTableType() == TableType.DATATABLE) //
+                .map(x -> x.getTable()) //
+                .map(x -> tableEntityMgr.findByName(x.getName())) //
+                .collect(Collectors.toList());
+        return tables;
     }
 
 }

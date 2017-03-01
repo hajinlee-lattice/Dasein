@@ -34,6 +34,7 @@ public abstract class BusinessObject {
     public abstract SchemaInterpretation getObjectType();
 
     public SQLQuery<?> startQuery(DataCollection dataCollection, Query query) {
+        // TODO Use QueryUtils
         String tableName = getTableName(dataCollection);
         StringPath path = Expressions.stringPath(tableName);
         return queryFactory.getQuery(dataCollection).from(path);
@@ -47,13 +48,12 @@ public abstract class BusinessObject {
     }
 
     public final Table getTable(DataCollection collection) {
-        return collection.getTables().stream() //
-                .filter(t -> getObjectType().toString().equals(t.getInterpretation())) //
-                .findFirst().orElse(null);
+        return collection.getTable(getObjectType());
     }
 
     protected final String getTableName(DataCollection collection) {
-        Table table = getTable(collection);
+        // TODO Use QueryUtils
+        Table table = collection.getTable(getObjectType());
         StorageMechanism storage = table.getStorageMechanism();
         String tableName = table.getName();
         if (storage instanceof JdbcStorage) {

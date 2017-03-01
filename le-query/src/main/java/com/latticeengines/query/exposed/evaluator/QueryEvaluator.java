@@ -32,7 +32,7 @@ public class QueryEvaluator {
             ResultSetMetaData metadata = results.getMetaData();
             while (results.next()) {
                 Map<String, Object> row = new HashMap<>();
-                for (int i = 0; i < metadata.getColumnCount(); ++i) {
+                for (int i = 1; i <= metadata.getColumnCount(); ++i) {
                     String columnName = metadata.getColumnName(i);
                     row.put(columnName, results.getObject(columnName));
                 }

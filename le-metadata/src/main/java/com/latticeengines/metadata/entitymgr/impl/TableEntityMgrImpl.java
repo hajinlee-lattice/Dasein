@@ -69,7 +69,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -104,10 +104,10 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 dataRuleDao.create(dataRule);
             }
         }
-        
+
         if (hiveEnabled) {
             hiveTableDao.create(entity);
-        }        
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -194,7 +194,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         });
 
         if (copy.getExtracts().size() > 0) {
-            Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), targetCustomerSpace, existing.getNamespace());
+            Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), targetCustomerSpace,
+                    existing.getNamespace());
 
             Path sourcePath = new Path(ExtractUtils.getSingleExtractPath(yarnConfiguration, copy));
             Path destPath = tablesPath.append(copy.getName());
@@ -209,7 +210,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         return copy;
     }
 
-    private static void inflateTable(Table table) {
+    public static void inflateTable(Table table) {
         if (table != null) {
             Hibernate.initialize(table.getAttributes());
             Hibernate.initialize(table.getExtracts());

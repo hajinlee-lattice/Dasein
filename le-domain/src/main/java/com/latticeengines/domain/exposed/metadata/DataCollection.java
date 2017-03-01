@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -144,5 +145,15 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public Table getTable(SchemaInterpretation objectType) {
+        if (objectType == null) {
+            return null;
+        }
+        return getTables().stream()
+                .filter(t -> t.getInterpretation() != null && t.getInterpretation().equals(objectType.toString())) //
+                .findFirst().orElse(null);
+
     }
 }
