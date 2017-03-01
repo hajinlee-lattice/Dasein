@@ -103,7 +103,6 @@ module.exports = function (grunt) {
             dist: {
                 src:     [
                     '<%= pls.app %>/app/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js',
                     '!<%= pls.app %>/app/AppCommon/vendor/**/*.js',
                     '!<%= pls.app %>/app/AppCommon/test/**/*.js'
                 ],

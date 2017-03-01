@@ -2,7 +2,7 @@
 
 module.exports = function (grunt) {
     // version of our software. This should really be in the package.json
-    // but it gets passed in through 
+    // but it gets passed in through
     var versionStringConfig = grunt.option('versionString') || new Date().getTime();
 
     // Define the configuration for all the tasks
@@ -103,7 +103,6 @@ module.exports = function (grunt) {
             dist: {
                 src:     [
                     '<%= pls.app %>/app/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js',
                     '!<%= pls.app %>/app/AppCommon/vendor/**/*.js',
                     '!<%= pls.app %>/app/AppCommon/test/**/*.js'
                 ],

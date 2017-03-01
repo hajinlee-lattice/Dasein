@@ -144,7 +144,6 @@ module.exports = function (grunt) {
                 src:     [
                     '<%= pls.app %>/app/**/*.js',
                     '!<%= pls.app %>/../common/lib/js/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js',
                     '!<%= pls.app %>/app/AppCommon/test/**/*.js'
                 ],
                 options: {
