@@ -111,6 +111,7 @@ public class GenericRecordProcessor {
             String repository = repositories.get(j);
             populateRecordPerRepository(recordMap, valueRecord, topicPartition, request, store, repository);
         }
+        countRecords(request);
     }
 
     private void populateRecordPerRepository(
@@ -134,7 +135,6 @@ public class GenericRecordProcessor {
         }
         partitionMap.get(topicPartition).add(Pair.of(request, valueRecord));
 
-        countRecords(request);
     }
 
     private void countRecords(GenericRecordRequest request) {

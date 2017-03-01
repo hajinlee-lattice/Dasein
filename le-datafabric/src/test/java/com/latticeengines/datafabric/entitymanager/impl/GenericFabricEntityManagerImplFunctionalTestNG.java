@@ -2,7 +2,9 @@ package com.latticeengines.datafabric.entitymanager.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -37,6 +39,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
     private static final long RECORD_COUNT = 10;
 
     private static final String POD = "FabricConnectors";
+    private static final String STACK = "b";
 
     @Autowired
     private GenericFabricEntityManager entityManager;
@@ -50,13 +53,17 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
     @Autowired
     private Configuration conf;
 
+    Set<String> batchIds = new HashSet<>();
+
     private Camille camille;
 
     @BeforeClass(groups = "functional")
     public void setUp() throws Exception {
-        ((FabricMessageServiceImpl) messageService).setPod(POD);
-        ((FabricMessageServiceImpl) messageService).setupCamille(Mode.BOOTSTRAP, POD, zkConnect);
-        camille = ((FabricMessageServiceImpl) messageService).getCamille();
+        FabricMessageServiceImpl messageServiceImpl = (FabricMessageServiceImpl) messageService;
+        messageServiceImpl.setPod(POD);
+        messageServiceImpl.setStack(STACK);
+        messageServiceImpl.setupCamille(Mode.BOOTSTRAP, POD, STACK, zkConnect);
+        camille = messageServiceImpl.getCamille();
 
         HdfsUtils.rmdir(conf, "/tmp/testGenericFile1");
         HdfsUtils.rmdir(conf, "/tmp/testGenericFile2");
@@ -64,8 +71,13 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
-        Path path = PathBuilder.buildPodPath(POD);
-        camille.delete(path);
+        for (String batchId : batchIds) {
+            try {
+                entityManager.cleanup(batchId);
+            } catch (Exception ex) {
+                log.warn("Failed to cleanup, batchId=" + batchId, ex);
+            }
+        }
         CamilleEnvironment.stop();
         HdfsUtils.rmdir(conf, "/tmp/testGenericFile1");
         HdfsUtils.rmdir(conf, "/tmp/testGenericFile2");
@@ -74,6 +86,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
     @Test(groups = "functional", enabled = true)
     public void createBatchId() throws Exception {
         String id = entityManager.createUniqueBatchId(5L);
+        batchIds.add(id);
         Assert.assertNotNull(id);
 
         String data = messageService.readData(id);
@@ -83,10 +96,8 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         Assert.assertEquals(node.getTotalCount(), 5);
         Assert.assertEquals(node.getName(), id);
 
-        Path path = PathBuilder.buildPodPath(POD).append(id);
+        Path path = PathBuilder.buildPodDivisionPath(POD, STACK).append(id);
         Assert.assertTrue(camille.exists(path));
-        entityManager.cleanup(id);
-        Assert.assertFalse(camille.exists(path));
 
     }
 
@@ -94,6 +105,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
     public void createOrGetBatchName() throws Exception {
         String name = entityManager.createOrGetNamedBatchId("connectors", 6L, true);
         Assert.assertNotNull(name);
+        batchIds.add(name);
 
         String data = messageService.readData(name);
         Assert.assertNotNull(data);
@@ -109,6 +121,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         // bulk use case
         String name = entityManager.createOrGetNamedBatchId("connectors", 7L, true);
         Assert.assertNotNull(name);
+        batchIds.add(name);
 
         String data = messageService.readData(name);
         Assert.assertNotNull(data);
@@ -138,6 +151,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
         // streaming continuously use case
         name = entityManager.createOrGetNamedBatchId("connectors", null, true);
+        batchIds.add(name);
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
         Assert.assertEquals(node.getTotalCount(), -1);
@@ -149,6 +163,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         Assert.assertEquals(entityManager.getBatchStatus(name), GenericFabricStatus.PROCESSING);
 
         name = entityManager.createUniqueBatchId(null);
+        batchIds.add(name);
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
         Assert.assertEquals(node.getTotalCount(), -1);
@@ -166,7 +181,6 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         String batchId1 = entityManager.createUniqueBatchId(RECORD_COUNT);
         List<GenericRecordRequest> recordRequests = new ArrayList<>();
         List<GenericFabricRecord> records = new ArrayList<>();
-
         // schema 1
         getRecords(batchId1, recordRequests, records, RECORD_COUNT, 1);
         for (int i = 0; i < records.size(); i++) {
@@ -181,6 +195,8 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         for (int i = 0; i < records.size(); i++) {
             entityManager.publish(recordRequests.get(i), records.get(i));
         }
+        batchIds.add(batchId1);
+        batchIds.add(batchId2);
 
         waitFor(batchId1, 10);
         waitFor(batchId2, 10);

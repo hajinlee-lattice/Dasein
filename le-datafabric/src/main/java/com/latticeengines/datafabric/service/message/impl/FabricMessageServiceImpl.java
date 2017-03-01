@@ -80,14 +80,15 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         buildKeySchema();
     }
 
-    public FabricMessageServiceImpl(String pod, String zkConnect) {
+    public FabricMessageServiceImpl(String pod, String stack, String zkConnect) {
         this.zkConnect = zkConnect;
         this.pod = pod;
+        this.stack = stack;
         buildRequestSchema();
-        setupCamille(Mode.RUNTIME, pod, zkConnect);
+        setupCamille(Mode.RUNTIME, pod, stack, zkConnect);
     }
 
-    public void setupCamille(Mode mode, String pod, String zkConnect) {
+    public void setupCamille(Mode mode, String pod, String stack, String zkConnect) {
         try {
             CamilleConfiguration config = new CamilleConfiguration(pod, zkConnect);
             CamilleEnvironment.start(mode, config);
@@ -105,7 +106,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         log.info("Initialize message service with brokers " + brokers);
         buildKeySchema();
         buildRequestSchema();
-        setupCamille(Mode.RUNTIME, pod, zkConnect);
+        setupCamille(Mode.RUNTIME, pod, stack, zkConnect);
     }
 
     @Override
@@ -129,6 +130,10 @@ public class FabricMessageServiceImpl implements FabricMessageService {
 
     public void setPod(String pod) {
         this.pod = pod;
+    }
+
+    public void setStack(String stack) {
+        this.stack = stack;
     }
 
     @Override
@@ -266,7 +271,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     @Override
     public boolean createZNode(String entityName, String data, boolean createNew) {
         boolean result = false;
-        Path path = PathBuilder.buildPodPath(pod).append(entityName);
+        Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
         try {
             if (createNew) {
                 try {
@@ -287,7 +292,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     @Override
     public String readData(String entityName) {
         try {
-            Path path = PathBuilder.buildPodPath(pod).append(entityName);
+            Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
             camille.get(path);
             Document document = camille.get(path);
             if (document != null) {
@@ -302,7 +307,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     @Override
     public boolean cleanup(String entityName) {
         try {
-            Path path = PathBuilder.buildPodPath(pod).append(entityName);
+            Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
             camille.delete(path);
             LockManager.deregisterCrossDivisionLock(entityName);
             return true;
@@ -318,7 +323,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         try {
             LockManager.registerCrossDivisionLock(lockName);
             LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
-            Path path = PathBuilder.buildPodPath(pod).append(entityName);
+            Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
             Document document = camille.get(path);
             String newData = updater.update(document.getData());
             camille.upsert(path, new Document(newData), ZooDefs.Ids.OPEN_ACL_UNSAFE);

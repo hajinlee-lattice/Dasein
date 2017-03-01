@@ -23,6 +23,8 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
             "HDFS base directory to save files.", "HDFS base Directory").setDefaultValue("/tmp");
     static final WorkerProperty<String> POD = new WorkerProperty<String>("datafabric.message.pod",
             "The pod name used in Zookeeper", "The pod used in Zookeeper").setDefaultValue("FabricConnectors");
+    static final WorkerProperty<String> STACK = new WorkerProperty<String>("datafabric.message.stack",
+            "The stack name used in Zookeeper", "The stack used in Zookeeper").setDefaultValue("b");
     static final WorkerProperty<String> KAFKA_ZKCONNECT = new WorkerProperty<String>("kafka.zkConnect",
             "The zookeeper servers for sink generic cluster", "Zookeeper servers").setDefaultValue("localhost:2181");
     static final WorkerProperty<String> REPOSITORIES = new WorkerProperty<String>("datafabric.connect.repositories",
@@ -34,6 +36,7 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
         addPropertyToGroup(HADOOP_CONF_DIR, String.class, GENERIC_HDFS_GROUP);
         addPropertyToGroup(HDFS_BASE_DIR, String.class, GENERIC_HDFS_GROUP);
         addPropertyToGroup(POD, String.class, GENERIC_HDFS_GROUP);
+        addPropertyToGroup(STACK, String.class, GENERIC_HDFS_GROUP);
         addPropertyToGroup(KAFKA_ZKCONNECT, String.class, GENERIC_HDFS_GROUP);
         addPropertyToGroup(REPOSITORIES, String.class, GENERIC_HDFS_GROUP);
         config = tmpConfig.get();

@@ -43,8 +43,9 @@ public class GenericSinkTask extends SinkTask {
             connectorConfig = new GenericSinkConnectorConfig(props);
             avroData = connectorConfig.constructAvroData();
             String pod = connectorConfig.getProperty(GenericSinkConnectorConfig.POD, String.class);
+            String stack = connectorConfig.getProperty(GenericSinkConnectorConfig.STACK, String.class);
             String zkConnect = connectorConfig.getProperty(GenericSinkConnectorConfig.KAFKA_ZKCONNECT, String.class);
-            FabricMessageServiceImpl messageService = new FabricMessageServiceImpl(pod, zkConnect);
+            FabricMessageServiceImpl messageService = new FabricMessageServiceImpl(pod, stack, zkConnect);
             entityManager = new GenericFabricEntityManagerImpl();
             entityManager.setMessageService(messageService);
 
