@@ -365,7 +365,7 @@ angular.module('common.datacloud')
             method: 'get',
             url: this.host + '/latticeinsights/stats/topn/all',
             params: {
-                limit: opts.limit,
+                max: 9999,
                 loadEnrichmentMetadata: opts.loadEnrichmentMetadata
             }
         }).then(function(response) {

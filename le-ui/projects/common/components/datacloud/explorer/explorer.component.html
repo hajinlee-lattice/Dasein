@@ -38,7 +38,7 @@
                         <li class="toggle no-attributes show" ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls" ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" /> <label for="nulls">Include "No" Attributes</label></li>
                     </ul>
                 </li>
-                <li class="sort" ng-disabled="!vm.category">
+                <li class="sort" ng-disabled="!vm.category" ng-if="vm.category">
                     <a class="button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
                         <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
                     </a>
@@ -124,12 +124,15 @@
 
                         <div class="attributes-container" ng-if="!vm.category">
                             <ul class="attributes noselect-children">
-                                <li class="header">
-                                    <div class="column label">{{ vm.lookupMode ? 'Attributes' : 'Top 5 attributes' }}</div>
-                                    <div class="column data">{{ vm.lookupMode ? 'Values' : 'Records' }}</div>
+                                <li class="header" ng-show="categoryAttributes.length > 0">
+                                    <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
+                                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
                                 </li>
 
-                                <li ng-repeat="attribute in (subcategories = vm.getTileTableItems(category)) | orderBy: [ '-Value' ] | limitTo: 5">
+                                <li ng-repeat="attribute in (categoryAttributes = (vm.getTileTableItems(category) 
+                                        | filter: vm.enrichmentsFilter() 
+                                        | orderBy: [ '-ImportanceOrdering', '-Value' ] 
+                                        | limitTo: 5))">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                                     <div class="column data {{ vm.lookupMode ? 'values' : 'records' }}">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}</div>
                                 </li>
@@ -192,12 +195,14 @@
 
                         <div class="attributes-container">
                             <ul class="attributes noselect-children">
-                                <li class="header">
-                                    <div class="column label">{{ vm.lookupMode ? 'Attributes' : 'Top 5 attributes' }}</div>
-                                    <div class="column data">{{ vm.lookupMode ? 'Values' : 'Records' }}</div>
+                                <li class="header" ng-show="subcategoryAttributes.length > 0">
+                                    <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(subcategoryAttributes) }}</div>
+                                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
                                 </li>
-
-                                <li ng-repeat="attribute in (vm.subCategoryAttributes = vm.getTileTableItems(vm.category, subcategory)) | orderBy: [ '-Value' ] | limitTo: 5">
+                                <li ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory)
+                                        | filter: vm.enrichmentsFilter(vm.lookupMode) 
+                                        | orderBy: [ '-Value' ]
+                                        | limitTo: 5))">
                                     <div class="column label" title="{{attribute.DisplayName}}">
                                         {{ attribute.DisplayName }}
                                     </div>
@@ -208,7 +213,7 @@
                                 </li>
                             </ul>
 
-                            <div class="attributes-more noselect" ng-if="vm.subCategoryAttributes.length > 5">More</div>
+                            <div class="attributes-more noselect" ng-if="subcategoryAttributes.length > 5">More</div>
                         </div>
                         <ul class="controls noselect" ng-if="!vm.lookupMode">
                             <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[vm.category + subcategory] = {}">
@@ -248,6 +253,9 @@
         <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length > 1 && vm.subcategory">
                 <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
+            </div>
+            <div class="subcategory-back" ng-if="vm.category && (!vm.subcategory || (vm.subcategory == 'Other' && !vm.isYesNoCategory(vm.category, true)))">
+                <span ng-click="vm.setCategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">

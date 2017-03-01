@@ -716,10 +716,23 @@ angular.module('common.datacloud.explorer', [
 
     vm.getTileTableItems = function(category, subcategory) {
         var items = [];
-        var i = 0;
 
         if (vm.topAttributes[category]) {
-            items = vm.topAttributes[category].SubCategories[subcategory || 'Other'];
+            if (!subcategory && vm.isYesNoCategory(category, true)) {
+                Object.keys(vm.topAttributes[category].SubCategories).forEach(function(key, index) {
+                    items = Object.assign(items, vm.topAttributes[category].SubCategories[key]);
+                })
+            } else {
+                items = vm.topAttributes[category].SubCategories[subcategory || 'Other'];
+            }
+
+            if (!vm.lookupMode) {
+                items.forEach(function(item) {
+                    var index = vm.enrichmentsMap[item.Attribute];
+                    var enrichment = vm.enrichments[index];
+                    Object.assign(item, enrichment);
+                });
+            }
         }
 
         if (vm.lookupMode || (!items || items.length == 0)) {
@@ -734,10 +747,9 @@ angular.module('common.datacloud.explorer', [
 
                     if (vm.lookupMode && attrValue && isSubcategory) {
                         item.Value = attrValue;
-                        if ((!vm.metadata.toggle.show.nulls && attrValue == 'No') || i > 4) {
+                        if ((!vm.metadata.toggle.show.nulls && attrValue == 'No')) {
                             return false;
                         } else {
-                            i++;
                             return true;
                         }
                     }
@@ -748,6 +760,12 @@ angular.module('common.datacloud.explorer', [
         }
 
         return items;
+    }
+
+    vm.generateTileTableLabel = function(items) {
+        return items 
+            ? 'Top ' + (items.length > 1 ? items.length + ' attributes' : 'attribute') 
+            : '';
     }
 
     var textSearch = function(haystack, needle, case_insensitive) {
@@ -1178,8 +1196,13 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.isYesNoCategory = function(category) {
+    vm.isYesNoCategory = function(category, includeKeywords) {
         var list = ['Website Profile','Technology Profile'];
+
+        if (includeKeywords) {
+            list.push('Website Keywords');
+        }
+
         return list.indexOf(category) >= 0;
     }
 
