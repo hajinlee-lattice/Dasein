@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
+import static com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy.KEY_ATTR;
 import static com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy.SUPPORTED_CLASSES;
 import static com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy.constructDeclaration;
 import static com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy.reservedAttrType;
@@ -58,9 +59,8 @@ public class KVOperation extends Operation {
     public KVOperation(Input input, String rowIdField, KVAttrPicker picker) {
         Pipe prior = input.pipe;
         Fields fields = DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(input.metadata));
-        String valAttr = KVDepivotStrategy.valueAttr(picker.valClzSimpleName());
         Aggregator agg = new KVAttrPickAggregator(fields, picker);
-        Pipe groupBy  = new GroupBy(prior, new Fields(rowIdField, valAttr));
+        Pipe groupBy  = new GroupBy(prior, new Fields(rowIdField, KEY_ATTR));
         this.pipe = new Every(groupBy, agg, Fields.RESULTS);
         this.metadata = input.metadata;
     }
