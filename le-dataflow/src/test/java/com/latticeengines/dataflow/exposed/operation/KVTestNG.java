@@ -150,22 +150,11 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                 // merge two streams
                 Node kv = kv1.merge(kv2);
 
-                // split attributes into groups that can use the same KVAttrPicker later
-                // in this example, none of the attrs can share kv picker
-                Node attr1 = kv.filter(String.format("%s.equals(\"%s\")", KVDepivotStrategy.KEY_ATTR, "Attr1"),
-                        new FieldList(KVDepivotStrategy.KEY_ATTR)).renamePipe("attr1");
-                Node attr2 = kv.filter(String.format("%s.equals(\"%s\")", KVDepivotStrategy.KEY_ATTR, "Attr2"),
-                        new FieldList(KVDepivotStrategy.KEY_ATTR)).renamePipe("attr2");
-                Node attr3 = kv.filter(String.format("%s.equals(\"%s\")", KVDepivotStrategy.KEY_ATTR, "Attr3"),
-                        new FieldList(KVDepivotStrategy.KEY_ATTR)).renamePipe("attr3");
-                Node attr4 = kv.filter(String.format("%s.equals(\"%s\")", KVDepivotStrategy.KEY_ATTR, "Attr4"),
-                        new FieldList(KVDepivotStrategy.KEY_ATTR)).renamePipe("attr4");
-
                 // pick (discarding help fields is optional)
-                attr1 = attr1.kvPickAttr("RowId", new ExampleAttrPicker(String.class)).discard("SourceTable");
-                attr2 = attr2.kvPickAttr("RowId", new ExampleAttrPicker(Double.class)).discard("SourceTable");
-                attr3 = attr3.kvPickAttr("RowId", new ExampleAttrPicker(Integer.class)).discard("SourceTable");
-                attr4 = attr4.kvPickAttr("RowId", new ExampleAttrPicker(Boolean.class)).discard("SourceTable");
+                Node attr1 = kv.kvPickAttr("RowId", new ExampleAttrPicker(String.class)).renamePipe("attr1");
+                Node attr2 = kv.kvPickAttr("RowId", new ExampleAttrPicker(Double.class)).renamePipe("attr2");
+                Node attr3 = kv.kvPickAttr("RowId", new ExampleAttrPicker(Integer.class)).renamePipe("attr3");
+                Node attr4 = kv.kvPickAttr("RowId", new ExampleAttrPicker(Boolean.class)).renamePipe("attr4");
 
                 // merge
                 Node attr = attr1.merge(Arrays.asList(attr2, attr3, attr4));
