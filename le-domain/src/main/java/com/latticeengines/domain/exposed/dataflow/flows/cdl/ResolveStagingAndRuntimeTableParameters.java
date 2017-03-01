@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.dataflow.flows.cdl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.pls.EntityExternalType;
 
 public class ResolveStagingAndRuntimeTableParameters extends DataFlowParameters {
 
@@ -16,4 +17,7 @@ public class ResolveStagingAndRuntimeTableParameters extends DataFlowParameters 
     
     @JsonProperty("runtime_table")
     public String runtimeTableName;
+    
+    @JsonProperty("entity_external_type")
+    public EntityExternalType entityExternalType;
 }
