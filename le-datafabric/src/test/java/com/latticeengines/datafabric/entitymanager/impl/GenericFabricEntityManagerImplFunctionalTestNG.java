@@ -160,7 +160,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         Assert.assertEquals(entityManager.getBatchStatus(name), GenericFabricStatus.PROCESSING);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "manual", enabled = true)
     public void publish() throws Exception {
 
         String batchId1 = entityManager.createUniqueBatchId(RECORD_COUNT);
