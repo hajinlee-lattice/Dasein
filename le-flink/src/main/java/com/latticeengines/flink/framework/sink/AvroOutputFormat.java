@@ -20,13 +20,11 @@ public class AvroOutputFormat extends FileOutputFormat<Tuple> {
     private static final long serialVersionUID = 1L;
     private final String serializedSchema;
     private Schema schema;
-    private final int numFields;
     private transient DataFileWriter<GenericRecord> dataFileWriter;
 
     AvroOutputFormat(Path filePath, Schema schema) {
         super(filePath);
         this.serializedSchema = schema.toString();
-        this.numFields = schema.getFields().size();
     }
 
     protected String getDirectoryFileName(int taskNumber) {

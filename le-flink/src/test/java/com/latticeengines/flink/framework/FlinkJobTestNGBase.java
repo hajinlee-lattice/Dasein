@@ -19,13 +19,13 @@ public abstract class FlinkJobTestNGBase extends FlinkRuntimeTestNGBase {
     protected abstract String getInputResource();
 
     @Override
-    protected String getResourceRoot() {
+    protected String getPackageName() {
         return "job";
     }
 
     @Deprecated
     @Override
-    protected String getOperatorName() {
+    protected String getTestName() {
         return getJobName();
     }
 

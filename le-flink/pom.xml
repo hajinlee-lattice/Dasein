@@ -9,7 +9,6 @@
 
     <properties>
         <component-name>flink</component-name>
-        <flink.avro.version>0.10.2</flink.avro.version>
     </properties>
 
     <parent>
@@ -99,11 +98,6 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-avro</artifactId>
-            <version>${flink.avro.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

@@ -14,15 +14,15 @@ import com.latticeengines.flink.framework.sink.AvroSink;
 import com.latticeengines.flink.framework.sink.CSVSink;
 import com.latticeengines.flink.framework.source.TextSource;
 
-public class TokenizerTestNG extends FlinkRuntimeTestNGBase {
+public class SinkTestNG extends FlinkRuntimeTestNGBase {
 
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
-    public void test() {
+    public void test() throws Exception {
         String input = getResourcePath("wiki.txt");
         String outputDir = getOutputDir();
 
-        DataSource<String> text = (DataSource<String>) new TextSource(env, input).connect();
+        DataSource<String> text = new TextSource(env, input).connect();
         DataSet<Tuple2<String, Integer>> counts =
                 // split up the lines in pairs (2-tuples) containing: (word,1)
                 text.flatMap(new Tokenizer())
@@ -33,6 +33,7 @@ public class TokenizerTestNG extends FlinkRuntimeTestNGBase {
         // csv sink
         new CSVSink(counts, outputDir + File.separator + "wiki.csv", "\n", ",").connect();
 
+        // avro sink
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
                 + "{\"name\":\"Word\",\"type\":[\"string\",\"null\"]},"
@@ -42,8 +43,8 @@ public class TokenizerTestNG extends FlinkRuntimeTestNGBase {
     }
 
     @Override
-    protected String getOperatorName() {
-        return "Tokenizer";
+    protected String getTestName() {
+        return "SinkTest";
     }
 
 }

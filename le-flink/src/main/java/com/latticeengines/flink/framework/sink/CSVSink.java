@@ -3,6 +3,7 @@ package com.latticeengines.flink.framework.sink;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.io.CsvOutputFormat;
 import org.apache.flink.api.java.operators.DataSink;
+import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.core.fs.Path;
 
 public class CSVSink extends FlinkSink {

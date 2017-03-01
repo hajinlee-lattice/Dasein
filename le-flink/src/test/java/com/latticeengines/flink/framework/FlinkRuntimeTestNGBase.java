@@ -15,18 +15,22 @@ public abstract class FlinkRuntimeTestNGBase {
 
     private ThreadLocal<String> senarioName = new ThreadLocal<>();
 
-    protected abstract String getOperatorName();
+    protected abstract String getTestName();
 
-    protected String getResourceRoot() {
+    protected String getPackageName() {
         return "runtime";
+    }
+
+    protected String getInput() {
+        return "input" + File.separator + getPackageName() + File.separator + getTestName();
     }
 
     protected String getResourcePath(String resourceName) {
         URL url = Thread.currentThread().getContextClassLoader()
-                .getResource(getResourceRoot() + File.separator + getOperatorName() + File.separator + resourceName);
+                .getResource(getPackageName() + File.separator + getTestName() + File.separator + resourceName);
         if (url == null) {
             throw new IllegalArgumentException(
-                    "Cannot find resource named " + resourceName + " for job " + getOperatorName());
+                    "Cannot find resource named " + resourceName + " for job " + getTestName());
         }
         return url.getFile();
     }
@@ -38,9 +42,9 @@ public abstract class FlinkRuntimeTestNGBase {
     protected String getOutputDir() {
         String senario = senarioName.get();
         if (StringUtils.isBlank(senario)) {
-            return JOB_OUTPUT + File.separator + getOperatorName();
+            return JOB_OUTPUT + File.separator + getTestName();
         } else {
-            return JOB_OUTPUT + File.separator + getOperatorName() + File.separator + senario;
+            return JOB_OUTPUT + File.separator + getTestName() + File.separator + senario;
         }
     }
 
@@ -49,7 +53,7 @@ public abstract class FlinkRuntimeTestNGBase {
     }
 
     protected void execute() {
-        String fullJobName = getOperatorName();
+        String fullJobName = getTestName();
         if (StringUtils.isNotBlank(getCurrentSenarioName())) {
             fullJobName = fullJobName + File.separator + getCurrentSenarioName();
         }
