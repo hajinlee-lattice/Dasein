@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.flows;
+package com.latticeengines.scoringapi.score.impl;
 
 import java.io.IOException;
 import java.util.Date;
