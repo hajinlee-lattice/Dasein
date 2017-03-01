@@ -701,6 +701,20 @@ public class AvroUtils {
         return schema;
     }
 
+    public static List<GenericRecord> convertToRecords(Object[][] data, Schema schema) {
+        List<GenericRecord> records = new ArrayList<>();
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        for (Object[] tuple : data) {
+            int i = 0;
+            for (Schema.Field field: schema.getFields()) {
+                builder.set(field, tuple[i]);
+                i++;
+            }
+            records.add(builder.build());
+        }
+        return records;
+    }
+
     public static Iterator<GenericRecord> iterator(Configuration configuration, String path) {
         try {
             return new AvroFilesIterator(configuration, path);
