@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatus;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 @Component("genericFabricEntityManager")
+@Lazy
 public class GenericFabricEntityManagerImpl extends BaseFabricEntityMgrImpl<GenericFabricRecord> implements
         GenericFabricEntityManager {
 
