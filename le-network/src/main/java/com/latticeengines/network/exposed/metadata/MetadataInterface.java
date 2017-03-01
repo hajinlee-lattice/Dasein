@@ -34,5 +34,12 @@ public interface MetadataInterface {
 
     void validateArtifact(String customerSpace, ArtifactType artifactType, String filePath);
 
-    MetadataSegment createSegment(String customerSpace, String segmentName, String tableName);
+    MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment metadataSegment);
+
+    void deleteSegmentByName(String customerSpace, String segmentName);
+
+    MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName);
+
+    List<MetadataSegment> getMetadataSegments(String customerSpace, String selection);
+
 }
