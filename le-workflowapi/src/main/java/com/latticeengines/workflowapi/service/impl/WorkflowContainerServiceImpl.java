@@ -70,6 +70,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Value("${datacloud.etl.cascading.platform}")
     private String datacloudCascadingEngine;
 
+    @Value("${datacloud.etl.workflow.mem.mb}")
+    private String datacloudWorkflowMem;
+
     @Value("${dataflowapi.flink.local.vcores}")
     private Integer flinkVcores;
 
@@ -127,12 +130,18 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
-        if ("local".equals(etlFlinkMode) && "FLINK".equalsIgnoreCase(datacloudCascadingEngine)
-                && isDataCloudEtlJob(workflowConfig)) {
-            appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
-            appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkVcores));
-            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
-            containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkVcores));
+        if (isDataCloudEtlJob(workflowConfig)) {
+            if ("local".equals(etlFlinkMode) && "FLINK".equalsIgnoreCase(datacloudCascadingEngine)) {
+                appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
+                appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkVcores));
+                containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
+                containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkVcores));
+            } else {
+                appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), "1");
+                appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(datacloudWorkflowMem));
+                containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+                containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(datacloudWorkflowMem));
+            }
         }
 
         job.setAppMasterPropertiesObject(appMasterProperties);
