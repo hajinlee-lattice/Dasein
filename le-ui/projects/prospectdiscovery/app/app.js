@@ -1,9 +1,8 @@
-//Initial load of the application    
+//Initial load of the application
 var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
     'ngAnimate',
-    'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
@@ -21,7 +20,7 @@ var mainApp = angular.module('mainApp', [
     /*
     //initialize get if not there
     if (!$httpProvider.defaults.headers.get) {
-        $httpProvider.defaults.headers.get = {};    
+        $httpProvider.defaults.headers.get = {};
     }
     // disable IE ajax request caching
     $httpProvider.defaults.headers.get['If-Modified-Since'] = 'Mon, 26 Jul 1997 05:00:00 GMT';
@@ -32,14 +31,14 @@ var mainApp = angular.module('mainApp', [
 }])
 
 .controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, LoginService) {
+    TimestampIntervalUtility, ResourceStringsService, LoginService) {
     $scope.showFooter = false;
     $scope.sessionExpired = false;
-    
+
     var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30 * 1000;
     var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 14.5 * 60 * 1000;  // 14.5 minutes
     var TIME_INTERVAL_WARNING_BEFORE_LOGOUT = 30 * 1000;
-    
+
     var inactivityCheckingId = null;
     var warningModalInstance = null;
 
@@ -62,35 +61,28 @@ var mainApp = angular.module('mainApp', [
         startObservingUserActivtyThroughMouseAndKeyboard();
         startCheckingIfSessionIsInactive();
     });
-    
+
     $scope.refreshPreviousSession = function (tenant) {
         //Refresh session and go somewhere
         LoginService.GetSessionDocument(tenant).then(
             // Success
             function (data, status) {
                 if (data && data.Success === true) {
-                    //Initialize Evergage
-                    EvergageUtility.Initialize({
-                        userID: data.Result.User.Identifier, 
-                        title: data.Result.User.Title,
-                        datasetPrefix: "pls",
-                        company: data.Ticket.Tenants[0].DisplayName
-                    });
-                    
+
                     $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
-                    
+
                     startObservingUserActivtyThroughMouseAndKeyboard();
                     startCheckingIfSessionIsInactive();
                 }
             },
-            
+
             // Fail
             function (data, status) {
 
             }
         );
     };
-    
+
     // Handle when the copyright footer should be shown
     $scope.$on("ShowFooterEvent", function (event, data) {
         $scope.showFooter = data;
@@ -99,7 +91,7 @@ var mainApp = angular.module('mainApp', [
             $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
         }
     });
-    
+
     $scope.getLocaleSpecificResourceStrings = function (locale) {
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
             $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
@@ -123,7 +115,7 @@ var mainApp = angular.module('mainApp', [
     function startCheckingIfSessionIsInactive() {
         refreshSessionLastActiveTimeStamp();
         inactivityCheckingId = setInterval(
-            checkIfSessionIsInactiveEveryInterval, 
+            checkIfSessionIsInactiveEveryInterval,
             TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS
         ); // 1 minute
     }
@@ -138,14 +130,14 @@ var mainApp = angular.module('mainApp', [
             $timeout(callWhenWarningModalExpires, TIME_INTERVAL_WARNING_BEFORE_LOGOUT);
         }
     }
-    
+
     function mustUserChangePassword(loginDocument) {
         var isTimedOut = loginDocument.MustChangePassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
 
         return isTimedOut;
     }
-    
-    
+
+
     function hasSessionTimedOut() {
         var isTimedOut = Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >=
             TIME_INTERVAL_INACTIVITY_BEFORE_WARNING + TIME_INTERVAL_WARNING_BEFORE_LOGOUT;
@@ -171,7 +163,7 @@ var mainApp = angular.module('mainApp', [
             startCheckingIfSessionIsInactive();
         };
     }
-    
+
     function cancelCheckingIfSessionIsInactiveAndSetIdToNull() {
         clearInterval(inactivityCheckingId);
         inactivityCheckingId = null;
@@ -181,7 +173,7 @@ var mainApp = angular.module('mainApp', [
         $(this).off("mousemove");
         $(this).off("keypress");
     }
-    
+
     function callWhenWarningModalExpires() {
         if (hasSessionTimedOut()) {
             $scope.sessionExpired = true;
