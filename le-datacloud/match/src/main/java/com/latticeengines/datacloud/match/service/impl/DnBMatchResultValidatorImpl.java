@@ -78,7 +78,7 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
             return true;
         }
 
-        if (res.isOutOfBusiness()) {
+        if (Boolean.TRUE.equals(res.isOutOfBusiness())) {
             res.setDnbCode(DnBReturnCode.DISCARD);
             return false;
         }

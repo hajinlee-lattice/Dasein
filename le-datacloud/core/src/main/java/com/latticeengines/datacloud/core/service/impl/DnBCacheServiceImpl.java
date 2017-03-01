@@ -90,12 +90,12 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     public DnBCache addCache(DnBMatchContext context) {
         DnBCache cache = null;
         if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
-            if (!context.isOutOfBusiness()) {
-                cache = initCacheEntity(context, false);
-                cache.setWhiteCache(true);
-            } else {
+            if (Boolean.TRUE.equals(context.isOutOfBusiness())) {    // Out of business, add to black cache
                 cache = initCacheEntity(context, true);
                 cache.setWhiteCache(false);
+            } else {
+                cache = initCacheEntity(context, false);
+                cache.setWhiteCache(true);
             }
         } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
             cache = initCacheEntity(context, true);
@@ -119,8 +119,13 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         for (DnBMatchContext context : contexts) {
             DnBCache cache = null;
             if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
-                cache = initCacheEntity(context, false);
-                cache.setWhiteCache(true);
+                if (Boolean.TRUE.equals(context.isOutOfBusiness())) {    // Out of business, add to black cache
+                    cache = initCacheEntity(context, true);
+                    cache.setWhiteCache(false);
+                } else {
+                    cache = initCacheEntity(context, false);
+                    cache.setWhiteCache(true);
+                }
             } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
                 cache = initCacheEntity(context, true);
                 cache.setWhiteCache(false);
@@ -131,8 +136,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 cache.setPatched(context.getPatched());
             }
             caches.add(cache);
-            log.info(String.format("Added Id = %s to %s cache", cache.getId(),
-                    cache.isWhiteCache() ? "white" : "black"));
+            log.info(String.format("Added Id = %s to %s cache. DnBCode = %s. OutOfBusiness = %b", cache.getId(),
+                    cache.isWhiteCache() ? "white" : "black", context.getDnbCode().getMessage(),
+                    context.isOutOfBusiness()));
         }
         getCacheMgr().batchCreate(caches);
         return caches;
@@ -198,6 +204,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     }
 
     private boolean expire(DnBCache cache) {
+        if (cache == null) {
+            return false;
+        }
         long currentDays = System.currentTimeMillis() / DnBCache.DAY_IN_MILLIS;
         if (cache.isWhiteCache() && cache.getTimestamp() != null
                 && currentDays <= (cache.getTimestamp().longValue() + whiteCacheExpireDays)) {

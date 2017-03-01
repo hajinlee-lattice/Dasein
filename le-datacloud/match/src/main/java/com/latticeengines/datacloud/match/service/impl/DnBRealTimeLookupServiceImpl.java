@@ -140,7 +140,9 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                     .setPhoneNumber((String) retrieveJsonValueFromResponse(entityPhoneNumberJsonPath, response, false));
             String outOfBusiness = (String) retrieveJsonValueFromResponse(operatingStatusJsonPath, response, false);
             if (outOfBusinessValue.equalsIgnoreCase(outOfBusiness)) {
-                context.setOutOfBusiness(true);
+                context.setOutOfBusiness(Boolean.TRUE);
+            } else {
+                context.setOutOfBusiness(Boolean.FALSE);
             }
             break;
         case REALTIME_EMAIL:

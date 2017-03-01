@@ -44,7 +44,7 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private long timestamp;
 
-    private boolean outOfBusiness;
+    private Boolean outOfBusiness;
 
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
@@ -263,11 +263,11 @@ public class DnBMatchContext implements Fact, Dimension {
         this.timestamp = timestamp;
     }
 
-    public boolean isOutOfBusiness() {
+    public Boolean isOutOfBusiness() {
         return outOfBusiness;
     }
 
-    public void setOutOfBusiness(boolean outOfBusiness) {
+    public void setOutOfBusiness(Boolean outOfBusiness) {
         this.outOfBusiness = outOfBusiness;
     }
 

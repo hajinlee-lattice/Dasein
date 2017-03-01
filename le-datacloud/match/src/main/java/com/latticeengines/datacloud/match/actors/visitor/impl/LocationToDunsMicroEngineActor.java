@@ -67,14 +67,15 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             traveler.debug(res.getHitWhiteCache() ? String.format(HIT_WHITE_CACHE, res.getCacheId())
                     : (res.getHitBlackCache() ? String.format(HIT_BLACK_CACHE, res.getCacheId()) : HIT_NO_CACHE));
             String logMessage = String.format(
-                    "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %b.",
+                    "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s.",
                     res.getDuns(), getClass().getSimpleName(),
                     (res.getConfidenceCode() == null ? "null" : res.getConfidenceCode().toString()),
                     (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode()),
                     res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
                     res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
                     res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
-                    res.getMatchedNameLocation().getPhoneNumber(), res.isOutOfBusiness());
+                    res.getMatchedNameLocation().getPhoneNumber(),
+                    res.isOutOfBusiness() == null ? null : res.isOutOfBusiness().toString());
             if (Boolean.TRUE.equals(res.getPatched())) {
                 logMessage += " This cache entry has been manually patched.";
             }

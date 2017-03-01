@@ -217,7 +217,9 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             phoneNumber = StringUtils.isNotEmpty(phoneNumber) ? phoneNumber : null;
             String outOfBusiness = StringUtils.strip(values[40]);
             if ("Y".equalsIgnoreCase(outOfBusiness) || "1".equalsIgnoreCase(outOfBusiness)) {
-                output.setOutOfBusiness(true);
+                output.setOutOfBusiness(Boolean.TRUE);
+            } else {
+                output.setOutOfBusiness(Boolean.FALSE);
             }
 
             output.setDuns(duns);
