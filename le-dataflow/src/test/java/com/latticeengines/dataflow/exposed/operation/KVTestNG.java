@@ -79,7 +79,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
             }
         }
 
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
     }
 
     @Test(groups = "functional")
@@ -116,7 +116,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                 Assert.assertEquals(record.get("Attr5").toString(), "only me");
             }
         }
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
     }
 
     @Test(groups = "functional")
@@ -155,7 +155,6 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                 Node attr2 = kv.kvPickAttr("RowId", new ExampleAttrPicker(Double.class)).renamePipe("attr2");
                 Node attr3 = kv.kvPickAttr("RowId", new ExampleAttrPicker(Integer.class)).renamePipe("attr3");
                 Node attr4 = kv.kvPickAttr("RowId", new ExampleAttrPicker(Boolean.class)).renamePipe("attr4");
-
                 // merge
                 Node attr = attr1.merge(Arrays.asList(attr2, attr3, attr4));
 
@@ -166,6 +165,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                         new FieldMetadata("Attr3", Integer.class), //
                         new FieldMetadata("Attr4", Boolean.class));
                 return attr.kvReconstruct("RowId", fms);
+                
             }
         });
 
@@ -187,7 +187,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                     break;
             }
         }
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
     }
 
     private void uploadAvro() {
@@ -214,7 +214,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                 + "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" //
                 + "]}");
 
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
         uploadDynamicSourceAvro(data, schema);
     }
 
@@ -243,7 +243,7 @@ public class KVTestNG extends DataFlowOperationFunctionalTestNGBase {
                 + "{\"name\":\"RowId\",\"type\":[\"long\",\"null\"]}" //
                 + "]}");
 
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
         uploadDynamicSourceAvro(data, schema);
     }
 

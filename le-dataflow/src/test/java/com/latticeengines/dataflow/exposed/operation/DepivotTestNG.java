@@ -52,7 +52,7 @@ public class DepivotTestNG extends DataFlowOperationFunctionalTestNGBase {
             }
         }
 
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
     }
 
     private void uploadDepivotAvro() {
@@ -73,7 +73,7 @@ public class DepivotTestNG extends DataFlowOperationFunctionalTestNGBase {
                 + "{\"name\":\"Score4\",\"type\":[\"double\",\"null\"]},"
                 + "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" + "]}");
 
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
         uploadDynamicSourceAvro(data, schema);
     }
 

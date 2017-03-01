@@ -79,7 +79,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
 
     @AfterMethod(groups = "functional")
     public void afterMethod() {
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
     }
 
     protected Map<String, Table> getSources() {
@@ -195,7 +195,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         FileUtils.deleteQuietly(new File(fileName));
     }
 
-    protected void cleanupDyanmicSource() {
+    protected void cleanupDynamicSource() {
         try {
             HdfsUtils.rmdir(configuration, INPUT_PATH + "/" + DYNAMIC_SOURCE);
         } catch (Exception e) {

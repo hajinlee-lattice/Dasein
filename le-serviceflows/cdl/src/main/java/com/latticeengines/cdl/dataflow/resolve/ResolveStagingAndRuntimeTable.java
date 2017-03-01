@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.dataflow.flows.cdl.KeyLoadStrategy;
 import com.latticeengines.domain.exposed.dataflow.flows.cdl.ResolveStagingAndRuntimeTableParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.EntityExternalType;
 
 @Component("resolveStagingAndRuntimeTable")
 public class ResolveStagingAndRuntimeTable extends TypesafeDataFlowWithResolutionBuilder<ResolveStagingAndRuntimeTableParameters> {
@@ -42,7 +41,6 @@ public class ResolveStagingAndRuntimeTable extends TypesafeDataFlowWithResolutio
         KeyLoadStrategy keyLoadStrategy = getKeyLoadStrategy(parameters);
         String stageTableName = parameters.stageTableName;
         String runtimeTableName = parameters.runtimeTableName;
-        EntityExternalType entityExternalType = parameters.entityExternalType;
         
         DataFlowContext ctx = getDataFlowCtx();
         Map<String, Table> sourceTables = ctx.getProperty(DataFlowProperty.SOURCETABLES, Map.class);
@@ -50,8 +48,7 @@ public class ResolveStagingAndRuntimeTable extends TypesafeDataFlowWithResolutio
         Table runtimeTable = sourceTables.get(runtimeTableName);
         
         if (keyLoadStrategy == KeyLoadStrategy.Full || runtimeTable == null) {
-            Node node = addSource(stageTableName);
-            return node;
+            return addSource(stageTableName);
         }
         
         Node extract = addSource(stageTableName);
@@ -74,10 +71,10 @@ public class ResolveStagingAndRuntimeTable extends TypesafeDataFlowWithResolutio
         int i = 0;
         Iterator<Triple<Node, Class<?>, Set<String>>> it = nodes.iterator();
         
-        List<FieldMetadata> fm = new ArrayList<>();
+        Map<String, FieldMetadata> fm = new HashMap<>();
         while (it.hasNext()) {
             Triple<Node, Class<?>, Set<String>> t = it.next();
-            Node n = t.getLeft().kvPickAttr(idColumns.get(0), new AttributePicker(t.getMiddle())).discard("TableType");
+            Node n = t.getLeft().kvPickAttr(idColumns.get(0), new AttributePicker(t.getMiddle(), fieldLoadStrategy)).discard("TableType");
             if (i == 0) {
                 firstPicked = n;
             } else {
@@ -88,13 +85,16 @@ public class ResolveStagingAndRuntimeTable extends TypesafeDataFlowWithResolutio
                 if (name.equals(idColumns.get(0))) {
                     continue;
                 }
-                fm.add(new FieldMetadata(name, t.getMiddle()));
+                if (!fm.containsKey(name)) {
+                    fm.put(name, new FieldMetadata(name, t.getMiddle()));
+                }
+                
             }
+            i++;
         }
         
         kv = firstPicked.merge(picked);
-        
-        return kv.kvReconstruct(idColumns.get(0), fm);
+        return kv.kvReconstruct(idColumns.get(0), new ArrayList<>(fm.values()));
     }
     
     private List<Triple<Node, Class<?>, Set<String>>> getFilteredAttributes(Node kv, Table stageTable, Table runtimeTable) {
@@ -178,9 +178,12 @@ public class ResolveStagingAndRuntimeTable extends TypesafeDataFlowWithResolutio
 
         private String valClzName;
 
+        private FieldLoadStrategy fieldLoadStrategy;
 
-        public AttributePicker(Class<?> valClz) {
+
+        public AttributePicker(Class<?> valClz, FieldLoadStrategy fieldLoadStrategy) {
             valClzName = valClz.getSimpleName();
+            this.fieldLoadStrategy = fieldLoadStrategy;
         }
 
         @Override
@@ -196,16 +199,26 @@ public class ResolveStagingAndRuntimeTable extends TypesafeDataFlowWithResolutio
         @Override
         public Object updateHelpAndReturnValue(Object oldValue, Map<String, Object> oldHelp, Object newValue,
                                         Map<String, Object> newHelp) {
+            
+            String oldSource = (String) oldHelp.get("TableType");
             String newSource = (String) newHelp.get("TableType");
+            
             boolean updateWithNewValue = false;
-            if (oldValue == null) {
-                // if candidate is null, update by new record anyway
+            if (oldSource == null) {
                 updateWithNewValue = true;
-            } else if (newValue !=  null) {
-                // if both candidate and new record are not null, check source table
-                updateWithNewValue = "Extract".equals(newSource);
+            } else if (newSource.equals("Extract")) {
+                if (newValue != null) {
+                    updateWithNewValue = true;
+                } else if (fieldLoadStrategy == FieldLoadStrategy.Update) {
+                    updateWithNewValue = false;
+                }
+            } else if (newSource.equals("Runtime")) {
+                if (newValue != null && oldValue == null && fieldLoadStrategy == FieldLoadStrategy.Update) {
+                    updateWithNewValue = true;
+                }
+            } else {
+                updateWithNewValue = false;
             }
-
             if (updateWithNewValue) {
                 oldHelp.put("TableType", newSource);
                 return newValue;
@@ -214,5 +227,5 @@ public class ResolveStagingAndRuntimeTable extends TypesafeDataFlowWithResolutio
             }
         }
     }
+    }
 
-}

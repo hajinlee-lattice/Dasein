@@ -67,7 +67,7 @@ public class TimestampTestNG extends DataFlowOperationFunctionalTestNGBase {
         Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
                 { "dom1.com", "f3", 3, 124L }, { "dom1.com", "k1_low", 3, 124L }, { "dom1.com", "k1_high", 5, 124L },
                 { "dom2.com", "f2", 4, 101L }, { "dom2.com", "f3", 2, 102L }, { "dom2.com", "k1_low", 3, 124L }, };
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
         uploadDynamicSourceAvro(data, PivotTestNG.featureSchema());
     }
 

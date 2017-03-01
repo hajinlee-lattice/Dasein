@@ -29,7 +29,7 @@ public class NoRuntimeTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBa
 
     @Override
     protected String getIdColumnName(String tableName) {
-        return "Id";
+        return "RowId";
     }
 
     @Override

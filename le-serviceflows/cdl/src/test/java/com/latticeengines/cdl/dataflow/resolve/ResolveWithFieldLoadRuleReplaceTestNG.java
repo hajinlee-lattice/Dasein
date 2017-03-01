@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.cdl.ResolveStagingAndRun
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-context.xml" })
-public class ResolveWithFieldLoadRuleUpdateTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public class ResolveWithFieldLoadRuleReplaceTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     /**
 Runtime:
@@ -38,7 +38,7 @@ Expected Result:
 {u'Timestamp': 1488386040509, u'Attr4': None, u'Attr5': None, u'Attr2': 1.0, u'Attr3': 1, u'RowId': 2, u'Attr1': '2', u'Attr3_added': None}
 {u'Timestamp': 1488391998461, u'Attr4': True, u'Attr5': None, u'Attr2': 1.0, u'Attr3': None, u'RowId': 3, u'Attr1': '3', u'Attr3_added': None}
 {u'Timestamp': 1488391998461, u'Attr4': True, u'Attr5': None, u'Attr2': None, u'Attr3': 1, u'RowId': 4, u'Attr1': '4', u'Attr3_added': 1}
-{u'Timestamp': 1488391998461, u'Attr4': True, u'Attr5': 'only me but better', u'Attr2': 1.0, u'Attr3': 1, u'RowId': 5, u'Attr1': None, u'Attr3_added': 1}
+{u'Timestamp': 1488391998461, u'Attr4': True, u'Attr5': 'only me but better', u'Attr2': None, u'Attr3': 1, u'RowId': 5, u'Attr1': None, u'Attr3_added': 1}
 {u'Timestamp': 1488391998461, u'Attr4': True, u'Attr5': 'extra1', u'Attr2': 1.0, u'Attr3': None, u'RowId': 6, u'Attr1': None, u'Attr3_added': 1}
 {u'Timestamp': 1488391998461, u'Attr4': True, u'Attr5': 'extra2', u'Attr2': 1.0, u'Attr3': None, u'RowId': 7, u'Attr1': None, u'Attr3_added': 1}
 
@@ -46,7 +46,7 @@ Expected Result:
     @Test(groups = "functional")
     public void test() {
         ResolveStagingAndRuntimeTableParameters parameters = new ResolveStagingAndRuntimeTableParameters();
-        parameters.fieldLoadStrategy = FieldLoadStrategy.Update;
+        parameters.fieldLoadStrategy = FieldLoadStrategy.Replace;
         parameters.stageTableName = "AccountStaging";
         parameters.runtimeTableName = "Account";
         executeDataFlow(parameters);
@@ -56,13 +56,12 @@ Expected Result:
         for (GenericRecord record : outputRecords) {
             if (record.get("RowId").equals(5)) {
                 assertEquals(record.get("Attr5"), "only me but better");
-                assertNull(record.get("Attr1"));
                 
-                // FieldLoadStrategy.Update keeps the value at Runtime value if the Extract value for the common attribute is null
-                assertEquals(record.get("Attr2"), 1.0);
+                // FieldLoadStrategy.Replace replaces it with the extract value (in this case null), regardless
+                assertNull(record.get("Attr2"));
             }
         }
-
+        
     }
 
     @Override

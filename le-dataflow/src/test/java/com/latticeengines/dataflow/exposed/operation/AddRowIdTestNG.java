@@ -40,7 +40,7 @@ public class AddRowIdTestNG extends DataFlowOperationFunctionalTestNGBase {
         }
         Assert.assertEquals(ids.size(), numRecords * 2);
 
-        cleanupDyanmicSource();
+        cleanupDynamicSource();
     }
 
     private void prepareAddRowId(int numRecords) {

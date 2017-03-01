@@ -56,6 +56,7 @@ public class KVOperation extends Operation {
     }
 
     // this is to pick
+    @SuppressWarnings("rawtypes")
     public KVOperation(Input input, String rowIdField, KVAttrPicker picker) {
         Pipe prior = input.pipe;
         Fields fields = DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(input.metadata));
@@ -66,6 +67,7 @@ public class KVOperation extends Operation {
     }
 
     // this is to pivot
+    @SuppressWarnings("rawtypes")
     public KVOperation(Input input, String rowIdField, List<FieldMetadata> outputFieldsExceptRowId) {
         Pipe prior = input.pipe;
 

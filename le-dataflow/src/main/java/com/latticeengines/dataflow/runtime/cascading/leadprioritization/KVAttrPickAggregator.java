@@ -23,6 +23,8 @@ public class KVAttrPickAggregator
         extends BaseAggregator<KVAttrPickAggregator.Context>
         implements Aggregator<KVAttrPickAggregator.Context> {
 
+    private static final long serialVersionUID = -4360627322028214738L;
+
     public static class Context extends BaseAggregator.Context {
         public Object value = null;
         public ConcurrentMap<String, Object> helpFields = new ConcurrentHashMap<>();
@@ -57,10 +59,12 @@ public class KVAttrPickAggregator
         return false;
     }
 
+    @Override
     protected Context initializeContext(TupleEntry group) {
         return new Context();
     }
 
+    @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
         if (!context.foundAlready) {
             Map<String, Object> newHelp = new HashMap<>();
@@ -72,6 +76,7 @@ public class KVAttrPickAggregator
         return context;
     }
 
+    @Override
     protected Tuple finalizeContext(Context context) {
         Tuple tuple = Tuple.size(fieldDeclaration.size());
 

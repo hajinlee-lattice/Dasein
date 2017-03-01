@@ -59,8 +59,14 @@ public class KVReconstuctAggregator extends BaseAggregator<KVReconstuctAggregato
     protected Context updateContext(Context context, TupleEntry arguments) {
         for (Map.Entry<String, String> entry: context.fieldsToFind.entrySet()) {
             String tgtFieldName = entry.getKey();
+            String tgtFieldValue = (String) arguments.getObject(KVDepivotStrategy.KEY_ATTR);
+            
+            if (!tgtFieldName.equals(tgtFieldValue)) {
+                continue;
+            }
             String srcFieldName = KVDepivotStrategy.valueAttr(entry.getValue());
             Object srcValue = arguments.getObject(srcFieldName);
+            
             if (srcValue != null) {
                 context.row.put(tgtFieldName, srcValue);
                 context.fieldsToFind.remove(tgtFieldName);
