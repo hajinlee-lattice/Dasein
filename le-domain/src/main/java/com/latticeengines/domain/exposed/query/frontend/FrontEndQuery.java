@@ -13,8 +13,8 @@ public class FrontEndQuery {
     private Sort sort;
     @JsonProperty("page_filter")
     private PageFilter pageFilter;
-    @JsonProperty("free_form_restriction")
-    private String freeFormRestriction;
+    @JsonProperty("free_form_text_search")
+    private String freeFormTextSearch;
 
     public FlattenedRestriction getRestriction() {
         return restriction;
@@ -40,11 +40,11 @@ public class FrontEndQuery {
         this.pageFilter = pageFilter;
     }
 
-    public String getFreeFormRestriction() {
-        return freeFormRestriction;
+    public String getFreeFormTextSearch() {
+        return freeFormTextSearch;
     }
 
-    public void setFreeFormRestriction(String freeFormRestriction) {
-        this.freeFormRestriction = freeFormRestriction;
+    public void setFreeFormTextSearch(String freeFormTextSearch) {
+        this.freeFormTextSearch = freeFormTextSearch;
     }
 }

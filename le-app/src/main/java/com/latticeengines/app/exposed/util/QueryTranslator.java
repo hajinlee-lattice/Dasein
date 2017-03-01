@@ -22,7 +22,7 @@ public class QueryTranslator {
 
         Restriction restriction = translateRestrictions();
         result.setRestriction(restriction);
-        result.setFreeFormTextSearch(frontEndQuery.getFreeFormRestriction());
+        result.setFreeFormTextSearch(frontEndQuery.getFreeFormTextSearch());
         result.setPageFilter(frontEndQuery.getPageFilter());
         result.setSort(frontEndQuery.getSort());
         return result;
