@@ -6,8 +6,8 @@ public class AlterDDLLoadTest extends AbstractLoadTest {
 
     private String testColumnName;
 
-    public AlterDDLLoadTest(int testerNum, JdbcTemplate jdbcTemplate, int noOfTestsPerThread) {
-        super(testerNum, jdbcTemplate, noOfTestsPerThread);
+    public AlterDDLLoadTest(int testerNum, int noOfTestsPerThread, int maxSleepTime, JdbcTemplate jdbcTemplate) {
+        super(testerNum, noOfTestsPerThread, maxSleepTime, jdbcTemplate);
         sqlStatementType = null;
         // ensure every tester uses their own column
         testColumnName = "load_test_column_" + testerID;

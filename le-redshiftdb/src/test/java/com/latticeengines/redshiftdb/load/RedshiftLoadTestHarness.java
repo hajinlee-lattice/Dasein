@@ -3,7 +3,13 @@ package com.latticeengines.redshiftdb.load;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class RedshiftLoadTestHarness {
@@ -15,12 +21,15 @@ public class RedshiftLoadTestHarness {
     private JdbcTemplate redshiftJdbcTemplate;
     private Random rng;
     private int noOfTestsPerThread;
+    private int maxSleepTime;
+    private static final Log log = LogFactory.getLog(RedshiftLoadTestNG.class);
 
-    public RedshiftLoadTestHarness(int load, JdbcTemplate jdbcTemplate, int noOfTests) {
+    public RedshiftLoadTestHarness(int load, int noOfTests, int sleepTime, JdbcTemplate jdbcTemplate) {
         loadLevel = load;
         redshiftJdbcTemplate = jdbcTemplate;
         rng = new Random();
         noOfTestsPerThread = noOfTests;
+        maxSleepTime = sleepTime;
     }
 
     public String run() {
@@ -37,16 +46,28 @@ public class RedshiftLoadTestHarness {
             LoadTestType testType = LoadTestType.values()[randomTestNum];
 
             if (testType == LoadTestType.Query) {
-                tester = new QueryLoadTest(i + 1, redshiftJdbcTemplate, noOfTestsPerThread);
+                tester = new QueryLoadTest(i + 1, noOfTestsPerThread, maxSleepTime, redshiftJdbcTemplate);
             } else if (testType == LoadTestType.DDL) {
-                tester = new AlterDDLLoadTest(i + 1, redshiftJdbcTemplate, noOfTestsPerThread);
+                tester = new AlterDDLLoadTest(i + 1, noOfTestsPerThread, maxSleepTime, redshiftJdbcTemplate);
             }
             testers.add(tester);
         }
 
         // Execute in parallel
-        testers.parallelStream().forEach(tester -> tester.execute());
+        try {
+            ExecutorService executor = Executors.newCachedThreadPool();
+            List<Future<String>> results = executor.invokeAll(testers);
+            for (Future<String> result : results) {
+                result.get();
+            }
+            executor.shutdown();
+        } catch (InterruptedException e) {
+            log.error(e);
+        } catch (ExecutionException e) {
+            log.error(e);
+        }
 
+        resultString = "\nTest,StatementType,Duration,StartTime\n";
         for (AbstractLoadTest tester : testers) {
             resultString += tester.toString() + "\n";
         }
