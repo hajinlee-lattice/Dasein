@@ -40,6 +40,8 @@ import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFabricEntityMgr<T> {
@@ -50,10 +52,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     public static final String STORE_DYNAMO = "DYNAMO";
 
     @Autowired
-    private FabricMessageService messageService;
+    protected FabricMessageService messageService;
 
     @Autowired
-    private FabricDataService dataService;
+    protected FabricDataService dataService;
 
     private boolean disabled;
 
@@ -104,17 +106,31 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     @PostConstruct
     public void init() {
         log.info("Initializing Datafabric " + topic);
-
         if (disabled) {
             log.info("Datafabric disabled");
             return;
         }
 
         entityClass = getTypeParameterClass();
-
         // get the reflected schema for Entity
         schema = FabricEntityFactory.getFabricSchema(entityClass, recordType);
+        if (schema != null) {
+            setupStore();
+        }
 
+        if (!disabled && (topic != null)) {
+            producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder()
+                    .messageService(this.messageService).topic(this.topic).scope(scope));
+
+            consumers = new HashMap<>();
+        }
+    }
+
+    public void setMessageService(FabricMessageService messageService) {
+        this.messageService = messageService;
+    }
+
+    private void setupStore() {
         // add redis index
         String redisIndex = RedisUtil.constructIndex(entityClass);
         schema.addProp(INDEX, redisIndex);
@@ -142,13 +158,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
                 log.error("Failed to create data store " + store);
                 disabled = true;
             }
-        }
-
-        if (!disabled && (topic != null)) {
-            producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder()
-                    .messageService(this.messageService).topic(this.topic).scope(scope));
-
-            consumers = new HashMap<>();
         }
     }
 
@@ -259,6 +268,15 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         } catch (Exception e) {
             log.info("Publish entity failed " + recordType + " " + entity.getId());
             log.info(e);
+        }
+    }
+
+    @Override
+    public void publish(GenericRecordRequest recordRequest, GenericFabricRecord record) {
+        try {
+            producer.send(recordRequest, record.getGenericRecord());
+        } catch (Exception e) {
+            log.info("Publish generic record failed " + recordType + " " + record.getId(), e);
         }
     }
 

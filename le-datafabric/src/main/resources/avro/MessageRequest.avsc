@@ -1,0 +1,6 @@
+{"type": "record",
+ "name": "messageRequest",
+ "fields": [{"name": "id", "type": "string"},
+            {"name": "recordRequest", "type": "string"}]
+}
+

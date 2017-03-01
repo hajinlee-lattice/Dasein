@@ -6,6 +6,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 public interface FabricMessageProducer {
 
@@ -14,5 +15,7 @@ public interface FabricMessageProducer {
     void flush();
 
     Future<RecordMetadata> send(RecordKey recordKey, GenericRecord record);
+
+    Future<RecordMetadata> send(GenericRecordRequest recordRequest, GenericRecord value);
 
 }

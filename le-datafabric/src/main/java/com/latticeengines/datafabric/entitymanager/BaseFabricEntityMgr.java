@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 public interface BaseFabricEntityMgr<T> {
 
@@ -28,6 +30,8 @@ public interface BaseFabricEntityMgr<T> {
     void publish(T entity);
 
     void publish(RecordKey recordKey, T entity);
+    
+    void publish(GenericRecordRequest recordRequest, GenericFabricRecord record);
 
     void addConsumer(String processorName, FabricEntityProcessor proc, int threadNumber);
 

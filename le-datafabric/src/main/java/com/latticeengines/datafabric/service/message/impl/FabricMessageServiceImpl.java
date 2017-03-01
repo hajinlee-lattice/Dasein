@@ -3,8 +3,14 @@ package com.latticeengines.datafabric.service.message.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+
+import kafka.admin.AdminUtils;
+import kafka.admin.RackAwareMode;
+import kafka.utils.ZKStringSerializer$;
+import kafka.utils.ZkUtils;
 
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
@@ -14,20 +20,30 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleConfiguration;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
+import com.latticeengines.camille.exposed.locks.LockManager;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datafabric.service.message.DataUpdater;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
-
-import kafka.admin.AdminUtils;
-import kafka.admin.RackAwareMode;
-import kafka.utils.ZKStringSerializer$;
-import kafka.utils.ZkUtils;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 @Component("messageService")
 public class FabricMessageServiceImpl implements FabricMessageService {
+
+    @Value("${datafabric.message.pod:FabricConnectors}")
+    private String pod;
 
     private static final Log log = LogFactory.getLog(FabricMessageServiceImpl.class);
 
@@ -50,9 +66,11 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     private String schemaRegUrl;
 
     private Schema msgKeySchema;
+    private Schema msgRequestSchema;
 
-    public FabricMessageServiceImpl(String brokers, String zkConnect, String schemaUrl, String stack,
-            String environment) {
+    private Camille camille;
+
+    public FabricMessageServiceImpl(String brokers, String zkConnect, String schemaUrl, String stack, String environment) {
         this.brokers = brokers;
         this.zkConnect = zkConnect;
         this.schemaRegUrl = schemaUrl;
@@ -62,6 +80,23 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         buildKeySchema();
     }
 
+    public FabricMessageServiceImpl(String pod, String zkConnect) {
+        this.zkConnect = zkConnect;
+        this.pod = pod;
+        buildRequestSchema();
+        setupCamille(Mode.RUNTIME, pod, zkConnect);
+    }
+
+    public void setupCamille(Mode mode, String pod, String zkConnect) {
+        try {
+            CamilleConfiguration config = new CamilleConfiguration(pod, zkConnect);
+            CamilleEnvironment.start(mode, config);
+            camille = CamilleEnvironment.getCamille();
+        } catch (Exception ex) {
+            log.error("Can not start Camille! error=" + ex.getMessage());
+        }
+    }
+
     public FabricMessageServiceImpl() {
     }
 
@@ -69,6 +104,8 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     public void init() {
         log.info("Initialize message service with brokers " + brokers);
         buildKeySchema();
+        buildRequestSchema();
+        setupCamille(Mode.RUNTIME, pod, zkConnect);
     }
 
     @Override
@@ -84,6 +121,14 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     @Override
     public String getSchemaRegUrl() {
         return schemaRegUrl;
+    }
+
+    public Camille getCamille() {
+        return camille;
+    }
+
+    public void setPod(String pod) {
+        this.pod = pod;
     }
 
     @Override
@@ -107,6 +152,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         return String.format("Env_%s_Stack_%s_%s", topicEnvironment, topicStack, origTopic);
     }
 
+    @Override
     public GenericRecord buildKey(String producer, String recordType, String id) {
 
         GenericRecord key = new GenericData.Record(msgKeySchema);
@@ -121,6 +167,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         return key;
     }
 
+    @Override
     public GenericRecord buildKey(RecordKey recordKey) {
 
         GenericRecord key = new GenericData.Record(msgKeySchema);
@@ -135,6 +182,15 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         return key;
     }
 
+    @Override
+    public GenericRecord buildKey(GenericRecordRequest recordRequest) {
+        GenericRecord key = new GenericData.Record(msgRequestSchema);
+        key.put(GenericRecordRequest.ID_KEY, recordRequest.getId());
+        key.put(GenericRecordRequest.REQUEST_KEY, JsonUtils.serialize(recordRequest));
+        return key;
+    }
+
+    @Override
     public boolean createTopic(String topic, TopicScope scope, int numPartitions, int numRepls) {
 
         boolean result = false;
@@ -149,8 +205,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
             if (!AdminUtils.topicExists(zkUtils, derivedTopic)) {
                 AdminUtils.createTopic(zkUtils, derivedTopic, numPartitions, numRepls, new Properties(),
                         RackAwareMode.Enforced$.MODULE$);
-                log.info(
-                        "Topic created. name: " + topic + "partitions: " + numPartitions + "replications: " + numRepls);
+                log.info("Topic created. name: " + topic + "partitions: " + numPartitions + "replications: " + numRepls);
             } else {
                 log.info("Topic exists. name " + topic);
             }
@@ -208,6 +263,73 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         return result;
     }
 
+    @Override
+    public boolean createZNode(String entityName, String data, boolean createNew) {
+        boolean result = false;
+        Path path = PathBuilder.buildPodPath(pod).append(entityName);
+        try {
+            if (createNew) {
+                try {
+                    camille.delete(path);
+                } catch (Exception ex) {
+                    log.warn("Can not delete znode, entityName=" + entityName + " reason=" + ex.getMessage());
+                }
+            }
+            camille.create(path, new Document(data), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            log.info("Created node, path " + path);
+            result = true;
+        } catch (Exception ex) {
+            log.error("Failed to create znode, path " + path, ex);
+        }
+        return result;
+    }
+
+    @Override
+    public String readData(String entityName) {
+        try {
+            Path path = PathBuilder.buildPodPath(pod).append(entityName);
+            camille.get(path);
+            Document document = camille.get(path);
+            if (document != null) {
+                return document.getData();
+            }
+        } catch (Exception ex) {
+            log.error("Failed to read data from znode, entityName " + entityName, ex);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean cleanup(String entityName) {
+        try {
+            Path path = PathBuilder.buildPodPath(pod).append(entityName);
+            camille.delete(path);
+            LockManager.deregisterCrossDivisionLock(entityName);
+            return true;
+        } catch (Exception ex) {
+            log.error("Failed to delete znode, entityName " + entityName, ex);
+        }
+        return false;
+    }
+
+    @Override
+    public void incrementalUpdate(String entityName, DataUpdater<String> updater) {
+        String lockName = entityName;
+        try {
+            LockManager.registerCrossDivisionLock(lockName);
+            LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
+            Path path = PathBuilder.buildPodPath(pod).append(entityName);
+            Document document = camille.get(path);
+            String newData = updater.update(document.getData());
+            camille.upsert(path, new Document(newData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        } catch (Exception ex) {
+            log.error("Failed to read data from node, entity name= " + entityName, ex);
+        } finally {
+            LockManager.releaseWriteLock(lockName);
+        }
+    }
+
     private void buildKeySchema() {
         try {
             InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("avro/MessageKey.avsc");
@@ -216,6 +338,18 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         } catch (IOException e) {
             log.error("Message key schema avsc file not found", e);
             msgKeySchema = null;
+        }
+    }
+
+    private void buildRequestSchema() {
+        try {
+            InputStream is = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("avro/MessageRequest.avsc");
+            Schema.Parser parser = new Schema.Parser();
+            msgRequestSchema = parser.parse(is);
+        } catch (IOException e) {
+            log.error("Message request schema avsc file not found", e);
+            msgRequestSchema = null;
         }
     }
 }
