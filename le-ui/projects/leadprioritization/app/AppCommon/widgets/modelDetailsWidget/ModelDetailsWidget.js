@@ -7,16 +7,14 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     'mainApp.appCommon.services.TopPredictorService',
     'mainApp.models.controllers.ModelDetailController'
 ])
-
 .controller('ModelDetailsWidgetController', function (
-    $stateParams, $scope, $rootScope, ResourceUtility, DateTimeFormatUtility, 
-    NavUtility, StringUtility, ModelStore, WidgetService, 
-    WidgetConfigUtility, ModelService
+    $stateParams, $scope, $rootScope, ResourceUtility, DateTimeFormatUtility,
+    NavUtility, StringUtility, ModelStore, ModelService
 ) {
     var data = ModelStore.data;
     $scope.ResourceUtility = ResourceUtility;
-    
-    var widgetConfig = ModelStore.widgetConfig.Widgets[0];
+
+    var widgetConfig = ModelStore.widgetConfig;
     var metadata = ModelStore.metadata;
     var modelDetails = data.ModelDetails;
 
@@ -24,7 +22,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.IsPmml = data.IsPmml;
 
     var isActive = modelDetails[widgetConfig.StatusProperty] == 'Active';
-    
+
     if (isActive) {
         $scope.status = ResourceUtility.getString("MODEL_DETAILS_ACTIVE_LABEL");
     } else {
@@ -40,18 +38,18 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.modelTypeLabel = ResourceUtility.getString("MODEL_DETAILS_LEADS_TITLE");
     }
 
-    
+
     $scope.score = modelDetails[widgetConfig.ScoreProperty];
     if ($scope.score != null && $scope.score < 1) {
         $scope.score = Math.round($scope.score * 100);
     }
-     
+
     //data.TopSample = ModelService.FormatLeadSampleData(data.TopSample);
     if (data.ExternalAttributes) {
         $scope.externalAttributes = data.ExternalAttributes.total;
         $scope.externalAttributes = StringUtility.AddCommas($scope.externalAttributes);
         $scope.totalExternalPredictors = data.ExternalAttributes.totalAttributeValues;
-        
+
         $scope.internalAttributes = data.InternalAttributes.total;
         $scope.internalAttributes = StringUtility.AddCommas($scope.internalAttributes);
         $scope.totalInternalPredictors = data.InternalAttributes.totalAttributeValues;
@@ -59,19 +57,19 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.createdDate = modelDetails[widgetConfig.CreatedDateProperty];
     $scope.createdDate = $scope.createdDate * 1000;
     $scope.createdDate = DateTimeFormatUtility.FormatShortDate($scope.createdDate);
-    
+
     $scope.totalLeads = modelDetails[widgetConfig.TotalLeadsProperty];
     $scope.totalLeads = StringUtility.AddCommas($scope.totalLeads);
-    
+
     $scope.testSet = modelDetails[widgetConfig.TestSetProperty];
     $scope.testSet = StringUtility.AddCommas($scope.testSet);
-    
+
     $scope.trainingSet = modelDetails[widgetConfig.TrainingSetProperty];
     $scope.trainingSet = StringUtility.AddCommas($scope.trainingSet);
 
     $scope.totalSuccessEvents = modelDetails[widgetConfig.TotalSuccessEventsProperty];
     $scope.totalSuccessEvents = StringUtility.AddCommas($scope.totalSuccessEvents);
-    
+
     $scope.conversionRate = modelDetails[widgetConfig.TotalSuccessEventsProperty] / (modelDetails[widgetConfig.TestSetProperty] + modelDetails[widgetConfig.TrainingSetProperty]);
     if ($scope.conversionRate != null && $scope.conversionRate < 1) {
         $scope.conversionRate = $scope.conversionRate * 100;
@@ -82,19 +80,19 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     }
     $scope.leadSource = modelDetails[widgetConfig.LeadSourceProperty];
     $scope.opportunity = modelDetails[widgetConfig.OpportunityProperty];
-    
+
     $scope.dataExpanded = false;
     $scope.showMoreLabel = ResourceUtility.getString('MODEL_DETAILS_SHOW_MORE_BUTTON');
     $("#moreDataPoints").hide();
-    
+
     $scope.backButtonClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
-        
+
         $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
     };
-    
+
     $scope.showMoreClicked = function ($event) {
         if ($event != null) {
             $event.preventDefault();
@@ -105,7 +103,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         } else {
             $scope.showMoreLabel = ResourceUtility.getString('MODEL_DETAILS_SHOW_MORE_BUTTON');
         }
-        
+
         $("#moreDataPoints").slideToggle('400');
     };
 })
@@ -113,6 +111,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     var directiveDefinitionObject = {
         templateUrl: 'app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidgetTemplate.html'
     };
-  
+
     return directiveDefinitionObject;
 });

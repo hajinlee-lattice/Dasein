@@ -11,7 +11,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         WidgetFrameworkService, TopPredictorService, ModelStore, FeatureFlagService
     ) {
 
-    var widgetConfig = ModelStore.widgetConfig.Widgets[0];
+    var widgetConfig = ModelStore.widgetConfig;
     var metadata = ModelStore.metadata;
     var data = ModelStore.data;
     var parentData = $scope.parentData;

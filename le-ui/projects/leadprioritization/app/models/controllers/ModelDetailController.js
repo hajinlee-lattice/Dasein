@@ -2,9 +2,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.appCommon.utilities.WidgetConfigUtility',
-    'mainApp.core.services.WidgetService',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
@@ -17,26 +14,11 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.models.review',
     'lp.navigation.review'
 ])
-.controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
-    NavUtility, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml) {
+.controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility,
+    NavUtility, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml) {
     $scope.ResourceUtility = ResourceUtility;
 
     var modelId = $stateParams.modelId;
-
-    var widgetConfig = WidgetService.GetApplicationWidgetConfig();
-    if (widgetConfig == null) {
-        return;
-    }
-
-    var screenWidgetConfig = WidgetConfigUtility.GetWidgetConfig(
-        widgetConfig,
-        "modelDetailsScreenWidget"
-    );
-
-    if (screenWidgetConfig == null) {
-        return;
-    }
-
     var model = Model;
     model.IsPmml = IsPmml;
     model.ModelId = modelId;
@@ -62,7 +44,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     model.SuppressedCategories = TopPredictorService.GetSuppressedCategories(model);
 
     angular.extend(ModelStore, {
-        widgetConfig: screenWidgetConfig,
         metadata: null,
         data: model,
         parentData: model

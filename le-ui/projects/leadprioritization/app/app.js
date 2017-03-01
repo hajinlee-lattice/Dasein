@@ -6,12 +6,16 @@ var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
     'oc.lazyLoad',
-    'angulartics', 
+    'angulartics',
     'angulartics.mixpanel',
+
+    'mainApp.appCommon.services.WidgetFrameworkService',
+    'mainApp.appCommon.utilities.WidgetConfigUtility',
+    'mainApp.core.services.WidgetService',
 
     'common.modules',
     'common.datacloud',
-    
+
     //'lp.header',
     'pd.navigation',
     'lp.jobs',
@@ -106,7 +110,7 @@ var mainApp = angular.module('mainApp', [
     return {
         request: function(config) {
             config.headers = config.headers || {};
-            
+
             if (config.headers.Authorization == null && BrowserStorageUtility.getTokenDocument()) {
                 config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
             }
@@ -116,7 +120,7 @@ var mainApp = angular.module('mainApp', [
             if (ClientSession && ClientSession.Tenant) {
                 config.headers.TenantId = ClientSession.Tenant.Identifier;
             }
-            
+
             return config;
         },
         response: function(response) {
@@ -131,7 +135,7 @@ var mainApp = angular.module('mainApp', [
 .config(function($httpProvider) {
     //initialize get if not there
     if (!$httpProvider.defaults.headers.get) {
-        $httpProvider.defaults.headers.get = {};    
+        $httpProvider.defaults.headers.get = {};
     }
 
     //disable IE ajax request caching

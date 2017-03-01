@@ -14,11 +14,28 @@ angular.module('mainApp.models.services.ModelService', [
     this.modelsMap = {};
     this.stale = true;
 
+    this.widgetConfig = {
+        "ScoreProperty": "RocScore",
+        "NameProperty": "DisplayName",
+        "StatusProperty": "Status",
+        "TypeProperty": "SourceSchemaInterpretation",
+        "ExternalAttributesProperty": "ExternalAttributes",
+        "InternalAttributesProperty": "InternalAttributes",
+        "CreatedDateProperty": "ConstructionTime",
+        "TotalLeadsProperty": "TotalLeads",
+        "TestSetProperty": "TestingLeads",
+        "TrainingSetProperty": "TrainingLeads",
+        "TotalSuccessEventsProperty": "TotalConversions",
+        "ConversionRateProperty": "ConversionRate",
+        "LeadSourceProperty": "LeadSource",
+        "OpportunityProperty": "Opportunity"
+    };
+
     // checks if items matching args exists, performs XHR to fetch if they don't
     this.getModel = function(modelId) {
         var deferred = $q.defer(),
             model = this.modelsMap[modelId];
-        
+
         if (typeof model == 'object') {
             deferred.resolve(model);
         } else {
@@ -464,7 +481,7 @@ angular.module('mainApp.models.services.ModelService', [
 
         return deferred.promise;
     };
-    
+
     // This will take sample lead data from the server and transform it for display purposes
     this.FormatLeadSampleData = function (sampleLeads) {
         if (sampleLeads == null) {
@@ -473,7 +490,7 @@ angular.module('mainApp.models.services.ModelService', [
         var toReturn = [];
         for (var i = 0; i < sampleLeads.length; i++) {
             var lead = sampleLeads[i];
-            
+
             var leadToDisplay = {
                 Company: lead.Company,
                 Contact: lead.Contact || (lead.FirstName + " " + lead.LastName),
@@ -483,7 +500,7 @@ angular.module('mainApp.models.services.ModelService', [
             };
             toReturn.push(leadToDisplay);
         }
-        
+
         return toReturn;
     };
 
@@ -563,7 +580,7 @@ angular.module('mainApp.models.services.ModelService', [
         return deferred.promise;
 
     };
-    
+
     this.GetAllSegments = function (modelList) {
         var deferred = $q.defer();
         var result;
@@ -589,16 +606,16 @@ angular.module('mainApp.models.services.ModelService', [
                     resultObj: {},
                     resultErrors: null
                 };
-                
+
                 var modelDict = {};
                 if (modelList != null && modelList.length > 0) {
                     for (var i=0;i<modelList.length;i++) {
                         modelDict[modelList[i].Id] = modelList[i].DisplayName;
                     }
                 }
-                
+
                 var segmentList = data;
-                if (segmentList != null && segmentList.length > 0 && 
+                if (segmentList != null && segmentList.length > 0 &&
                     Object.keys(modelDict).length > 0) {
                     for (var x=0;x<segmentList.length;x++) {
                         var segment = segmentList[x];
@@ -609,7 +626,7 @@ angular.module('mainApp.models.services.ModelService', [
                         }
                     }
                 }
-                
+
                 result.resultObj = segmentList;
             }
 
@@ -628,14 +645,14 @@ angular.module('mainApp.models.services.ModelService', [
 
         return deferred.promise;
     };
-    
+
     this.AddSegment = function (segment) {
         var deferred = $q.defer();
         var result;
         if (segment == null || StringUtility.IsEmptyString(segment.Name)) {
             return null;
         }
-        
+
         if (segment.ModelId == "FAKE_MODEL") {
             segment.ModelId = null;
         }
@@ -646,7 +663,7 @@ angular.module('mainApp.models.services.ModelService', [
             headers: {
                 "Content-Type": "application/json"
             },
-            
+
             data: segment
         })
         .success(function(data, status, headers, config) {
@@ -666,7 +683,7 @@ angular.module('mainApp.models.services.ModelService', [
                 if (result.success === false) {
                     result.resultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
                 }
-                
+
             }
 
             deferred.resolve(result);
@@ -684,7 +701,7 @@ angular.module('mainApp.models.services.ModelService', [
 
         return deferred.promise;
     };
-    
+
     this.DeleteSegment = function (segmentName) {
         var deferred = $q.defer();
         var result;
@@ -717,7 +734,7 @@ angular.module('mainApp.models.services.ModelService', [
                 if (result.success === false) {
                     result.resultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
                 }
-                
+
             }
 
             deferred.resolve(result);
@@ -735,7 +752,7 @@ angular.module('mainApp.models.services.ModelService', [
 
         return deferred.promise;
     };
-    
+
     this.UpdateSegments = function (segments) {
         var deferred = $q.defer();
         var result;
@@ -743,12 +760,12 @@ angular.module('mainApp.models.services.ModelService', [
             deferred.resolve(result);
             return deferred.promise;
         }
-        
+
         for (var i = 0; i < segments.length; i++) {
             if (segments[i].ModelId == "FAKE_MODEL") {
                 segments[i].ModelId = "";
             }
-        }        
+        }
 
         $http({
             method: 'POST',
@@ -775,7 +792,7 @@ angular.module('mainApp.models.services.ModelService', [
                 if (result.success === false) {
                     result.resultErrors = data.Errors[0];
                 }
-                
+
             }
 
             deferred.resolve(result);
@@ -791,7 +808,7 @@ angular.module('mainApp.models.services.ModelService', [
             deferred.resolve(result);
         });
 
-        return deferred.promise;        
+        return deferred.promise;
     };
 
     this.UpdateSegment = function (segment) {
@@ -801,8 +818,8 @@ angular.module('mainApp.models.services.ModelService', [
             deferred.resolve(result);
             return deferred.promise;
         }
-        
-        
+
+
         if (segment.ModelId == "FAKE_MODEL") {
             segment.ModelId = null;
         }
@@ -832,7 +849,7 @@ angular.module('mainApp.models.services.ModelService', [
                 if (result.success === false) {
                     result.resultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
                 }
-                
+
             }
 
             deferred.resolve(result);
