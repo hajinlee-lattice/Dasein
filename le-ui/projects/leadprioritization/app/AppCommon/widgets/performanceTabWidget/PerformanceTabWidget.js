@@ -1,6 +1,5 @@
 angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.widgets.performanceTab.ThresholdExplorer',
     'mainApp.appCommon.widgets.performanceTab.LiftChart',
     'mainApp.appCommon.widgets.performanceTab.DataTable'

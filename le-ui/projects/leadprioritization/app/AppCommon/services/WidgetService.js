@@ -1,10 +1,9 @@
 angular.module('mainApp.core.services.WidgetService', [
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.appCommon.utilities.WidgetConfigUtility',
-    'mainApp.appCommon.utilities.MetadataUtility'
+    'mainApp.appCommon.utilities.WidgetConfigUtility'
 ])
-.service('WidgetService', function ($compile, BrowserStorageUtility, WidgetConfigUtility, MetadataUtility) {
-    
+.service('WidgetService', function ($compile, BrowserStorageUtility, WidgetConfigUtility) {
+
     this.GetApplicationWidgetConfig = function () {
         var applicationId = "PredictiveLeadScoring";
         var rootWidgetConfig = BrowserStorageUtility.getWidgetConfigDocument();

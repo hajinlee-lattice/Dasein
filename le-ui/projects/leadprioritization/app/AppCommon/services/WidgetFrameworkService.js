@@ -1,6 +1,5 @@
 angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.utilities.WidgetConfigUtility',
-    'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.appCommon.widgets.TopPredictorWidget',
     'mainApp.appCommon.widgets.ThresholdExplorerWidget',
     'mainApp.appCommon.widgets.PerformanceTabWidget',
@@ -10,7 +9,7 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.LeadsTabWidget',
     'mainApp.appCommon.widgets.ModelListCreationHistoryWidget'
 ])
-.service('WidgetFrameworkService', function ($compile, $rootScope, WidgetConfigUtility, MetadataUtility) {
+.service('WidgetFrameworkService', function ($compile, $rootScope, WidgetConfigUtility) {
 
     this.CreateWidget = function (options) {
         if (options == null || options.element == null || options.widgetConfig == null) {
@@ -236,7 +235,7 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
             isChildActive = false;
 
         // Note: All takes precedence over None,
-        // so ["All", "None"] and ["None", "All"] both evaluate to "All" 
+        // so ["All", "None"] and ["None", "All"] both evaluate to "All"
         if (isAllActive) {
             isChildActive = true;
         } else if (isNoneActive) {
@@ -276,47 +275,4 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
         return childData;
     };
 
-    // Get a list of properties to sort on (in the form that SortUtil expects)
-    // given the Sorts specified in a WidgetConfig
-    this.GetSortProperties = function (widgetConfig, metadata) {
-        if (widgetConfig == null) {
-            return [];
-        }
-
-        var widgetConfigSorts = widgetConfig.Sorts;
-        if (!(widgetConfigSorts instanceof Array)) {
-            return [];
-        }
-
-        if (metadata == null) {
-            return [];
-        }
-
-        var targetNotionMetadata = MetadataUtility.GetNotionMetadata(widgetConfig.TargetNotion, metadata);
-
-        var propsToSortOn = [];
-        for (var i = 0; i < widgetConfigSorts.length; i++) {
-            var widgetConfigSort = widgetConfigSorts[i];
-            if (widgetConfigSort == null) {
-                continue;
-            }
-
-            var propName = widgetConfigSort.Property;
-            var propIsAscending = widgetConfigSort.IsAscending;
-
-            var metadataProperty = MetadataUtility.GetNotionProperty(
-                propName, targetNotionMetadata);
-            var propTypeString = (metadataProperty != null) ? metadataProperty.PropertyTypeString : null;
-            var propCompareFunction = MetadataUtility.GetCompareFunction(propTypeString);
-
-            var prop = {
-                Name: propName,
-                IsAscending: propIsAscending,
-                CompareFunction: propCompareFunction
-            };
-            propsToSortOn.push(prop);
-        }
-
-        return propsToSortOn;
-    };
 });

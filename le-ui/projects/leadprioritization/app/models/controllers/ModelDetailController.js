@@ -5,7 +5,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.WidgetService',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.controllers.ModelDetailController',
@@ -18,9 +17,9 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'lp.navigation.review'
 ])
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
-    NavUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml) {
+    NavUtility, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml) {
     $scope.ResourceUtility = ResourceUtility;
-    
+
     var modelId = $stateParams.modelId;
 
     var widgetConfig = WidgetService.GetApplicationWidgetConfig();
@@ -32,7 +31,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         widgetConfig,
         "modelDetailsScreenWidget"
     );
-    
+
     if (screenWidgetConfig == null) {
         return;
     }
@@ -47,7 +46,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         combineInternalAndExternalAttributesDups(model.InternalAttributes, model.ExternalAttributes);
         model.TotalPredictors = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
     }
-    
+
     // UI BAND-AID for DP-2854 here
 
     model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
