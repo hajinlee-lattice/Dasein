@@ -45,6 +45,48 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testConcreteRestrictionAgainstDouble() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        restriction.addRestriction(new ConcreteRestriction(false, new ColumnLookup(SchemaInterpretation.Account,
+                "alexaviewsperuser"), ComparisonType.EQUAL, new ValueLookup(2.5)));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+        assertEquals(count, 4858);
+    }
+
+    @Test(groups = "functional")
+    public void testCompareColumnToOtherColumn() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        restriction.addRestriction(new ConcreteRestriction(false, new ColumnLookup(SchemaInterpretation.Account,
+                "companyname"), ComparisonType.EQUAL, new ColumnLookup(SchemaInterpretation.Account, "city")));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+        assertEquals(count, 211);
+    }
+
+    @Test(groups = "functional")
+    public void testObjectTypeInRestrictionOptional() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        restriction.addRestriction(new ConcreteRestriction(false, new ColumnLookup("companyname"),
+                ComparisonType.EQUAL, new ColumnLookup("city")));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+        assertEquals(count, 211);
+    }
+
+    @Test(groups = "functional")
     public void testBucketRestriction() {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
@@ -70,8 +112,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         query.setRestriction(restriction);
         List<Map<String, Object>> results = queryEvaluator.getResults(collection, query);
         assertEquals(results.size(), 5);
+        int expectedColumnCount = getDataCollection().getTables().get(0).getAttributes().size();
         for (Map<String, Object> row : results) {
-            assertEquals(row.size(), 5);
+            assertEquals(row.size(), expectedColumnCount);
         }
     }
 
@@ -93,6 +136,19 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         }
     }
 
+    @Test(groups = "functional", expectedExceptions = Exception.class)
+    public void testUnknownColumnLookup() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
+                "poopy_cupcakes"), 1));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        queryEvaluator.evaluate(collection, query).fetchCount();
+    }
+
     private DataCollection getDataCollection() {
         DataCollection collection = new DataCollection();
         Table table = new Table();
@@ -101,6 +157,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Attribute companyName = new Attribute();
         companyName.setName("companyname");
         table.addAttribute(companyName);
+        Attribute id = new Attribute();
+        id.setName("id");
+        table.addAttribute(id);
         Attribute city = new Attribute();
         city.setName("city");
         table.addAttribute(city);
@@ -113,6 +172,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Attribute familyMembers = new Attribute();
         familyMembers.setName("number_of_family_members");
         table.addAttribute(familyMembers);
+        Attribute alexaViews = new Attribute();
+        alexaViews.setName("alexaviewsperuser");
+        table.addAttribute(alexaViews);
         JdbcStorage storage = new JdbcStorage();
         storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
         storage.setTableNameInStorage("querytest_table");

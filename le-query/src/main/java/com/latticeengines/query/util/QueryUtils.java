@@ -13,7 +13,7 @@ public final class QueryUtils {
         return Expressions.stringPath(tablePath, attribute.getName());
     }
 
-    private static StringPath getTablePath(Table table) {
+    public static StringPath getTablePath(Table table) {
         StorageMechanism storage = table.getStorageMechanism();
         String tableName = table.getName();
         if (storage instanceof JdbcStorage) {

@@ -28,6 +28,7 @@ import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLQuery;
@@ -50,9 +51,11 @@ public class JdbcQueryProcessor extends QueryProcessor {
                     query.getObjectType()));
         }
         Predicate freeForm = processFreeFormSearch(dataCollection, query, businessObject);
-        return businessObject.startQuery(dataCollection, query).where(freeForm)
-                .where(processRestriction(businessObject.getTable(dataCollection).getName(), query.getRestriction()))
+        SQLQuery<?> sqlQuery = businessObject.startQuery(dataCollection, query).where(freeForm)
+                .where(processRestriction(query.getRestriction(), query.getObjectType(), dataCollection))
                 .select(getSelect(query, dataCollection));
+        log.info(String.format("Generated query:\n%s", sqlQuery.getSQL().getSQL()));
+        return sqlQuery;
     }
 
     private Predicate processFreeFormSearch(DataCollection dataCollection, Query query, BusinessObject businessObject) {
@@ -84,7 +87,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
         }
     }
 
-    private Expression<?> resolveLookup(Lookup lookup, SchemaInterpretation rootObjectType,
+    private ComparableExpression<String> resolveLookup(Lookup lookup, SchemaInterpretation rootObjectType,
             DataCollection dataCollection) {
         if (lookup instanceof ColumnLookup) {
             ColumnLookup columnLookup = (ColumnLookup) lookup;
@@ -108,7 +111,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
             return QueryUtils.getColumnPath(table, attribute);
 
         } else if (lookup instanceof ValueLookup) {
-            return Expressions.constant(((ValueLookup) lookup).getValue());
+            return Expressions.asComparable(((ValueLookup) lookup).getValue().toString());
         } else {
             throw new RuntimeException(String.format("Unsupported lookup type %s", lookup.getClass().getName()));
         }
@@ -119,7 +122,8 @@ public class JdbcQueryProcessor extends QueryProcessor {
                 .findFirst().orElse(null);
     }
 
-    private BooleanExpression processRestriction(String tableName, Restriction restriction) {
+    private BooleanExpression processRestriction(Restriction restriction, SchemaInterpretation rootObjectType,
+            DataCollection dataCollection) {
         if (restriction == null) {
             return Expressions.TRUE;
         }
@@ -129,7 +133,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
 
             BooleanExpression[] childExpressions = new BooleanExpression[logicalRestriction.getRestrictions().size()];
             childExpressions = logicalRestriction.getRestrictions().stream() //
-                    .map(r -> processRestriction(tableName, r)) //
+                    .map(r -> processRestriction(r, rootObjectType, dataCollection)) //
                     .collect(Collectors.toList()) //
                     .toArray(childExpressions);
 
@@ -140,25 +144,23 @@ public class JdbcQueryProcessor extends QueryProcessor {
             }
         } else if (restriction instanceof ConcreteRestriction) {
             ConcreteRestriction concreteRestriction = (ConcreteRestriction) restriction;
-            ColumnLookup columnLookup = (ColumnLookup) concreteRestriction.getLhs();
-            ValueLookup valueLookup = (ValueLookup) concreteRestriction.getRhs();
-            if (columnLookup == null || valueLookup == null) {
-                throw new RuntimeException("LHS must be a ColumnLookup and RHS must be a ValueLookup");
-            }
+            Lookup lhs = concreteRestriction.getLhs();
+            Lookup rhs = concreteRestriction.getRhs();
 
-            StringPath tablePath = Expressions.stringPath(tableName);
-            StringPath columnPath = Expressions.stringPath(tablePath, columnLookup.getColumnName());
+            ComparableExpression<String> lhsPath = resolveLookup(lhs, rootObjectType, dataCollection);
+            ComparableExpression<String> rhsPath = resolveLookup(rhs, rootObjectType, dataCollection);
+
             switch (concreteRestriction.getRelation()) {
             case EQUAL:
-                return columnPath.eq(valueLookup.getValue().toString());
+                return lhsPath.eq(rhsPath);
             case GREATER_OR_EQUAL:
-                return columnPath.goe(valueLookup.getValue().toString());
+                return lhsPath.goe(rhsPath);
             case GREATER_THAN:
-                return columnPath.gt(valueLookup.getValue().toString());
+                return lhsPath.gt(rhsPath);
             case LESS_OR_EQUAL:
-                return columnPath.loe(valueLookup.getValue().toString());
+                return lhsPath.loe(rhsPath);
             case LESS_THAN:
-                return columnPath.lt(valueLookup.getValue().toString());
+                return lhsPath.lt(rhsPath);
             default:
                 throw new RuntimeException(String.format("Unsupported relation %s", concreteRestriction.getRelation()));
             }
