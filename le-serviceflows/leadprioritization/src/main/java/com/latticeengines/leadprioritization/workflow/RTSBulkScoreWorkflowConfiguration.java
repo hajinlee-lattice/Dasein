@@ -135,9 +135,8 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder skipMatchingStep(boolean skipMatchingStep) {
-            match.setSkipStep(skipMatchingStep);
-            matchResult.setSkipStep(skipMatchingStep);
+        public Builder excludeDataCloudAttrs(boolean exclude) {
+            matchResult.setExcludeDataCloudAttrs(exclude);
             return this;
         }
 

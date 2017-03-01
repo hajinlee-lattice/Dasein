@@ -81,8 +81,8 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder skipMatchingStep(boolean skipMatchingStep) {
-            scoreWorkflowConfigurationBuilder.skipMatchingStep(skipMatchingStep);
+        public Builder excludeDataCloudAttrs(boolean exclude) {
+            scoreWorkflowConfigurationBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 

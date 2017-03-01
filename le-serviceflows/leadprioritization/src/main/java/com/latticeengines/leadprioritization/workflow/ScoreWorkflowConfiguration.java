@@ -76,7 +76,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
-
+ 
         public Builder modelId(String modelId) {
             score.setModelId(modelId);
             return this;
@@ -87,9 +87,8 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder skipMatchingStep(boolean skipMatchingStep) {
-            match.setSkipStep(skipMatchingStep);
-            matchResult.setSkipStep(skipMatchingStep);
+        public Builder excludeDataCloudAttrs(boolean exclude) {
+            matchResult.setExcludeDataCloudAttrs(exclude);
             return this;
         }
 

@@ -135,7 +135,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("AccountMasterColumn") //
                 .columnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion) //
-                .skipMatchingStep(skipIdMatch) //
+                .excludeDataCloudAttrs(skipIdMatch) //
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //
                 .build();

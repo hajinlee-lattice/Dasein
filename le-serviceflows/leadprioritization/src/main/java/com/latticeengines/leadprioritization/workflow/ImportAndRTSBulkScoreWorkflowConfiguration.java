@@ -132,8 +132,8 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
             return this;
         }
 
-        public Builder skipMatchingStep(boolean skipMatchingStep) {
-            rtsBulkScoreWorkflowConfigurationBuilder.skipMatchingStep(skipMatchingStep);
+        public Builder excludeDataCloudAttrs(boolean exclude) {
+            rtsBulkScoreWorkflowConfigurationBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 

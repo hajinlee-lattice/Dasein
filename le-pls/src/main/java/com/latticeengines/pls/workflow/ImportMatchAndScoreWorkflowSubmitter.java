@@ -136,7 +136,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .modelId(modelId) //
                 .sourceSchemaInterpretation(modelSummary.getSourceSchemaInterpretation()) //
                 .inputTableName(sourceFile.getTableName()) //
-                .skipMatchingStep(modelSummary.getModelSummaryConfiguration()
+                .excludeDataCloudAttrs(modelSummary.getModelSummaryConfiguration()
                         .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
                 .matchClientDocument(matchClientDocument) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //

@@ -8,6 +8,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
+import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
+import com.latticeengines.serviceflows.workflow.match.ProcessMatchResultConfiguration;
 import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 
 @Component("setConfigurationForScoring")
@@ -15,12 +17,20 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
 
     @Override
     public void execute() {
+        MatchStepConfiguration matchStepConfig = getConfigurationFromJobParameters(MatchStepConfiguration.class);
+        Table eventTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
+        matchStepConfig.setInputTableName(eventTable.getName());
+        matchStepConfig.setSkipStep(true);
+        putObjectInContext(MatchStepConfiguration.class.getName(), matchStepConfig);
+
+        ProcessMatchResultConfiguration processMatchResultStepConfig = getConfigurationFromJobParameters(
+                ProcessMatchResultConfiguration.class);
+        processMatchResultStepConfig.setSkipStep(true);
+        putObjectInContext(ProcessMatchResultConfiguration.class.getName(), processMatchResultStepConfig);
+
         DedupEventTableConfiguration dedupStepConfig = getConfigurationFromJobParameters(
                 DedupEventTableConfiguration.class);
-        if (!dedupStepConfig.isSkipStep()) {
-            Table eventTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
-            putObjectInContext(EVENT_TABLE, eventTable);
-        } else {
+        if (dedupStepConfig.isSkipStep()) {
             AddStandardAttributesConfiguration addStandardAttrStepConfig = getConfigurationFromJobParameters(
                     AddStandardAttributesConfiguration.class);
             addStandardAttrStepConfig.setSkipStep(true);
@@ -42,7 +52,7 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
         String targetFileName = String.format("%s_scored_%s",
                 StringUtils.substringBeforeLast(sourceFileName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv"),
                 DateTime.now().getMillis());
-        Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
+        eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         String outputPath = String.format("%s/%s/data/%s/csv_files/score_event_table_output/%s",
                 configuration.getModelingServiceHdfsBaseDir(), configuration.getCustomerSpace(), eventTable.getName(),
                 targetFileName);
