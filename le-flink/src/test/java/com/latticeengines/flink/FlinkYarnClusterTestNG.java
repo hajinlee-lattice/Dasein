@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.flink.framework.FlinkFunctionalTestNGBase;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -22,10 +23,6 @@ import org.apache.flink.yarn.YarnClusterClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,9 +31,7 @@ import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.flink.runtime.Tokenizer;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-flink-context.xml" })
-public class FlinkYarnClusterTestNG extends AbstractTestNGSpringContextTests {
+public class FlinkYarnClusterTestNG extends FlinkFunctionalTestNGBase {
 
     @Autowired
     private YarnConfiguration yarnConfiguration;
