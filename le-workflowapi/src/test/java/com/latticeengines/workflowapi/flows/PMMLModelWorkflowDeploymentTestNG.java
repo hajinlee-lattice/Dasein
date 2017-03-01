@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -22,6 +24,7 @@ import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfigura
 import com.latticeengines.leadprioritization.workflow.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBase {
