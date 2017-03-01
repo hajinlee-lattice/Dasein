@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -96,6 +97,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         Map<String, Object> enrichValueMap = new HashMap<String, Object>();
         Map<String, Object> nonNullEnrichValueMap = new HashMap<>();
         Map<String, Object> nonNullInternalEnrichValueMap = new HashMap<>();
+        Map<String, Object> firmographicAttrValueMap = new HashMap<>();
 
         List<String> outputFields = matchOutput.getOutputFields();
         List<Object> outputRecords = matchOutput.getResult().get(0).getOutput();
@@ -123,9 +125,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                         nonNullInternalEnrichValueMap.put(attr.getColumnName(),
                                 nonNullEnrichValueMap.get(attr.getColumnName()));
                     }
+                    if (attr.getCategory() == Category.FIRMOGRAPHICS) {
+                        firmographicAttrValueMap.put(attr.getColumnName(),
+                                nonNullEnrichValueMap.get(attr.getColumnName()));
+                    }
                 }
             }
-            profile.setCompanyInfo(nonNullInternalEnrichValueMap);
+            profile.setCompanyInfo(firmographicAttrValueMap);
 
             if (!considerInternalAttributes) {
                 for (String key : nonNullInternalEnrichValueMap.keySet()) {
@@ -135,7 +141,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         }
 
-        profile.setCompanyInfo(nonNullInternalEnrichValueMap);
+        profile.setCompanyInfo(firmographicAttrValueMap);
         profile.setAttributes(nonNullEnrichValueMap);
         profile.setTimestamp(matchOutput.getFinishedAt().toString());
         profile.setMatchLogs(matchOutput.getResult().get(0).getMatchLogs());

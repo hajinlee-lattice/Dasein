@@ -4,9 +4,15 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -15,13 +21,18 @@ import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+
+    private static final Log log = LogFactory.getLog(CompanyProfileResourceDeploymentTestNG.class);
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
+    @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
     public void testGetCompanyProfile() {
         String url = getRestAPIHostPort() + "/pls/companyprofiles/?enforceFuzzyMatch=true";
@@ -44,12 +55,23 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
             assertFalse("Attr: " + attr, value.equals("null"));
         }
 
+        String[] requiredAttrs = { "LDC_Name", "LDC_Street", "LDC_City", "LDC_State", "LDC_ZipCode",
+                "LDC_Domain", "LDC_DUNS", "LE_NUMBER_OF_LOCATIONS", "LE_IS_PRIMARY_LOCATION", "LE_INDUSTRY",
+                "LE_REVENUE_RANGE", "LE_EMPLOYEE_RANGE" };
+        Set<String> requiredAttrSet = new HashSet<String>(Arrays.asList(requiredAttrs));
+        Set<String> actualAttrSet = new HashSet<>();
+
         for (String attr : profile.getCompanyInfo().keySet()) {
             Object value = profile.getCompanyInfo().get(attr);
 
             assertNotNull(value);
             assertFalse("Attr: " + attr, value.equals("null"));
+            log.info(attr + ": " + value.toString());
+            if (requiredAttrSet.contains(attr)) {
+                actualAttrSet.add(attr);
+            }
         }
+        Assert.assertEquals(actualAttrSet.size(), requiredAttrSet.size());
     }
 
     @Test(groups = "deployment")
