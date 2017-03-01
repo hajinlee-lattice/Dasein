@@ -102,6 +102,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             skipIdMatch = !modelSummary.isMatch();
         }
+        skipIdMatch = skipIdMatch && !enableLeadEnrichment;
         String modelType = modelSummary.getModelType();
         skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelType);
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
