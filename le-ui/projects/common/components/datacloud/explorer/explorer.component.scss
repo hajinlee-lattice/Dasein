@@ -155,6 +155,23 @@
                         right: 15px;
                         font-size: 20px;
                     }
+                    .attributes {
+                        .attribute {
+                            padding-left: 20px;
+                            &.has-highlight {
+                                position: relative; 
+                                &:before {
+                                    @include font-awesome-inline("\f005");
+                                    display: block;
+                                    position: absolute;
+                                    top: calc(50% - 1px);
+                                    left: 5px;
+                                    transform: translateY(-50%);
+                                }
+
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1112,6 +1129,24 @@
             position: absolute;
             top: 18px;
             right: 10px;
+        }
+    }
+    &.section-team {
+       .categories {
+            &:not(.has-category) {
+                .category {
+                    &:not(.has-highlights) {
+                        filter: grayscale(100%);
+                    }
+                }
+            }
+        }
+        .subcategories {
+            .subcategory {
+                &:not(.has-highlights) {
+                    filter: grayscale(100%);
+                }
+            }
         }
     }
 }

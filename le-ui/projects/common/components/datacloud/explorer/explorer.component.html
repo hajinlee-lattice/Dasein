@@ -105,7 +105,7 @@
             </li>
             <li ng-repeat="category in vm.categories" class="category"
                 ng-if="count = vm.categoryCount(category)"
-                ng-class="{active: vm.category == category}"
+                ng-class="{active: vm.category == category, 'has-highlights': vm.highlightMetadata.categories[category].hasHighlights && vm.section == 'team'}"
                 ng-click="vm.categoryClick(category, $event);">
 
                 <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
@@ -128,11 +128,12 @@
                                     <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
                                     <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
                                 </li>
-
                                 <li ng-repeat="attribute in (categoryAttributes = (vm.getTileTableItems(category) 
                                         | filter: vm.enrichmentsFilter() 
-                                        | orderBy: [ '-ImportanceOrdering', '-Value' ] 
-                                        | limitTo: 5))">
+                                        | orderBy: [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ] 
+                                        | limitTo: 5))"
+                                        class="attribute"
+                                        ng-class="{'has-highlight':attribute.HighlightHighlighted}">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                                     <div class="column data {{ vm.lookupMode ? 'values' : 'records' }}">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}</div>
                                 </li>
@@ -140,12 +141,12 @@
                         </div>
                     </span>
                     <ul class="controls noselect" ng-if="!vm.lookupMode && !vm.category">
-                        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[vm.category] = {}">
+                        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[category] = {}">
                             <div class="button"
-                                    ng-class="{'selected': openHighlighter[category].open, 'enabled': false}"
-                                    ng-click="openHighlighter[category].open = !openHighlighter[category].open">
-                                <span class="highlight-icon {{openHighlighter[category].state.type}}">{{openHighlighter[category].state.label || 'Set'}}</span>
-                                <ul ng-class="{open: openHighlighter[category].open}" class="highlightOptions button-dropdown">
+                                    ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': false}"
+                                    ng-click="vm.closeHighlighterButtons(category); vm.openHighlighter[category].open = !vm.openHighlighter[category].open;">
+                                <span class="highlight-icon {{vm.openHighlighter[category].state.type}}">{{vm.openHighlighter[category].state.label || 'Set'}}</span>
+                                <ul ng-class="{open: vm.openHighlighter[category].open}" class="highlightOptions button-dropdown">
                                     <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, category)">{{label}}</li>
                                 </ul>
                             </div>
@@ -175,7 +176,7 @@
                         track by $index"
                     class="subcategory"
                     ng-if="count = vm.subcategoryCount(vm.category, subcategory)"
-                    ng-class="{active: vm.subcategory == subcategory}"
+                    ng-class="{active: vm.subcategory == subcategory, 'has-highlights': vm.highlightMetadata.subcategories[subcategory].hasHighlights && vm.section == 'team'}"
                     ng-click="vm.subcategoryClick(subcategory, $event)">
 
                     <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
@@ -216,13 +217,13 @@
                             <div class="attributes-more noselect" ng-if="subcategoryAttributes.length > 5">More</div>
                         </div>
                         <ul class="controls noselect" ng-if="!vm.lookupMode">
-                            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[vm.category + subcategory] = {}">
+                            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">
                                 <!-- this can't be a <button> element because IE and FF don't like it -->
                                 <div class="button"
-                                        ng-class="{'selected': openHighlighter[vm.category + subcategory].open, 'enabled': false}"
-                                        ng-click="openHighlighter[vm.category + subcategory].open = !openHighlighter[vm.category + subcategory].open">
-                                    <span class="highlight-icon {{openHighlighter[vm.category + subcategory].state.type}}">{{openHighlighter[vm.category + subcategory].state.label || 'Set'}}</span>
-                                    <ul ng-class="{open: openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
+                                        ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': false}"
+                                        ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
+                                    <span class="highlight-icon {{vm.openHighlighter[vm.category + subcategory].state.type}}">{{vm.openHighlighter[vm.category + subcategory].state.label || 'Set'}}</span>
+                                    <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
                                         <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
                                     </ul>
                                 </div>
@@ -251,8 +252,10 @@
         </div>
 
         <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
-            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length > 1 && vm.subcategory">
-                <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
+            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
+                <div ng-if="vm.subcategories[vm.category].length > 1">
+                    <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
+                </div>
             </div>
             <div class="subcategory-back" ng-if="vm.category && (!vm.subcategory || (vm.subcategory == 'Other' && !vm.isYesNoCategory(vm.category, true)))">
                 <span ng-click="vm.setCategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
@@ -337,16 +340,16 @@
                                     <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
                                 </button>
                             </li>
-                            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[enrichment.FieldName] = {}">
+                            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[enrichment.FieldName] = {}">
                                 <!-- this can't be a <button> element because IE and FF don't like it -->
                                 <div class="button"
-                                        ng-class="{'selected': openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}"
-                                        ng-click="openHighlighter[enrichment.FieldName].open = !openHighlighter[enrichment.FieldName].open">
-                                    <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">
-                                        {{openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}
+                                        ng-class="{'selected': vm.openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}"
+                                        ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[enrichment.FieldName].open = !vm.openHighlighter[enrichment.FieldName].open">
+                                    <span class="highlight-icon {{vm.openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">
+                                        {{vm.openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}
                                     </span>
-                                    <ul ng-class="{open: openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
-                                        <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}" ng-click="openHighlighter[enrichment.FieldName].state = vm.setFlags(type, enrichment)">{{label}}</li>
+                                    <ul ng-class="{open: vm.openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
+                                        <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}" ng-click="vm.openHighlighter[enrichment.FieldName].state = vm.setFlags(type, enrichment)">{{label}}</li>
                                     </ul>
                                 </div>
                             </li>

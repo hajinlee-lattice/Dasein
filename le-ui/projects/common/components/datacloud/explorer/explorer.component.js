@@ -85,6 +85,10 @@ angular.module('common.datacloud.explorer', [
         category: $stateParams.category,
         subcategory: $stateParams.subcategory,
         categoryCounts: {},
+        highlightMetadata: {
+            categories: {}, 
+            subcategories: {}
+        },
         pagesize: 24
     });
 
@@ -222,7 +226,7 @@ angular.module('common.datacloud.explorer', [
                     parent = button.closest('.dropdown-container');
 
                 parent.removeClass('active');
-                buttons.removeClass('active');
+                buttons.removeClass('selected');
                 buttons.parents().find('.dropdown-container').removeClass('active');
                 buttons.siblings('ul.dropdown').removeClass('open');
 
@@ -237,6 +241,15 @@ angular.module('common.datacloud.explorer', [
             });
         }
 
+        vm.closeHighlighterButtons = function(index){
+            var index = index || '';
+            for(var i in vm.openHighlighter) {
+                if(i !== index && vm.openHighlighter[i].open === true) {
+                    vm.openHighlighter[i].open = false;
+                }
+            }
+        }
+
         angular.element(document).click(function(event) {
             var target = angular.element(event.target),
                 el = angular.element('.dropdown-container ul.dropdown, button ul.button-dropdown, .button ul.button-dropdown'),
@@ -245,10 +258,15 @@ angular.module('common.datacloud.explorer', [
                 is_visible = el.is(':visible');
 
             if(!has_parent) {
+                vm.closeHighlighterButtons();
                 el.removeClass('open');
                 parent.removeClass('active');
                 el.siblings('.button.active').removeClass('active');
             }
+            if(is_visible && !has_parent) {
+                $scope.$digest(); //ben -- hrmmm, works for now
+            }
+
         });
 
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
@@ -465,6 +483,9 @@ angular.module('common.datacloud.explorer', [
             if(!item.AttributeFlagsMap || !item.AttributeFlagsMap.CompanyProfile) {
                 item.AttributeFlagsMap = {};
                 item.AttributeFlagsMap.CompanyProfile = {};
+            } else if(item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && Object.keys(item.AttributeFlagsMap.CompanyProfile).length) {
+                vm.highlightMetadata.categories[item.Category] = {hasHighlights: true};
+                vm.highlightMetadata.subcategories[item.Subcategory] = {hasHighlights: true};
             }
 
             obj[category][subcategory].push(index);
@@ -479,6 +500,7 @@ angular.module('common.datacloud.explorer', [
 
             getTopAttributes();
         }
+        //console.log(vm.highlightMetadata); ben
     }
 
     vm.highlightTypes = {
@@ -489,7 +511,8 @@ angular.module('common.datacloud.explorer', [
 
     vm.highlightTypesCategory = {
         enabled: vm.highlightTypes.enabled,
-        disabled: vm.highlightTypes.disabled
+        disabled: vm.highlightTypes.disabled,
+        dirty: 'some enabled for sales team'
     }
 
     var highlightOptionsInitState = function(enrichment) {
@@ -503,23 +526,28 @@ angular.module('common.datacloud.explorer', [
         }
 
         ret.enabled = !enrichment.AttributeFlagsMap.CompanyProfile.hidden;
+        ret.dirty = false;
 
         if(enrichment.AttributeFlagsMap.CompanyProfile.hidden === true) {
             ret.type = 'disabled';
             ret.enabled = false;
+            ret.dirty = true;
         }
         if(enrichment.AttributeFlagsMap.CompanyProfile.hidden === false) {
             ret.type = 'enabled';
             ret.enabled = true;
+            ret.dirty = true;
         }
         if(enrichment.AttributeFlagsMap.CompanyProfile.highlighted === true) {
             ret.type = 'highlighted';
             ret.highlighted = true;
             ret.enabled = true;
+            ret.dirty = true;
         }
         if(ret.type) {
             ret.label = vm.highlightTypes[ret.type];
         }
+
         return ret;
     }
 
