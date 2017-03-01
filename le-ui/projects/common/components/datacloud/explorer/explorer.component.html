@@ -124,16 +124,30 @@
 
                         <div class="attributes-container" ng-if="!vm.category">
                             <ul class="attributes noselect-children">
-                                <li class="header" ng-show="categoryAttributes.length > 0">
-                                    <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
-                                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
+                                <li class="header" ng-show="highlightAttributes.length > 0">
+                                    <div class="column label">Highlighted Insights</div>
                                 </li>
-                                <li ng-repeat="attribute in (categoryAttributes = (vm.getTileTableItems(category) 
+                                <li ng-repeat="attribute in (highlightAttributes = (vm.getTileTableItems(category, null, 'HighlightHighlighted', 5).HighlightHighlighted 
                                         | filter: vm.enrichmentsFilter() 
                                         | orderBy: [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ] 
                                         | limitTo: 5))"
                                         class="attribute"
-                                        ng-class="{'has-highlight':attribute.HighlightHighlighted}">
+                                        ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
+                                    <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
+                                    <div class="column data {{ vm.lookupMode ? 'values' : 'records' }}">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}</div>
+                                </li>
+                            </ul>
+                            <ul class="attributes noselect-children">
+                                <li class="header" ng-show="categoryAttributes.length > 0">
+                                    <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
+                                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
+                                </li>
+                                <li ng-repeat="attribute in (categoryAttributes = (vm.getTileTableItems(category, null, 'HighlightHighlighted', 5).other 
+                                        | filter: vm.enrichmentsFilter() 
+                                        | orderBy: [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ] 
+                                        | limitTo: 5))"
+                                        class="attribute"
+                                        ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                                     <div class="column data {{ vm.lookupMode ? 'values' : 'records' }}">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}</div>
                                 </li>

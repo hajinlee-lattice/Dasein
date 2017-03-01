@@ -207,7 +207,7 @@ angular.module('common.datacloud.explorer', [
                     vm.setCategory(categories[0]);
                 }
 
-                vm.filterEmptySubcategories(); // ben:note this is breaking
+                vm.filterEmptySubcategories();
             }, 500);
         });
 
@@ -338,6 +338,9 @@ angular.module('common.datacloud.explorer', [
 
     vm.filter = function(items, property, value, debug) {
         var propsList = property.split('.');
+        if(debug) {
+            console.log('poperty:', property, 'value:', value, 'items:', items);
+        }
 
         for (var i=0, result=[]; i < items.length; i++) {
             var item = propsList.reduce(walkObject, items[i]);
@@ -742,8 +745,9 @@ angular.module('common.datacloud.explorer', [
         vm.filterEmptySubcategories();
     }
 
-    vm.getTileTableItems = function(category, subcategory) {
-        var items = [];
+    vm.getTileTableItems = function(category, subcategory, segment, limit) {
+        var items = [],
+            limit = (limit === 0 ? 0 : null) || limit || null;
 
         if (vm.topAttributes[category]) {
             if (!subcategory && vm.isYesNoCategory(category, true)) {
@@ -785,6 +789,23 @@ angular.module('common.datacloud.explorer', [
                     return isSubcategory;
                 });
             }
+        }
+        if(segment && items) { //ben
+            var segmented = vm.filter(items, segment, true),
+                other = vm.filter(items, segment, false);
+
+            segmented.length = Object.keys(segmented).length;
+            other.length = Object.keys(other).length;
+
+            var remainder = (limit - segmented.length);
+
+            _items = {};
+            _items[segment] = segmented;
+
+            if(remainder) {
+                _items['other'] = Array.prototype.slice.call(other, 0, remainder);
+            }
+            items = _items;
         }
 
         return items;
@@ -1136,7 +1157,7 @@ angular.module('common.datacloud.explorer', [
             }
         }
         if(categories.length <= 1) {
-            vm.setCategory(categories[0]); //ben
+            vm.setCategory(categories[0]);
         }
     }
 
