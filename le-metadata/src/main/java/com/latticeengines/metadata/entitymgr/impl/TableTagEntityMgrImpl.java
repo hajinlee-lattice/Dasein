@@ -43,4 +43,12 @@ public class TableTagEntityMgrImpl extends BaseEntityMgrImpl<TableTag> implement
         return tables;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<TableTag> getTableTagsForName(String tagName) {
+        List<TableTag> tags = tableTagDao.findAll();
+        return tags.stream().filter(x -> x.getName().equals(tagName) && x.getTable().getTableType() == TableType.DATATABLE) //
+                .collect(Collectors.toList());
+    }
+
 }

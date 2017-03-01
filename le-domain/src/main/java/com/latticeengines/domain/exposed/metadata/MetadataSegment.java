@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -12,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.OnDelete;
@@ -44,6 +47,14 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     @Column(name = "NAME", nullable = false)
     private String name;
 
+    @JsonProperty("display_name")
+    @Column(name = "DISPLAY_NAME", nullable = false)
+    private String displayName;
+
+    @JsonProperty("description")
+    @Column(name = "DESCRIPTION", nullable = true)
+    private String description;
+
     @JsonIgnore
     @Column(name = "RESTRICTION")
     @Type(type = "text")
@@ -67,6 +78,11 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     @JsonProperty("created")
     private Date created;
 
+    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "metadataSegment", fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("SegmentProperties")
+    private List<MetadataSegmentProperty> metadataSegmentProperties = new ArrayList<>();
+
     @Override
     public Long getPid() {
         return pid;
@@ -85,6 +101,22 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @JsonProperty("restriction")
@@ -131,5 +163,29 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
+    }
+
+    public List<MetadataSegmentProperty> getMetadataSegmentProperties() {
+        return metadataSegmentProperties;
+    }
+
+    public void setMetadataSegmentProperties(List<MetadataSegmentProperty> metadataSegmentProperties) {
+        this.metadataSegmentProperties = metadataSegmentProperties;
+    }
+
+    public void addSegmentProperty(MetadataSegmentProperty metadataSegmentProperty) {
+        this.metadataSegmentProperties.add(metadataSegmentProperty);
+    }
+
+    @Transient
+    @JsonIgnore
+    public MetadataSegmentPropertyBag getSegmentPropertyBag() {
+        return new MetadataSegmentPropertyBag(metadataSegmentProperties);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setSegmentPropertyBag(MetadataSegmentPropertyBag metadataSegmentPropertyBag) {
+        this.metadataSegmentProperties = metadataSegmentPropertyBag.getBag();
     }
 }

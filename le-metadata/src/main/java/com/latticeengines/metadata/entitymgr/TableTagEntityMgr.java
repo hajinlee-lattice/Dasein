@@ -9,4 +9,6 @@ import com.latticeengines.domain.exposed.metadata.TableTag;
 public interface TableTagEntityMgr extends BaseEntityMgr<TableTag> {
 
     List<Table> getTablesForTag(String tagName);
+
+    List<TableTag> getTableTagsForName(String tagName);
 }

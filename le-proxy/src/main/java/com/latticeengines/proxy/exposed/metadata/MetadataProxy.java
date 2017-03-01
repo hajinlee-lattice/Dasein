@@ -25,8 +25,8 @@ import com.latticeengines.network.exposed.metadata.RuleResultInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
-public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataInterface, ArtifactInterface,
-        RuleResultInterface, ModuleInterface, DataCollectionInterface {
+public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataInterface,
+        ArtifactInterface, RuleResultInterface, ModuleInterface, DataCollectionInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -34,7 +34,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @Override
     public Boolean createImportTable(String customerSpace, String tableName, Table table) {
-        String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}",
+                customerSpace, tableName);
         return post("createImportTable", url, table, Boolean.class);
     }
 
@@ -59,25 +60,29 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @Override
     public Table getImportTable(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}",
+                customerSpace, tableName);
         return get("getImportTable", url, Table.class);
     }
 
     @Override
     public void deleteTable(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}",
+                customerSpace, tableName);
         delete("deleteImportTable", url);
     }
 
     @Override
     public void deleteImportTable(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}",
+                customerSpace, tableName);
         delete("deleteImportTable", url);
     }
 
     @Override
     public void createTable(String customerSpace, String tableName, Table table) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}",
+                customerSpace, tableName);
         post("createTable", url, table, Boolean.class);
     }
 
@@ -89,13 +94,15 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @Override
     public void updateTable(String customerSpace, String tableName, Table table) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}",
+                customerSpace, tableName);
         put("updateTable", url, table);
     }
 
     @Override
     public Table cloneTable(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/clone", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/clone",
+                customerSpace, tableName);
         return post("cloneTable", url, null, Table.class);
     }
 
@@ -116,7 +123,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @Override
     public Table getTable(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}",
+                customerSpace, tableName);
         return get("getTable", url, Table.class);
     }
 
@@ -133,21 +141,25 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     }
 
     @Override
-    public Boolean createArtifact(String customerSpace, String moduleName, String artifactName, Artifact artifact) {
-        String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}/artifacts/{artifactName}", //
+    public Boolean createArtifact(String customerSpace, String moduleName, String artifactName,
+            Artifact artifact) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/modules/{moduleName}/artifacts/{artifactName}", //
                 customerSpace, moduleName, artifactName);
         return post("createArtifact", url, artifact, Boolean.class);
     }
 
     @Override
     public Module getModule(String customerSpace, String moduleName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}", customerSpace, moduleName);
+        String url = constructUrl("/customerspaces/{customerSpace}/modules/{moduleName}",
+                customerSpace, moduleName);
         return get("getModule", url, Module.class);
     }
 
     @Override
     public void validateArtifact(String customerSpace, ArtifactType artifactType, String filePath) {
-        String url = constructUrl("/customerspaces/{customerSpace}/artifacttype/{artifactType}?file={filePath}",
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/artifacttype/{artifactType}?file={filePath}",
                 customerSpace, artifactType, filePath);
         post("validateArtifact", url, null, ResponseDocument.class);
     }
@@ -179,26 +191,58 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     }
 
     @Override
-    public ModelReviewData getReviewData(String customerSpace, String modelId, String eventTableName) {
-        String url = constructUrl("/ruleresults/reviewdata/{customerSpace}/{modelId}/{eventTableName}", customerSpace,
+    public ModelReviewData getReviewData(String customerSpace, String modelId,
+            String eventTableName) {
+        String url = constructUrl(
+                "/ruleresults/reviewdata/{customerSpace}/{modelId}/{eventTableName}", customerSpace,
                 modelId, eventTableName);
         return get("getReviewData", url, ModelReviewData.class);
     }
 
     @Override
     public Artifact getArtifactByPath(String customerSpace, String artifactPath) {
-        String url = constructUrl("/customerspaces/{customerSpace}/artifactpath?file={artifactPath}", //
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/artifactpath?file={artifactPath}", //
                 customerSpace, artifactPath);
         return get("getArtifactByPath", url, Artifact.class);
     }
 
     @Override
-    public MetadataSegment createSegment(String customerSpace, String segmentName, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/segments/{segmentName}?tableName={tableName}", //
-                customerSpace, segmentName, tableName);
-        return post("createSegment", url, null, MetadataSegment.class);
+    public MetadataSegment createOrUpdateSegment(String customerSpace,
+                                                 MetadataSegment metadataSegment) {
+        String url = constructUrl("/customerspaces/{customerSpace}/segments", //
+                customerSpace);
+        return post("createOrUpdateSegment", url, metadataSegment, MetadataSegment.class);
     }
 
+    @Override
+    public void deleteSegmentByName(String customerSpace, String segmentName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/segments/{segmentName}", //
+                customerSpace, segmentName);
+        delete("deleteSegmentByName", url);
+    }
+
+    @Override
+    public MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/segments/{segmentName}", //
+                customerSpace, segmentName);
+        return get("getSegment", url, MetadataSegment.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<MetadataSegment> getMetadataSegments(String customerSpace, String selection) {
+        String url = null;
+        if (selection == null) {
+            url = constructUrl("/all/customerspaces/{customerSpace}/segments?selection={selection}", //
+                    customerSpace, selection);
+        } else {
+            url = constructUrl("/all/customerspaces/{customerSpace}/segments", customerSpace);
+        }
+        return get("getSegments", url, List.class);
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public List<DataCollection> getDataCollections(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollections", customerSpace);

@@ -97,7 +97,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     public void removeDataCollection(String name) {
         DataCollection dataCollection = dataCollectionDao.findByField("name", name);
 
-        // TODO Remove tags
+        for (TableTag tableTag : tableTagEntityMgr.getTableTagsForName(name)) {
+            tableTagEntityMgr.delete(tableTag);
+        }
 
         dataCollectionDao.delete(dataCollection);
     }

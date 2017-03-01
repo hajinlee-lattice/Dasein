@@ -1,11 +1,14 @@
 package com.latticeengines.metadata.service;
 
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import java.util.List;
+
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
 public interface SegmentService {
 
-    MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment);
+    MetadataSegment createOrUpdateSegment(MetadataSegment segment);
+
+    Boolean deleteSegmentByName(String segmentName);
 
     List<MetadataSegment> getSegments();
 

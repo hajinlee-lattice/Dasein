@@ -20,9 +20,18 @@ public class SegmentServiceImpl implements SegmentService {
     private TableEntityMgr tableEntityMgr;
 
     @Override
-    public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
+    public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
         segmentEntityMgr.createOrUpdate(segment);
         return segment;
+    }
+
+    @Override
+    public Boolean deleteSegmentByName(String segmentName) {
+        if (segmentEntityMgr.findByName(segmentName) == null) {
+            return false;
+        }
+        segmentEntityMgr.delete(segmentEntityMgr.findByName(segmentName));
+        return true;
     }
 
     @Override
