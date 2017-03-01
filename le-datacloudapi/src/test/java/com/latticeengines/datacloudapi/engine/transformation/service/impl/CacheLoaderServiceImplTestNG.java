@@ -51,6 +51,7 @@ public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBa
             config.setDunsField("DUNS");
             config.setConfidenceCode(6);
             config.setMatchGrade("AAA");
+            config.setIsWhiteCache(true);
             long count = ((AvroCacheLoaderServiceImpl) cacheLoaderService).startLoad(avroDir, config);
 
             Assert.assertEquals(count, 83);
@@ -67,7 +68,7 @@ public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBa
         nameLocation.setName("R. W. Notary");
         nameLocation.setCity("Alta Loma");
         nameLocation.setState("California");
-        nameLocation.setCountry("USA");
+        nameLocation.setCountryCode("USA");
         nameLocation.setZipcode("917374428");
         nameLocation.setPhoneNumber(null);
         nameLocationService.normalize(nameLocation);
@@ -122,7 +123,7 @@ public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBa
         nameLocation.setName("Angeles Grocery");
         nameLocation.setCity("Jersey City");
         nameLocation.setState("New Jersey");
-        nameLocation.setCountry("USA");
+        nameLocation.setCountryCode("USA");
         nameLocation.setZipcode(null);
         nameLocation.setPhoneNumber(null);
         nameLocationService.normalize(nameLocation);

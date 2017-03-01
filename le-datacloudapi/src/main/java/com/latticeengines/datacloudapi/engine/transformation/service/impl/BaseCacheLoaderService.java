@@ -387,7 +387,6 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
                     log.info("Batch has no required records, record start=" + recordStart);
                     return 0;
                 }
-
                 List<DnBCache> caches = dnbCacheService.batchAddCache(matchContexts);
                 log.info("Finished loading cache! record start=" + recordStart + " batch size=" + records.size()
                         + " cache size=" + matchContexts.size() + " returned size=" + caches.size());
