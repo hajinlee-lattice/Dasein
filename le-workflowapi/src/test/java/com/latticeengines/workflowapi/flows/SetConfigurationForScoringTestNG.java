@@ -58,6 +58,7 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         Table t = new Table();
         t.setName("table");
         executionContext.putString("MATCH_RESULT_TABLE", JsonUtils.serialize(t));
+        executionContext.putString("EVENT_TABLE", JsonUtils.serialize(t));
 
         WorkflowJob job = new WorkflowJob();
         WorkflowJobEntityMgr workflowJobEntityMgr = mock(WorkflowJobEntityMgr.class);
