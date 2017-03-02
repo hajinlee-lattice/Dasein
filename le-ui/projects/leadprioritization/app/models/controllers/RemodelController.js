@@ -93,10 +93,15 @@ angular.module('mainApp.models.remodel', [
         var modelNameFormatted = StringUtility.SubstituteAllSpecialCharsWithDashes(vm.newModelName);
 
         var copy_text = " (copy)",
-            dedupType = Model.EventTableProvenance.Is_One_Lead_Per_Domain === 'true' ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
-            includePersonalEmailDomains = Model.EventTableProvenance.Exclude_Public_Domains === "false",
-            useLatticeAttributes = Model.EventTableProvenance.Exclude_Propdata_Columns === "false",
-            enableTransformations = (Model.EventTableProvenance.Transformation_Group_Name == "none" || Model.ModelDetails.TransformationGroupName === "none") ? false : true,
+            oneLeadPerDomain = Model.EventTableProvenance.Is_One_Lead_Per_Domain == null ? false :
+                Model.EventTableProvenance.Is_One_Lead_Per_Domain == "true",
+            dedupType = oneLeadPerDomain === 'true' ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
+            includePersonalEmailDomains = Model.EventTableProvenance.Exclude_Public_Domains == null ? true :
+                Model.EventTableProvenance.Exclude_Public_Domains == "false",
+            useLatticeAttributes = Model.EventTableProvenance.Exclude_Propdata_Columns == null ? true :
+                Model.EventTableProvenance.Exclude_Propdata_Columns == "false",
+            enableTransformations = (Model.EventTableProvenance.Transformation_Group_Name == "none" ||
+                Model.ModelDetails.TransformationGroupName === "none") ? false : true,
             modelName = modelNameFormatted,
             modelDisplayName = vm.newModelName,
             originalModelSummaryId = Model.ModelDetails.ModelID,
