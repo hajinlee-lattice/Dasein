@@ -88,8 +88,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String DATA_EXPORT_CSV = "_dataexport.csv";
     public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
     public static final String SCORED_TXT = "_scored.txt";
-    public static final String RTS_OR_NON_FUZZY_MATCH_VALIDATION_EXPRESSION = "((Email|Website)&&Id)";
-    public static final String FUZZY_MATCH_VALIDATION_EXPRESSION = "((CompanyName|Email|Website)&&Id)";
+    public static final String RTS_OR_NON_FUZZY_MATCH_VALIDATION_EXPRESSION = "((Email||Website)&&Id)";
+    public static final String FUZZY_MATCH_VALIDATION_EXPRESSION = "((CompanyName||Email||Website)&&Id)";
     public static final String RTS_DATA_CLOUD_VERSION = "1.0";
 
     @VisibleForTesting
