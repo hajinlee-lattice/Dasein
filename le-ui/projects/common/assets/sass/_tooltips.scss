@@ -17,18 +17,19 @@
         margin-left: 10px;
         padding: 5px;
         border-radius: 3px;
-        background: rgba(0,0,0,1); 
+        background: rgba(0,0,0,1);
         color: white;
         white-space: nowrap;
     }
     &:hover {
         &:after {
             display: block;
+            z-index: 88;
         }
     }
 }
 
-/* 
+/*
 Informational Tooltips
 ====================================================== */
 

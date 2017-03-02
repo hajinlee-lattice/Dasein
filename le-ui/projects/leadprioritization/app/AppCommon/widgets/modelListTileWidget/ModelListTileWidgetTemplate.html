@@ -13,7 +13,7 @@
                     type="button"
                     ng-click="customMenuClick($event)"
                     ng-class="{ 'open': showCustomMenu }">
-                <span class="fa fa-ellipsis-v" ng-class="{ 'yellow-flag': menuFlag && !showCustomMenu, 'fa-rotate-180': showCustomMenu }"></span>
+                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
             </button>
             <ul class="model-menu" ng-if="showCustomMenu">
                 <li
@@ -111,6 +111,9 @@
             <span data-ng-if="!isActive" class="error-text">{{::ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</span>
             <span data-ng-if="isActive" class="success-text">{{::ResourceUtility.getString('MODEL_DETAILS_ACTIVE_LABEL')}}</span>
         </div>
+    </div>
+    <div ng-if="!isActive && canRemodel" class="recommendation">
+        <span data-stooltip="Remodel Recommended"><i class="fa fa-exclamation-triangle"/></span>
     </div>
 
 </div><!-- End .model -->
