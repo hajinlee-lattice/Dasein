@@ -93,7 +93,7 @@ public class ModelSummary
     private String modelType;
     private List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties = new ArrayList<>();
     private String dataCloudVersion;
-    boolean isMatch;
+    boolean isMatch = true;
     private String moduleName;
     private Double crossValidatedMean;
     private Double crossValidatedStd;
