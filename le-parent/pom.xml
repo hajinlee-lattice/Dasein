@@ -468,6 +468,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <skip>false</skip>
+                                    <reuseForks>false</reuseForks>
                                     <includes>
                                         <include>${deployment.classes.include}</include>
                                     </includes>
