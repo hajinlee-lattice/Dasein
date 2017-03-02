@@ -4,7 +4,7 @@ angular.module('lp.models.ratings', [
     'mainApp.models.services.ModelService'
 ])
 .controller('ModelRatingsController', function ($scope, $rootScope, $stateParams,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, HistoricalABCDBuckets) {
 
     var vm = this;
     angular.extend(vm, {
@@ -17,6 +17,7 @@ angular.module('lp.models.ratings', [
         showSaveBucketsError: false,
         ResourceUtility: ResourceUtility,
         currentConfiguration: CurrentConfiguration,
+        historicalBuckets: HistoricalABCDBuckets,
         ratingsSummary: RatingsSummary,
         workingBuckets: []
     });
@@ -77,6 +78,8 @@ angular.module('lp.models.ratings', [
         vm.container = document.getElementById("sliders");
         vm.containerBox = vm.container.getBoundingClientRect();
         vm.bucket = bucket;
+        vm.index = index;
+        vm.canAddBucket = false;
 
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);
@@ -85,34 +88,41 @@ angular.module('lp.models.ratings', [
     }
     function eleMouseMove(ev) {
 
+        vm.canAddBucket = false;
+
         vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
+        vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
+
+        // set right_bound_score from current percentage point on chart
+        vm.bucket.right_bound_score = vm.slider.style.right.slice(0, -1);
+
         if (ev.clientY > vm.containerBox.bottom + 10) {
             vm.slider.style.opacity = .25;
         } else {
             vm.slider.style.opacity = 1;
         }
-        vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
-
-        vm.bucket.right_bound_score = vm.slider.style.right.slice(0, -1);
 
         ev.preventDefault();
 
     }
-    function eleMouseUp(ev, bucket, index, $state){
+    function eleMouseUp(ev){
 
         vm.slider.style.opacity = 1;
 
-        if (ev.clientY > vm.containerBox.top + 150) {
-            vm.workingBuckets.splice(index, bucket);
+
+        if (ev.clientY > vm.containerBox.bottom + 10) {
+
             vm.chartNotUpdated = false;
+            vm.workingBuckets.splice(vm.index, 1);
+            
         }
         refreshChartData();
+
+        delete vm.slider;
 
         document.removeEventListener('mousemove', eleMouseMove, false);
         document.removeEventListener('mouseup', eleMouseUp, false);
         ev.preventDefault();
-
-        delete vm.slider;
 
     }
     function refreshChartData(){
@@ -186,11 +196,23 @@ angular.module('lp.models.ratings', [
         
     }
     vm.publishConfiguration = function() {
+        
         vm.chartNotUpdated = false;
+        vm.saveInProgress = true;
 
-        var params = {id: vm.modelId, bucketMetadatas: vm.workingBuckets}
+        var modelId = $stateParams.modelId,
+            bucketMetadatas = {
+                credentialName: vm.credentialName,
+                soapEndpoint: vm.soapEndpoint,
+                soapUserId: vm.soapUserId,
+                soapEncryptionKey: vm.soapEncryptionKey,
+                restEndpoint: vm.restEndpoint,
+                restIdentityEndpoint: vm.restIdentityEndpoint,
+                restClientId: vm.restClientId,
+                restClientSecret: vm.restClientSecret
+            };
 
-        ModelRatingsService.CreateABCDBuckets(params).then(function(result){
+        ModelRatingsService.CreateABCDBuckets(modelId, bucketMetadatas).then(function(result){
             if (result != null && result.success === true) {
                 $state.go('home.model.ratings', {}, { reload: true });
             } else {
