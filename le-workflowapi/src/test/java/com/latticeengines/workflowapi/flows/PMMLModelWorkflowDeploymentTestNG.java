@@ -24,7 +24,6 @@ import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfigura
 import com.latticeengines.leadprioritization.workflow.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBase {
