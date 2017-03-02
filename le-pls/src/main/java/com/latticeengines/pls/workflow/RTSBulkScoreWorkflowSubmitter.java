@@ -114,6 +114,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .columnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion) //
                 .excludeDataCloudAttrs(skipIdMatch) //
+                .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //
                 .build();

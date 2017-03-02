@@ -140,6 +140,12 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder skipMatchingStep(boolean skipMatchingStep) {
+            match.setSkipStep(skipMatchingStep);
+            matchResult.setSkipStep(skipMatchingStep);
+            return this;
+        }
+
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);

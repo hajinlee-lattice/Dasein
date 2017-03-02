@@ -59,8 +59,7 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             importDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
-            rtsBulkScoreWorkflowConfigurationBuilder
-                    .internalResourceHostPort(internalResourceHostPort);
+            rtsBulkScoreWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -125,15 +124,18 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
             return this;
         }
 
-        public Builder columnSelection(Predefined predefinedColumnSelection,
-                String selectionVersion) {
-            rtsBulkScoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection,
-                    selectionVersion);
+        public Builder columnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            rtsBulkScoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
             rtsBulkScoreWorkflowConfigurationBuilder.excludeDataCloudAttrs(exclude);
+            return this;
+        }
+
+        public Builder skipMatchingStep(boolean skipMatchingStep) {
+            rtsBulkScoreWorkflowConfigurationBuilder.skipMatchingStep(skipMatchingStep);
             return this;
         }
 
@@ -166,8 +168,7 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            rtsBulkScoreWorkflowConfigurationBuilder
-                    .sourceSchemaInterpretation(sourceSchemaInterpretation);
+            rtsBulkScoreWorkflowConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
