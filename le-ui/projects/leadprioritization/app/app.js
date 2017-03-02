@@ -11,7 +11,6 @@ var mainApp = angular.module('mainApp', [
 
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
-    'mainApp.core.services.WidgetService',
 
     'common.modules',
     'common.datacloud',

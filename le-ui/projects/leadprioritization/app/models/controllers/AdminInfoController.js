@@ -1,29 +1,12 @@
 angular.module('mainApp.models.controllers.AdminInfoController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.WidgetConfigUtility',
-    'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.services.TopPredictorService',
-    'mainApp.core.services.WidgetService',
     'mainApp.core.utilities.NavUtility',
     'mainApp.models.services.ModelService',
     'mainApp.core.services.FeatureFlagService'
 ])
-.controller('AdminInfoController', function ($scope, $rootScope, $http, ResourceUtility, WidgetService,
-    WidgetConfigUtility, WidgetFrameworkService, NavUtility, ModelService, FeatureFlagService, ModelStore) {
+.controller('AdminInfoController', function ($scope, $rootScope, $http, ResourceUtility, NavUtility, ModelService, FeatureFlagService, ModelStore) {
     $scope.ResourceUtility = ResourceUtility;
-    var widgetConfig = WidgetService.GetApplicationWidgetConfig();
-    if (widgetConfig == null) {
-        return;
-    }
-
-    var screenWidgetConfig = WidgetConfigUtility.GetWidgetConfig(
-        widgetConfig,
-        "adminInfoScreenWidget"
-    );
-
-    if (screenWidgetConfig == null) {
-        return;
-    }
 
     var data = ModelStore.data;
     $scope.ModelId = data.ModelId;
@@ -45,58 +28,9 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
 
     var flags = FeatureFlagService.Flags();
     var showAlertsTab = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
-    
+
     if (showAlertsTab) {
         $scope.loading= true;
-/*
-        var suppressedCategories = data.SuppressedCategories;
-        ModelService.GetModelAlertsByModelId(data.ModelId).then(function(result) {
-            console.log('RESULT',result);
-            $scope.loading= false;
-            if (result != null && result.success === true) {
-                ModelStore.data.ModelAlerts = result.resultObj;
-                ModelStore.SuppressedCategories = suppressedCategories;
-            } else if (result != null && result.success === false) {
-                ModelStore.ModelAlerts = result.resultObj;
-                ModelStore.SuppressedCategories = null;
-            }
-            //$scope.$apply();
-            var contentContainer = $('#adminInfoContainer');
-            WidgetFrameworkService.CreateWidget({
-                element: contentContainer,
-                widgetConfig: screenWidgetConfig,
-                metadata: null,
-                data: data,
-                parentData: null
-            });
-        });
-*/
-    } else {
-        var screenWidgetConfigNoAlertsTab = angular.copy(screenWidgetConfig);
-        for (var i = 0; i < screenWidgetConfigNoAlertsTab.Widgets.length; i++) {
-            var widget = screenWidgetConfigNoAlertsTab.Widgets[i];
-            if (widget.Tabs != null) {
-                var tabs = [];
-                for (var j = 0; j < widget.Tabs.length; j++) {
-                    var tab = widget.Tabs[j];
-                    if (tab.ID !== "adminInfoAlertsTab") {
-                        var tabCopy = angular.copy(tab);
-                        tabs.push(tabCopy);
-                    }
-                }
-                widget.Tabs = tabs;
-            }
-        }
-        /*
-        var contentContainer = $('#adminInfoContainer');
-        WidgetFrameworkService.CreateWidget({
-            element: contentContainer,
-            widgetConfig: screenWidgetConfigNoAlertsTab,
-            metadata: null,
-            data: data,
-            parentData: null
-        });
-        */
     }
 
 });
