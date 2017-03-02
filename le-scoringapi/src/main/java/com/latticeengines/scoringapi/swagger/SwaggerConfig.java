@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.latticeengines.common.exposed.version.VersionManager;
 
@@ -20,6 +21,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
+@EnableWebMvc
 @ImportResource("classpath:common-component-context.xml")
 @EnableSwagger2
 public class SwaggerConfig {
@@ -29,16 +31,16 @@ public class SwaggerConfig {
 
     @Bean
     public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.latticeengines.scoringapi.controller"))
-                .build()
-                .pathMapping("/")
-                .apiInfo(apiInfo())
-                .useDefaultResponseMessages(false)
-                .globalResponseMessage(
-                        RequestMethod.GET,
-                        newArrayList(
+        return new Docket(DocumentationType.SWAGGER_2) //
+                .select() //
+                .apis(RequestHandlerSelectors.basePackage("com.latticeengines.scoringapi.controller")) //
+                .build() //
+                .pathMapping("/") //
+                .apiInfo(apiInfo()) //
+                .useDefaultResponseMessages(false) //
+                .globalResponseMessage( //
+                        RequestMethod.GET, //
+                        newArrayList( //
                                 new ResponseMessageBuilder().code(500).message("500 message")
                                         .responseModel(new ModelRef("Error")).build(), //
                                 new ResponseMessageBuilder().code(400).message("Bad Request").build(), //

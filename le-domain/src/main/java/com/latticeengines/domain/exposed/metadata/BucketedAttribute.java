@@ -18,7 +18,7 @@ public class BucketedAttribute {
     @JsonProperty("num_bits")
     private int numBits;
 
-    // for jacksoon
+    // for jackson
     private BucketedAttribute() {
 
     }
