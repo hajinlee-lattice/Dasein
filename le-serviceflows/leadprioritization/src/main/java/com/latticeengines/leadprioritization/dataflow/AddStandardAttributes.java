@@ -70,7 +70,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         if (websiteOrEmail != null && !domainLength.arguments.isEmpty()) {
             domainLength.arguments.put("column", websiteOrEmail.getName());
             log.info("set domain_length arguments to: " + domainLength.arguments);
-        } else {
+        } else if (!domainLength.arguments.isEmpty()) {
             domainLength.arguments.put("column", "");
         }
     }
