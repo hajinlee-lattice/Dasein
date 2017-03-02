@@ -69,8 +69,9 @@ public class OAuthServer extends SpringBootServletInitializer implements WebAppl
             LatticeTokenServices tokenServices = new LatticeTokenServices(tokenStore);
             tokenServices.setTokenStore(tokenStore);
             tokenServices.setSupportRefreshToken(true);
-            tokenServices.setRefreshTokenValiditySeconds(60 * 60 * 24 * 180); // 180
-                                                                              // days
+            tokenServices.setRefreshTokenValiditySeconds(60 * 60 * 24 * 180); // 180 days
+            tokenServices.setAccessTokenValiditySeconds(60 * 60 * 24 * 180); // 180 days
+            
             return tokenServices;
         }
 
