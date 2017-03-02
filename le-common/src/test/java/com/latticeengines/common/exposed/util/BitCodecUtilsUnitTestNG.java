@@ -54,11 +54,13 @@ public class BitCodecUtilsUnitTestNG {
         int numBits2 = 4;
         int value2 = 9;
         // prepare result
+        result = BitCodecUtils.setBits(randomBits, lowestBit, numBits, value);
         result = BitCodecUtils.setBits(result, lowestBit2, numBits2, value2);
         // prepare bit mask
         mask = BitCodecUtils.bitMask(0, lowestBit, numBits);
         mask = BitCodecUtils.bitMask(mask, lowestBit2, numBits2);
         // prepare expected
+        expected = BitCodecUtils.setBits(0, lowestBit, numBits, value);
         expected = BitCodecUtils.setBits(expected, lowestBit2, numBits2, value2);
         // query
         Assert.assertEquals(result & mask, expected);
