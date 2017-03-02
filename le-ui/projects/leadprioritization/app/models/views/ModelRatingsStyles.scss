@@ -34,7 +34,6 @@
 .ratings-chart {
 	position: relative;
 	margin: 26px auto 34px;
-	/* min-height: 150px; */
 	width: 94%;
 	&:after {
 		display: table;
@@ -62,11 +61,9 @@
 }
 .bar-colors {
 	width: 100%;
-	/* min-height: 150px; */
 	mix-blend-mode: color;
 	.overlay {
 		position: absolute;
-		/* min-height: 150px; */
 		&:nth-child(1) {
 			background-color: rgba(112,187,86,1);
 		}
@@ -86,14 +83,15 @@
 }
 .sliders-container {
 	width: 100%;
-	/* min-height: 150px; */
 	position: absolute;
 	z-index: 4;
+	&.can-add-bucket:hover {
+		cursor: copy;
+	}
 }	
 .slider-dugout {
 	width: 20px;
 	margin-right: 9px;
-	/* min-height: 150px; */
 	background: #e8e8e8;
 	border: #dedada solid 1px;
 	float: right;
@@ -101,7 +99,6 @@
 .slider {
 	border-right: #1c3d59 solid 1px;
 	position: absolute;
-	/* min-height: 150px; */
 	z-index: 5;
 	.handle {
 		position: absolute;
@@ -157,7 +154,6 @@
 }
 .vertical-axis {
 	width: 94%;
-	/* min-height: 150px; */
 	margin-left: 10px;
 	display: flex;
 	flex-direction: column-reverse;
@@ -212,26 +208,57 @@
     	&:nth-child(1){
     		.bucket-label{
     			background-color: #70bb56;
+    			&:before {
+    				content: "A"
+    			}
     		}
     	}
     	&:nth-child(2){
     		.bucket-label{
     			background-color: #ffb93d;
+    			&:before {
+    				content: "B"
+    			}
     		}
     	}
     	&:nth-child(3){
     		.bucket-label{
     			background-color: #f56c35;
+    			&:before {
+    				content: "C"
+    			}
     		}
     	}
     	&:nth-child(4){
     		.bucket-label{
     			background-color: #d62b30;
+    			&:before {
+    				content: "D"
+    			}
     		}
     	}
     	&:nth-child(5){
     		.bucket-label{
     			background-color: #494949;
+    			&:before {
+    				content: "E"
+    			}
+    		}
+    	}
+    	&:nth-child(6){
+    		.bucket-label{
+    			background-color: #494949;
+    			&:before {
+    				content: "F"
+    			}
+    		}
+    	}
+    	&:nth-child(7){
+    		.bucket-label{
+    			background-color: #494949;
+    			&:before {
+    				content: "G"
+    			}
     		}
     	}
     }

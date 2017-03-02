@@ -96,11 +96,8 @@ angular
     }
 
 
-    this.CreateABCDBuckets = function(id) {
-        var deferred = $q.defer(),
-            data = [{
-
-            }];
+    this.CreateABCDBuckets = function(id, data) {
+        var deferred = $q.defer();
 
         $http({
             method: 'POST',

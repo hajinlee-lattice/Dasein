@@ -39,6 +39,8 @@ angular.module('lp.models.ratings', [
 
     function renderChart(){
         
+        refreshChartData();
+
         var verticalAxis = document.getElementById("verticalAxis");
 
         // Get tallest bar in set
@@ -67,9 +69,7 @@ angular.module('lp.models.ratings', [
 
         vm.getNumber = function(num) {return new Array(num);}
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
-
-        refreshChartData();
-        refreshSliders();
+   
     }
 
     vm.eleMouseDown = function(ev, bucket, index) {
@@ -77,7 +77,6 @@ angular.module('lp.models.ratings', [
         vm.container = document.getElementById("sliders");
         vm.containerBox = vm.container.getBoundingClientRect();
         vm.bucket = bucket;
-        console.log('mousedown', bucket, index)
 
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);
@@ -85,53 +84,113 @@ angular.module('lp.models.ratings', [
         ev.preventDefault();
     }
     function eleMouseMove(ev) {
-        var relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
-        if (ev.clientY > vm.containerBox.top + 150) {
+
+        vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
+        if (ev.clientY > vm.containerBox.bottom + 10) {
             vm.slider.style.opacity = .25;
         } else {
             vm.slider.style.opacity = 1;
         }
-        vm.slider.style.right = 100 - Math.round(relativeSliderChartPosition * 100) + '%';
+        vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
+
+        vm.bucket.right_bound_score = vm.slider.style.right.slice(0, -1);
+
         ev.preventDefault();
+
     }
-    function eleMouseUp(ev){
+    function eleMouseUp(ev, bucket, index, $state){
+
         vm.slider.style.opacity = 1;
-        delete vm.slider;
+
+        if (ev.clientY > vm.containerBox.top + 150) {
+            vm.workingBuckets.splice(index, bucket);
+            vm.chartNotUpdated = false;
+        }
+        refreshChartData();
 
         document.removeEventListener('mousemove', eleMouseMove, false);
         document.removeEventListener('mouseup', eleMouseUp, false);
-
         ev.preventDefault();
-        console.log("mouse up", vm.workingBuckets);
+
+        delete vm.slider;
+
     }
     function refreshChartData(){
-        // adjust colors
+        
         vm.workingBuckets = vm.currentConfiguration;
-    }
-    function refreshSliders(){
+        var buckets = vm.workingBuckets;
 
-        // Add bucket sliders and any needed in the dugout
-        var slidersToAdd = 
-                {
-                    creation_timestamp: null,
-                    left_bound_score: 2,
-                    lift: null,
-                    name: null,
-                    num_leads: null,
-                    right_bound_score: 2,
-                },
-            templatesToAdd = 5 - vm.currentConfiguration.length;
-
-        if(vm.currentConfiguration.length <= 4) {
-            for (var i = 0; i < templatesToAdd; i++) {
-                vm.currentConfiguration.push(slidersToAdd);
-            }
+        // check if we can add anymore sliders
+        if(buckets.length < 5) {
+            vm.canAddBucket = true;
         }
 
+        buckets[0].left_bound_score = 99;
+        // loop through buckets in object and set their values
+        for (var i = 0, len = buckets.length; i < len; i++) { 
+            
+            var previousBucket = buckets[i-1];
+            for (var bucket in previousBucket) {
+              vm.previousRightBoundScore = previousBucket["right_bound_score"];
+            }
+            // set each buckets left_bound_score to the previous buckets right_bound_score minus one
+            buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
+            buckets[0].left_bound_score = 99;
+
+            vm.rightScore = buckets[i].right_bound_score;
+            vm.rightLeads = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_leads;
+            vm.rightConverted = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_converted;
+            vm.leftScore = buckets[i].left_bound_score;
+            vm.leftLeads = vm.ratingsSummary.bucketed_scores[vm.leftScore].left_num_leads;
+            vm.leftConverted = vm.ratingsSummary.bucketed_scores[vm.leftScore].left_num_converted;
+    
+            buckets[i].num_leads = vm.rightLeads - vm.leftLeads;
+
+            buckets[i].lift = (vm.rightConverted - vm.leftConverted)/(vm.rightLeads - vm.leftLeads);
+
+        }
+
+        
+        
+    }
+    vm.addBucket = function(ev){
+        
+        if(vm.workingBuckets.length < 6) {
+            
+            vm.container = document.getElementById("sliders");
+            vm.containerBox = vm.container.getBoundingClientRect();
+            vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
+
+            var addSlider = {
+                    creation_timestamp: 0,
+                    left_bound_score: 0,
+                    lift: 0,
+                    name: "",
+                    num_leads: 0,
+                    right_bound_score: 100 - Math.round(vm.relativeSliderChartPosition * 100)
+                };
+
+            vm.currentConfiguration.push(addSlider);
+            vm.currentConfiguration.sort(function(a, b){return b.right_bound_score - a.right_bound_score});
+
+            vm.chartNotUpdated = false;
+            vm.canAddBucket = true;
+
+            refreshChartData();
+
+        } else if(vm.workingBuckets.length >= 6) {
+            
+            vm.canAddBucket = false;
+
+        }
+        
     }
     vm.publishConfiguration = function() {
         vm.chartNotUpdated = false;
-        ModelRatingsService.CreateABCDBuckets().then(function(result){
+
+        var params = {id: vm.modelId, bucketMetadatas: vm.workingBuckets}
+
+        ModelRatingsService.CreateABCDBuckets(params).then(function(result){
             if (result != null && result.success === true) {
                 $state.go('home.model.ratings', {}, { reload: true });
             } else {
