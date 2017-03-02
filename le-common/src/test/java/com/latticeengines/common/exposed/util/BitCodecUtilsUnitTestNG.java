@@ -28,18 +28,41 @@ public class BitCodecUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testCodecOfLong() {
+        int lowestBit = 2;
+        int numBits = 3;
+
         // 110
         int value = 6;
-        long result = BitCodecUtils.setBits(0, 2, 3, value);
+        long result = BitCodecUtils.setBits(0, lowestBit, numBits, value);
         // 11000
         // value * 4
         Assert.assertEquals(result, 24L);
-        Assert.assertEquals(BitCodecUtils.getBits(result, 2, 3), value);
+        Assert.assertEquals(BitCodecUtils.getBits(result, lowestBit, numBits), value);
 
         // other bits are irrelevant
         long randomBits = new Random(System.currentTimeMillis()).nextInt(Integer.MAX_VALUE);
-        result = BitCodecUtils.setBits(randomBits, 2, 3, value);
-        Assert.assertEquals(BitCodecUtils.getBits(result, 2, 3), value);
+        result = BitCodecUtils.setBits(randomBits, lowestBit, numBits, value);
+        Assert.assertEquals(BitCodecUtils.getBits(result, lowestBit, numBits), value);
+
+        // bit mask check
+        long expected = BitCodecUtils.setBits(0, lowestBit, numBits, value);
+        long mask = BitCodecUtils.bitMask(0, lowestBit, numBits);
+        Assert.assertEquals(result & mask, expected);
+
+        // double bit mask check: check two values together
+        int lowestBit2 = 10;
+        int numBits2 = 4;
+        int value2 = 16;
+        // prepare result
+        result = BitCodecUtils.setBits(result, lowestBit2, numBits2, value2);
+        // prepare bit mask
+        mask = BitCodecUtils.bitMask(0, lowestBit, numBits);
+        mask = BitCodecUtils.setBits(mask, lowestBit2, numBits2, value2);
+        // prepare expected
+        expected = BitCodecUtils.setBits(expected, lowestBit2, numBits2, value2);
+        // query
+        Assert.assertEquals(result & mask, expected);
+
     }
 
 }
