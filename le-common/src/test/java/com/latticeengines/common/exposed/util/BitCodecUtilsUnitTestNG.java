@@ -52,7 +52,7 @@ public class BitCodecUtilsUnitTestNG {
         // double bit mask check: check two values together
         int lowestBit2 = 10;
         int numBits2 = 4;
-        int value2 = 16;
+        int value2 = 9;
         // prepare result
         result = BitCodecUtils.setBits(result, lowestBit2, numBits2, value2);
         // prepare bit mask
