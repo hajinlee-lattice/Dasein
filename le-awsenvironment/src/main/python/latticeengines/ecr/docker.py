@@ -40,7 +40,7 @@ def push(args):
 
 def pull(args):
     print "pulling image %s:%s from repo to local ..." % (args.image, args.remotetag)
-    pull_internal(args.environment, args.image, args.remotetag, args.localtag)
+    pull_internal(args.environment, args.image, args.remotetag, args.localtag, withf=args.withf)
 
 def purge(args):
     if args.environment == 'dev':
@@ -49,7 +49,7 @@ def purge(args):
     print "purging old tags of image %s from repo ..." % args.image
     purge_internal(args.environment, args.image)
 
-def pull_internal(environment, image, remotetag, localtag, skiplogin=False):
+def pull_internal(environment, image, remotetag, localtag, skiplogin=False, withf=False):
     registry = AwsEnvironment(environment).ecr_registry()
     if environment == 'dev':
         registry = NEXUS_DOCKER_REGISTRY
@@ -59,7 +59,7 @@ def pull_internal(environment, image, remotetag, localtag, skiplogin=False):
     else:
         login_cmd = login_internal(environment)
         subprocess.call(login_cmd + "; docker pull %s" % source, shell=True)
-    tag_for_local(registry, image, remotetag, localtag)
+    tag_for_local(registry, image, remotetag, localtag, with_foption=withf)
     subprocess.call("docker rmi " + source, shell=True)
 
 def purge_internal(environment, image):
@@ -110,13 +110,19 @@ def tag_for_remote(args):
         reg_url = NEXUS_DOCKER_REGISTRY
     destination = reg_url + "/" + NAMESPACE + "/" + args.image + ":" + args.remotetag
     print "tagging image %s as %s ..." % (source, destination)
-    subprocess.call(["docker", "tag", "-f", source, destination])
+    if args.withf:
+        subprocess.call(["docker", "tag", "-f", source, destination])
+    else:
+        subprocess.call(["docker", "tag", source, destination])
 
-def tag_for_local(registry, image, remotetag, localtag):
+def tag_for_local(registry, image, remotetag, localtag, with_foption=False):
     source = registry + "/" + NAMESPACE + "/" + image + ":" + remotetag
     print "tagging image %s as %s:%s ..." % (source, image, localtag)
     destination = "" + NAMESPACE + "/" +  image + ":" + localtag
-    subprocess.call(["docker", "tag", "-f", source, destination])
+    if with_foption:
+        subprocess.call(["docker", "tag", "-f", source, destination])
+    else:
+        subprocess.call(["docker", "tag", source, destination])
 
 def create_ecr_if_not_exists(env, image):
     if not repo_in_ecr(env, image):
@@ -172,6 +178,7 @@ def parse_args():
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
+    subparser.add_argument('--with-f', dest='withf', action="store_true", help='with -f option when tagging')
     subparser.set_defaults(func=push)
 
     subparser = commands.add_parser("pull")
@@ -180,6 +187,7 @@ def parse_args():
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
+    subparser.add_argument('--with-f', dest='withf', action="store_true", help='with -f option when tagging')
     subparser.set_defaults(func=pull)
 
     subparser = commands.add_parser("purge")
