@@ -6,17 +6,17 @@ angular.module('mainApp.login.services.LoginService', [
     'mainApp.core.services.SessionService'
 ])
 .service('LoginService', function ($http, $q, $window, $location, BrowserStorageUtility, ResourceUtility, StringUtility, SessionService) {
-    
+
     this.Login = function (username, password) {
         var deferred = $q.defer();
-        
+
         var passwordHash = CryptoJS.SHA256(password);
         var httpHeaders = {
         };
         var params = JSON.stringify({ Username: username, Password: passwordHash.toString() });
 
         $http({
-            method: 'POST', 
+            method: 'POST',
             url: '/pls/login',
             data: params
          }).then(
@@ -29,29 +29,29 @@ angular.module('mainApp.login.services.LoginService', [
                 }
                 deferred.resolve(result);
             }, function onError(response) {
-                
+
                 var result = {
                     Success: false,
                     errorMessage: ResourceUtility.getString('LOGIN_UNKNOWN_ERROR')
                 };
 
-                if (response.data.errorCode == 'LEDP_18001') {
+                if (response.data && response.data.errorCode === 'LEDP_18001') {
                     result.errorMessage = ResourceUtility.getString('DEFAULT_LOGIN_ERROR_TEXT');
                 }
                 deferred.resolve(result.errorMessage);
             });
-        
+
         return deferred.promise;
     };
-    
+
     this.GetSessionDocument = function (tenant) {
         if (tenant == null) {
             return null;
         }
         var deferred = $q.defer();
-        
+
         $http({
-            method: 'POST', 
+            method: 'POST',
             url: '/pls/attach',
             data: angular.toJson(tenant)
         })
@@ -75,7 +75,7 @@ angular.module('mainApp.login.services.LoginService', [
             SessionService.HandleResponseErrors(data, status);
             deferred.resolve(data);
         });
-        
+
         return deferred.promise;
     };
 
@@ -109,12 +109,12 @@ angular.module('mainApp.login.services.LoginService', [
 
         return deferred.promise;
     };
-    
+
     this.Logout = function () {
         var deferred = $q.defer();
-        
+
         $http({
-            method: 'GET', 
+            method: 'GET',
             data: '',
             url: "/pls/logout",
             headers: {
@@ -125,9 +125,9 @@ angular.module('mainApp.login.services.LoginService', [
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();
-                
-                setTimeout(function() { 
-                    window.open("/login/", "_self"); 
+
+                setTimeout(function() {
+                    window.open("/login/", "_self");
                 }, 300);
             } else {
                 SessionService.HandleResponseErrors(data, status);
@@ -137,13 +137,13 @@ angular.module('mainApp.login.services.LoginService', [
         .error(function(data, status, headers, config) {
             deferred.resolve(data);
         });
-        
+
         return deferred.promise;
     };
-    
+
     this.ChangePassword = function (oldPassword, newPassword, confirmNewPassword) {
         var deferred = $q.defer();
-        
+
         if (StringUtility.IsEmptyString(oldPassword) || StringUtility.IsEmptyString(newPassword) || StringUtility.IsEmptyString(confirmNewPassword)) {
             deferred.resolve(null);
             return deferred.promise;
