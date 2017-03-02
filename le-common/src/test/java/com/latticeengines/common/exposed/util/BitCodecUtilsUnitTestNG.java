@@ -1,13 +1,8 @@
 package com.latticeengines.common.exposed.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.avro.Schema;
-import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
