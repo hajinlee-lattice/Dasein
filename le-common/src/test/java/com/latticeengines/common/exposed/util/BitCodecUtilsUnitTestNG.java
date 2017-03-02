@@ -57,7 +57,7 @@ public class BitCodecUtilsUnitTestNG {
         result = BitCodecUtils.setBits(result, lowestBit2, numBits2, value2);
         // prepare bit mask
         mask = BitCodecUtils.bitMask(0, lowestBit, numBits);
-        mask = BitCodecUtils.setBits(mask, lowestBit2, numBits2, value2);
+        mask = BitCodecUtils.bitMask(mask, lowestBit2, numBits2);
         // prepare expected
         expected = BitCodecUtils.setBits(expected, lowestBit2, numBits2, value2);
         // query
