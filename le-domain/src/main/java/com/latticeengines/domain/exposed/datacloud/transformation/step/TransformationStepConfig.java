@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.transformation;
+package com.latticeengines.domain.exposed.datacloud.transformation.step;
 
 import java.util.List;
 
@@ -12,6 +12,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransformationStepConfig {
+
+    public static final String SIMPLE = "Simple";
+    public static final String ITERATIVE = "Iterative";
 
     @JsonProperty("Transformer")
     private String transformer;
@@ -36,6 +39,9 @@ public class TransformationStepConfig {
 
     @JsonProperty("TargetTemplate")
     private String targetTemplate;
+
+    @JsonProperty("StepType")
+    private String stepType = SIMPLE;
 
     @JsonIgnore
     private String configuration;
@@ -124,4 +130,11 @@ public class TransformationStepConfig {
        this.inputSteps = inputSteps;
     }
 
+    public String getStepType() {
+        return stepType;
+    }
+
+    public void setStepType(String stepType) {
+        this.stepType = stepType;
+    }
 }

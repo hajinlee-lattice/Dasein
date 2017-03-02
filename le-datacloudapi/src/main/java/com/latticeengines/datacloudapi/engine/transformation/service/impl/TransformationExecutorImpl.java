@@ -103,7 +103,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
 
     private void scheduleTransformationWorkflow(TransformationConfiguration transformationConfiguration,
             TransformationProgress progress, TransformationProgressEntityMgr transformationProgressEntityMgr) {
-        log.info("Kick off workflow for progress " + progress);
+        log.info("Kick off workflow for progress " + progress + " in pod " + HdfsPodContext.getHdfsPodId());
 
         TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow") //
                 .payloadName("Transformation") //

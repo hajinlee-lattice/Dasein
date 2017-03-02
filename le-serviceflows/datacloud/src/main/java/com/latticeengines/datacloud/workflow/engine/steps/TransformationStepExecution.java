@@ -50,7 +50,6 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
             initializeYarnClient();
             prepareTransformationConfiguration = getConfiguration();
             String serviceBeanName = prepareTransformationConfiguration.getServiceBeanName();
-
             transformationService = (TransformationService) applicationContext.getBean(serviceBeanName);
             Class<? extends TransformationConfiguration> configurationClass = transformationService
                     .getConfigurationClass();

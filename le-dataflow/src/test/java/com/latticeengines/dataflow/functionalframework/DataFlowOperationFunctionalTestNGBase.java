@@ -10,7 +10,6 @@ import java.util.Properties;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -171,27 +170,15 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
     }
 
     protected void uploadDynamicSourceAvro(Object[][] data, Schema schema, String fileName) {
-        List<GenericRecord> records = new ArrayList<>();
-        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        for (Object[] tuple : data) {
-            int i = 0;
-            for (Schema.Field field: schema.getFields()) {
-                builder.set(field, tuple[i]);
-                i++;
-            }
-            records.add(builder.build());
-        }
-
+        List<GenericRecord> records = AvroUtils.convertToRecords(data, schema);
         try {
-            AvroUtils.writeToLocalFile(schema, records, fileName);
             if (HdfsUtils.fileExists(configuration, INPUT_PATH + "/" + DYNAMIC_SOURCE + "/" + fileName)) {
                 HdfsUtils.rmdir(configuration, INPUT_PATH + "/" + DYNAMIC_SOURCE + "/" + fileName);
             }
-            HdfsUtils.copyLocalToHdfs(configuration, fileName, INPUT_PATH + "/" + DYNAMIC_SOURCE + "/" + fileName);
+            AvroUtils.writeToHdfsFile(configuration, schema, INPUT_PATH + "/" + DYNAMIC_SOURCE + "/" + fileName, records);
         } catch (Exception e) {
             Assert.fail("Failed to upload " + fileName, e);
         }
-
         FileUtils.deleteQuietly(new File(fileName));
     }
 

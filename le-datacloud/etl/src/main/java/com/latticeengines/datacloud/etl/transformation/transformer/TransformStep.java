@@ -9,8 +9,8 @@ public class TransformStep {
     private final String name;
     private String config;
     private Transformer transformer;
-    private Source[] baseSources;
-    private List<String> baseVersions;
+    protected Source[] baseSources;
+    protected List<String> baseVersions;
     private Source[] baseTemplates;
     private Source target;
     private String targetVersion;
@@ -82,4 +82,5 @@ public class TransformStep {
     public void setCount(Long count) {
         this.count = count;
     }
+
 }

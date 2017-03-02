@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import static com.latticeengines.datacloud.etl.transformation.transformer.IterativeStep.CTX_ITERATION;
+import static com.latticeengines.datacloud.etl.transformation.transformer.IterativeStep.CTX_LAST_COUNT;
+import static com.latticeengines.datacloud.etl.transformation.transformer.IterativeStep.MAX_ITERATION;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
@@ -25,20 +28,23 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformerService;
+import com.latticeengines.datacloud.etl.transformation.transformer.IterativeStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.manage.PipelineTransformationReportByStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationReport;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepReport;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 /**
  * This transformation service allows parameterizing the source and target,
@@ -280,8 +286,16 @@ public class PipelineTransformationService extends AbstractTransformationService
                     + targetTemplate.getSourceName());
 
             String confStr = config.getConfiguration();
-            TransformStep step = new TransformStep(String.valueOf(stepIdx), transformer, baseSources, baseVersions, baseTemplates, target,
-                    targetVersion, targetTemplate, confStr);
+            TransformStep step;
+            if (TransformationStepConfig.ITERATIVE.equalsIgnoreCase(config.getStepType())) {
+                step = new IterativeStep(String.valueOf(stepIdx), transformer, baseSources, baseVersions, baseTemplates,
+                        target, targetVersion, targetTemplate, confStr);
+                log.info("Found a iterative step " + step.getName());
+            } else {
+                step = new TransformStep(String.valueOf(stepIdx), transformer, baseSources, baseVersions, baseTemplates,
+                        target, targetVersion, targetTemplate, confStr);
+                log.info("Found a simple step " + step.getName());
+            }
             steps[stepIdx] = step;
         }
         return steps;
@@ -317,40 +331,38 @@ public class PipelineTransformationService extends AbstractTransformationService
             sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, "", transConf);
             TransformStep step = steps[i];
             Transformer transformer = step.getTransformer();
+            Long startTime = System.currentTimeMillis();
+            boolean succeeded;
+            if (step instanceof IterativeStep) {
+                succeeded = executeIterativeStep((IterativeStep) step, transformer, progress, workflowDir);
+            } else {
+                succeeded = executeSimpleStep(step, transformer, progress, workflowDir);
+            }
+            long stepDuration = System.currentTimeMillis() - startTime;
+            step.setElapsedTime(stepDuration / 1000);
+
             try {
-                log.info("Transforming step " + i);
-                if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())) {
-                    step.setElapsedTime(0);
-                    log.info("Skip executed step " + i);
-                } else {
-                    long startTime = System.currentTimeMillis();
-                    boolean succeeded = transformer.transform(progress, workflowDir, step);
-                    long stepDuration = System.currentTimeMillis() - startTime;
-                    step.setElapsedTime(stepDuration / 1000);
-                    if (!succeeded) {
-                        // failed message
-                        slackMessage = String.format("Failed at step %d after %s :sob:", i,
-                                DurationFormatUtils.formatDurationHMS(stepDuration));
-                        sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
-                                SLACK_COLOR_DANGER, transConf);
-                        updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
-                        return false;
-                    }
-                    // success message
-                    slackMessage = String.format("Step %d finished after %s :smile:", i,
+                if (!succeeded) {
+                    // failed message
+                    slackMessage = String.format("Failed at step %d after %s :sob:", i,
                             DurationFormatUtils.formatDurationHMS(stepDuration));
-                    sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
-                            transConf);
+                    sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
+                            SLACK_COLOR_DANGER, transConf);
+                    updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
+                    return false;
+                }
+                // success message
+                slackMessage = String.format("Step %d finished after %s :smile:", i,
+                        DurationFormatUtils.formatDurationHMS(stepDuration));
+                sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
+                        transConf);
 
-                    if (i == steps.length - 1) {
-                        slackMessage = String.format("All %d steps in the pipeline are finished after %s :clap:", steps.length,
-                                DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - pipelineStarTime));
-                        sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage, SLACK_COLOR_GOOD,
-                                transConf);
-                    }
-
-                    saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
-                    cleanupWorkflowDir(progress, workflowDir);
+                if (i == steps.length - 1) {
+                    slackMessage = String.format("All %d steps in the pipeline are finished after %s :clap:",
+                            steps.length,
+                            DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - pipelineStarTime));
+                    sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
+                            SLACK_COLOR_GOOD, transConf);
                 }
 
                 if (reportEnabled) {
@@ -370,13 +382,120 @@ public class PipelineTransformationService extends AbstractTransformationService
 
                     reportStepToDB(name, version, step, stepConfig);
                 }
-
             } catch (Exception e) {
-                updateStatusToFailed(progress, "Failed to transform data at step " + i, e);
-                return false;
+                log.error("Failed to generate report of step " + step.getName(), e);
             }
         }
         return true;
+    }
+
+    private boolean executeSimpleStep(TransformStep step, Transformer transformer, TransformationProgress progress,
+            String workflowDir) {
+        try {
+            log.info("Transforming step " + step.getName());
+            if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())) {
+                step.setElapsedTime(0);
+                log.info("Skip executed step " + step.getName());
+            } else {
+                boolean succeeded = transformer.transform(progress, workflowDir, step);
+                saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
+                cleanupWorkflowDir(progress, workflowDir);
+                return succeeded;
+            }
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to transform data at step " + step.getName(), e);
+        }
+        return false;
+    }
+
+    private boolean executeIterativeStep(IterativeStep step, Transformer transformer, TransformationProgress progress,
+            String workflowDir) {
+        try {
+            log.info("Iterative transforming step " + step.getName());
+            if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())) {
+                step.setElapsedTime(0);
+                log.info("Skip executed step " + step.getName());
+            } else {
+                Map<String, Object> iterationContext = initializeIterationContext(step);
+                boolean converged;
+                boolean succeeded;
+                do {
+                    int iteration = (Integer) iterationContext.get(CTX_ITERATION);
+                    log.info("Starting " + iteration + "-th iteration ...");
+                    succeeded = transformer.transform(progress, workflowDir, step);
+                    saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
+                    cleanupWorkflowDir(progress, workflowDir);
+                    converged = updateIterationContext(step, iterationContext);
+                    if (!converged) {
+                        updateStepForNextIteration(step);
+                    }
+                } while (!converged && ((Integer) iterationContext.get(CTX_ITERATION)) < MAX_ITERATION);
+                if (converged && succeeded) {
+                    log.error("Iterative step " + step.getName() + " converged, final count = " + String.valueOf(step.getCount()));
+                    return true;
+                } else {
+                    if (!converged) {
+                        log.error("Iterative step " + step.getName() + " failed to converge.");
+                    } else {
+                        log.error("Iterative step " + step.getName() + " converged, but not successful.");
+                    }
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to transform data at step " + step.getName(), e);
+        }
+        return false;
+    }
+
+    private Map<String, Object> initializeIterationContext(IterativeStep step) {
+        Map<String, Object> iterationContext = new HashMap<>();
+        if (step.getStrategy() instanceof IterativeStepConfig.ConvergeOnCount) {
+            iterationContext.put(CTX_LAST_COUNT, -1L);
+            iterationContext.put(CTX_ITERATION, 0);
+        }
+        log.info("Initialized iteration context: \n" + JsonUtils.pprint(iterationContext));
+        return iterationContext;
+    }
+
+    private boolean updateIterationContext(IterativeStep step, Map<String, Object> iterationContext) {
+        boolean converged = false;
+        if (step.getStrategy() instanceof IterativeStepConfig.ConvergeOnCount) {
+            IterativeStepConfig.ConvergeOnCount strategy = (IterativeStepConfig.ConvergeOnCount) step.getStrategy();
+            long lastCount = (Long) iterationContext.get(CTX_LAST_COUNT);
+            long newCount = step.getCount();
+            int countDiff = strategy.getCountDiff();
+            iterationContext.put(CTX_LAST_COUNT, step.getCount());
+            if (Math.abs(newCount - lastCount) <= countDiff) {
+                // converged
+                converged = true;
+            }
+            int iteration = (Integer) iterationContext.get(CTX_ITERATION);
+            iterationContext.put(CTX_ITERATION, iteration + 1);
+        }
+        log.info("Updated iteration context to: \n" + JsonUtils.pprint(iterationContext));
+        return converged;
+    }
+
+    private void updateStepForNextIteration(IterativeStep step) {
+        // refresh input
+        Source newTargetSource = step.getTarget();
+        Source[] updatedBaseSources = new Source[step.getBaseSources().length];
+        List<String> updatedBaseSourceNames = new ArrayList<>();
+        for (int i = 0; i < updatedBaseSources.length; i++) {
+            Source original = step.getBaseSources()[i];
+            if (original.getSourceName().equals(step.getStrategy().getIteratingSource())) {
+                updatedBaseSources[i] = newTargetSource;
+                String targetSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(newTargetSource);
+                step.getBaseVersions().set(i, targetSourceVersion);
+            } else {
+                updatedBaseSources[i] = step.getBaseSources()[i];
+            }
+            updatedBaseSourceNames.add(updatedBaseSources[i].getSourceName());
+        }
+        step.setBaseSources(updatedBaseSources);
+        log.info("Updated the base sources of iterative step " + step.getName() + " to "
+                + updatedBaseSourceNames);
     }
 
     private TransformationStepReport generateStepReport(TransformStep step, TransformationStepConfig stepConfig) {
@@ -401,7 +520,8 @@ public class PipelineTransformationService extends AbstractTransformationService
         return stepReport;
     }
 
-    private void reportStepToDB(String pipelineName, String pipelineVersion, TransformStep step, TransformationStepConfig stepConfig) {
+    private void reportStepToDB(String pipelineName, String pipelineVersion, TransformStep step,
+            TransformationStepConfig stepConfig) {
         PipelineTransformationReportByStep stepReport = new PipelineTransformationReportByStep();
 
         stepReport.setPipeline(pipelineName);
