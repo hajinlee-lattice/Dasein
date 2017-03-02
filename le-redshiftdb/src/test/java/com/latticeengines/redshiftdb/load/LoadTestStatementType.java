@@ -5,7 +5,9 @@ public enum LoadTestStatementType {
     Query_Numeric("QueryLoadTest", "NumericColumnGreaterThanQuery.sql"), //
     Query_String("QueryLoadTest", "StringColumnLikeQuery.sql"), //
     DDL_Add("AlterDDLLoadTest", "AddColumnDDL.sql"), //
-    DDL_Drop("AlterDDLLoadTest", "DropColumnDDL.sql");
+    DDL_Drop("AlterDDLLoadTest", "DropColumnDDL.sql"), //
+    Query_Numeric_Join("QueryLoadTest", "NumericColumnJoinQuery.sql"), //
+    Query_Numeric_BitMask("QueryLoadTest", "NumericColumnBitMaskQuery.sql");
 
     private final String testerType;
     private final String scriptFileName;

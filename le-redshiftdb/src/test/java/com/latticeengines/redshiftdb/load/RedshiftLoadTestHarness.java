@@ -1,7 +1,9 @@
 package com.latticeengines.redshiftdb.load;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -17,40 +19,32 @@ public class RedshiftLoadTestHarness {
     private int loadLevel = 1;
     private boolean timeseries;
     private boolean encrypted;
-    private boolean includeDDL;
     private JdbcTemplate redshiftJdbcTemplate;
     private Random rng;
-    private int noOfTestsPerThread;
+    private List<LoadTestStatementType> statements;
     private int maxSleepTime;
     private static final Log log = LogFactory.getLog(RedshiftLoadTestNG.class);
+    List<AbstractLoadTest> testers = new ArrayList<>();
 
-    public RedshiftLoadTestHarness(int load, int noOfTests, int sleepTime, JdbcTemplate jdbcTemplate) {
+    public RedshiftLoadTestHarness(int load, List<LoadTestStatementType> stmts, int sleepTime, JdbcTemplate jdbcTemplate) {
         loadLevel = load;
         redshiftJdbcTemplate = jdbcTemplate;
         rng = new Random();
-        noOfTestsPerThread = noOfTests;
+        statements = stmts;
         maxSleepTime = sleepTime;
+
+        // setup testers as per the config
+        for (int i = 0; i < getLoadLevel(); i++) {
+            AbstractLoadTest tester = null;
+            tester = new Tester(i + 1, statements, maxSleepTime, redshiftJdbcTemplate);
+            testers.add(tester);
+        }
     }
 
     public String run() {
         String resultString = "";
         if (loadLevel < 1) {
             return "loadLevel needs to be greater than 1. Terminating Test";
-        }
-
-        // setup testers as per the config
-        List<AbstractLoadTest> testers = new ArrayList<>();
-        for (int i = 0; i < getLoadLevel(); i++) {
-            AbstractLoadTest tester = null;
-            int randomTestNum = rng.nextInt(LoadTestType.values().length);
-            LoadTestType testType = LoadTestType.values()[randomTestNum];
-
-            if (testType == LoadTestType.Query) {
-                tester = new QueryLoadTest(i + 1, noOfTestsPerThread, maxSleepTime, redshiftJdbcTemplate);
-            } else if (testType == LoadTestType.DDL) {
-                tester = new AlterDDLLoadTest(i + 1, noOfTestsPerThread, maxSleepTime, redshiftJdbcTemplate);
-            }
-            testers.add(tester);
         }
 
         // Execute in parallel
@@ -67,12 +61,7 @@ public class RedshiftLoadTestHarness {
             log.error(e);
         }
 
-        resultString = "\nTest,StatementType,Duration,StartTime\n";
-        for (AbstractLoadTest tester : testers) {
-            resultString += tester.toString() + "\n";
-        }
-
-        return resultString;
+        return getMetrics().toString();
     }
 
     public int getLoadLevel() {
@@ -99,11 +88,17 @@ public class RedshiftLoadTestHarness {
         this.encrypted = encrypted;
     }
 
-    public boolean isIncludeDDL() {
-        return includeDDL;
-    }
+    public Map<LoadTestStatementType, Double> getMetrics() {
+        Map<LoadTestStatementType, List<Long>> all = new HashMap<>();
+        for (AbstractLoadTest tester : testers) {
+            all.putAll(tester.getMetrics());
+        }
 
-    public void setIncludeDDL(boolean includeDDL) {
-        this.includeDDL = includeDDL;
+        Map<LoadTestStatementType, Double> results = new HashMap<>();
+        for (LoadTestStatementType statementType : all.keySet()) {
+            double average = all.get(statementType).stream().mapToLong(x -> x).average().getAsDouble();
+            results.put(statementType, average);
+        }
+        return results;
     }
 }

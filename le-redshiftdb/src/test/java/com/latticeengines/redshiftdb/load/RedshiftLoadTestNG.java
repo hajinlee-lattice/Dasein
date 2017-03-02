@@ -2,7 +2,9 @@ package com.latticeengines.redshiftdb.load;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -42,8 +44,8 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
 
             if (badColumns.size() > 0) {
 
-                String dropColumnSql = FileUtils.readFileToString(new File(ClassLoader
-                        .getSystemResource("load/" + LoadTestStatementType.DDL_Drop.getScriptFileName()).getFile()));
+                String dropColumnSql = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
+                        "load/" + LoadTestStatementType.DDL_Drop.getScriptFileName()).getFile()));
 
                 for (String column : badColumns) {
                     redshiftJdbcTemplate.execute(dropColumnSql.replaceAll("load_test_column", column));
@@ -55,97 +57,87 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "load")
-    public void testDDLWithSelects1() {
+    public void testPerformance1() {
         int maxSleepTime = 1000;
         int stmtsPerTest = 15;
-        int noOfTests = 5;
+        int numSimultaneousUsers = 5;
 
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(noOfTests, stmtsPerTest, maxSleepTime,
-                redshiftJdbcTemplate);
+        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers, generateStatements(15),
+                maxSleepTime, redshiftJdbcTemplate);
 
-        String testSummary = "No of threads: " + noOfTests + "\n" + //
+        String testSummary = "No of threads: " + numSimultaneousUsers + "\n" + //
                 "Statements per Thread: " + stmtsPerTest + "\n" + //
                 "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
 
-        log.info("### Starting testDDLWithSelects1 ###");
+        log.info("### Starting testPerformance1 ###");
         log.info(test.run());
         log.info(testSummary);
-        log.info("### Finished testDDLWithSelects1 ###");
+        log.info("### Finished testPerformance1 ###");
     }
 
     @Test(groups = "load")
-    public void testDDLWithSelects2() {
+    public void testPerformance2() {
         int maxSleepTime = 1000;
         int stmtsPerTest = 15;
-        int noOfTests = 10;
+        int numSimultaneousUsers = 10;
 
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(noOfTests, stmtsPerTest, maxSleepTime,
-                redshiftJdbcTemplate);
+        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers,
+                generateStatements(stmtsPerTest), maxSleepTime, redshiftJdbcTemplate);
 
-        String testSummary = "No of threads: " + noOfTests + "\n" + //
+        String testSummary = "No of threads: " + numSimultaneousUsers + "\n" + //
                 "Statements per Thread: " + stmtsPerTest + "\n" + //
                 "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
 
-        log.info("### Starting testDDLWithSelects2 ###");
+        log.info("### Starting testPerformance2 ###");
         log.info(test.run());
         log.info(testSummary);
-        log.info("### Finished testDDLWithSelects2 ###");
+        log.info("### Finished testPerformance2 ###");
     }
 
     @Test(groups = "load")
-    public void testDDLWithSelects3() {
+    public void testPerformance3() {
         int maxSleepTime = 1000;
         int stmtsPerTest = 15;
-        int noOfTests = 15;
+        int numSimultaneousUsers = 20;
 
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(noOfTests, stmtsPerTest, maxSleepTime,
-                redshiftJdbcTemplate);
+        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers,
+                generateStatements(stmtsPerTest), maxSleepTime, redshiftJdbcTemplate);
 
-        String testSummary = "No of threads: " + noOfTests + "\n" + //
+        String testSummary = "No of threads: " + numSimultaneousUsers + "\n" + //
                 "Statements per Thread: " + stmtsPerTest + "\n" + //
                 "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
 
-        log.info("### Starting testDDLWithSelects3 ###");
+        log.info("### Starting testPerformance3 ###");
         log.info(test.run());
         log.info(testSummary);
-        log.info("### Finished testDDLWithSelects3 ###");
+        log.info("### Finished testPerformance3 ###");
     }
 
     @Test(groups = "load")
-    public void testDDLWithSelects4() {
+    public void testPerformance4() {
         int maxSleepTime = 1000;
         int stmtsPerTest = 15;
-        int noOfTests = 25;
+        int numSimultaneousUsers = 25;
 
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(noOfTests, stmtsPerTest, maxSleepTime,
-                redshiftJdbcTemplate);
+        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers,
+                generateStatements(stmtsPerTest), maxSleepTime, redshiftJdbcTemplate);
 
-        String testSummary = "No of threads: " + noOfTests + "\n" + //
+        String testSummary = "No of threads: " + numSimultaneousUsers + "\n" + //
                 "Statements per Thread: " + stmtsPerTest + "\n" + //
                 "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
 
-        log.info("### Starting testDDLWithSelects4 ###");
+        log.info("### Starting testPerformance4 ###");
         log.info(test.run());
         log.info(testSummary);
-        log.info("### Finished testDDLWithSelects4 ###");
+        log.info("### Finished testPerformance4 ###");
     }
 
-    @Test(groups = "load")
-    public void testDDLWithSelects5() {
-        int maxSleepTime = 1000;
-        int stmtsPerTest = 15;
-        int noOfTests = 50;
-
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(noOfTests, stmtsPerTest, maxSleepTime,
-                redshiftJdbcTemplate);
-
-        String testSummary = "No of threads: " + noOfTests + "\n" + //
-                "Statements per Thread: " + stmtsPerTest + "\n" + //
-                "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
-
-        log.info("### Starting testDDLWithSelects5 ###");
-        log.info(test.run());
-        log.info(testSummary);
-        log.info("### Finished testDDLWithSelects5 ###");
+    private List<LoadTestStatementType> generateStatements(int stmtsPerTest) {
+        List<LoadTestStatementType> statements = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < stmtsPerTest; ++i) {
+            statements.add(LoadTestStatementType.Query_Numeric_Join);
+        }
+        return statements;
     }
 }
