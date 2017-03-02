@@ -47,6 +47,29 @@ public class BitCodecUtils {
         return Base64Utils.encodeBase64(bits.toByteArray());
     }
 
+    public static long setBits(long result, int lowestBitPos, int numBits, int value) {
+        for (int i = 0; i < numBits; i++) {
+            int offset = lowestBitPos + i;
+            if ((value >> i & 1) == 1) {
+                result = result | (1 << offset);
+            } else {
+                result = result & ~(1 << offset);
+            }
+        }
+        return result;
+    }
+
+    public static int getBits(long result, int lowestBitPos, int numBits) {
+        int value = 0;
+        for (int i = 0; i < numBits; i++) {
+            int offset = lowestBitPos + i;
+            if ((result >> offset & 1) == 1) {
+                value = value | (1 << i);
+            }
+        }
+        return value;
+    }
+
 
     /**
      * This is command line tool to decode an encoded base64 string
