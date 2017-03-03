@@ -52,8 +52,6 @@ public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctional
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 RedshiftUtils.generateJsonPathsFile(schema, outputStream);
                 try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
-                    // s3Service.uploadInputStream(s3Bucket, jsonPathPrefix,
-                    // inputStream, true);
                     Configuration config = new Configuration();
                     config.set(FileSystem.FS_DEFAULT_NAME_KEY, "s3n:///");
                     config.set("fs.s3n.awsAccessKeyId", awsAccessKey);
