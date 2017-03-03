@@ -36,7 +36,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
     @Autowired
     private SalesforceURLEntityMgr salesforceURLEntityMgr;
 
-    @BeforeClass(groups = { "functional", "deployment" })
+    @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         // If there is no BisLP/BisAP in SALESFORCE_URL table, insert them
         SalesforceURL sfdcURLLP = salesforceURLEntityMgr.findByURLName(SalesforceURLConstants.BISLP_NAME);
@@ -50,7 +50,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
         }
     }
 
-    @AfterClass(groups = { "functional", "deployment" })
+    @AfterClass(groups = { "functional" })
     public void tearDown() {
         // Delete records that inserted in setup()
         if (sfdcURLLPCreated != null) {
@@ -62,7 +62,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
         }
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional" })
     public void bisLP() throws Exception {
         String url = getRestAPIHostPort() + "/pls/salesforce/bis-lp";
         String redirectionURL = getRedirectionURL(url);
@@ -73,7 +73,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
         Assert.assertEquals(redirectionURL, sfdcURLLP);
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional" })
     public void bisLPSandbox() throws Exception {
         String url = getRestAPIHostPort() + "/pls/salesforce/bis-lp-sandbox";
         String redirectionURL = getRedirectionURL(url);
@@ -85,7 +85,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
         Assert.assertEquals(redirectionURL, sfdcURLLPSandbox);
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional" })
     public void bisAP() throws Exception {
         String url = getRestAPIHostPort() + "/pls/salesforce/bis-ap";
         String redirectionURL = getRedirectionURL(url);
@@ -96,7 +96,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
         Assert.assertEquals(redirectionURL, sfdcURLAP);
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional" })
     public void bisAPSandbox() throws Exception {
         String url = getRestAPIHostPort() + "/pls/salesforce/bis-ap-sandbox";
         String redirectionURL = getRedirectionURL(url);
@@ -110,8 +110,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
 
     private String getRedirectionURL(String url) throws Exception {
         String redirectionURL;
-        HttpClient noRedirectClient =
-                HttpClientBuilder.create().setRedirectStrategy(new NoRedirectStrategy()).build();
+        HttpClient noRedirectClient = HttpClientBuilder.create().setRedirectStrategy(new NoRedirectStrategy()).build();
         RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(noRedirectClient));
         HttpHeaders requestHeaders = new HttpHeaders();
         HttpEntity<String> requestEntity = new HttpEntity<>("", requestHeaders);
@@ -134,7 +133,8 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
 
     private class NoRedirectStrategy extends DefaultRedirectStrategy {
         @Override
-        public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws ProtocolException {
+        public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext)
+                throws ProtocolException {
             return false;
         }
 
