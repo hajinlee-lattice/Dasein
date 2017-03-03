@@ -4,7 +4,7 @@ angular.module('common.datacloud.explorer', [
 ])
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
-    ApiHost, BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount,
+    ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
 ){
     var vm = this,
@@ -86,7 +86,7 @@ angular.module('common.datacloud.explorer', [
         subcategory: $stateParams.subcategory,
         categoryCounts: {},
         highlightMetadata: {
-            categories: {}, 
+            categories: {},
             subcategories: {}
         },
         pagesize: 24
@@ -709,10 +709,35 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.filterLookupFiltered = function(item, type) {
-        if (type === 'PERCENTAGE' && item != undefined) {
-            var percentage = Math.round(item * 100);
+        if (item === undefined || item === null) {
+            return item;
+        }
 
-            return percentage !== NaN ? percentage + '%' : '';
+        switch (type) {
+            case 'PERCENTAGE':
+                var percentage = Math.round(item * 100);
+                return percentage !== NaN ? percentage + '%' : '';
+            case 'NUMERIC':
+                return $filter('number')(parseInt(item, 10));
+            case 'CURRENCY':
+                return ResourceUtility.getString('CURRENCY_SYMBOL') + $filter('number')(parseInt(item, 10));
+            case 'DATE':
+                var date = new Date(parseInt(item, 10));
+                var year = date.getFullYear().toString();
+                var month = (date.getMonth() + 1).toString();
+                month = month.length === 2 ? month : 0 + month;
+                var day = date.getDate().toString();
+                day = day.length === 2 ? day : '0' + day;
+                return '' + year + month + day;
+            case 'URI':
+            case 'ALPHA':
+            case 'BOOLEAN':
+            case 'ENUM':
+            case 'EMAIL':
+            case 'PHONE':
+            case 'YEAR':
+            default:
+                return item;
         }
 
         return item;
@@ -830,8 +855,8 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.generateTileTableLabel = function(items) {
-        return items 
-            ? 'Top ' + (items.length > 1 ? items.length + ' attributes' : 'attribute') 
+        return items
+            ? 'Top ' + (items.length > 1 ? items.length + ' attributes' : 'attribute')
             : '';
     }
 

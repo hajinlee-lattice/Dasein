@@ -329,7 +329,8 @@
                         </div>
 
                         <p class="description" title="{{enrichment.Description}}">
-                            <strong ng-if="vm.lookupFiltered[enrichment.FieldName]" title="{{vm.lookupFiltered[enrichment.FieldName]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.FieldName], enrichment.FundamentalType)}}</strong>
+                            <a ng-if="enrichment.FundamentalType === 'URI'" ng-href="{{vm.lookupFiltered[enrichment.FieldName]}}" target="_blank" class="{{vm.categoryClass(enrichment.Category)}} color"><strong>{{vm.lookupFiltered[enrichment.FieldName]}}</strong></a>
+                            <strong ng-if="vm.lookupFiltered[enrichment.FieldName] && enrichment.FundamentalType !== 'URI'" title="{{vm.lookupFiltered[enrichment.FieldName]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.FieldName], enrichment.FundamentalType)}}</strong>
                             <span ng-if="!vm.lookupFiltered[enrichment.FieldName]">{{enrichment.Description}}</span>
                         </p>
 
