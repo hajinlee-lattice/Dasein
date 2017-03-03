@@ -15,8 +15,8 @@ public class PmmlModelHandlerFunctionalTestNG extends ScoringApiFunctionalTestNG
 
     @Test(groups = "functional")
     public void testProcess() throws FileNotFoundException {
-        PMMLModelEvaluator d = new PMMLModelEvaluator(ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/scoringapi/pmmlmodels/numeric_mapping_test.xml.fixed.xml"));
+        PMMLModelEvaluator d = new PMMLModelEvaluator(Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("com/latticeengines/scoringapi/pmmlmodels/numeric_mapping_test.xml.fixed.xml"));
         Map<String, Object> arguments = new HashMap<>();
         arguments.put("x", new Double(5.0));
         arguments.put("y", new Double(5.0));
@@ -54,7 +54,8 @@ public class PmmlModelHandlerFunctionalTestNG extends ScoringApiFunctionalTestNG
     @Test(groups = "functional")
     public void testProcessNNIris() throws FileNotFoundException {
         PMMLModelEvaluator d = new PMMLModelEvaluator(
-                ClassLoader.getSystemResourceAsStream("com/latticeengines/scoringapi/pmmlmodels/nn_iris.xml"));
+                Thread.currentThread().getContextClassLoader() //
+                        .getResourceAsStream("com/latticeengines/scoringapi/pmmlmodels/nn_iris.xml"));
         Map<String, Object> arguments = new HashMap<>();
         arguments.put("sepal_length", new Double(0));
         arguments.put("sepal_width", new Double(10));

@@ -1,17 +1,16 @@
 package com.latticeengines.scoringapi.controller;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema.Type;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 
-import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -93,14 +92,18 @@ public class TestRegisterModels {
                 modelConfiguration.getParsedApplicationId());
         String enhancementsDir = artifactBaseDir + ModelJsonTypeHandler.HDFS_ENHANCEMENTS_DIR;
 
-        URL eventTableDataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+        InputStream eventTableDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(modelConfiguration.getLocalModelPath()
                 + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
-        URL modelJsonUrl = ClassLoader.getSystemResource(modelConfiguration.getModelSummaryJsonLocalpath());
-        URL rfpmmlUrl = ClassLoader
-                .getSystemResource(modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.PMML_FILENAME);
-        URL dataScienceDataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
+        InputStream modelJsonUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(modelConfiguration.getModelSummaryJsonLocalpath());
+        InputStream rfpmmlUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.PMML_FILENAME);
+        InputStream dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(modelConfiguration.getLocalModelPath()
                 + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
-        URL scoreDerivationUrl = ClassLoader.getSystemResource(
+        InputStream scoreDerivationUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(
                 modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
@@ -110,24 +113,30 @@ public class TestRegisterModels {
         HdfsUtils.mkdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, eventTableDataCompositionUrl,
                 artifactTableDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, modelJsonUrl,
                 artifactBaseDir + modelConfiguration.getTestModelFolderName() + "_model.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, rfpmmlUrl,
                 artifactBaseDir + ModelJsonTypeHandler.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, dataScienceDataCompositionUrl,
                 enhancementsDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, scoreDerivationUrl,
                 enhancementsDir + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
-        String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
+        eventTableDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(modelConfiguration.getLocalModelPath()
+                        + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        String eventTableDataCompositionContents = IOUtils.toString(eventTableDataCompositionUrl,
                 Charset.defaultCharset());
         TestModelArtifactDataComposition testModelArtifactDataComposition = new TestModelArtifactDataComposition();
         testModelArtifactDataComposition.setEventTableDataComposition(
                 JsonUtils.deserialize(eventTableDataCompositionContents, DataComposition.class));
 
-        String dataScienceDataCompositionContents = Files.toString(new File(dataScienceDataCompositionUrl.getFile()),
+        dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(modelConfiguration.getLocalModelPath()
+                        + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        String dataScienceDataCompositionContents = IOUtils.toString(dataScienceDataCompositionUrl,
                 Charset.defaultCharset());
         testModelArtifactDataComposition.setDataScienceDataComposition(
                 JsonUtils.deserialize(dataScienceDataCompositionContents, DataComposition.class));

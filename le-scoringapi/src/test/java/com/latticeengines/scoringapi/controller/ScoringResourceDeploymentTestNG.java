@@ -2,6 +2,7 @@ package com.latticeengines.scoringapi.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -10,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -109,8 +111,9 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     @Test(groups = "deployment", enabled = true)
     public void scoreOutOfRangeRecord() throws IOException {
         String url = apiHostPort + "/score/record/debug";
-        URL scoreRequestUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "outofrange_score_request.json");
-        String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
+        InputStream scoreRequestIs = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(LOCAL_MODEL_PATH + "outofrange_score_request.json");
+        String scoreRecordContents = IOUtils.toString(scoreRequestIs, Charset.defaultCharset());
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
 
         scoreRequest.setModelId(MODEL_ID);

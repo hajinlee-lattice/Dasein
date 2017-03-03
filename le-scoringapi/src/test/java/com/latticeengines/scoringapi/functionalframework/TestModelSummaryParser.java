@@ -55,7 +55,8 @@ public class TestModelSummaryParser {
 	public void setPredictors(ModelSummary summary, String modelSummaryJsonLocalResourcePath) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode json;
-		InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(modelSummaryJsonLocalResourcePath);
+		InputStream modelSummaryFileAsStream = Thread.currentThread().getContextClassLoader() //
+				.getResourceAsStream(modelSummaryJsonLocalResourcePath);
 		String fileContents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
 		modelSummaryFileAsStream.close();
 		json = mapper.readValue(fileContents, JsonNode.class);

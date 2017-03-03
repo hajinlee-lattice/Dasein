@@ -1,26 +1,20 @@
-package com.latticeengines.workflowapi.flows;
+package com.latticeengines.scoringapi.score.impl;
 
 import java.io.IOException;
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.controller.InternalScoringResourceDeploymentTestNG;
 
 @Component
 public class TestPMMLScoring extends InternalScoringResourceDeploymentTestNG {
-
-    private static final int MAX_COUNTER = 10;
-
-    @Autowired
-    protected InternalScoringApiInterface internalScoringApiProxy;
+    private static final int MAX_COUNTER_FOR_PMML_SCORE = 10;
 
     public void scoreRecords(String modelName, CustomerSpace customerSpace, Tenant pmmlTenant)
             throws IOException, InterruptedException {
@@ -33,7 +27,7 @@ public class TestPMMLScoring extends InternalScoringResourceDeploymentTestNG {
     public Model getModel(String modelName, CustomerSpace customerSpace, Tenant pmmlTenant)
             throws IOException, InterruptedException {
         Thread.sleep(10000);
-        for (int i = 0; i < MAX_COUNTER; i++) {
+        for (int i = 0; i < MAX_COUNTER_FOR_PMML_SCORE; i++) {
             for (ModelDetail modelDetail : internalScoringApiProxy.getPaginatedModels(new Date(0),
                     true, 0, 50, customerSpace.toString())) {
                 if (modelName.equals(modelDetail.getModel().getName())) {
@@ -45,4 +39,5 @@ public class TestPMMLScoring extends InternalScoringResourceDeploymentTestNG {
 
         return null;
     }
+
 }

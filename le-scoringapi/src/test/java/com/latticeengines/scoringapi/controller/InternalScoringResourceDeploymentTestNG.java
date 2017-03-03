@@ -1,19 +1,19 @@
 package com.latticeengines.scoringapi.controller;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 
+@Component
 public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
     private static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
@@ -155,13 +156,13 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
 
     @Test(groups = "deployment", enabled = true)
     public void scoreOutOfRangeRecord() throws IOException {
-        URL scoreRequestUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "outofrange_score_request.json");
-        String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
+        InputStream scoreRequestStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(LOCAL_MODEL_PATH + "outofrange_score_request.json");
+        String scoreRecordContents = IOUtils.toString(scoreRequestStream, Charset.defaultCharset());
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
 
         scoreRequest.setModelId(MODEL_ID);
 
-        DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
+        DebugScoreResponse scoreResponse = internalScoringApiProxy
                 .scoreProbabilityRecord(scoreRequest, customerSpace.toString(), true, false);
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);

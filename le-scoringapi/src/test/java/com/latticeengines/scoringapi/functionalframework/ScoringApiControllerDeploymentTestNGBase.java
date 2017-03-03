@@ -1,13 +1,13 @@
 package com.latticeengines.scoringapi.functionalframework;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -19,7 +19,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
-import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -254,14 +253,16 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 MODEL_VERSION, PARSED_APPLICATION_ID);
         String enhancementsDir = artifactBaseDir + ModelJsonTypeHandler.HDFS_ENHANCEMENTS_DIR;
 
-        URL eventTableDataCompositionUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
-        URL modelJsonUrl = ClassLoader.getSystemResource(MODELSUMMARYJSON_LOCALPATH);
-        URL rfpmmlUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + ModelJsonTypeHandler.PMML_FILENAME);
-        URL dataScienceDataCompositionUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
-        URL scoreDerivationUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
+        InputStream eventTableDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(LOCAL_MODEL_PATH + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        InputStream modelJsonUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(MODELSUMMARYJSON_LOCALPATH);
+        InputStream rfpmmlUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(LOCAL_MODEL_PATH + ModelJsonTypeHandler.PMML_FILENAME);
+        InputStream dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(LOCAL_MODEL_PATH + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        InputStream scoreDerivationUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(LOCAL_MODEL_PATH + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
@@ -270,22 +271,26 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         HdfsUtils.mkdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, eventTableDataCompositionUrl,
                 artifactTableDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, modelJsonUrl,
                 artifactBaseDir + TEST_MODEL_FOLDERNAME + "_model.json");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, rfpmmlUrl,
                 artifactBaseDir + ModelJsonTypeHandler.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, dataScienceDataCompositionUrl,
                 enhancementsDir + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, scoreDerivationUrl,
                 enhancementsDir + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
-        String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
+        eventTableDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(LOCAL_MODEL_PATH + "eventtable-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        String eventTableDataCompositionContents = IOUtils.toString(eventTableDataCompositionUrl,
                 Charset.defaultCharset());
         eventTableDataComposition = JsonUtils.deserialize(eventTableDataCompositionContents, DataComposition.class);
 
-        String dataScienceDataCompositionContents = Files.toString(new File(dataScienceDataCompositionUrl.getFile()),
+        dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(LOCAL_MODEL_PATH + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+        String dataScienceDataCompositionContents = IOUtils.toString(dataScienceDataCompositionUrl,
                 Charset.defaultCharset());
         dataScienceDataComposition = JsonUtils.deserialize(dataScienceDataCompositionContents, DataComposition.class);
     }
@@ -299,9 +304,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         if (isPmmlModel) {
             scoreRecordContents = pmmlImputJson;
         } else {
-            URL scoreRequestUrl = ClassLoader
-                    .getSystemResource(isPmmlModel ? null : LOCAL_MODEL_PATH + "score_request.json");
-            scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
+            InputStream scoreRequestUrl = Thread.currentThread().getContextClassLoader() //
+                    .getResourceAsStream(isPmmlModel ? null : LOCAL_MODEL_PATH + "score_request.json");
+            scoreRecordContents = IOUtils.toString(scoreRequestUrl, Charset.defaultCharset());
         }
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
         return scoreRequest;

@@ -1,15 +1,14 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -18,16 +17,15 @@ public class ModelRetrieverUnitTestNG {
 
     @Test(groups = "unit")
     public void testRemoveDroppedDataScienceFieldEventTableTransforms() throws IOException {
-        URL eventTableDataCompositionUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoringapi/model/eventtable-datacomposition.json");
-        String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
-                Charset.defaultCharset());
+        InputStream eventTableDataCompositionIs = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("com/latticeengines/scoringapi/model/eventtable-datacomposition.json");
+        String eventTableDataCompositionContents = IOUtils.toString(eventTableDataCompositionIs, Charset.defaultCharset());
         DataComposition eventTableDataComposition = JsonUtils.deserialize(eventTableDataCompositionContents,
                 DataComposition.class);
 
-        URL dataScienceDataCompositionUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoringapi/model/datascience-datacomposition.json");
-        String dataScienceDataCompositionContents = Files.toString(new File(dataScienceDataCompositionUrl.getFile()),
+        InputStream dataScienceDataCompositionIs = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("com/latticeengines/scoringapi/model/datascience-datacomposition.json");
+        String dataScienceDataCompositionContents = IOUtils.toString(dataScienceDataCompositionIs,
                 Charset.defaultCharset());
         DataComposition dataScienceDataComposition = JsonUtils.deserialize(dataScienceDataCompositionContents,
                 DataComposition.class);
