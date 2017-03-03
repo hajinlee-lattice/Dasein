@@ -1,5 +1,5 @@
 export NODE_APPS={{NODE_APPS}}
-export NODE_ENV=qa
+export NODE_ENV=production
 export ULYSSES_URL=${AWS_PUBLIC_LB}
 export API_URL=${AWS_PUBLIC_LB}
 export API_CON_URL=${AWS_PUBLIC_LB}
