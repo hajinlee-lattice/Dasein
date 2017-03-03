@@ -1,7 +1,5 @@
 package com.latticeengines.scoringapi.transform;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.jython.JythonEngine;
+import com.latticeengines.common.exposed.util.PrecisionUtils;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.TransformId;
@@ -35,6 +34,11 @@ public class RecordTransformer {
         JythonEngine engine = jythonEngineRetriever.getEngine(modelPath);
         Map<String, Object> result = new HashMap<>(record.size() + definitions.size());
         result.putAll(record);
+        for (Map.Entry<String, Object> entry : result.entrySet()) {
+            if (entry.getValue() != null && entry.getValue() instanceof Double) {
+                entry.setValue(PrecisionUtils.setPlatformStandardPrecision((Double) entry.getValue()));
+            }
+        }
 
         for (TransformDefinition entry : definitions) {
             TransformId id = new TransformId(modelPath, entry.name, null);
@@ -56,8 +60,8 @@ public class RecordTransformer {
                         } else if (value.toString().toLowerCase().equals("false")) {
                             value = entry.type.type().cast(Double.valueOf("0.0"));
                         } else if (!value.toString().equals("null") && !value.toString().equals("None")) {
-                            value = entry.type.type().cast(BigDecimal.valueOf(Double.valueOf(value.toString()))
-                                    .setScale(8, RoundingMode.HALF_UP).doubleValue());
+                            value = new Double(
+                                    PrecisionUtils.setPlatformStandardPrecision(Double.valueOf(value.toString())));
                         } else {
                             value = null;
                         }
