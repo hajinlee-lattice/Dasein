@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -101,10 +102,19 @@ public class HdfsUtils {
         }
     }
 
-    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
-            throws IOException {
+    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream,
+            String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
+                IOUtils.copy(inputStream, outputStream);
+            }
+        }
+    }
+
+    public static final void copyInputStreamToHdfs(URI scheme, Configuration configuration, InputStream inputStream)
+            throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(scheme, configuration)) {
+            try (OutputStream outputStream = fs.create(new Path(scheme.getPath()))) {
                 IOUtils.copy(inputStream, outputStream);
             }
         }
@@ -560,8 +570,8 @@ public class HdfsUtils {
             }
             return false;
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Could not check if key %s exists using provider %s", keyName,
-                    provider), e);
+            throw new RuntimeException(
+                    String.format("Could not check if key %s exists using provider %s", keyName, provider), e);
         }
     }
 

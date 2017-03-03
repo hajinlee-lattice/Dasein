@@ -3,16 +3,18 @@ package com.latticeengines.cdl.dataflow.redshiftdb;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 
 import org.apache.avro.Schema;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.RedshiftDataFlowParameters;
@@ -23,14 +25,17 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowF
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-context.xml" })
 public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
-    @Autowired
-    private S3Service s3Service;
-
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
     @Value("${common.le.stack}")
     private String leStack;
+
+    @Value("${aws.default.access.key.encrypted}")
+    private String awsAccessKey;
+
+    @Value("${aws.default.secret.key.encrypted}")
+    private String awsSecretKey;
 
     @Test(groups = "functional")
     public void test() {
@@ -47,9 +52,16 @@ public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctional
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 RedshiftUtils.generateJsonPathsFile(schema, outputStream);
                 try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
-                    s3Service.uploadInputStream(s3Bucket, jsonPathPrefix, inputStream, true);
+                    // s3Service.uploadInputStream(s3Bucket, jsonPathPrefix,
+                    // inputStream, true);
+                    Configuration config = new Configuration();
+                    config.set(FileSystem.FS_DEFAULT_NAME_KEY, "s3n:///");
+                    config.set("fs.s3n.awsAccessKeyId", awsAccessKey);
+                    config.set("fs.s3n.awsSecretAccessKey", awsSecretKey);
+                    HdfsUtils.copyInputStreamToHdfs(new URI("s3n://" + s3Bucket + "/" + jsonPathPrefix), config,
+                            inputStream);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } catch (IOException e) {
