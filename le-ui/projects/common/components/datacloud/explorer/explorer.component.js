@@ -1222,7 +1222,7 @@ angular.module('common.datacloud.explorer', [
             var category = category || '';
             if(vm.subcategory && vm.category == category) {
                 vm.setSubcategory('');
-                if(subcategoriesExclude.indexOf(category)) { // don't show subcategories
+                if(subcategoriesExclude.indexOf(category) >= 0) { // don't show subcategories
                     vm.setSubcategory(vm.subcategories[category][0]);
                 }
             } else if(vm.category == category) {
