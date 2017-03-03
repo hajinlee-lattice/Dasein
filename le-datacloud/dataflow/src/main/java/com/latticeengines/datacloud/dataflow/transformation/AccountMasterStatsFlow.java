@@ -10,6 +10,8 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +37,8 @@ import cascading.tuple.Fields;
 @Component("accountMasterStatsFlow")
 public class AccountMasterStatsFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, AccountMasterStatsParameters> {
+
+    private static Log log = LogFactory.getLog(AccountMasterStatsFlow.class);
 
     private static final String TEMP_RENAMED_PREFIX = "_RENAMED_";
     private static final String MIN_MAX_JOIN_FIELD = "_JoinFieldMinMax_";
@@ -120,6 +124,7 @@ public class AccountMasterStatsFlow
         List<String> renamedMinMaxAndDimensionIds = new ArrayList<>();
 
         for (FieldMetadata fieldMeta : joinedSchema) {
+            log.info("Found field name " + fieldMeta.getFieldName());
             inputSchemaForFieldSubstituteFunction.add(fieldMeta);
             boolean isDimension = false;
             for (String dimensionFieldName : dimensionIdFieldNames) {
@@ -131,10 +136,10 @@ public class AccountMasterStatsFlow
             if (fieldMeta.getFieldName().equals(getMinMaxKey()) || isDimension) {
                 minMaxAndDimensionList.add(fieldMeta);
                 renamedMinMaxAndDimensionIds.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
+                log.info("Found dimension " + fieldMeta.getFieldName());
             }
 
             if (!fieldMeta.getFieldName().equals(getMinMaxKey())) {
-
                 if (!isDimension) {
                     FieldMetadata newFieldMeta = new FieldMetadata(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName(),
                             String.class);
@@ -142,6 +147,7 @@ public class AccountMasterStatsFlow
                     oldValueColumnsForSubstitution.add(fieldMeta.getFieldName());
                     newValueColumnsForSubstitution.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
                     renamedNonDimensionFieldIds.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
+                    log.info("Rename field " + fieldMeta.getFieldName());
                 }
             }
         }
@@ -222,7 +228,7 @@ public class AccountMasterStatsFlow
         targetMetadataList.addAll(inputSchemaForFieldSubstituteFunction);
         targetMetadataList.addAll(minMaxAndDimensionList);
         node = node.apply(leafCreationFunction, //
-                getFieldList(inputSchemaForFieldSubstituteFunction), targetMetadataList,
+                getFieldList(inputSchemaForFieldSubstituteFunction), outputSchemaForFieldSubstituteFunction,
                 getFieldList(combinedOutputSchemaForFieldSubstituteFunction));
 
         // once we have calculated stats obj using renamed columns names, now
