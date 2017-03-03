@@ -36,7 +36,8 @@ public class RedshiftServiceImpl implements RedshiftService {
         try {
             redshiftJdbcTemplate.execute(RedshiftUtils.getCreateTableStatement(redshiftTableConfig, schema));
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Could not create table %s in Redshift", redshiftTableConfig.getTableName()), e);
+            throw new RuntimeException(
+                    String.format("Could not create table %s in Redshift", redshiftTableConfig.getTableName()), e);
         }
     }
 

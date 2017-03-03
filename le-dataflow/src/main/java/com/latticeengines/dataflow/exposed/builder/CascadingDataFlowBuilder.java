@@ -60,6 +60,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.flink.FlinkYarnCluster;
 
 import cascading.avro.AvroScheme;
+import cascading.cascade.Cascade;
+import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
@@ -929,7 +931,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Map<String, String> extraJarsForFlink = new HashMap<>();
 
         log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
-        log.info("Using hadoop fs.defaultFS = " + config.get("fs.defaultFS"));
+        log.info("Using hadoop fs.defaultFS = " + config.get(FileSystem.FS_DEFAULT_NAME_KEY));
         try {
             String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/"
                     : "/app/" + artifactVersion + "/dataflow/lib/";
@@ -988,7 +990,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             flow.writeDOT("dot/wcr.dot");
             flow.addListener(dataFlowListener);
             flow.addStepListener(dataFlowStepListener);
-            flow.complete();
+            //flow.complete();
+
+            CascadeConnector connector = new CascadeConnector();
+            Cascade cascade = connector.connect(flow);
+            cascade.complete();
 
             List steps = flow.getFlowSteps();
             Long tuplesWritten = null;
@@ -1001,7 +1007,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             } catch (Exception e) {
                 log.error("Failed to read final count", e);
             }
-            Table resultTable = getTableMetadata(dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
+            Table resultTable = getTableMetadata(
+                    dataFlowCtx.getProperty(DataFlowProperty.TARGETTABLENAME, String.class), //
                     targetPath, //
                     pipesAndOutputSchemas.get(lastOperator).getValue());
             if (tuplesWritten != null && tuplesWritten > 0) {
@@ -1028,7 +1035,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return new GlobHfs(new AvroScheme(), sourcePath);
     }
 
-    private Tap<?, ?, ?> createSink(String lastOperator, String targetPath) {
+    protected Tap<?, ?, ?> createSink(String lastOperator, String targetPath) {
         DataFlowContext context = getDataFlowCtx();
         String flowName = context.getProperty(DataFlowProperty.FLOWNAME, String.class);
         Schema schema = getSchema(flowName, lastOperator, context);

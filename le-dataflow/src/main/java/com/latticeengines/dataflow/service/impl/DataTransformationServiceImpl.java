@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -25,10 +26,6 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 public class DataTransformationServiceImpl implements DataTransformationService {
 
     private static final String APPCTX = "APPCTX";
-
-    private static final String LOCAL_FS = "file:///";
-
-    private static final String FS_DEFAULT_FS = "fs.defaultFS";
 
     @Autowired
     private ApplicationContext appContext;
@@ -62,7 +59,8 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         properties.setProperty("mapred.mapper.new-api", "false");
         context.setProperty(DataFlowProperty.JOBPROPERTIES, properties);
 
-        dataFlow.setLocal(configuration == null || configuration.get(FS_DEFAULT_FS).equals(LOCAL_FS));
+        dataFlow.setLocal(configuration == null
+                || configuration.get(FileSystem.FS_DEFAULT_NAME_KEY).equals(FileSystem.DEFAULT_FS));
         dataFlow.setCheckpoint(doCheckpoint);
         if (context.containsProperty(DataFlowProperty.ENFORCEGLOBALORDERING)
                 && context.getProperty(DataFlowProperty.ENFORCEGLOBALORDERING, Boolean.class) == false) {

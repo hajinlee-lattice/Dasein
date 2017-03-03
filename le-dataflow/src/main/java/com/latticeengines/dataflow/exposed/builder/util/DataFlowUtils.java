@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 
 import com.google.common.base.Joiner;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
@@ -184,9 +185,9 @@ public class DataFlowUtils {
         DataFlowContext context = cascadingDataFlowBuilder.getDataFlowCtx();
         Configuration configuration = context.getRequiredProperty("HADOOPCONF", Configuration.class);
 
-        if (path.startsWith("file://")) {
+        if (path.startsWith(FileSystem.FS_DEFAULT_NAME_KEY)) {
             path = path.substring(7);
-        } else if (path.startsWith("hdfs://")) {
+        } else if (path.startsWith(HdfsConstants.HDFS_URI_SCHEME + "://")) {
             String[] parts = path.split("/");
             // skip over hdfs://hostname:port/
             List<String> partsSkipped = new ArrayList<>();

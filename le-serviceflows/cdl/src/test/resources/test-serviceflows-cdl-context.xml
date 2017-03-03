@@ -12,5 +12,6 @@
     <import resource="classpath:serviceflows-cdl-context.xml"/>
     <import resource="classpath:serviceflows-cdl-workflow-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
+    <import resource="classpath:aws-context.xml"/>
 
 </beans>

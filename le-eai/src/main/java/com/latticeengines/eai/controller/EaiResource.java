@@ -27,7 +27,7 @@ public class EaiResource implements EaiInterface {
 
     @RequestMapping(value = "/jobs", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create an import data job")
+    @ApiOperation(value = "Submit an eai job")
     public AppSubmission submitEaiJob(@RequestBody EaiJobConfiguration eaiJobConfig) {
         return new AppSubmission(Collections.singletonList(eaiService.submitEaiJob(eaiJobConfig)));
     }

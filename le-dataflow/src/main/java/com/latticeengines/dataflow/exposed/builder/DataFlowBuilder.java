@@ -36,7 +36,7 @@ public abstract class DataFlowBuilder {
     private boolean checkpoint;
     private boolean enforceGlobalOrdering;
     private boolean debug;
-    private DataFlowContext dataFlowCtx;
+    protected DataFlowContext dataFlowCtx;
 
     public abstract Table runFlow(DataFlowContext dataFlowCtx, String artifactVersion);
 
