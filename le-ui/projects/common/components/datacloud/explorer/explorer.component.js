@@ -718,8 +718,9 @@ angular.module('common.datacloud.explorer', [
                 var percentage = Math.round(item * 100);
                 return percentage !== NaN ? percentage + '%' : '';
             case 'NUMERIC':
-            case 'CURRENCY':
                 return $filter('number')(parseInt(item, 10));
+            case 'CURRENCY':
+                return '$' + $filter('number')(parseInt(item, 10));
             case 'DATE':
                 var date = new Date(parseInt(item, 10));
                 var year = date.getFullYear().toString();
