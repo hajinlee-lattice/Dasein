@@ -396,6 +396,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())) {
                 step.setElapsedTime(0);
                 log.info("Skip executed step " + step.getName());
+                return true;
             } else {
                 boolean succeeded = transformer.transform(progress, workflowDir, step);
                 saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
@@ -415,6 +416,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())) {
                 step.setElapsedTime(0);
                 log.info("Skip executed step " + step.getName());
+                return true;
             } else {
                 Map<String, Object> iterationContext = initializeIterationContext(step);
                 boolean converged;
