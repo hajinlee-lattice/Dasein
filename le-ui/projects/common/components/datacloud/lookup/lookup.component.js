@@ -1,6 +1,7 @@
 angular
 .module('common.datacloud.lookup', [
-    'mainApp.appCommon.utilities.ResourceUtility'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.directives.ngEnterDirective'
 ])
 .controller('LookupController', function(
     $state, LookupStore, ResourceUtility, FeatureFlagService
