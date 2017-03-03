@@ -105,7 +105,7 @@
             </li>
             <li ng-repeat="category in vm.categories" class="category"
                 ng-if="count = vm.categoryCount(category)"
-                ng-class="{active: vm.category == category, 'has-highlights': vm.highlightMetadata.categories[category].hasHighlights && vm.section == 'team'}"
+                ng-class="{active: vm.category == category, 'has-highlights': vm.highlightMetadata.categories[category].hasDirty && vm.section == 'team'}"
                 ng-click="vm.categoryClick(category, $event);">
 
                 <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
@@ -127,14 +127,15 @@
                                 <li class="header" ng-show="highlightAttributes.length > 0">
                                     <div class="column label">Highlighted Insights</div>
                                 </li>
-                                <li ng-repeat="attribute in (highlightAttributes = (vm.getTileTableItems(category, null, 'HighlightHighlighted', 5).HighlightHighlighted 
+                                <li ng-repeat="attribute in (highlightAttributes = (vm.getTileTableItems(category, false, 'HighlightHighlighted', 5).HighlightHighlighted 
                                         | filter: vm.enrichmentsFilter() 
                                         | orderBy: [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ] 
                                         | limitTo: 5))"
                                         class="attribute"
                                         ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
-                                    <div class="column data {{ vm.lookupMode ? 'values' : 'records' }}">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}</div>
+                                    <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
+                                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.NonNullCount|number }}</div>
                                 </li>
                             </ul>
                             <ul class="attributes noselect-children">
@@ -149,7 +150,8 @@
                                         class="attribute"
                                         ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
-                                    <div class="column data {{ vm.lookupMode ? 'values' : 'records' }}">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}</div>
+                                    <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
+                                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.NonNullCount|number }}</div>
                                 </li>
                             </ul>
                         </div>
@@ -159,7 +161,13 @@
                             <div class="button"
                                     ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': false}"
                                     ng-click="vm.closeHighlighterButtons(category); vm.openHighlighter[category].open = !vm.openHighlighter[category].open;">
-                                <span class="highlight-icon {{vm.openHighlighter[category].state.type}}">{{vm.openHighlighter[category].state.label || 'Set'}}</span>
+                                <span class="highlight-icon dirty" ng-if="vm.highlightMetadata.categories[category].hasDirty">
+                                    {{vm.highlightTypesCategory.dirty}} 
+                                    [all disabled? {{vm.highlightMetadata.categories[category].allDisabled}}]
+                                </span>
+                                <span class="highlight-icon enabled" ng-if="!vm.highlightMetadata.categories[category].hasDirty">
+                                    {{vm.highlightTypesCategory.enabled}}
+                                </span>
                                 <ul ng-class="{open: vm.openHighlighter[category].open}" class="highlightOptions button-dropdown">
                                     <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, category)">{{label}}</li>
                                 </ul>
@@ -190,7 +198,7 @@
                         track by $index"
                     class="subcategory"
                     ng-if="count = vm.subcategoryCount(vm.category, subcategory)"
-                    ng-class="{active: vm.subcategory == subcategory, 'has-highlights': vm.highlightMetadata.subcategories[subcategory].hasHighlights && vm.section == 'team'}"
+                    ng-class="{active: vm.subcategory == subcategory, 'has-highlights': vm.highlightMetadata.subcategories[subcategory].hasDirty && vm.section == 'team'}"
                     ng-click="vm.subcategoryClick(subcategory, $event)">
 
                     <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
@@ -222,8 +230,11 @@
                                         {{ attribute.DisplayName }}
                                     </div>
 
-                                    <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} {{ vm.lookupMode ? 'values' : 'records' }}">
-                                        {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}
+                                    <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode">
+                                        {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}
+                                    </div>
+                                    <div class="column data records" ng-if="!vm.lookupMode">
+                                        {{ attribute.NonNullCount|number }}
                                     </div>
                                 </li>
                             </ul>

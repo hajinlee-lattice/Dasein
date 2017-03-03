@@ -483,12 +483,31 @@ angular.module('common.datacloud.explorer', [
             item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden === true ? true : false);
             item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : false);
 
+            var highlightMetadataFlags = {
+                    allDisabled: false
+                };
             if(!item.AttributeFlagsMap || !item.AttributeFlagsMap.CompanyProfile) {
                 item.AttributeFlagsMap = {};
                 item.AttributeFlagsMap.CompanyProfile = {};
             } else if(item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && Object.keys(item.AttributeFlagsMap.CompanyProfile).length) {
-                vm.highlightMetadata.categories[item.Category] = {hasHighlights: true};
-                vm.highlightMetadata.subcategories[item.Subcategory] = {hasHighlights: true};
+                // need to know if all are disabled as well
+                highlightMetadataFlags.hasDirty = true;
+
+                if(item.AttributeFlagsMap.CompanyProfile.hidden === false) {
+                    highlightMetadataFlags.hasEnabled = true;
+                }
+                if(item.AttributeFlagsMap.CompanyProfile.hidden === true) {
+                    highlightMetadataFlags.hasDisabled = true;
+                    if(vm.highlightMetadata.categories[item.Category]) {
+                        if(vm.highlightMetadata.categories[item.Category].hasEnabled) {
+                            vm.highlightMetadata.categories[item.Category].allDisabled = false;
+                        } else {
+                            vm.highlightMetadata.categories[item.Category].allDisabled = true;
+                        }
+                    }
+                 }
+                vm.highlightMetadata.categories[item.Category] = highlightMetadataFlags;
+                vm.highlightMetadata.subcategories[item.Subcategory] = highlightMetadataFlags;
             }
 
             obj[category][subcategory].push(index);
@@ -745,14 +764,14 @@ angular.module('common.datacloud.explorer', [
         vm.filterEmptySubcategories();
     }
 
-    vm.getTileTableItems = function(category, subcategory, segment, limit) {
+    vm.getTileTableItems = function(category, subcategory, segment, limit, debug) {
         var items = [],
             limit = (limit === 0 ? 0 : null) || limit || null;
 
         if (vm.topAttributes[category]) {
             if (!subcategory && vm.isYesNoCategory(category, true)) {
                 Object.keys(vm.topAttributes[category].SubCategories).forEach(function(key, index) {
-                    items = Object.assign(items, vm.topAttributes[category].SubCategories[key]);
+                    items = items.concat(vm.topAttributes[category].SubCategories[key]);
                 })
             } else {
                 items = vm.topAttributes[category].SubCategories[subcategory || 'Other'];
@@ -802,12 +821,11 @@ angular.module('common.datacloud.explorer', [
             _items = {};
             _items[segment] = segmented;
 
-            if(remainder) {
+            if(remainder > 0) {
                 _items['other'] = Array.prototype.slice.call(other, 0, remainder);
             }
             items = _items;
         }
-
         return items;
     }
 
