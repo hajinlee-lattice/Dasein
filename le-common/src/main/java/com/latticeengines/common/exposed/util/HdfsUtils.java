@@ -42,6 +42,7 @@ import org.springframework.util.StreamUtils;
 
 public class HdfsUtils {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(HdfsUtils.class);
 
     public interface HdfsFileFormat {
@@ -111,7 +112,7 @@ public class HdfsUtils {
         }
     }
 
-    public static final void copyInputStreamToHdfs(URI scheme, Configuration configuration, InputStream inputStream)
+    public static final void copyInputStreamToDest(URI scheme, Configuration configuration, InputStream inputStream)
             throws IOException {
         try (FileSystem fs = FileSystem.newInstance(scheme, configuration)) {
             try (OutputStream outputStream = fs.create(new Path(scheme.getPath()))) {

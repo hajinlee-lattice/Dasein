@@ -56,7 +56,7 @@ public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctional
                     config.set(FileSystem.FS_DEFAULT_NAME_KEY, "s3n:///");
                     config.set("fs.s3n.awsAccessKeyId", awsAccessKey);
                     config.set("fs.s3n.awsSecretAccessKey", awsSecretKey);
-                    HdfsUtils.copyInputStreamToHdfs(new URI("s3n://" + s3Bucket + "/" + jsonPathPrefix), config,
+                    HdfsUtils.copyInputStreamToDest(new URI("s3n://" + s3Bucket + "/" + jsonPathPrefix), config,
                             inputStream);
                 }
             } catch (Exception e) {
