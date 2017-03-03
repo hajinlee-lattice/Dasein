@@ -718,16 +718,15 @@ angular.module('common.datacloud.explorer', [
                 var percentage = Math.round(item * 100);
                 return percentage !== NaN ? percentage + '%' : '';
             case 'NUMERIC':
-                return $filter('number')(parseInt(item, 10));
             case 'CURRENCY':
-                return ResourceUtility.getString('CURRENCY_SYMBOL') + $filter('number')(parseInt(item, 10));
+                return $filter('number')(parseInt(item, 10));
             case 'DATE':
                 var date = new Date(parseInt(item, 10));
                 var year = date.getFullYear().toString();
                 var month = (date.getMonth() + 1).toString();
-                month = month.length === 2 ? month : 0 + month;
+                month = (month.length >= 2) ? month : ('0' + month);
                 var day = date.getDate().toString();
-                day = day.length === 2 ? day : '0' + day;
+                day = (day.length >= 2) ? day : ('0' + day);
                 return '' + year + month + day;
             case 'URI':
             case 'ALPHA':
