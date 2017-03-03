@@ -34,6 +34,9 @@ public class ExistsRestriction extends Restriction {
         this.negate = negate;
     }
 
+    public ExistsRestriction() {
+    }
+
     public boolean getNegate() {
         return negate;
     }

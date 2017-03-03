@@ -16,6 +16,9 @@ public class BucketRestriction extends Restriction {
         this.value = value;
     }
 
+    public BucketRestriction() {
+    }
+
     public ColumnLookup getLhs() {
         return lhs;
     }
