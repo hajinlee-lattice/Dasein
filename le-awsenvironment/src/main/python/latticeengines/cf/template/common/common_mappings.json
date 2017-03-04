@@ -6,15 +6,15 @@
   },
   "AWSRegion2AMI": {
     "us-east-1": {
-      "AmazonLinux": "ami-a4827dc9",
+      "AmazonLinux": "ami-92659c84",
       "AmazonECSLinux": "ami-fbacaaec"
     },
     "us-west-1": {
-      "AmazonLinux": "ami-11790371",
+      "AmazonLinux": "ami-ee8cd18e",
       "AmazonECSLinux": "ami-4bc6912b"
     },
     "us-west-2": {
-      "AmazonLinux": "ami-f303fb93",
+      "AmazonLinux": "ami-af8b30cf",
       "AmazonECSLinux": "ami-f9c16a99"
     }
   },
