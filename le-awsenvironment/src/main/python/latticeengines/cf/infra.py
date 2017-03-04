@@ -16,6 +16,7 @@ _S3_CF_PATH='cloudformation/infra'
 TOMCAT_APP_HEALTH_MAP = {
     "swaggerprivate": "/",
     "swaggerpublic": "/",
+    "haproxy": "/",
 
     "api": "/rest/add/1/2",
     "eai": "/eai/v2/api-docs",
@@ -108,39 +109,52 @@ def create_load_balancers(tg_map, ui=False):
     # private tomcat
     private_lb = ApplicationLoadBalancer("private", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
     private_lb.add_tag("le-product", "lpi")
+    private_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
     for k, v in tg_map.items():
         private_lb.depends_on(v)
     resources.append(private_lb)
     albs["private"] = private_lb
 
+    # 2nd tier private tomcat
+    private_lb2 = ApplicationLoadBalancer("private2", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+    private_lb2.add_tag("le-product", "lpi")
+    private_lb2.add_tag("le-stack", PARAM_LE_STACK.ref())
+    for k, v in tg_map.items():
+        private_lb2.depends_on(v)
+    resources.append(private_lb2)
+    albs["private2"] = private_lb2
+
     # public tomcat
     public_lb = ApplicationLoadBalancer("public", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
     public_lb.add_tag("le-product", "lpi")
+    public_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
     for k, v in tg_map.items():
         private_lb.depends_on(v)
     resources.append(public_lb)
     albs["public"] = public_lb
 
     # listeners
-    private_lsnr = create_listener(private_lb, tg_map["swaggerprivate"])
+    private_lsnr = create_listener(private_lb, tg_map["haproxy"])
     resources.append(private_lsnr)
+    private2_lsnr = create_listener(private_lb, tg_map["swaggerprivate"])
+    resources.append(private2_lsnr)
     public_lsnr = create_listener(public_lb, tg_map["swaggerpublic"])
     resources.append(public_lsnr)
 
     # listener rules
     resources.append(create_listener_rule(private_lsnr, tg_map["matchapi"], "/match/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["admin"], "/admin/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["metadata"], "/metadata/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["eai"], "/eai/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["workflowapi"], "/workflowapi/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["dataflowapi"], "/dataflowapi/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["metadata"], "/metadata/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["eai"], "/eai/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["scoring"], "/scoring/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["modeling"], "/modeling/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["datacloudapi"], "/datacloudapi/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["modelquality"], "/modelquality/*"))
 
-    # cannot add to private listener, max rules is 10
-    # resources.append(create_listener_rule(private_lsnr, tg_map["propdata"], "/propdata/*"))
+    # listener rules
+    resources.append(create_listener_rule(private2_lsnr, tg_map["datacloudapi"], "/datacloudapi/*"))
+    resources.append(create_listener_rule(private2_lsnr, tg_map["modelquality"], "/modelquality/*"))
+    resources.append(create_listener_rule(private2_lsnr, tg_map["propdata"], "/propdata/*"))
 
     resources.append(create_listener_rule(public_lsnr, tg_map["pls"], "/pls/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/score/*"))
