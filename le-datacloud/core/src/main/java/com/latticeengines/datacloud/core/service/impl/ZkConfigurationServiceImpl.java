@@ -92,7 +92,23 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
             return (flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())
                     && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())));
         } catch (Exception e) {
-            log.error("Error when retrieving feature flags for " + customerSpace, e);
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName() + " feature flags for "
+                    + customerSpace, e);
+            return false;
+        }
+    }
+
+    public boolean bypassDnBCache(CustomerSpace customerSpace) {
+        try {
+            FeatureFlagValueMap flags = FeatureFlagClient.getFlags(customerSpace);
+            if (!flags.containsKey(LatticeFeatureFlag.BYPASS_DNB_CACHE.getName())) {
+                return false;
+            } else {
+                return Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.BYPASS_DNB_CACHE.getName()));
+            }
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.BYPASS_DNB_CACHE.getName() + " feature flags for "
+                    + customerSpace, e);
             return false;
         }
     }

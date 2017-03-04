@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -82,10 +83,9 @@ public class FuzzyMatchHelper implements DbHelper {
         boolean fetchOnly = context.getInput().getFetchOnly();
         if (!fetchOnly) {
             try {
-                String decisionGraph = parseDecisionGraph(context);
-                boolean useRemoteDnB = shouldUseRemoteDnB(context);
-                context.getInput().setUseRemoteDnB(useRemoteDnB);
-                context.getInput().setDecisionGraph(decisionGraph);
+                updateDecisionGraph(context.getInput());
+                updateUseRemoteDnB(context.getInput());
+                updateBypassDnBCache(context.getInput());
                 if (isSync) {
                     fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput());
                 } else {
@@ -99,25 +99,35 @@ public class FuzzyMatchHelper implements DbHelper {
         }
     }
 
-    private String parseDecisionGraph(MatchContext context) {
-        String decisionGraph = context.getInput().getDecisionGraph();
-        if (StringUtils.isEmpty(decisionGraph) && context.getInput() != null
-                && context.getInput().getTenant() != null) {
+    private void updateDecisionGraph(MatchInput matchInput) {
+        String decisionGraph = matchInput.getDecisionGraph();
+        if (StringUtils.isEmpty(decisionGraph) && matchInput.getTenant() != null) {
             decisionGraph = defaultGraph;
         }
-        return decisionGraph;
+        matchInput.setDecisionGraph(decisionGraph);
     }
 
-    private boolean shouldUseRemoteDnB(MatchContext context) {
-        Boolean useRemoteDnB = context.getInput().getUseRemoteDnB();
+    private void updateUseRemoteDnB(MatchInput matchInput) {
+        Boolean useRemoteDnB = matchInput.getUseRemoteDnB();
         if (useRemoteDnB != null) {
-            return useRemoteDnB;
+            return;
         }
-        if (context.getInput() != null && context.getInput().getTenant() != null) {
-            CustomerSpace customerSpace = CustomerSpace.parse(context.getInput().getTenant().getId());
-            return zkConfigurationService.fuzzyMatchEnabled(customerSpace);
+        if (matchInput.getTenant() != null) {
+            CustomerSpace customerSpace = CustomerSpace.parse(matchInput.getTenant().getId());
+            matchInput.setUseRemoteDnB(zkConfigurationService.fuzzyMatchEnabled(customerSpace));
+        } else {
+            matchInput.setUseRemoteDnB(false);
         }
-        return false;
+    }
+
+    private void updateBypassDnBCache(MatchInput matchInput) {
+        if (matchInput.getTenant() != null) {
+            CustomerSpace customerSpace = CustomerSpace.parse(matchInput.getTenant().getId());
+            boolean bypassDnBCache = zkConfigurationService.bypassDnBCache(customerSpace);
+            if (bypassDnBCache) {
+                matchInput.setUseDnBCache(false);
+            }
+        }
     }
 
     @Override

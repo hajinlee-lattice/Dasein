@@ -12,4 +12,6 @@ public interface ZkConfigurationService {
 
     boolean fuzzyMatchEnabled(CustomerSpace customerSpace);
 
+    boolean bypassDnBCache(CustomerSpace customerSpace);
+
 }
