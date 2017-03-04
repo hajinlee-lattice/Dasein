@@ -70,7 +70,7 @@ public class RedshiftExportDataFlow extends TypesafeDataFlowBuilder<RedshiftData
         if (enforceGlobalOrdering()) {
             scheme.setNumSinkParts(1);
         }
-        String jsonPathPrefix = redshiftTableConfig.getJsonPath();
+        String jsonPathPrefix = redshiftTableConfig.getJsonPathPrefix();
         RedshiftAvroScheme redshiftScheme = new RedshiftAvroScheme(new Fields(fieldNames), redshiftTableDesc, scheme,
                 jsonPathPrefix);
 

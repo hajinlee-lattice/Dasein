@@ -14,9 +14,6 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
     @JsonProperty("append")
     private boolean append = false;
 
-    @JsonProperty("json_path_prefix")
-    private String jsonPathPrefix;
-
     public RedshiftTableConfiguration getRedshiftTableConfiguration() {
         return redshiftTableConfiguration;
     }
@@ -39,14 +36,6 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
 
     public void setAppend(boolean append) {
         this.append = append;
-    }
-
-    public String getJsonPathPrefix() {
-        return jsonPathPrefix;
-    }
-
-    public void setJsonPathPrefix(String jsonPathPrefix) {
-        this.jsonPathPrefix = jsonPathPrefix;
     }
 
 }

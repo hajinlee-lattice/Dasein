@@ -68,9 +68,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_TABLE", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
 @Filters({ //
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
+        @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
         @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
 @EntityListeners(TableListener.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -214,6 +214,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         attributes.add(attribute);
         attribute.setTable(this);
         attribute.setTenant(getTenant());
+    }
+
+    public void addAttributes(List<Attribute> attributes) {
+        attributes.stream().forEach(attr -> addAttribute(attr));
     }
 
     public void removeAttribute(final String name) {
@@ -485,7 +489,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             attrMetadatum.setFundamentalType(attr.getFundamentalType());
             attrMetadatum.setExtensions(Arrays.<KV> asList(new KV[] { //
                     new KV("Category", attr.getCategory()), //
-                            new KV("DataType", attr.getDataType()) }));
+                    new KV("DataType", attr.getDataType()) }));
             attrMetadatum.setDataQuality(attr.getDataQuality());
             attrMetadatum.setDataSource(attr.getDataSource());
 
@@ -536,9 +540,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         for (Attribute attr : getAttributes()) {
             boolean isRequest = requestTargets.contains(attr.getName());
             if (isRequest) {
-                if (attr.getInterfaceName() == null
-                        && (attr.getApprovedUsage() == null || attr.getApprovedUsage().size() == 0 || attr
-                                .getApprovedUsage().get(0).equals("None"))) {
+                if (attr.getInterfaceName() == null && (attr.getApprovedUsage() == null
+                        || attr.getApprovedUsage().size() == 0 || attr.getApprovedUsage().get(0).equals("None"))) {
                     // Custom field with no approved usage
                     continue;
                 } else if (LogicalDataType.isExcludedFromRealTimeMetadata(attr.getLogicalDataType())) {

@@ -116,7 +116,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
     private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
-    
+
     @Override
     public Long getPid() {
         return pid;
@@ -816,6 +816,60 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     public void setExcludeFromDetailView(String excludeFromDetailView) {
         properties.put("ExcludeFromDetailView", Boolean.valueOf(excludeFromDetailView));
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setBitOffset(Integer bitOffset) {
+        properties.put("BitOffset", bitOffset);
+    }
+
+    @Transient
+    @JsonIgnore
+    public Integer getBitOffset() {
+        return (Integer) properties.get("BitOffset");
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setNumOfBits(Integer numOfBits) {
+        properties.put("NumOfBits", numOfBits);
+    }
+
+    @Transient
+    @JsonIgnore
+    public Integer getNumOfBits() {
+        return (Integer) properties.get("NumOfBits");
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setBucketList(List<String> bucketList) {
+        properties.put("BucketList", bucketList);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void addBucket(String bucket) {
+        List<String> bucketList = getBucketList();
+        if (bucketList == null) {
+            bucketList = new ArrayList<>();
+            setBucketList(bucketList);
+        }
+        getBucketList().add(bucket);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setBucketList(String bucketList) {
+        setListPropertyFromString("BucketList", bucketList);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Transient
+    @JsonIgnore
+    public List<String> getBucketList() {
+        return (List<String>) properties.get("BucketList");
     }
 
     @Override

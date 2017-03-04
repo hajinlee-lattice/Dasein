@@ -10,6 +10,8 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ArrayNode;
 import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -66,7 +68,21 @@ public class MetadataConverter {
                 }
             }
 
-            Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName);
+            Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
+            return table;
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Failed to parse metadata for avro file located at %s", path), e);
+        }
+    }
+
+    public static Table getBucketedTableFromSchemaPath(Configuration configuration, String path, String primaryKeyName,
+            String lastModifiedKeyName) {
+        try {
+            @SuppressWarnings("deprecation")
+            Schema schema = Schema.parse(HdfsUtils.getInputStream(configuration, path));
+            List<Extract> extracts = new ArrayList<Extract>();
+
+            Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, true);
             return table;
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to parse metadata for avro file located at %s", path), e);
@@ -74,7 +90,7 @@ public class MetadataConverter {
     }
 
     public static Table getTable(Schema schema, List<Extract> extracts, String primaryKeyName,
-            String lastModifiedKeyName) {
+            String lastModifiedKeyName, boolean isBucketed) {
         try {
             Table table = new Table();
             table.setName(schema.getName());
@@ -82,18 +98,19 @@ public class MetadataConverter {
 
             List<Schema.Field> fields = schema.getFields();
 
-            for (Schema.Field field : fields) {
-                Attribute attr = getAttribute(field);
-                table.addAttribute(attr);
+            if (!isBucketed) {
+                fields.stream().forEach(field -> table.addAttribute(getAttribute(field)));
+            } else {
+                fields.stream().forEach(field -> table.addAttributes(getBucketedAttributes(field)));
             }
 
             table.setExtracts(extracts);
 
             if (primaryKeyName != null) {
-                Schema.Field primaryKeyField = schema.getField(primaryKeyName);
-                if (primaryKeyField == null) {
-                    throw new RuntimeException(String.format("Could not locate primary key field %s in avro schema",
-                            primaryKeyName));
+                Attribute primaryKeyAttr = table.getAttribute(primaryKeyName);
+                if (primaryKeyAttr == null) {
+                    throw new RuntimeException(
+                            String.format("Could not locate primary key field %s in avro schema", primaryKeyName));
                 }
                 PrimaryKey primaryKey = new PrimaryKey();
                 primaryKey.setName(primaryKeyName);
@@ -103,10 +120,10 @@ public class MetadataConverter {
             }
 
             if (lastModifiedKeyName != null) {
-                Schema.Field lastModifiedField = schema.getField(lastModifiedKeyName);
-                if (lastModifiedField == null) {
-                    throw new RuntimeException(String.format(
-                            "Could not locate last modified key field %s in avro schema", lastModifiedKeyName));
+                Attribute lastModifiedAttr = table.getAttribute(lastModifiedKeyName);
+                if (lastModifiedAttr == null) {
+                    throw new RuntimeException(String
+                            .format("Could not locate last modified key field %s in avro schema", lastModifiedKeyName));
                 }
 
                 LastModifiedKey lastModifiedKey = new LastModifiedKey();
@@ -180,6 +197,27 @@ public class MetadataConverter {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to read avro field %s", field.name()), e);
         }
+    }
+
+    public static List<Attribute> getBucketedAttributes(Schema.Field field) {
+        List<Attribute> attrs = new ArrayList<>();
+        String fieldName = field.name();
+        JsonNode bucketedAttrs = field.getJsonProp("bucketed_attrs");
+        if (bucketedAttrs == null) {
+            attrs.add(getAttribute(field));
+        } else {
+            for (JsonNode bucketedAttr : (ArrayNode) bucketedAttrs) {
+                Attribute attr = new Attribute();
+                attr.setName(bucketedAttr.get("nominal_attr").asText());
+                attr.setPhysicalDataType(Schema.Type.STRING.getName());
+                attr.setBitOffset(bucketedAttr.get("lowest_bit").asInt());
+                attr.setNumOfBits(bucketedAttr.get("num_bits").asInt());
+                ((ArrayNode) bucketedAttr.get("buckets")).forEach(node -> attr.addBucket(node.asText()));
+                attr.setPhysicalName(fieldName);
+                attrs.add(attr);
+            }
+        }
+        return attrs;
     }
 
     public static String getType(Schema schema) {

@@ -52,11 +52,11 @@ public class EaiSerUnitTest {
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setTableName("aaa");
         conf.setRedshiftTableConfiguration(redshiftTableConfig);
-        conf.setJsonPathPrefix("bbb");
+        redshiftTableConfig.setJsonPathPrefix("bbb");
         String s = JsonUtils.serialize(conf);
         System.out.println(s);
         EaiJobConfiguration jobConfig = JsonUtils.deserialize(s, EaiJobConfiguration.class);
         assertEquals(((HdfsToRedshiftConfiguration) jobConfig).getRedshiftTableConfiguration().getTableName(), "aaa");
-        assertEquals(((HdfsToRedshiftConfiguration) jobConfig).getJsonPathPrefix(), "bbb");
+        assertEquals(((HdfsToRedshiftConfiguration) jobConfig).getRedshiftTableConfiguration().getJsonPathPrefix(), "bbb");
     }
 }

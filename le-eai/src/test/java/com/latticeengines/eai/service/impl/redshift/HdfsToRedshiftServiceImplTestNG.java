@@ -108,8 +108,8 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiFunctionalTestNGBase {
         configuration.setExportInputPath(HDFS_DIR + "/*.avro");
         RedshiftTableConfiguration redshiftTableConfiguration = new RedshiftTableConfiguration();
         redshiftTableConfiguration.setTableName(testTable);
+        redshiftTableConfiguration.setJsonPathPrefix("camel.jsonpath");
         configuration.setRedshiftTableConfiguration(redshiftTableConfiguration);
-        configuration.setJsonPathPrefix("camel.jsonpath");
         return configuration;
     }
 

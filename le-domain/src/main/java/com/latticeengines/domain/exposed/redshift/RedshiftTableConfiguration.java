@@ -21,8 +21,8 @@ public class RedshiftTableConfiguration {
     @JsonProperty("dist_key")
     private String distKey;
 
-    @JsonProperty("jsonpath_path")
-    private String jsonPath;
+    @JsonProperty("json_path_prefix")
+    private String jsonPathPrefix;
 
     public String getTableName() {
         return tableName;
@@ -64,12 +64,12 @@ public class RedshiftTableConfiguration {
         this.distKey = distKey;
     }
 
-    public String getJsonPath() {
-        return jsonPath;
+    public String getJsonPathPrefix() {
+        return jsonPathPrefix;
     }
 
-    public void setJsonPath(String jsonPath) {
-        this.jsonPath = jsonPath;
+    public void setJsonPathPrefix(String jsonPathPrefix) {
+        this.jsonPathPrefix = jsonPathPrefix;
     }
 
     public enum SortKeyType {

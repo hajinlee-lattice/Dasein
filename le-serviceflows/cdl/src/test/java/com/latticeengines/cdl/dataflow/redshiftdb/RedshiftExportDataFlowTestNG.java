@@ -70,7 +70,7 @@ public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctional
         RedshiftTableConfiguration config = new RedshiftTableConfiguration();
         config.setTableName(tableName);
         config.setSortKeys(new ArrayList<>());
-        config.setJsonPath("s3://" + s3Bucket + "/" + jsonPathPrefix);
+        config.setJsonPathPrefix("s3://" + s3Bucket + "/" + jsonPathPrefix);
         context.setProperty(RedshiftTableConfiguration.class.getSimpleName(), config);
 
         return context;

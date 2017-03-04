@@ -68,7 +68,7 @@ public class HdfsToRedshiftService {
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
             RedshiftUtils.generateJsonPathsFile(schema, outputStream);
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
-                s3Service.uploadInputStream(s3Bucket, configuration.getJsonPathPrefix(), inputStream, true);
+                s3Service.uploadInputStream(s3Bucket, redshiftTableConfig.getJsonPathPrefix(), inputStream, true);
             }
             redshiftService.createTable(redshiftTableConfig, schema);
         } catch (IOException e) {
@@ -76,7 +76,7 @@ public class HdfsToRedshiftService {
             throw new RuntimeException(e);
         }
         redshiftService.loadTableFromAvroInS3(redshiftTableConfig.getTableName(), s3Bucket,
-                s3Prefix(redshiftTableConfig), configuration.getJsonPathPrefix());
+                s3Prefix(redshiftTableConfig), redshiftTableConfig.getJsonPathPrefix());
 
     }
 
@@ -86,9 +86,10 @@ public class HdfsToRedshiftService {
     }
 
     public void cleanupS3(HdfsToRedshiftConfiguration configuration) {
-        String prefix = s3Prefix(configuration.getRedshiftTableConfiguration());
+        RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
+        String prefix = s3Prefix(redshiftTableConfig);
         s3Service.cleanupPrefix(s3Bucket, prefix);
-        s3Service.cleanupPrefix(s3Bucket, configuration.getJsonPathPrefix());
+        s3Service.cleanupPrefix(s3Bucket, redshiftTableConfig.getJsonPathPrefix());
     }
 
     private String s3FileName(RedshiftTableConfiguration configuration) {

@@ -90,7 +90,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         String path = getClass().getClassLoader().getResource(RESOURCE_BASE + "/tables/part-v001-o000-00000.avro")
                 .getPath();
         Schema schema = AvroUtils.readSchemaFromLocalFile(path);
-        Table eventTable = MetadataConverter.getTable(schema, new ArrayList<Extract>(), null, null);
+        Table eventTable = MetadataConverter.getTable(schema, new ArrayList<Extract>(), null, null, false);
         eventTable.setName("RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib");
         eventTable.getAttribute(InterfaceName.Website.name()).setTags(Tag.INTERNAL);
         eventTable.getAttribute(InterfaceName.City.name()).setTags(Tag.INTERNAL);
