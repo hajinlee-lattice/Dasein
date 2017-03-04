@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -41,10 +42,14 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 
 public class BatonServiceImpl implements BatonService {
 
-    private static final Logger log = LoggerFactory.getLogger(new Object() {}.getClass().getEnclosingClass());
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
+
+    private static final int MAX_RETRY_TIMES = 3;
 
     @Override
-    public boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
+    public boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
+            CustomerSpaceInfo spaceInfo) {
         ContractInfo contractInfo = new ContractInfo(new ContractProperties());
         TenantInfo tenantInfo = new TenantInfo(
                 new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
@@ -52,8 +57,8 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
-    public boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
-                                ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo spaceInfo) {
+    public boolean createTenant(String contractId, String tenantId, String defaultSpaceId, ContractInfo contractInfo,
+            TenantInfo tenantInfo, CustomerSpaceInfo spaceInfo) {
         try {
             Camille camille = CamilleEnvironment.getCamille();
             Path contractsPath = PathBuilder.buildContractsPath(CamilleEnvironment.getPodId());
@@ -78,12 +83,12 @@ public class BatonServiceImpl implements BatonService {
             // Setup a dummy space configuration.
             // True space configuration will be handled in le-admin
             String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
-            Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                    contractId, tenantId, spaceId)
+            Path spaceConfigPath = PathBuilder
+                    .buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)
                     .append(new Path("/" + PathConstants.SPACECONFIGURATION_NODE));
             if (!camille.exists(spaceConfigPath)) {
-                setupSpaceConfiguration(contractId, tenantId,
-                        CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, new SpaceConfiguration());
+                setupSpaceConfiguration(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                        new SpaceConfiguration());
             }
         } catch (Exception e) {
             log.error("Error creating tenant", e);
@@ -144,7 +149,9 @@ public class BatonServiceImpl implements BatonService {
     public boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
             Map<String, String> properties) {
         CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
-        if (properties == null) { properties = new HashMap<>(); }
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
         try {
             log.info("Bootstrapping service " + serviceName + " in space " + space);
             ServiceWarden.commandBootstrap(serviceName, space, properties);
@@ -208,17 +215,33 @@ public class BatonServiceImpl implements BatonService {
     public TenantDocument getTenant(String contractId, String tenantId) {
         TenantDocument doc = new TenantDocument();
         try {
-            TenantInfo tenantInfo = TenantLifecycleManager.getInfo(contractId, tenantId);
+            int failedTimes = 0;
+            TenantInfo tenantInfo = null;
+            while (true) {
+                try {
+                    tenantInfo = TenantLifecycleManager.getInfo(contractId, tenantId);
+                } catch (NoNodeException e) {
+                    if (failedTimes++ == MAX_RETRY_TIMES) {
+                        log.error(String.format("Could not get the tenant info for tenant %s", tenantId));
+                        throw e;
+                    }
+                }
+                if (tenantInfo != null) {
+                    break;
+                }
+                Thread.sleep(500);
+            }
 
-            if (tenantInfo == null) return null;
-
+            if (tenantInfo == null) {
+                return null;
+            }
             doc.setTenantInfo(tenantInfo);
 
             try {
                 ContractInfo contractInfo = ContractLifecycleManager.getInfo(contractId);
                 doc.setContractInfo(contractInfo);
             } catch (Exception e) {
-                log.error("Could not get the info of the default space for tenant " + tenantId);
+                log.error(String.format("Could not get the info of the default space for tenant %s", tenantId));
             }
 
             try {
@@ -226,23 +249,22 @@ public class BatonServiceImpl implements BatonService {
                 SpaceConfiguration spaceConfig = new SpaceConfiguration(spaceConfigDir);
                 doc.setSpaceConfig(spaceConfig);
             } catch (Exception e) {
-                log.error("Could not get the space configuration directory for tenant " + tenantId);
+                log.error(String.format("Could not get the space configuration directory for tenant %s", tenantId));
             }
 
             String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
 
             try {
-                CustomerSpaceInfo spaceInfo =
-                        SpaceLifecycleManager.getInfo(contractId, tenantId, spaceId);
+                CustomerSpaceInfo spaceInfo = SpaceLifecycleManager.getInfo(contractId, tenantId, spaceId);
                 doc.setSpaceInfo(spaceInfo);
             } catch (Exception e) {
-                log.error("Could not get the info of the default space for tenant " + tenantId);
+                log.error(String.format("Could not get the info of the default space for tenant %s", tenantId));
             }
 
             CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
             doc.setSpace(space);
         } catch (Exception e) {
-            log.error("Error retrieving tenant " + tenantId + " in " + contractId, e);
+            log.error(String.format("Error retrieving tenant %s in %s", tenantId, contractId), e);
         }
         return doc;
     }
@@ -276,17 +298,16 @@ public class BatonServiceImpl implements BatonService {
         }
     }
 
-
     @Override
     public BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName) {
-        return getTenantServiceBootstrapState(contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
+        return getTenantServiceBootstrapState(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                serviceName);
     }
 
     @Override
-    public BootstrapState getTenantServiceBootstrapState(
-            String contractId, String tenantId, String spaceId, String serviceName) {
-        CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId,spaceId);
+    public BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String spaceId,
+            String serviceName) {
+        CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId, spaceId);
         try {
             return CustomerSpaceServiceBootstrapManager.getBootstrapState(serviceName, customerSpace);
         } catch (Exception e) {
@@ -322,9 +343,8 @@ public class BatonServiceImpl implements BatonService {
     }
 
     private DocumentDirectory getSpaceConfiguration(String contractId, String tenantId) {
-        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID)
-                .append(new Path("/SpaceConfiguration"));
+        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID).append(new Path("/SpaceConfiguration"));
         return CamilleEnvironment.getCamille().getDirectory(spaceConfigPath);
     }
 
@@ -332,8 +352,8 @@ public class BatonServiceImpl implements BatonService {
         List<TenantDocument> tenantDocs = new ArrayList<>();
         if (contractId != null) {
             try {
-                List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries
-                        = TenantLifecycleManager.getAll(contractId);
+                List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries = TenantLifecycleManager
+                        .getAll(contractId);
                 if (contractInfo == null) {
                     contractInfo = ContractLifecycleManager.getInfo(contractId);
                 }
@@ -363,12 +383,13 @@ public class BatonServiceImpl implements BatonService {
     }
 
     private List<TenantDocument> constructTenantDocsWithDefaultSpaceId(
-            List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries,
-            String contractId, ContractInfo contractInfo) {
-        if (tenantEntries == null) return null;
+            List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries, String contractId,
+            ContractInfo contractInfo) {
+        if (tenantEntries == null)
+            return null;
 
         List<TenantDocument> docs = new ArrayList<>();
-        for (Map.Entry<String, TenantInfo> tenantEntry :  tenantEntries) {
+        for (Map.Entry<String, TenantInfo> tenantEntry : tenantEntries) {
             String tenantId = tenantEntry.getKey();
             String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
 
@@ -393,8 +414,7 @@ public class BatonServiceImpl implements BatonService {
                 doc.setSpaceInfo(spaceInfo);
                 docs.add(doc);
             } catch (Exception e) {
-                log.error(String.format(
-                        "Error constructing tenant document for contract %s, tenant %s, and space %s.",
+                log.error(String.format("Error constructing tenant document for contract %s, tenant %s, and space %s.",
                         contractId, tenantId, spaceId), e);
             }
         }
@@ -404,14 +424,14 @@ public class BatonServiceImpl implements BatonService {
 
     @Override
     public boolean setupSpaceConfiguration(String contractId, String tenantId, String spaceId,
-                                           SpaceConfiguration spaceConfig) {
+            SpaceConfiguration spaceConfig) {
         return setupSpaceConfiguration(contractId, tenantId, spaceId, spaceConfig.toDocumentDirectory());
     }
 
     private boolean setupSpaceConfiguration(String contractId, String tenantId, String spaceId,
-                                            DocumentDirectory spaceConfig) {
-        Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                contractId, tenantId, spaceId)
+            DocumentDirectory spaceConfig) {
+        Path spaceConfigPath = PathBuilder
+                .buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)
                 .append(new Path("/" + PathConstants.SPACECONFIGURATION_NODE));
         return loadDirectory(spaceConfig, spaceConfigPath);
     }
