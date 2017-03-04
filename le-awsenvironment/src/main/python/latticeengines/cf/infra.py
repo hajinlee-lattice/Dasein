@@ -116,13 +116,13 @@ def create_load_balancers(tg_map, ui=False):
     albs["private"] = private_lb
 
     # 2nd tier private tomcat
-    private_lb2 = ApplicationLoadBalancer("private2", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
-    private_lb2.add_tag("le-product", "lpi")
-    private_lb2.add_tag("le-stack", PARAM_LE_STACK.ref())
+    private2_lb = ApplicationLoadBalancer("private2", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+    private2_lb.add_tag("le-product", "lpi")
+    private2_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
     for k, v in tg_map.items():
-        private_lb2.depends_on(v)
-    resources.append(private_lb2)
-    albs["private2"] = private_lb2
+        private2_lb.depends_on(v)
+    resources.append(private2_lb)
+    albs["private2"] = private2_lb
 
     # public tomcat
     public_lb = ApplicationLoadBalancer("public", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
@@ -136,7 +136,7 @@ def create_load_balancers(tg_map, ui=False):
     # listeners
     private_lsnr = create_listener(private_lb, tg_map["haproxy"])
     resources.append(private_lsnr)
-    private2_lsnr = create_listener(private_lb, tg_map["swaggerprivate"])
+    private2_lsnr = create_listener(private2_lb, tg_map["swaggerprivate"])
     resources.append(private2_lsnr)
     public_lsnr = create_listener(public_lb, tg_map["swaggerpublic"])
     resources.append(public_lsnr)
