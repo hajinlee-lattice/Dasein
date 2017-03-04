@@ -129,6 +129,7 @@ def haproxy_task(stackname, ec2s):
         "/latticeengines/haproxy" ] ]}) \
         .mem_mb("768") \
         .publish_port(80, 80) \
+        .publish_port(443, 443) \
         .publish_port(81, 81) \
         .set_logging({
         "LogDriver": "awslogs",
