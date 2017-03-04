@@ -6,6 +6,7 @@ RUN apt-get -y install dnsutils
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
+COPY server.crt /etc/ssl/server.crt
 COPY start.sh /start.sh
 
 ENTRYPOINT ["bash"]
