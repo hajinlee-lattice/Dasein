@@ -492,14 +492,14 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             }
         });
     }
-    
+
     function parseFeatureFlagDefinitions(featureFlagDefinitions) {
         if (featureFlagDefinitions === null) {
             return;
         } else {
             _.each(featureFlagDefinitions, function(featureFlag){
                 // initilize its value
-                featureFlag.Value = defaultFeatureFlagValue(featureFlag);
+                featureFlag.Value = featureFlag.DefaultValue;
                 if (featureFlag.AvailableProducts !== null) {
                     _.each(featureFlag.AvailableProducts, function(product){
                         _.each($scope.availableProducts, function(availableProduct){
@@ -514,22 +514,6 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         console.log("parseFeatureFlagDefinitions" + $scope.availableProducts);
     }
 
-    function defaultFeatureFlagValue(featureFlag) {
-        if (featureFlag.DisplayName === "Dante" ||
-            featureFlag.DisplayName === "UseSalesforceSettings" ||
-            featureFlag.DisplayName === "UseMarketoSettings" ||
-            featureFlag.DisplayName === "UseEloquaSettings" ||
-            featureFlag.DisplayName === "EnablePocTransform" ||
-            featureFlag.DisplayName === "EnableLatticeMarketoCredentialPage" ||
-            featureFlag.DisplayName === "EnableDataProfilingV2") {
-            return true;
-        }
-        if (!featureFlag.Configurable) {
-            return true;
-        }
-        return false;
-    }
-    
     function getAvailableComponents() {
         ServiceService.GetRegisteredServicesWithAssociatedProducts().then( function(result) {
             if (result.success) {

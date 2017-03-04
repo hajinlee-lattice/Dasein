@@ -14,6 +14,7 @@ public class FeatureFlagDefinition {
     private Set<LatticeProduct> availableProducts;
     private boolean configurable;
     private boolean modifiableAfterProvisioning = true;
+    private boolean defaultValue = false;
 
     @JsonProperty("DisplayName")
     public String getDisplayName() {
@@ -63,6 +64,16 @@ public class FeatureFlagDefinition {
     @JsonProperty("ModifiableAfterProvisioning")
     public void setModifiableAfterProvisioning(boolean modifiableAfterProvisioning) {
         this.modifiableAfterProvisioning = modifiableAfterProvisioning;
+    }
+
+    @JsonProperty("DefaultValue")
+    public void setDefaultValue(boolean defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    @JsonProperty("DefaultValue")
+    public boolean getDefaultValue() {
+        return this.defaultValue;
     }
 
     @Override

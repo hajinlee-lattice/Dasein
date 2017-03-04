@@ -104,35 +104,46 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
     void defineDefaultFeatureFlags() {
         // LPA flags
         Collection<LatticeProduct> lp2 = Collections.singleton(LatticeProduct.LPA);
-        createDefaultFeatureFlag(LatticeFeatureFlag.DANTE, lp2);
+        createDefaultFeatureFlag(LatticeFeatureFlag.DANTE, lp2).setDefaultValue(true);
 
         // PD flags
         Collection<LatticeProduct> pd = Collections.singleton(LatticeProduct.PD);
-        createDefaultFeatureFlag(LatticeFeatureFlag.QUOTA, pd).setConfigurable(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.TARGET_MARKET, pd).setConfigurable(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, pd).setConfigurable(false);
+        FeatureFlagDefinition quotaFf = createDefaultFeatureFlag(LatticeFeatureFlag.QUOTA, pd);
+        quotaFf.setConfigurable(false);
+        quotaFf.setDefaultValue(true);
+        FeatureFlagDefinition targetMarketFf = createDefaultFeatureFlag(LatticeFeatureFlag.TARGET_MARKET, pd);
+        targetMarketFf.setConfigurable(false);
+        targetMarketFf.setDefaultValue(true);
+        FeatureFlagDefinition eaiValidateFf = createDefaultFeatureFlag(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL,
+                pd);
+        eaiValidateFf.setConfigurable(false);
+        eaiValidateFf.setDefaultValue(true);
 
         // LPI flags
         Collection<LatticeProduct> lpi = Collections.singleton(LatticeProduct.LPA3);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_POC_TRANSFORM, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.USE_SALESFORCE_SETTINGS, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.USE_MARKETO_SETTINGS, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.USE_ELOQUA_SETTINGS, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_POC_TRANSFORM, lpi).setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.USE_SALESFORCE_SETTINGS, lpi).setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.USE_MARKETO_SETTINGS, lpi).setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.USE_ELOQUA_SETTINGS, lpi).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_PIVOT_FILE, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE, lpi).setConfigurable(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_FUZZY_MATCH, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2, lpi);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2, lpi).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.LATTICE_INSIGHTS, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.BYPASS_DNB_CACHE, lpi).setConfigurable(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CDL, lpi);
+        FeatureFlagDefinition marketoCredentialFf = createDefaultFeatureFlag(
+                LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE, lpi);
+        marketoCredentialFf.setConfigurable(false);
+        marketoCredentialFf.setDefaultValue(true);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
                 Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG));
         enableDataEncryption.setModifiableAfterProvisioning(false);
+        enableDataEncryption.setDefaultValue(true);
 
         // register to feature flag client
         registerAllFlags();
@@ -147,6 +158,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         featureFlagDef.setAvailableProducts(featureFlagProdSet);
         featureFlagDef.setConfigurable(true);
         featureFlagDef.setModifiableAfterProvisioning(true);
+        featureFlagDef.setDefaultValue(false);
         flagDefinitionMap.put(featureFlag.getName(), featureFlagDef);
         return featureFlagDef;
     }

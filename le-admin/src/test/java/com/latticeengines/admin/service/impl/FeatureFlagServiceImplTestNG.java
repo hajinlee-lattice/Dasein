@@ -56,6 +56,11 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .singleton(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
+        Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList(LatticeFeatureFlag.ALLOW_PIVOT_FILE,
+                LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, LatticeFeatureFlag.ENABLE_FUZZY_MATCH,
+                LatticeFeatureFlag.LATTICE_INSIGHTS, LatticeFeatureFlag.ENABLE_CDL,
+                LatticeFeatureFlag.BYPASS_DNB_CACHE);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);
@@ -93,7 +98,13 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                         latticeFeatureFlag.getName() + " should be included in the product "
                                 + LatticeProduct.CG.getName() + ", but it is not.");
             }
-
+            if (!expectedDefaultFalseFlags.contains(latticeFeatureFlag)) {
+                Assert.assertTrue(flagDefinition.getDefaultValue(),
+                        String.format("Default feature flag %s, value should be true", latticeFeatureFlag.getName()));
+            } else {
+                Assert.assertFalse(flagDefinition.getDefaultValue(),
+                        String.format("Default feature flag %s, value should be false", latticeFeatureFlag.getName()));
+            }
         }
     }
 
