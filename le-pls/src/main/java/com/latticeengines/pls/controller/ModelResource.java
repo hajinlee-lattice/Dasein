@@ -260,8 +260,9 @@ public class ModelResource {
         Table schemaTable = SchemaRepository.instance().getSchema(schemaInterpretation);
 
         for (VdbMetadataField metadataField : metadataFields) {
-            if (metadataField.getTags().contains("Internal")) {
-                if (metadataField.getApprovedUsage().equals("None")
+            if (metadataField.getTags() != null && metadataField.getTags().contains("Internal")) {
+                if ((metadataField.getApprovedUsage() == null
+                        || metadataField.getApprovedUsage().equals("None"))
                         && (metadataField.getAssociatedRules().isEmpty()
                                 || (schemaTable.getAttribute(metadataField.getColumnName()) != null
                                         && schemaTable.getAttribute(metadataField.getColumnName())
