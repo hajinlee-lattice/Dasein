@@ -26,15 +26,15 @@ public class GenericRecordProcessor {
     private GenericSinkConnectorConfig connectorConfig;
     private GenericFabricEntityManager<GenericFabricRecord> entityManager;
 
-    List<GenericRecord> allKeyRecords = new ArrayList<>();
-    List<GenericRecord> allValueRecords = new ArrayList<>();
+    private List<GenericRecord> allKeyRecords = new ArrayList<>();
+    private List<GenericRecord> allValueRecords = new ArrayList<>();
     private List<TopicPartition> allTopicPartitions = new ArrayList<>();
 
-    Set<FabricStoreEnum> repositorySet = new HashSet<>();
+    private Set<FabricStoreEnum> repositorySet = new HashSet<>();
+    private Map<String, Long> batchCountMap = new HashMap<>();
 
-    Map<String, Long> batchCountMap = new HashMap<>();
-
-    public GenericRecordProcessor(GenericSinkConnectorConfig connectorConfig, GenericFabricEntityManager<GenericFabricRecord> entityManager) {
+    public GenericRecordProcessor(GenericSinkConnectorConfig connectorConfig,
+            GenericFabricEntityManager<GenericFabricRecord> entityManager) {
         this.connectorConfig = connectorConfig;
         this.entityManager = entityManager;
 
