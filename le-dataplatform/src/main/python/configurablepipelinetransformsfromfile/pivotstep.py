@@ -7,11 +7,11 @@ import json
 import math
 import os
 
+from scipy.stats import chisquare
+
 from pipelinefwk import PipelineStep
 from pipelinefwk import create_column
 from pipelinefwk import get_logger
-
-from scipy.stats import chisquare
 
 
 logger = get_logger("pipeline")
@@ -116,7 +116,7 @@ class PivotStep(PipelineStep):
             return
         entry = {}
         entry["ColumnName"] = columnName
-        entry["StatisticalType"] = "ratio"
+        entry["StatisticalType"] = "nominal"
         entry["FundamentalType"] = "numeric"
         entry["DataType"] = "Integer"
         super(PivotStep, self).appendMetadataEntry(configMetadata, entry)

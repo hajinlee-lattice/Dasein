@@ -1,8 +1,8 @@
 import logging
 import os
-import shutil
-from pandas import Series
 from pandas import DataFrame
+from pandas import Series
+import shutil
 
 from leframework.codestyle import overrides
 from leframework.executor import Executor
@@ -11,12 +11,14 @@ from leframework.model.states.averageprobabilitygenerator import AverageProbabil
 from leframework.model.states.bucketgenerator import BucketGenerator
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
 from leframework.model.states.columnmetadatagenerator import ColumnMetadataGenerator
+from leframework.model.states.crossvalidationgenerator import CrossValidationGenerator
 from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
 from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
 from leframework.model.states.finalize import Finalize
 from leframework.model.states.initialize import Initialize
 from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.modelgenerator import ModelGenerator
+from leframework.model.states.modelpredictorgenerator import ModelPredictorGenerator
 from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.normalizationgenerator import NormalizationGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
@@ -28,8 +30,6 @@ from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
-from leframework.model.states.crossvalidationgenerator import CrossValidationGenerator
-from leframework.model.states.modelpredictorgenerator import ModelPredictorGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -111,14 +111,12 @@ class LearningExecutor(Executor):
 
     @overrides(Executor)
     def transformData(self, params):
-        pipeline, metadata, pipelineParams = self.createDataPipeline(params)
+        pipeline, metadata, _ = self.createDataPipeline(params)
         configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None
 
         pipeline.learnParameters(params["training"], params["test"], configMetadata)
         training = pipeline.predict(params["training"], configMetadata, False)
         test = pipeline.predict(params["test"], configMetadata, True)
-        if "trainingDataRemediated" in pipelineParams and "testDataRemediated" in pipelineParams:
-            params["allDataPreTransform"] = DataFrame.append(pipelineParams["trainingDataRemediated"], pipelineParams["testDataRemediated"])
 
         return (training, test, metadata)
 

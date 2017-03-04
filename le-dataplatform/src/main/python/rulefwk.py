@@ -1,9 +1,11 @@
 from abc import abstractmethod
 from avro import schema, datafile, io
 import codecs
+import logging
+
 from pipelinefwk import Pipeline
 from pipelinefwk import PipelineStep
-import logging
+
 
 logger = logging.getLogger(name='rulefwk')
 
@@ -21,7 +23,7 @@ class DataRulePipeline(Pipeline):
                 logger.exception("Caught Exception while applying datarule. Stack trace below" + str(e))
         return dataFrame
 
-    def processResults(self, dataRulesLocalDir, dataFrame, targetColumn, idColumn = None):
+    def processResults(self, dataRulesLocalDir, dataFrame, targetColumn, idColumn=None):
         for step in self.pipelineSteps:
             logger.info("Processing results for DataRule " + step.__class__.__name__)
             step.logAndWriteResults(dataRulesLocalDir, dataFrame, targetColumn, idColumn)
@@ -46,29 +48,29 @@ class RuleResults(object):
 class DataRule(PipelineStep):
 
     interfaceColumns = { 'Id',
-                        'InternalId',
-                        'Event',
-                        'Domain',
-                        'LastModifiedDate',
-                        'CreatedDate',
-                        'FirstName',
-                        'LastName',
-                        'Title',
-                        'Email',
-                        'City',
-                        'State',
-                        'PostalCode',
-                        'Country',
-                        'PhoneNumber',
-                        'Website',
-                        'CompanyName',
-                        'Industry',
-                        'LeadSource',
-                        'IsClosed',
-                        'StageName',
-                        'AnnualRevenue',
-                        'NumberOfEmployees',
-                        'YearStarted' }
+                         'InternalId',
+                         'Event',
+                         'Domain',
+                         'LastModifiedDate',
+                         'CreatedDate',
+                         'FirstName',
+                         'LastName',
+                         'Title',
+                         'Email',
+                         'City',
+                         'State',
+                         'PostalCode',
+                         'Country',
+                         'PhoneNumber',
+                         'Website',
+                         'CompanyName',
+                         'Industry',
+                         'LeadSource',
+                         'IsClosed',
+                         'StageName',
+                         'AnnualRevenue',
+                         'NumberOfEmployees',
+                         'YearStarted' }
 
     def __init__(self, props):
         super(DataRule, self).__init__(props)
@@ -111,7 +113,7 @@ class DataRule(PipelineStep):
             for itemID, ruleResult in results.iteritems():
                 if not ruleResult.isPassed():
                     self.appendDataWriterRow(index, itemID, dataWriter, dataFrame, targetColumn, idColumn)
-                    index +=1
+                    index += 1
 
     def logResults(self, results):
         details = ''
@@ -124,7 +126,7 @@ class DataRule(PipelineStep):
                 details = details + '{0:50s} FAILED: {1}\n'.format(c, r.getMessage())
             else:
                 details = details + '{0:50s} PASSED: {1}\n'.format(c, r.getMessage())
-        logger.info('DataRule results: {0} columns failed ({1:.2%})\n{2}'.format(n_failed, float(n_failed)/float(n_cols), details))
+        logger.info('DataRule results: {0} columns failed ({1:.2%})\n{2}'.format(n_failed, float(n_failed) / float(n_cols), details))
 
     def getDataWriter(self, dataRulesLocalDir):
         recordWriter = io.DatumWriter(self.getSchema())
@@ -223,7 +225,7 @@ class RowRule(DataRule):
         return schema.parse(ruleSchema)
 
     def appendDataWriterRow(self, index, rowId, dataWriter, dataFrame, targetColumn, idColumn):
-        ## This needs implementation
+        # # This needs implementation
         pass
 
 

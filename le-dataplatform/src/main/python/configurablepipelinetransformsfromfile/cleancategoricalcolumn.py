@@ -1,14 +1,7 @@
-from collections import Counter
-import math
-import pandas as pd
-from pipelinefwk import get_logger
-from pipelinefwk import create_column
-from pipelinefwk import PipelineStep
-import os
 '''
 Description:
 
-This code ingests a categorical varaible list xlist and a threshold value thresh
+This code ingests a categorical variable list xlist and a threshold value thresh
 It then keeps only those categories which (from largest to smallest) comprise up to 95%
 of the population.  It also puts a filter on that each category must
 represent at least 1% of the total population by the variable percMin
@@ -21,6 +14,16 @@ Running The Code Plus Notes: #note, test is run for eventList floats but in prac
     ff=__cleanCategFull(bb,aa,elist)
     z=[j for i, j in zip(bb, ff) if i != j]
 '''
+
+from collections import Counter
+import math
+import os
+
+import pandas as pd
+from pipelinefwk import PipelineStep
+from pipelinefwk import create_column
+from pipelinefwk import get_logger
+
 
 logger = get_logger("pipeline")
 

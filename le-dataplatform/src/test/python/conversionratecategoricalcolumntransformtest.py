@@ -33,7 +33,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         # Only Convert one column, we will use the other one to check the train/test logic
         columnsToTransform = {'E':1}
         columnsNotToPivot = {'F':1}  # Not used in "training" phase. This column will be added to testing data frame
-        conversionRateAssigner = AssignConversionRateToAllCategoricalValues(columnsToTransform=columnsToTransform, \
+        conversionRateAssigner = AssignConversionRateToAllCategoricalValues(categoricalColumns=columnsToTransform, \
                                                                             targetColumn=targetColumn, \
                                                                             totalPositiveThreshold=1)
 

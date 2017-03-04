@@ -1,22 +1,17 @@
 import base64
 import csv
-import glob
 import gzip
 import json
 import os
 from random import shuffle
 import shutil
-import sys
 import uuid
-import zipfile
-
-## This will setup the test environment as if it were running in Hadoop
-import simulatehadoop
 
 from leframework import scoringengine as se
 from leframework.argumentparser import ArgumentParser
 import numpy as np
 from pipelinefwk import ModelStep
+import simulatehadoop
 from testbase import TestBase
 from testbase import removeFiles
 

@@ -3,8 +3,10 @@ Description:
 If the choice is made to assign a categorical variable to numeric values, the choice should be the conversion rate for that specitic categorical value.
 For example, category A has 0% conversion, B has 1% conversion, and C has 8% conversion in the training set.  Reassign A,B, and C to 0,.01 and .08, respectively
 '''
+from json import encoder
 import json
 import os
+import pandas as pd
 from pipelinefwk import PipelineStep
 from pipelinefwk import create_column
 from pipelinefwk import get_logger
@@ -18,37 +20,31 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
     categoricalColumnMapping = None
     categoricalColumnMappingFilePath = None
     totalPositiveThreshold = 12
-    columnsToTransform = {}
+    categoricalColumns = {}
     targetColumn = ""
 
-    def __init__(self, columnsToTransform, targetColumn, totalPositiveThreshold=12):
-        self.columnsToTransform = columnsToTransform
+    def __init__(self, categoricalColumns, targetColumn, totalPositiveThreshold=12):
+        self.categoricalColumns = categoricalColumns
         self.targetColumn = targetColumn
         self.totalPositiveThreshold = totalPositiveThreshold
         
         if self.categoricalColumnMapping is None:
             self.categoricalColumnMapping = {}
-        if columnsToTransform:
-            self.columnList = columnsToTransform.keys()
+        if categoricalColumns:
+            self.columnList = categoricalColumns.keys()
         else:
             self.columnList = []
-        logger.info("Initialized AssignConversionRate with columnsToTransform " + str(columnsToTransform)
+        logger.info("Initialized AssignConversionRate with categoricalColumns " + str(categoricalColumns)
                     + ", targetColumn=" + str(targetColumn)
                     + ", positiveThreshold=" + str(self.totalPositiveThreshold))
     
-    def learnParameters(self, trainingDataFrame, testDataFrame, configMetadata):
-        for column, _ in self.columnsToTransform.iteritems():
-            if column in trainingDataFrame.columns:
-                self.__assignConversionRateToCategoricalColumns(column, trainingDataFrame, self.targetColumn)
-                logger.info("self.assignConversionRateMapping " + str(self.categoricalColumnMapping))
-        self.__writeRTSArtifacts()
-
     def transform(self, dataFrame, configMetadata, test):
-        for column, _ in self.columnsToTransform.iteritems():
+        for column, _ in self.categoricalColumns.iteritems():
             if column in dataFrame.columns:
                 self.currentColumn = column
+                self.__assignConversionRateToCategoricalColumns(column, dataFrame, self.targetColumn)
                 dataFrame[column] = dataFrame[column].apply(self.__applyConversionRate)
-                logger.info("self.assignConversionRateMapping " + str(self.categoricalColumnMapping))
+        self.__writeRTSArtifacts()
         return dataFrame
 
     def __assignConversionRateToCategoricalColumns(self, column, dataFrame, targetColumn):
@@ -76,6 +72,8 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
 
     def __applyConversionRate(self, categoryValue):
         if self.currentColumn in self.categoricalColumnMapping:
+            if pd.isnull(categoryValue):
+                return self.categoricalColumnMapping[self.currentColumn]["UNKNOWN"]
             if categoryValue in self.categoricalColumnMapping[self.currentColumn]:
                 if self.categoricalColumnMapping[self.currentColumn][categoryValue]:
                     return self.categoricalColumnMapping[self.currentColumn][categoryValue]
@@ -84,9 +82,12 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
         return categoryValue
 
     def __writeRTSArtifacts(self):
+        e = encoder.FLOAT_REPR
+        encoder.FLOAT_REPR = lambda o: format(o, ".2f")
         with open("conversionratemapping.json", "wb") as fp:
             json.dump(self.categoricalColumnMapping, fp)
             self.categoricalColumnMappingFilePath = os.path.abspath(fp.name)
+        encoder.FLOAT_REPR = e
 
     def getRTSArtifacts(self):
         return [("conversionratemapping.json", self.categoricalColumnMappingFilePath)]

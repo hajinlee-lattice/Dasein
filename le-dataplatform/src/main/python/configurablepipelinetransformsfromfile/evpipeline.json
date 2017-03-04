@@ -52,7 +52,7 @@
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Categorical"],
         "NamedParameterListToInit": {
-            "columnsToTransform": "categoricalColumns", 
+            "categoricalColumns": "categoricalColumns", 
             "targetColumn": "targetColumn",
             "totalPositiveThreshold": 12
         },

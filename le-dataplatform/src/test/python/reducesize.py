@@ -1,8 +1,9 @@
-import avro.schema
 from avro.datafile import DataFileReader, DataFileWriter
 from avro.io import DatumReader, DatumWriter
-import sys
+import avro.schema
 import random
+import sys
+
 
 def reduceFileSize(fileName, percentageOfLines):
     fileReader = DataFileReader(open(fileName, "r"), DatumReader())
@@ -18,7 +19,7 @@ def reduceFileSize(fileName, percentageOfLines):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print "Usage: python reduceSize.py data/s100Training-dp1089.avro 0.1"
+        print "Usage: python reducesize.py <avrofile> <percentreduction>"
         print " where 0.1 is percentage of rows to take"
     fileName = sys.argv[1]
     numberOfLines = float(sys.argv[2])

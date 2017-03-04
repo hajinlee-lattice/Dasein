@@ -1,5 +1,10 @@
+import atexit
+import glob
+import os
+import shutil
+import sys
+import zipfile
 
-import glob, os, shutil, sys, zipfile
 
 fwkdir = "./leframework.tar.gz"
 pipelinefwkdir = "./lepipeline.tar.gz"
@@ -8,14 +13,14 @@ swlibdir = "./le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.jar"
 
 basePath = os.path.join('..', '..') if os.path.exists("../../main/python/rulefwk.py") else os.path.join('..', '..', '..')
 
-## This needs to be at the scope of the module
+# # This needs to be at the scope of the module
 _filesToCopy = {}
 
 sys.path.append(fwkdir)
 sys.path.append(pipelinefwkdir)
 sys.path.append(evpipelinefwkdir)
 
-def setUp(filesToCopy):
+def setup(filesToCopy):
     print 'Simulating HDFS'
     # These properties won't really be used since these are just unit tests.
     # Functional and end-to-end tests should be done from java
@@ -32,15 +37,14 @@ def setUp(filesToCopy):
     filesToCopy[os.path.join(basePath, "main", "python", "configurablepipelinetransformsfromfile", "pipeline.json")] = "pipeline.json"
     filesToCopy[os.path.join(basePath, "main", "python", "datarules", "rulepipeline.json")] = "rulepipeline.json"
     filesToCopy[os.path.join(basePath, "main", "python", "configurablepipelinetransformsfromfile", "pmmlpipeline.json")] = "pmmlpipeline.json"
-    filesToCopy[os.path.join(basePath, "main", "python", "configurablepipelinetransformsfromfile", "pipelinenullconversionrate.json")] = "pipelinenullconversionrate.json"
     filesToCopy[os.path.join(basePath, "main", "python", "evpipeline", "evpipeline.py")] = "evpipeline.py"
 
     for (root, dirs, files) in os.walk(os.path.join(basePath, "main", "python", "algorithm")):
-        for file in files:
-            if file[-3:] != '.py':
+        for f in files:
+            if f[-3:] != '.py':
                 continue
-            src = os.path.join(root, file)
-            tgt = file
+            src = os.path.join(root, f)
+            tgt = f
             filesToCopy[src] = tgt
 
     if os.path.exists(fwkdir):
@@ -79,11 +83,11 @@ def setUp(filesToCopy):
             dtgt = os.path.join(root.replace(os.path.join(basePath, "main", "python"), os.path.join(".", "leframework.tar.gz"), 1), dsrc)
             print 'Making directory {}'.format(dtgt)
             os.makedirs(dtgt)
-        for file in files:
-            if file[-3:] != '.py':
+        for f in files:
+            if f[-3:] != '.py':
                 continue
-            src = os.path.join(root, file)
-            tgt = os.path.join(root.replace(os.path.join(basePath, "main", "python"), os.path.join(".", "leframework.tar.gz"), 1), file)
+            src = os.path.join(root, f)
+            tgt = os.path.join(root.replace(os.path.join(basePath, "main", "python"), os.path.join(".", "leframework.tar.gz"), 1), f)
             print 'Copying: ', src, '==>', tgt
             shutil.copy(src, tgt)
 
@@ -111,7 +115,7 @@ def setUp(filesToCopy):
 
 def tearDown(filesToCopy):
     print 'Cleaning up simulated HDFS'
-    for src, tgt in filesToCopy.iteritems():
+    for _, tgt in filesToCopy.iteritems():
         os.remove(tgt)
     if os.path.exists(fwkdir):
         shutil.rmtree(fwkdir)
@@ -129,6 +133,5 @@ def __unzipSoftwareLibJar():
     with zipfile.ZipFile(zipFilePath) as z:
         z.extractall(swlibdir)
 
-setUp(_filesToCopy)
-import atexit
+setup(_filesToCopy)
 atexit.register(tearDown, filesToCopy=_filesToCopy)

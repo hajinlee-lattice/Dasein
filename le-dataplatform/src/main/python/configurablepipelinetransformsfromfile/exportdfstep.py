@@ -15,7 +15,7 @@ class ExportDataFrameStep(PipelineStep):
     def __init__(self): pass
 
     def transform(self, dataFrame, configMetadata, test):
-        if test == True or "DEBUG" not in os.environ or os.environ["DEBUG"] != "true":
+        if test == False or "DEBUG" not in os.environ or os.environ["DEBUG"] != "true":
             return dataFrame
 
         columns = list(dataFrame.columns.values)

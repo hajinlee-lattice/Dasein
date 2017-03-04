@@ -49,7 +49,6 @@ def setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColum
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
 
-    features = params['schema']['features']
     keys = params['schema']['keys']
     customerColumns = set()
     if columnMetadata is not None:
@@ -102,7 +101,7 @@ def setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColum
                                     objectFromJson = getObjectFromJSON(type(currentValue), value)
                                     setattr(step, tokens[1], objectFromJson)
                                 except Exception as e:
-                                    logger.error("Couldn't set object property correctly. Stacktrace below")
+                                    logger.error("Couldn't set object property correctly. Stack trace below")
                                     logger.error(e)
                 except Exception as propError:
                     logger.error(str(propError))

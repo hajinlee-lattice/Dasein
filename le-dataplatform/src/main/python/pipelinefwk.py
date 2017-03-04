@@ -2,7 +2,6 @@ import logging
 import sys
 
 import pandas as pd
-import numpy as np
 
 try:
     from precisionutil import PrecisionUtil
@@ -34,7 +33,8 @@ class Pipeline(object):
         return self.pipelineSteps
 
     def predict(self, dataFrame, configMetadata, test):
-        transformed = dataFrame.apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
+        transformed = dataFrame
+        # transformed = transformed.apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
         for step in self.pipelineSteps:
             step.setMediator(self.mediator)
             try:
