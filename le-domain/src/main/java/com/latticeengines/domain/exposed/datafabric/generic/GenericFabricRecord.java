@@ -7,12 +7,17 @@ import org.apache.avro.generic.GenericRecord;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
-public class GenericFabricRecord implements  HasId<String> {
+public class GenericFabricRecord implements HasId<String> {
 
     @Id
     private String id;
     @JsonProperty("GenericRecord")
     private GenericRecord genericRecord;
+
+    public GenericFabricRecord(String id, GenericRecord genericRecord) {
+        this.id = id;
+        this.genericRecord = genericRecord;
+    }
 
     public GenericRecord getGenericRecord() {
         return genericRecord;
@@ -32,6 +37,4 @@ public class GenericFabricRecord implements  HasId<String> {
         this.id = id;
     }
 
-    
 }
-

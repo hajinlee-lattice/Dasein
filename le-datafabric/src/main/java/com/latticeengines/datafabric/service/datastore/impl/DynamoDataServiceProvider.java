@@ -9,13 +9,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.datafabric.service.datastore.FabricDataServiceProvider;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 
 @Component("dynamoDataService")
 public class DynamoDataServiceProvider implements FabricDataServiceProvider {
 
     private static final Log log = LogFactory.getLog(FabricDataServiceImpl.class);
-
-    private final String name = "DYNAMO";
 
     @Autowired
     private DynamoService dynamoService;
@@ -28,6 +27,6 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
 
     @Override
     public String getName() {
-        return name;
+        return FabricStoreEnum.DYNAMO.name();
     }
 }

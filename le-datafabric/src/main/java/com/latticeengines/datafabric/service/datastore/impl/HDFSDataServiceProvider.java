@@ -8,13 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datafabric.service.datastore.FabricDataServiceProvider;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 
 @Component("hdfsDataServiceProvider")
 public class HDFSDataServiceProvider implements FabricDataServiceProvider {
 
     private static final Log log = LogFactory.getLog(FabricDataServiceImpl.class);
-
-    private final String name = "HDFS";
 
     private Configuration config;
 
@@ -33,7 +32,7 @@ public class HDFSDataServiceProvider implements FabricDataServiceProvider {
 
     @Override
     public String getName() {
-        return name;
+        return FabricStoreEnum.HDFS.name();
     }
 
     @Override

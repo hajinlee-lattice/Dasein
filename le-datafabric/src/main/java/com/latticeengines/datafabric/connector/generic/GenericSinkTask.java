@@ -19,6 +19,7 @@ import org.apache.kafka.connect.sink.SinkTask;
 
 import com.latticeengines.datafabric.entitymanager.impl.GenericFabricEntityManagerImpl;
 import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 
 public class GenericSinkTask extends SinkTask {
 
@@ -26,7 +27,7 @@ public class GenericSinkTask extends SinkTask {
     private AvroData avroData;
 
     private GenericSinkConnectorConfig connectorConfig;
-    private GenericFabricEntityManagerImpl entityManager;
+    private GenericFabricEntityManagerImpl<GenericFabricRecord> entityManager;
 
     public GenericSinkTask() {
 
@@ -46,7 +47,7 @@ public class GenericSinkTask extends SinkTask {
             String stack = connectorConfig.getProperty(GenericSinkConnectorConfig.STACK, String.class);
             String zkConnect = connectorConfig.getProperty(GenericSinkConnectorConfig.KAFKA_ZKCONNECT, String.class);
             FabricMessageServiceImpl messageService = new FabricMessageServiceImpl(pod, stack, zkConnect);
-            entityManager = new GenericFabricEntityManagerImpl();
+            entityManager = new GenericFabricEntityManagerImpl<GenericFabricRecord>();
             entityManager.setMessageService(messageService);
 
         } catch (Exception e) {
@@ -62,7 +63,7 @@ public class GenericSinkTask extends SinkTask {
     public void put(Collection<SinkRecord> records) throws ConnectException {
 
         if (records.size() <= 0) {
-            log.info("There's not generic connector records.");
+            log.info("There's no generic connector records.");
             return;
         }
 

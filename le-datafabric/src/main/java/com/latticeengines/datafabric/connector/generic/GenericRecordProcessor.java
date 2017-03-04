@@ -1,7 +1,6 @@
 package com.latticeengines.datafabric.connector.generic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +15,8 @@ import org.apache.kafka.common.TopicPartition;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 public class GenericRecordProcessor {
@@ -23,23 +24,25 @@ public class GenericRecordProcessor {
     private static final Log log = LogFactory.getLog(GenericRecordProcessor.class);
 
     private GenericSinkConnectorConfig connectorConfig;
-    private GenericFabricEntityManager entityManager;
+    private GenericFabricEntityManager<GenericFabricRecord> entityManager;
 
     List<GenericRecord> allKeyRecords = new ArrayList<>();
     List<GenericRecord> allValueRecords = new ArrayList<>();
     private List<TopicPartition> allTopicPartitions = new ArrayList<>();
 
-    Set<String> repositorySet = new HashSet<>();
+    Set<FabricStoreEnum> repositorySet = new HashSet<>();
 
     Map<String, Long> batchCountMap = new HashMap<>();
 
-    public GenericRecordProcessor(GenericSinkConnectorConfig connectorConfig, GenericFabricEntityManager entityManager) {
+    public GenericRecordProcessor(GenericSinkConnectorConfig connectorConfig, GenericFabricEntityManager<GenericFabricRecord> entityManager) {
         this.connectorConfig = connectorConfig;
         this.entityManager = entityManager;
 
         String repositories = connectorConfig.getProperty(GenericSinkConnectorConfig.REPOSITORIES, String.class);
-        String[] tokens = repositories.split(";");
-        repositorySet.addAll(Arrays.asList(tokens));
+        String[] stores = repositories.split(";");
+        for (String store : stores) {
+            repositorySet.add(FabricStoreEnum.typeOf(store));
+        }
 
     }
 
@@ -52,7 +55,7 @@ public class GenericRecordProcessor {
     }
 
     public void process() {
-        Map<String, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap = populateRecords();
+        Map<FabricStoreEnum, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap = populateRecords();
         writeRecords(recordMap);
         updateRecordCount();
     }
@@ -67,11 +70,11 @@ public class GenericRecordProcessor {
     }
 
     private void writeRecords(
-            Map<String, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap) {
+            Map<FabricStoreEnum, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap) {
 
-        for (Map.Entry<String, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> storeEntry : recordMap
+        for (Map.Entry<FabricStoreEnum, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> storeEntry : recordMap
                 .entrySet()) {
-            String store = storeEntry.getKey();
+            FabricStoreEnum store = storeEntry.getKey();
             if (!repositorySet.contains(store)) {
                 log.warn("The store is not supported, store=" + store);
                 continue;
@@ -87,8 +90,8 @@ public class GenericRecordProcessor {
         }
     }
 
-    private Map<String, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> populateRecords() {
-        Map<String, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap = new HashMap<>();
+    private Map<FabricStoreEnum, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> populateRecords() {
+        Map<FabricStoreEnum, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap = new HashMap<>();
         for (int i = 0; i < allKeyRecords.size(); i++) {
             GenericRecord keyRecord = allKeyRecords.get(i);
             GenericRecord valueRecord = allValueRecords.get(i);
@@ -100,14 +103,14 @@ public class GenericRecordProcessor {
     }
 
     private void populateRecordPerRecord(
-            Map<String, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap,
+            Map<FabricStoreEnum, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap,
             GenericRecord keyRecord, GenericRecord valueRecord, TopicPartition topicPartition) {
         GenericRecordRequest request = JsonUtils.deserialize((String) keyRecord.get(GenericRecordRequest.REQUEST_KEY),
                 GenericRecordRequest.class);
-        List<String> stores = request.getStores();
+        List<FabricStoreEnum> stores = request.getStores();
         List<String> repositories = request.getRepositories();
         for (int j = 0; j < stores.size(); j++) {
-            String store = stores.get(j);
+            FabricStoreEnum store = stores.get(j);
             String repository = repositories.get(j);
             populateRecordPerRepository(recordMap, valueRecord, topicPartition, request, store, repository);
         }
@@ -115,9 +118,9 @@ public class GenericRecordProcessor {
     }
 
     private void populateRecordPerRepository(
-            Map<String, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap,
-            GenericRecord valueRecord, TopicPartition topicPartition, GenericRecordRequest request, String store,
-            String repository) {
+            Map<FabricStoreEnum, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap,
+            GenericRecord valueRecord, TopicPartition topicPartition, GenericRecordRequest request,
+            FabricStoreEnum store, String repository) {
         if (!recordMap.containsKey(store)) {
             recordMap.put(store,
                     new HashMap<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>());

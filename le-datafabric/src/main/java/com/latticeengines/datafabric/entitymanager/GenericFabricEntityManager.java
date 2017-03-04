@@ -1,9 +1,12 @@
 package com.latticeengines.datafabric.entitymanager;
 
-import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatus;
+import org.apache.avro.generic.GenericRecord;
 
-public interface GenericFabricEntityManager extends BaseFabricEntityMgr<GenericFabricRecord> {
+import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatus;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
+
+public interface GenericFabricEntityManager<T extends HasId<String>> extends BaseFabricEntityMgr<T> {
 
     GenericFabricStatus getBatchStatus(String batchId);
 
@@ -14,5 +17,9 @@ public interface GenericFabricEntityManager extends BaseFabricEntityMgr<GenericF
     void updateBatchCount(String batchId, long delta);
 
     boolean cleanup(String batchId);
+
+    void publishRecord(GenericRecordRequest request, GenericRecord genericRecord);
+
+    void publishEntity(GenericRecordRequest request, T entity, Class<T> clazz);
 
 }

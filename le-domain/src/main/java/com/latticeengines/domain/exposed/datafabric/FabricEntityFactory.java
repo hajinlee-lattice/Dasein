@@ -9,7 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.AvroReflectionUtils;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 
 public final class FabricEntityFactory {
 
@@ -17,9 +16,6 @@ public final class FabricEntityFactory {
 
     public static <T> Schema getFabricSchema(Class<T> clz, String recordType) {
         try {
-            if (GenericFabricRecord.class.isAssignableFrom(clz)) {
-                return null;
-            }
             if (FabricEntity.class.isAssignableFrom(clz)) {
                 T entity = clz.newInstance();
                 return ((FabricEntity<?>) entity).getSchema(recordType);

@@ -1,20 +1,33 @@
 package com.latticeengines.domain.exposed.datafabric.generic;
 
-public enum GenericFabricStatus {
-    FINISHED("Finished"), PROCESSING("Processing"), ERROR("Error"), UNKNOWN("Unknown");
+public class GenericFabricStatus {
 
-    private String value;
+    private GenericFabricStatusEnum status;
+    private float progress;
+    private String message;
 
-    private GenericFabricStatus(String status) {
-        this.value = status;
+    public GenericFabricStatusEnum getStatus() {
+        return status;
     }
 
-    public static GenericFabricStatus typeOf(String status) {
-        for (GenericFabricStatus enumStatus : GenericFabricStatus.values()) {
-            if (enumStatus.value.equalsIgnoreCase(status)) {
-                return enumStatus;
-            }
-        }
-        return UNKNOWN;
+    public void setStatus(GenericFabricStatusEnum status) {
+        this.status = status;
     }
+
+    public float getProgress() {
+        return progress;
+    }
+
+    public void setProgress(float progress) {
+        this.progress = progress;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
 }

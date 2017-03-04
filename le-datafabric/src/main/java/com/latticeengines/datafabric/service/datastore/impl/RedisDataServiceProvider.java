@@ -9,21 +9,20 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datafabric.service.datastore.FabricDataServiceProvider;
-import com.latticeengines.datafabric.service.datastore.FabricDataStore;
-
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.util.Pool;
 
+import com.latticeengines.datafabric.service.datastore.FabricDataServiceProvider;
+import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
+
 @Component("redisDataService")
 public class RedisDataServiceProvider implements FabricDataServiceProvider {
 
     private static final Log log = LogFactory.getLog(FabricDataServiceImpl.class);
-
-    private final String name = "REDIS";
 
     @Value("${datafabric.dataService.redis.servers:localhost}")
     private String redisServers;
@@ -93,6 +92,6 @@ public class RedisDataServiceProvider implements FabricDataServiceProvider {
     }
 
     public String getName() {
-        return name;
+        return FabricStoreEnum.REDIS.name();
     }
 }

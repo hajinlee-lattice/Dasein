@@ -309,10 +309,14 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         try {
             Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
             camille.delete(path);
+        } catch (Exception ex) {
+            log.error("Failed to delete znode, entityName " + entityName, ex);
+        }
+        try {
             LockManager.deregisterCrossDivisionLock(entityName);
             return true;
         } catch (Exception ex) {
-            log.error("Failed to delete znode, entityName " + entityName, ex);
+            log.error("Failed to delete lock, entityName " + entityName, ex);
         }
         return false;
     }

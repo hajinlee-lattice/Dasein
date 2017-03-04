@@ -1,14 +1,25 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Resource;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,20 +40,21 @@ import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTes
 import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricNode;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatus;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatusEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFunctionalTestNGBase {
 
-    private static final long RECORD_COUNT = 10;
+    private static final Log log = LogFactory.getLog(GenericFabricEntityManagerImplFunctionalTestNG.class);
 
     private static final String POD = "FabricConnectors";
     private static final String STACK = "b";
 
-    @Autowired
-    private GenericFabricEntityManager entityManager;
+    @Resource(name = "genericFabricEntityManager")
+    private GenericFabricEntityManager<SampleEntity> entityManager;
 
     @Value("${datafabric.message.zkConnect}")
     private String zkConnect;
@@ -65,6 +77,10 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         messageServiceImpl.setupCamille(Mode.BOOTSTRAP, POD, STACK, zkConnect);
         camille = messageServiceImpl.getCamille();
 
+        cleanHDFS();
+    }
+
+    private void cleanHDFS() throws IOException {
         HdfsUtils.rmdir(conf, "/tmp/testGenericFile1");
         HdfsUtils.rmdir(conf, "/tmp/testGenericFile2");
     }
@@ -79,8 +95,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
             }
         }
         CamilleEnvironment.stop();
-        HdfsUtils.rmdir(conf, "/tmp/testGenericFile1");
-        HdfsUtils.rmdir(conf, "/tmp/testGenericFile2");
+        cleanHDFS();
     }
 
     @Test(groups = "functional", enabled = true)
@@ -104,8 +119,8 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
     @Test(groups = "functional", enabled = true)
     public void createOrGetBatchName() throws Exception {
         String name = entityManager.createOrGetNamedBatchId("connectors", 6L, true);
-        Assert.assertNotNull(name);
         batchIds.add(name);
+        Assert.assertNotNull(name);
 
         String data = messageService.readData(name);
         Assert.assertNotNull(data);
@@ -119,35 +134,47 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
     @Test(groups = "functional", enabled = true)
     public void updateBatchCount() throws Exception {
         // bulk use case
-        String name = entityManager.createOrGetNamedBatchId("connectors", 7L, true);
-        Assert.assertNotNull(name);
+        String name = entityManager.createOrGetNamedBatchId("connectors", 10L, true);
         batchIds.add(name);
+        Assert.assertNotNull(name);
 
         String data = messageService.readData(name);
         Assert.assertNotNull(data);
         GenericFabricNode node = JsonUtils.deserialize(data, GenericFabricNode.class);
         Assert.assertEquals(node.getCount(), 0);
-        Assert.assertEquals(node.getTotalCount(), 7);
+        Assert.assertEquals(node.getTotalCount(), 10);
         Assert.assertEquals(node.getName(), "connectors");
-        Assert.assertEquals(entityManager.getBatchStatus(name), GenericFabricStatus.PROCESSING);
+        GenericFabricStatus batchStatus = entityManager.getBatchStatus(name);
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
 
         entityManager.updateBatchCount(name, 3);
         data = messageService.readData(name);
         Assert.assertNotNull(data);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
         Assert.assertEquals(node.getCount(), 3);
-        Assert.assertEquals(node.getTotalCount(), 7);
+        Assert.assertEquals(node.getTotalCount(), 10);
         Assert.assertEquals(node.getName(), "connectors");
-        Assert.assertEquals(entityManager.getBatchStatus(name), GenericFabricStatus.PROCESSING);
+        batchStatus = entityManager.getBatchStatus(name);
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
+        Assert.assertEquals(batchStatus.getProgress(), new Float(0.30f));
 
-        entityManager.updateBatchCount(name, 4);
+        entityManager.updateBatchCount(name, 6);
         data = messageService.readData(name);
         Assert.assertNotNull(data);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
-        Assert.assertEquals(node.getCount(), 7);
-        Assert.assertEquals(node.getTotalCount(), 7);
+        Assert.assertEquals(node.getCount(), 9);
+        Assert.assertEquals(node.getTotalCount(), 10);
         Assert.assertEquals(node.getName(), "connectors");
-        Assert.assertEquals(entityManager.getBatchStatus(name), GenericFabricStatus.FINISHED);
+        batchStatus = entityManager.getBatchStatus(name);
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
+        Assert.assertEquals(batchStatus.getProgress(), new Float(0.9f));
+
+        entityManager.updateBatchCount(name, 1);
+        data = messageService.readData(name);
+        node = JsonUtils.deserialize(data, GenericFabricNode.class);
+        batchStatus = entityManager.getBatchStatus(name);
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.FINISHED);
+        Assert.assertEquals(batchStatus.getProgress(), new Float(1.0f));
 
         // streaming continuously use case
         name = entityManager.createOrGetNamedBatchId("connectors", null, true);
@@ -160,7 +187,9 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
         Assert.assertEquals(node.getCount(), 18);
-        Assert.assertEquals(entityManager.getBatchStatus(name), GenericFabricStatus.PROCESSING);
+        batchStatus = entityManager.getBatchStatus(name);
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
+        Assert.assertEquals(batchStatus.getProgress(), new Float(0.01f));
 
         name = entityManager.createUniqueBatchId(null);
         batchIds.add(name);
@@ -172,34 +201,70 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
         Assert.assertEquals(node.getCount(), 18);
-        Assert.assertEquals(entityManager.getBatchStatus(name), GenericFabricStatus.PROCESSING);
+        batchStatus = entityManager.getBatchStatus(name);
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
+        Assert.assertEquals(batchStatus.getProgress(), new Float(0.01f));
     }
 
     @Test(groups = "manual", enabled = true)
-    public void publish() throws Exception {
+    public void publishEntity() throws Exception {
+
+        long RECORD_COUNT = 1;
+        cleanHDFS();
+
+        String batchId = entityManager.createUniqueBatchId(RECORD_COUNT);
+        batchIds.add(batchId);
+
+        GenericRecordRequest recordRequest = new GenericRecordRequest();
+        recordRequest.setBatchId(batchId).setCustomerSpace("generic").setStores(Arrays.asList(FabricStoreEnum.HDFS))
+                .setRepositories(Arrays.asList("testGenericFile1")).setId(1 + "");
+
+        SampleEntity entity = new SampleEntity();
+        entity.setId("" + 1);
+        entity.setCompany("company" + 1);
+        entity.setName("lattice" + 1);
+        entity.setLatticeId("latticeId" + 1);
+
+        entityManager.publishEntity(recordRequest, entity, SampleEntity.class);
+
+        waitInSeconds(batchId, 10);
+
+        long count1 = AvroUtils.count(conf, "/tmp/testGenericFile1/*.avro");
+        Assert.assertEquals(count1, RECORD_COUNT);
+
+        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, "/tmp/testGenericFile1/*.avro");
+        Assert.assertEquals(records1.get(0).get("latticeId").toString(), "latticeId1");
+
+    }
+
+    @Test(groups = "manual", enabled = true)
+    public void publishRecord() throws Exception {
+
+        long RECORD_COUNT = 10;
+        cleanHDFS();
 
         String batchId1 = entityManager.createUniqueBatchId(RECORD_COUNT);
+        batchIds.add(batchId1);
         List<GenericRecordRequest> recordRequests = new ArrayList<>();
-        List<GenericFabricRecord> records = new ArrayList<>();
+        List<GenericRecord> records = new ArrayList<>();
         // schema 1
         getRecords(batchId1, recordRequests, records, RECORD_COUNT, 1);
         for (int i = 0; i < records.size(); i++) {
-            entityManager.publish(recordRequests.get(i), records.get(i));
+            entityManager.publishRecord(recordRequests.get(i), records.get(i));
         }
 
         // schema 2
         recordRequests.clear();
         records.clear();
         String batchId2 = entityManager.createUniqueBatchId(RECORD_COUNT);
+        batchIds.add(batchId2);
         getRecords(batchId2, recordRequests, records, RECORD_COUNT, 2);
         for (int i = 0; i < records.size(); i++) {
-            entityManager.publish(recordRequests.get(i), records.get(i));
+            entityManager.publishRecord(recordRequests.get(i), records.get(i));
         }
-        batchIds.add(batchId1);
-        batchIds.add(batchId2);
 
-        waitFor(batchId1, 10);
-        waitFor(batchId2, 10);
+        waitInSeconds(batchId1, 10);
+        waitInSeconds(batchId2, 10);
 
         long count1 = AvroUtils.count(conf, "/tmp/testGenericFile1/*.avro");
         long count2 = AvroUtils.count(conf, "/tmp/testGenericFile2/*.avro");
@@ -213,25 +278,80 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
     }
 
-    private void waitFor(String batchId, int timeoutInSeconds) throws InterruptedException {
+    @Test(groups = "manual", enabled = false)
+    public void performance() throws Exception {
+
+        cleanHDFS();
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        long startTime = System.currentTimeMillis();
+        long LARGE_RECORD_COUNT = 1_000_000L;
+        try {
+            List<Future<Boolean>> futures = new ArrayList<>();
+            // schema 1
+            addThread(pool, LARGE_RECORD_COUNT, futures, 1);
+
+            // schema 2
+            addThread(pool, LARGE_RECORD_COUNT, futures, 2);
+
+            for (Future<Boolean> future : futures) {
+                Boolean result = future.get(5, TimeUnit.HOURS);
+                Assert.assertTrue(result);
+            }
+
+            long count1 = AvroUtils.count(conf, "/tmp/testGenericFile1/*.avro");
+            long count2 = AvroUtils.count(conf, "/tmp/testGenericFile2/*.avro");
+            Assert.assertEquals(count1, count2);
+            Assert.assertEquals(count1, LARGE_RECORD_COUNT);
+
+            List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, "/tmp/testGenericFile1/*.avro");
+            Assert.assertTrue(records1.get(0).get("age") == null);
+            List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf, "/tmp/testGenericFile2/*.avro");
+            Assert.assertTrue(records2.get(0).get("age") != null);
+
+        } catch (Exception ex) {
+            log.error("Failed for performance!", ex);
+            Assert.fail("Failed for perfomance!" + ex.getMessage());
+
+        } finally {
+            pool.shutdown();
+            log.info("Finished within "
+                    + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss.SSS")
+                    + " for records=" + LARGE_RECORD_COUNT);
+        }
+    }
+
+    private void addThread(ExecutorService pool, long recordCount, List<Future<Boolean>> futures, int type) {
+        String batchId = entityManager.createUniqueBatchId(recordCount);
+        batchIds.add(batchId);
+        List<GenericRecordRequest> recordRequests = new ArrayList<>();
+        List<GenericRecord> records = new ArrayList<>();
+        getRecords(batchId, recordRequests, records, recordCount, type);
+        ConnectorCallable callable = new ConnectorCallable(batchId, recordRequests, records);
+        futures.add(pool.submit(callable));
+    }
+
+    private void waitInSeconds(String batchId, int timeoutInSeconds) throws InterruptedException {
         long start = System.currentTimeMillis();
         do {
             GenericFabricStatus status = entityManager.getBatchStatus(batchId);
-            if (status.equals(GenericFabricStatus.ERROR) || status.equals(GenericFabricStatus.UNKNOWN)) {
+            if (status.getStatus().equals(GenericFabricStatusEnum.ERROR)
+                    || status.getStatus().equals(GenericFabricStatusEnum.UNKNOWN)) {
+                log.error("Failed for batchId=" + batchId + " Error=" + status.getMessage());
                 throw new RuntimeException("Failed for batchId=" + batchId);
             }
-            if (status.equals(GenericFabricStatus.FINISHED)) {
-                System.out.println("Finished batchId=" + batchId);
+            if (status.getStatus().equals(GenericFabricStatusEnum.FINISHED)) {
+                log.info("Finished batchId=" + batchId);
                 return;
             }
+            log.info("BatchId=" + batchId + " Progressing=" + String.format("%.0f", status.getProgress() * 100) + "%");
             Thread.sleep(500L);
         } while ((System.currentTimeMillis() - start) < (timeoutInSeconds * 1000));
 
         throw new RuntimeException("Failed for timeout. batchId=" + batchId);
     }
 
-    private List<GenericFabricRecord> getRecords(String id, List<GenericRecordRequest> recordRequests,
-            List<GenericFabricRecord> records, long count, int type) {
+    private List<GenericRecord> getRecords(String id, List<GenericRecordRequest> recordRequests,
+            List<GenericRecord> records, long count, int type) {
         GenericRecordBuilder builder = null;
         if (type == 1) {
             builder = new GenericRecordBuilder(buildSchem1());
@@ -244,13 +364,11 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
             if (type != 1) {
                 builder.set("age", 10 + i);
             }
-            GenericFabricRecord fabricRecord = new GenericFabricRecord();
-            fabricRecord.setGenericRecord(builder.build());
-            records.add(fabricRecord);
+            records.add(builder.build());
 
             GenericRecordRequest recordRequest = new GenericRecordRequest();
             String testFile = "testGenericFile" + type;
-            recordRequest.setBatchId(id).setCustomerSpace("generic").setStores(Arrays.asList("HDFS"))
+            recordRequest.setBatchId(id).setCustomerSpace("generic").setStores(Arrays.asList(FabricStoreEnum.HDFS))
                     .setRepositories(Arrays.asList(testFile)).setId(i + "");
             recordRequests.add(recordRequest);
         }
@@ -264,7 +382,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
                 + "{\"name\": \"RowId\", \"type\": \"long\"}," + "{\"name\": \"Id\", \"type\": \"string\"},"
                 + "{\"name\": \"FirstLastName\", \"type\": \"string\"}" + "]}";
 
-        System.out.println(schemaString);
+        log.info(schemaString);
         Schema.Parser parser = new Schema.Parser();
         return parser.parse(schemaString);
     }
@@ -276,8 +394,38 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
                 + "{\"name\": \"FirstLastName\", \"type\": \"string\"}," + "{\"name\": \"age\", \"type\": \"int\"}"
                 + "]}";
 
-        System.out.println(schemaString);
+        log.info(schemaString);
         Schema.Parser parser = new Schema.Parser();
         return parser.parse(schemaString);
+    }
+
+    private class ConnectorCallable implements Callable<Boolean> {
+        private List<GenericRecordRequest> recordRequests;
+        private List<GenericRecord> records;
+        private String batchId;
+
+        public ConnectorCallable(String batchId, List<GenericRecordRequest> recordRequests, List<GenericRecord> records) {
+            this.batchId = batchId;
+            this.recordRequests = recordRequests;
+            this.records = records;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            try {
+                for (int i = 0; i < records.size(); i++) {
+                    entityManager.publishRecord(recordRequests.get(i), records.get(i));
+                    if (i % 1000 == 0) {
+                        log.info("Publishing at record=" + i + " for batchId=" + batchId);
+                    }
+                }
+                waitInSeconds(batchId, 3_600);
+                return Boolean.TRUE;
+            } catch (Exception ex) {
+                log.error("Failed to publish!", ex);
+                return Boolean.FALSE;
+            }
+        }
+
     }
 }

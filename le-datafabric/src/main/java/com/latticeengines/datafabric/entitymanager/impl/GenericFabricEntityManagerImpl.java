@@ -1,10 +1,13 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.Lazy;
@@ -14,14 +17,15 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricNode;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatus;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatusEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 @Component("genericFabricEntityManager")
 @Lazy
-public class GenericFabricEntityManagerImpl extends BaseFabricEntityMgrImpl<GenericFabricRecord> implements
-        GenericFabricEntityManager {
+public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends BaseFabricEntityMgrImpl<T> implements
+        GenericFabricEntityManager<T> {
 
     private static final Log log = LogFactory.getLog(GenericFabricEntityManagerImpl.class);
 
@@ -73,25 +77,68 @@ public class GenericFabricEntityManagerImpl extends BaseFabricEntityMgrImpl<Gene
 
     @Override
     public GenericFabricStatus getBatchStatus(String batchId) {
+        GenericFabricStatus status = new GenericFabricStatus();
         String data = messageService.readData(batchId);
         if (StringUtils.isBlank(data)) {
-            return GenericFabricStatus.UNKNOWN;
+            status.setStatus(GenericFabricStatusEnum.UNKNOWN);
+            return status;
         }
+
         GenericFabricNode fabricNode = JsonUtils.deserialize(data, GenericFabricNode.class);
+        status.setStatus(getStatusEnum(batchId, fabricNode));
+        setStatusProgress(batchId, status, fabricNode);
+        status.setMessage(fabricNode.getMessage());
+        return status;
+    }
+
+    @Override
+    public void publishEntity(GenericRecordRequest request, T entity, Class<T> clazz) {
+        try {
+            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
+            GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
+            publish(request, genericRecord);
+
+        } catch (Exception e) {
+            log.warn("Publish entity failed! entity Id=" + entity.getId(), e);
+            throw new RuntimeException("Publish entity failed! entity Id=" + entity.getId(), e);
+        }
+    }
+
+    @Override
+    public void publishRecord(GenericRecordRequest request, GenericRecord genericRecord) {
+        publish(request, genericRecord);
+    }
+
+    private void setStatusProgress(String batchId, GenericFabricStatus status, GenericFabricNode fabricNode) {
+        if (fabricNode.getTotalCount() < 0) {
+            status.setProgress(0.01f);
+            return;
+        }
+        if (fabricNode.getTotalCount() == 0) {
+            status.setProgress(1.0f);
+            return;
+        }
+        float result = fabricNode.getCount() == fabricNode.getTotalCount() ? 1.0f : 1.0f * fabricNode.getCount()
+                / fabricNode.getTotalCount();
+        status.setProgress(result);
+    }
+
+    private GenericFabricStatusEnum getStatusEnum(String batchId, GenericFabricNode fabricNode) {
+
         if (StringUtils.isNotBlank(fabricNode.getMessage())) {
             log.error("Batch failed for batch Id=" + batchId + " error=" + fabricNode.getMessage());
-            return GenericFabricStatus.ERROR;
+            return GenericFabricStatusEnum.ERROR;
         }
         if (fabricNode.getTotalCount() <= -1) {
-            return GenericFabricStatus.PROCESSING;
+            return GenericFabricStatusEnum.PROCESSING;
         }
         if (fabricNode.getCount() >= fabricNode.getTotalCount()) {
-            return GenericFabricStatus.FINISHED;
+            return GenericFabricStatusEnum.FINISHED;
         }
         if (fabricNode.getCount() < fabricNode.getTotalCount()) {
-            return GenericFabricStatus.PROCESSING;
+            return GenericFabricStatusEnum.PROCESSING;
         }
-        return GenericFabricStatus.UNKNOWN;
+        return GenericFabricStatusEnum.UNKNOWN;
     }
 
     @Override
@@ -107,7 +154,9 @@ public class GenericFabricEntityManagerImpl extends BaseFabricEntityMgrImpl<Gene
                     return origData;
                 }
                 GenericFabricNode node = JsonUtils.deserialize(origData, GenericFabricNode.class);
-                node.setCount(node.getCount() + delta);
+                if (node.getCount() + delta < Long.MAX_VALUE) {
+                    node.setCount(node.getCount() + delta);
+                }
                 return JsonUtils.serialize(node);
             } catch (Exception ex) {
                 log.warn("Failed to update, batchIdName=" + batchId + " delta=" + delta);
@@ -119,15 +168,6 @@ public class GenericFabricEntityManagerImpl extends BaseFabricEntityMgrImpl<Gene
     @Override
     public boolean cleanup(String batchId) {
         return messageService.cleanup(batchId);
-    }
-
-    @Override
-    public void publish(GenericRecordRequest recordRequest, GenericFabricRecord record) {
-        if (record == null || record.getGenericRecord() == null) {
-            log.warn("Record is empty!");
-            return;
-        }
-        super.publish(recordRequest, record);
     }
 
 }

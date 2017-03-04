@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
@@ -113,7 +112,9 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         entityClass = getTypeParameterClass();
         // get the reflected schema for Entity
-        schema = FabricEntityFactory.getFabricSchema(entityClass, recordType);
+        if (entityClass != null) {
+            schema = FabricEntityFactory.getFabricSchema(entityClass, recordType);
+        }
         if (schema != null) {
             setupStore();
         }
@@ -272,11 +273,11 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     @Override
-    public void publish(GenericRecordRequest recordRequest, GenericFabricRecord record) {
+    public void publish(GenericRecordRequest recordRequest, GenericRecord record) {
         try {
-            producer.send(recordRequest, record.getGenericRecord());
+            producer.send(recordRequest, record);
         } catch (Exception e) {
-            log.info("Publish generic record failed " + recordType + " " + record.getId(), e);
+            log.info("Publish generic record failed " + recordType + " " + recordRequest.getId(), e);
         }
     }
 
@@ -313,7 +314,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         return disabled;
     }
 
-    private Pair<GenericRecord, Map<String, Object>> entityToPair(T entity) {
+    protected Pair<GenericRecord, Map<String, Object>> entityToPair(T entity) {
         try {
             if (entity instanceof FabricEntity) {
                 GenericRecord record = ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
@@ -328,6 +329,22 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         }
     }
 
+    protected Pair<GenericRecord, Map<String, Object>> entityToPair(T entity, Class<T> clazz) {
+        try {
+            if (entity instanceof FabricEntity) {
+                GenericRecord record = ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
+                Map<String, Object> tags = ((FabricEntity<?>) entity).getTags();
+                return Pair.of(record, tags);
+            }
+            Schema schema = FabricEntityFactory.getFabricSchema(clazz, recordType);
+            log.info("Create Entity " + entity + "Schema " + schema.toString());
+            return Pair.of(AvroReflectionUtils.toGenericRecord(entity, schema), null);
+        } catch (Exception e) {
+            log.error("Failed to convert entity to generic record", e);
+            return null;
+        }
+    }
+    
     private T pairToEntity(Pair<GenericRecord, Map<String, Object>> pair) {
         if (pair == null || pair.getLeft() == null) {
             return null;
@@ -343,7 +360,11 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     private Class<T> getTypeParameterClass() {
         Type type = getClass().getGenericSuperclass();
         ParameterizedType paramType = (ParameterizedType) type;
-        return (Class<T>) paramType.getActualTypeArguments()[0];
+        Type actualType = paramType.getActualTypeArguments()[0];
+        if (actualType.getTypeName().equals("T")) {
+           return null;
+        }
+        return (Class<T>) actualType;
     }
 
     private List<String> dedupIds(List<String> ids) {

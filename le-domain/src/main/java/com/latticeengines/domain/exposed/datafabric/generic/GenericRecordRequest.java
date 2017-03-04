@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.datafabric.generic;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 
 public class GenericRecordRequest {
 
@@ -22,7 +23,7 @@ public class GenericRecordRequest {
     private long timeStamp;
 
     @JsonProperty("Scores")
-    private List<String> stores;
+    private List<FabricStoreEnum> stores;
 
     @JsonProperty("Repositories")
     private List<String> repositories;
@@ -69,11 +70,11 @@ public class GenericRecordRequest {
         return this;
     }
 
-    public List<String> getStores() {
+    public List<FabricStoreEnum> getStores() {
         return stores;
     }
 
-    public GenericRecordRequest setStores(List<String> destinations) {
+    public GenericRecordRequest setStores(List<FabricStoreEnum> destinations) {
         this.stores = destinations;
         return this;
     }

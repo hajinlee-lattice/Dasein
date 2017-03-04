@@ -61,7 +61,7 @@ public class HDFSProcessorAdapter implements ProcessorAdapter {
             count += entry.getValue().size();
             dataStore.createRecords(pairMap);
         }
-        log.info("Wrote generic connector records, count=" + count);
+        log.info("Wrote generic connector records, count=" + count + " repository=" + repository);
         return count;
     }
 

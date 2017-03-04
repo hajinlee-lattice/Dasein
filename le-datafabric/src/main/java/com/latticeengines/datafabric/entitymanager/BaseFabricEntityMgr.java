@@ -3,8 +3,9 @@ package com.latticeengines.datafabric.entitymanager;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.generic.GenericRecord;
+
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 public interface BaseFabricEntityMgr<T> {
@@ -31,7 +32,7 @@ public interface BaseFabricEntityMgr<T> {
 
     void publish(RecordKey recordKey, T entity);
     
-    void publish(GenericRecordRequest recordRequest, GenericFabricRecord record);
+    void publish(GenericRecordRequest recordRequest, GenericRecord record);
 
     void addConsumer(String processorName, FabricEntityProcessor proc, int threadNumber);
 
