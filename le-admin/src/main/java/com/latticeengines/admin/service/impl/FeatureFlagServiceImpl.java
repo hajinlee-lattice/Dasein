@@ -143,7 +143,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
                 Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG));
         enableDataEncryption.setModifiableAfterProvisioning(false);
-        enableDataEncryption.setDefaultValue(true);
 
         // register to feature flag client
         registerAllFlags();
