@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 public class PivotUnitTestNG {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PivotUnitTestNG.class);
 
     @Test(groups = "unit")

@@ -1,6 +1,7 @@
 package com.latticeengines.transform.v2_0_25.functions;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,6 +75,8 @@ public class AddTitleAttributes implements RealTimeTransform {
                     log.info(String.format("Loaded Imputation Value %f for %s", entry.getValue(), entry.getKey()));
                 }
             }
+        } catch (FileNotFoundException e) {
+            log.warn(String.format("Cannot find json file with title imputation values: %s", filename));
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Cannot open json file with title imputation values: %s", filename), e);
