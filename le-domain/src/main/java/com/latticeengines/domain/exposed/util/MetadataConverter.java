@@ -214,6 +214,7 @@ public class MetadataConverter {
                 attr.setNumOfBits(bucketedAttr.get("num_bits").asInt());
                 ((ArrayNode) bucketedAttr.get("buckets")).forEach(node -> attr.addBucket(node.asText()));
                 attr.setPhysicalName(fieldName);
+                attr.setNullable(Boolean.TRUE);
                 attrs.add(attr);
             }
         }
