@@ -34,6 +34,7 @@ public class RecordTransformer {
         JythonEngine engine = jythonEngineRetriever.getEngine(modelPath);
         Map<String, Object> result = new HashMap<>(record.size() + definitions.size());
         result.putAll(record);
+        
         for (Map.Entry<String, Object> entry : result.entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof Double) {
                 entry.setValue(PrecisionUtils.setPlatformStandardPrecision((Double) entry.getValue()));
@@ -73,7 +74,7 @@ public class RecordTransformer {
                 result.put(entry.output, value);
             } catch (Exception e) {
                 if (log.isWarnEnabled()) {
-                    log.warn(String.format("Problem invoking %s", entry.name));
+                    log.warn(String.format("Problem invoking %s", entry.name), e);
                 }
             }
         }
