@@ -178,7 +178,7 @@ def parse_args():
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
-    subparser.add_argument('--with-f', dest='withf', action="store_true", help='with -f option when tagging')
+    subparser.add_argument('-f', dest='withf', action="store_true", help='with -f option when tagging')
     subparser.set_defaults(func=push)
 
     subparser = commands.add_parser("pull")
@@ -187,7 +187,7 @@ def parse_args():
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
     subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
-    subparser.add_argument('--with-f', dest='withf', action="store_true", help='with -f option when tagging')
+    subparser.add_argument('-f', dest='withf', action="store_true", help='with -f option when tagging')
     subparser.set_defaults(func=pull)
 
     subparser = commands.add_parser("purge")
