@@ -45,19 +45,6 @@
       "ColumnTransformFilePath": "pivotstep.py"
     },
     {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "enumeratedcolumntransformstep",
-      "MainClassName": "EnumeratedColumnTransformStep",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [
-        "Categorical"
-      ],
-      "NamedParameterListToInit": {
-        "columns": "categoricalColumns"
-      },
-      "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
-    },
-    {
       "KeyWhenSortingByAscending": "5",
       "Name": "columntypeconversionstep",
       "MainClassName": "ColumnTypeConversionStep",
