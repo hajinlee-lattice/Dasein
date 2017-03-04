@@ -100,21 +100,22 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         }
         AnalyticTest analyticTestAlreadyExists = analyticTestEntityMgr.findByName(analyticTestEntityNames.getName());
         if (analyticTestAlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete AnalyticTest \"%s\"",
-                    analyticTestEntityNames.getName()));
+            System.out.println(
+                    String.format("Attempting to delete AnalyticTest \"%s\"", analyticTestEntityNames.getName()));
             analyticTestEntityMgr.delete(analyticTestAlreadyExists);
         }
 
         String analyticPipelineStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource(
-                        "com/latticeengines/modelquality/functionalframework/analyticpipeline.json").getFile()));
+                ClassLoader
+                        .getSystemResource("com/latticeengines/modelquality/functionalframework/analyticpipeline.json")
+                        .getFile()));
         AnalyticPipelineEntityNames analyticPipelineEntityNames = JsonUtils.deserialize(analyticPipelineStr,
                 AnalyticPipelineEntityNames.class);
 
         List<ModelRun> existingModelRuns = modelRunEntityMgr.findAll();
         for (ModelRun aModelRun : existingModelRuns) {
-            AnalyticPipeline anAnalyticPipeline = analyticPipelineEntityMgr.findByName(aModelRun.getAnalyticPipeline()
-                    .getName());
+            AnalyticPipeline anAnalyticPipeline = analyticPipelineEntityMgr
+                    .findByName(aModelRun.getAnalyticPipeline().getName());
             if (anAnalyticPipeline.getName().equals(analyticPipelineEntityNames.getName()) //
                     || anAnalyticPipeline.getName().equals(analyticPipline2Name)) {
                 System.out.println(String.format("Attempting to delete ModelRun \"%s\"", aModelRun.getName()));
@@ -435,8 +436,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                 Assert.fail("Failed due to= " + modelRun.getErrorMessage());
                 break;
             }
-            System.out.println("Waiting for modelRun name \"" + modelName + "\": Status is "
-                    + modelRun.getStatus().toString());
+            System.out.println(
+                    "Waiting for modelRun name \"" + modelName + "\": Status is " + modelRun.getStatus().toString());
             long end = System.currentTimeMillis();
             if ((end - start) > 10 * 3_600_000) { // 10 hours max
                 Assert.fail("Timeout for modelRun name \"" + modelName + "\"");

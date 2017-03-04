@@ -55,7 +55,7 @@ public class DataSetEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase
 
         List<DataSet> dataSets = dataSetEntityMgr.findAll();
         assertNotNull(dataSets);
-        
+
         DataSet retrievedDataSet = dataSetEntityMgr.findByName(datasetName);
         assertEquals(retrievedDataSet.getName(), dataSet.getName());
         assertEquals(retrievedDataSet.getIndustry(), dataSet.getIndustry());

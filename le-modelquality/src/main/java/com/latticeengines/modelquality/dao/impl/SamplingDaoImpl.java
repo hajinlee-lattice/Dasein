@@ -19,7 +19,7 @@ public class SamplingDaoImpl extends BaseDaoImpl<Sampling> implements SamplingDa
     }
 
     @Override
-    public Sampling findByMaxVersion(){
+    public Sampling findByMaxVersion() {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where version = (select MAX(version) from %s)",
                 getEntityClass().getSimpleName(), getEntityClass().getSimpleName());

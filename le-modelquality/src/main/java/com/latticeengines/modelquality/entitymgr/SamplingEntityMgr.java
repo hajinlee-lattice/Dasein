@@ -7,5 +7,5 @@ public interface SamplingEntityMgr extends BaseEntityMgr<Sampling> {
 
     Sampling findByName(String samplingConfigName);
 
-    Sampling  getLatestProductionVersion();
+    Sampling getLatestProductionVersion();
 }

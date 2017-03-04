@@ -14,14 +14,15 @@ import com.latticeengines.modelquality.dao.ModelConfigDao;
 import com.latticeengines.modelquality.entitymgr.ModelConfigEntityMgr;
 
 /**
- * This entity manager is responsible for persisting predefined or template config.
+ * This entity manager is responsible for persisting predefined or template
+ * config.
  */
 @Component("modelConfigEntityMgr")
 public class ModelConfigEntityMgrImpl extends BaseEntityMgrImpl<ModelConfig> implements ModelConfigEntityMgr {
 
     @Autowired
     private ModelConfigDao modelConfigDao;
-    
+
     @Override
     public BaseDao<ModelConfig> getDao() {
         return modelConfigDao;

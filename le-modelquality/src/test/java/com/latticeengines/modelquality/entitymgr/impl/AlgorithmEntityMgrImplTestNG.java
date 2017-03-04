@@ -53,7 +53,7 @@ public class AlgorithmEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBa
 
         List<Algorithm> retrievedAlgorithms = algorithmEntityMgr.findAll();
         assertNotNull(retrievedAlgorithms);
-        
+
         Algorithm retrievedAlgorithm = algorithmEntityMgr.findByName(algorithmName);
         assertEquals(retrievedAlgorithm.getName(), algorithm.getName());
         assertEquals(retrievedAlgorithm.getScript(), algorithm.getScript());

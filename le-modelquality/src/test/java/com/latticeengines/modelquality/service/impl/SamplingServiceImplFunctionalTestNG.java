@@ -54,5 +54,4 @@ public class SamplingServiceImplFunctionalTestNG extends ModelQualityFunctionalT
         }
     }
 
-
 }

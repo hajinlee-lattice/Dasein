@@ -17,9 +17,9 @@ public class PipelineDaoImpl extends BaseDaoImpl<Pipeline> implements PipelineDa
     protected Class<Pipeline> getEntityClass() {
         return Pipeline.class;
     }
-    
+
     @Override
-    public Pipeline findByMaxVersion(){
+    public Pipeline findByMaxVersion() {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where version = (select MAX(version) from %s)",
                 getEntityClass().getSimpleName(), getEntityClass().getSimpleName());

@@ -38,7 +38,8 @@ public class DataSetDaoImpl extends BaseDaoImpl<DataSet> implements DataSetDao {
             return null;
         }
         if (results.size() > 1) {
-            // No need to throw an exception, just return the first one. But log it
+            // No need to throw an exception, just return the first one. But log
+            // it
             log.info(String.format("Multiple rows found with given tenantID(%s) and trainingHdfsPath(%s)", tenantID,
                     trainingSetFilePath));
         }

@@ -37,10 +37,10 @@ public class AnalyticTestEntityMgrImpl extends BaseEntityMgrImpl<AnalyticTest> i
     public AnalyticTest findByName(String analyticTestName) {
         return analyticTestDao.findByField("NAME", analyticTestName);
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<AnalyticTest> findAllByAnalyticPipeline(AnalyticPipeline ap){
+    public List<AnalyticTest> findAllByAnalyticPipeline(AnalyticPipeline ap) {
         return analyticTestDao.findAllByAnalyticPipeline(ap);
     }
 }

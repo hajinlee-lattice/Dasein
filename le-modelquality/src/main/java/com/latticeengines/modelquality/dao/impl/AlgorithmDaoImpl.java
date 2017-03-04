@@ -17,9 +17,9 @@ public class AlgorithmDaoImpl extends BaseDaoImpl<Algorithm> implements Algorith
     protected Class<Algorithm> getEntityClass() {
         return Algorithm.class;
     }
-    
+
     @Override
-    public Algorithm findByMaxVersion(){
+    public Algorithm findByMaxVersion() {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where version = (select MAX(version) from %s)",
                 getEntityClass().getSimpleName(), getEntityClass().getSimpleName());

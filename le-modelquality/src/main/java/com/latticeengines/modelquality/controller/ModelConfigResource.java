@@ -24,7 +24,7 @@ public class ModelConfigResource {
 
     @Autowired
     private ModelConfigEntityMgr modelConfigEntityMgr;
-    
+
     private static final Log log = LogFactory.getLog(ModelConfigResource.class);
 
     @RequestMapping(value = "/modelconfigs", method = RequestMethod.GET)
@@ -34,13 +34,13 @@ public class ModelConfigResource {
         try {
             List<ModelConfig> modelConfigs = modelConfigEntityMgr.findAll();
             return ResponseDocument.successResponse(modelConfigs);
-            
+
         } catch (Exception e) {
             log.error("Failed on this API!", e);
             return ResponseDocument.failedResponse(e);
         }
     }
-    
+
     @RequestMapping(value = "/modelconfigs", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upsert ModelConfigs")

@@ -20,9 +20,11 @@ public class PropDataResourceDeploymentTestNG extends ModelQualityDeploymentTest
     @Test(groups = "deployment", enabled = true)
     public void createLatestforUI() {
         ObjectMapper objMapper = new ObjectMapper();
-        List<PropData> propdatas = objMapper.convertValue(modelQualityProxy.createPropDataConfigFromProductionForUI(), new TypeReference<List<PropData>>() { });
+        List<PropData> propdatas = objMapper.convertValue(modelQualityProxy.createPropDataConfigFromProductionForUI(),
+                new TypeReference<List<PropData>>() {
+                });
         Assert.assertEquals(propdatas.size(), 5);
-        
+
         // cleanup
         for (PropData pd : propdatas) {
             propDataEntityMgr.delete(objMapper.convertValue(pd, PropData.class));

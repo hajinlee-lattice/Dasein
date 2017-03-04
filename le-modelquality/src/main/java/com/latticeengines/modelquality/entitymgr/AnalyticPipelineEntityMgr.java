@@ -8,6 +8,6 @@ public interface AnalyticPipelineEntityMgr extends BaseEntityMgr<AnalyticPipelin
     AnalyticPipeline findByName(String analyticPipelineName);
 
     AnalyticPipeline getLatestProductionVersion();
-    
+
     AnalyticPipeline findByVersion(Integer version);
 }

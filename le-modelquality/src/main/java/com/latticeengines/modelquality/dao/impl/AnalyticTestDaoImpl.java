@@ -22,7 +22,8 @@ public class AnalyticTestDaoImpl extends BaseDaoImpl<AnalyticTest> implements An
     @Override
     public void deleteAll() {
         Session session = getSessionFactory().getCurrentSession();
-        // Need to delete Many-To-Many associations first with native sql and then delete all.
+        // Need to delete Many-To-Many associations first with native sql and
+        // then delete all.
         Class<AnalyticTest> entityClz = getEntityClass();
         Query querytoDeleteAPAssociations = session.createSQLQuery("delete from MODELQUALITY_AP_TEST_AP_PIPELINE");
         querytoDeleteAPAssociations.executeUpdate();
@@ -44,7 +45,7 @@ public class AnalyticTestDaoImpl extends BaseDaoImpl<AnalyticTest> implements An
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("analyticPipelinePid", ap.getPid());
-        return (List<AnalyticTest>)query.list();
+        return (List<AnalyticTest>) query.list();
     }
 
 }

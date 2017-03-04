@@ -7,7 +7,8 @@ import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyValue;
 import com.latticeengines.modelquality.dao.AlgorithmPropertyValueDao;
 
 @Component("algorithmPropertyValueDao")
-public class AlgorithmPropertyValueDaoImpl extends BaseDaoImpl<AlgorithmPropertyValue> implements AlgorithmPropertyValueDao {
+public class AlgorithmPropertyValueDaoImpl extends BaseDaoImpl<AlgorithmPropertyValue>
+        implements AlgorithmPropertyValueDao {
 
     @Override
     protected Class<AlgorithmPropertyValue> getEntityClass() {

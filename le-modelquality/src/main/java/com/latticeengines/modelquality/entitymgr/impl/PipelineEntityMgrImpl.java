@@ -55,7 +55,7 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
     public Pipeline findByName(String name) {
         return pipelineDao.findByField("NAME", name);
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Pipeline getLatestProductionVersion() {

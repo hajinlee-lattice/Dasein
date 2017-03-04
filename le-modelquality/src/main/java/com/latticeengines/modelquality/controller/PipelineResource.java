@@ -62,7 +62,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     @ResponseBody
     @ApiOperation(value = "Create new pipeline from a list of either existing pipeline steps or uploaded files")
     public String createPipeline(@RequestParam("pipelineName") String pipelineName,
-            @RequestParam(value="pipelineDescription", required=false) String pipelineDescription,
+            @RequestParam(value = "pipelineDescription", required = false) String pipelineDescription,
             @RequestBody List<PipelineStepOrFile> pipelineSteps) {
         return create(null, pipelineName, pipelineDescription, pipelineSteps);
     }
@@ -115,7 +115,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
         try {
             String moduleName = fileName.split("\\.")[0];
             return pipelineService.uploadPipelineStepFile(stepName, file.getInputStream(), //
-                    new String [] { moduleName, "py" }, PipelineStepType.PYTHONRTS);
+                    new String[] { moduleName, "py" }, PipelineStepType.PYTHONRTS);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -165,6 +165,5 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
         Pipeline p = pipelineService.createPipeline(pipelineName, pipelineDescription, pipelineSteps);
         return p.getName();
     }
-
 
 }

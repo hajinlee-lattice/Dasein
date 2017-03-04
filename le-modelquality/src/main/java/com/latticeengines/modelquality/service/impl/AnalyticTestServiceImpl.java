@@ -210,8 +210,9 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
         env.tenant = "ModelQuality_Test.ModelQuality_Test.Production";
         env.username = "bnguyen@lattice-engines.com";
         env.password = "tahoe";
-        
-        String validatedAnalyticTestName = (analyticTest.getName() != null) ? analyticTest.getName().replaceAll("[^A-Za-z0-9_]", "") : "";
+
+        String validatedAnalyticTestName = (analyticTest.getName() != null)
+                ? analyticTest.getName().replaceAll("[^A-Za-z0-9_]", "") : "";
 
         ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames();
         modelRunEntityNames.setAnalyticPipelineName(ap.getName());

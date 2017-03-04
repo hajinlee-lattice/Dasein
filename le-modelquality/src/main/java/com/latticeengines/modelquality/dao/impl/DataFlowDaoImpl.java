@@ -19,7 +19,7 @@ public class DataFlowDaoImpl extends BaseDaoImpl<DataFlow> implements DataFlowDa
     }
 
     @Override
-    public DataFlow findByMaxVersion(){
+    public DataFlow findByMaxVersion() {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where version = (select MAX(version) from %s)",
                 getEntityClass().getSimpleName(), getEntityClass().getSimpleName());

@@ -56,38 +56,32 @@ public class PropDataServiceImplFunctionalTestNG extends ModelQualityFunctionalT
         }
     }
 
-    @Test(groups = "functional")
-    public void createLatestforUIForDefaultDNB() {     
+    @Test(groups = "functional", enabled = false)
+    public void createLatestforUIForDefaultDNB() {
         List<PropData> propdatas = propDataService.createLatestProductionPropDatasForUI();
-        
+
         Assert.assertEquals(propdatas.size(), 5);
-        for(PropData pd : propdatas)
-        {
-            if(pd.getName().contains("DNB"))
-            {
+        for (PropData pd : propdatas) {
+            if (pd.getName().contains("DNB")) {
                 Assert.assertTrue(pd.getName().contains("2.0.1"));
             }
         }
     }
-    
+
     @Test(groups = "functional")
     public void createLatestforUIForCustomDNB() {
-        PropDataServiceImpl spiedPropDataService = spy(((PropDataServiceImpl)propDataService));
+        PropDataServiceImpl spiedPropDataService = spy(((PropDataServiceImpl) propDataService));
         doReturn("2.0.1").when(spiedPropDataService).getLatestDNBVersion();
-        
+
         List<PropData> propdatas = spiedPropDataService.createLatestProductionPropDatasForUI();
-        
+
         Assert.assertEquals(propdatas.size(), 5);
-        for(PropData pd : propdatas)
-        {
-            if(pd.getName().contains("DNB"))
-            {
+        for (PropData pd : propdatas) {
+            if (pd.getName().contains("DNB")) {
                 Assert.assertFalse(pd.getName().contains("2.0.0"));
                 Assert.assertTrue(pd.getName().contains("2.0.1"));
             }
-        }        
+        }
     }
-    
-    
 
 }

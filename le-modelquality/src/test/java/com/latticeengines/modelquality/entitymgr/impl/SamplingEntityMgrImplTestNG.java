@@ -51,7 +51,7 @@ public class SamplingEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
         List<Sampling> retrievedSamplings = samplingEntityMgr.findAll();
         assertNotNull(retrievedSamplings);
-        
+
         Sampling retrievedSampling = samplingEntityMgr.findByName("SamplingEntityMgrImplTestNG");
         assertEquals(retrievedSampling.getName(), sampling.getName());
 

@@ -3,8 +3,8 @@ package com.latticeengines.modelquality.metrics;
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 
-public class ModelingMeasurement extends BaseMeasurement<ModelQualityMetrics, ModelQualityMetrics> implements
-        Measurement<ModelQualityMetrics, ModelQualityMetrics> {
+public class ModelingMeasurement extends BaseMeasurement<ModelQualityMetrics, ModelQualityMetrics>
+        implements Measurement<ModelQualityMetrics, ModelQualityMetrics> {
 
     private ModelQualityMetrics modelQualityMetrics;
 

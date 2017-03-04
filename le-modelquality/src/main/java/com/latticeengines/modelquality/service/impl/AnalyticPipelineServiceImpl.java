@@ -36,10 +36,10 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
 
     @Autowired
     private PipelineService pipelineService;
-    
+
     @Autowired
     private AlgorithmEntityMgr algorithmEntityMgr;
-    
+
     @Autowired
     private AlgorithmService algorithmService;
 
@@ -74,34 +74,39 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
 
         Pipeline pipeline = pipelineEntityMgr.findByName(analyticPipelineEntityNames.getPipeline());
         if (pipeline == null) {
-            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Pipeline", analyticPipelineEntityNames.getPipeline() });
+            throw new LedpException(LedpCode.LEDP_35000,
+                    new String[] { "Pipeline", analyticPipelineEntityNames.getPipeline() });
         }
         analyticPipeline.setPipeline(pipeline);
 
         Algorithm algorithm = algorithmEntityMgr.findByName(analyticPipelineEntityNames.getAlgorithm());
         if (algorithm == null) {
-            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Algorithm", analyticPipelineEntityNames.getAlgorithm() });
+            throw new LedpException(LedpCode.LEDP_35000,
+                    new String[] { "Algorithm", analyticPipelineEntityNames.getAlgorithm() });
         }
         analyticPipeline.setAlgorithm(algorithm);
 
         PropData propdata = propdataEntityMgr.findByName(analyticPipelineEntityNames.getPropData());
         if (propdata == null) {
-            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Propdata", analyticPipelineEntityNames.getPropData() });
+            throw new LedpException(LedpCode.LEDP_35000,
+                    new String[] { "Propdata", analyticPipelineEntityNames.getPropData() });
         }
         analyticPipeline.setPropData(propdata);
 
         DataFlow dataFlow = dataflowEntityMgr.findByName(analyticPipelineEntityNames.getDataFlow());
         if (dataFlow == null) {
-            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Dataflow", analyticPipelineEntityNames.getDataFlow() });
+            throw new LedpException(LedpCode.LEDP_35000,
+                    new String[] { "Dataflow", analyticPipelineEntityNames.getDataFlow() });
         }
         analyticPipeline.setDataFlow(dataFlow);
 
         Sampling sampling = samplingEntityMgr.findByName(analyticPipelineEntityNames.getSampling());
         if (sampling == null) {
-            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Sampling", analyticPipelineEntityNames.getSampling() });
+            throw new LedpException(LedpCode.LEDP_35000,
+                    new String[] { "Sampling", analyticPipelineEntityNames.getSampling() });
         }
         analyticPipeline.setSampling(sampling);
-        
+
         analyticPipeline.setVersion(analyticPipelineEntityNames.getVersion());
 
         analyticPipelineEntityMgr.create(analyticPipeline);
@@ -113,12 +118,11 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
         String version = getVersion();
         String analyticPipelineName = production + "-" + version.replace('/', '_');
         AnalyticPipeline analyticPipeline = analyticPipelineEntityMgr.findByName(analyticPipelineName);
-        
-        if(analyticPipeline != null)
-        {
+
+        if (analyticPipeline != null) {
             return analyticPipeline;
         }
-        
+
         AnalyticPipelineEntityNames analyticPipelineEntityNames = new AnalyticPipelineEntityNames();
         analyticPipelineEntityNames.setName(analyticPipelineName);
         analyticPipelineEntityNames.setAlgorithm(algorithmService.createLatestProductionAlgorithm().getName());
@@ -129,7 +133,7 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
 
         AnalyticPipeline previousLatest = analyticPipelineEntityMgr.getLatestProductionVersion();
         int versionNo = 1;
-        if(previousLatest != null) {
+        if (previousLatest != null) {
             versionNo = previousLatest.getVersion() + 1;
         }
         analyticPipelineEntityNames.setVersion(versionNo);

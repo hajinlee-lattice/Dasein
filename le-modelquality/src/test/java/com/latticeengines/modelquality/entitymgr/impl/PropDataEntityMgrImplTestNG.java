@@ -42,7 +42,7 @@ public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
         List<PropData> propDatas = propDataEntityMgr.findAll();
         assertNotNull(propDatas);
-        
+
         PropData retrievedPropData = propDataEntityMgr.findByName("PropDataEntityMgrImplTestNG");
         assertEquals(retrievedPropData.getName(), propData.getName());
         assertEquals(retrievedPropData.getDataCloudVersion(), propData.getDataCloudVersion());

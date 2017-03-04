@@ -10,6 +10,6 @@ public interface DataFlowEntityMgr extends BaseEntityMgr<DataFlow> {
     void createDataFlows(List<DataFlow> dataflows);
 
     DataFlow findByName(String dataFlowName);
-    
-    DataFlow  getLatestProductionVersion();
+
+    DataFlow getLatestProductionVersion();
 }

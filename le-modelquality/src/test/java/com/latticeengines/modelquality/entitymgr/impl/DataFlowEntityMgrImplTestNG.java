@@ -44,7 +44,7 @@ public class DataFlowEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
         List<DataFlow> dataFlows = dataFlowEntityMgr.findAll();
         assertNotNull(dataFlows);
-        
+
         DataFlow retrievedDataFlow = dataFlowEntityMgr.findByName("DataFlowEntityMgrImplTestNG");
         assertEquals(retrievedDataFlow.getName(), dataFlow.getName());
         assertEquals(retrievedDataFlow.getMatch(), Boolean.TRUE);

@@ -20,37 +20,39 @@ public class DataSetServiceImplFunctionalTestNG extends ModelQualityFunctionalTe
 
     @Autowired
     private DataSetService dataSetService;
-    
+
     @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
     }
-    
+
     @Test(groups = "functional", enabled = true)
     public void createDataSetFromTenant() {
         String tenantId = getTestTenant();
         String modelId = getTestModelID();
         ModelSummary spiedModelSummary = spy(new ModelSummary());
         doReturn("SalesforceLead").when(spiedModelSummary).getSourceSchemaInterpretation();
-        ModelSummaryProvenance spiedModelSummaryProvenance  = spy(new ModelSummaryProvenance());
-        doReturn("/some/hdfs/path").when(spiedModelSummaryProvenance).getString(ProvenancePropertyName.TrainingFilePath, "");
+        ModelSummaryProvenance spiedModelSummaryProvenance = spy(new ModelSummaryProvenance());
+        doReturn("/some/hdfs/path").when(spiedModelSummaryProvenance).getString(ProvenancePropertyName.TrainingFilePath,
+                "");
         doReturn(spiedModelSummaryProvenance).when(spiedModelSummary).getModelSummaryConfiguration();
-        
+
         InternalResourceRestApiProxy internalResourceRestApiProxy = spy(new InternalResourceRestApiProxy(null));
-        doReturn(spiedModelSummary).when(internalResourceRestApiProxy).getModelSummaryFromModelId(modelId, CustomerSpace.parse(tenantId));
-        
-        DataSetServiceImpl spiedDataSetService = spy(((DataSetServiceImpl)dataSetService));
+        doReturn(spiedModelSummary).when(internalResourceRestApiProxy).getModelSummaryFromModelId(modelId,
+                CustomerSpace.parse(tenantId));
+
+        DataSetServiceImpl spiedDataSetService = spy(((DataSetServiceImpl) dataSetService));
         spiedDataSetService.internalResourceRestApiProxy = internalResourceRestApiProxy;
-        String dataSetName =  spiedDataSetService.createDataSetFromLP2Tenant(tenantId, modelId);
+        String dataSetName = spiedDataSetService.createDataSetFromLP2Tenant(tenantId, modelId);
         Assert.assertNotNull(dataSetName);
-        
-        String dataSetName1 =  spiedDataSetService.createDataSetFromLP2Tenant(tenantId, modelId);
+
+        String dataSetName1 = spiedDataSetService.createDataSetFromLP2Tenant(tenantId, modelId);
         Assert.assertNotNull(dataSetName, dataSetName1);
-        
-        if(dataSetName != null && !dataSetName.isEmpty()){
+
+        if (dataSetName != null && !dataSetName.isEmpty()) {
             dataSetEntityMgr.delete(dataSetEntityMgr.findByName(dataSetName));
         }
-            
+
     }
 
     private String getTestModelID() {

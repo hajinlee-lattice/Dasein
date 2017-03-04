@@ -30,14 +30,14 @@ public class DataFlowServiceImpl extends BaseServiceImpl implements DataFlowServ
         dataFlow.setMatch(true);
         dataFlow.setTransformationGroup(TransformationGroup.STANDARD);
         dataFlow.setDedupType(DedupType.ONELEADPERDOMAIN);
-        
+
         DataFlow previousLatest = dataFlowEntityMgr.getLatestProductionVersion();
         int versionNo = 1;
-        if(previousLatest != null) {
+        if (previousLatest != null) {
             versionNo = previousLatest.getVersion() + 1;
         }
         dataFlow.setVersion(versionNo);
-        
+
         dataFlowEntityMgr.create(dataFlow);
         return dataFlow;
     }

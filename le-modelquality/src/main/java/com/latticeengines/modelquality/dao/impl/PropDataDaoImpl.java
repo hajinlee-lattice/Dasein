@@ -19,7 +19,7 @@ public class PropDataDaoImpl extends BaseDaoImpl<PropData> implements PropDataDa
     }
 
     @Override
-    public PropData findByMaxVersion(){
+    public PropData findByMaxVersion() {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where version = (select MAX(version) from %s)",
                 getEntityClass().getSimpleName(), getEntityClass().getSimpleName());

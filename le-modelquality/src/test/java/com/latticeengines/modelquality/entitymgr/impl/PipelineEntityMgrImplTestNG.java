@@ -68,7 +68,7 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
         List<Pipeline> pipelines = pipelineEntityMgr.findAll();
         assertNotNull(pipelines);
-        
+
         Pipeline retrievedPineline = pipelineEntityMgr.findByName(pipelineName);
         assertEquals(retrievedPineline.getName(), pipeline.getName());
         assertEquals(retrievedPineline.getPipelineSteps().size(), pipeline.getPipelineSteps().size());

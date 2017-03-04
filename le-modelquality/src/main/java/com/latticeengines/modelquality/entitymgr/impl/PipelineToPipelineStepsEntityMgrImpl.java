@@ -10,9 +10,9 @@ import com.latticeengines.modelquality.dao.PipelineToPipelineStepsDao;
 import com.latticeengines.modelquality.entitymgr.PipelineToPipelineStepsEntityMgr;
 
 @Component("pipelineToPipelineStepsEntityMgr")
-public class PipelineToPipelineStepsEntityMgrImpl extends BaseEntityMgrImpl<PipelineToPipelineSteps> 
-    implements PipelineToPipelineStepsEntityMgr {
-    
+public class PipelineToPipelineStepsEntityMgrImpl extends BaseEntityMgrImpl<PipelineToPipelineSteps>
+        implements PipelineToPipelineStepsEntityMgr {
+
     @Autowired
     private PipelineToPipelineStepsDao pipelineToPipelineStepsDao;
 
