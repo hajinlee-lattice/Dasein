@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -238,12 +241,18 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         extract.setPath(TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX + AVRO_FILE);
         extract.setExtractionTimestamp(12345L);
         extract.setTable(metadataTable);
-        Attribute idAttr = new Attribute();
-        idAttr.setName(InterfaceName.Id.name());
-        idAttr.setDisplayName(InterfaceName.Id.name());
-        idAttr.setSourceLogicalDataType("");
-        idAttr.setPhysicalDataType(Type.STRING.name());
-        metadataTable.addAttribute(idAttr);
+
+        URL inputAvroFile = ClassLoader.getSystemResource(LOCAL_DATA_DIR + AVRO_FILE);
+        Schema inputAvroSchema = AvroUtils.readSchemaFromLocalFile(inputAvroFile.getPath());
+        for (Schema.Field field : inputAvroSchema.getFields()) {
+            Attribute attribute = new Attribute();
+            attribute.setName(field.name());
+            attribute.setDisplayName(field.name());
+            attribute.setSourceLogicalDataType("");
+            attribute.setPhysicalDataType(Type.STRING.name());
+            metadataTable.addAttribute(attribute);
+        }
+
         metadataTable.setName("MetadataTable");
         metadataTable.setTableType(TableType.DATATABLE);
         metadataTable.addExtract(extract);
@@ -326,7 +335,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
             this.parsedApplicationId = applicationId.substring(applicationId.indexOf("_") + 1);
             this.modelVersion = modelVersion;
             this.eventTable = testModelFolderName;
-            this.sourceInterpretation = "SalesforceLead";
+            this.sourceInterpretation = "SalesforceAccount";
             this.modelSummaryJsonLocalpath = localModelPath + Model.MODEL_JSON;
         }
 

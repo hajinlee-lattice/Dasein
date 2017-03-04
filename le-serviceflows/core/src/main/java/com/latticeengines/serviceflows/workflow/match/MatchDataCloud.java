@@ -24,6 +24,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -43,13 +45,14 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     static final String LDC_MATCH = "DataCloudMatch";
 
     static {
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Name, "CompanyName");
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.City, "City");
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.State, "State");
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Country, "Country");
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Zipcode, "PostalCode");
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.PhoneNumber, "PhoneNumber");
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.ExternalId, "Id");
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Name, InterfaceName.CompanyName.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.City, InterfaceName.City.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.State, InterfaceName.State.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Country, InterfaceName.Country.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Zipcode, InterfaceName.PostalCode.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.DUNS, InterfaceName.DUNS.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.ExternalId, InterfaceName.Id.name());
     }
 
     @Autowired
@@ -74,8 +77,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     @Override
     public void skipStep() {
         log.info("skipping matching step and registering event table now:");
-        Table table = metadataProxy.getTable(
-                configuration.getCustomerSpace().toString(), configuration.getInputTableName());
+        Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                configuration.getInputTableName());
         putObjectInContext(EVENT_TABLE, table);
         putObjectInContext(MATCH_RESULT_TABLE, table);
     }
@@ -138,33 +141,44 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         if (configuration.getSourceSchemaInterpretation() != null
                 && configuration.getSourceSchemaInterpretation()
                         .equals(SchemaInterpretation.SalesforceAccount.toString())) {
-            if (preMatchEventTable.getAttribute("Website") != null
-                    && preMatchEventTable.getAttribute("Website").getApprovedUsage() != null
-                    && preMatchEventTable.getAttribute("Website").getApprovedUsage()
-                            .contains("Ignored")) {
+            if (preMatchEventTable.getAttribute(InterfaceName.Website.name()) != null
+                    && preMatchEventTable.getAttribute(InterfaceName.Website.name())
+                            .getApprovedUsage() != null
+                    && preMatchEventTable.getAttribute(InterfaceName.Website.name())
+                            .getApprovedUsage().contains(ApprovedUsage.IGNORED.getName())) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
-                matchInputKeys.put(MatchKey.Domain, Collections.singletonList("Website"));
+                matchInputKeys.put(MatchKey.Domain,
+                        Collections.singletonList(InterfaceName.Website.name()));
             }
         } else if (configuration.getSourceSchemaInterpretation() != null
                 && configuration.getSourceSchemaInterpretation()
                         .equals(SchemaInterpretation.SalesforceLead.toString())) {
-            if (preMatchEventTable.getAttribute("Email") != null
-                    && preMatchEventTable.getAttribute("Email").getApprovedUsage() != null
-                    && preMatchEventTable.getAttribute("Email").getApprovedUsage()
-                            .contains("Ignored")) {
+            if (preMatchEventTable.getAttribute(InterfaceName.Email.name()) != null
+                    && preMatchEventTable.getAttribute(InterfaceName.Email.name())
+                            .getApprovedUsage() != null
+                    && preMatchEventTable.getAttribute(InterfaceName.Email.name())
+                            .getApprovedUsage().contains(ApprovedUsage.IGNORED.getName())) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
-                matchInputKeys.put(MatchKey.Domain, Collections.singletonList("Email"));
+                matchInputKeys.put(MatchKey.Domain,
+                        Collections.singletonList(InterfaceName.Email.name()));
             }
         }
         for (MatchKey matchKey : MATCH_KEYS_TO_DISPLAY_NAMES.keySet()) {
-            if (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) == null
+            if (preMatchEventTable
+                    .getAttribute(
+                            MATCH_KEYS_TO_DISPLAY_NAMES
+                                    .get(matchKey)) == null
                     || (preMatchEventTable
                             .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) != null
                             && preMatchEventTable
                                     .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
-                                    .getApprovedUsage().contains("Ignored"))) {
+                                    .getApprovedUsage() != null
+                            && preMatchEventTable
+                                    .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
+                                    .getApprovedUsage()
+                                    .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(matchKey, new ArrayList<>());
             } else {
                 log.info(String.format("attribute: %s is found as: %s", matchKey,
