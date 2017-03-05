@@ -17,17 +17,7 @@ services:
     volumes:
       - $DOCKER_DATA_ROOT/mysql:/var/lib/mysql
 
-  dynamo:
-    image: latticeengines/dynamo
-    ports:
-      - '8000:8000'
-    volumes:
-      - $DOCKER_DATA_ROOT/dynamo:/var/lib/dynamo
-
   tez-ui:
     image: latticeengines/tez-ui
     ports:
       - '8001:8080'
-    environment:
-      - ATS_ADDRESS=${HOST_IP}
-      - RM_ADDRESS=${HOST_IP}
