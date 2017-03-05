@@ -64,9 +64,6 @@ public class AMSeedCleanPipelineTestNG
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
-
     String targetSourceName = "AccountMasterSeed";
     String targetVersion;
 

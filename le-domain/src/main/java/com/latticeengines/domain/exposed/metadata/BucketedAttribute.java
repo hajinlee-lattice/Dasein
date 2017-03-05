@@ -1,10 +1,15 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class BucketedAttribute {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class BucketedAttribute implements Serializable {
 
     @JsonProperty("nominal_attr")
     private String nominalAttr;
@@ -19,9 +24,7 @@ public class BucketedAttribute {
     private int numBits;
 
     // for jackson
-    private BucketedAttribute() {
-
-    }
+    protected BucketedAttribute() {}
 
     public BucketedAttribute(String nominalAttr, List<String> buckets, int lowestBit, int numBits) {
         this.nominalAttr = nominalAttr;

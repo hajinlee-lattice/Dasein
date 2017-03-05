@@ -1,0 +1,29 @@
+package com.latticeengines.domain.exposed.datacloud.dataflow;
+
+import static com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm.CATEGORICAL;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm.INTEVAL;
+
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "algorithm")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = CategoricalBucket.class, name = CATEGORICAL),
+        @JsonSubTypes.Type(value = IntervalBucket.class, name = INTEVAL)
+})
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public abstract class BucketAlgorithm implements Serializable {
+
+    public static final String CATEGORICAL = "Categorical";
+    public static final String INTEVAL = "Interval";
+
+    @JsonProperty("algorithm")
+    public abstract String getAlgorithm();
+
+}

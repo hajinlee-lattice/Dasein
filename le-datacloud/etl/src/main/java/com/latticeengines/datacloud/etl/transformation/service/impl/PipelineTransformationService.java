@@ -257,7 +257,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                 }
             }
 
-            Source target = null;
+            Source target;
             Source targetTemplate = null;
             String targetName = config.getTargetSource();
             if (targetName == null) {
@@ -413,36 +413,31 @@ public class PipelineTransformationService extends AbstractTransformationService
             String workflowDir) {
         try {
             log.info("Iterative transforming step " + step.getName());
-            if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())) {
-                step.setElapsedTime(0);
-                log.info("Skip executed step " + step.getName());
+            Map<String, Object> iterationContext = initializeIterationContext(step);
+            boolean converged;
+            boolean succeeded;
+            do {
+                int iteration = (Integer) iterationContext.get(CTX_ITERATION);
+                log.info("Starting " + iteration + "-th iteration ...");
+                succeeded = transformer.transform(progress, workflowDir, step);
+                saveSourceVersionWithoutHive(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
+                cleanupWorkflowDir(progress, workflowDir);
+                converged = updateIterationContext(step, iterationContext);
+                if (!converged) {
+                    updateStepForNextIteration(step);
+                }
+            } while (!converged && ((Integer) iterationContext.get(CTX_ITERATION)) < MAX_ITERATION);
+            if (converged && succeeded) {
+                log.error("Iterative step " + step.getName() + " converged, final count = " + String.valueOf(step.getCount()));
+                saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
                 return true;
             } else {
-                Map<String, Object> iterationContext = initializeIterationContext(step);
-                boolean converged;
-                boolean succeeded;
-                do {
-                    int iteration = (Integer) iterationContext.get(CTX_ITERATION);
-                    log.info("Starting " + iteration + "-th iteration ...");
-                    succeeded = transformer.transform(progress, workflowDir, step);
-                    saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
-                    cleanupWorkflowDir(progress, workflowDir);
-                    converged = updateIterationContext(step, iterationContext);
-                    if (!converged) {
-                        updateStepForNextIteration(step);
-                    }
-                } while (!converged && ((Integer) iterationContext.get(CTX_ITERATION)) < MAX_ITERATION);
-                if (converged && succeeded) {
-                    log.error("Iterative step " + step.getName() + " converged, final count = " + String.valueOf(step.getCount()));
-                    return true;
+                if (!converged) {
+                    log.error("Iterative step " + step.getName() + " failed to converge.");
                 } else {
-                    if (!converged) {
-                        log.error("Iterative step " + step.getName() + " failed to converge.");
-                    } else {
-                        log.error("Iterative step " + step.getName() + " converged, but not successful.");
-                    }
-                    return false;
+                    log.error("Iterative step " + step.getName() + " converged, but not successful.");
                 }
+                return false;
             }
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform data at step " + step.getName(), e);

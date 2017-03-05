@@ -57,7 +57,7 @@ public class SourceServiceImpl implements SourceService {
         source.setSourceName(sourceName);
         hdfsSourceEntityMgr.initiateSource(source);
         sourceMap.put(sourceName, source);
-        return (Source)source;
+        return source;
     }
 
     public Source findOrCreateSource(String sourceName) {

@@ -19,6 +19,7 @@ public class BitCodeBook implements Serializable {
     private Map<String, Integer> bitsPosMap;
     private Algorithm encodeAlgo;
     private DecodeStrategy decodeStrategy;
+    private String encodedColumn;
 
     public BitCodeBook() {
         super();
@@ -62,6 +63,14 @@ public class BitCodeBook implements Serializable {
 
     public Integer getBitPosForKey(String key) {
         return bitsPosMap.get(key);
+    }
+
+    public String getEncodedColumn() {
+        return encodedColumn;
+    }
+
+    public void bindEncodedColumn(String encodedColumn) {
+        this.encodedColumn = encodedColumn;
     }
 
     public boolean hasKey(String key) {

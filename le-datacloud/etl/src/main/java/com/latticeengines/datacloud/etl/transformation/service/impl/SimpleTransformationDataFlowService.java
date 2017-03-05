@@ -69,7 +69,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
 
     private boolean addSource(Map<String, Table> sourceTables, Source source, List<String> versions) {
         String sourceName = source.getSourceName();
-        Table sourceTable = null;
+        Table sourceTable;
         try {
             if (versions.size() == 1) {
                 sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, versions.get(0));

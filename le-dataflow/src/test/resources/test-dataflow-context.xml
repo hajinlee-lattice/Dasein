@@ -4,8 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <import resource="classpath:dataflow-context.xml"/>
+    <import resource="classpath:test-dataflow-cascading-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
-    <import resource="classpath:common-component-context.xml"/>
 
 </beans>

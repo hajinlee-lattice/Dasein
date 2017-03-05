@@ -135,6 +135,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
                 }
                 versionList.add(baseSourceVersions.get(i));
             }
+            preDataFlowProcessing(workflowDir, parameters, configuration);
             Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);
             step.setCount(result.getCount());
@@ -145,4 +146,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
         return true;
     }
+
+    protected void preDataFlowProcessing(String workflowDir, P paramters, T configuration) {}
+
 }

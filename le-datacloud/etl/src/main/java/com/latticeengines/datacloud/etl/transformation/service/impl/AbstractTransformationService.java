@@ -257,13 +257,26 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     }
 
     protected boolean saveSourceVersion(TransformationProgress progress, Source source, String version, String workflowDir) {
+        boolean success = saveSourceVersionWithoutHive(progress, source, version, workflowDir);
+        if (success) {
+            try {
+                // register hive table
+                hiveTableService.createTable(source.getSourceName(), version);
+            } catch (Exception e) {
+                getLogger().error("Failed to create hive table.", e);
+            }
+        }
+        return success;
+    }
+
+    protected boolean saveSourceVersionWithoutHive(TransformationProgress progress, Source source, String version, String workflowDir) {
         String avroWorkflowDir = finalWorkflowOuputDir(progress);
         // extract schema
         try {
-            extractSchema(progress, source, version, workflowDir);
+            extractSchema(source, version, workflowDir);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.",
-                        e);
+                    e);
             return false;
         }
 
@@ -274,7 +287,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             String currentMaxVersion = null;
 
             for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
-                avroWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
+                    avroWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
                 if (!HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
                     HdfsUtils.mkdir(yarnConfiguration, sourceDir);
                 }
@@ -301,13 +314,6 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
             return false;
-        }
-        
-        try {
-            // register hive table
-            hiveTableService.createTable(source.getSourceName(), version);
-        } catch (Exception e) {
-            getLogger().error("Failed to create hive table.", e);
         }
 
         return true;
@@ -349,8 +355,8 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return HdfsPathBuilder.dateFormat.format(progress.getCreateTime());
     }
 
-    protected void extractSchema(TransformationProgress progress, Source source,String version, String avroDir) throws Exception {
-        String avscPath = hdfsPathBuilder.constructSchemaFile(source, version).toString();
+    protected void extractSchema(Source source,String version, String avroDir) throws Exception {
+        String avscPath = hdfsPathBuilder.constructSchemaFile(source.getSourceName(), version).toString();
         if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
             HdfsUtils.rmdir(yarnConfiguration, avscPath);
         }

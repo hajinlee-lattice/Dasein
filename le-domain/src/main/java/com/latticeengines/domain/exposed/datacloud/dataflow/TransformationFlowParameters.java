@@ -28,7 +28,7 @@ public class TransformationFlowParameters extends DataFlowParameters {
     @JsonProperty("PrimaryKeys")
     private List<String> primaryKeys;
 
-    @JsonProperty("FakedCurrentTime")
+    @JsonProperty("BaseTables")
     private List<String> baseTables;
 
     @JsonProperty("Columns")

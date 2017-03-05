@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTestNGBase;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
@@ -36,6 +37,12 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     @Autowired
     TransformationProgressEntityMgr progressEntityMgr;
+
+    @Autowired
+    protected PipelineTransformationService pipelineTransformationService;
+
+    @Autowired
+    protected SourceService sourceService;
 
     Source source;
 

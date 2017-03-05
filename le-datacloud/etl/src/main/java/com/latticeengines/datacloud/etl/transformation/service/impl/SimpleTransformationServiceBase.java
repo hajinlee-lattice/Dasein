@@ -166,7 +166,7 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
 
             P parameters = getDataFlowParameters(progress, transConf);
 
-            Table resultTable = dataFlowService.executeDataFlow(getSource(), workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
+            dataFlowService.executeDataFlow(getSource(), workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform data.", e);
