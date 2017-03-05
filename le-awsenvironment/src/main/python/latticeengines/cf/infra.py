@@ -30,6 +30,7 @@ TOMCAT_APP_HEALTH_MAP = {
     "propdata": "/propdata/v2/api-docs",
     "datacloudapi": "/datacloudapi/v2/api-docs",
     "dellebi": "/dellebi/v2/api-docs",
+    "objectapi": "/objectapi/health",
 
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
@@ -146,12 +147,14 @@ def create_load_balancers(tg_map, ui=False):
     resources.append(create_listener_rule(private_lsnr, tg_map["admin"], "/admin/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["workflowapi"], "/workflowapi/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["dataflowapi"], "/dataflowapi/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["objectapi"], "/objectapi/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["metadata"], "/metadata/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["eai"], "/eai/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["scoring"], "/scoring/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["modeling"], "/modeling/*"))
 
     # listener rules
+    resources.append(create_listener_rule(private2_lsnr, tg_map["api"], "/rest/*"))
     resources.append(create_listener_rule(private2_lsnr, tg_map["datacloudapi"], "/datacloudapi/*"))
     resources.append(create_listener_rule(private2_lsnr, tg_map["modelquality"], "/modelquality/*"))
     resources.append(create_listener_rule(private2_lsnr, tg_map["propdata"], "/propdata/*"))
