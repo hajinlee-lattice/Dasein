@@ -99,10 +99,14 @@ angular
     this.CreateABCDBuckets = function(id, data) {
         var deferred = $q.defer();
 
+        console.log(id, data);
+
         $http({
             method: 'POST',
             url: '/pls/bucketedscore/abcdbuckets/' + id,
-            data: data,
+            params: {
+                'bucketMetadatas': data
+            },
             headers: { 'Content-Type': 'application/json' }
         }).then(
             function onSuccess(response) {

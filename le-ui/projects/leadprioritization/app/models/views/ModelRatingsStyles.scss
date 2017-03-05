@@ -59,6 +59,19 @@
 		}
 	}
 }
+
+.remove-text {
+	visibility: hidden;
+	-webkit-transition: visibility 1s;
+    transition: visibility 1s;
+    color: #d62b30;
+    text-align: center;
+    font-weight: bold;
+	&.show {
+		visibility: visible;
+	}
+}
+
 .bar-colors {
 	width: 100%;
 	mix-blend-mode: color;
@@ -77,6 +90,9 @@
 			background-color: rgba(214,43,48,1);
 		}
 		&:nth-child(5) {
+			background-color: rgba(36,99,155,1);
+		}
+		&:nth-child(6) {
 			background-color: rgba(73,73,73,1);
 		}
 	}
@@ -239,7 +255,7 @@
     	}
     	&:nth-child(5){
     		.bucket-label{
-    			background-color: #494949;
+    			background-color: #24639b;
     			&:before {
     				content: "E"
     			}
@@ -250,14 +266,6 @@
     			background-color: #494949;
     			&:before {
     				content: "F"
-    			}
-    		}
-    	}
-    	&:nth-child(7){
-    		.bucket-label{
-    			background-color: #494949;
-    			&:before {
-    				content: "G"
     			}
     		}
     	}

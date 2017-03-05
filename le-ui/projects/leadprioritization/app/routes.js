@@ -268,6 +268,16 @@ angular
                     }); 
 
                     return deferred.promise;
+                },                
+                HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
+                    var deferred = $q.defer(),
+                        id = $stateParams.modelId;
+
+                    ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             },
             params: {

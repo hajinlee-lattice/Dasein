@@ -40,6 +40,8 @@ angular.module('lp.models.ratings', [
 
     function renderChart(){
         
+        vm.workingBuckets = vm.currentConfiguration;
+
         refreshChartData();
 
         var verticalAxis = document.getElementById("verticalAxis");
@@ -72,68 +74,18 @@ angular.module('lp.models.ratings', [
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
    
     }
-
-    vm.eleMouseDown = function(ev, bucket, index) {
-        vm.slider = ev.currentTarget;
-        vm.container = document.getElementById("sliders");
-        vm.containerBox = vm.container.getBoundingClientRect();
-        vm.bucket = bucket;
-        vm.index = index;
-        vm.canAddBucket = false;
-
-        document.addEventListener('mousemove', eleMouseMove, false);
-        document.addEventListener('mouseup', eleMouseUp, false);
-
-        ev.preventDefault();
-    }
-    function eleMouseMove(ev) {
-
-        vm.canAddBucket = false;
-
-        vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
-        vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
-
-        // set right_bound_score from current percentage point on chart
-        vm.bucket.right_bound_score = vm.slider.style.right.slice(0, -1);
-
-        if (ev.clientY > vm.containerBox.bottom + 10) {
-            vm.slider.style.opacity = .25;
-        } else {
-            vm.slider.style.opacity = 1;
-        }
-
-        ev.preventDefault();
-
-    }
-    function eleMouseUp(ev){
-
-        vm.slider.style.opacity = 1;
-
-
-        if (ev.clientY > vm.containerBox.bottom + 10) {
-
-            vm.chartNotUpdated = false;
-            vm.workingBuckets.splice(vm.index, 1);
-            
-        }
-        refreshChartData();
-
-        delete vm.slider;
-
-        document.removeEventListener('mousemove', eleMouseMove, false);
-        document.removeEventListener('mouseup', eleMouseUp, false);
-        ev.preventDefault();
-
-    }
     function refreshChartData(){
-        
-        vm.workingBuckets = vm.currentConfiguration;
+          
         var buckets = vm.workingBuckets;
 
         // check if we can add anymore sliders
-        if(buckets.length < 5) {
+        if(buckets.length < 6) {
             vm.canAddBucket = true;
+        } else {
+            vm.canAddBucket = false;
         }
+
+        console.log(vm.canAddBucket);
 
         buckets[0].left_bound_score = 99;
         // loop through buckets in object and set their values
@@ -159,13 +111,13 @@ angular.module('lp.models.ratings', [
             buckets[i].lift = (vm.rightConverted - vm.leftConverted)/(vm.rightLeads - vm.leftLeads);
 
         }
-
-        
         
     }
+
+
     vm.addBucket = function(ev){
         
-        if(vm.workingBuckets.length < 6) {
+        if (vm.workingBuckets.length < 6 && vm.canAddBucket) {
             
             vm.container = document.getElementById("sliders");
             vm.containerBox = vm.container.getBoundingClientRect();
@@ -188,31 +140,82 @@ angular.module('lp.models.ratings', [
 
             refreshChartData();
 
-        } else if(vm.workingBuckets.length >= 6) {
-            
+        } else {
             vm.canAddBucket = false;
-
         }
         
     }
+
+    vm.eleMouseDown = function(ev, bucket, index) {
+        
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        vm.slider = ev.currentTarget;
+        vm.container = document.getElementById("sliders");
+        vm.containerBox = vm.container.getBoundingClientRect();
+        vm.bucket = bucket;
+        vm.index = index;
+        vm.canAddBucket = false;
+        vm.showRemoveBucketText = false;
+
+        document.addEventListener('mousemove', eleMouseMove, false);
+        document.addEventListener('mouseup', eleMouseUp, false);
+
+    }
+    function eleMouseMove(ev) {
+
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
+        vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
+
+        // set right_bound_score from current percentage point on chart
+        vm.bucket.right_bound_score = vm.slider.style.right.slice(0, -1);
+
+        if (ev.clientY > vm.containerBox.bottom + 10) {
+            vm.showRemoveBucketText = true;
+            vm.slider.style.opacity = .25;
+        } else {
+            vm.showRemoveBucketText = false;
+            vm.slider.style.opacity = 1;
+        }
+
+    }
+    function eleMouseUp(ev){
+
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        vm.slider.style.opacity = 1;
+        vm.canAddBucket = false;
+
+        if (ev.clientY > vm.containerBox.bottom + 10) {
+            vm.chartNotUpdated = false;
+            vm.workingBuckets.splice(vm.index, 1);
+        }
+
+        delete vm.slider;
+        refreshChartData();
+
+        document.removeEventListener('mousemove', eleMouseMove, false);
+        document.removeEventListener('mouseup', eleMouseUp, false);
+
+    }
+    
+
     vm.publishConfiguration = function() {
         
         vm.chartNotUpdated = false;
         vm.saveInProgress = true;
 
         var modelId = $stateParams.modelId,
-            bucketMetadatas = {
-                credentialName: vm.credentialName,
-                soapEndpoint: vm.soapEndpoint,
-                soapUserId: vm.soapUserId,
-                soapEncryptionKey: vm.soapEncryptionKey,
-                restEndpoint: vm.restEndpoint,
-                restIdentityEndpoint: vm.restIdentityEndpoint,
-                restClientId: vm.restClientId,
-                restClientSecret: vm.restClientSecret
-            };
+            bucketMetadatas = vm.workingBuckets;
 
         ModelRatingsService.CreateABCDBuckets(modelId, bucketMetadatas).then(function(result){
+            console.log(result);
+
             if (result != null && result.success === true) {
                 $state.go('home.model.ratings', {}, { reload: true });
             } else {
