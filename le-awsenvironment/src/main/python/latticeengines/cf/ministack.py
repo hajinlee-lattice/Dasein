@@ -169,7 +169,7 @@ def provision(environment, stackname, tag, instance_type='r3.large'):
         PARAM_SUBNET_2.config(subnet2),
         PARAM_SUBNET_3.config(subnet3),
         PARAM_KEY_NAME.config(config.ec2_key()),
-        PARAM_SECURITY_GROUP.config(config.tomcat_sg()),
+        PARAM_SECURITY_GROUP.config(config.ministack_sg()),
         PARAM_INSTANCE_TYPE.config(instance_type),
         PARAM_ENVIRONMENT.config(environment),
         PARAM_CAPACITY.config("0"),

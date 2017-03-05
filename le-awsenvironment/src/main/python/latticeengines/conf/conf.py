@@ -68,6 +68,9 @@ class AwsEnvironment:
     def tomcat_sg(self):
         return self._props['sg.tomcat']
 
+    def ministack_sg(self):
+        return self._props['sg.ministack']
+
     def nodejs_sg(self):
         return self._props['sg.nodejs']
 
