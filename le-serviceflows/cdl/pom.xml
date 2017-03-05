@@ -55,6 +55,13 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.dataflow.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataflow</artifactId>
+            <version>${le.dataflow.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>

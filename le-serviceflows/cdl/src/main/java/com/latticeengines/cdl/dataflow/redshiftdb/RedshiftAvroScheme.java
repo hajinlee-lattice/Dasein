@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.dataflow.redshiftdb;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -12,7 +11,6 @@ import cascading.jdbc.RedshiftFactory.CopyOption;
 import cascading.jdbc.RedshiftScheme;
 import cascading.jdbc.RedshiftTableDesc;
 import cascading.scheme.Scheme;
-import cascading.scheme.SinkCall;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
