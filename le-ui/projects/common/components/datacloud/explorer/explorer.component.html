@@ -105,7 +105,7 @@
             </li>
             <li ng-repeat="category in vm.categories" class="category"
                 ng-if="count = vm.categoryCount(category)"
-                ng-class="{active: vm.category == category, 'has-highlights': vm.highlightMetadata.categories[category].hasDirty && vm.section == 'team'}"
+                ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].hasEnabled && vm.section == 'team'}"
                 ng-click="vm.categoryClick(category, $event);">
 
                 <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
@@ -159,14 +159,10 @@
                     <ul class="controls noselect" ng-if="!vm.lookupMode && !vm.category">
                         <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[category] = {}">
                             <div class="button"
-                                    ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': false}"
+                                    ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': vm.highlightTypesCategoryLabel(category).type == 'enabled' || vm.highlightTypesCategoryLabel(category).type == 'dirty'}"
                                     ng-click="vm.closeHighlighterButtons(category); vm.openHighlighter[category].open = !vm.openHighlighter[category].open;">
-                                <span class="highlight-icon dirty" ng-if="vm.highlightMetadata.categories[category].hasDirty">
-                                    {{vm.highlightTypesCategory.dirty}} 
-                                    [all disabled? {{vm.highlightMetadata.categories[category].allDisabled}}]
-                                </span>
-                                <span class="highlight-icon enabled" ng-if="!vm.highlightMetadata.categories[category].hasDirty">
-                                    {{vm.highlightTypesCategory.enabled}}
+                                <span class="highlight-icon {{vm.highlightTypesCategoryLabel(category).type}}">
+                                    {{vm.highlightTypesCategoryLabel(category).label}} 
                                 </span>
                                 <ul ng-class="{open: vm.openHighlighter[category].open}" class="highlightOptions button-dropdown">
                                     <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, category)">{{label}}</li>
@@ -198,7 +194,7 @@
                         track by $index"
                     class="subcategory"
                     ng-if="count = vm.subcategoryCount(vm.category, subcategory)"
-                    ng-class="{active: vm.subcategory == subcategory, 'has-highlights': vm.highlightMetadata.subcategories[subcategory].hasDirty && vm.section == 'team'}"
+                    ng-class="{active: vm.subcategory == subcategory, 'disabled-grayout': vm.highlightMetadata.categories[vm.category].subcategories[subcategory] && !vm.highlightMetadata.categories[vm.category].subcategories[subcategory].hasEnabled && vm.section == 'team'}"
                     ng-click="vm.subcategoryClick(subcategory, $event)">
 
                     <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
@@ -245,12 +241,15 @@
                             <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">
                                 <!-- this can't be a <button> element because IE and FF don't like it -->
                                 <div class="button"
-                                        ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': false}"
+                                        ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': vm.highlightTypesCategoryLabel(category, subcategory).type == 'enabled' || vm.highlightTypesCategoryLabel(category, subcategory).type == 'dirty'}"
                                         ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
-                                    <span class="highlight-icon {{vm.openHighlighter[vm.category + subcategory].state.type}}">{{vm.openHighlighter[vm.category + subcategory].state.label || 'Set'}}</span>
-                                    <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
-                                        <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
+                                    <span class="highlight-icon {{vm.highlightTypesCategoryLabel(vm.category, subcategory).type}}">
+                                        {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
+                                    </span>
+                                    <ul ng-class="{open: vm.openHighlighter[category].open}" class="highlightOptions button-dropdown">
+                                        <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, category, subcategory)">{{label}}</li>
                                     </ul>
+
                                 </div>
                             </li>
                         </ul>
@@ -295,7 +294,7 @@
             </div>
 
             <ul class="enrichments {{vm.view}}">
-                <li class="box"
+                <li class="box enrichment"
                     ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category]
                         | filter: vm.searchFields
                         | filter: vm.enrichmentsFilter()
@@ -304,7 +303,7 @@
                         | limitTo: vm.pagesize
                         track by enrichment.FieldNameInTarget"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
-                    ng-class="{'active': enrichment.IsSelected}">
+                    ng-class="{'active': enrichment.IsSelected, 'disabled-grayout': enrichment.HighlightHidden && vm.section == 'team'}">
                     <div ng-if="vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
                     <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
