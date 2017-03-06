@@ -45,7 +45,12 @@ public class LatticeIdUpdateFuction extends BaseOperation implements Function {
         Tuple result = Tuple.size(getFieldDeclaration().size());
         setupTupleForGroup(result, arguments);
         String status = arguments.getString(statusField);
-        if (!this.status.equals(status)) {
+        if (this.status.equals("UPDATED")) {
+            if (arguments.getObject(copyIdFrom) != null) {
+                result.set(statusLoc, this.status);
+                result.set(timestampLoc, System.currentTimeMillis());
+            }
+        } else if (!this.status.equals(status)) {
             result.set(statusLoc, this.status);
             result.set(timestampLoc, System.currentTimeMillis());
         }

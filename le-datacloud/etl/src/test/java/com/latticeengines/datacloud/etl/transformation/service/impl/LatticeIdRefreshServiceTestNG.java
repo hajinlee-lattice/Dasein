@@ -223,9 +223,9 @@ public class LatticeIdRefreshServiceTestNG
                 { "dom22.com", "DUNS22", "OBSOLETE" }, //
                 { null, "DUNS11", "OBSOLETE" }, //
                 { null, "DUNS33", "OBSOLETE" }, //
-                { "dom1111.com", "DUNS1111", "ACTIVE" }, //
-                { "dom2222.com", "DUNS2222", "ACTIVE" }, //
-                { "dom3333.com", "DUNS3333", "ACTIVE" }, //
+                { "dom1111.com", "DUNS1111", "UPDATED" }, //
+                { "dom2222.com", "DUNS2222", "UPDATED" }, //
+                { "dom3333.com", "DUNS3333", "UPDATED" }, //
                 { "dom1111.com", null, "ACTIVE" }, //
                 { null, "DUNS1111", "ACTIVE" }, //
                 { "dom2222.com", null, "ACTIVE" }, //

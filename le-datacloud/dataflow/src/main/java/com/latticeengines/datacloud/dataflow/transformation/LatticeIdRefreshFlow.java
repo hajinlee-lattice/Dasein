@@ -33,6 +33,7 @@ public class LatticeIdRefreshFlow
 
     private final static String OBSOLETE = "OBSOLETE";
     private final static String ACTIVE = "ACTIVE";
+    private final static String UPDATED = "UPDATED";
     private final static String ENTITY = "ENTITY_";
 
     private static final Log log = LogFactory.getLog(LatticeIdRefreshFlow.class);
@@ -128,7 +129,7 @@ public class LatticeIdRefreshFlow
         copyIdTo.add(strategy.getIdName());
         node = node.apply(
                 new LatticeIdUpdateFuction(
-                        new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), ACTIVE,
+                        new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), UPDATED,
                         STATUS_FIELD, TIMESTAMP_FIELD, copyIdFrom, copyIdTo, null, null),
                 new FieldList(node.getFieldNames()), node.getSchema(), new FieldList(node.getFieldNames()),
                 Fields.REPLACE);
