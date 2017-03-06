@@ -497,53 +497,38 @@ angular.module('common.datacloud.explorer', [
         }
     }
     var getHighlightMetadata = function(){
+        var timestamp = new Date().getTime();
+
         vm.categories.forEach(function(category) {
             if(vm.enrichmentsObj && vm.enrichmentsObj[category]) {
-                vm.highlightMetadata.categories[category] = {
-                    dirty: false,
-                    hasEnabled: false,
-                    subcategories: {}
+                vm.highlightMetadata.categories[category] = {};
+
+                var items = vm.enrichmentsObj[category],
+                    disabled = vm.filter(items, 'HighlightHidden', true).length,
+                    enabled = items.length - disabled;
+
+                vm.highlightMetadata.categories[category].enabled = enabled;
+                vm.highlightMetadata.categories[category].disabled = disabled;
+
+                if(vm.subcategories[category] && vm.subcategories[category].length > 1) {
+                    vm.highlightMetadata.categories[category].subcategories = {};
+                    vm.subcategories[category].forEach(function(subcategory){
+                        vm.highlightMetadata.categories[category].subcategories[subcategory] = {};
+
+                        var items = vm.filter(vm.enrichmentsObj[category], 'Subcategory', subcategory),
+                            disabled = vm.filter(items, 'HighlightHidden', true).length,
+                            enabled = items.length - disabled;
+
+                        vm.highlightMetadata.categories[category].subcategories[subcategory].enabled = enabled;
+                        vm.highlightMetadata.categories[category].subcategories[subcategory].disabled = disabled;
+                    });
                 }
-                for(var i in vm.enrichmentsObj[category]) {
-                    var item = vm.enrichmentsObj[category][i];
-                    if(item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile) {
-                        if(vm.subcategories[category] && vm.subcategories[category].length > 1) {
-                            for(var j in vm.subcategories[category]) {
-                                var subcategory = vm.subcategories[category][j],
-                                    items = vm.filter(vm.enrichmentsObj[category], 'Subcategory', subcategory),
-                                    enabled = vm.filter(items, 'HighlightHidden', true),
-                                    disabled = vm.filter(items, 'HighlightHidden', false),
-                                    hasEnabled = (enabled.length > 0),
-                                    dirty = false;
-
-                                for(var k in items) {
-                                    var item = items[k];
-                                    if(item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile) {
-                                        dirty = true;
-                                        break;
-                                    }
-                                }
-
-                                vm.highlightMetadata.categories[category].subcategories[subcategory] = vm.highlightMetadata.categories[category].subcategories[subcategory] || {};
-
-                                vm.highlightMetadata.categories[category].subcategories[subcategory].dirty = dirty;
-
-                                if(disabled.length > 0 && !vm.highlightMetadata.categories[category].subcategories[subcategory].hasEnabled) {
-                                    vm.highlightMetadata.categories[category].subcategories[subcategory].hasEnabled = true;
-                                }
-                            }
-                        }
-                        vm.highlightMetadata.categories[category].dirty = true;
-                        if(item.HighlightHidden === false) {
-                            vm.highlightMetadata.categories[category].hasEnabled = true;
-                            break;
-                        }
-                    } else {
-                        vm.highlightMetadata.categories[category].hasEnabled = true;
-                    }
-                };
             }
+
         });
+
+        var timestamp2 = new Date().getTime();
+        console.log('time for getHighlightMetadata(): '(timestamp2 - timestamp) + 'ms');
     }
 
     vm.highlightTypes = {
@@ -571,10 +556,10 @@ angular.module('common.datacloud.explorer', [
             }
         }
         if(metadata) {
-            if(metadata.dirty && metadata.hasEnabled) {
+            if(metadata.enabled && metadata.disabled) {
                 type = 'dirty';
                 label = 'Some enabled for sales team';
-            } else if(metadata.dirty && !metadata.hasEnabled) {
+            } else if(!metadata.enabled) {
                 type = 'disabled';
                 label = vm.highlightTypesCategory[type];
             }

@@ -95,7 +95,7 @@
                             </div>
 
                             <div class="employees" ng-if="vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE">
-                                <h3>Empolyees</h3>
+                                <h3>Employees</h3>
                                 {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE)}}
                             </div>
                         </div>
@@ -105,7 +105,7 @@
             </li>
             <li ng-repeat="category in vm.categories" class="category"
                 ng-if="count = vm.categoryCount(category)"
-                ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].hasEnabled && vm.section == 'team'}"
+                ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].enabled && vm.section == 'team'}"
                 ng-click="vm.categoryClick(category, $event);">
 
                 <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
@@ -194,7 +194,7 @@
                         track by $index"
                     class="subcategory"
                     ng-if="count = vm.subcategoryCount(vm.category, subcategory)"
-                    ng-class="{active: vm.subcategory == subcategory, 'disabled-grayout': vm.highlightMetadata.categories[vm.category].subcategories[subcategory] && !vm.highlightMetadata.categories[vm.category].subcategories[subcategory].hasEnabled && vm.section == 'team'}"
+                    ng-class="{active: vm.subcategory == subcategory, 'disabled-grayout': vm.highlightMetadata.categories[vm.category].subcategories[subcategory] && !vm.highlightMetadata.categories[vm.category].subcategories[subcategory].enabled && vm.section == 'team'}"
                     ng-click="vm.subcategoryClick(subcategory, $event)">
 
                     <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
