@@ -7,11 +7,11 @@ from random import shuffle
 import shutil
 import uuid
 
+import simulatehadoop
 from leframework import scoringengine as se
 from leframework.argumentparser import ArgumentParser
 import numpy as np
 from pipelinefwk import ModelStep
-import simulatehadoop
 from testbase import TestBase
 from testbase import removeFiles
 

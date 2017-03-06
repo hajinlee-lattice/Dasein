@@ -34,7 +34,8 @@ class Pipeline(object):
 
     def predict(self, dataFrame, configMetadata, test):
         transformed = dataFrame
-        # transformed = transformed.apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
+        if len(dataFrame.index) > 0:
+            transformed = dataFrame.apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
         for step in self.pipelineSteps:
             step.setMediator(self.mediator)
             try:
