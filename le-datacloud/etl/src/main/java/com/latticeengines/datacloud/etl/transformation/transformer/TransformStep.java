@@ -1,8 +1,10 @@
 package com.latticeengines.datacloud.etl.transformation.transformer;
 
-import com.latticeengines.datacloud.core.source.Source;
-
 import java.util.List;
+
+import org.apache.avro.Schema;
+
+import com.latticeengines.datacloud.core.source.Source;
 
 public class TransformStep {
 
@@ -15,6 +17,7 @@ public class TransformStep {
     private Source target;
     private String targetVersion;
     private Source targetTemplate;
+    private Schema targetSchema;
     private long elapsedTime;
     private Long count;
 
@@ -65,6 +68,14 @@ public class TransformStep {
 
     public String getTargetVersion() {
         return targetVersion;
+    }
+
+    public Schema getTargetSchema() {
+        return targetSchema;
+    }
+
+    public void setTargetSchema(Schema targetSchema) {
+        this.targetSchema = targetSchema;
     }
 
     public long getElapsedTime() {

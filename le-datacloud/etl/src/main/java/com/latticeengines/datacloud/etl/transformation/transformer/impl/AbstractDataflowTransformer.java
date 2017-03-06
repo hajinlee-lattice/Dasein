@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -139,12 +140,17 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);
             step.setCount(result.getCount());
+            step.setTargetSchema(getTargetSchema(result, parameters));
         } catch (Exception e) {
             log.error("Failed to transform data", e);
             return false;
         }
 
         return true;
+    }
+
+    protected Schema getTargetSchema(Table result, P parameters) {
+        return null;
     }
 
     protected void preDataFlowProcessing(String workflowDir, P paramters, T configuration) {}

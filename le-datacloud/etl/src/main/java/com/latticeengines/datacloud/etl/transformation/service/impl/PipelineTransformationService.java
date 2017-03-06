@@ -399,7 +399,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                 return true;
             } else {
                 boolean succeeded = transformer.transform(progress, workflowDir, step);
-                saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
+                saveSourceVersion(progress, step.getTargetSchema(), step.getTarget(), step.getTargetVersion(), workflowDir);
                 cleanupWorkflowDir(progress, workflowDir);
                 return succeeded;
             }
@@ -420,7 +420,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                 int iteration = (Integer) iterationContext.get(CTX_ITERATION);
                 log.info("Starting " + iteration + "-th iteration ...");
                 succeeded = transformer.transform(progress, workflowDir, step);
-                saveSourceVersionWithoutHive(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
+                saveSourceVersionWithoutHive(progress, null, step.getTarget(), step.getTargetVersion(), workflowDir);
                 cleanupWorkflowDir(progress, workflowDir);
                 converged = updateIterationContext(step, iterationContext);
                 if (!converged) {

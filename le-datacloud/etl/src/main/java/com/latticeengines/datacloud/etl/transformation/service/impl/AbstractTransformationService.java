@@ -118,10 +118,12 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         checkTransformationConfigurationValidity(transformationConfiguration);
         TransformationProgress progress;
         try {
-            progress = progressEntityMgr.findEarliestFailureUnderMaxRetry(getSource(), transformationConfiguration.getVersion());
+            progress = progressEntityMgr.findEarliestFailureUnderMaxRetry(getSource(),
+                    transformationConfiguration.getVersion());
 
             if (progress == null) {
-                progress = progressEntityMgr.insertNewProgress(getSource(), transformationConfiguration.getVersion(), creator);
+                progress = progressEntityMgr.insertNewProgress(getSource(), transformationConfiguration.getVersion(),
+                        creator);
             } else {
                 LOG.info("Retrying " + progress.getRootOperationUID());
                 progress.setNumRetries(progress.getNumRetries() + 1);
@@ -129,8 +131,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             }
             writeTransConfOutsideWorkflow(transformationConfiguration, progress);
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Failed to start a new progress for " + getSource(), e);
+            throw new RuntimeException("Failed to start a new progress for " + getSource(), e);
         }
         LoggingUtils.logInfo(getLogger(), progress,
                 "Started a new progress with version=" + transformationConfiguration.getVersion());
@@ -256,8 +257,14 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return status;
     }
 
-    protected boolean saveSourceVersion(TransformationProgress progress, Source source, String version, String workflowDir) {
-        boolean success = saveSourceVersionWithoutHive(progress, source, version, workflowDir);
+    protected boolean saveSourceVersion(TransformationProgress progress, Source source, String version,
+            String workflowDir) {
+        return saveSourceVersion(progress, null, source, version, workflowDir);
+    }
+
+    protected boolean saveSourceVersion(TransformationProgress progress, Schema schema, Source source, String version,
+            String workflowDir) {
+        boolean success = saveSourceVersionWithoutHive(progress, schema, source, version, workflowDir);
         if (success) {
             try {
                 // register hive table
@@ -269,14 +276,14 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return success;
     }
 
-    protected boolean saveSourceVersionWithoutHive(TransformationProgress progress, Source source, String version, String workflowDir) {
+    protected boolean saveSourceVersionWithoutHive(TransformationProgress progress, Schema schema, Source source,
+            String version, String workflowDir) {
         String avroWorkflowDir = finalWorkflowOuputDir(progress);
         // extract schema
         try {
-            extractSchema(source, version, workflowDir);
+            extractSchema(source, schema, version, workflowDir);
         } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.",
-                    e);
+            updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.", e);
             return false;
         }
 
@@ -355,22 +362,50 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return HdfsPathBuilder.dateFormat.format(progress.getCreateTime());
     }
 
-    protected void extractSchema(Source source,String version, String avroDir) throws Exception {
+    protected void extractSchema(Source source, Schema schema, String version, String avroDir) throws Exception {
         String avscPath = hdfsPathBuilder.constructSchemaFile(source.getSourceName(), version).toString();
         if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
             HdfsUtils.rmdir(yarnConfiguration, avscPath);
         }
 
+        Schema parsedSchema = null;
         List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration,
                 avroDir + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_EXTENSION);
         if (files.size() > 0) {
             String avroPath = files.get(0);
-            if (HdfsUtils.fileExists(yarnConfiguration, avroPath)) {
-                Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
-                HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
-            }
+            parsedSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
         } else {
             throw new IllegalStateException("No avro file found at " + avroDir);
+        }
+
+        if (schema != null) {
+            verifySchemaCorrectness(parsedSchema, schema);
+            HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
+        } else {
+            HdfsUtils.writeToFile(yarnConfiguration, avscPath, parsedSchema.toString());
+        }
+    }
+
+    private void verifySchemaCorrectness(Schema parsedSchema, Schema providedSchema) {
+        List<Schema.Field> parsedFields = parsedSchema.getFields();
+        List<Schema.Field> providedFields = providedSchema.getFields();
+        if (parsedFields.size() != providedFields.size()) {
+            throw new IllegalStateException("Provided schema has " + providedFields.size()
+                    + " fields, while the schema parsed from avro has " + parsedFields.size() + " fields.");
+        }
+        for (int i = 0; i < parsedFields.size(); i++) {
+            Schema.Field parsedField = parsedFields.get(i);
+            Schema.Field provideField = providedFields.get(i);
+            if (!parsedField.name().equals(provideField.name())) {
+                throw new IllegalStateException("For " + i + "-th attribute, provided schema uses the name "
+                        + provideField.name() + ", while the parsed schema is " + parsedField.name());
+            }
+            String parsedType = AvroUtils.getJavaType(AvroUtils.getType(parsedField)).getCanonicalName();
+            String providedType = AvroUtils.getJavaType(AvroUtils.getType(provideField)).getCanonicalName();
+            if (!parsedType.equals(providedType)) {
+                throw new IllegalStateException("For " + i + "-th attribute, provided schema uses the type "
+                        + providedType + ", while the parsed schema is " + parsedType);
+            }
         }
     }
 
