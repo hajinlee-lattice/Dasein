@@ -59,7 +59,7 @@ public class VisiDBDLComponentDeploymentTestNG extends BatonAdapterDeploymentTes
 
     protected String tenant;
 
-    @BeforeClass(groups = "deployment_lp2")
+    @BeforeClass(groups = "lp2")
     @Override
     public void setup() throws Exception {
         super.setup();
@@ -72,7 +72,7 @@ public class VisiDBDLComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
     }
 
-    @AfterClass(groups = "deployment_lp2")
+    @AfterClass(groups = "lp2")
     @Override
     public void tearDown() throws Exception {
         deleteVisiDBDLTenantWithRetry(tenant);
@@ -94,7 +94,7 @@ public class VisiDBDLComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         return confDir;
     }
 
-    @Test(groups = "deployment_lp2")
+    @Test(groups = "lp2")
     public void testInstallation() throws InterruptedException, IOException {
         InstallResult response = deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);

@@ -29,7 +29,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
     @Value("${common.test.pls.url}")
     private String plsHostPort;
 
-    @BeforeClass(groups = { "deployment", "functional", "deployment_lp2" })
+    @BeforeClass(groups = { "deployment", "functional", "lp2" })
     public void setup() throws Exception {
         serviceName = getServiceName();
         contractId = TestContractId + serviceName + "Tenant";
@@ -48,7 +48,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
     }
 
-    @AfterClass(groups = { "deployment", "functional", "deployment_lp2" }, alwaysRun = true)
+    @AfterClass(groups = { "deployment", "functional", "lp2" }, alwaysRun = true)
     public void tearDown() throws Exception {
         try {
             deleteTenant(contractId, tenantId);
@@ -57,7 +57,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
         }
     }
 
-    @Test(groups = { "deployment", "functional", "deployment_lp2" })
+    @Test(groups = { "deployment", "functional", "lp2" })
     public void testGetDefaultConfig() throws Exception {
         verifyDefaultConfig();
     }

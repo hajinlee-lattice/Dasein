@@ -52,7 +52,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     private DocumentDirectory vdbdlConfig;
     private SerializableDocumentDirectory jamsConfig;
 
-    @BeforeClass(groups = { "functional", "deployment_lp2" })
+    @BeforeClass(groups = { "functional", "lp2" })
     @Override
     public void setup() throws Exception {
         super.setup();
@@ -66,7 +66,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         jamsConfig.setRootPath("/" + BardJamsComponent.componentName);
     }
 
-    @AfterClass(groups = { "functional", "deployment_lp2" })
+    @AfterClass(groups = { "functional", "lp2" })
     public void tearDown() throws Exception {
         try {
             deleteTenant(contractId, tenantId);
@@ -76,12 +76,12 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         deleteBardJamsTenant(tenantId);
     }
 
-    @BeforeMethod(groups = { "functional", "deployment_lp2" })
+    @BeforeMethod(groups = { "functional", "lp2" })
     public void beforeMethod() {
         deleteBardJamsTenant(tenantId);
     }
 
-    @Test(groups = "deployment_lp2")
+    @Test(groups = "lp2")
     public void testInstallation() {
         orchestrateVisiDBAndBardJams();
 

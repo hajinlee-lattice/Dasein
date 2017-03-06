@@ -17,7 +17,7 @@ public class DanteComponentDeploymentTestNG extends BatonAdapterDeploymentTestNG
     @Value("${admin.dante.dryrun}")
     private boolean danteSkipped;
 
-    @Test(groups = "deployment_lp2")
+    @Test(groups = "lp2")
     public void testInstallation() throws InterruptedException {
         if (danteSkipped) {
             return;
