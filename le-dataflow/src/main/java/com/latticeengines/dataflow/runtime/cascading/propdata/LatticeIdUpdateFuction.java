@@ -54,7 +54,7 @@ public class LatticeIdUpdateFuction extends BaseOperation implements Function {
                 result.set(namePositionMap.get(idsKeys.get(i)), arguments.getString(entityKeys.get(i)));
             }
         }
-        if (copyIdFrom != null && copyIdTo != null) {
+        if (copyIdFrom != null && copyIdTo != null && arguments.getObject(copyIdFrom) != null) {
             for (String id : copyIdTo) {
                 result.set(namePositionMap.get(id), arguments.getObject(copyIdFrom));
             }

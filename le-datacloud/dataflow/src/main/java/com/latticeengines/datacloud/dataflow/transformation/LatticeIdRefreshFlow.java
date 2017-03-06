@@ -31,6 +31,8 @@ public class LatticeIdRefreshFlow
     public final static String TIMESTAMP_FIELD = "LE_Last_Update_Date";
     public final static String REDIRECT_FROM_FIELD = "RedirectFromId";
 
+    private final static String OBSOLETE = "OBSOLETE";
+    private final static String ACTIVE = "ACTIVE";
     private final static String ENTITY = "ENTITY_";
 
     private static final Log log = LogFactory.getLog(LatticeIdRefreshFlow.class);
@@ -43,7 +45,7 @@ public class LatticeIdRefreshFlow
 
         Node ids = addSource(parameters.getBaseTables().get(0));
         Node entity = addSource(parameters.getBaseTables().get(1));
-        entity = renameEntity(entity);
+        entity = renameColumns(entity, ENTITY);
         entity = entity.retain(new FieldList(entityKeys));
 
         List<String> finalFields = new ArrayList<>();
@@ -58,18 +60,87 @@ public class LatticeIdRefreshFlow
         onlyEntity = processOnlyEntity(onlyEntity, finalFields, idsKeys, entityKeys, strategy,
                 parameters.getCurrentCount());
 
+        Node res = matched.merge(onlyIds).merge(onlyEntity);
+
         if (strategy.isMergeDup()) {
             // TODO: Implement merge duplicate records for CDL use case
         }
 
-        return matched.merge(onlyIds).merge(onlyEntity);
+        if (strategy.getEntity() == LatticeIdStrategy.Entity.ACCOUNT) {
+            res = processObsoleteAccount(res, finalFields, idsKeys, strategy);
+        }
+
+        return res;
+    }
+
+    /**
+     * Domain only - set status to OBSOLETE
+     * DUNS only - set status to OBDOLETE
+     * Domain + DUNS
+     *      If Domain exists, set status to ACTIVE and set redirectedID to to domain-only ID
+     *      If Duns exists, set status to ACTIVE and set redirectedID to duns-only ID.
+     *      Otherwise, set status to OBSOLETE
+     */
+    private Node processObsoleteAccount(Node node, List<String> finalFields, List<String> idsKeys,
+            LatticeIdStrategy strategy) {
+        Node active = node
+                .filter(String.format("\"%s\".equalsIgnoreCase(%s)", ACTIVE, STATUS_FIELD), new FieldList(STATUS_FIELD))
+                .renamePipe("Active");
+        active = renameColumns(active, "Active_");
+        StringBuilder sb = new StringBuilder();
+        List<String> fields = new ArrayList<>();
+        for (String idsKey : idsKeys) {
+            sb.append(idsKey + " != null && ");
+            fields.add(idsKey);
+        }
+        fields.add(STATUS_FIELD);
+        Node obsolete = node
+                .filter(String.format("%s \"%s\".equalsIgnoreCase(%s)", sb.toString(), OBSOLETE, STATUS_FIELD),
+                        new FieldList(fields))
+                .renamePipe("Obsolete");
+        obsolete = renameColumns(obsolete, "Obsolete_");
+
+        List<Node> joinedList = new ArrayList<>();
+        for (int i = 0; i < idsKeys.size(); i++) {
+            String idsKey = idsKeys.get(i);
+            Node joined = obsolete.join("Obsolete_" + idsKey, active, "Active_" + idsKey, JoinType.INNER)
+                    .addColumnWithFixedValue("Priority", i, Integer.class).renamePipe("Joined" + i);
+            joinedList.add(joined);
+        }
+        Node joined = joinedList.get(0);
+        joinedList.remove(0);
+        if (joinedList.size() > 0) {
+            joined = joined.merge(joinedList);
+        }
+        joined = joined.groupByAndLimit(new FieldList("Obsolete_" + REDIRECT_FROM_FIELD), new FieldList("Priority"), 1,
+                false, true);
+        joined = joined
+                .rename(new FieldList("Obsolete_" + REDIRECT_FROM_FIELD),
+                        new FieldList("Redirect_" + REDIRECT_FROM_FIELD))
+                .rename(new FieldList("Active_" + strategy.getIdName()),
+                        new FieldList("Redirect_" + strategy.getIdName()))
+                .retain(new FieldList("Redirect_" + REDIRECT_FROM_FIELD, "Redirect_" + strategy.getIdName()));
+
+        node = node.join(new FieldList(REDIRECT_FROM_FIELD), joined, new FieldList("Redirect_" + REDIRECT_FROM_FIELD),
+                JoinType.LEFT);
+        String copyIdFrom = "Redirect_" + strategy.getIdName();
+        List<String> copyIdTo = new ArrayList<>();
+        copyIdTo.add(strategy.getIdName());
+        node = node.apply(
+                new LatticeIdUpdateFuction(
+                        new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), ACTIVE,
+                        STATUS_FIELD, TIMESTAMP_FIELD, copyIdFrom, copyIdTo, null, null),
+                new FieldList(node.getFieldNames()), node.getSchema(), new FieldList(node.getFieldNames()),
+                Fields.REPLACE);
+        node = node.retain(new FieldList(finalFields));
+        return node;
     }
 
     private Node processMatched(Node node, List<String> finalFields, LatticeIdStrategy strategy) {
         node = node.retain(new FieldList(finalFields));
         node = node.apply(
                 new LatticeIdUpdateFuction(
-                        new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), "ACTIVE",
+                        new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), ACTIVE,
                         STATUS_FIELD, TIMESTAMP_FIELD, null, null, null, null),
                 new FieldList(node.getFieldNames()), node.getSchema(), new FieldList(node.getFieldNames()),
                 Fields.REPLACE);
@@ -81,8 +152,8 @@ public class LatticeIdRefreshFlow
         if (strategy.isCheckObsolete()) {
             node = node.apply(
                     new LatticeIdUpdateFuction(
-                            new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])),
-                            "OBSOLETE", STATUS_FIELD, TIMESTAMP_FIELD, null, null, null, null),
+                            new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), OBSOLETE,
+                            STATUS_FIELD, TIMESTAMP_FIELD, null, null, null, null),
                     new FieldList(node.getFieldNames()), node.getSchema(), new FieldList(node.getFieldNames()),
                     Fields.REPLACE);
         }
@@ -111,7 +182,7 @@ public class LatticeIdRefreshFlow
         copyIdTo.add(strategy.getIdName());
         node = node.apply(
                 new LatticeIdUpdateFuction(
-                        new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), "ACTIVE",
+                        new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])), ACTIVE,
                         STATUS_FIELD, TIMESTAMP_FIELD, copyIdFrom, copyIdTo, idsKeys, entityKeys),
                 new FieldList(node.getFieldNames()), node.getSchema(), new FieldList(node.getFieldNames()),
                 Fields.REPLACE);
@@ -180,9 +251,9 @@ public class LatticeIdRefreshFlow
         return joined.filter(sb.toString(), new FieldList(filterFields));
     }
 
-    private Node renameEntity(Node src) {
+    private Node renameColumns(Node src, String prefix) {
         for (String attr : src.getFieldNames()) {
-            src = src.rename(new FieldList(attr), new FieldList(ENTITY + attr));
+            src = src.rename(new FieldList(attr), new FieldList(prefix + attr));
         }
         return src;
     }

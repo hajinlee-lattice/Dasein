@@ -155,6 +155,9 @@ public class LatticeIdRefreshServiceTestNG
             { null, "DUNS33" }, //
             { "dom11.com", null }, //
             { "dom33.com", null }, //
+            { "dom1111.com", "DUNS1111" }, //
+            { "dom2222.com", "DUNS2222" }, //
+            { "dom3333.com", "DUNS3333" }, //
     };
 
     private void prepareAMSeedInit() {
@@ -181,6 +184,10 @@ public class LatticeIdRefreshServiceTestNG
             { null, "DUNS333" }, //
             { "dom111.com", null }, //
             { "dom333.com", null }, //
+            { "dom1111.com", null }, //
+            { null, "DUNS1111" }, //
+            { "dom2222.com", null }, //
+            { null, "DUNS3333" }, //
     };
 
     private void prepareAMSeedRefresh() {
@@ -216,8 +223,13 @@ public class LatticeIdRefreshServiceTestNG
                 { "dom22.com", "DUNS22", "OBSOLETE" }, //
                 { null, "DUNS11", "OBSOLETE" }, //
                 { null, "DUNS33", "OBSOLETE" }, //
-                { "dom11.com", null, "OBSOLETE" }, //
-                { "dom33.com", null, "OBSOLETE" }, //
+                { "dom1111.com", "DUNS1111", "ACTIVE" }, //
+                { "dom2222.com", "DUNS2222", "ACTIVE" }, //
+                { "dom3333.com", "DUNS3333", "ACTIVE" }, //
+                { "dom1111.com", null, "ACTIVE" }, //
+                { null, "DUNS1111", "ACTIVE" }, //
+                { "dom2222.com", null, "ACTIVE" }, //
+                { null, "DUNS3333", "ACTIVE" }, //
         };
         int rowNum = 0;
         Set<Long> ids = new HashSet<Long>();
@@ -225,8 +237,8 @@ public class LatticeIdRefreshServiceTestNG
             GenericRecord record = records.next();
             Long id = (Long) record.get("LatticeAccountId");
             Long redirectFromId = (Long) record.get("RedirectFromId");
-            Assert.assertFalse(ids.contains(id));
-            ids.add(id);
+            Assert.assertFalse(ids.contains(redirectFromId));
+            ids.add(redirectFromId);
             Object duns = record.get("DUNS");
             if (duns instanceof Utf8) {
                 duns = duns.toString();
@@ -252,7 +264,7 @@ public class LatticeIdRefreshServiceTestNG
             Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(24L, rowNum);
+        Assert.assertEquals(31L, rowNum);
     }
 
 }
