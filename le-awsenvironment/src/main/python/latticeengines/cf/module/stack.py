@@ -314,6 +314,10 @@ class ECSStack(Stack):
                 {
                     'Key': 'le-stack',
                     'Value': le_stack
+                },
+                {
+                    'Key': 'le-service',
+                    'Value': stackname.replace('-lpi-%s' % le_stack, '')
                 }
 
             ]
