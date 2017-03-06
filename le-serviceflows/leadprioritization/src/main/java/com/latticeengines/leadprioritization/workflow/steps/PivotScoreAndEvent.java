@@ -73,13 +73,13 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
                     bucketMetadatas.get(0).getNumLeads(), bucketMetadatas.get(0).getLift(),
                     bucketMetadatas.get(1).getLeftBoundScore(),
                     bucketMetadatas.get(1).getRightBoundScore(),
-                    bucketMetadatas.get(0).getNumLeads(), bucketMetadatas.get(1).getLift(),
+                    bucketMetadatas.get(1).getNumLeads(), bucketMetadatas.get(1).getLift(),
                     bucketMetadatas.get(2).getLeftBoundScore(),
                     bucketMetadatas.get(2).getRightBoundScore(),
-                    bucketMetadatas.get(0).getNumLeads(), bucketMetadatas.get(2).getLift(),
+                    bucketMetadatas.get(2).getNumLeads(), bucketMetadatas.get(2).getLift(),
                     bucketMetadatas.get(3).getLeftBoundScore(),
                     bucketMetadatas.get(3).getRightBoundScore(),
-                    bucketMetadatas.get(0).getNumLeads(), bucketMetadatas.get(3).getLift()));
+                    bucketMetadatas.get(3).getNumLeads(), bucketMetadatas.get(3).getLift()));
         } catch (Exception e) {
             log.warn(String.format(
                     "Creating default ABCD buckets for model: %s failed. Proceeding with the workflow",

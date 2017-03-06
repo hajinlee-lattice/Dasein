@@ -76,7 +76,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Value("${pls..modeling.validation.min.negativerows:250}")
     private long minNegativeEvents;
 
-    public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
+    public ImportMatchAndModelWorkflowConfiguration generateConfiguration(
+            ModelingParameters parameters) {
 
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
@@ -87,31 +88,37 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         String trainingTableName = sourceFile.getTableName();
 
         if (trainingTableName == null) {
-            throw new LedpException(LedpCode.LEDP_18099, new String[] { sourceFile.getDisplayName() });
+            throw new LedpException(LedpCode.LEDP_18099,
+                    new String[] { sourceFile.getDisplayName() });
         }
 
         if (hasRunningWorkflow(sourceFile)) {
-            throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
+            throw new LedpException(LedpCode.LEDP_18081,
+                    new String[] { sourceFile.getDisplayName() });
         }
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         Map<String, String> inputProperties = new HashMap<>();
-        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importMatchAndModelWorkflow");
-        inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, parameters.getDisplayName());
-        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceFile.getDisplayName());
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE,
+                "importMatchAndModelWorkflow");
+        inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
+                parameters.getDisplayName());
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
+                sourceFile.getDisplayName());
 
         Predefined predefinedSelection = Predefined.getDefaultSelection();
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
         if (StringUtils.isNotEmpty(predefinedSelectionName)) {
             predefinedSelection = Predefined.fromName(predefinedSelectionName);
             if (predefinedSelection == null) {
-                throw new IllegalArgumentException("Cannot parse column selection named " + predefinedSelectionName);
+                throw new IllegalArgumentException(
+                        "Cannot parse column selection named " + predefinedSelectionName);
             }
         }
 
-        Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                trainingTableName);
+        Table trainingTable = metadataProxy
+                .getTable(MultiTenantContext.getCustomerSpace().toString(), trainingTableName);
 
         String moduleName = parameters.getModuleName();
         final String pivotFileName = parameters.getPivotFileName();
@@ -127,7 +134,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 }
             }, null);
             if (pivotFileName != null && pivotArtifact == null) {
-                throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
+                throw new LedpException(LedpCode.LEDP_28026,
+                        new String[] { pivotFileName, moduleName });
             }
         }
         if (pivotArtifact != null) {
@@ -160,9 +168,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns())
                 //
-                .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
+                .skipDedupStep(
+                        parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 //
-                .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE)
+                .skipStandardTransform(
+                        parameters.getTransformationGroup() == TransformationGroup.NONE)
                 //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion())
                 // null
@@ -192,7 +202,10 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .excludePublicDomains(parameters.isExcludePublicDomains())
                 //
-                .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, sourceFile.getPath())
+                .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath,
+                        sourceFile.getPath()) //
+                .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled,
+                        plsFeatureFlagService.isFuzzyMatchEnabled()) //
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .moduleName(moduleName != null ? moduleName : null) //
                 .runTimeParams(parameters.runTimeParams) //
@@ -201,7 +214,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .bucketMetadata(null)
                 //
                 // TODO: legacy SQL based match engine configurations
-                .matchClientDocument(matchClientDocument).matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
+                .matchClientDocument(matchClientDocument)
+                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
                 .matchDestTables("DerivedColumnsCache");
         return builder.build();
     }
@@ -220,7 +234,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     public ApplicationId submit(ModelingParameters parameters) {
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
-        TransformationGroup transformationGroup = plsFeatureFlagService.getTransformationGroupFromZK();
+        TransformationGroup transformationGroup = plsFeatureFlagService
+                .getTransformationGroupFromZK();
 
         if (parameters.getTransformationGroup() == null) {
             parameters.setTransformationGroup(transformationGroup);
@@ -247,11 +262,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             throw new RuntimeException("PivotValuesLookup is null.");
         }
         Set<String> sourceColumnNames = pivotValues.pivotValuesBySourceColumn.keySet();
-        List<Attribute> attrs = PivotMappingFileUtils.createAttrsFromPivotSourceColumns(sourceColumnNames,
-                trainingAttrs);
+        List<Attribute> attrs = PivotMappingFileUtils
+                .createAttrsFromPivotSourceColumns(sourceColumnNames, trainingAttrs);
 
         trainingTable.setAttributes(attrs);
-        metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTable.getName(),
-                trainingTable);
+        metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(),
+                trainingTable.getName(), trainingTable);
     }
 }
