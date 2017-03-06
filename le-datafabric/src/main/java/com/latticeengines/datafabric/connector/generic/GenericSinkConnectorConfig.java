@@ -9,12 +9,22 @@ import com.latticeengines.datafabric.connector.WorkerProperty;
 
 public class GenericSinkConnectorConfig extends ConnectorConfiguration {
 
+    private static final String GENERIC_COMMON_GROUP = "GENERIC_COMMON";
     private static final String GENERIC_HDFS_GROUP = "GENERIC_HDFS";
+    private static final String GENERIC_DYNAMO_GROUP = "GENERIC_DYNAMO";
     private static ConfigDef config;
 
     public static ConfigDef getConfig() {
         return config;
     }
+
+    // common
+    static final WorkerProperty<String> STACK = new WorkerProperty<String>("datafabric.message.stack",
+            "The stack name used in Zookeeper", "The stack used in Zookeeper").setDefaultValue("b");
+    static final WorkerProperty<String> KAFKA_ZKCONNECT = new WorkerProperty<String>("kafka.zkConnect",
+            "The zookeeper servers for sink generic cluster", "Zookeeper servers").setDefaultValue("localhost:2181");
+    static final WorkerProperty<String> REPOSITORIES = new WorkerProperty<String>("datafabric.connect.repositories",
+            "Supported stores .e.g HDFS, REDIS, DYNAMO", "stores").setDefaultValue("HDFS;DYNAMO");
 
     // HDFS
     static final WorkerProperty<String> HADOOP_CONF_DIR = new WorkerProperty<String>("hadoop.conf.dir",
@@ -23,22 +33,29 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
             "HDFS base directory to save files.", "HDFS base Directory").setDefaultValue("/tmp");
     static final WorkerProperty<String> POD = new WorkerProperty<String>("datafabric.message.pod",
             "The pod name used in Zookeeper", "The pod used in Zookeeper").setDefaultValue("FabricConnectors");
-    static final WorkerProperty<String> STACK = new WorkerProperty<String>("datafabric.message.stack",
-            "The stack name used in Zookeeper", "The stack used in Zookeeper").setDefaultValue("b");
-    static final WorkerProperty<String> KAFKA_ZKCONNECT = new WorkerProperty<String>("kafka.zkConnect",
-            "The zookeeper servers for sink generic cluster", "Zookeeper servers").setDefaultValue("localhost:2181");
-    static final WorkerProperty<String> REPOSITORIES = new WorkerProperty<String>("datafabric.connect.repositories",
-            "Supported stores .e.g HDFS, REDIS, DYNAMO", "stores").setDefaultValue("HDFS");
+
+    // DYNAMO
+    static final WorkerProperty<String> ACCESS_KEY = new WorkerProperty<String>("aws.default.access.key",
+            "AWS access key", "AWS access key").setDefaultValue("AKIAJYGRJBKAXQAV5OXQ");
+    static final WorkerProperty<String> SECRET_KEY = new WorkerProperty<String>("aws.default.secret.key",
+            "AWS secret key", "AWS secret key").setDefaultValue("Kw4HndU744WxSegVdAZ+hgiL3ogupKIkI1Ce8Cjj");
 
     static {
         initialize();
+        addGroup(GENERIC_COMMON_GROUP);
+        addPropertyToGroup(POD, String.class, GENERIC_COMMON_GROUP);
+        addPropertyToGroup(STACK, String.class, GENERIC_COMMON_GROUP);
+        addPropertyToGroup(KAFKA_ZKCONNECT, String.class, GENERIC_COMMON_GROUP);
+        addPropertyToGroup(REPOSITORIES, String.class, GENERIC_COMMON_GROUP);
+
         addGroup(GENERIC_HDFS_GROUP);
         addPropertyToGroup(HADOOP_CONF_DIR, String.class, GENERIC_HDFS_GROUP);
         addPropertyToGroup(HDFS_BASE_DIR, String.class, GENERIC_HDFS_GROUP);
-        addPropertyToGroup(POD, String.class, GENERIC_HDFS_GROUP);
-        addPropertyToGroup(STACK, String.class, GENERIC_HDFS_GROUP);
-        addPropertyToGroup(KAFKA_ZKCONNECT, String.class, GENERIC_HDFS_GROUP);
-        addPropertyToGroup(REPOSITORIES, String.class, GENERIC_HDFS_GROUP);
+
+        addGroup(GENERIC_DYNAMO_GROUP);
+        addPropertyToGroup(ACCESS_KEY, String.class, GENERIC_DYNAMO_GROUP);
+        addPropertyToGroup(SECRET_KEY, String.class, GENERIC_DYNAMO_GROUP);
+
         config = tmpConfig.get();
     }
 

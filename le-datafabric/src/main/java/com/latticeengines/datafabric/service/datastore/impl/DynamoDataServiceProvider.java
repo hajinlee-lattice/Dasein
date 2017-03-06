@@ -29,4 +29,9 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
     public String getName() {
         return FabricStoreEnum.DYNAMO.name();
     }
+
+    public void setDynamoService(DynamoService dynamoService) {
+        this.dynamoService = dynamoService;
+    }
+
 }

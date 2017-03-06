@@ -1,6 +1,5 @@
 package com.latticeengines.datafabric.connector.generic;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +18,7 @@ import com.latticeengines.datafabric.service.datastore.impl.FabricDataServiceImp
 import com.latticeengines.datafabric.service.datastore.impl.HDFSDataServiceProvider;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
-public class HDFSProcessorAdapter implements ProcessorAdapter {
+public class HDFSProcessorAdapter extends AbstractProcessorAdapter {
     private final Log log = LogFactory.getLog(HDFSProcessorAdapter.class);
 
     private GenericSinkConnectorConfig connectorConfig;
@@ -61,20 +60,8 @@ public class HDFSProcessorAdapter implements ProcessorAdapter {
             count += entry.getValue().size();
             dataStore.createRecords(pairMap);
         }
-        log.info("Wrote generic connector records, count=" + count + " repository=" + repository);
+        log.info("Wrote generic connector records, count=" + count + " store=" + hdfsProvider.getName()
+                + " repository=" + repository);
         return count;
-    }
-
-    private String getFileName(TopicPartition tp) {
-        return "part-" + tp.topic() + "-" + tp.partition() + ".avro";
-    }
-
-    private Map<String, Pair<GenericRecord, Map<String, Object>>> getPairMap(
-            List<Pair<GenericRecordRequest, GenericRecord>> pairs) {
-        Map<String, Pair<GenericRecord, Map<String, Object>>> pairMap = new HashMap<String, Pair<GenericRecord, Map<String, Object>>>();
-        for (Pair<GenericRecordRequest, GenericRecord> pair : pairs) {
-            pairMap.put(pair.getKey().getId(), Pair.of(pair.getValue(), null));
-        }
-        return pairMap;
     }
 }

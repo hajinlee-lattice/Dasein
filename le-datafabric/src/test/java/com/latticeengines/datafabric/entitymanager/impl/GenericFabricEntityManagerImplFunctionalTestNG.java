@@ -248,7 +248,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         List<GenericRecordRequest> recordRequests = new ArrayList<>();
         List<GenericRecord> records = new ArrayList<>();
         // schema 1
-        getRecords(batchId1, recordRequests, records, RECORD_COUNT, 1);
+        getRecords(batchId1, recordRequests, records, RECORD_COUNT, 1, 2);
         for (int i = 0; i < records.size(); i++) {
             entityManager.publishRecord(recordRequests.get(i), records.get(i));
         }
@@ -258,13 +258,13 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         records.clear();
         String batchId2 = entityManager.createUniqueBatchId(RECORD_COUNT);
         batchIds.add(batchId2);
-        getRecords(batchId2, recordRequests, records, RECORD_COUNT, 2);
+        getRecords(batchId2, recordRequests, records, RECORD_COUNT, 2, 1);
         for (int i = 0; i < records.size(); i++) {
             entityManager.publishRecord(recordRequests.get(i), records.get(i));
         }
 
-        waitInSeconds(batchId1, 10);
-        waitInSeconds(batchId2, 10);
+        waitInSeconds(batchId1, 20);
+        waitInSeconds(batchId2, 20);
 
         long count1 = AvroUtils.count(conf, "/tmp/testGenericFile1/*.avro");
         long count2 = AvroUtils.count(conf, "/tmp/testGenericFile2/*.avro");
@@ -325,7 +325,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         batchIds.add(batchId);
         List<GenericRecordRequest> recordRequests = new ArrayList<>();
         List<GenericRecord> records = new ArrayList<>();
-        getRecords(batchId, recordRequests, records, recordCount, type);
+        getRecords(batchId, recordRequests, records, recordCount, type, 1);
         ConnectorCallable callable = new ConnectorCallable(batchId, recordRequests, records);
         futures.add(pool.submit(callable));
     }
@@ -350,8 +350,8 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         throw new RuntimeException("Failed for timeout. batchId=" + batchId);
     }
 
-    private List<GenericRecord> getRecords(String id, List<GenericRecordRequest> recordRequests,
-            List<GenericRecord> records, long count, int type) {
+    private List<GenericRecord> getRecords(String batchId, List<GenericRecordRequest> recordRequests,
+            List<GenericRecord> records, long count, int type, int repositoryCount) {
         GenericRecordBuilder builder = null;
         if (type == 1) {
             builder = new GenericRecordBuilder(buildSchem1());
@@ -367,9 +367,21 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
             records.add(builder.build());
 
             GenericRecordRequest recordRequest = new GenericRecordRequest();
-            String testFile = "testGenericFile" + type;
-            recordRequest.setBatchId(id).setCustomerSpace("generic").setStores(Arrays.asList(FabricStoreEnum.HDFS))
-                    .setRepositories(Arrays.asList(testFile)).setId(i + "");
+            if (repositoryCount == 1) {
+                String testFile = "testGenericFile" + type;
+                List<FabricStoreEnum> stores = Arrays.asList(FabricStoreEnum.HDFS);
+                List<String> repositories = Arrays.asList(testFile);
+                recordRequest.setBatchId(batchId).setCustomerSpace("generic").setStores(stores)
+                        .setRepositories(repositories).setId(i + "");
+            }
+            if (repositoryCount == 2) {
+                List<FabricStoreEnum> stores = Arrays.asList(FabricStoreEnum.HDFS, FabricStoreEnum.DYNAMO);
+                List<String> repositories = Arrays.asList("testGenericFile" + type, "DataCloud");
+                recordRequest.setBatchId(batchId).setCustomerSpace("generic").setStores(stores)
+                        .setRepositories(repositories).setId(i + "").setRecordType("DynamoConnector");
+                ;
+            }
+
             recordRequests.add(recordRequest);
         }
 

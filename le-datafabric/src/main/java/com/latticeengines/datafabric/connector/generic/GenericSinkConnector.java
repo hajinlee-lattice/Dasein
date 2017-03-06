@@ -10,6 +10,7 @@ import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.connector.Connector;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.errors.ConnectException;
+import org.apache.kafka.connect.errors.RetriableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,8 @@ public class GenericSinkConnector extends Connector {
             configProperties = props;
             config = new GenericSinkConnectorConfig(props);
         } catch (ConfigException e) {
-            throw new ConnectException("Couldn't start GenericSinkConnector due to configuration error", e);
+            log.error("Generic Connector failed!", e);
+            throw new RetriableException("Couldn't start GenericSinkConnector due to configuration error", e);
         }
     }
 
