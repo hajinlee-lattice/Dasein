@@ -97,7 +97,8 @@ angular
 
 
     this.CreateABCDBuckets = function(id, data) {
-        var deferred = $q.defer();
+        var deferred = $q.defer(),
+            data = data;
 
         console.log(id, data);
 

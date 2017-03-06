@@ -3,7 +3,7 @@ angular.module('lp.models.ratings', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'
 ])
-.controller('ModelRatingsController', function ($scope, $rootScope, $stateParams,
+.controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams,
     ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, HistoricalABCDBuckets) {
 
     var vm = this;
@@ -85,16 +85,14 @@ angular.module('lp.models.ratings', [
             vm.canAddBucket = false;
         }
 
-        console.log(vm.canAddBucket);
-
-        buckets[0].left_bound_score = 99;
         // loop through buckets in object and set their values
         for (var i = 0, len = buckets.length; i < len; i++) { 
-            
+
             var previousBucket = buckets[i-1];
             for (var bucket in previousBucket) {
               vm.previousRightBoundScore = previousBucket["right_bound_score"];
             }
+
             // set each buckets left_bound_score to the previous buckets right_bound_score minus one
             buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
             buckets[0].left_bound_score = 99;
@@ -183,7 +181,7 @@ angular.module('lp.models.ratings', [
         }
 
     }
-    function eleMouseUp(ev){
+    function eleMouseUp(ev, index){
 
         ev.preventDefault();
         ev.stopPropagation();
@@ -193,7 +191,20 @@ angular.module('lp.models.ratings', [
 
         if (ev.clientY > vm.containerBox.bottom + 10) {
             vm.chartNotUpdated = false;
+            vm.showRemoveBucketText = false;
             vm.workingBuckets.splice(vm.index, 1);
+
+            var buckets = vm.workingBuckets;
+            for (var i = 0, len = buckets.length; i < len; i++) { 
+                var previousBucket = buckets[i-1];
+                for (var bucket in previousBucket) {
+                  vm.previousRightBoundScore = previousBucket["right_bound_score"];
+                }
+                buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
+                buckets[0].left_bound_score = 99;
+            }
+
+            $scope.$apply();
         }
 
         delete vm.slider;

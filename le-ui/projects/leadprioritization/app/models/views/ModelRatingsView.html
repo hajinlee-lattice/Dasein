@@ -20,7 +20,7 @@
                 </div>
             </div><!-- End .chart-header -->
 
-            <div class="remove-text" ng-class="{ 'show': vm.showRemoveBucketText }">Drop to remove bucket</div>
+            <div class="remove-text" ng-show="vm.showRemoveBucketText">Drop to remove bucket</div>
 
             <div 
                 id="ratingsChart"
@@ -66,7 +66,7 @@
                             height: '+ vm.dugoutHeight +'px;
                             right: '+ bucket.right_bound_score +'%;
                             width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'}}" 
-                        ng-repeat="bucket in vm.currentConfiguration">
+                        ng-repeat="bucket in vm.workingBuckets">
                     </div>
                 </div><!-- End .bar-colors -->
                 <ul class="horizontal-axis">
