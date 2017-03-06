@@ -528,7 +528,7 @@ angular.module('common.datacloud.explorer', [
         });
 
         var timestamp2 = new Date().getTime();
-        console.log('time for getHighlightMetadata(): '(timestamp2 - timestamp) + 'ms');
+        console.log('time for getHighlightMetadata(): ' + (timestamp2 - timestamp) + 'ms');
     }
 
     vm.highlightTypes = {
