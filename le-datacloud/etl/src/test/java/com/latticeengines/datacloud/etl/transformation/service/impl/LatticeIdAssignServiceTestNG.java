@@ -20,14 +20,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeed;
-import com.latticeengines.datacloud.core.source.impl.AccountMasterSeedMerged;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.LatticeIdAssignConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.LatticeIdRefreshConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class LatticeIdAssignServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
@@ -35,9 +34,6 @@ public class LatticeIdAssignServiceTestNG
 
     @Autowired
     AccountMasterSeed source;
-
-    @Autowired
-    AccountMasterSeedMerged ams;
 
     GeneralSource amId = new GeneralSource("AccountMasterId");
 
@@ -75,8 +71,8 @@ public class LatticeIdAssignServiceTestNG
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();
-            baseSources.add(ams.getSourceName());
             baseSources.add(amId.getSourceName());
+            baseSources.add(source.getSourceName());
             step1.setBaseSources(baseSources);
             step1.setTransformer("latticeIdAssignTransformer");
             step1.setTargetSource(targetSourceName);
@@ -97,14 +93,9 @@ public class LatticeIdAssignServiceTestNG
     }
 
     private String getTransformerConfig() throws JsonProcessingException {
-        LatticeIdAssignConfig conf = new LatticeIdAssignConfig();
-        conf.setAmSeedIdField("LatticeID");
-        conf.setAmSeedDunsField("DUNS");
-        conf.setAmSeedDomainField("Domain");
-        conf.setAmIdSrcIdField("LatticeID");
-        conf.setAmIdSrcDunsField("DUNS");
-        conf.setAmIdSrcDomainField("Domain");
-        return om.writeValueAsString(conf);
+        LatticeIdRefreshConfig config = new LatticeIdRefreshConfig();
+        config.setStrategy("AccountMasterSeedRebuild");
+        return om.writeValueAsString(config);
     }
 
     @Override
@@ -131,26 +122,16 @@ public class LatticeIdAssignServiceTestNG
 
     private Object[][] amsData = new Object[][] { //
             { "dom1.com", "DUNS1" }, //
-            { "dom1.com", "DUNS2" }, //
-            { "dom11.com", "DUNS11" }, //
-            { "dom11.com", "DUNS22" }, //
             { null, "DUNS2" }, //
-            { null, "DUNS3" }, //
-            { null, "DUNS22" }, //
-            { null, "DUNS33" }, //
-            { "dom2.com", "DUNS4" }, //
             { "dom3.com", "DUNS4" }, //
-            { "dom22.com", "DUNS44" }, //
-            { "dom33.com", "DUNS44" }, //
             { "dom3.com", null }, //
-            { "dom33.com", null }, //
     };
 
     private void prepareAMSeed() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("Domain", String.class));
         columns.add(Pair.of("DUNS", String.class));
-        uploadBaseSourceData(ams.getSourceName(), baseSourceVersion, columns, amsData);
+        uploadBaseSourceData(source.getSourceName(), baseSourceVersion, columns, amsData);
     }
 
     private Object[][] amIdData = new Object[][] { //
@@ -165,7 +146,7 @@ public class LatticeIdAssignServiceTestNG
 
     private void prepareAMId() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of("LatticeID", Long.class));
+        columns.add(Pair.of("LatticeAccountId", Long.class));
         columns.add(Pair.of("Domain", String.class));
         columns.add(Pair.of("DUNS", String.class));
         uploadBaseSourceData(amId.getSourceName(), baseSourceVersion, columns, amIdData);
@@ -174,12 +155,20 @@ public class LatticeIdAssignServiceTestNG
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
+        Object[][] expectedData = new Object[][] { //
+                { 10_000_000_001L, "dom1.com", "DUNS1" }, //
+                { 20_000_000_003L, null, "DUNS2" }, //
+                { 30_000_000_002L, "dom3.com", "DUNS4" }, //
+                { 40_000_000_001L, "dom3.com", null }, //
+        };
         int rowNum = 0;
-        int existingRowNum = 0;
         Set<Long> ids = new HashSet<Long>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            Long id = (Long) record.get("LatticeID");
+            Long id = (Long) record.get("LatticeAccountId");
+            Assert.assertNotNull(id);
+            Assert.assertFalse(ids.contains(id));
+            ids.add(id);
             Object duns = record.get("DUNS");
             if (duns instanceof Utf8) {
                 duns = duns.toString();
@@ -188,21 +177,19 @@ public class LatticeIdAssignServiceTestNG
             if (domain instanceof Utf8) {
                 domain = domain.toString();
             }
-            log.info(String.format("LatticeID = %d, Domain = %s, DUNS = %s", id, domain, duns));
-            for (Object[] data : amIdData) {
-                if (((domain == null && data[1] == null) || (domain != null && domain.equals(data[1])))
+            log.info(String.format("LatticeAccountId = %d, Domain = %s, DUNS = %s", id, domain, duns));
+            boolean flag = false;
+            for (Object[] data : expectedData) {
+                if (id.longValue() == ((Long) data[0]).longValue() //
+                        && ((domain == null && data[1] == null) || (domain != null && domain.equals(data[1]))) //
                         && ((duns == null && data[2] == null) || (duns != null && duns.equals(data[2])))) {
-                    Assert.assertEquals(id, data[0]);
-                    existingRowNum++;
+                    flag = true;
                 }
             }
-            Assert.assertNotNull(id);
-            Assert.assertTrue(!ids.contains(id));
-            ids.add(id);
+            Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 14);
-        Assert.assertEquals(existingRowNum, 7);
+        Assert.assertEquals(rowNum, 4);
     }
 
 }

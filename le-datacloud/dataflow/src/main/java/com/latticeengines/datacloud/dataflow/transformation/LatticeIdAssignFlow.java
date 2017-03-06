@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.domain.exposed.datacloud.dataflow.LatticeIdAssignFlowParameter;
+import com.latticeengines.domain.exposed.datacloud.dataflow.LatticeIdRefreshFlowParameter;
+import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("latticeIdAssignFlow")
 public class LatticeIdAssignFlow
-        extends TransformationFlowBase<BasicTransformationConfiguration, LatticeIdAssignFlowParameter> {
+        extends TransformationFlowBase<BasicTransformationConfiguration, LatticeIdRefreshFlowParameter> {
     @Override
     public Class<? extends TransformationConfiguration> getTransConfClass() {
         return BasicTransformationConfiguration.class;
@@ -26,29 +26,67 @@ public class LatticeIdAssignFlow
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(LatticeIdAssignFlow.class);
 
+    private final static String ID = "ID_";
+
     @Override
-    public Node construct(LatticeIdAssignFlowParameter parameters) {
-        Node ams = addSource(parameters.getBaseTables().get(0));
-        Node amId = addSource(parameters.getBaseTables().get(1));
+    public Node construct(LatticeIdRefreshFlowParameter parameters) {
+        LatticeIdStrategy strategy = parameters.getStrategy();
+        List<String> idsKeys = getIdsKeys(strategy);
+        List<String> entityKeys = getEntityKeys(strategy);
 
-        List<String> finalFields = new ArrayList<String>();
-        finalFields.addAll(ams.getFieldNames());
-        finalFields.add(parameters.getAmSeedIdField());
-        ams = ams.join(new FieldList(parameters.getAmSeedDunsField(), parameters.getAmSeedDomainField()), amId,
-                new FieldList(parameters.getAmIdSrcDunsField(), parameters.getAmIdSrcDomainField()), JoinType.LEFT);
-        ams = ams.rename(new FieldList(parameters.getAmIdSrcIdField()), new FieldList(parameters.getAmSeedIdField()))
-                .retain(new FieldList(finalFields));
+        Node ids = addSource(parameters.getBaseTables().get(0));
+        Node entity = addSource(parameters.getBaseTables().get(1));
+        ids = renameIds(ids);
+        entity = dropIdIfExist(entity, strategy);
 
-        Node hasId = ams.filter(String.format("%s != null", parameters.getAmSeedIdField()),
-                new FieldList(parameters.getAmSeedIdField()));
-        Node noId = ams.filter(String.format("%s == null", parameters.getAmSeedIdField()),
-                new FieldList(parameters.getAmSeedIdField())).discard(parameters.getAmSeedIdField());
+        List<String> finalFields = new ArrayList<>();
+        finalFields.addAll(entity.getFieldNames());
+        finalFields.add(strategy.getIdName());
 
-        noId = noId.addRowID(parameters.getAmSeedIdField());
-        noId = noId.apply(
-                String.format("Long.valueOf(%s) + %d", parameters.getAmSeedIdField(), parameters.getCurrentCount()),
-                new FieldList(parameters.getAmSeedIdField()),
-                new FieldMetadata(parameters.getAmSeedIdField(), Long.class));
-        return hasId.merge(noId);
+        Node joined = entity.join(new FieldList(entityKeys), ids, new FieldList(idsKeys), JoinType.INNER);
+        joined = joined.rename(new FieldList(ID + strategy.getIdName()), new FieldList(strategy.getIdName()));
+        joined = joined.retain(new FieldList(finalFields));
+
+        return joined;
     }
+
+    private Node dropIdIfExist(Node entity, LatticeIdStrategy strategy) {
+        boolean flag = false;
+        for (String field : entity.getFieldNames()) {
+            if (field.equals(strategy.getIdName())) {
+                flag = true;
+                break;
+            }
+        }
+        if (flag) {
+            entity = entity.discard(new FieldList(strategy.getIdName()));
+        }
+        return entity;
+    }
+
+    private Node renameIds(Node src) {
+        for (String attr : src.getFieldNames()) {
+            src = src.rename(new FieldList(attr), new FieldList(ID + attr));
+        }
+        return src;
+    }
+
+    private List<String> getIdsKeys(LatticeIdStrategy strategy) {
+        List<String> fields = new ArrayList<>();
+        for (List<String> attrs : strategy.getKeyMap().values()) {
+            for (String attr : attrs) {
+                fields.add(ID + attr);
+            }
+        }
+        return fields;
+    }
+
+    private List<String> getEntityKeys(LatticeIdStrategy strategy) {
+        List<String> fields = new ArrayList<>();
+        for (List<String> attrs : strategy.getKeyMap().values()) {
+            fields.addAll(attrs);
+        }
+        return fields;
+    }
+
 }

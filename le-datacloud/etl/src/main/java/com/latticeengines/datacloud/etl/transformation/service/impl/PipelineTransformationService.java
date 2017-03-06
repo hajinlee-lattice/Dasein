@@ -212,6 +212,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                 }
             }
 
+            transformer.initBaseSources(config.getConfiguration(), baseSourceNames);
+
             if ((baseSourceNames != null) && (baseSourceNames.size() != 0)) {
                 for (int i = 0; i < baseSourceNames.size(); i++, baseSourceIdx++) {
                     String sourceName = baseSourceNames.get(i);

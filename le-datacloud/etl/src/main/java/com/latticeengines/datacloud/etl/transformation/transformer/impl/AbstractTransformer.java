@@ -2,15 +2,14 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import java.util.List;
 
-import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.etl.transformation.ProgressHelper;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -52,6 +51,20 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
                 return validateConfig(config, sourceNames);
             }
         }
+    }
+
+    @Override
+    public void initBaseSources(String confStr, List<String> sourceNames) {
+        T config = getConfiguration(confStr);
+        if (config == null) {
+            return;
+        } else {
+            initBaseSources(config, sourceNames);
+        }
+    }
+
+    protected void initBaseSources(T config, List<String> sourceNames) {
+
     }
 
     @SuppressWarnings("unchecked")

@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,14 +11,18 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.domain.exposed.datacloud.dataflow.LatticeIdAssignFlowParameter;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.LatticeIdAssignConfig;
+import com.latticeengines.datacloud.etl.transformation.entitymgr.LatticeIdStrategyEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.dataflow.LatticeIdRefreshFlowParameter;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.LatticeIdRefreshConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 @Component("latticeIdAssignTransformer")
 public class LatticeIdAssignTransformer
-        extends AbstractDataflowTransformer<LatticeIdAssignConfig, LatticeIdAssignFlowParameter> {
+        extends AbstractDataflowTransformer<LatticeIdRefreshConfig, LatticeIdRefreshFlowParameter> {
     private static final Log log = LogFactory.getLog(LatticeIdAssignTransformer.class);
+
+    @Autowired
+    private LatticeIdStrategyEntityMgr latticeIdStrategyEntityMgr;
 
     private static String transfomerName = "latticeIdAssignTransformer";
 
@@ -37,45 +42,29 @@ public class LatticeIdAssignTransformer
     }
 
     @Override
-    protected Class<LatticeIdAssignFlowParameter> getDataFlowParametersClass() {
-        return LatticeIdAssignFlowParameter.class;
+    protected Class<LatticeIdRefreshFlowParameter> getDataFlowParametersClass() {
+        return LatticeIdRefreshFlowParameter.class;
     }
 
     @Override
     protected Class<? extends TransformerConfig> getConfigurationClass() {
-        return LatticeIdAssignConfig.class;
+        return LatticeIdRefreshConfig.class;
     }
 
     @Override
-    protected void updateParameters(LatticeIdAssignFlowParameter parameters, Source[] baseTemplates,
-            Source targetTemplate, LatticeIdAssignConfig config) {
-        parameters.setAmSeedIdField(config.getAmSeedIdField());
-        parameters.setAmSeedDunsField(config.getAmSeedDunsField());
-        parameters.setAmSeedDomainField(config.getAmSeedDomainField());
-        parameters.setAmIdSrcIdField(config.getAmIdSrcIdField());
-        parameters.setAmIdSrcDunsField(config.getAmIdSrcDunsField());
-        parameters.setAmIdSrcDomainField(config.getAmIdSrcDomainField());
-        // AMSeed must be put at 0th position of base source
-        Long currentCount = hdfsSourceEntityMgr.count(baseTemplates[0],
-                hdfsSourceEntityMgr.getCurrentVersion(baseTemplates[0]));
-        if (currentCount == null || currentCount.longValue() <= 0) {
-            throw new RuntimeException("Fail to get current count of AccountMasterSeed");
-        }
-        parameters.setCurrentCount(currentCount);
+    protected void updateParameters(LatticeIdRefreshFlowParameter parameters, Source[] baseTemplates,
+            Source targetTemplate, LatticeIdRefreshConfig config) {
+        parameters.setStrategy(latticeIdStrategyEntityMgr.getStrategyByName(config.getStrategy()));
     }
 
     @Override
-    protected boolean validateConfig(LatticeIdAssignConfig config, List<String> sourceNames) {
-        if (StringUtils.isEmpty(config.getAmSeedIdField()) || StringUtils.isEmpty(config.getAmIdSrcIdField())) {
-            log.error("Empty string or null is not allowed for AMSeedIdField or AMIdSrcIdField");
+    protected boolean validateConfig(LatticeIdRefreshConfig config, List<String> sourceNames) {
+        if (StringUtils.isEmpty(config.getStrategy())) {
+            log.error("Entity is not provided");
             return false;
         }
-        if (StringUtils.isEmpty(config.getAmSeedDunsField()) || StringUtils.isEmpty(config.getAmIdSrcDunsField())) {
-            log.error("Empty string or null is not allowed for AMSeedDunsField or AMIdSrcDunsField");
-            return false;
-        }
-        if (StringUtils.isEmpty(config.getAmSeedDomainField()) || StringUtils.isEmpty(config.getAmIdSrcDomainField())) {
-            log.error("Empty string or null is not allowed for AMSeedDomainField or AMIdSrcDomainField");
+        if (CollectionUtils.isEmpty(sourceNames) || sourceNames.size() != 2) {
+            log.error("Number of base sources must be 2");
             return false;
         }
         return true;
