@@ -37,7 +37,8 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                     "yum" : {
                         "xfsprogs" : [],
                         "nfs-utils": [],
-                        "aws-cli": []
+                        "aws-cli": [],
+                        "jq": []
                     }
                 },
                 "files" : {
