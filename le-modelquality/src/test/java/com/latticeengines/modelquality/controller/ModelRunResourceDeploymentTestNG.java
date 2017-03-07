@@ -52,6 +52,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             thisDataset.setName("ModelRunResourceDeploymentTestNG-NGINX");
             thisDataset.setTrainingSetHdfsPath(
                     "/Pods/Default/Services/ModelQuality/NGINX_PLS_LP3_ModelingLead_ReducedRows_20160712_125224.csv");
+            thisDataset.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
             DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(thisDataset.getName());
             if (datasetAlreadyExists != null)
                 dataSetEntityMgr.delete(datasetAlreadyExists);
