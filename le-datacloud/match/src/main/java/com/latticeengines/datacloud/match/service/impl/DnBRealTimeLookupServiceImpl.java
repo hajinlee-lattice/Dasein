@@ -154,38 +154,46 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
         if (!StringUtils.isEmpty(context.getDuns())) {
             context.setDnbCode(DnBReturnCode.OK);
         } else {
-            log.warn(String.format("Fail to extract duns from response of request %: %", context.getLookupRequestId(),
+            log.error(String.format("Fail to extract duns from response of request %: %", context.getLookupRequestId(),
                     response));
             context.setDnbCode(DnBReturnCode.BAD_RESPONSE);
         }
 
         dnbMatchResultValidator.validate(context);
     }
-    
+
     @Override
     protected void parseError(Exception ex, DnBMatchContext context) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
-            if (log.isDebugEnabled()) {
-                log.debug("HttpClientErrorException in DnB realtime request " + context.getLookupRequestId() + ": "
-                        + httpEx.getStatusText());
-            }
+            log.error(String.format("HttpClientErrorException in DnB realtime request: HttpStatus %d %s",
+                    ((HttpClientErrorException) ex).getStatusCode().value(),
+                    ((HttpClientErrorException) ex).getStatusCode().name()));
             context.setDnbCode(parseDnBHttpError(httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
-            if (log.isDebugEnabled()) {
-                log.debug("LedpException in DnB realtime request " + context.getLookupRequestId() + ": "
-                        + ledpEx.getCode().getMessage());
-            }
-            if (ledpEx.getCode() == LedpCode.LEDP_25027) {
+            log.error(String.format("LedpException in DnB realtime request: %s %s",
+                    ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
+            switch (ledpEx.getCode()) {
+            case LEDP_25027:
                 context.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
-            } else {
+                break;
+            case LEDP_25037:
                 context.setDnbCode(DnBReturnCode.BAD_REQUEST);
+                break;
+            case LEDP_25038:
+                context.setDnbCode(DnBReturnCode.UNMATCH);
+                break;
+            case LEDP_25039:
+                context.setDnbCode(DnBReturnCode.SERVICE_UNAVAILABLE);
+                break;
+            default:
+                context.setDnbCode(DnBReturnCode.UNKNOWN);
+                break;
             }
         } else {
-            log.warn("Unhandled exception in DnB realtime request " + context.getLookupRequestId() + ": "
-                    + ex.getMessage());
-            ex.printStackTrace();
+            log.error("Unhandled exception in DnB realtime request " + context.getLookupRequestId() + ": "
+                    + ex.getMessage(), ex);
             context.setDnbCode(DnBReturnCode.UNKNOWN);
         }
 

@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("dnbBulkLookupFetcher")
@@ -101,23 +100,30 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     protected void parseError(Exception ex, DnBBatchMatchContext batchContext) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
-            if (log.isDebugEnabled()) {
-                log.debug("HttpClientErrorException in DnB batch match fetching request: " + httpEx.getStatusText());
-            }
+            log.error(String.format("HttpClientErrorException in DnB batch match fetching request: HttpStatus %d %s",
+                    ((HttpClientErrorException) ex).getStatusCode().value(),
+                    ((HttpClientErrorException) ex).getStatusCode().name()));
             batchContext.setDnbCode(parseDnBHttpError(httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
-            if (log.isDebugEnabled()) {
-                log.debug("LedpException in DnB batch match fetching request: " + ledpEx.getCode().getMessage());
-            }
-            if (ledpEx.getCode() == LedpCode.LEDP_25027) {
+            log.error(String.format("LedpException in DnB batch match fetching request: %s %s",
+                    ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
+            switch (ledpEx.getCode()) {
+            case LEDP_25027:
                 batchContext.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
-            } else {
+                break;
+            case LEDP_25037:
                 batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
+                break;
+            case LEDP_25039:
+                batchContext.setDnbCode(DnBReturnCode.SERVICE_UNAVAILABLE);
+                break;
+            default:
+                batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
+                break;
             }
         } else {
-            log.warn("Unhandled exception in DnB batch match fetching request: " + ex.getMessage());
-            ex.printStackTrace();
+            log.error("Unhandled exception in DnB batch match fetching request: " + ex.getMessage(), ex);
             batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
         }
     }

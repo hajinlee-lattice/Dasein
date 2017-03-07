@@ -343,8 +343,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                 submittedReqs.add(batchContext);
                                 break;
                             case RATE_LIMITING:
-                            case EXCEED_REQUEST_NUM:
-                            case EXCEED_CONCURRENT_NUM:
+                            case EXCEED_LIMIT_OR_UNAUTHORIZED:
                                 // Not allow to submit this request due to rate limiting
                                 // Put it back to unsubmittedReqs list. Maintain the same order in the unsubmittedReqs
                                 unsubmittedReqs.add(unsubmittedReqs.size() - num, batchContext);
@@ -377,8 +376,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                         case SUBMITTED:
                         case IN_PROGRESS:
                         case RATE_LIMITING:
-                        case EXCEED_CONCURRENT_NUM:
-                        case EXCEED_REQUEST_NUM:
+                        case EXCEED_LIMIT_OR_UNAUTHORIZED:
                             break;
                         default:
                             processBulkMatchResult(submittedReq, false);

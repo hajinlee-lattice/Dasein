@@ -42,7 +42,6 @@ public abstract class BaseRestApiProxy {
 
     // Used to call external API because there is no standardized error handler
     protected BaseRestApiProxy() {
-
     }
 
     protected BaseRestApiProxy(String hostport) {
@@ -83,12 +82,23 @@ public abstract class BaseRestApiProxy {
 
     protected <T> T postForEntity(final String method, final String url, final HttpEntity<?> entity,
             final Class<T> returnValueClazz) {
-        log.info(String.format("Invoking %s by posting from url %s with http headers.", method, url));
-        try {
-            return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
-        } catch (Exception e) {
-            throw e;
-        }
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(new RetryCallback<T, RuntimeException>() {
+            @Override
+            public T doWithRetry(RetryContext context) {
+                try {
+                    log.info(String.format("Invoking %s by posting from url %s with http headers.  (Attempt=%d)", method, url, context.getRetryCount() + 1));
+                    return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
+                } catch (LedpException e) {
+                    context.setExhaustedOnly();
+                    logError(e, method);
+                    throw e;
+                } catch (Exception e) {
+                    logError(e, method);
+                    throw e;
+                }
+            }
+        });
     }
 
     private void logError(Exception e, String method) {
@@ -141,17 +151,10 @@ public abstract class BaseRestApiProxy {
 
     protected <T> T get(final String method, final String url, final HttpEntity<?> entity,
             final Class<T> returnValueClazz) {
-        log.info(String.format("Invoking %s by getting from url %s with http headers.", method, url));
-        try {
-            return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
-        } catch (Exception e) {
-            throw e;
-        }
-        /*
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(new RetryCallback<T, RuntimeException>() {
             @Override
-            public T doWithRetry(RetryContext context) throws RuntimeException {
+            public T doWithRetry(RetryContext context) {
                 try {
                     log.info(String.format("Invoking %s by getting from url %s with http headers.  (Attempt=%d)",
                             method, url, context.getRetryCount() + 1));
@@ -166,7 +169,6 @@ public abstract class BaseRestApiProxy {
                 }
             }
         });
-        */
     }
 
     protected void delete(final String method, final String url) {

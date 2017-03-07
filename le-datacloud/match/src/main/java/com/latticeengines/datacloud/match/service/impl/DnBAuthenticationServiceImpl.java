@@ -10,7 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -61,10 +63,14 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     private LoadingCache<DnBKeyType, String> tokenCache;
 
-    private RestApiClient dnbClient = new RestApiClient();
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    private RestApiClient dnbClient;
 
     @PostConstruct
     public void initialize() throws Exception {
+        dnbClient = RestApiClient.newExternalClient(applicationContext);
         tokenCache = //
                 CacheBuilder.newBuilder()//
                         .expireAfterWrite(tokenCacheExpirationTime, TimeUnit.MINUTES)//

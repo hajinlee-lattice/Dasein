@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("dnbBulkLookupStatusChecker")
@@ -168,25 +167,40 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     protected void parseError(Exception ex, Map<String, DnBBatchMatchContext> batch) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
-            log.error("HttpClientErrorException in DnB batch status checking: " + httpEx.getStatusText());
+            log.info(String.format("HttpClientErrorException in DnB realtime request: HttpStatus %d %s",
+                    ((HttpClientErrorException) ex).getStatusCode().value(),
+                    ((HttpClientErrorException) ex).getStatusCode().name()));
             for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
                 entry.getValue().setDnbCode(parseDnBHttpError(httpEx));
             }
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
-            log.error("LedpException in DnB batch status checking: " + ledpEx.getCode().getMessage());
-            if (ledpEx.getCode() == LedpCode.LEDP_25027) {
+            log.error(String.format("LedpException in DnB batch status checking: %s %s",
+                    ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
+            switch (ledpEx.getCode()) {
+            case LEDP_25027:
                 for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
                     entry.getValue().setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
                 }
-            } else {
+                break;
+            case LEDP_25037:
                 for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
                     entry.getValue().setDnbCode(DnBReturnCode.BAD_REQUEST);
                 }
+                break;
+            case LEDP_25039:
+                for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
+                    entry.getValue().setDnbCode(DnBReturnCode.SERVICE_UNAVAILABLE);
+                }
+                break;
+            default:
+                for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
+                    entry.getValue().setDnbCode(DnBReturnCode.BAD_STATUS);
+                }
+                break;
             }
         } else {
-            log.error("Unhandled exception in DnB batch status checking: " + ex.getMessage());
-            ex.printStackTrace();
+            log.error("Unhandled exception in DnB batch status checking: " + ex.getMessage(), ex);
             for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
                 entry.getValue().setDnbCode(DnBReturnCode.BAD_STATUS);
             }

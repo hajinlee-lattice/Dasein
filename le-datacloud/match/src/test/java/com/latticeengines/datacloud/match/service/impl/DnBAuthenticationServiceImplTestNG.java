@@ -17,7 +17,7 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
     @Autowired
     private DnBAuthenticationService dnBAuthenticationService;
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "dnb", enabled = true)
     public void testAuthentication() {
         String token1 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME);
         String token2 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME);

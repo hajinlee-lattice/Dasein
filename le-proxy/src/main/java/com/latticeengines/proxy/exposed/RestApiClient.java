@@ -4,6 +4,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResponseErrorHandler;
 
 @Component("restApiClient")
 @Scope("prototype")
@@ -11,6 +12,7 @@ public class RestApiClient extends BaseRestApiProxy {
 
     // Used to call external API because there is no standardized error handler
     public RestApiClient() {
+        super();
     }
 
     public RestApiClient(String hostport) {
@@ -39,6 +41,24 @@ public class RestApiClient extends BaseRestApiProxy {
         RestApiClient restApiClient = (RestApiClient) appCtx.getBean("restApiClient", hostport);
         restApiClient.enforceSSLNameVerification();
         return restApiClient;
+    }
+
+    /**
+     * This is the client used to call external api outside of lattice. This
+     * client ignores ssl name check This client WON'T use standard error
+     * handler in BaseRestApiProxy
+     * 
+     * @param appCtx
+     * @param hostport
+     * @return RestApiClient
+     */
+    public static RestApiClient newExternalClient(ApplicationContext appCtx) {
+        RestApiClient restApiClient = (RestApiClient) appCtx.getBean("restApiClient");
+        return restApiClient;
+    }
+
+    public void setErrorHandler(ResponseErrorHandler handler) {
+        super.setErrorHandler(handler);
     }
 
     public String get(final String path, final String... variables) {

@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -31,7 +29,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     @Autowired
     private DnBRealTimeLookupService dnBRealTimeLookupService;
 
-    private final static int THREAD_NUM = 20;
+    private final static int THREAD_NUM = 50;
 
     @Test(groups = "dnb", dataProvider = "entityInputData", enabled = true, priority = 1)
     public void testRealTimeEntityLookupService(String name, String city, String state, String country,
@@ -67,10 +65,8 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     }
 
-    @Test(groups = "dnb", enabled = false)
+    @Test(groups = "dnb", enabled = true)
     public void loadTestRealTimeLookupService() {
-
-        List<String> messageList = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_NUM);
         CompletionService<DnBMatchContext> cs = new ExecutorCompletionService<DnBMatchContext>(executorService);
 
@@ -80,7 +76,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
                     MatchKeyTuple input = new MatchKeyTuple();
                     input.setCountry("USA");
                     input.setCountryCode("US");
-                    input.setName("Gorman Manufacturing");
+                    input.setName("Google");
                     input.setState("CA");
                     DnBMatchContext context = new DnBMatchContext();
                     context.setInputNameLocation(input);
@@ -93,22 +89,14 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         for (int i = 0; i < THREAD_NUM; i++) {
             try {
                 DnBMatchContext result = cs.take().get();
-                log.info(i + " message:" + result.getDnbCode().getMessage());
-                messageList.add(result.getDnbCode().getMessage());
+                log.info(i + " message:" + result.getDnbCode().getMessage() + " DUNS:" + result.getDuns());
+                Assert.assertEquals(result.getDnbCode(), DnBReturnCode.OK);
             } catch (InterruptedException e) {
                 log.error(e);
             } catch (ExecutionException e) {
                 log.error(e);
             }
         }
-
-        boolean flag = false;
-        for (int i = 0; i < THREAD_NUM; i++) {
-            if (messageList.get(i).equals(DnBReturnCode.EXCEED_CONCURRENT_NUM.getMessage())) {
-                flag = true;
-            }
-        }
-        Assert.assertTrue(flag);
     }
 
     @Test(groups = "dnb", dataProvider = "emailInputData", enabled = false, priority = 2)

@@ -386,6 +386,10 @@ public enum LedpCode {
     LEDP_25034("The specified input can already match to lattice account id {0}, no need to patch."), //
     LEDP_25035("Cannot correctly parse the input domain {0}. Please remove this domain from your input."), //
     LEDP_25036("Cannot find a unique DUNS for the input. The matched DUNS is: {0}"), //
+    LEDP_25037("HTTP Status: 400 Bad Request"), //
+    LEDP_25038("HTTP Status: 404 Not Found"), //
+    LEDP_25039("HTTP Status: 500/503 DnB System Unavailable"), //
+    LEDP_25040("HTTP Status: {0} {1}"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
