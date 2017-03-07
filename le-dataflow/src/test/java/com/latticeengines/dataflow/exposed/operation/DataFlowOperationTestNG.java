@@ -14,13 +14,14 @@ import org.testng.annotations.Test;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.latticeengines.domain.exposed.query.ColumnLookup;
-import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 
@@ -32,7 +33,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             @Override
             public Node construct(DataFlowParameters parameters) {
                 Node lead = addSource("Lead");
-                List<ColumnLookup> lookups = new ArrayList<>();
+                List<Lookup> lookups = new ArrayList<>();
                 lookups.add(new ColumnLookup("Email"));
                 Sort sort = new Sort(lookups);
                 return lead.sort(sort);
@@ -50,8 +51,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 Assert.assertTrue(StringUtils.isBlank(lastEmail),
                         "If this email is blan, last email should also be blank, but it is " + lastEmail + " instead.");
             } else {
-                Assert.assertTrue(StringUtils.isBlank(lastEmail) || email.compareTo(lastEmail) >= 0,
-                        email + " should not be after " + lastEmail);
+                Assert.assertTrue(StringUtils.isBlank(lastEmail) || email.compareTo(lastEmail) >= 0, email
+                        + " should not be after " + lastEmail);
             }
             lastEmail = email;
         }

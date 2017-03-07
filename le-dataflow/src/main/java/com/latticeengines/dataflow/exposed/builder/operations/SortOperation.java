@@ -9,16 +9,17 @@ import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Retain;
 import cascading.tuple.Fields;
 
-import com.latticeengines.domain.exposed.query.ColumnLookup;
-import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.Sort;
 
 public class SortOperation extends Operation {
     public SortOperation(Input prior, String field, boolean descending) {
-        List<ColumnLookup> lookups = new ArrayList<>();
+        List<Lookup> lookups = new ArrayList<>();
         ColumnLookup lookup = new ColumnLookup(field);
         lookups.add(lookup);
         Sort sort = new Sort(lookups);
@@ -54,8 +55,8 @@ public class SortOperation extends Operation {
 
     private Fields getSortFields(Sort sort) {
         List<String> fields = new ArrayList<>();
-        for (ColumnLookup lookup : sort.getLookups()) {
-            fields.add(lookup.getColumnName());
+        for (Lookup lookup : sort.getLookups()) {
+            fields.add(((ColumnLookup) lookup).getColumnName());
         }
 
         return new Fields(fields.toArray(new String[fields.size()]));

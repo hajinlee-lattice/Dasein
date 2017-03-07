@@ -1,6 +1,7 @@
 package com.latticeengines.query.evaluator.impl;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.List;
@@ -19,7 +20,10 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 
@@ -147,6 +151,32 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         query.setObjectType(SchemaInterpretation.Account);
         query.setRestriction(restriction);
         queryEvaluator.evaluate(collection, query).fetchCount();
+    }
+
+    @Test(groups = "functional")
+    public void testSortAndPage() {
+        DataCollection collection = getDataCollection();
+        Restriction restriction = new ConcreteRestriction(false, new ColumnLookup("companyname"), ComparisonType.EQUAL,
+                new ColumnLookup("city"));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        query.setLookups(SchemaInterpretation.Account, "companyname", "city");
+        query.setPageFilter(new PageFilter(0, 100));
+        Sort sort = new Sort();
+        sort.setDescending(false);
+        sort.setLookups(SchemaInterpretation.Account, "companyname");
+        query.setSort(sort);
+        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query);
+        assertEquals(results.size(), 100);
+        String lastName = null;
+        for (Map<String, Object> result : results) {
+            String name = result.get("companyname").toString();
+            if (lastName != null) {
+                assertTrue(lastName.compareTo(name) <= 0);
+            }
+            lastName = name;
+        }
     }
 
     private DataCollection getDataCollection() {

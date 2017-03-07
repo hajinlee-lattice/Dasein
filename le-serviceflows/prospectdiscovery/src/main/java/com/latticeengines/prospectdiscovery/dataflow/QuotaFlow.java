@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Sort;
 
 @Component("quotaFlow")
@@ -168,7 +169,7 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
 
     private Node sortByFit(Node last, String modelId) {
         ColumnLookup lookup = new ColumnLookup(String.format("Score_%s", modelId));
-        List<ColumnLookup> lookups = new ArrayList<>();
+        List<Lookup> lookups = new ArrayList<>();
         lookups.add(lookup);
         Sort sort = new Sort(lookups, true);
         return last.sort(sort);

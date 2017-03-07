@@ -44,5 +44,4 @@ public class QueryEvaluator {
             throw new RuntimeException(String.format("Failed to retrieve data for object %s", query.getObjectType()), e);
         }
     }
-
 }

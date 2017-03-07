@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.object.BusinessObject;
@@ -52,11 +53,16 @@ public class JdbcQueryProcessor extends QueryProcessor {
             throw new RuntimeException(String.format("Could not locate BusinessObject for ObjectType %s",
                     query.getObjectType()));
         }
-        Predicate freeForm = processFreeFormSearch(dataCollection, query, businessObject);
-        SQLQuery<?> sqlQuery = businessObject.startQuery(dataCollection, query).where(freeForm)
-                .where(processRestriction(query.getRestriction(), query.getObjectType(), dataCollection))
+
+        SQLQuery<?> sqlQuery = businessObject.startQuery(dataCollection, query) //
+                .where(processFreeFormSearch(dataCollection, query, businessObject)) //
+                .where(processRestriction(query.getRestriction(), query.getObjectType(), dataCollection)) //
                 .select(getSelect(query, dataCollection));
+
         sqlQuery = addPaging(sqlQuery, query.getPageFilter());
+
+        sqlQuery = addSort(sqlQuery, query.getSort(), query.getObjectType(), dataCollection);
+
         log.info(String.format("Generated query:\n%s", sqlQuery.getSQL().getSQL()));
         return sqlQuery;
     }
@@ -65,6 +71,24 @@ public class JdbcQueryProcessor extends QueryProcessor {
         if (pageFilter != null) {
             return sqlQuery.limit(Math.min(MAX_PAGE_SIZE, pageFilter.getNumRows())).offset(pageFilter.getRowOffset());
         }
+        return sqlQuery;
+    }
+
+    private SQLQuery<?> addSort(SQLQuery<?> sqlQuery, Sort sort, SchemaInterpretation rootObjectType,
+            DataCollection dataCollection) {
+        if (sort != null) {
+            for (Lookup lookup : sort.getLookups()) {
+                if (lookup instanceof ColumnLookup) {
+                    ComparableExpression<String> resolved = resolveLookup(lookup, rootObjectType, dataCollection);
+                    if (sort.getDescending()) {
+                        sqlQuery = sqlQuery.orderBy(resolved.desc());
+                    } else {
+                        sqlQuery = sqlQuery.orderBy(resolved.asc());
+                    }
+                }
+            }
+        }
+
         return sqlQuery;
     }
 
