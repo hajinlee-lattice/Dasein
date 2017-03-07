@@ -16,6 +16,7 @@ def ec2_defn():
 def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
     config = AwsEnvironment(env)
     lerepo = config.le_repo()
+    bucket = config.cf_bucket()
     chefbucket= config.chef_bucket()
     assert isinstance(instance_role_name, Parameter)
 
@@ -92,7 +93,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "group": "root"
                     },
                     "/etc/telegraf/telegraf.conf":{
-                        "source":"http://s3.amazonaws.com/" + chefbucket + "/telegraph/telegraph.conf",
+                        "source":"http://s3.amazonaws.com/" + bucket + "/telegraph/telegraph.conf",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
