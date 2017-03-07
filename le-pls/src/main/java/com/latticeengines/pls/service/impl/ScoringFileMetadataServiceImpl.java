@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,13 +71,14 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     private PlsFeatureFlagService plsFeatureFlagService;
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
-            String displayName) {
+    public InputStream validateHeaderFields(InputStream stream,
+            CloseableResourcePool closeableResourcePool, String displayName) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
         stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
-        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream,
+                closeableResourcePool);
         try {
             stream.reset();
         } catch (IOException e) {
@@ -84,14 +86,15 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
-        Collection<String> reservedWords = Arrays
-                .asList(new String[] { ScoreResultField.Percentile.displayName, ScoreResultField.Rating.displayName });
+        Collection<String> reservedWords = Arrays.asList(new String[] {
+                ScoreResultField.Percentile.displayName, ScoreResultField.Rating.displayName });
         ValidateFileHeaderUtils.checkForReservedHeaders(displayName, headerFields, reservedWords);
         return stream;
     }
 
     @Override
-    public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId) {
+    public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName,
+            String modelId) {
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (modelSummary == null) {
             throw new RuntimeException(String.format("No such model summary with id %s", modelId));
@@ -100,14 +103,16 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         if (schemaInterpretationStr == null) {
             throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
         }
-        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation
+                .valueOf(schemaInterpretationStr);
 
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
         fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
 
         fieldMappingDocument.getRequiredFields().add(InterfaceName.Id.name());
-        if (!modelSummary.getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.ExcludePropdataColumns)
+        if (!modelSummary.getModelSummaryConfiguration()
+                .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)
                 && !plsFeatureFlagService.isFuzzyMatchEnabled()) {
             if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
                 fieldMappingDocument.getRequiredFields().add(InterfaceName.Website.name());
@@ -118,7 +123,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
-        List<Attribute> schemaFields = SchemaRepository.instance().getSchema(schemaInterpretation).getAttributes();
+        List<Attribute> schemaFields = SchemaRepository.instance().getSchema(schemaInterpretation)
+                .getAttributes();
         Iterator<String> scoringHeaderFieldsIterator = scoringHeaderFields.iterator();
         while (scoringHeaderFieldsIterator.hasNext()) {
             String scoringHeaderField = scoringHeaderFieldsIterator.next();
@@ -128,7 +134,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             while (requiredAttributesIterator.hasNext()) {
                 Attribute requiredAttribute = requiredAttributesIterator.next();
 
-                if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField, requiredAttribute)) {
+                if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField,
+                        requiredAttribute)) {
                     fieldMapping.setUserField(scoringHeaderField);
                     fieldMapping.setMappedField(requiredAttribute.getName());
                     fieldMapping.setMappedToLatticeField(true);
@@ -146,7 +153,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                     if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField, schemaField)) {
                         fieldMapping.setUserField(scoringHeaderField);
                         fieldMapping.setMappedField(schemaField.getName());
-                        // fields here are not in model event table, so we set false here
+                        // fields here are not in model event table, so we set
+                        // false here
                         fieldMapping.setMappedToLatticeField(false);
                         fieldMappingDocument.getFieldMappings().add(fieldMapping);
 
@@ -214,6 +222,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
     private void resolveModelAttributeBasedOnFieldMapping(List<Attribute> modelAttributes,
             FieldMappingDocument fieldMappingDocument) {
+        Set<String> modelAttributeNames = modelAttributes.stream()
+                .map(modelAttribute -> modelAttribute.getName()).collect(Collectors.toSet());
         Iterator<Attribute> attrIterator = modelAttributes.iterator();
         while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
@@ -228,7 +238,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (!fieldMapping.isMappedToLatticeField()) {
+            if (!fieldMapping.isMappedToLatticeField()
+                    || !modelAttributeNames.contains(fieldMapping.getMappedField())) {
                 if (fieldMapping.getUserField() == null) {
                     continue;
                 }
@@ -276,7 +287,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         return table;
     }
 
-    private boolean isScoringFieldMatchedWithModelAttribute(String scoringField, Attribute modelAttribute) {
+    private boolean isScoringFieldMatchedWithModelAttribute(String scoringField,
+            Attribute modelAttribute) {
         List<String> allowedDisplayNames = modelAttribute.getAllowedDisplayNames();
         if (allowedDisplayNames != null) {
             for (int i = 0; i < modelAttribute.getAllowedDisplayNames().size(); i++) {
