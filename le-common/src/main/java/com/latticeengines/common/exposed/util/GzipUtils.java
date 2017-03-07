@@ -9,12 +9,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class GzipUtils {
+
+    private static final ObjectMapper OM = new ObjectMapper();
 
     public static byte[] compress(final String str) {
         if ((str == null) || (str.length() == 0)) {
@@ -95,5 +101,15 @@ public class GzipUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void writeToGzipStream(HttpServletResponse response, Object output) throws IOException {
+        OutputStream os = response.getOutputStream();
+        response.setHeader("Content-Encoding", "gzip");
+        response.setHeader("Content-Type", "application/json");
+        GzipCompressorOutputStream gzipOs = new GzipCompressorOutputStream(os);
+        OM.writeValue(gzipOs, output);
+        gzipOs.flush();
+        gzipOs.close();
     }
 }

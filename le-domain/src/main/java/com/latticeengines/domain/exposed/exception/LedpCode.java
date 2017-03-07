@@ -486,6 +486,9 @@ public enum LedpCode {
     LEDP_31020("Too many scored txt files exist at {0}"), //
     LEDP_31021("Could not find ID field name from datacomposition schema {0}"), //
     LEDP_31022("No match found"), //
+    LEDP_31023("Get enrichment for one record failed."), //
+    LEDP_31024("Score a single record failed."), //
+    LEDP_31025("Score a bulk record failed."), //
 
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //
@@ -502,11 +505,12 @@ public enum LedpCode {
     LEDP_31112("enrichment_config_error", "Error while extracting enrichment configuration. Cause: {0}"), //
     LEDP_31113("missing_domain", "Either email or website is required"), //
     LEDP_31114("inactive_model", "The model {0} is not active for Real time scoring"), //
-    LEDP_31199("missing_domain", "Required field(s) are missing: {0}. In case of lead type model, " //
-            + "make sure to specify 'Email' field and for non-lead type model " //
-            + "specify either 'Website' or 'Domain' fields. If these fields " //
-            + "are not specified then specify both 'CompanyName' " //
-            + "and 'State' fields."), //
+    LEDP_31199("missing_domain",
+            "Required field(s) are missing: {0}. In case of lead type model, " //
+                    + "make sure to specify 'Email' field and for non-lead type model " //
+                    + "specify either 'Website' or 'Domain' fields. If these fields " //
+                    + "are not specified then specify both 'CompanyName' " //
+                    + "and 'State' fields."), //
     LEDP_31200("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     // le-serviceflows

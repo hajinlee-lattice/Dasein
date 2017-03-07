@@ -1,12 +1,9 @@
 package com.latticeengines.matchapi.controller;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -61,7 +59,7 @@ public class MatchResource {
     public void matchRealTime(@RequestBody MatchInput input, HttpServletResponse response) {
         try {
             MatchOutput output = realTimeMatchService.match(input);
-            writeToGzipStream(response, output);
+            GzipUtils.writeToGzipStream(response, output);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
         }
@@ -79,7 +77,7 @@ public class MatchResource {
         long time = System.currentTimeMillis();
         try {
             BulkMatchOutput output = realTimeMatchService.matchBulk(input);
-            writeToGzipStream(response, output);
+            GzipUtils.writeToGzipStream(response, output);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed.", e);
         } finally {
@@ -116,16 +114,6 @@ public class MatchResource {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25008, e, new String[] { rootuid });
         }
-    }
-
-    private void writeToGzipStream(HttpServletResponse response, Object output) throws IOException {
-        OutputStream os = response.getOutputStream();
-        response.setHeader("Content-Encoding", "gzip");
-        response.setHeader("Content-Type", "application/json");
-        GzipCompressorOutputStream gzipOs = new GzipCompressorOutputStream(os);
-        OM.writeValue(gzipOs, output);
-        gzipOs.flush();
-        gzipOs.close();
     }
 
     private BulkMatchService getBulkMatchService(String matchVersion) {
