@@ -93,7 +93,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "group": "root"
                     },
                     "/etc/telegraf/telegraf.conf":{
-                        "source":"http://s3.amazonaws.com/" + bucket + "/telegraph/telegraph.conf",
+                        "source":"http://s3.amazonaws.com/" + bucket + "/telegraf/telegraf.conf",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
@@ -193,7 +193,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "    sleep 1;\n",
                             "done;\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
-                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraph --container-instances ${instance_arn} --region ${region}\n"
+                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraf --container-instances ${instance_arn} --region ${region}\n"
                         ] ] }
                     },
                     "30_mount_efs" : {
