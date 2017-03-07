@@ -669,6 +669,7 @@ angular.module('common.datacloud.explorer', [
                 EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
+            getHighlightMetadata();
 
         });
     }
@@ -740,6 +741,7 @@ angular.module('common.datacloud.explorer', [
                 EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
+            getHighlightMetadata();
         });
     }
 
