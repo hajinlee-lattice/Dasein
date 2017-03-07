@@ -3,6 +3,7 @@ package com.latticeengines.app.exposed.util;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -24,6 +25,9 @@ public class QueryTranslator {
         result.setRestriction(restriction);
         result.setFreeFormTextSearch(frontEndQuery.getFreeFormTextSearch());
         result.setPageFilter(frontEndQuery.getPageFilter());
+        if (frontEndQuery.getPageFilter() == null) {
+            frontEndQuery.setPageFilter(new PageFilter(0, 100));
+        }
         result.setSort(frontEndQuery.getSort());
         return result;
     }

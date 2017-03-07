@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
 
@@ -33,22 +33,13 @@ public class DataCollectionResource implements DataCollectionInterface {
         return dataCollectionService.getDataCollections(customerSpace);
     }
 
-    @RequestMapping(value = "/default", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/types/{dataCollectionType}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get default data collections")
+    @ApiOperation(value = "Get data collection by type")
     @Override
-    public DataCollection getDefaultDataCollection(@PathVariable String customerSpace) {
-        return dataCollectionService.getDefaultDataCollection(customerSpace);
-    }
-
-    @RequestMapping(value = "/default", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create default data collection")
-    @Override
-    public DataCollection createDefaultDataCollection(@PathVariable String customerSpace, //
-            @RequestParam String statisticsId, //
-            @RequestBody List<String> tableNames) {
-        return dataCollectionService.createDefaultDataCollection(customerSpace, statisticsId, tableNames);
+    public DataCollection getDataCollectionByType(@PathVariable String customerSpace,
+            @PathVariable DataCollectionType dataCollectionType) {
+        return dataCollectionService.getDataCollectionByType(customerSpace, dataCollectionType);
     }
 
     @RequestMapping(value = "/names/{dataCollectionName}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -64,8 +55,7 @@ public class DataCollectionResource implements DataCollectionInterface {
     @ApiOperation(value = "Create data collection")
     @Override
     public DataCollection createDataCollection(@PathVariable String customerSpace, //
-            @RequestParam String statisticsId, //
-            @RequestBody List<String> tableNames) {
-        return dataCollectionService.createDataCollection(customerSpace, statisticsId, tableNames);
+            @RequestBody DataCollection dataCollection) {
+        return dataCollectionService.createDataCollection(customerSpace, dataCollection);
     }
 }

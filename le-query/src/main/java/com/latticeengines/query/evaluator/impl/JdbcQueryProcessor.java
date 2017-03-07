@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.ValueLookup;
@@ -36,6 +37,7 @@ import com.querydsl.sql.SQLQuery;
 @Component("jdbcQueryProcessor")
 public class JdbcQueryProcessor extends QueryProcessor {
     private static final Log log = LogFactory.getLog(JdbcQueryProcessor.class);
+    private static final int MAX_PAGE_SIZE = 500;
 
     @Autowired
     private QueryFactory queryFactory;
@@ -54,7 +56,15 @@ public class JdbcQueryProcessor extends QueryProcessor {
         SQLQuery<?> sqlQuery = businessObject.startQuery(dataCollection, query).where(freeForm)
                 .where(processRestriction(query.getRestriction(), query.getObjectType(), dataCollection))
                 .select(getSelect(query, dataCollection));
+        sqlQuery = addPaging(sqlQuery, query.getPageFilter());
         log.info(String.format("Generated query:\n%s", sqlQuery.getSQL().getSQL()));
+        return sqlQuery;
+    }
+
+    private SQLQuery<?> addPaging(SQLQuery<?> sqlQuery, PageFilter pageFilter) {
+        if (pageFilter != null) {
+            return sqlQuery.limit(Math.min(MAX_PAGE_SIZE, pageFilter.getNumRows())).offset(pageFilter.getRowOffset());
+        }
         return sqlQuery;
     }
 

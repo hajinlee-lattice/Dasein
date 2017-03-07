@@ -80,7 +80,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
 
     @OneToMany(cascade = CascadeType.MERGE, mappedBy = "metadataSegment", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("SegmentProperties")
+    @JsonProperty("segment_properties")
     private List<MetadataSegmentProperty> metadataSegmentProperties = new ArrayList<>();
 
     @Override

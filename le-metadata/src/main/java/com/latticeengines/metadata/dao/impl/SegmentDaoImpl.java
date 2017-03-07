@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.metadata.dao.SegmentDao;
 
@@ -34,12 +35,12 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
     }
 
     @Override
-    public MetadataSegment findByNameWithDefaultDataCollection(String name) {
+    public MetadataSegment findByNameWithSegmentationDataCollection(String name) {
         Session session = sessionFactory.getCurrentSession();
         Class<MetadataSegment> entityClz = getEntityClass();
         String queryStr = String
-                .format("from %s as segment inner join fetch segment.dataCollection as dataCollection where dataCollection.isDefault = true and segment.name = '%s'",
-                        entityClz.getSimpleName(), name);
+                .format("from %s as segment inner join fetch segment.dataCollection as dataCollection where dataCollection.type = '%s' and segment.name = '%s'",
+                        entityClz.getSimpleName(), DataCollectionType.Segmentation, name);
         Query query = session.createQuery(queryStr);
         List list = query.list();
         if (list.size() == 0) {

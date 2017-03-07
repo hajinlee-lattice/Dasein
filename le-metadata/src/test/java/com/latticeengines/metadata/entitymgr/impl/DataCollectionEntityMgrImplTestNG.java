@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -19,7 +20,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
-    private DataCollection defaultDataCollection;
+    private DataCollection dataCollection;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -34,29 +35,31 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
     @Test(groups = "functional")
     @SuppressWarnings("unchecked")
-    public void createDefault() {
-        defaultDataCollection = dataCollectionEntityMgr.createDataCollection(Collections.singletonList(TABLE1), null,
-                true);
-        assertNotNull(defaultDataCollection);
-        Table table = tableEntityMgr.findByName(TABLE1);
-        assertTrue(table.getTags().contains(defaultDataCollection.getName()));
+    public void create() {
+        DataCollection collection = new DataCollection();
+        Table table = new Table();
+        table.setName(TABLE1);
+        collection.setTables(Collections.singletonList(table));
+        collection.setType(DataCollectionType.Segmentation);
+        dataCollection = dataCollectionEntityMgr.createDataCollection(collection);
+        assertNotNull(dataCollection);
+        table = tableEntityMgr.findByName(TABLE1);
+        assertTrue(table.getTags().contains(dataCollection.getName()));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "createDefault")
-    public void getDefault() {
-        DataCollection retrieved = dataCollectionEntityMgr.getDefaultDataCollection();
+    @Test(groups = "functional", dependsOnMethods = "create")
+    public void retrieve() {
+        DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(DataCollectionType.Segmentation);
         assertEquals(retrieved.getTables().size(), 1);
         assertEquals(retrieved.getTables().get(0).getName(), TABLE1);
-        assertEquals(retrieved.getName(), defaultDataCollection.getName());
+        assertEquals(retrieved.getName(), dataCollection.getName());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "getDefault")
-    public void notVisibleInOtherTenant() {
-        // TODO Validate that DataCollection is not available in other tenant
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "notVisibleInOtherTenant")
-    public void removeQuerySource() {
-        // TODO Remove DataCollection and ensure tags are removed
+    @Test(groups = "functional", dependsOnMethods = "retrieve")
+    public void retrieveByName() {
+        DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(dataCollection.getName());
+        assertEquals(retrieved.getTables().size(), 1);
+        assertEquals(retrieved.getTables().get(0).getName(), TABLE1);
+        assertEquals(retrieved.getName(), dataCollection.getName());
     }
 }

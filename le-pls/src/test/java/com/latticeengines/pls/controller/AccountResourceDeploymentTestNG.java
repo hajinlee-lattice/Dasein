@@ -9,6 +9,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -27,8 +29,10 @@ public class AccountResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTestEnvironmentWithOneTenant();
         Table table = createTestTable();
         metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
-        metadataProxy.createDefaultDataCollection(mainTestTenant.getId(), "",
-                Collections.singletonList("querytest_table"));
+        DataCollection collection = new DataCollection();
+        collection.setType(DataCollectionType.Segmentation);
+        collection.setTables(Collections.singletonList(table));
+        metadataProxy.createDataCollection(mainTestTenant.getId(), collection);
     }
 
     @Test(groups = "deployment")

@@ -1,21 +1,20 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Date;
 
-import com.latticeengines.domain.exposed.metadata.MetadataSegmentProperty;
-import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentProperty;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
@@ -33,7 +32,7 @@ public class SegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     private MetadataSegment segment;
-    private DataCollection defaultDataCollection;
+    private DataCollection collection;
 
     private static final MetadataSegmentProperty METADATA_SEGMENT_PROPERTY_1 = new MetadataSegmentProperty();
     private static final MetadataSegmentProperty METADATA_SEGMENT_PROPERTY_2 = new MetadataSegmentProperty();
@@ -43,7 +42,9 @@ public class SegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     public void setup() {
         super.setup();
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE1));
-        defaultDataCollection = dataCollectionEntityMgr.createDataCollection(new ArrayList<>(), null, true);
+        collection = new DataCollection();
+        collection.setType(DataCollectionType.Segmentation);
+        collection = dataCollectionEntityMgr.createDataCollection(collection);
         METADATA_SEGMENT_PROPERTY_1.setOption(MetadataSegmentPropertyName.NumAccounts.getName());
         METADATA_SEGMENT_PROPERTY_1.setValue("100");
         METADATA_SEGMENT_PROPERTY_2.setOption(MetadataSegmentPropertyName.NumContacts.getName());
@@ -82,15 +83,15 @@ public class SegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         MetadataSegment retrieved = segmentEntityMgr.findByName("Test");
         assertEquals(retrieved.getName(), segment.getName());
         assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);
-        assertTrue(retrieved.getDataCollection().isDefault());
+        assertEquals(retrieved.getDataCollection().getType(), DataCollectionType.Segmentation);
     }
 
     @Test(groups = "functional", dependsOnMethods = "getSegment")
     public void getSegmentWithExplicitQuerySource() {
-        MetadataSegment retrieved = segmentEntityMgr.findByName(defaultDataCollection.getName(), "Test");
+        MetadataSegment retrieved = segmentEntityMgr.findByName(collection.getName(), "Test");
         assertEquals(retrieved.getName(), segment.getName());
         assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);
-        assertTrue(retrieved.getDataCollection().isDefault());
+        assertEquals(retrieved.getDataCollection().getType(), DataCollectionType.Segmentation);
     }
 
     @Test(groups = "functional", dependsOnMethods = "getSegmentWithExplicitQuerySource")

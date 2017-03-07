@@ -1,4 +1,4 @@
-package com.latticeeninges.metadata.validation.service;
+package com.latticeengines.metadata.service;
 
 public interface ArtifactValidationService {
 

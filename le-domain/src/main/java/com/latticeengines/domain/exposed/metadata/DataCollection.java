@@ -8,12 +8,15 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
@@ -63,13 +66,15 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @JsonProperty("is_default")
-    @Column(name = "IS_DEFAULT", nullable = false)
-    private boolean isDefault;
+    @JsonProperty("type")
+    @Column(name = "TYPE", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DataCollectionType type;
 
-    @JsonProperty("statistics_id")
-    @Column(name = "STATISTICS_ID", nullable = true)
-    private String statisticsId;
+    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "dataCollection", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("properties")
+    private List<DataCollectionProperty> properties = new ArrayList<>();
 
     @JsonProperty("tables")
     @Transient
@@ -118,14 +123,6 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         this.tenant = tenant;
     }
 
-    public boolean isDefault() {
-        return isDefault;
-    }
-
-    public void setDefault(boolean aDefault) {
-        isDefault = aDefault;
-    }
-
     public List<Table> getTables() {
         return tables;
     }
@@ -134,12 +131,12 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         this.tables = tables;
     }
 
-    public String getStatisticsId() {
-        return statisticsId;
+    public DataCollectionType getType() {
+        return type;
     }
 
-    public void setStatisticsId(String statisticsId) {
-        this.statisticsId = statisticsId;
+    public void setType(DataCollectionType type) {
+        this.type = type;
     }
 
     @Override
@@ -155,5 +152,13 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
                 .filter(t -> t.getInterpretation() != null && t.getInterpretation().equals(objectType.toString())) //
                 .findFirst().orElse(null);
 
+    }
+
+    public List<DataCollectionProperty> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(List<DataCollectionProperty> properties) {
+        this.properties = properties;
     }
 }

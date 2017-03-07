@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.metadata.service.ArtifactService;
 import com.latticeengines.metadata.validation.service.impl.ArtifactValidation;
-import com.latticeeninges.metadata.validation.service.ArtifactValidationService;
+import com.latticeengines.metadata.service.ArtifactValidationService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -7,5 +7,5 @@ public interface SegmentDao extends BaseDao<MetadataSegment> {
 
     MetadataSegment findByDataCollectionAndName(String querySourceName, String name);
 
-    MetadataSegment findByNameWithDefaultDataCollection(String name);
+    MetadataSegment findByNameWithSegmentationDataCollection(String name);
 }

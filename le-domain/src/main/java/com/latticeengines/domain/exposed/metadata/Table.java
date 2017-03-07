@@ -169,6 +169,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @Transient
     private Long count;
 
+    @JsonProperty("relationships")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "sourceTable")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public List<TableRelationship> relationships = new ArrayList<>();
+
     public Table() {
     }
 
@@ -770,4 +775,15 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         this.hierarchies = hierarchies;
     }
 
+    public List<TableRelationship> getRelationships() {
+        return relationships;
+    }
+
+    public void setRelationships(List<TableRelationship> relationships) {
+        this.relationships = relationships;
+    }
+
+    public void addRelationship(TableRelationship relationship) {
+        this.relationships.add(relationship);
+    }
 }

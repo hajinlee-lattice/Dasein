@@ -29,7 +29,9 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Cardinality;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRelationship;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -223,8 +225,13 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
         attribute.setDataSource("[DerivedColumns]");
         attribute.addValidator(new RequiredIfOtherFieldIsEmpty("Test"));
-        
+
         table.setTags(Arrays.asList(new String[] { "TAG1", "TAG2" }));
+        TableRelationship relationship = new TableRelationship();
+        relationship.setSourceCardinality(Cardinality.ONE);
+        relationship.setTargetCardinality(Cardinality.ONE);
+        relationship.setTargetTableName(TABLE1);
+        table.addRelationship(relationship);
         return table;
     }
 }

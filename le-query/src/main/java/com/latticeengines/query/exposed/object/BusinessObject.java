@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.Query;
@@ -51,15 +52,18 @@ public abstract class BusinessObject {
 
     public final long getCount(Query query) {
         query.setObjectType(getObjectType());
-        return queryEvaluator.evaluate(getDefaultDataCollection(), query).fetchCount();
+        query.setPageFilter(null);
+        query.setSort(null);
+        return queryEvaluator.evaluate(getDataCollection(), query).fetchCount();
     }
 
     public final List<Map<String, Object>> getData(Query query) {
         query.setObjectType(getObjectType());
-        return queryEvaluator.getResults(getDefaultDataCollection(), query);
+        return queryEvaluator.getResults(getDataCollection(), query);
     }
 
-    protected final DataCollection getDefaultDataCollection() {
-        return metadataProxy.getDefaultDataCollection(MultiTenantContext.getTenant().getId());
+    protected final DataCollection getDataCollection() {
+        return metadataProxy.getDataCollectionByType(MultiTenantContext.getTenant().getId(),
+                DataCollectionType.Segmentation);
     }
 }

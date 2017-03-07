@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeeninges.metadata.validation.service.ArtifactValidationService;
+import com.latticeengines.metadata.service.ArtifactValidationService;
 
 @Component
 public abstract class ArtifactValidation implements ArtifactValidationService {

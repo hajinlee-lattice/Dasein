@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
 
@@ -20,13 +21,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollection getDefaultDataCollection(String customerSpace) {
-        return dataCollectionEntityMgr.getDefaultDataCollection();
-    }
-
-    @Override
-    public DataCollection createDefaultDataCollection(String customerSpace, String statisticsId, List<String> tableNames) {
-        return dataCollectionEntityMgr.createDataCollection(tableNames, statisticsId, true);
+    public DataCollection getDataCollectionByType(String customerSpace, DataCollectionType type) {
+        return dataCollectionEntityMgr.getDataCollection(type);
     }
 
     @Override
@@ -35,7 +31,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollection createDataCollection(String customerSpace, String statisticsId, List<String> tableNames) {
-        return dataCollectionEntityMgr.createDataCollection(tableNames, statisticsId, false);
+    public DataCollection createDataCollection(String customerSpace, DataCollection dataCollection) {
+        return dataCollectionEntityMgr.createDataCollection(dataCollection);
     }
 }
