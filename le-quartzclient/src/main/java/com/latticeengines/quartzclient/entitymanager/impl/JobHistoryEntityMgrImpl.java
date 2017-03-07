@@ -11,8 +11,7 @@ import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 import com.latticeengines.quartzclient.entitymanager.impl.core.BaseJobHistoryEntityMgrImpl;
 
 @Component("jobHistoryEntityMgr")
-public class JobHistoryEntityMgrImpl extends BaseJobHistoryEntityMgrImpl implements
-        JobHistoryEntityMgr {
+public class JobHistoryEntityMgrImpl extends BaseJobHistoryEntityMgrImpl implements JobHistoryEntityMgr {
 
     @Override
     @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -48,6 +47,12 @@ public class JobHistoryEntityMgrImpl extends BaseJobHistoryEntityMgrImpl impleme
     @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public JobHistory getLastJobHistory(String tenantId, String jobName) {
         return jobHistoryDao.getLastJobHistory(tenantId, jobName);
+    }
+
+    @Override
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRED)
+    public void deleteAllJobHistory(String tenantId, String jobName) {
+        jobHistoryDao.deleteAllJobHistory(tenantId, jobName);
     }
 
 }

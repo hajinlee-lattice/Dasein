@@ -154,4 +154,16 @@ public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<Job
     public void updateJobHistory(JobHistory jobHistory) {
         super.update(jobHistory);
     }
+
+    @Override
+    public void deleteAllJobHistory(String tenantId, String jobName) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<JobHistory> entityClz = getEntityClass();
+        String queryStr = String.format("delete from %s where TenantId = :tenantId and JobName = :jobName ",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("tenantId", tenantId);
+        query.setString("jobName", jobName);
+        query.executeUpdate();
+    }
 }

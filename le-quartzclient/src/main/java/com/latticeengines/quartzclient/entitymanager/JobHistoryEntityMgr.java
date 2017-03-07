@@ -19,4 +19,6 @@ public interface JobHistoryEntityMgr extends BaseJobHistoryEntityMgr {
 
     void deleteOldJobHistory(int retainingDays);
 
+    void deleteAllJobHistory(String tenantId, String jobName);
+
 }

@@ -22,4 +22,6 @@ public interface JobHistoryDao extends BaseDao<JobHistory> {
 
     void deleteOldJobHistory(int retainingDays);
 
+    void deleteAllJobHistory(String tenantId, String jobName);
+
 }

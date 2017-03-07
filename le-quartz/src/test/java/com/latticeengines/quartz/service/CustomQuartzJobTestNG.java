@@ -1,10 +1,11 @@
 package com.latticeengines.quartz.service;
 
-import com.latticeengines.domain.exposed.quartz.JobConfig;
-import com.latticeengines.domain.exposed.quartz.JobHistory;
-import com.latticeengines.domain.exposed.quartz.JobInfo;
-import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
-import com.latticeengines.quartz.entitymanager.SchedulerEntityMgr;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -13,13 +14,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import com.latticeengines.domain.exposed.quartz.JobConfig;
+import com.latticeengines.domain.exposed.quartz.JobHistory;
+import com.latticeengines.domain.exposed.quartz.JobInfo;
+import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
+import com.latticeengines.quartz.entitymanager.SchedulerEntityMgr;
+import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:test-quartz-context.xml" })
 public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
@@ -31,6 +34,9 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private SchedulerEntityMgr schedulerEntityMgr;
+
+    @Autowired
+    private JobHistoryEntityMgr jobHistoryEntityMgr;
 
     @Autowired
     private ApplicationContext appContext;
@@ -50,6 +56,12 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
     @Value("${quartz.test.functional.testjob.cron:}")
     private String testJobCronTrigger;
 
+    @BeforeClass
+    @Test(groups = "functional")
+    public void init() {
+        jobHistoryEntityMgr.deleteAllJobHistory(JOB_GROUP, JOB_NAME);
+    }
+
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void addJob() {
@@ -62,9 +74,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
         jobConfig.setJobTimeout(30);
         jobConfig.setQueryApi(testJobQueryApi);
         jobConfig.setCheckJobBeanUrl(testJobCheckBeanUrl);
-        jobConfig.setJobArguments("{" +
-                "  \"jobType\": \"testQuartzJob\"," +
-                "  \"printMsg\": \"Hello World\"," + "}");
+        jobConfig.setJobArguments("{" + "  \"jobType\": \"testQuartzJob\"," + "  \"printMsg\": \"Hello World\"," + "}");
         schedulerEntityMgr.addJob(JOB_GROUP, jobConfig);
     }
 
@@ -88,7 +98,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
             e.printStackTrace();
         }
         List<TriggerJobThread> jobList = new ArrayList<>();
-        for (int i = 0; i < 5; i ++) {
+        for (int i = 0; i < 5; i++) {
             jobList.add(new TriggerJobThread(jobKey));
         }
         JobInfoDetail jobDetail = schedulerEntityMgr.getJobDetail(JOB_GROUP, JOB_NAME);
@@ -111,7 +121,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "triggerJob", "addJob"})
+    @Test(groups = "functional", dependsOnMethods = { "triggerJob", "addJob" })
     public void deleteJob() {
         try {
             Thread.sleep(10000);
@@ -125,6 +135,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
     private class TriggerJobThread extends Thread {
 
         private JobKey jobKey;
+
         TriggerJobThread(JobKey jobKey) {
             super("trigger job thread");
             this.jobKey = jobKey;
