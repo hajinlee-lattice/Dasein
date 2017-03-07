@@ -35,7 +35,8 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                 "packages" : {
                     "yum" : {
                         "xfsprogs" : [],
-                        "nfs-utils": []
+                        "nfs-utils": [],
+                        "aws-cli": []
                     }
                 },
                 "files" : {
@@ -89,6 +90,13 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "mode": "000755",
                         "owner": "root",
                         "group": "root"
+                    },
+                    "/etc/telegraf/telegraf.conf":{
+                        "source":"http://s3.amazonaws.com/" + chefbucket + "/telegraph/telegraph.conf",
+                        "mode":"000777",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
                     },
                     "/tmp/mount_efs.sh": {
                         "content": {
@@ -175,9 +183,8 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                     "20_start_cadvisor" : {
                         "command" : { "Fn::Join": [ "", [
                             "start ecs\n"
-                            "yum install -y aws-cli jq\n",
                             "for i in {1..100}; do\n",
-                            "    instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
+                            "    instance_arn=`curl http://169.254.169.254/latest/meta-data/instance-id`\n",
                             "    if [ ! -z \"${instance_arn}\" ]; then\n",
                             "        break;\n",
                             "    fi;\n",
@@ -185,7 +192,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "    sleep 1;\n",
                             "done;\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
-                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances ${instance_arn} --region ${region}\n"
+                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraph --container-instances ${instance_arn} --region ${region}\n"
                         ] ] }
                     },
                     "30_mount_efs" : {
