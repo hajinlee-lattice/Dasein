@@ -18,7 +18,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         templateUrl: 'app/AppCommon/widgets/modelListTileWidget/ModelListTileWidgetTemplate.html',
         controller: function(
             $scope, $state, $rootScope, $document, $element, ResourceUtility, BrowserStorageUtility,
-            NavUtility, DeleteModelModal, StaleModelModal, DeactivateModelModal, 
+            NavUtility, DeleteModelModal, StaleModelModal, DeactivateModelModal,
             FeatureFlagService, ModelService, CopyModelToTenantModal
         ) {
             $scope.ResourceUtility = ResourceUtility;
@@ -45,7 +45,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
 
             $scope.isNotPmmlModel = $scope.data.ModelFileType !== 'PmmlModel';
             $scope.canRemodel = ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
-            $scope.menuFlag = !!$scope.data.ConflictWithOptionalRules;
+            $scope.modelRecommendation = !!$scope.data.ConflictWithOptionalRules;
 
             //TODO:pierce Field names subject to change
             $scope.isActive = data.Status === "Active";
@@ -55,7 +55,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                 if ($event != null) {
                     $event.stopPropagation();
                 }
-                
+
                 $scope.showCustomMenu = !$scope.showCustomMenu;
 
                 if ($scope.showCustomMenu) {
@@ -74,7 +74,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                     });
                 }
             };
-            
+
             $scope.reviewRatingsClick = function ($event) {
                 if ($event != null) {
                     $event.stopPropagation();
@@ -145,7 +145,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                 if ($event != null) {
                     $event.stopPropagation();
                 }
-                
+
                 if ($scope.mayChangeModelNames) {
                     //Changing the name of the model
                     $scope.nameStatus.editing = true;
@@ -162,7 +162,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                     StaleModelModal.show($scope.data.Id);
                 }
             };
-            
+
             $scope.showCopyModelToTenantModal = function($event, model){
                 if ($event != null) {
                     $event.stopPropagation();
@@ -221,9 +221,9 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                 $scope.showNameEditError = true;
                 $scope.submitting = false;
             }
-            
+
         });
-       
+
 
     };
 
@@ -233,7 +233,5 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         $scope.DisplayName = $scope.$parent.data.DisplayName == null ? $scope.$parent.name : $scope.$parent.data.DisplayName;
         $scope.nameStatus.editing = false;
     };
-
-    
 
 });
