@@ -26,7 +26,7 @@ def template_cli(args):
     template(args.environment, args.upload)
 
 def template(environment, upload=False):
-    stack = create_template()
+    stack = create_template(environment)
     if upload:
         stack.validate()
         stack.upload(environment, _S3_CF_PATH)
@@ -34,8 +34,8 @@ def template(environment, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template():
-    stack = ECSStack("AWS CloudFormation template for swagger ECS cluster.", use_asgroup=False, instances=1)
+def create_template(environment):
+    stack = ECSStack("AWS CloudFormation template for swagger ECS cluster.", environment, use_asgroup=False, instances=1)
     stack.add_params([PARAM_SWAGGER_APPS, PARAM_LE_STACK])
     task = swagger_task()
     stack.add_resource(task)
