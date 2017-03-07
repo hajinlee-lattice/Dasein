@@ -2,6 +2,7 @@ package com.latticeengines.camille.exposed.locks;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -19,9 +20,11 @@ public class LockManager {
 
     private static final ConcurrentMap<String, InterProcessReadWriteLock> locks = new ConcurrentHashMap<>();
     private static Log log = LogFactory.getLog(LockManager.class);
+    private static final ConcurrentSkipListSet<String> privateLocks = new ConcurrentSkipListSet<>();
 
     public static void registerDivisionPrivateLock(String lockName) {
         registerLock(lockName, CamilleEnvironment.getDivision());
+        privateLocks.add(lockName);
     }
 
     public static void registerCrossDivisionLock(String lockName) {
@@ -40,6 +43,7 @@ public class LockManager {
     // this method is only for testing
     public static void deregisterDivisionPrivateLock(String lockName) {
         deregisterLock(lockName, CamilleEnvironment.getDivision());
+        privateLocks.remove(lockName);
     }
 
     // this method is only for testing
@@ -63,7 +67,11 @@ public class LockManager {
     }
 
     public static String peekData(String lockName, long duration, TimeUnit timeUnit) throws Exception {
-        Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), CamilleEnvironment.getDivision(),
+        String division = "";
+        if (privateLocks.contains(lockName)) {
+            division = CamilleEnvironment.getDivision();
+        }
+        Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), division,
                 lockName);
         Camille camille = CamilleEnvironment.getCamille();
         InterProcessReadWriteLock lock = locks.get(lockName);
