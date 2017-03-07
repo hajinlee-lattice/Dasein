@@ -150,7 +150,9 @@ angular
         .state('home.datacloud.lookup.tabs.attr', {
             url: '/attr/:category/:subcategory',
             params: {
-                section: 'lookup'
+                section: 'lookup',
+                category: {value: null, squash: true},
+                subcategory: {value: null, squash: true}
             },
             views: {
                 "main@": {
