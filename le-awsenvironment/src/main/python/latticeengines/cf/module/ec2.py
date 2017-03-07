@@ -181,11 +181,11 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "echo ECS_RESERVED_PORTS=[22] >> /etc/ecs/ecs.config\n"
                         ] ] }
                     },
-                    "20_start_cadvisor" : {
+                    "20_start_telegraf" : {
                         "command" : { "Fn::Join": [ "", [
                             "start ecs\n"
                             "for i in {1..100}; do\n",
-                            "    instance_arn=`curl http://169.254.169.254/latest/meta-data/instance-id`\n",
+                            "    instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
                             "    if [ ! -z \"${instance_arn}\" ]; then\n",
                             "        break;\n",
                             "    fi;\n",
