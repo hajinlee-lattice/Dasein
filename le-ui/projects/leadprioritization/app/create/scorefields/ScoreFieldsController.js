@@ -9,13 +9,9 @@ angular
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
         modelId: $stateParams.modelId,
-        isRTS: Model.EventTableProvenance &&
-            (!Model.EventTableProvenance.hasOwnProperty('Data_Cloud_Version') ||
-            Model.EventTableProvenance.Data_Cloud_Version === null ||
-            Model.EventTableProvenance.Data_Cloud_Version.substring(0,2) === '1.'),
         csvFileName: $stateParams.csvFileName,
         schema: Model.ModelDetails.SourceSchemaInterpretation,
-        fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
+        useFuzzyMatch: false,
         standardFieldsList: ['Id', null, 'CompanyName', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
         requiredFieldsMissing: {
             'Id': true
@@ -37,7 +33,14 @@ angular
         vm.standardFieldsList[1] = (vm.schema === 'SalesforceAccount') ? 'Website' : 'Email';
         vm.requiredFieldsMissing[vm.standardFieldsList[1]] = true;
 
-        if (vm.fuzzyMatchEnabled && !vm.isRTS) {
+        var fuzzyMatchEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH);
+        var isRTS = Model.EventTableProvenance &&
+                    (!Model.EventTableProvenance.hasOwnProperty('Data_Cloud_Version') ||
+                    Model.EventTableProvenance.Data_Cloud_Version === null ||
+                    Model.EventTableProvenance.Data_Cloud_Version.substring(0,2) === '1.');
+        vm.useFuzzyMatch = fuzzyMatchEnabled && !isRTS;
+
+        if (vm.useFuzzyMatch) {
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
 
@@ -174,7 +177,7 @@ angular
             }
         }
 
-        if (vm.fuzzyMatchEnabled && !vm.isRTS) {
+        if (vm.useFuzzyMatch) {
             if (vm.schema === 'SalesforceAccount') {
                 if (!vm.requiredFieldsMissing['Website']) {
                     vm.requiredFieldsMissing['CompanyName'] = false;
