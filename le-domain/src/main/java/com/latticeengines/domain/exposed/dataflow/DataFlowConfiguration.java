@@ -10,35 +10,37 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
 
     @JsonProperty("bean_name")
     private String dataFlowBeanName;
-    
+
     @JsonProperty("sources")
     private List<DataFlowSource> dataSources;
-    
+
     @JsonProperty("data_flow_parameters")
     private DataFlowParameters dataFlowParameters;
-    
+
     @JsonProperty("target_table_name")
     private String targetTableName;
-    
+
     @JsonProperty("target_path")
     private String targetPath;
-    
+
     @JsonProperty("partitions")
     private Integer partitions;
-    
+
     @JsonProperty("job_properties")
     private Properties jobProperties;
-    
+
     @JsonProperty("engine")
     private String engine;
-    
+
     @JsonProperty("queue")
     private String queue;
-    
+
     @JsonProperty("namespace")
     private String namespace;
 
-    
+    @JsonProperty("skip_register_table")
+    private boolean skipRegisteringTable = false;
+
     public String getDataFlowBeanName() {
         return dataFlowBeanName;
     }
@@ -59,7 +61,6 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
         return dataFlowParameters;
     }
 
-    
     public void setDataFlowParameters(DataFlowParameters dataFlowParameters) {
         this.dataFlowParameters = dataFlowParameters;
     }
@@ -80,7 +81,6 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
         this.targetPath = targetPath;
     }
 
-    
     public Integer getPartitions() {
         return partitions;
     }
@@ -97,7 +97,6 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
         this.jobProperties = jobProperties;
     }
 
-    
     public String getEngine() {
         return this.engine;
     }
@@ -106,7 +105,6 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
         this.engine = engine;
     }
 
-    
     public void setQueue(String queue) {
         this.queue = queue;
     }
@@ -121,6 +119,14 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    public boolean shouldSkipRegisteringTable() {
+        return skipRegisteringTable;
+    }
+
+    public void setSkipRegisteringTable(boolean skipRegisteringTable) {
+        this.skipRegisteringTable = skipRegisteringTable;
     }
 
 }

@@ -119,7 +119,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
 
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] sourceResources = new Resource[]{};
+            Resource[] sourceResources = new Resource[] {};
             try {
                 sourceResources = resolver.getResources(getDirectory() + "/*/*.avro");
                 log.info("Resolved resources for " + getDirectory());
@@ -153,7 +153,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
 
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] templateResources = new Resource[]{};
+            Resource[] templateResources = new Resource[] {};
             try {
                 templateResources = resolver.getResources(getDirectory() + "/*/*.json");
             } catch (Exception e) {
@@ -313,10 +313,10 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
      * already?
      */
     protected boolean allEntriesExist( //
-                                       final List<GenericRecord> test, //
-                                       final String testId, //
-                                       final List<GenericRecord> master, //
-                                       final String masterId) {
+            final List<GenericRecord> test, //
+            final String testId, //
+            final List<GenericRecord> master, //
+            final String masterId) {
 
         return Iterables.all(test, new Predicate<GenericRecord>() {
 
@@ -406,7 +406,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
             return dflt;
         }
         try {
-            return (T) clazz.getConstructor(new Class[]{String.class}).newInstance(value);
+            return (T) clazz.getConstructor(new Class[] { String.class }).newInstance(value);
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to parse %s as a %s", value, clazz.getSimpleName()));
         }

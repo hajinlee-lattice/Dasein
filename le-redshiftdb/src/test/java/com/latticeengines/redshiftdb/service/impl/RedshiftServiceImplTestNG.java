@@ -30,7 +30,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistKeyStyle;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
@@ -104,7 +104,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     public void loadDataToRedshift() {
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setTableName(TABLE_NAME);
-        redshiftTableConfig.setDistStyle(DistKeyStyle.Key);
+        redshiftTableConfig.setDistStyle(DistStyle.Key);
         redshiftTableConfig.setDistKey("lastmodifieddate");
         redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
         redshiftTableConfig.setSortKeys(Arrays.asList(new String[] { "id" }));

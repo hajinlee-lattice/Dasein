@@ -19,11 +19,10 @@ public class RedshiftAvroScheme extends RedshiftScheme {
     private Scheme<Configuration, RecordReader, OutputCollector, Object[], Object[]> sinkScheme;
 
     public RedshiftAvroScheme(Fields fields, RedshiftTableDesc redshiftTableDesc,
-            Scheme<Configuration, RecordReader, OutputCollector, Object[], Object[]> scheme, String jsonPathPrefix) {
+            Scheme<Configuration, RecordReader, OutputCollector, Object[], Object[]> scheme, Map<CopyOption, String> options) {
         super(fields, redshiftTableDesc);
-        Map<CopyOption, String> options = getCopyOptions();
-        options.clear();
-        options.put(CopyOption.FORMAT, String.format("AVRO \'%s\'", jsonPathPrefix));
+        getCopyOptions().clear();
+        getCopyOptions().putAll(options);
         this.sinkScheme = scheme;
         sinkScheme.setSinkFields(getSinkFields());
     }

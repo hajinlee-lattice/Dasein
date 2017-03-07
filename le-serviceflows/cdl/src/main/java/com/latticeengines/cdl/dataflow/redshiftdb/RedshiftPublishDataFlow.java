@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.dataflow.redshiftdb;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
-import com.latticeengines.domain.exposed.dataflow.flows.RedshiftDataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.RedshiftPublishDataFlowParameters;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -17,12 +18,13 @@ import cascading.avro.AvroScheme;
 import cascading.jdbc.AWSCredentials;
 import cascading.jdbc.RedshiftTableDesc;
 import cascading.jdbc.RedshiftTap;
+import cascading.jdbc.RedshiftFactory.CopyOption;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 
-@Component("redshiftExportDataflow")
-public class RedshiftExportDataFlow extends TypesafeDataFlowBuilder<RedshiftDataFlowParameters> {
+@Component("redshiftPublishDataflow")
+public class RedshiftPublishDataFlow extends TypesafeDataFlowBuilder<RedshiftPublishDataFlowParameters> {
 
     @Value("${aws.default.access.key.encrypted}")
     private String awsAccessKey;
@@ -35,6 +37,9 @@ public class RedshiftExportDataFlow extends TypesafeDataFlowBuilder<RedshiftData
 
     @Value("${common.le.stack}")
     private String leStack;
+
+    @Value("${redshift.jdbc.url}")
+    private String redshiftJdbcUrl;
 
     @Value("${redshift.user}")
     private String redshiftUsername;
@@ -50,37 +55,34 @@ public class RedshiftExportDataFlow extends TypesafeDataFlowBuilder<RedshiftData
         String flowName = dataFlowCtx.getProperty(DataFlowProperty.FLOWNAME, String.class);
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
 
-        RedshiftTableConfiguration redshiftTableConfig = dataFlowCtx
-                .getProperty(RedshiftTableConfiguration.class.getSimpleName(), RedshiftTableConfiguration.class);
+        RedshiftTableConfiguration redshiftTableConfig = dataFlowCtx.getProperty(DataFlowProperty.PARAMETERS,
+                RedshiftPublishDataFlowParameters.class).redshiftTableConfig;
 
         String targetRedshiftTable = redshiftTableConfig.getTableName();
         String distributionKey = redshiftTableConfig.getDistKey();
-        String redshiftJdbcUrl = "jdbc:redshift://redshift.cegcmwpsftfz.us-east-1.redshift.amazonaws.com:5439/"
-                + redshiftDB;
+        redshiftJdbcUrl = redshiftJdbcUrl + "/" + redshiftDB;
 
-        String[] fieldNames = schema.getFields().stream().map(a -> a.name()).toArray(size -> new String[size]);
+        String[] fieldNames = schema.getFields().stream().map(f -> f.name()).toArray(size -> new String[size]);
         String[] fieldTypes = schema.getFields().stream() //
-                .map(a -> RedshiftUtils.getSQLType(a.schema())).toArray(size -> new String[size]);
+                .map(f -> RedshiftUtils.getSQLType(f.schema())).toArray(size -> new String[size]);
         String[] sortKeys = redshiftTableConfig.getSortKeys().toArray(new String[0]);
 
         RedshiftTableDesc redshiftTableDesc = new RedshiftTableDesc(targetRedshiftTable, fieldNames, fieldTypes,
-                distributionKey, sortKeys);
+                redshiftTableConfig.getDistStyle().getName(), distributionKey, redshiftTableConfig.getSortKeyType().getName(), sortKeys);
 
         AvroScheme scheme = new AvroScheme(schema);
         if (enforceGlobalOrdering()) {
             scheme.setNumSinkParts(1);
         }
-        String jsonPathPrefix = redshiftTableConfig.getJsonPathPrefix();
+        Map<CopyOption, String> options = createCopyOptions(redshiftTableConfig);
+
         RedshiftAvroScheme redshiftScheme = new RedshiftAvroScheme(new Fields(fieldNames), redshiftTableDesc, scheme,
-                jsonPathPrefix);
+                options);
 
         AWSCredentials awsCredentials = new AWSCredentials(awsAccessKey, awsSecretKey);
-        Properties jobProperties = dataFlowCtx.getProperty(DataFlowProperty.JOBPROPERTIES, Properties.class);
-        jobProperties.setProperty("fs.s3n.awsAccessKeyId", awsAccessKey);
-        jobProperties.setProperty("fs.s3n.awsSecretAccessKey", awsSecretKey);
-
         String tempPath = "s3n://" + s3Bucket + "/" + RedshiftUtils.AVRO_STAGE + "/" + leStack + "/"
                 + targetRedshiftTable;
+
         Tap<?, ?, ?> sink = new RedshiftTap(redshiftJdbcUrl, redshiftUsername, redshiftPassword, scheme, tempPath,
                 awsCredentials, redshiftTableDesc, redshiftScheme, SinkMode.REPLACE, true, false);
 
@@ -88,9 +90,16 @@ public class RedshiftExportDataFlow extends TypesafeDataFlowBuilder<RedshiftData
     }
 
     @Override
-    public Node construct(RedshiftDataFlowParameters parameters) {
+    public Node construct(RedshiftPublishDataFlowParameters parameters) {
         Node source = addSource(parameters.sourceTable);
         return source;
+    }
+
+    private Map<CopyOption, String> createCopyOptions(RedshiftTableConfiguration redshiftTableConfig) {
+        String jsonPathPrefix = redshiftTableConfig.getJsonPathPrefix();
+        Map<CopyOption, String> options = new HashMap<>();
+        options.put(CopyOption.FORMAT, String.format("AVRO \'%s\'", jsonPathPrefix));
+        return options;
     }
 
 }

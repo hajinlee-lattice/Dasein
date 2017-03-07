@@ -81,6 +81,7 @@ public class RedshiftTap extends JDBCTap {
         LOG.info("created {} ", toString());
     }
 
+    // New constructor added
     public RedshiftTap(String connectionUrl, String username, String password,
             Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String hfsStagingDir,
             AWSCredentials awsCredentials, RedshiftTableDesc redshiftTableDesc,

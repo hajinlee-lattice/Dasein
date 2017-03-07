@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Properties;
 
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
@@ -15,15 +17,18 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.RedshiftDataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.RedshiftPublishDataFlowParameters;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-context.xml" })
-public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public class RedshiftPublishDataFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
@@ -37,15 +42,24 @@ public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctional
     @Value("${aws.default.secret.key.encrypted}")
     private String awsSecretKey;
 
+    private String tableName = "cascadingredshifttable";
+
     @Test(groups = "functional")
     public void test() {
-        RedshiftDataFlowParameters parameters = new RedshiftDataFlowParameters("SourceTable");
+        RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
+        redshiftTableConfig.setTableName(tableName);
+        redshiftTableConfig.setSortKeys(new ArrayList<>());
+        String jsonPathPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/" + tableName + "/table.jsonpath";
+        redshiftTableConfig.setJsonPathPrefix("s3://" + s3Bucket + "/" + jsonPathPrefix);
+        redshiftTableConfig.setDistStyle(DistStyle.Key);
+        redshiftTableConfig.setDistKey("lastmodifieddate");
+        redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
+        redshiftTableConfig.setSortKeys(Arrays.asList(new String[] { "id" }));
+        RedshiftPublishDataFlowParameters parameters = new RedshiftPublishDataFlowParameters("SourceTable", redshiftTableConfig);
         executeDataFlow(parameters);
     }
 
     protected DataFlowContext createDataFlowContext(DataFlowParameters parameters) {
-        String tableName = "cascadingredshifttable";
-        String jsonPathPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/" + tableName + "/table.jsonpath";
 
         try {
             Schema schema = AvroUtils.readSchemaFromLocalFile(sourcePaths.values().iterator().next());
@@ -56,8 +70,9 @@ public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctional
                     config.set(FileSystem.FS_DEFAULT_NAME_KEY, "s3n:///");
                     config.set("fs.s3n.awsAccessKeyId", awsAccessKey);
                     config.set("fs.s3n.awsSecretAccessKey", awsSecretKey);
-                    HdfsUtils.copyInputStreamToDest(new URI("s3n://" + s3Bucket + "/" + jsonPathPrefix), config,
-                            inputStream);
+                    HdfsUtils.copyInputStreamToDest(new URI("s3n://" + s3Bucket + "/"
+                            + ((RedshiftPublishDataFlowParameters) parameters).redshiftTableConfig.getJsonPathPrefix()),
+                            config, inputStream);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -67,22 +82,21 @@ public class RedshiftExportDataFlowTestNG extends ServiceFlowsDataFlowFunctional
         }
 
         DataFlowContext context = super.createDataFlowContext(parameters);
-        RedshiftTableConfiguration config = new RedshiftTableConfiguration();
-        config.setTableName(tableName);
-        config.setSortKeys(new ArrayList<>());
-        config.setJsonPathPrefix("s3://" + s3Bucket + "/" + jsonPathPrefix);
-        context.setProperty(RedshiftTableConfiguration.class.getSimpleName(), config);
-
+        Properties jobProperties = new Properties();
+        jobProperties.setProperty("fs.s3n.awsAccessKeyId", awsAccessKey);
+        jobProperties.setProperty("fs.s3n.awsSecretAccessKey", awsSecretKey);
+        context.setProperty(DataFlowProperty.JOBPROPERTIES, jobProperties);
+        context.setProperty(DataFlowProperty.PARTITIONS, 2);
         return context;
     }
 
     @Override
     protected String getFlowBeanName() {
-        return "redshiftExportDataflow";
+        return "redshiftPublishDataflow";
     }
 
     @Override
     protected String getScenarioName() {
-        return "redshiftExportDataflow";
+        return "redshiftPublishDataflow";
     }
 }

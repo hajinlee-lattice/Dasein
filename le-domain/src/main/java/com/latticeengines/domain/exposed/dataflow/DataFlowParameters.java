@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParamete
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.RedshiftPublishDataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.cdl.CreateStagingTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.cdl.ResolveStagingAndRuntimeTableParameters;
 
@@ -43,6 +44,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.cdl.ResolveStagingAndRun
         @JsonSubTypes.Type(value = PivotScoreAndEventParameters.class, name = "pivotScoreAndEventParameters"), //
         @JsonSubTypes.Type(value = CreateStagingTableParameters.class, name = "createStagingTableParameters"), //
         @JsonSubTypes.Type(value = ResolveStagingAndRuntimeTableParameters.class, name = "resolveStagingAndRuntimeTableParameters"), //
+        @JsonSubTypes.Type(value = RedshiftPublishDataFlowParameters.class, name = "RedshiftExportDataFlowParameters"), //
 })
 public class DataFlowParameters {
 

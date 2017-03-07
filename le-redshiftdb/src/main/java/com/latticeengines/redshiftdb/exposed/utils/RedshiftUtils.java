@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistKeyStyle;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 
 public class RedshiftUtils {
     public static final String AVRO_STAGE = "redshift_avro_stage";
@@ -38,7 +38,7 @@ public class RedshiftUtils {
         if (redshiftTableConfig.getDistStyle() != null) {
             statement = String.format("%s diststyle %s", statement, redshiftTableConfig.getDistStyle().getName());
         }
-        if (redshiftTableConfig.getDistStyle() == DistKeyStyle.Key && redshiftTableConfig.getDistKey() != null) {
+        if (redshiftTableConfig.getDistStyle() == DistStyle.Key && redshiftTableConfig.getDistKey() != null) {
             statement = String.format("%s distkey (%s)", statement, String.join(",", redshiftTableConfig.getDistKey()));
         }
         if (CollectionUtils.isNotEmpty(redshiftTableConfig.getSortKeys())) {

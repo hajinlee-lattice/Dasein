@@ -16,7 +16,7 @@ public class RedshiftTableConfiguration {
     private List<String> sortKeys;
 
     @JsonProperty("dist_style")
-    private DistKeyStyle distStyle;
+    private DistStyle distStyle;
 
     @JsonProperty("dist_key")
     private String distKey;
@@ -40,11 +40,11 @@ public class RedshiftTableConfiguration {
         this.sortKeys = sortKeys;
     }
 
-    public DistKeyStyle getDistStyle() {
+    public DistStyle getDistStyle() {
         return distStyle;
     }
 
-    public void setDistStyle(DistKeyStyle distStyle) {
+    public void setDistStyle(DistStyle distStyle) {
         this.distStyle = distStyle;
     }
 
@@ -88,14 +88,14 @@ public class RedshiftTableConfiguration {
 
     }
 
-    public enum DistKeyStyle {
+    public enum DistStyle {
         All("all"), //
         Even("even"), //
         Key("key");
 
         private String name;
 
-        DistKeyStyle(String name) {
+        DistStyle(String name) {
             this.name = name;
         }
 
