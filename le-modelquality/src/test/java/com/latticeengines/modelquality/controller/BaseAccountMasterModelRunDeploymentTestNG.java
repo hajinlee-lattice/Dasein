@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.PropData;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
@@ -43,6 +44,7 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
             thisDataset.setTenant(mainTestTenant);
             thisDataset.setTrainingSetHdfsPath( //
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
+            thisDataset.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
             DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(thisDataset.getName());
             if (datasetAlreadyExists != null)
                 dataSetEntityMgr.delete(datasetAlreadyExists);

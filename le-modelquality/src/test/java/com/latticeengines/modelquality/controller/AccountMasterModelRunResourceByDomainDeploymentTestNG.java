@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityName
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.PropData;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
 
@@ -39,6 +40,7 @@ public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseA
         super.tearDown();
     }
 
+    @Override
     @Test(groups = "deployment", enabled = true, dataProvider = "getAccountMasterCsvFile")
     public void runModelAccountMaster(String dataSetName, String csvFile) {
         super.runModelAccountMaster(dataSetName, csvFile);
@@ -58,6 +60,7 @@ public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseA
             thisDataset.setName(dataSetName);
             thisDataset.setTrainingSetHdfsPath( //
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
+            thisDataset.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
             DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(thisDataset.getName());
             if (datasetAlreadyExists != null)
                 dataSetEntityMgr.delete(datasetAlreadyExists);
