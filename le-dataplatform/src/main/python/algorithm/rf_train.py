@@ -1,15 +1,25 @@
 from sklearn import ensemble
 from sklearn import tree
+import pandas as pd
 from leframework.consolecapture import Capture
 from leframework.consolecapture import CaptureMonitor
+from pipelinefwk import get_logger
+
+logger = get_logger("algorithm")
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties=None, params = None):
     X_train = trainingData[schema["features"]]
     Y_train = trainingData[schema["target"]]
-    
+
+    if X_train.isnull().any().any():
+        pd.set_option('display.max_rows', 1000)
+        logger.error('Features having None/NaN')
+        logger.error('\n{}'.format(X_train.isnull().any()))
+        pd.reset_option('display.max_rows')
+
     estimators = int(algorithmProperties.get("n_estimators", 100))
     randomState = algorithmProperties.get("random_state")
-    
+
     if randomState is not None:
         randomState = int(randomState)
 
