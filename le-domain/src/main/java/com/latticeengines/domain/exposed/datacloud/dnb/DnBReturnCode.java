@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.dnb;
 
 public enum DnBReturnCode {
     OK("Match is finished"), //
+    PARTIAL_SUCCESS("Batch match is finised. However there are some error records."), //
     UNMATCH("No matched result found"), //
     UNMATCH_TIMEOUT("No matched result found because of timeout"), //
     DISCARD("Matched result is discarded"), //

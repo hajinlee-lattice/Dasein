@@ -143,6 +143,12 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             readyToReturn = true;
         }
 
+        // Check country code
+        if (!readyToReturn && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
+            context.setDnbCode(DnBReturnCode.UNMATCH);
+            readyToReturn = true;
+        }
+
         MatchTraveler traveler = request.getMatchTravelerContext();
         if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
@@ -231,6 +237,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         // Check timeout
         if ((System.currentTimeMillis() - request.getTimestamp()) >= bulkTimeout) {
             context.setDnbCode(DnBReturnCode.UNMATCH_TIMEOUT);
+            readyToReturn = true;
+        }
+        // Check country code
+        if (!readyToReturn && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
+            context.setDnbCode(DnBReturnCode.UNMATCH);
             readyToReturn = true;
         }
         context.setTimestamp(request.getTimestamp());

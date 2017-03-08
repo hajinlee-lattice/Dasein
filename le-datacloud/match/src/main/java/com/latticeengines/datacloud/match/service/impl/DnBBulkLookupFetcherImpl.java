@@ -132,14 +132,16 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     protected void parseResponse(String response, DnBBatchMatchContext batchContext, DnBAPIType apiType) {
         try {
             DnBReturnCode returnCode = parseBatchProcessStatus(response);
-            batchContext.setDnbCode(returnCode);
-
-            if (batchContext.getDnbCode() != DnBReturnCode.OK) {
+            if (returnCode != DnBReturnCode.OK && returnCode != DnBReturnCode.PARTIAL_SUCCESS) {
+                batchContext.setDnbCode(returnCode);
                 return;
             }
+            batchContext.setDnbCode(DnBReturnCode.OK);  // Both OK and PARTIAL_SUCCESS are treated as finished
 
             parseTimestamp(response, batchContext);
 
+            String contentObjectXpath = String.format(this.contentObjectXpath,
+                    (returnCode == DnBReturnCode.PARTIAL_SUCCESS ? "2" : "1"));
             String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, response);
             byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
             String decodedStr = new String(decodeResults);
@@ -162,7 +164,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
                 }
             }
         } catch (Exception ex) {
-            log.warn(String.format("Fail to extract match result from response of DnB bulk match request %s: %s",
+            log.error(String.format("Fail to extract match result from response of DnB bulk match request %s: %s",
                     batchContext.getServiceBatchId(), response));
             batchContext.setDnbCode(DnBReturnCode.BAD_RESPONSE);
         }
@@ -176,6 +178,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
         case "BC007":
             return DnBReturnCode.IN_PROGRESS;
         case "BC001":
+            return DnBReturnCode.PARTIAL_SUCCESS;
         case "CM000":
             return DnBReturnCode.OK;
         default:

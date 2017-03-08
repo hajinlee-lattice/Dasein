@@ -83,6 +83,37 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
     }
 
+    @Test(groups = "dnb", enabled = true)
+    public void testDnBBulkLookupWithErrorRecords() {
+        DnBBatchMatchContext batchContext = dnBBulkLookupDispatcher.sendRequest(generateInputWithErrorRecords());
+        Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.SUBMITTED);
+
+        batchContext = dnBBulkLookupFetcher.getResult(batchContext);
+        while (batchContext.getDnbCode() == DnBReturnCode.IN_PROGRESS
+                || batchContext.getDnbCode() == DnBReturnCode.RATE_LIMITING) {
+            if (batchContext.getTimestamp() == null
+                    || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) / 1000 / 60 > 60) {
+                break;
+            }
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                break;
+            }
+            batchContext = dnBBulkLookupFetcher.getResult(batchContext);
+        }
+        Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.OK);
+        Map<String, DnBMatchContext> output = batchContext.getContexts();
+        Assert.assertEquals(output.size(), getEntityInputData().length);
+        for (String lookupRequestId : output.keySet()) {
+            DnBMatchContext result = output.get(lookupRequestId);
+            log.info(String.format("Request %s: DnBReturnCode = %s, DUNS = %s", result.getLookupRequestId(),
+                    result.getDnbCodeAsString(), result.getDuns()));
+            Assert.assertEquals(result.getDnbCode(),
+                    getEntityInputDataWithErrorRecords()[Integer.valueOf(lookupRequestId)][4]);
+        }
+    }
+
     public static Object[][] getEntityInputData() {
         return new Object[][] {
                 { "AMAZON INC", "CHICAGO", "ILLINOIS", "US", "013919572", 7, new DnBMatchGrade("AZZAAZZZFFZ"),
@@ -95,11 +126,37 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
                 };
     }
 
+    public static Object[][] getEntityInputDataWithErrorRecords() {
+        return new Object[][] { { "AMAZON INC", "CHICAGO", "ILLINOIS", "US", DnBReturnCode.OK },
+                { "GOOGLE", null, null, null, DnBReturnCode.UNMATCH },
+                { "GOOGLE", null, null, "ZZ", DnBReturnCode.UNMATCH }, };
+    }
+
     private DnBBatchMatchContext generateInput() {
         DnBBatchMatchContext batchContext = new DnBBatchMatchContext();
         Map<String, DnBMatchContext> contexts = new HashMap<String, DnBMatchContext>();
         for (int i = 0; i < getEntityInputData().length; i++) {
             Object[] record = getEntityInputData()[i];
+            String uuid = String.valueOf(i);
+            MatchKeyTuple tuple = new MatchKeyTuple();
+            tuple.setName((String) record[0]);
+            tuple.setCity((String) record[1]);
+            tuple.setState((String) record[2]);
+            tuple.setCountryCode((String) record[3]);
+            DnBMatchContext context = new DnBMatchContext();
+            context.setLookupRequestId(uuid);
+            context.setInputNameLocation(tuple);
+            contexts.put(uuid, context);
+        }
+        batchContext.setContexts(contexts);
+        return batchContext;
+    }
+
+    private DnBBatchMatchContext generateInputWithErrorRecords() {
+        DnBBatchMatchContext batchContext = new DnBBatchMatchContext();
+        Map<String, DnBMatchContext> contexts = new HashMap<String, DnBMatchContext>();
+        for (int i = 0; i < getEntityInputDataWithErrorRecords().length; i++) {
+            Object[] record = getEntityInputDataWithErrorRecords()[i];
             String uuid = String.valueOf(i);
             MatchKeyTuple tuple = new MatchKeyTuple();
             tuple.setName((String) record[0]);
