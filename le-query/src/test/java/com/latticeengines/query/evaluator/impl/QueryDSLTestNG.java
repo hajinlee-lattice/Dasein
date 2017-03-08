@@ -1,5 +1,7 @@
 package com.latticeengines.query.evaluator.impl;
 
+import static org.testng.Assert.assertEquals;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -27,9 +29,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testWindowFunctionComparison() throws SQLException {
-        SQLTemplates templates = new PostgreSQLTemplates();
-        Configuration configuration = new Configuration(templates);
-        SQLQueryFactory factory = new SQLQueryFactory(configuration, redshiftDataSource);
+        SQLQueryFactory factory = factory();
         StringPath tablePath = Expressions.stringPath("querytest_table");
         StringPath columnPath = Expressions.stringPath(tablePath, "id");
         StringPath innerPath = Expressions.stringPath("inner");
@@ -49,20 +49,35 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCount() throws SQLException {
-        SQLTemplates templates = new PostgreSQLTemplates();
-        Configuration configuration = new Configuration(templates);
-        SQLQueryFactory factory = new SQLQueryFactory(configuration, redshiftDataSource);
+        SQLQueryFactory factory = factory();
         StringPath tablePath = Expressions.stringPath("querytest_table");
         try (PerformanceTimer timer = new PerformanceTimer("getCount")) {
             long count = factory.query().from(tablePath).fetchCount();
         }
     }
 
-    @Test(groups = "functional", expectedExceptions = Exception.class)
-    public void testWindowFunctionBug() throws SQLException {
+    @Test(groups = "functional")
+    public void testExists() {
+        StringPath outerTable = Expressions.stringPath("querytest_table");
+        StringPath innerTable = Expressions.stringPath("querytest_table");
+
+        StringPath outerColumn = Expressions.stringPath(outerTable, "id");
+        StringPath innerColumn = Expressions.stringPath(innerTable, "id");
+
+        long count = factory().query().from(outerTable)
+                .where(factory().from(innerTable).where(innerColumn.eq(outerColumn)).exists()).fetchCount();
+        assertEquals(count, 611136);
+    }
+
+    private SQLQueryFactory factory() {
         SQLTemplates templates = new PostgreSQLTemplates();
         Configuration configuration = new Configuration(templates);
-        SQLQueryFactory factory = new SQLQueryFactory(configuration, redshiftDataSource);
+        return new SQLQueryFactory(configuration, redshiftDataSource);
+    }
+
+    @Test(groups = "functional", expectedExceptions = Exception.class)
+    public void testWindowFunctionBug() throws SQLException {
+        SQLQueryFactory factory = factory();
         StringPath tablePath = Expressions.stringPath("querytest_table");
         StringPath columnPath = Expressions.stringPath(tablePath, "id");
         StringPath innerPath = Expressions.stringPath("inner");
