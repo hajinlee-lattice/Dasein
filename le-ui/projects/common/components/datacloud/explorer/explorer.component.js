@@ -541,7 +541,7 @@ angular.module('common.datacloud.explorer', [
                     enabled = breakOnFirstEncounter(items, 'HighlightHidden', false);
 
                 vm.highlightMetadata.categories[category].enabled = enabled ? 1 : 0;
-                vm.highlightMetadata.categories[category].disabled = enabled ? 1 : 0;
+                vm.highlightMetadata.categories[category].disabled = disabled ? 1 : 0;
 
                 if (vm.subcategories[category] && vm.subcategories[category].length > 1) {
                     vm.highlightMetadata.categories[category].subcategories = {};
@@ -912,7 +912,7 @@ angular.module('common.datacloud.explorer', [
             
             var timestamp_b = new Date().getTime();
 
-            if (!vm.lookupMode) {
+            if (!vm.lookupMode && items) {
                 items.forEach(function(item) {
                     var index = vm.enrichmentsMap[item.Attribute];
                     var enrichment = vm.enrichments[index];
