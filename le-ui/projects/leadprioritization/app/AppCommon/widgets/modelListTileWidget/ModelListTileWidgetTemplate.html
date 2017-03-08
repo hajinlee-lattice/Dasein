@@ -21,14 +21,14 @@
                     <i class="fa {{Activating ? 'fa-spinner fa-pulse fa-fw' : 'fa-play-circle-o'}}"></i>
                 </li>
 
-                <!-- <li
+                <li
                     ui-sref="home.model.ratings({ modelId: '{{ data.Id | escape }}' })"
-                    data-ng-if="isNotPmmlModel"
+                    data-ng-if="isNotPmmlModel && hasRatingsAvailable"
                     data-ng-click="reviewRatingsClick($event)">
                     <a href="javascript:void(0)" title="Review Ratings">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}
                     </a>
                     <i class="ico ico-ratings"></i>
-                </li> -->
+                </li>
 
                 <li
                     data-ng-if="mayChangeModelNames"

@@ -5,7 +5,7 @@ angular
         'mainApp.core.services.FeatureFlagService'
     ])
     .controller('SidebarRootController', function(
-        $scope, $rootScope, $state, FeatureFlagService, ResourceUtility, JobsStore
+        $scope, $rootScope, $state, FeatureFlagService, ResourceUtility, JobsStore, ModelRatingsService
     ) {
         $scope.$state = $state;
         $scope.ResourceUtility = ResourceUtility;
@@ -24,7 +24,6 @@ angular
                 $rootScope.$broadcast('sidebar:toggle');
             }
         }
-
         
         FeatureFlagService.GetAllFlags().then(function(result) {
             var flags = FeatureFlagService.Flags();

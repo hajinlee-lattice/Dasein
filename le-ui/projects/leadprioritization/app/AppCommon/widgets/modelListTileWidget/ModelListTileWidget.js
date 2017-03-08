@@ -19,7 +19,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         controller: function(
             $scope, $state, $rootScope, $document, $element, ResourceUtility, BrowserStorageUtility,
             NavUtility, DeleteModelModal, StaleModelModal, DeactivateModelModal,
-            FeatureFlagService, ModelService, CopyModelToTenantModal
+            FeatureFlagService, ModelService, CopyModelToTenantModal, ModelRatingsService
         ) {
             $scope.ResourceUtility = ResourceUtility;
             $scope.nameStatus = {
@@ -46,6 +46,15 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $scope.isNotPmmlModel = $scope.data.ModelFileType !== 'PmmlModel';
             $scope.canRemodel = ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
             $scope.modelRecommendation = !!$scope.data.ConflictWithOptionalRules;
+            
+            ModelRatingsService.HistoricalABCDBuckets($scope.data.Id).then(function(result) {
+                if(JSON.stringify(result) != "{}") {
+                   $scope.hasRatingsAvailable = true;
+               } else {
+                    $scope.hasRatingsAvailable = false;
+               }
+            });
+            
 
             //TODO:pierce Field names subject to change
             $scope.isActive = data.Status === "Active";

@@ -174,14 +174,31 @@ angular
                 },
                 loadAlaSQL: function($ocLazyLoad) {
                     return $ocLazyLoad.load('lib/js/alasql.min.js');
+                },
+                HasRatingsAvailable: function($q, $stateParams, ModelRatingsService){
+                    var deferred = $q.defer(),
+                        id = $stateParams.modelId;
+
+                    ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             },
             views: {
                 "navigation@": {
-                    controller: function($scope, $rootScope, Model, IsPmml, FeatureFlagService) {
+                    controller: function($scope, $rootScope, Model, IsPmml, FeatureFlagService, HasRatingsAvailable) {
                         $scope.IsPmml = IsPmml;
                         $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
                         $scope.Uploaded = Model.ModelDetails.Uploaded;
+                        $scope.HasRatingsAvailable = HasRatingsAvailable;
+
+                        if(JSON.stringify(HasRatingsAvailable) != "{}"){
+                            $scope.HasRatingsAvailable = true;
+                        } else {
+                            $scope.HasRatingsAvailable = false;
+                        }
 
                         $scope.canRemodel = !$scope.IsPmml && !$scope.Uploaded;
 
