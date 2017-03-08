@@ -12,12 +12,12 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class RedshiftPublishWorkflow extends AbstractWorkflow<RedshiftPublishWorkflowConfiguration> {
 
     @Autowired
-    private RedshiftPublishStep redshiftExportDataflow;
+    private RedshiftPublishStep redshiftPublishStep;
 
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(redshiftExportDataflow) //
+                .next(redshiftPublishStep) //
                 .build();
     }
 

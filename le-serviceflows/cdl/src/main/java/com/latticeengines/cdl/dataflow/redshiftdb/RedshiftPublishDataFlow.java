@@ -65,10 +65,12 @@ public class RedshiftPublishDataFlow extends TypesafeDataFlowBuilder<RedshiftPub
         String[] fieldNames = schema.getFields().stream().map(f -> f.name()).toArray(size -> new String[size]);
         String[] fieldTypes = schema.getFields().stream() //
                 .map(f -> RedshiftUtils.getSQLType(f.schema())).toArray(size -> new String[size]);
-        String[] sortKeys = redshiftTableConfig.getSortKeys().toArray(new String[0]);
+        String[] sortKeys = redshiftTableConfig.getSortKeys()
+                .toArray(new String[redshiftTableConfig.getSortKeys().size()]);
 
         RedshiftTableDesc redshiftTableDesc = new RedshiftTableDesc(targetRedshiftTable, fieldNames, fieldTypes,
-                redshiftTableConfig.getDistStyle().getName(), distributionKey, redshiftTableConfig.getSortKeyType().getName(), sortKeys);
+                redshiftTableConfig.getDistStyle().getName(), distributionKey,
+                redshiftTableConfig.getSortKeyType().getName(), sortKeys);
 
         AvroScheme scheme = new AvroScheme(schema);
         if (enforceGlobalOrdering()) {
@@ -80,10 +82,10 @@ public class RedshiftPublishDataFlow extends TypesafeDataFlowBuilder<RedshiftPub
                 options);
 
         AWSCredentials awsCredentials = new AWSCredentials(awsAccessKey, awsSecretKey);
-        String tempPath = "s3n://" + s3Bucket + "/" + RedshiftUtils.AVRO_STAGE + "/" + leStack + "/"
+        String s3Path = "s3n://" + s3Bucket + "/" + RedshiftUtils.AVRO_STAGE + "/" + leStack + "/"
                 + targetRedshiftTable;
 
-        Tap<?, ?, ?> sink = new RedshiftTap(redshiftJdbcUrl, redshiftUsername, redshiftPassword, scheme, tempPath,
+        Tap<?, ?, ?> sink = new RedshiftTap(redshiftJdbcUrl, redshiftUsername, redshiftPassword, scheme, s3Path,
                 awsCredentials, redshiftTableDesc, redshiftScheme, SinkMode.REPLACE, true, false);
 
         return sink;

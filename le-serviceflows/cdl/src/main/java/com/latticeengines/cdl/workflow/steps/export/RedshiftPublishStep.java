@@ -84,7 +84,6 @@ public class RedshiftPublishStep extends RunDataFlow<RedshiftPublishStepConfigur
         JdbcStorage storage = new JdbcStorage();
         storage.setDatabaseName(DatabaseName.REDSHIFT);
         storage.setTableNameInStorage(bucketedTable.getStorageMechanism().getTableNameInStorage());
-        storage.setTable(bucketedTable);
         bucketedTable.setStorageMechanism(storage);
         metadataProxy.updateTable(configuration.getCustomerSpace().toString(), configuration.getBucketedTableName(),
                 bucketedTable);
