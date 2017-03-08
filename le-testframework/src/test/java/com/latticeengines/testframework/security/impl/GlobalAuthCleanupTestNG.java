@@ -1,6 +1,7 @@
 package com.latticeengines.testframework.security.impl;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +35,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -99,6 +101,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         }
 
         cleanupTenantsInHdfs();
+        cleanupZK();
 
         log.info("Finished cleaning up test tenants.");
     }
@@ -118,6 +121,22 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
         log.info("Clean up tenant in GA: " + tenant.getId());
         tenantService.discardTenant(tenant);
+    }
+
+    private void cleanupZK() throws Exception {
+        List<AbstractMap.SimpleEntry<Document, Path>> entries = camille.getChildren(PathBuilder.buildContractsPath(podId));
+        if (entries != null) {
+            for (AbstractMap.SimpleEntry<Document, Path> entry : entries) {
+                Path path = entry.getValue();
+                String contract = path.getSuffix();
+                if (TestFrameworkUtils.isTestTenant(contract)) {
+                    long testTime = TestFrameworkUtils.getTestTimestamp(contract);
+                    if (testTime > 0 && (System.currentTimeMillis() - testTime) > cleanupThreshold) {
+                        cleanupTenantInZK(contract);
+                    }
+                }
+            }
+        }
     }
 
     private void cleanupTenantInZK(String contractId) throws Exception {
