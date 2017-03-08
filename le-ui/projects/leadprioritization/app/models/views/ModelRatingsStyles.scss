@@ -49,10 +49,10 @@
 		width: 99%;
 		li {
 			bottom: 0;
-			margin-right: 0.1%;
-			width: 2.9%;
-			background-color: #bbb;
-			border-top: #a7a7a7 solid 3px;
+			margin-right: 0.135%;
+    		width: 2.85%;
+			background-color: #b8b8b8;
+			border-top: #818181 solid 3px;
 			&:last-child {
 				width: 2.5%;
 			}
@@ -68,26 +68,26 @@
 
 .bar-colors {
 	width: 100%;
-	mix-blend-mode: color;
+	mix-blend-mode: overlay;
 	.overlay {
 		position: absolute;
 		&:nth-child(1) {
-			background-color: rgba(112,187,86,1);
+			background-color: #81c16b;
 		}
 		&:nth-child(2) {
-			background-color: rgba(255,185,61,1);
+			background-color: #f7b44e;
 		}
 		&:nth-child(3) {
-			background-color: rgba(245,108,53,1);
+			background-color: #ea6e2b;
 		}
 		&:nth-child(4) {
-			background-color: rgba(214,43,48,1);
+			background-color: #dd1e23;
 		}
 		&:nth-child(5) {
-			background-color: rgba(36,99,155,1);
+			background-color: #1c7edd;
 		}
 		&:nth-child(6) {
-			background-color: rgba(73,73,73,1);
+			background-color: #7b7b7b;
 		}
 	}
 }
@@ -98,13 +98,6 @@
 	&.can-add-bucket:hover {
 		cursor: copy;
 	}
-}	
-.slider-dugout {
-	width: 20px;
-	margin-right: 9px;
-	background: #e8e8e8;
-	border: #dedada solid 1px;
-	float: right;
 }
 .slider {
 	border-right: #1c3d59 solid 1px;
@@ -124,6 +117,12 @@
 		line-height: 17px;
 		&:hover {
 			cursor: col-resize;
+		}
+	}
+	&:last-child {
+		border-right: none;
+		.handle {
+			display: none;
 		}
 	}
 }
@@ -246,18 +245,10 @@
     				content: "D"
     			}
     		}
-    	}
+    	}    	
     	&:nth-child(5){
     		.bucket-label{
-    			background-color: #24639b;
-    			&:before {
-    				content: "E"
-    			}
-    		}
-    	}
-    	&:nth-child(6){
-    		.bucket-label{
-    			background-color: #494949;
+				background-color: #24639b;
     			&:before {
     				content: "F"
     			}
@@ -285,7 +276,54 @@
 			font-size: 30px;
 	    }	
     }
-
+    &.six-buckets {
+    	li {
+	    	&:nth-child(1){
+	    		.bucket-label{
+	    			padding: 4px 8px 3px;
+	    			&:before {
+	    				content: "A+"
+	    			}
+	    		}
+	    	}
+	    	&:nth-child(2){
+	    		.bucket-label{
+	    			&:before {
+	    				content: "A"
+	    			}
+	    		}
+	    	}
+	    	&:nth-child(3){
+	    		.bucket-label{
+	    			&:before {
+	    				content: "B"
+	    			}
+	    		}
+	    	}
+	    	&:nth-child(4){
+	    		.bucket-label{
+	    			&:before {
+	    				content: "C"
+	    			}
+	    		}
+	    	}
+	    	&:nth-child(5){
+	    		.bucket-label{
+	    			&:before {
+	    				content: "D"
+	    			}
+	    		}
+	    	}
+	    	&:nth-child(6){
+	    		.bucket-label{
+    				background-color: #494949;
+	    			&:before {
+	    				content: "F"
+	    			}
+	    		}
+	    	}
+	    }
+    }
     .bucket-label {
     	display: inline-block;
     	margin-bottom: 8px;

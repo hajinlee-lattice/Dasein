@@ -19,7 +19,9 @@ angular.module('lp.models.ratings', [
         currentConfiguration: CurrentConfiguration,
         historicalBuckets: HistoricalABCDBuckets,
         ratingsSummary: RatingsSummary,
-        workingBuckets: []
+        workingBuckets: [],
+        bucketTiles: document.getElementById("bucketTiles"),
+        slidersContainer: document.getElementById("sliders")
     });
 
     vm.init = function() {
@@ -41,8 +43,6 @@ angular.module('lp.models.ratings', [
     function renderChart(){
         
         vm.workingBuckets = vm.currentConfiguration;
-
-        refreshChartData();
 
         var verticalAxis = document.getElementById("verticalAxis");
 
@@ -72,41 +72,49 @@ angular.module('lp.models.ratings', [
 
         vm.getNumber = function(num) {return new Array(num);}
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
+
+        refreshChartData();
    
     }
     function refreshChartData(){
           
-        var buckets = vm.workingBuckets;
+        vm.buckets = vm.workingBuckets;
 
-        // check if we can add anymore sliders
-        if(buckets.length < 6) {
-            vm.canAddBucket = true;
-        } else {
+        console.log(vm.ratingsSummary);
+
+        if (vm.buckets.length === 6) {
+            vm.bucketTiles.classList.add('six-buckets');
             vm.canAddBucket = false;
-        }
+        } else if (vm.buckets.length < 6) {
+            vm.bucketTiles.classList.remove('six-buckets');
+            vm.canAddBucket = true;            
+        };
 
         // loop through buckets in object and set their values
-        for (var i = 0, len = buckets.length; i < len; i++) { 
+        for (var i = 0, len = vm.buckets.length; i < len; i++) { 
 
-            var previousBucket = buckets[i-1];
+            var previousBucket = vm.buckets[i-1];
             for (var bucket in previousBucket) {
               vm.previousRightBoundScore = previousBucket["right_bound_score"];
             }
 
             // set each buckets left_bound_score to the previous buckets right_bound_score minus one
-            buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
-            buckets[0].left_bound_score = 99;
+            vm.buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
+            vm.buckets[0].left_bound_score = 99;
 
-            vm.rightScore = buckets[i].right_bound_score;
+            vm.rightScore = vm.buckets[i].right_bound_score - 1;
             vm.rightLeads = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_leads;
             vm.rightConverted = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_converted;
-            vm.leftScore = buckets[i].left_bound_score;
+            vm.leftScore = vm.buckets[i].left_bound_score;
             vm.leftLeads = vm.ratingsSummary.bucketed_scores[vm.leftScore].left_num_leads;
             vm.leftConverted = vm.ratingsSummary.bucketed_scores[vm.leftScore].left_num_converted;
+            
+            vm.totalLeads = vm.rightLeads - vm.leftLeads;
+            vm.totalConverted = vm.rightConverted - vm.leftConverted;
     
-            buckets[i].num_leads = vm.rightLeads - vm.leftLeads;
+            vm.buckets[i].num_leads = vm.rightLeads - vm.leftLeads;
 
-            buckets[i].lift = (vm.rightConverted - vm.leftConverted)/(vm.rightLeads - vm.leftLeads);
+            vm.buckets[i].lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
 
         }
         
@@ -117,8 +125,7 @@ angular.module('lp.models.ratings', [
         
         if (vm.workingBuckets.length < 6 && vm.canAddBucket) {
             
-            vm.container = document.getElementById("sliders");
-            vm.containerBox = vm.container.getBoundingClientRect();
+            vm.containerBox = vm.slidersContainer.getBoundingClientRect();
             vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
 
             var addSlider = {
@@ -150,8 +157,7 @@ angular.module('lp.models.ratings', [
         ev.stopPropagation();
 
         vm.slider = ev.currentTarget;
-        vm.container = document.getElementById("sliders");
-        vm.containerBox = vm.container.getBoundingClientRect();
+        vm.containerBox = vm.slidersContainer.getBoundingClientRect();
         vm.bucket = bucket;
         vm.index = index;
         vm.canAddBucket = false;
@@ -170,7 +176,7 @@ angular.module('lp.models.ratings', [
         vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
 
         // set right_bound_score from current percentage point on chart
-        vm.bucket.right_bound_score = vm.slider.style.right.slice(0, -1);
+        vm.bucket.right_bound_score = parseInt(vm.slider.style.right.slice(0, -1));
 
         if (ev.clientY > vm.containerBox.bottom + 10) {
             vm.showRemoveBucketText = true;
@@ -188,6 +194,8 @@ angular.module('lp.models.ratings', [
 
         vm.slider.style.opacity = 1;
         vm.canAddBucket = false;
+
+        vm.workingBuckets.sort(function(a, b){return b.right_bound_score - a.right_bound_score});
 
         if (ev.clientY > vm.containerBox.bottom + 10) {
             vm.chartNotUpdated = false;
@@ -208,13 +216,17 @@ angular.module('lp.models.ratings', [
         }
 
         delete vm.slider;
+
+
         refreshChartData();
 
         document.removeEventListener('mousemove', eleMouseMove, false);
         document.removeEventListener('mouseup', eleMouseUp, false);
 
     }
-    
+    vm.bucketHover = function(ev, index){
+
+    }
 
     vm.publishConfiguration = function() {
         
@@ -222,11 +234,13 @@ angular.module('lp.models.ratings', [
         vm.saveInProgress = true;
 
         var modelId = $stateParams.modelId,
-            bucketMetadatas = vm.workingBuckets;
+            bucketMetadatas = JSON.stringify(vm.workingBuckets);
+
+
 
         ModelRatingsService.CreateABCDBuckets(modelId, bucketMetadatas).then(function(result){
+            
             console.log(result);
-
             if (result != null && result.success === true) {
                 $state.go('home.model.ratings', {}, { reload: true });
             } else {

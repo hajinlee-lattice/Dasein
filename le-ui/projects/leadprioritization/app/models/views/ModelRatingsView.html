@@ -66,7 +66,8 @@
                             height: '+ vm.dugoutHeight +'px;
                             right: '+ bucket.right_bound_score +'%;
                             width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'}}" 
-                        ng-repeat="bucket in vm.workingBuckets">
+                        ng-repeat="bucket in vm.workingBuckets"
+                        ng-mouseover="vm.bucketHover($event)">
                     </div>
                 </div><!-- End .bar-colors -->
                 <ul class="horizontal-axis">
@@ -105,9 +106,8 @@
                 </ul><!-- End .horizontal-axis -->
             </div><!-- End .ratings-chart -->
 
-            <ul class="bucket-tiles large-buckets">
-            	<li ng-repeat="bucket in vm.workingBuckets"
-                    ng-if="bucket.right_bound_score!=2">
+            <ul id="bucketTiles" class="bucket-tiles large-buckets">
+            	<li ng-repeat="bucket in vm.workingBuckets">
             		<div class="bucket-label"></div>
             		<dl>
             			<dt>Lift</dt>

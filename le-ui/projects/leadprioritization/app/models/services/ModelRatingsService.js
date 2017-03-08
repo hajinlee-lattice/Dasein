@@ -100,25 +100,24 @@ angular
         var deferred = $q.defer(),
             data = data;
 
-        console.log(id, data);
-
         $http({
             method: 'POST',
             url: '/pls/bucketedscore/abcdbuckets/' + id,
-            params: {
-                'bucketMetadatas': data
-            },
-            headers: { 'Content-Type': 'application/json' }
+            data: data,
+            headers: {'Content-Type': 'application/json'}
         }).then(
             function onSuccess(response) {
                 var result = {
                     data: response.data,
                     success: true
                 };
-                
+
                 deferred.resolve(result);
 
             }, function onError(response) {
+
+                console.log(response);
+
                 if (!response.data) {
                     response.data = {};
                 }
