@@ -36,6 +36,18 @@
                                 <argument>--exclude='*tests*'</argument>
                                 <argument>--exclude='le-ui/target'</argument>
                                 <argument>--exclude='le-ui/src'</argument>
+
+                                <argument>--exclude='le-ui/projects/**/app'</argument>
+                                <argument>--exclude='le-ui/projects/**/lib'</argument>
+                                <argument>--exclude='le-ui/projects/**/test'</argument>
+                                <argument>--exclude='le-ui/projects/**/node_modules'</argument>
+                                <argument>--exclude='le-ui/projects/**/.sass_cache'</argument>
+
+                                <argument>--exclude='le-ui/projects/common/components/**/*.js'</argument>
+                                <argument>--exclude='le-ui/projects/common/components/**/*.scss'</argument>
+                                <argument>--exclude='le-ui/projects/tenantconsole/assets'</argument>
+
+                                <argument>--exclude='le-ui/projects/ng2'</argument> <!-- not using angular2 in production yet -->
                                 <argument>le-ui</argument>
                             </arguments>
                         </configuration>

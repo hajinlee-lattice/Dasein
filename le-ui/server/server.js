@@ -197,6 +197,8 @@ class Server {
                     let r = null;
 
                     try {
+                        // set default api proxy timeout to be 10 min
+                        res.setTimeout(600000);
                         if (req.method === 'POST') {
                             r = request.post({
                                 uri: url,
