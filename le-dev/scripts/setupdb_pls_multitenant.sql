@@ -23,4 +23,9 @@ INSERT INTO TENANT(
   'PropDataService',
   UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR)),
   '3.0'
+), (
+  'DataCloudService.DataCloudService.Production',
+  'DataCloudService',
+  UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR)),
+  '3.0'
 )
