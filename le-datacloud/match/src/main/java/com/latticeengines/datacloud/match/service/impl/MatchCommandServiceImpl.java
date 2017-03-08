@@ -249,8 +249,10 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         }
 
         public MatchCommand commit() {
-            matchCommand.setLatestStatusUpdate(new Date());
-            return matchCommandEntityMgr.updateCommand(matchCommand);
+            synchronized (MatchCommandServiceImpl.class) {
+                matchCommand.setLatestStatusUpdate(new Date());
+                return matchCommandEntityMgr.updateCommand(matchCommand);
+            }
         }
 
     }
@@ -290,8 +292,10 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         }
 
         public MatchBlock commit() {
-            matchBlock.setLatestStatusUpdate(new Date());
-            return matchBlockEntityMgr.updateBlock(matchBlock);
+            synchronized (MatchCommandServiceImpl.class) {
+                matchBlock.setLatestStatusUpdate(new Date());
+                return matchBlockEntityMgr.updateBlock(matchBlock);
+            }
         }
 
         String getRootOperationUid() {
