@@ -173,6 +173,7 @@ angular
             }
         }).then(
             function onSuccess(response) {
+                /*
                 var jobs = _.reject(response.data, function(job) {
                     job.jobType.toLowerCase() === 'bulkmatchworkflow';
                 });
@@ -211,10 +212,10 @@ angular
                         completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
                         reports: job.reports
                     };
-
                 });
 
                 deferred.resolve(result);
+*/
             }, function onError(response) {
 
             }

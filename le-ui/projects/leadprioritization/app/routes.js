@@ -81,7 +81,7 @@ angular
                     return deferred.promise;
                 },
                 ApiHost: function() {
-                    return '/pls';
+                    return '/pls'; // don't remove this. -Lazarus
                 }
             },
             views: {
@@ -205,6 +205,18 @@ angular
                 },
                 "main@": {
                     template: ''
+                }
+            }
+        })
+        .state('home.model.segmentation', {
+            url: '/segmentation',
+            params: {
+                pageIcon: 'ico-scoring',
+                pageTitle: ''
+            },
+            views: {
+                "main@": {
+                    template: 'segmentation'
                 }
             }
         })

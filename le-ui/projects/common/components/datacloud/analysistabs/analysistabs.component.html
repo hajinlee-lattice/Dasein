@@ -1,0 +1,48 @@
+<section id="ExplorerTabsView" class="containerx">
+    <ul>
+        <li class="tab-browse">
+            <div class="tab-container">
+                <h2>Attributes
+                    <span class="more-info">&#105;
+                        <div class="tooltip_">
+                            <div class="cover">
+                                <h3>Attributes</h3>
+                                <p>
+                                    Select the attributes which contacts/accounts in the segment must have.  In query language these are AND conditions.
+                                </p>
+                                <p>
+                                    You can further refine the segment using [ Refine Query ]
+                                </p>
+                            </div>
+                        </div>
+                    </span>
+                </h2>
+                <div class="count" ng-if="vm.DataCloudStore.metadata.enrichmentsTotal">{{vm.DataCloudStore.metadata.enrichmentsTotal|number}}</div>
+            </div>
+        </li>
+        <li class="tab-edit info noselect-children">
+            <div class="tab-container">
+                <h2>Accounts</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">21,009</span>
+                </div>
+            </div>
+        </li>
+        <li class="tab-team">
+            <div class="tab-container">
+                <h2>Contacts</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">28,752</span>
+                </div>
+            </div>
+        </li>
+        <li class="tab-edit">
+            <div class="tab-container">
+                <h2>Lift</h2>
+                <div class="enrichmentCounts">
+                    <span class="count">1.0x</span>
+                </div>
+            </div>
+        </li>
+    </ul>
+</section>

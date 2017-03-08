@@ -1,15 +1,18 @@
 angular
 .module('lp.jobs')
-.run(function($timeout, $interval, $stateParams, JobsStore) {
+.run(function($timeout, $interval, $stateParams, $state, JobsStore) {
     $timeout(function() {
         JobsStore.getJobs();
     }, 1000); // FIXME: we wont need this soon, this is for switching tenants fix hack
 
     var pending = false;
-    $interval(function() {
+
+    setInterval(function() {
         var modelId = $stateParams.modelId || '';
+        
         if (!pending) {
             pending = true;
+            
             JobsStore.getJobs(null, modelId).then(function(response) {
                 pending = false;
             });

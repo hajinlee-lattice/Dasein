@@ -9,41 +9,7 @@ angular
     $stateProvider
         .state('home.datacloud', {
             url: '/datacloud',
-            resolve: {
-                EnrichmentCount: function($q, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getCount().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                },
-                EnrichmentTopAttributes: function($q, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getAllTopAttributes().then(function(result) {
-                        deferred.resolve(result || {});
-                    });
-
-                    return deferred.promise;
-                },
-                EnrichmentPremiumSelectMaximum: function($q, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getPremiumSelectMaximum().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }
-            },
+            resolve: DataCloudResolve,
             redirectTo: 'home.datacloud.explorer'
         })
         .state('home.datacloud.lookup', {
@@ -57,9 +23,6 @@ angular
                 pageTitle: 'Data Cloud Explorer'
             },
             views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
                 "summary@": {
                     controller: 'ExplorerTabsController',
                     controllerAs: 'vm',
@@ -240,5 +203,70 @@ angular
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
                 }
             }
+        })
+        .state('home.model.analysis', {
+            url: '/analysis/:category/:subcategory',
+            params: {
+                pageIcon: 'ico-performance',
+                pageTitle: 'Analysis',
+                section: 'analysis',
+                category: {value: null, squash: true},
+                subcategory: {value: null, squash: true}
+            },
+            resolve: DataCloudResolve,
+            views: {
+                "summary@": {
+                    controller: 'ExplorerTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/analysistabs/analysistabs.component.html'
+                },
+                "main@": {
+                    resolve: {
+                        // Note: this is needed for Account Lookup, dont remove!
+                        EnrichmentAccountLookup: function() {
+                            return null;
+                        }
+                    },
+                    controller: 'DataCloudController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/explorer/explorer.component.html'
+                }
+            }
         });
 });
+
+var DataCloudResolve = {
+    EnrichmentCount: function($q, DataCloudStore, ApiHost) {
+        var deferred = $q.defer();
+
+        DataCloudStore.setHost(ApiHost);
+
+        DataCloudStore.getCount().then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    },
+    EnrichmentTopAttributes: function($q, DataCloudStore, ApiHost) {
+        var deferred = $q.defer();
+
+        DataCloudStore.setHost(ApiHost);
+
+        DataCloudStore.getAllTopAttributes().then(function(result) {
+            deferred.resolve(result || {});
+        });
+
+        return deferred.promise;
+    },
+    EnrichmentPremiumSelectMaximum: function($q, DataCloudStore, ApiHost) {
+        var deferred = $q.defer();
+
+        DataCloudStore.setHost(ApiHost);
+
+        DataCloudStore.getPremiumSelectMaximum().then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    }
+};
