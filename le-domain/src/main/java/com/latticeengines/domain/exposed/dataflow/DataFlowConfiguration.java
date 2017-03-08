@@ -38,7 +38,7 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("namespace")
     private String namespace;
 
-    @JsonProperty("skip_register_table")
+    @JsonProperty("skip_registering_table")
     private boolean skipRegisteringTable = false;
 
     public String getDataFlowBeanName() {
