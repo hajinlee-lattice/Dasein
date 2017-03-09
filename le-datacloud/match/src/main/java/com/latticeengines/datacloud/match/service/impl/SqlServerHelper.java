@@ -36,6 +36,7 @@ import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.core.datasource.DataSourceService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
+import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
@@ -79,6 +80,9 @@ public class SqlServerHelper implements DbHelper {
     @Autowired
     @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
+
+    @Autowired
+    private DomainCollectService domainCollectService;
 
     private boolean fetchersInitiated = false;
 
@@ -189,6 +193,12 @@ public class SqlServerHelper implements DbHelper {
                 log.error("Attempt to execute query failed.", e);
             }
         }
+
+        // send to collector
+        for  (String domain: context.getDomains()) {
+            domainCollectService.enqueue(domain);
+        }
+
         return context;
     }
 

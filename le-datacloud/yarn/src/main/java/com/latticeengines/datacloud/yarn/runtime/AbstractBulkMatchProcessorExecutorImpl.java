@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
@@ -71,6 +72,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @Autowired
     private MetricService metricService;
+
+    @Autowired
+    private DomainCollectService domainCollectService;
 
     @Override
     public void finalize(ProcessorContext processorContext) throws Exception {
@@ -297,6 +301,11 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
         }
         processorContext.getDataCloudProcessor().setProgress(1f);
+        try {
+            domainCollectService.dumpQueue();
+        } catch (Exception e) {
+            log.error("Failed to dump domains to SQL.", e);
+        }
     }
 
     @MatchStep

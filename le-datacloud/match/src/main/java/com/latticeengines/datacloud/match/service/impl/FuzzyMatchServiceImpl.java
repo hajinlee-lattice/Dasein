@@ -6,23 +6,18 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-
 import com.latticeengines.actors.exposed.traveler.TravelLog;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
+import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
@@ -35,6 +30,12 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
+
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private static final Log log = LogFactory.getLog(FuzzyMatchServiceImpl.class);
@@ -44,6 +45,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Autowired
     private MatchActorSystem actorSystem;
+
+    @Autowired
+    private DomainCollectService domainCollectService;
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
@@ -190,6 +194,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 travelContext.setMatchInput(matchInput);
                 travelContext.setTravelTimeout(actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT);
                 matchFutures.add(askFuzzyMatchAnchor(travelContext));
+
+                // send to collector
+                String domain = matchKeyTuple.getDomain();
+                if (StringUtils.isNotBlank(domain)) {
+                    domainCollectService.enqueue(domain);
+                }
             }
         }
         return matchFutures;

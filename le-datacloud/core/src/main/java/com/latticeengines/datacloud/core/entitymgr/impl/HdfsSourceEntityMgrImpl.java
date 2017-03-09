@@ -154,7 +154,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         if (source instanceof HasSqlPresence) {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
-            return TableUtils.createTable(((HasSqlPresence) source).getSqlTableName(),
+            return TableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
         } else {
             String path = null;
@@ -163,7 +163,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             } else {
                 path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             }
-            return TableUtils.createTable(source.getSourceName(),
+            return TableUtils.createTable(yarnConfiguration, source.getSourceName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
         }
 
@@ -190,10 +190,10 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             }
         }
         if (source instanceof HasSqlPresence) {
-            return TableUtils.createTable(((HasSqlPresence) source).getSqlTableName(),
+            return TableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
                     paths.toArray(new String[paths.size()]), source.getPrimaryKey());
         } else {
-            return TableUtils.createTable(source.getSourceName(), paths.toArray(new String[paths.size()]),
+            return TableUtils.createTable(yarnConfiguration, source.getSourceName(), paths.toArray(new String[paths.size()]),
                     source.getPrimaryKey());
         }
     }
@@ -277,7 +277,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } catch (Exception e) {
             throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
         }
-        return TableUtils.createTable(source.getSourceName(), avroPaths.toArray(new String[avroPaths.size()]),
+        return TableUtils.createTable(yarnConfiguration, source.getSourceName(), avroPaths.toArray(new String[avroPaths.size()]),
                 source.getPrimaryKey());
     }
 
