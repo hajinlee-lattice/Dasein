@@ -26,8 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
+import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
@@ -50,6 +50,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     private static final String LONG = Long.class.getSimpleName();
     private static final String FLOAT = Float.class.getSimpleName();
     private static final String DOUBLE = Double.class.getSimpleName();
+    private static final String BOOLEAN = Boolean.class.getSimpleName();
     private static final String STRING = String.class.getSimpleName();
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.buffer";
 
@@ -261,6 +262,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     }
 
     private static Object convertByJavaClass(Object value, String javaClass) {
+        if (value == null) {
+            return null;
+        }
         if (STRING.equalsIgnoreCase(javaClass) && !(value instanceof String)) {
             return String.valueOf(value);
         }
@@ -276,6 +280,17 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         if (DOUBLE.equalsIgnoreCase(javaClass) && !(value instanceof Double)) {
             return Double.valueOf(String.valueOf(value));
         }
+        if (BOOLEAN.equalsIgnoreCase(javaClass) && !(value instanceof Boolean)) {
+            String str = String.valueOf(value);
+            if ("1".equals(str) || "yes".equalsIgnoreCase(str) || "Y".equalsIgnoreCase(str)) {
+                return true;
+            } else if ("1".equals(str) || "no".equalsIgnoreCase(str) || "N".equalsIgnoreCase(str)) {
+                return false;
+            } else {
+                return Boolean.valueOf(str);
+            }
+        }
+
         return value;
     }
 

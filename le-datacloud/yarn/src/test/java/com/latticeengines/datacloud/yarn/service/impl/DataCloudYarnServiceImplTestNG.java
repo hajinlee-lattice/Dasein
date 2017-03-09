@@ -1,10 +1,13 @@
 package com.latticeengines.datacloud.yarn.service.impl;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -82,6 +85,35 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Test(groups = "functional")
+    public void testEnrichment() throws Exception {
+        String fileName = "BulkMatchInput.avro";
+        cleanupAvroDir(avroDir);
+        uploadDataCsv(avroDir, fileName);
+        String avroPath = avroDir + "/" + fileName;
+
+        DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
+        jobConfiguration.getMatchInput().setPredefinedSelection(Predefined.Enrichment);
+
+        ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        String avroGlob = getBlockOutputDir(jobConfiguration) + "/*.avro";
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroGlob);
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            for (int i = 0; i < record.getSchema().getFields().size(); i++) {
+                Object obj = record.get(i);
+                if (obj instanceof Utf8 || obj instanceof String) {
+                    String str = obj.toString();
+                    Assert.assertFalse("null".equalsIgnoreCase(str),
+                            record.getSchema().getFields().get(i).name() + " is the literal \"null\"!");
+                }
+            }
+        }
+    }
+
     private void verifyDedupeHelpers(DataCloudJobConfiguration jobConfiguration) throws Exception {
         String rootUid = jobConfiguration.getRootOperationUid();
         String blockUid = jobConfiguration.getBlockOperationUid();
@@ -97,6 +129,12 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
             Assert.assertNotNull(pop);
             Assert.assertTrue(pop instanceof Integer);
         });
+    }
+
+    private String getBlockOutputDir(DataCloudJobConfiguration jobConfiguration) {
+        String rootUid = jobConfiguration.getRootOperationUid();
+        String blockUid = jobConfiguration.getBlockOperationUid();
+        return hdfsPathBuilder.constructMatchBlockDir(rootUid, blockUid).toString();
     }
 
     private DataCloudJobConfiguration jobConfiguration(String avroPath) {
