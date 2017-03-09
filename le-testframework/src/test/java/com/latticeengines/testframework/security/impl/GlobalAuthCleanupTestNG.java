@@ -124,18 +124,22 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     }
 
     private void cleanupZK() throws Exception {
-        List<AbstractMap.SimpleEntry<Document, Path>> entries = camille.getChildren(PathBuilder.buildContractsPath(podId));
-        if (entries != null) {
-            for (AbstractMap.SimpleEntry<Document, Path> entry : entries) {
-                Path path = entry.getValue();
-                String contract = path.getSuffix();
-                if (TestFrameworkUtils.isTestTenant(contract)) {
-                    long testTime = TestFrameworkUtils.getTestTimestamp(contract);
-                    if (testTime > 0 && (System.currentTimeMillis() - testTime) > cleanupThreshold) {
-                        cleanupTenantInZK(contract);
+        try {
+            List<AbstractMap.SimpleEntry<Document, Path>> entries = camille.getChildren(PathBuilder.buildContractsPath(podId));
+            if (entries != null) {
+                for (AbstractMap.SimpleEntry<Document, Path> entry : entries) {
+                    Path path = entry.getValue();
+                    String contract = path.getSuffix();
+                    if (TestFrameworkUtils.isTestTenant(contract)) {
+                        long testTime = TestFrameworkUtils.getTestTimestamp(contract);
+                        if (testTime > 0 && (System.currentTimeMillis() - testTime) > cleanupThreshold) {
+                            cleanupTenantInZK(contract);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            log.error("Failed to clean up test tenants in ZK.", e);
         }
     }
 
@@ -177,8 +181,8 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("Failed to clean up test tenants in hdfs.", e);
         }
     }
 
