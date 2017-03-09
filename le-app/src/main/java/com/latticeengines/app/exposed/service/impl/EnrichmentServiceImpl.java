@@ -12,6 +12,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.google.common.cache.CacheBuilder;
@@ -47,6 +49,10 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     @Autowired
     private AttributeService attributeService;
 
+    @Autowired
+    @Qualifier("taskScheduler")
+    private ThreadPoolTaskScheduler scheduler;
+
     @PostConstruct
     public void postConstruct() {
         topAttrsCache = CacheBuilder.newBuilder().maximumSize(5).expireAfterWrite(1, TimeUnit.HOURS)
@@ -65,6 +71,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
                         return attributeTree;
                     }
                 });
+        scheduler.scheduleWithFixedDelay(this::loadCache, TimeUnit.MINUTES.toMillis(30));
     }
 
     @Override
@@ -90,9 +97,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     @Override
     public TopNAttributes getTopAttrs(Category category, int max, boolean shouldConsiderInternalEnrichment) {
         TopNAttributeTree topAttrsTree = getTopAttrTree();
-        TopNAttributes topAttrsForCategory = //
-                topAttrsTree == null ? //
-                        null : topAttrsTree.get(category);
+        TopNAttributes topAttrsForCategory = topAttrsTree == null ? null : topAttrsTree.get(category);
         return selectTopN(topAttrsForCategory, max, shouldConsiderInternalEnrichment);
     }
 
@@ -184,6 +189,14 @@ public class EnrichmentServiceImpl implements EnrichmentService {
         return getTopQuery(DataCloudConstants.ACCOUNT_MASTER, //
                 AccountMasterFact.DIM_NUM_LOC_RANGE, //
                 DataCloudConstants.ATTR_NUM_LOC_RANGE);
+    }
+
+    private void loadCache() {
+        try {
+            topAttrsCache.get(DUMMY_KEY);
+        } catch (Exception e) {
+            log.error("Failed to load top attrs cache.", e);
+        }
     }
 
     // TODO: should get root attribute name by calling some matchapi

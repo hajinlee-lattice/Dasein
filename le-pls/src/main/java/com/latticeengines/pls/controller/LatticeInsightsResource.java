@@ -175,19 +175,16 @@ public class LatticeInsightsResource {
     @ApiOperation(value = "Get list of attributes with selection flag")
     public int getInsightsAttributesCount(HttpServletRequest request,
             @ApiParam(value = "Get attributes with name containing specified " //
-                    + "text for attributeDisplayNameFilter", required = false) //
+                    + "text for attributeDisplayNameFilter") //
             @RequestParam(value = "attributeDisplayNameFilter", required = false) //
             String attributeDisplayNameFilter, //
-            @ApiParam(value = "Get attributes " //
-                    + "with specified category", required = false) //
+            @ApiParam(value = "Get attributes with specified category") //
             @RequestParam(value = "category", required = false) //
             String category, //
-            @ApiParam(value = "Get attributes " //
-                    + "with specified subcategory", required = false) //
+            @ApiParam(value = "Get attributes with specified subcategory") //
             @RequestParam(value = "subcategory", required = false) //
             String subcategory, //
-            @ApiParam(value = "Should get only selected attribute", //
-                    required = false) //
+            @ApiParam(value = "Should get only selected attribute") //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
