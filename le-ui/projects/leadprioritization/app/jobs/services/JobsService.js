@@ -173,7 +173,6 @@ angular
             }
         }).then(
             function onSuccess(response) {
-                /*
                 var jobs = _.reject(response.data, function(job) {
                     job.jobType.toLowerCase() === 'bulkmatchworkflow';
                 });
@@ -215,7 +214,6 @@ angular
                 });
 
                 deferred.resolve(result);
-*/
             }, function onError(response) {
 
             }
