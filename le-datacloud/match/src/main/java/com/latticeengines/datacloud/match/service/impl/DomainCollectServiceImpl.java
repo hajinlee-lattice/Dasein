@@ -57,7 +57,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     @Qualifier("dataCloudCollectorJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
-    @Value("datacloud.collector.enabled")
+    @Value("${datacloud.collector.enabled}")
     private boolean domainCollectEnabled;
 
     @PostConstruct
