@@ -5,13 +5,11 @@ import com.latticeengines.domain.exposed.eai.*;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
-import com.sun.tools.internal.ws.wsdl.document.Import;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
