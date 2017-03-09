@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsDimensionAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsDimensionExpandBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsLeafFieldSubstitutionFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsLeafFunction;
@@ -81,7 +83,7 @@ public class AccountMasterStatsFlow
 
         Map<String, List<String>> dimensionDefinitionMap = parameters.getDimensionDefinitionMap();
 
-        Set<String> fieldIds = new HashSet<>();
+        List<String> fieldIds = new ArrayList<String>();
 
         List<List<FieldMetadata>> leafSchema = getLeafSchema(schema, dimensionDefinitionMap, fieldIds);
         List<FieldMetadata> leafSchemaNewColumns = leafSchema.get(0);
@@ -124,7 +126,6 @@ public class AccountMasterStatsFlow
         List<String> renamedMinMaxAndDimensionIds = new ArrayList<>();
 
         for (FieldMetadata fieldMeta : joinedSchema) {
-            log.info("Found field name " + fieldMeta.getFieldName());
             inputSchemaForFieldSubstituteFunction.add(fieldMeta);
             boolean isDimension = false;
             for (String dimensionFieldName : dimensionIdFieldNames) {
@@ -136,7 +137,6 @@ public class AccountMasterStatsFlow
             if (fieldMeta.getFieldName().equals(getMinMaxKey()) || isDimension) {
                 minMaxAndDimensionList.add(fieldMeta);
                 renamedMinMaxAndDimensionIds.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
-                log.info("Found dimension " + fieldMeta.getFieldName());
             }
 
             if (!fieldMeta.getFieldName().equals(getMinMaxKey())) {
@@ -147,7 +147,6 @@ public class AccountMasterStatsFlow
                     oldValueColumnsForSubstitution.add(fieldMeta.getFieldName());
                     newValueColumnsForSubstitution.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
                     renamedNonDimensionFieldIds.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
-                    log.info("Rename field " + fieldMeta.getFieldName());
                 }
             }
         }
@@ -165,12 +164,14 @@ public class AccountMasterStatsFlow
                 minMaxAndDimensionList, renamedMinMaxAndDimensionIds, dimensionIdFieldNames, //
                 oldValueColumnsForSubstitution, newValueColumnsForSubstitution, renamedNonDimensionFieldIds);
 
-        node = createDimensionBasedExpandAndMergeNodes(requiredDimensionsValuesMap, //
-                node, dimensionDefinitionMap, node.getSchema(), //
-                groupByFields, dimensionIdFieldNames);
+          node = createDimensionBasedAggregateNode(node, dimensionIdFieldNames);
 
-        List<FieldMetadata> fms = node.getSchema();
-        node = createReportGenerationNode(parameters, dimensionIdFieldNames, fms, node, dataCloudVersion);
+          node = createDimensionBasedExpandAndMergeNodes(requiredDimensionsValuesMap, //
+                     node, dimensionDefinitionMap, node.getSchema(), //
+                     groupByFields, dimensionIdFieldNames);
+
+          List<FieldMetadata> fms = node.getSchema();
+          node = createReportGenerationNode(parameters, dimensionIdFieldNames, fms, node, dataCloudVersion);
 
         return node;
     }
@@ -243,11 +244,6 @@ public class AccountMasterStatsFlow
     }
 
     private Node joinWithMinMaxNode(Node node, Node minMaxNode, String[] dimensionIdFieldNames) {
-        String[] renamedDimensionFieldNames = new String[dimensionIdFieldNames.length];
-        int i = 0;
-        for (String id : dimensionIdFieldNames) {
-            renamedDimensionFieldNames[i++] = TEMP_RENAMED_PREFIX + id;
-        }
 
         node.renamePipe("beginJoinWithMinMax");
         node = node.addColumnWithFixedValue(MIN_MAX_JOIN_FIELD, 0, Integer.class);
@@ -272,6 +268,37 @@ public class AccountMasterStatsFlow
         accountMaster = accountMaster.apply(leafCreationFunction, applyToFieldList, leafSchemaNewColumns,
                 outputFieldList);
         return accountMaster;
+    }
+
+    private Node createDimensionBasedAggregateNode(Node node, String[] dimensionIdFieldNames) {
+
+            Fields fields = new Fields();
+            List<String> groupBy = new ArrayList<>();
+            int idx = 0;
+            String[] allFields = new String[node.getSchema().size()];
+            for (FieldMetadata fieldMeta : node.getSchema()) {
+                String name = fieldMeta.getFieldName();
+                if (name.equals("_Location_") || name.equals("_Industry_")) {
+                    log.info("DimensionName " + name + " Position " + idx);
+                }
+                allFields[idx++] = name;
+                fields = fields.append(new Fields(name, fieldMeta.getJavaType()));
+                for (String dimensionId : dimensionIdFieldNames) {
+                    if (name.equals(dimensionId)) {
+                        groupBy.add(name);
+                        break;
+                    }
+                }
+            }
+            List<FieldMetadata> fms = new ArrayList<>();
+            fms.addAll(node.getSchema());
+
+            node = node.retain(new FieldList(allFields));
+            AccountMasterStatsDimensionAggregator aggregator = //
+                    new AccountMasterStatsDimensionAggregator(fields);
+            node = node.groupByAndAggregate(new FieldList(groupBy), aggregator, fms);
+
+            return node;
     }
 
     private Node createDimensionBasedExpandAndMergeNodes(
@@ -352,8 +379,11 @@ public class AccountMasterStatsFlow
             List<String> splunkReportColumns) {
         List<FieldMetadata> finalReportColumns = new ArrayList<>();
 
+        int index = 0;
         for (String dimensionKey : finalDimensionsList) {
             finalReportColumns.add(new FieldMetadata(dimensionKey, Long.class));
+            log.info("Final report column " + index + " " + dimensionKey);
+            index++;
         }
 
         finalReportColumns.add(new FieldMetadata(encodedCubeColumnName, String.class));
@@ -418,7 +448,7 @@ public class AccountMasterStatsFlow
     }
 
     private List<List<FieldMetadata>> getLeafSchema(List<FieldMetadata> schema,
-            Map<String, List<String>> dimensionDefinitionMap, Set<String> fieldIds) {
+            Map<String, List<String>> dimensionDefinitionMap, List<String> fieldIds) {
         List<FieldMetadata> leafSchemaOldColumns = new ArrayList<>();
         List<FieldMetadata> leafSchemaNewColumns = new ArrayList<>();
         List<FieldMetadata> inputSchemaDimensionColumns = new ArrayList<>();

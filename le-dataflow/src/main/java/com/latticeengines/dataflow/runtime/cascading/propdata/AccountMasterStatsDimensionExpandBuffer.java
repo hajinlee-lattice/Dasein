@@ -126,9 +126,10 @@ public class AccountMasterStatsDimensionExpandBuffer extends BaseOperation imple
             }
             Long nonFixedDimensionId = originalTuple.getLong(pos);
 
-            mergeAndPutTuple(fieldsArray, tuplesMap, originalTuple, nonFixedDimensionId);
 
             List<Long> ancestorList = dimensionValueAncestorPathMap.get(nonFixedDimensionId);
+            mergeAndPutTuple(fieldsArray, tuplesMap, originalTuple, nonFixedDimensionId);
+
             if (ancestorList != null //
                     && ancestorList.size() != 0//
                     && !nonFixedDimensionId.equals(ancestorList.get(0))) {
@@ -164,12 +165,22 @@ public class AccountMasterStatsDimensionExpandBuffer extends BaseOperation imple
         for (int idx = 0; idx < fieldsArray.length; idx++) {
             Object objInExistingMergedTuple = existingMergedTuple.getObject(idx);
             Object objInOriginalTuple = originalTuple.getObject(idx);
+            boolean isPrint = false;
 
             if (objInExistingMergedTuple == null) {
+                if (isPrint) {
+                    System.out.println("set new");
+                }
                 existingMergedTuple.set(idx, objInOriginalTuple);
             } else if (objInOriginalTuple == null) {
+                if (isPrint) {
+                    System.out.println("use old");
+                }
                 existingMergedTuple.set(idx, objInExistingMergedTuple);
             } else if (objInExistingMergedTuple instanceof String) {
+                if (isPrint) {
+                    System.out.println("merge 2");
+                }
                 AttributeStatsDetails statsInExistingMergedTuple = null;
                 AttributeStatsDetails statsInOriginalTuple = null;
 
@@ -180,10 +191,11 @@ public class AccountMasterStatsDimensionExpandBuffer extends BaseOperation imple
                 } catch (IOException e) {
                     // ignore if type of serialized obj is not
                     // statsInExistingMergedTuple
+                    System.out.println("Sth wrong");
                     continue;
                 }
 
-                mergedStats = merge(statsInExistingMergedTuple, statsInOriginalTuple);
+                mergedStats = merge(statsInExistingMergedTuple, statsInOriginalTuple, isPrint);
                 try {
                     existingMergedTuple.set(idx, OM.writeValueAsString(mergedStats));
                 } catch (JsonProcessingException e) {
@@ -196,9 +208,9 @@ public class AccountMasterStatsDimensionExpandBuffer extends BaseOperation imple
     }
 
     private AttributeStatsDetails merge(AttributeStatsDetails statsInExistingMergedTuple,
-            AttributeStatsDetails statsInOriginalTuple) {
+            AttributeStatsDetails statsInOriginalTuple, boolean isPrint) {
         AttributeStatsDetails mergedAttrStats = AttributeStatsDetailsMergeUtil
-                .addStatsDetails(statsInExistingMergedTuple, statsInOriginalTuple);
+                .addStatsDetails(statsInExistingMergedTuple, statsInOriginalTuple, isPrint);
         return mergedAttrStats;
     }
 

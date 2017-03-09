@@ -22,7 +22,7 @@ public class AttributeStatsDetailsMergeUtil {
     private static ObjectMapper OM = new ObjectMapper();
 
     public static AttributeStatsDetails addStatsDetails(AttributeStatsDetails firstStatsDetails,
-            AttributeStatsDetails secondStatsDetails) {
+            AttributeStatsDetails secondStatsDetails, boolean printTop) {
         try {
             if (firstStatsDetails == null || secondStatsDetails == null) {
                 if (firstStatsDetails != null) {
@@ -40,18 +40,21 @@ public class AttributeStatsDetailsMergeUtil {
         }
 
         AttributeStatsDetails resultAttributeStatsDetails = new AttributeStatsDetails();
+        if (printTop) {
+            System.out.println("First count " + firstStatsDetails.getNonNullCount() + "Second count " + secondStatsDetails.getNonNullCount());
+        }
         resultAttributeStatsDetails.setNonNullCount(firstStatsDetails.getNonNullCount() //
                 + secondStatsDetails.getNonNullCount());
 
         Buckets combinedBuckets = addBuckets(firstStatsDetails.getBuckets(), //
-                secondStatsDetails.getBuckets());
+                secondStatsDetails.getBuckets(), printTop);
 
         resultAttributeStatsDetails.setBuckets(combinedBuckets);
 
         return resultAttributeStatsDetails;
     }
 
-    public static Buckets addBuckets(Buckets firstBucketObj, Buckets secondBucketsObj) {
+    public static Buckets addBuckets(Buckets firstBucketObj, Buckets secondBucketsObj, boolean printTop) {
         if (firstBucketObj == null && secondBucketsObj == null) {
             return null;
         } else if (firstBucketObj == null) {

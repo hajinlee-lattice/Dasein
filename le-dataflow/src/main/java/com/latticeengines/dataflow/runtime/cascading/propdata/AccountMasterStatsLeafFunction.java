@@ -95,7 +95,7 @@ public class AccountMasterStatsLeafFunction extends BaseOperation implements Fun
                         requiredDimensionsValues.get(dimensionKey) == null//
                         || !requiredDimensionsValues.get(dimensionKey).containsKey(value))//
                                 ? //
-                                requiredDimensionsRootAttrId.get(dimensionKey) //
+                                requiredDimensionsRootAttrId.get(dimensionKey) * 100000//
                                 : requiredDimensionsValues.get(dimensionKey).get(value);
 
                 dimensionValues.put(field, dimensionValue);
