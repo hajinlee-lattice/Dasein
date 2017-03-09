@@ -155,10 +155,10 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         createTableByRestCall(tenant1, tbl, true);
 
         tbl = createTable(tenant2, TABLE1, tableLocation1.append(TABLE1).toString());
-        // Tenant2, Type=IMPORTTABLE
-        createTableByRestCall(tenant2, tbl, true);
         // Tenant2, Type=DATATABLE
         createTableByRestCall(tenant2, tbl, false);
+        // Tenant2, Type=IMPORTTABLE
+        createTableByRestCall(tenant2, tbl, true);
     }
 
     private void dropAllHiveTables() {
