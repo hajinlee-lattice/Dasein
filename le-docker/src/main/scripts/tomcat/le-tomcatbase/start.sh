@@ -18,6 +18,8 @@ export LE_PROPDIR="/etc/ledp"
 if [ -f "/etc/internaladdr.txt" ]; then
     export QUARTZ_EXECUTION_HOST=`cat /etc/internaladdr.txt`
     echo "QUARTZ_EXECUTION_HOST=${QUARTZ_EXECUTION_HOST}"
+    export METRIC_ADVERTISE_NAME=${HOSTNAME}-`cat /etc/internaladdr.txt | sed 's|[.]|-|g'`
+    echo "METRIC_ADVERTISE_NAME=${METRIC_ADVERTISE_NAME}"
 fi
 
 if [ -f "/etc/efsip.txt" ]; then

@@ -1,7 +1,5 @@
 package com.latticeengines.monitor.metric.service.impl;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +39,7 @@ public class SplunkLogMetricWriter implements MetricWriter {
 
     @PostConstruct
     private void postConstruct() {
-        logPrefix = String.format("%s=\"%s\" ", MetricUtils.TAG_HOST, getHostName() == null ? MetricUtils.NULL
-                : getHostName());
-        logPrefix += String.format("%s=\"%s\" ", MetricUtils.TAG_ENVIRONMENT, environment);
+        logPrefix = String.format("%s=\"%s\" ", MetricUtils.TAG_ENVIRONMENT, environment);
     }
 
     @Override
@@ -100,16 +96,6 @@ public class SplunkLogMetricWriter implements MetricWriter {
         @Override
         public void run() {
             writeInternal(metricDb, measurements, fieldMaps);
-        }
-    }
-
-    private static String getHostName() {
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            return addr.getHostName();
-        } catch (UnknownHostException ex) {
-            log.error("Hostname can not be resolved");
-            return "unknown";
         }
     }
 

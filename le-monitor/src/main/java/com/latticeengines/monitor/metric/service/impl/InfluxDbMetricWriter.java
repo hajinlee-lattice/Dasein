@@ -50,6 +50,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
 
     private static final Log log = LogFactory.getLog(InfluxDbMetricWriter.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
+    private static final String METRIC_ADVERTISE_NAME = "METRIC_ADVERTISE_NAME";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
 
     @Value("${monitor.influxdb.url:}")
@@ -174,7 +175,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
         BatchPoints.Builder builder = BatchPoints.database(db.getDbName());
         Collection<String> excludedSystemTags = measurements.get(0).excludeSystemTags();
         if (!excludedSystemTags.contains(MetricUtils.TAG_HOST)) {
-            builder.tag(MetricUtils.TAG_HOST, getHostName() == null ? MetricUtils.NULL : getHostName());
+            builder.tag(MetricUtils.TAG_HOST, getAdvertiseName() == null ? MetricUtils.NULL : getAdvertiseName());
         }
         if (!excludedSystemTags.contains(MetricUtils.TAG_ENVIRONMENT)) {
             builder.tag(MetricUtils.TAG_ENVIRONMENT, environment);
@@ -297,17 +298,32 @@ public class InfluxDbMetricWriter implements MetricWriter {
         }
     }
 
-    private static String getHostName() {
+    private String getAdvertiseName() {
         if (hostname == null || hostname.equals("unknown")) {
             try {
-                InetAddress addr;
-                addr = InetAddress.getLocalHost();
-                hostname = addr.getHostName();
-            } catch (UnknownHostException ex) {
+                String advertiseName = System.getenv(METRIC_ADVERTISE_NAME);
+                if (StringUtils.isBlank(advertiseName)) {
+                    hostname = getHostName();
+                } else {
+                    hostname = advertiseName;
+                }
+            } catch (Exception ex) {
                 log.error("Hostname can not be resolved");
             }
         }
         return hostname;
+
+    }
+
+    private static String getHostName() {
+        try {
+            InetAddress addr;
+            addr = InetAddress.getLocalHost();
+            return addr.getHostName();
+        } catch (UnknownHostException ex) {
+            log.error("Hostname can not be resolved");
+            return "unknown";
+        }
     }
 
 }

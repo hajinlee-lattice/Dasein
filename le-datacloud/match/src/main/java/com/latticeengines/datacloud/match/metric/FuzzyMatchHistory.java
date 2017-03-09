@@ -1,18 +1,15 @@
 package com.latticeengines.datacloud.match.metric;
 
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
 import com.latticeengines.common.exposed.metric.Measurement;
-import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.common.exposed.util.MetricUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
-import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 
 
@@ -40,11 +37,6 @@ public class FuzzyMatchHistory extends BaseMeasurement<MatchTraveler, MatchTrave
     @Override
     public RetentionPolicy getRetentionPolicy() {
         return RetentionPolicyImpl.ONE_MONTH;
-    }
-
-    @Override
-    public Collection<MetricStore> getMetricStores() {
-        return Arrays.<MetricStore>asList(MetricStoreImpl.INFLUX_DB, MetricStoreImpl.SPLUNK_LOG);
     }
 
     @Override
