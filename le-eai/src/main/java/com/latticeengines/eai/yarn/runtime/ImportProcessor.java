@@ -1,11 +1,15 @@
 package com.latticeengines.eai.yarn.runtime;
 
+import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
+import com.latticeengines.domain.exposed.eai.SourceType;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+
+import java.util.Optional;
 
 @Component("importProcessor")
 public class ImportProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
@@ -14,9 +18,19 @@ public class ImportProcessor extends SingleContainerYarnProcessor<ImportConfigur
     @Autowired
     private ImportTableProcessor importTableProcessor;
 
+    @Autowired
+    private ImportVdbTableProcessor importVdbTableProcessor;
+
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
-        return importTableProcessor.process(importConfig);
+        Optional<SourceImportConfiguration> sourceImportConfiguration =  importConfig.getSourceConfigurations()
+                .stream().findFirst();
+        if (sourceImportConfiguration.isPresent()
+                && sourceImportConfiguration.get().getSourceType().equals(SourceType.VISIDB)) {
+            return importVdbTableProcessor.process(importConfig);
+        } else {
+            return importTableProcessor.process(importConfig);
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -120,6 +121,16 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
             addExtractToTable(table, targetPathsMap.get(table.getName()), processedRecordsMap.get(table.getName()));
             setLastModifiedTimeStamp(table, importContext);
         }
+    }
+
+    @Override
+    public VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier) {
+        return metadataProxy.getVdbImportExtract(customerSpace, extractIdentifier);
+    }
+
+    @Override
+    public Boolean updateVdbImportExtract(String customerSpace, VdbImportExtract vdbImportExtract) {
+        return metadataProxy.updateVdbImportExtract(customerSpace, vdbImportExtract);
     }
 
     @VisibleForTesting

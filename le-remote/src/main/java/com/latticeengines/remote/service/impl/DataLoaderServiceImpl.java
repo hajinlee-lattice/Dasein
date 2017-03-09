@@ -13,8 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -45,10 +48,16 @@ import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.Segment;
+import com.latticeengines.domain.exposed.pls.VdbGetQueryData;
+import com.latticeengines.domain.exposed.pls.VdbQueryDataResult;
+import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.remote.exposed.service.Headers;
 import com.latticeengines.remote.util.CrmUtils;
 import com.latticeengines.remote.util.DlConfigUtils;
+import org.springframework.web.client.RestTemplate;
+
+import javax.annotation.PostConstruct;
 
 @Component("dataLoaderService")
 public class DataLoaderServiceImpl implements DataLoaderService {
@@ -101,6 +110,18 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final int RETRY_WAIT_TIME = 10000;
 
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    private MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader =
+            new MagicAuthenticationHeaderHttpRequestInterceptor();
+    private List<ClientHttpRequestInterceptor> addMagicAuthHeaders =
+            Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
+
+    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+
+    @PostConstruct
+    private void setupRestTemplate() {
+        restTemplate.setInterceptors(addMagicAuthHeaders);
+    }
 
     @Override
     @RestApiCall
@@ -847,5 +868,16 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21027, ex);
         }
+    }
+
+    @Override
+    public VdbQueryDataResult getQueryDataResult(String dlEndPoint, VdbGetQueryData vdbGetQueryData) {
+        return restTemplate.postForObject(dlEndPoint, vdbGetQueryData,
+                VdbQueryDataResult.class);
+    }
+
+    @Override
+    public void reportGetDataStatus(String dlEndPoint, VdbLoadTableStatus status) {
+        restTemplate.postForEntity(dlEndPoint, status, Void.class);
     }
 }

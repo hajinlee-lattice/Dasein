@@ -50,6 +50,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             "importAndRTSBulkScoreWorkflow", //
             "importMatchAndModelWorkflow", //
             "importMatchAndScoreWorkflow", //
+            "importVdbTableAndPublishWorkflow", //
             "ingestionWorkflow", //
             "modelAndEmailWorkflow", //
             "modelWorkflow", //

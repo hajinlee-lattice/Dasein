@@ -5,7 +5,8 @@ public enum SourceType {
     MARKETO("Marketo", true), //
     ELOQUA("Eloqua", true), //
     SALESFORCE("Salesforce", true), //
-    FILE("File", false);
+    FILE("File", false),
+    VISIDB("VisiDB", true);
 
     private String name;
     private boolean willSubmitEaiJob;

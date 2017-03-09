@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
 
 public interface EaiMetadataService {
 
@@ -17,5 +18,9 @@ public interface EaiMetadataService {
     List<Table> getImportTables(String customerSpace);
 
     void updateTableSchema(List<Table> tableMetadata, ImportContext importContext);
+
+    VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier);
+
+    Boolean updateVdbImportExtract(String customerSpace, VdbImportExtract vdbImportExtract);
 
 }

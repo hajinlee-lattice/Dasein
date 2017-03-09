@@ -18,6 +18,9 @@ import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataCol
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.Segment;
+import com.latticeengines.domain.exposed.pls.VdbGetQueryData;
+import com.latticeengines.domain.exposed.pls.VdbQueryDataResult;
+import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
 
 public interface DataLoaderService {
 
@@ -80,4 +83,8 @@ public interface DataLoaderService {
     QueryDataResult getQueryData(String tenantName, String queryHandle, int startRow, int rowCount, String dlUrl);
 
     SourceTableMetadataResult getSourceTableMetadata(String tenantName, String dataProviderName, String sourceTableName, String dlUrl);
+
+    VdbQueryDataResult getQueryDataResult(String dlEndPoint, VdbGetQueryData vdbGetQueryData);
+
+    void reportGetDataStatus(String dlEndPoint, VdbLoadTableStatus status);
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
 
 public interface MetadataInterface {
 
@@ -41,5 +42,11 @@ public interface MetadataInterface {
     MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName);
 
     List<MetadataSegment> getMetadataSegments(String customerSpace, String selection);
+
+    VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier);
+
+    Boolean updateVdbImportExtract(String customerSpace, VdbImportExtract importExtract);
+
+    Boolean createVdbImportExtract(String customerSpace, VdbImportExtract importExtract);
 
 }

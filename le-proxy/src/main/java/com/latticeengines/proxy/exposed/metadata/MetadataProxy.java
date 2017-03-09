@@ -1,6 +1,11 @@
 package com.latticeengines.proxy.exposed.metadata;
 
 import java.util.ArrayList;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
+import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -225,6 +230,25 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
             url = constructUrl("/all/customerspaces/{customerSpace}/segments", customerSpace);
         }
         return get("getSegments", url, List.class);
+    }
+
+    @Override
+    public VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier) {
+        String url = constructUrl("/customerspaces/{customerSpace}/vdbextract/{identifier}", customerSpace,
+                extractIdentifier);
+        return get("getVdbImportExtract", url, null, VdbImportExtract.class);
+    }
+
+    @Override
+    public Boolean updateVdbImportExtract(String customerSpace, VdbImportExtract importExtract) {
+        String url = constructUrl("/customerspaces/{customerSpace}/vdbextract/update", customerSpace);
+        return post("updateVdbImportExtract", url, importExtract, Boolean.class);
+    }
+
+    @Override
+    public Boolean createVdbImportExtract(String customerSpace, VdbImportExtract importExtract) {
+        String url = constructUrl("/customerspaces/{customerSpace}/vdbextract/create", customerSpace);
+        return post("createVdbImportExtract", url, importExtract, Boolean.class);
     }
 
     @SuppressWarnings("unchecked")

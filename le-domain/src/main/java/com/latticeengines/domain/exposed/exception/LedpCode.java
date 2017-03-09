@@ -232,6 +232,18 @@ public enum LedpCode {
     LEDP_18127("Cannot copy model with application id: {0}. Error when copying ABCD buckets"), //
     LEDP_18128("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
+
+    LEDP_18129("Table name should be specified for Vdb table import workflow."), //
+    LEDP_18130("Import table total rows should be greater than 0."), //
+    LEDP_18131("Invalid read table data endpoint for Vdb table import workflow."), //
+    LEDP_18132("Invalid Spec metadata for Vdb table import workflow."), //
+    LEDP_18133("TenantId should be specified for Vdb table import workflow."), //
+    LEDP_18134("Get query handle should be specified for Vdb table import workflow."), //
+    LEDP_18135("Cannot recognize vdb table create rule {0}"), //
+    LEDP_18136("Same load vdb table job is already submitted."), //
+    LEDP_18137("Same load vdb table job is running with application id {0}"), //
+    LEDP_18138("Same load vdb table job is already succeeded."), //
+
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
 
