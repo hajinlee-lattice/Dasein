@@ -515,12 +515,22 @@ angular.module('common.datacloud.explorer', [
 
             getTopAttributes();
             getHighlightMetadata();
-            //console.log(vm.highlightMetadata); //ben
+            console.log('vm.highlightMetadata:\t ', vm.highlightMetadata); //ben
         }
     }
 
     var breakOnFirstEncounter = function(items, property, value) {
         for (var i=0,item; i<items.length; i++) {
+            if (value === null) {
+                if(typeof items[i][property] !== 'undefined') {
+                    return true;
+                }
+            }
+            if (typeof value === 'object') {
+                if(typeof items[i][property] === 'object' && items[i][property] !== null) {
+                    return true;
+                }
+            }
             if (items[i][property] == value) {
                 return true;
             };
@@ -538,10 +548,12 @@ angular.module('common.datacloud.explorer', [
 
                 var items = vm.enrichmentsObj[category],
                     disabled = breakOnFirstEncounter(items, 'HighlightHidden', true),
-                    enabled = breakOnFirstEncounter(items, 'HighlightHidden', false);
+                    enabled = breakOnFirstEncounter(items, 'HighlightHidden', false),
+                    dirty = breakOnFirstEncounter(items, 'AttributeFlagsMap', {});
 
                 vm.highlightMetadata.categories[category].enabled = enabled ? 1 : 0;
                 vm.highlightMetadata.categories[category].disabled = disabled ? 1 : 0;
+                vm.highlightMetadata.categories[category].dirty = dirty ? 1 : 0;
 
                 if (vm.subcategories[category] && vm.subcategories[category].length > 1) {
                     vm.highlightMetadata.categories[category].subcategories = {};
@@ -551,10 +563,12 @@ angular.module('common.datacloud.explorer', [
 
                         var items = vm.filter(vm.enrichmentsObj[category], 'Subcategory', subcategory),
                             disabled = breakOnFirstEncounter(items, 'HighlightHidden', true),
-                            enabled = breakOnFirstEncounter(items, 'HighlightHidden', false);
+                            enabled = breakOnFirstEncounter(items, 'HighlightHidden', false),
+                            dirty = breakOnFirstEncounter(items, 'AttributeFlagsMap', {});
 
                         vm.highlightMetadata.categories[category].subcategories[subcategory].enabled = enabled ? 1 : 0;
                         vm.highlightMetadata.categories[category].subcategories[subcategory].disabled = disabled ? 1 : 0;
+                        vm.highlightMetadata.categories[category].subcategories[subcategory].dirty = dirty ? 1 : 0;
                     });
                 }
             }
