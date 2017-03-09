@@ -305,6 +305,14 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
+        table.addAttribute(attr("DUNS") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "DUNS", "DUNS NUMBER" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.DUNS) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
 
         table.addAttribute(attr("Industry") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "INDUSTRY" })) //
@@ -432,6 +440,14 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "POSTALCODE", "BILLING ZIP", "POSTAL CODE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr("DUNS") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "DUNS", "DUNS NUMBER" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.DUNS) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //

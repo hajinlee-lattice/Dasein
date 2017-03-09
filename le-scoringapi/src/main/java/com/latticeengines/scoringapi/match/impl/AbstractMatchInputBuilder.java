@@ -1,14 +1,19 @@
 package com.latticeengines.scoringapi.match.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.springframework.util.CollectionUtils;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
@@ -19,6 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -27,6 +33,8 @@ import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
+
+    private Log log = LogFactory.getLog(AbstractMatchInputBuilder.class);
 
     @Override
     public MatchInput buildMatchInput(CustomerSpace space, //
@@ -54,9 +62,9 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             boolean performFetchOnlyForMatching, //
             String requestId, //
             boolean isDebugMode) {
-        return buildMatchInput(space, interpreted, record, modelSummary, selectedLeadEnrichmentAttributes,
-                skipPredefinedSelection, overrideDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode,
-                false, false);
+        return buildMatchInput(space, interpreted, record, modelSummary,
+                selectedLeadEnrichmentAttributes, skipPredefinedSelection, overrideDataCloudVersion,
+                performFetchOnlyForMatching, requestId, isDebugMode, false, false);
     }
 
     @Override
@@ -73,7 +81,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             boolean enforceFuzzyMatch, boolean skipDnBCache) {
         MatchInput matchInput = new MatchInput();
 
-        setMatchKeyMap(interpreted, record, matchInput);
+        setMatchKeyMap(modelSummary, interpreted, record, matchInput);
 
         setColumnSelections(modelSummary, selectedLeadEnrichmentAttributes, //
                 skipPredefinedSelection, overrideDataCloudVersion, matchInput);
@@ -125,7 +133,8 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         bulkInput.setHomogeneous(isHomogeneous);
 
         for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
-            ModelSummary modelSummary = getModelSummary(originalOrderModelSummaryList, recordModelTuple.getModelId());
+            ModelSummary modelSummary = getModelSummary(originalOrderModelSummaryList,
+                    recordModelTuple.getModelId());
 
             if (recordModelTuple.getRecord().isPerformEnrichment()) {
                 if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
@@ -139,13 +148,15 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
                     matchInputList.add(//
                             buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
                                     recordModelTuple.getParsedData().getKey(), modelSummary, null,
-                                    skipPredefinedSelection, performFetchOnlyForMatching, requestId, isDebugMode));
+                                    skipPredefinedSelection, performFetchOnlyForMatching, requestId,
+                                    isDebugMode));
                 }
             } else {
                 matchInputList.add(//
                         buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
                                 recordModelTuple.getParsedData().getKey(), modelSummary, null, //
-                                skipPredefinedSelection, performFetchOnlyForMatching, requestId, isDebugMode));
+                                skipPredefinedSelection, performFetchOnlyForMatching, requestId,
+                                isDebugMode));
             }
         }
         return bulkInput;
@@ -157,7 +168,8 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             String overrideDataCloudVersion, //
             MatchInput matchInput) {
         if (skipPredefinedSelection) {
-            ColumnSelection customSelection = populateCustomSelection(selectedLeadEnrichmentAttributes);
+            ColumnSelection customSelection = populateCustomSelection(
+                    selectedLeadEnrichmentAttributes);
             matchInput.setCustomSelection(customSelection);
         } else {
             setMatchUnionSelection(modelSummary, selectedLeadEnrichmentAttributes, matchInput);
@@ -176,24 +188,34 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         }
     }
 
-    protected void setPredefinedSelections(ModelSummary modelSummary, Map<Predefined, String> predefinedSelections,
-            UnionSelection unionSelections) {
+    protected void setPredefinedSelections(ModelSummary modelSummary,
+            Map<Predefined, String> predefinedSelections, UnionSelection unionSelections) {
         unionSelections.setPredefinedSelections(predefinedSelections);
     }
 
-    private void setMatchKeyMap(InterpretedFields interpreted, Map<String, Object> record, MatchInput matchInput) {
+    private void setMatchKeyMap(ModelSummary modelSummary, InterpretedFields interpreted,
+            Map<String, Object> record, MatchInput matchInput) {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getDomain(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getWebsite(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getEmailAddress(), record);
+        if (modelSummary.getSourceSchemaInterpretation()
+                .equals(SchemaInterpretation.SalesforceAccount.toString())) {
+            keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getWebsite()));
+        } else if (modelSummary.getSourceSchemaInterpretation()
+                .equals(SchemaInterpretation.SalesforceLead.toString())) {
+            keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getEmailAddress()));
+        }
         addToKeyMapIfValueExists(keyMap, MatchKey.Name, interpreted.getCompanyName(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.City, interpreted.getCompanyCity(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.DUNS, interpreted.getDuns(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Zipcode, interpreted.getPostalCode(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.PhoneNumber, interpreted.getPhoneNumber(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.LatticeAccountID, interpreted.getLatticeAccountId(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.PhoneNumber, interpreted.getPhoneNumber(),
+                record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.LatticeAccountID,
+                interpreted.getLatticeAccountId(), record);
+
+        log.info(String.format("MatchKey for record: %s is : %s", JsonUtils.serialize(record),
+                JsonUtils.serialize(keyMap)));
         matchInput.setKeyMap(keyMap);
     }
 
@@ -215,7 +237,8 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
 
         if (modelSummary != null && modelSummary.getPredefinedSelection() != null) {
             String version = null;
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(modelSummary.getPredefinedSelectionVersion())) {
+            if (org.apache.commons.lang.StringUtils
+                    .isNotEmpty(modelSummary.getPredefinedSelectionVersion())) {
                 version = modelSummary.getPredefinedSelectionVersion();
             }
             predefinedSelections.put(modelSummary.getPredefinedSelection(), version);
@@ -225,7 +248,8 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         return predefinedSelections;
     }
 
-    private ColumnSelection populateCustomSelection(List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {
+    private ColumnSelection populateCustomSelection(
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {
         ColumnSelection customSelection = null;
         if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
             customSelection = getCustomColumnSelection(selectedLeadEnrichmentAttributes);
@@ -261,7 +285,8 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         return null;
     }
 
-    private ColumnSelection getCustomColumnSelection(List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {
+    private ColumnSelection getCustomColumnSelection(
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {
         List<ExternalColumn> externalColumns = new ArrayList<>();
 
         for (LeadEnrichmentAttribute attr : selectedLeadEnrichmentAttributes) {
