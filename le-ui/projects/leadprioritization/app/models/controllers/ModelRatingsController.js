@@ -20,6 +20,7 @@ angular.module('lp.models.ratings', [
         historicalBuckets: HistoricalABCDBuckets,
         ratingsSummary: RatingsSummary,
         workingBuckets: [],
+        bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
         bucketTiles: document.getElementById("bucketTiles"),
         slidersContainer: document.getElementById("sliders")
     });
@@ -94,7 +95,7 @@ angular.module('lp.models.ratings', [
         for (var i = 0, len = vm.buckets.length; i < len; i++) { 
 
             var previousBucket = vm.buckets[i-1];
-            for (var bucket in previousBucket) {
+            if (previousBucket != null) {
               vm.previousRightBoundScore = previousBucket["right_bound_score"];
             }
 
@@ -115,7 +116,7 @@ angular.module('lp.models.ratings', [
             vm.buckets[i].num_leads = vm.rightLeads - vm.leftLeads;
 
             vm.buckets[i].lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
-
+            vm.buckets[i].name = vm.bucketNames[i];
         }
         
     }
@@ -233,12 +234,11 @@ angular.module('lp.models.ratings', [
         vm.chartNotUpdated = false;
         vm.saveInProgress = true;
 
-        var modelId = $stateParams.modelId,
-            bucketMetadatas = JSON.stringify(vm.workingBuckets);
+        var modelId = $stateParams.modelId;
 
 
 
-        ModelRatingsService.CreateABCDBuckets(modelId, bucketMetadatas).then(function(result){
+        ModelRatingsService.CreateABCDBuckets(modelId, vm.workingBuckets).then(function(result){
             
             console.log(result);
             if (result != null && result.success === true) {

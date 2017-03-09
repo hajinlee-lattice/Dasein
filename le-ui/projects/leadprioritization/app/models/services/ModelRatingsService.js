@@ -96,28 +96,26 @@ angular
     }
 
 
-    this.CreateABCDBuckets = function(id, data) {
-        var deferred = $q.defer(),
-            data = data;
+    this.CreateABCDBuckets = function(id, buckets) {
+        var deferred = $q.defer();
 
         $http({
             method: 'POST',
             url: '/pls/bucketedscore/abcdbuckets/' + id,
-            data: data,
-            headers: {'Content-Type': 'application/json'}
+            data: buckets,
+            headers: {
+                'Content-Type': 'application/json'
+            }
         }).then(
             function onSuccess(response) {
                 var result = {
                     data: response.data,
                     success: true
                 };
-
+                
                 deferred.resolve(result);
 
             }, function onError(response) {
-
-                console.log(response);
-
                 if (!response.data) {
                     response.data = {};
                 }
