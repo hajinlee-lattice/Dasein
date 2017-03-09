@@ -137,7 +137,7 @@
   "schema": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/bad-target.avsc",
   "training_data": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/samples/bad-target-s100Training-r-00000.avro",
   "test_data": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/samples/bad-target-s100Test-r-00000.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "data_profile": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/EventMetadata",
   "config_metadata": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/EventMetadata",
   "python_pipeline_script":"/app/dataplatform/scripts/pipeline/pipeline.py",

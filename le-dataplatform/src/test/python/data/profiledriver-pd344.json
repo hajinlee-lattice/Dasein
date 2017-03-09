@@ -116,7 +116,7 @@
   ],
   "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-pd344.avro",
   "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTest-pd344.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "model_data_dir": "/user/s-analytics/customers/Nutanix/data/EventMetadata",
   "schema": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/schema-pd344.avsc",
   "key_columns": [

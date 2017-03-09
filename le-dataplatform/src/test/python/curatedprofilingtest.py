@@ -1,5 +1,5 @@
-from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
+from leframework.executors.learningexecutor import LearningExecutor
 
 
 class CuratedProfilingTest(ProfilingTestBase):

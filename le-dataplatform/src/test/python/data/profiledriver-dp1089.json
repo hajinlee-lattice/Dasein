@@ -325,7 +325,7 @@
   ],
   "training_data": "/user/s-analytics/customers/Endicia_PLS_Relaunched/data/Endicia_PLS_Relaunched_Q_PLS_Modeling_1286020_2015_04_29_15_23_02/samples/s100Training-dp1089reduced.avro",
   "test_data": "/user/s-analytics/customers/Endicia_PLS_Relaunched/data/Endicia_PLS_Relaunched_Q_PLS_Modeling_1286020_2015_04_29_15_23_02/samples/s100Test-dp1089reduced.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "model_data_dir": "/user/s-analytics/customers/Endicia_PLS_Relaunched/data/EventMetadata",
   "schema": "/user/s-analytics/customers/Endicia_PLS_Relaunched/data/Endicia_PLS_Relaunched_Q_PLS_Modeling_1286020_2015_04_29_15_23_02/schema-dp1089.avsc",
   "key_columns": [

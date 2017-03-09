@@ -377,12 +377,12 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         uniqueValues = len(columnData.unique())
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
-        if uniqueValues > 200:
-            if not filtered: attributeStats["GT200_DistinctValue"].append(colName)
-            columnData = columnData.apply(lambda x: 'LATTICE_GT200_DistinctValue' if not isnull(x) else None)
         groupingDict = getCatGroupingAndStatsForModel(columnData.tolist(), eventVector.tolist())
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriterFull['Model'], groupingDict, mode, colName, otherMetadata, index)
         groupingDict = getCatGroupingAndStatsForDisplay(groupingDict['groupingResults'])
+        if uniqueValues > 200:
+            if not filtered: attributeStats["GT200_DistinctValue"].append(colName)
+            groupingDict['groupingResults']['LATTICE_GT200_DistinctValue'] = (0, 0.0, 0.0)
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriterFull['UI'], groupingDict, mode, colName, otherMetadata, index)
     else:
         # Band column
@@ -478,7 +478,7 @@ def writeCategoricalValuesToAvro(dataWriter, groupingDict, mode, colName, otherM
         datum["skewness"] = None
         datum["count"] = value[0]
         datum["lift"] = value[2]
-        datum["uncertaintyCoefficient"] = uncertaintyCoeffDict[key]
+        datum["uncertaintyCoefficient"] = uncertaintyCoeffDict[key] if key in uncertaintyCoeffDict else None
         datum["discreteNullBucket"] = key is None
         datum["continuousNullBucket"] = False
         datum["positiveEventCount"] = int(value[1])

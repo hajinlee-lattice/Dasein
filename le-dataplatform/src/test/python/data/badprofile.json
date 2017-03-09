@@ -228,7 +228,7 @@
   ],
   "training_data": "/user/s-analytics/customers/PLS13_Training/data/DataForModelingPLS13_Training/samples/DataForModelingPLS13Training.avro",
   "test_data": "/user/s-analytics/customers/PLS13_Training/data/DataForModelingPLS13_Training/samples/DataForModelingPLS13Test.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "model_data_dir": "/user/s-analytics/customers/PLS13_Training/data/EventMetadata",
   "schema": "/user/s-analytics/customers/PLS13_Training/data/DataForModelingPLS13_Training/DataForModelingPLS13_Training.avsc",
   "key_columns": [

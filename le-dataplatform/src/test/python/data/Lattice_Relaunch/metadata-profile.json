@@ -200,7 +200,7 @@
   ],
   "training_data": "/user/s-analytics/customers/Lattice_Relaunch/data/Q_PLS_Modeling_Lattice_Relaunch/samples/s100Training-r-00000.avro",
   "test_data": "/user/s-analytics/customers/Lattice_Relaunch/data/Q_PLS_Modeling_Lattice_Relaunch/samples/s100Test-r-00000.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "model_data_dir": "/user/s-analytics/customers/Lattice_Relaunch/data/EventMetadata",
   "schema": "/user/s-analytics/customers/Lattice_Relaunch/data/Q_PLS_Modeling_Lattice_Relaunch/Q_PLS_Modeling_Lattice_Relaunch.avsc",
   "key_columns": [

@@ -61,7 +61,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         columnsInMetadata = set()
         for c in configMetadata:
             u = c["ApprovedUsage"]
-            if isinstance(u, list) and u[0] == "None":
+            if isinstance(u, list) and u[0] == "None" and c["ColumnName"] not in ['Company', 'FirstName', 'LastName']:
                 columnsInMetadata.add(c["ColumnName"])
         self.assertEqual(len(columnsInMetadata.intersection(columnsInPredictors)), 0)
 
@@ -200,7 +200,7 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
             if row['Attribute Name'] == 'Open Source Adoption':
                 binarySet.add(row['Attribute Value'])
 
-        self.assertTrue(count == 9)
+        self.assertTrue(count == 8)
         self.assertTrue(hasOther)
 
         self.assertEqual(len(binarySet), 3)

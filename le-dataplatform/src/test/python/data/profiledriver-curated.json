@@ -52,7 +52,7 @@
   "algorithm_properties": "",
   "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/s100Training-curated.avro",
   "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/s100Test-curated.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "python_pipeline_script":"",
   "python_pipeline_lib":"",
   "name": null

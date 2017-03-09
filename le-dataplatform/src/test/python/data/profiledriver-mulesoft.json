@@ -324,7 +324,7 @@
   ],
   "training_data": "/user/s-analytics/customers/Mulesoft_Relaunch/data/Q_PLS_ModelingMulesoft_Relaunch/samples/s100Training-mulesoft.avro",
   "test_data": "/user/s-analytics/customers/Mulesoft_Relaunch/data/Q_PLS_ModelingMulesoft_Relaunch/samples/s100Test-mulesoft.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "model_data_dir": "/user/s-analytics/customers/Mulesoft_Relaunch/data/EventMetadata",
   "schema": "/user/s-analytics/customers/Mulesoft_Relaunch/data/Q_PLS_ModelingMulesoft_Relaunch/schema-mulesoft.avsc",
   "key_columns": [

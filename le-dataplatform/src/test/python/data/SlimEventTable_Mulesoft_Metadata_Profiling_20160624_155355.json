@@ -51,7 +51,7 @@
     "display_name":"SlimEventTable_Mulesoft",
     "training_data":"/user/s-analytics/customers/ModelQualityTests_ReleaseM3.ModelQualityTests_ReleaseM3.Production/data/DataCloudMatchEvent_FAE123F6-A268-4642-B689-85FE2CF70DD1_with_std_attrib_With_UserRefinedAttributes/samples/SlimEventTable_Mulesoft_Training_20160624_155355.avro",
     "test_data":"/user/s-analytics/customers/ModelQualityTests_ReleaseM3.ModelQualityTests_ReleaseM3.Production/data/DataCloudMatchEvent_FAE123F6-A268-4642-B689-85FE2CF70DD1_with_std_attrib_With_UserRefinedAttributes/samples/SlimEventTable_Mulesoft_Test_20160624_155355.avro",
-    "python_script":"/app/a/2.0.33/dataplatform/scripts/algorithm/data_profile.py",
+    "python_script":"/app/a/2.0.33/dataplatform/scripts/algorithm/data_profile_v2.py",
     "model_data_dir":"/user/s-analytics/customers/ModelQualityTests_ReleaseM3.ModelQualityTests_ReleaseM3.Production/models/DataCloudMatchEvent_FAE123F6-A268-4642-B689-85FE2CF70DD1_with_std_attrib_With_UserRefinedAttributes/839eda16-d3af-4ee4-a226-8732618d6364",
     "schema":"/user/s-analytics/customers/ModelQualityTests_ReleaseM3.ModelQualityTests_ReleaseM3.Production/data/DataCloudMatchEvent_FAE123F6-A268-4642-B689-85FE2CF70DD1_with_std_attrib_With_UserRefinedAttributes/SlimEventTable_Mulesoft_with_std_attrib_With_UserRefinedAttributes_20160624_155355.avsc",
     "key_columns":["Id"],

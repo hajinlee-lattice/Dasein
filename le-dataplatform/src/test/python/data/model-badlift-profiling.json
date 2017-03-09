@@ -232,7 +232,7 @@
   ],
   "training_data": "/user/s-analytics/customers/BD_ADEDTBDd69061522nF26061040r1/data/DataForModeling_BD_ADEDTBDd69061522nF26061040r1/samples/s100Training-badlift.avro",
   "test_data": "/user/s-analytics/customers/BD_ADEDTBDd69061522nF26061040r1/data/DataForModeling_BD_ADEDTBDd69061522nF26061040r1/samples/s100Test-badlift.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "model_data_dir": "/user/s-analytics/customers/BD_ADEDTBDd69061522nF26061040r1/data/EventMetadata",
   "schema": "/user/s-analytics/customers/BD_ADEDTBDd69061522nF26061040r1/data/DataForModeling_BD_ADEDTBDd69061522nF26061040r1/schema-badlift.avsc",
   "key_columns": [

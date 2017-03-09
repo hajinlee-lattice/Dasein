@@ -213,7 +213,7 @@
   ],
   "training_data": "/user/s-analytics/customers/Tenant1/data/Q_PLS_Modeling_Tenant1/samples/s100Training-r-00000.avro",
   "test_data": "/user/s-analytics/customers/Tenant1/data/Q_PLS_Modeling_Tenant1/samples/s100Test-r-00000.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "model_data_dir": "/user/s-analytics/customers/Tenant1/data/EventMetadata",
   "schema": "/user/s-analytics/customers/Tenant1/data/Q_PLS_Modeling_Tenant1/Q_PLS_Modeling_Tenant1.avsc",
   "key_columns": [

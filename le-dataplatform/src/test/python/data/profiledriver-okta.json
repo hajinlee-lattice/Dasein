@@ -279,7 +279,7 @@
   ],
   "training_data": "/user/s-analytics/customers/Okta/data/Q_PLS_ModelingOkta/samples/s100Training-okta.avro",
   "test_data": "/user/s-analytics/customers/Okta/data/Q_PLS_ModelingOkta/samples/s100Test-okta.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
+  "python_script": "/app/dataplatform/scripts/algorithm/data_profile_v2.py",
   "model_data_dir": "/user/s-analytics/customers/Okta/models/Q_PLS_ModelingOkta/3a11fc8f-fe6d-4a9e-a7cd-773330d9d5bb",
   "schema": "/user/s-analytics/customers/Okta/data/Q_PLS_ModelingOkta/schema-okta.avsc",
   "key_columns": [

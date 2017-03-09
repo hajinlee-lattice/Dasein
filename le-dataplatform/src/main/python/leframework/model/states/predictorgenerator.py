@@ -19,8 +19,6 @@ class PredictorGenerator(State):
         for key, profileMetadata in mediator.metadata[0].iteritems():
             if key + "_1" in mediator.schema["targets"]:
                 continue
-            if 'LATTICE_GT200_DistinctValue' in [record['columnvalue'] for record in profileMetadata]:
-                continue
             self.logger.info("Generating predictors for " + key)
             predictors.append(self.generatePredictors(key, profileMetadata, configMetadata))
 
@@ -43,6 +41,8 @@ class PredictorGenerator(State):
         attrLevelUncertaintyCoeff = 0
         hasNotNoneUC = False
         for record in profileMetadata:
+            if 'LATTICE_GT200_DistinctValue' == record['columnvalue']:
+                continue
             self.logger.info(record)
             element = OrderedDict()
             element["CorrelationSign"] = 1 if record["lift"] > 1 else -1
