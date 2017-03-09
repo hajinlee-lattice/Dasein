@@ -2,6 +2,7 @@ package com.latticeengines.metadata.controller;
 
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +29,7 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
-        return segmentService.getSegments();
+        return segmentService.getSegments(customerSpace);
     }
 
     @RequestMapping(value = "/name/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -36,7 +37,7 @@ public class SegmentResource {
     @ApiOperation(value = "Get segment by name")
     public MetadataSegment getSegment(@PathVariable String customerSpace, //
             @PathVariable String segmentName) {
-        return segmentService.findByName(segmentName);
+        return segmentService.findByName(customerSpace, segmentName);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -44,13 +45,13 @@ public class SegmentResource {
     @ApiOperation(value = "Create a segment")
     public MetadataSegment createOrUpdateSegment(@PathVariable String customerSpace, //
             @RequestBody MetadataSegment segment) {
-        return segmentService.createOrUpdateSegment(segment);
+        return segmentService.createOrUpdateSegment(customerSpace, segment);
     }
 
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ApiOperation(value = "Delete a segment by name")
     public Boolean deleteSegmentByName(@PathVariable String customerSpace, @PathVariable String segmentName) {
-        return segmentService.deleteSegmentByName(segmentName);
+        return segmentService.deleteSegmentByName(customerSpace, segmentName);
     }
 
 }

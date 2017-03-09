@@ -2,6 +2,7 @@ package com.latticeengines.metadata.service.impl;
 
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,13 +21,13 @@ public class SegmentServiceImpl implements SegmentService {
     private TableEntityMgr tableEntityMgr;
 
     @Override
-    public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
+    public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
         segmentEntityMgr.createOrUpdate(segment);
         return segment;
     }
 
     @Override
-    public Boolean deleteSegmentByName(String segmentName) {
+    public Boolean deleteSegmentByName(String customerSpace, String segmentName) {
         if (segmentEntityMgr.findByName(segmentName) == null) {
             return false;
         }
@@ -35,12 +36,12 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public List<MetadataSegment> getSegments() {
+    public List<MetadataSegment> getSegments(String customerSpace) {
         return segmentEntityMgr.findAll();
     }
 
     @Override
-    public MetadataSegment findByName(String name) {
+    public MetadataSegment findByName(String customerSpace, String name) {
         return segmentEntityMgr.findByName(name);
     }
 

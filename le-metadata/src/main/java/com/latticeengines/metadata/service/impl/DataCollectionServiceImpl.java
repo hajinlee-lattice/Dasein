@@ -26,11 +26,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollection getDataCollection(String customerSpace, String dataCollectionName) {
-        return dataCollectionEntityMgr.getDataCollection(dataCollectionName);
-    }
-
-    @Override
     public DataCollection createDataCollection(String customerSpace, DataCollection dataCollection) {
         return dataCollectionEntityMgr.createDataCollection(dataCollection);
     }

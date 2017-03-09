@@ -6,11 +6,11 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
 public interface SegmentService {
 
-    MetadataSegment createOrUpdateSegment(MetadataSegment segment);
+    MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment);
 
-    Boolean deleteSegmentByName(String segmentName);
+    Boolean deleteSegmentByName(String customerSpace, String segmentName);
 
-    List<MetadataSegment> getSegments();
+    List<MetadataSegment> getSegments(String customerSpace);
 
-    MetadataSegment findByName(String name);
+    MetadataSegment findByName(String customerSpace, String name);
 }

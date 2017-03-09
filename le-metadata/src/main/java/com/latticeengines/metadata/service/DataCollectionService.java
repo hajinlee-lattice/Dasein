@@ -11,7 +11,5 @@ public interface DataCollectionService {
 
     DataCollection getDataCollectionByType(String customerSpace, DataCollectionType type);
 
-    DataCollection getDataCollection(String customerSpace, String dataCollectionName);
-
     DataCollection createDataCollection(String customerSpace, DataCollection dataCollection);
 }

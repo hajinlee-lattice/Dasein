@@ -10,21 +10,25 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.HibernateUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableTag;
 import com.latticeengines.metadata.dao.DataCollectionDao;
+import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataCollectionEntityMgr")
-public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollection> implements DataCollectionEntityMgr {
+public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollection>
+        implements DataCollectionEntityMgr {
 
     @Autowired
     private DataCollectionDao dataCollectionDao;
@@ -34,6 +38,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Autowired
     private TableTagEntityMgr tableTagEntityMgr;
+
+    @Autowired
+    DataCollectionPropertyDao dataCollectionPropertyDao;
 
     @Override
     public DataCollectionDao getDao() {
@@ -49,7 +56,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
                 .map(name -> tableEntityMgr.findByName(name)) //
                 .collect(Collectors.toList());
         if (tables.stream().anyMatch(table -> table == null)) {
-            throw new LedpException(LedpCode.LEDP_11006, new String[] { String.join(",", tableNames) });
+            throw new LedpException(LedpCode.LEDP_11006,
+                    new String[] { String.join(",", tableNames) });
         }
         dataCollection.setName("DataCollection_" + UUID.randomUUID());
 
@@ -62,6 +70,10 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
         dataCollection.setTenant(MultiTenantContext.getTenant());
         create(dataCollection);
+        for (DataCollectionProperty dataCollectionProperty : dataCollection.getProperties()) {
+            dataCollectionPropertyDao.create(dataCollectionProperty);
+        }
+
         return getDataCollection(dataCollection.getName());
     }
 
