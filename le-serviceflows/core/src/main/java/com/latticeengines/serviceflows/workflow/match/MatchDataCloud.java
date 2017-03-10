@@ -141,11 +141,12 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         if (configuration.getSourceSchemaInterpretation() != null
                 && configuration.getSourceSchemaInterpretation()
                         .equals(SchemaInterpretation.SalesforceAccount.toString())) {
-            if (preMatchEventTable.getAttribute(InterfaceName.Website.name()) != null
-                    && preMatchEventTable.getAttribute(InterfaceName.Website.name())
+            if (preMatchEventTable.getAttribute(InterfaceName.Website.name()) == null
+                    || (preMatchEventTable.getAttribute(InterfaceName.Website.name())
                             .getApprovedUsage() != null
-                    && preMatchEventTable.getAttribute(InterfaceName.Website.name())
-                            .getApprovedUsage().contains(ApprovedUsage.IGNORED.getName())) {
+                            && preMatchEventTable.getAttribute(InterfaceName.Website.name())
+                                    .getApprovedUsage()
+                                    .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
                 matchInputKeys.put(MatchKey.Domain,
@@ -154,11 +155,12 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } else if (configuration.getSourceSchemaInterpretation() != null
                 && configuration.getSourceSchemaInterpretation()
                         .equals(SchemaInterpretation.SalesforceLead.toString())) {
-            if (preMatchEventTable.getAttribute(InterfaceName.Email.name()) != null
-                    && preMatchEventTable.getAttribute(InterfaceName.Email.name())
+            if (preMatchEventTable.getAttribute(InterfaceName.Email.name()) == null
+                    || (preMatchEventTable.getAttribute(InterfaceName.Email.name())
                             .getApprovedUsage() != null
-                    && preMatchEventTable.getAttribute(InterfaceName.Email.name())
-                            .getApprovedUsage().contains(ApprovedUsage.IGNORED.getName())) {
+                            && preMatchEventTable.getAttribute(InterfaceName.Email.name())
+                                    .getApprovedUsage()
+                                    .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
                 matchInputKeys.put(MatchKey.Domain,
