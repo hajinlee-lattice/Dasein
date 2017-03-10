@@ -64,7 +64,7 @@ def create_template(environment, profile, fixed_instances=False, num_instances=1
             stack.attach_tgrp(PARAM_SECOND_TGRP_ARN)
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
-    task = tomcat_task(profile_vars)
+    task = tomcat_task(profile_vars, env=environment)
     stack.add_resource(task)
     service, tgt = stack.add_service("tomcat", task, asrolearn=PARAM_ECS_SCALE_ROLE_ARN)
     if not fixed_instances:
@@ -72,7 +72,7 @@ def create_template(environment, profile, fixed_instances=False, num_instances=1
         stack.exact_autoscale(tgt, "ScaleBack", num_instances, 600, ub=0)
     return stack
 
-def tomcat_task(profile_vars):
+def tomcat_task(profile_vars, env="qa"):
     container = ContainerDefinition("tomcat", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
@@ -83,15 +83,19 @@ def tomcat_task(profile_vars):
         .publish_port(1099, 1099) \
         .add_docker_label("stack", profile_vars["LE_STACK"].ref()) \
         .add_docker_label("app", PARAM_DOCKER_IMAGE.ref()) \
-        .set_logging({
-        "LogDriver": "splunk",
-        "Options": {
-            "splunk-url": PARAM_SPLUNK_URL.ref(),
-            "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
-            "splunk-index": "history",
-            "labels": "stack,app"
-        }}) \
         .privileged()
+
+    if env == "prodcluster":
+        container = container
+    else:
+        container = container.set_logging({
+            "LogDriver": "splunk",
+            "Options": {
+                "splunk-url": PARAM_SPLUNK_URL.ref(),
+                "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
+                "splunk-index": "history",
+                "labels": "stack,app"
+            }})
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
