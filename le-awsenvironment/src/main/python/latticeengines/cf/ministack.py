@@ -26,7 +26,7 @@ _S3_CF_PATH='cloudformation/ministack/'
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
 PARAM_EFS = Parameter("Efs", "EFS Id")
 
-ALL_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi,quartz,modelquality,propdata,dellebi,datacloudapi"
+ALL_APPS="ui,pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi,quartz,modelquality,propdata,dellebi,datacloudapi"
 DEFAULT_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi"
 ALLOCATION = {}
 HAPROXY_KEY="HAProxy"
@@ -46,7 +46,10 @@ class CreateServiceThread (threading.Thread):
         self.region = region
 
     def run(self):
-        container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, tag=self.tag, region=self.region)
+        if self.app == "ui":
+            container = ui_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, tag=self.tag, region=self.region)
+        else:
+            container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, tag=self.tag, region=self.region)
         ledp = ECSVolume("ledp", "/etc/ledp")
         efsip = ECSVolume("efsip", "/etc/efsip.txt")
         internalAddr = ECSVolume("intAddr", "/etc/internaladdr.txt")
@@ -89,13 +92,13 @@ def create_infra_template(environment, stackname, instances, apps):
     stack = ECSStack("AWS CloudFormation template for mini-stack infrastructure.", environment, use_asgroup=False, instances=instances, efs=PARAM_EFS)
     stack.add_params([PARAM_EFS, PARAM_DOCKER_IMAGE_TAG])
 
-    task = swagger_task(stackname, apps)
-    stack.add_resource(task)
-    stack.add_service("swagger", task, capacity=1)
+    task1 = swagger_task(stackname, apps)
+    stack.add_resource(task1)
+    stack.add_service("swagger", task1, capacity=1)
 
-    task = haproxy_task(stackname, stack.get_ec2s())
-    stack.add_resource(task)
-    haproxy, _ = stack.create_service("haproxy", task, capacity=instances)
+    task2 = haproxy_task(stackname, stack.get_ec2s())
+    stack.add_resource(task2)
+    haproxy, _ = stack.create_service("haproxy", task2, capacity=instances)
     stack.add_resource(haproxy)
 
     return stack
@@ -249,6 +252,42 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
         "awslogs-stream-prefix": app
     })
     container.publish_port(8080, alloc["port"])
+    container.hostname("%s-%s" % (stackname, app))
+    container.privileged()
+
+    params = get_profile_vars(profile_file)
+    params["LE_CLIENT_ADDRESS"] = ip
+    params["HAPROXY_ADDRESS"] = ip
+
+    # TODO: change to https
+    protocol = params["HTTP_PROTOCOL"] if "HTTP_PROTOCOL" in params else "http"
+    params["AWS_PRIVATE_LB"] = "%s://%s" % (protocol, ip)
+    params["AWS_PUBLIC_LB"] = "%s://%s" % (protocol, ip)
+    params["LE_STACK"] = stackname
+    params["LE_ENVIRONMENT"] = environment
+    params["CATALINA_OPTS"] = "-Xmx%dm -XX:ReservedCodeCacheSize=%dm" % (int(alloc["mem"] * 0.9), 256 if alloc["mem"] <= 1024 else 512)
+    for k, v in params.items():
+        container.set_env(k, v)
+
+    container = container.mount("/etc/ledp", "ledp") \
+        .mount("/etc/efsip.txt", "efsip") \
+        .mount("/etc/internaladdr.txt", "intAddr")
+
+    return container
+
+def ui_container(environment, stackname, ecr_url, app, ip, profile_file, tag, region):
+    alloc = ALLOCATION[app]
+    container = Container("express", "%s/latticeengines/express:%s" % (ecr_url, tag))
+    container.mem_mb(alloc["mem"])
+    if "cpu" in alloc:
+        container.cpu(alloc["cpu"])
+    container.log("awslogs", {
+        "awslogs-group": "ministack-%s" % stackname,
+        "awslogs-region": region,
+        "awslogs-stream-prefix": app
+    })
+    container.publish_port(3000, 3000)
+    container.publish_port(3002, 3002)
     container.hostname("%s-%s" % (stackname, app))
     container.privileged()
 
