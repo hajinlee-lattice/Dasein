@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 module.exports = function (grunt) {
     // version of our software. This should really be in the package.json
@@ -354,10 +354,10 @@ module.exports = function (grunt) {
 
         webpack: {
             ng2: {
-                entry: "<%= dir.ng2 %>/src/index.html",
+                entry: '<%= dir.ng2 %>/src/index.html',
                 output: {
-                    path: "<%= dir.ng2 %>/dist/",
-                    filename: "inline2.js",
+                    path: '<%= dir.ng2 %>/dist/',
+                    filename: 'inline2.js',
                 },
 
                 stats: {
@@ -367,7 +367,7 @@ module.exports = function (grunt) {
                     reasons: true
                 },
 
-                storeStatsTo: "webpackOutput", // writes the status to a variable named xyz
+                storeStatsTo: 'webpackOutput', // writes the status to a variable named xyz
                 // you may use it later in grunt i.e. <%= xyz.hash %>
 
                 progress: true, // Don't show progress

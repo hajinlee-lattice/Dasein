@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /*
               Lattice Engines Express Server Application
@@ -11,29 +11,40 @@ const fmt       = require('util').format;
 const express   = require('express');
 const log4js    = require('log4js');
 
-const DateUtil  = require('./server/utilities/DateUtil');
 const Server    = require('./server/Server');
 
 const configs   = require('./server/configs/config');
-const apps      = process.env.NODE_APPS.split(',');
-
-const log       = log4js.getLogger('LE-UI');
+const apps      = process.env.NODE_APPS ? process.env.NODE_APPS.split(',') : [];
 const logPath   = process.env.LOGGING ? path.resolve(process.env.LOGGING + '/le-ui.log') : null;
 
+const log       = log4js.getLogger('LE-UI');
+log.info('Logging Node Server to stdout');
 if (logPath) {
     log4js.loadAppender('file');
     log4js.addAppender(log4js.appenders.file(logPath), 'LE-UI');
     log.info(fmt('Logging Node Server to %s', logPath));
 }
-log.info('Logging Node Server to stdout');
+
+if (apps.length === 0) {
+    let msg = 'NODE_APPS environment variable not set';
+    let e = new Error(msg);
+    log.error(fmt('%s\n%s', e, e.stack));
+    throw e;
+}
 
 apps.forEach(app => {
-    new Server(express, express(), configs[app]).start(onStart);
+    const config = configs[app];
+
+    if (typeof config !== undefined) {
+        new Server(express, express(), config).start(onStart);
+    } else {
+        log.error(fmt('Config missing for APP:%s in NODE_APPS:%s', app, process.env.NODE_APPS));
+    }
 });
 
 function onStart(err, meta) {
     if (err) {
-        log.error(fmt('Error starting %s %s server on port %d \n %s', meta.app, meta.proto, meta.port, err));
+        log.error(fmt('Error starting %s %s server on port %d\n%s', meta.app, meta.proto, meta.port, err));
         return;
     }
 
@@ -41,13 +52,13 @@ function onStart(err, meta) {
 }
 
 process.on('uncaughtException', err => {
-    log.error(fmt(':uncaughtException> %s \n %s', err, err.stack));
+    log.error(fmt(':uncaughtException> %s\n%s', err, err.stack));
 });
 
 process.on('SIGTERM', err => {
-    log.error(fmt(':SIGTERM> %s \n %s', err, err.stack));
+    log.error(fmt(':SIGTERM> %s\n%s', err, err.stack));
 });
 
 process.on('ECONNRESET', err => {
-    log.error(fmt(':ECONNRESET> %s \n %s', err, err.stack));
+    log.error(fmt(':ECONNRESET> %s\n%s', err, err.stack));
 });
