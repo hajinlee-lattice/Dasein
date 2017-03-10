@@ -16,6 +16,8 @@ if [ "${INSTALL_MODE}" == "EXTERNAL" ]; then
 elif [ "${INSTALL_MODE}" == "INTERNAL" ]; then
     sed -i "s|{{NODE_APPS}}|leadmin|g" /opt/node/app/ENV_VARS
     sed -i "s/export HTTPS_PORT=/export HTTPS_PORT=false/g" /opt/node/app/ENV_VARS
+else
+    sed -i "s|{{NODE_APPS}}|leui,leadmin|g" /opt/node/app/ENV_VARS
 fi
 
 sed -i "/export LOGGING=/d" /opt/node/app/ENV_VARS
