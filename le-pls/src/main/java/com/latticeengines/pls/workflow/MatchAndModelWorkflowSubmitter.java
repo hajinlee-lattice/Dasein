@@ -117,6 +117,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .excludeDataCloudAttrs(parameters.isExcludePropDataAttributes()) //
                 .skipStandardTransform(!parameters.enableTransformation()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
+                .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, plsFeatureFlagService.isFuzzyMatchEnabled()) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .dataCloudVersion(getDataCloudVersion(modelSummary.getDataCloudVersion()))//
