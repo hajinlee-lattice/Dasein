@@ -38,8 +38,7 @@ public class MetadataSegmentResource {
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments(HttpServletRequest httpRequest) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(httpRequest, sessionService);
-        return metadataProxy.getMetadataSegments(CustomerSpace.parse(tenant.getId()).toString(),
-                null);
+        return metadataProxy.getAllMetadataSegments(CustomerSpace.parse(tenant.getId()).toString());
     }
 
     @RequestMapping(value = "/name/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
