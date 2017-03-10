@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.query.Sort;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FrontEndQuery {
     @JsonProperty("restriction")
-    private FlattenedRestriction restriction;
+    private FrontEndRestriction restriction;
     @JsonProperty("sort")
     private Sort sort;
     @JsonProperty("page_filter")
@@ -16,11 +16,11 @@ public class FrontEndQuery {
     @JsonProperty("free_form_text_search")
     private String freeFormTextSearch;
 
-    public FlattenedRestriction getRestriction() {
+    public FrontEndRestriction getRestriction() {
         return restriction;
     }
 
-    public void setRestriction(FlattenedRestriction restriction) {
+    public void setRestriction(FrontEndRestriction restriction) {
         this.restriction = restriction;
     }
 

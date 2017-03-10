@@ -5,15 +5,16 @@ import static org.testng.AssertJUnit.assertEquals;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.app.exposed.util.QueryTranslator;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.domain.exposed.query.frontend.FlattenedRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.QueryTranslator;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class QueryTranslatorUnitTestNG {
@@ -22,12 +23,12 @@ public class QueryTranslatorUnitTestNG {
     @SuppressWarnings("unchecked")
     public void testTranslate() {
         FrontEndQuery query = new FrontEndQuery();
-        FlattenedRestriction flattenedRestriction = new FlattenedRestriction();
-        flattenedRestriction.setAll(Collections.singletonList(new BucketRestriction(new ColumnLookup(
-                "Some_Bucketed_Value"), 1)));
-        flattenedRestriction.setAny(Collections.singletonList(new BucketRestriction(new ColumnLookup(
-                "Some_Other_Bucketed_Value"), 2)));
-        query.setRestriction(flattenedRestriction);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndRestriction.setAll(Collections.singletonList(new BucketRestriction(new ColumnLookup(
+                "Some_Bucketed_Value"), new Bucket())));
+        frontEndRestriction.setAny(Collections.singletonList(new BucketRestriction(new ColumnLookup(
+                "Some_Other_Bucketed_Value"), new Bucket())));
+        query.setRestriction(frontEndRestriction);
 
         QueryTranslator translator = new QueryTranslator(query, SchemaInterpretation.Account);
         Query result = translator.translate();

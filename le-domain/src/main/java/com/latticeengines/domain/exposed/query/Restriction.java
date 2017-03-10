@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @Type(value = ConcreteRestriction.class, name = "concreteRestriction"),
         @Type(value = ExistsRestriction.class, name = "existsRestriction"),
         @Type(value = LogicalRestriction.class, name = "logicalRestriction"),
-        @Type(value = BucketRestriction.class, name = "bucketRestriction"), })
+        @Type(value = BucketRestriction.class, name = "bucketRestriction") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Restriction {
 }

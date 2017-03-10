@@ -1,11 +1,6 @@
 package com.latticeengines.proxy.exposed.metadata;
 
 import java.util.ArrayList;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
-import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,13 +10,17 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.network.exposed.metadata.ArtifactInterface;
+import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
 import com.latticeengines.network.exposed.metadata.ModuleInterface;
 import com.latticeengines.network.exposed.metadata.RuleResultInterface;
@@ -218,9 +217,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<MetadataSegment> getAllMetadataSegments(String customerSpace) {
-        String url = null;
-        url = constructUrl("/all/customerspaces/{customerSpace}/segments", customerSpace);
+    public List<MetadataSegment> getMetadataSegments(String customerSpace) {
+        String url = constructUrl("/all/customerspaces/{customerSpace}/segments", customerSpace);
         return get("getSegments", url, List.class);
     }
 

@@ -2,21 +2,19 @@ package com.latticeengines.domain.exposed.query;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BucketRestriction extends Restriction {
     @JsonProperty("lhs")
     private ColumnLookup lhs;
 
-    @JsonProperty("value")
-    private int value;
+    @JsonProperty("bucket")
+    private Bucket bucket;
 
-    public BucketRestriction(ColumnLookup lhs, int value) {
+    public BucketRestriction(ColumnLookup lhs, Bucket bucket) {
         this.lhs = lhs;
-        this.value = value;
-    }
-
-    public BucketRestriction() {
+        this.bucket = bucket;
     }
 
     public ColumnLookup getLhs() {
@@ -27,12 +25,11 @@ public class BucketRestriction extends Restriction {
         this.lhs = lhs;
     }
 
-    public int getValue() {
-        return value;
+    public Bucket getBucket() {
+        return bucket;
     }
 
-    public void setValue(int value) {
-        this.value = value;
+    public void setBucket(Bucket bucket) {
+        this.bucket = bucket;
     }
-
 }

@@ -15,12 +15,14 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.ValueLookup;
@@ -182,30 +184,33 @@ public class JdbcQueryProcessor extends QueryProcessor {
             Lookup rhs = concreteRestriction.getRhs();
 
             ComparableExpression<String> lhsPath = resolveLookup(lhs, rootObjectType, dataCollection);
-            ComparableExpression<String> rhsPath = resolveLookup(rhs, rootObjectType, dataCollection);
 
             switch (concreteRestriction.getRelation()) {
             case EQUAL:
-                return lhsPath.eq(rhsPath);
+                return lhsPath.eq(resolveLookup(rhs, rootObjectType, dataCollection));
             case GREATER_OR_EQUAL:
-                return lhsPath.goe(rhsPath);
+                return lhsPath.goe(resolveLookup(rhs, rootObjectType, dataCollection));
             case GREATER_THAN:
-                return lhsPath.gt(rhsPath);
+                return lhsPath.gt(resolveLookup(rhs, rootObjectType, dataCollection));
             case LESS_OR_EQUAL:
-                return lhsPath.loe(rhsPath);
+                return lhsPath.loe(resolveLookup(rhs, rootObjectType, dataCollection));
             case LESS_THAN:
-                return lhsPath.lt(rhsPath);
+                return lhsPath.lt(resolveLookup(rhs, rootObjectType, dataCollection));
+            case IN_RANGE:
+                RangeLookup casted = (RangeLookup) rhs;
+                if (casted == null) {
+                    throw new RuntimeException(String.format("Expected RangeLookup in restriction %s", restriction));
+                }
+                return lhsPath.between(Expressions.constant(casted.getMin().toString()),
+                        Expressions.constant(casted.getMax().toString()));
             default:
                 throw new RuntimeException(String.format("Unsupported relation %s", concreteRestriction.getRelation()));
             }
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucketRestriction = (BucketRestriction) restriction;
-            ColumnLookup columnLookup = bucketRestriction.getLhs();
-            int value = bucketRestriction.getValue();
-
-            // TODO implement
-            return Expressions.simpleTemplate(Integer.class, String.format("\"%s\"&1", columnLookup.getColumnName()))
-                    .eq(1);
+            ConcreteRestriction placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(),
+                    ComparisonType.EQUAL, new ValueLookup(bucketRestriction.getBucket().getBucketLabel()));
+            return processRestriction(placeholder, rootObjectType, dataCollection);
         } else {
             throw new RuntimeException(String.format("Unsupported restriction %s", restriction.getClass().getName()));
         }

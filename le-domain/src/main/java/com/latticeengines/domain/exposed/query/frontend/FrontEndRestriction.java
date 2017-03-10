@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FlattenedRestriction {
+public class FrontEndRestriction {
     @JsonProperty("any")
     private List<BucketRestriction> any = new ArrayList<>();
 

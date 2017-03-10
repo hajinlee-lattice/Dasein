@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.app.exposed.util.QueryTranslator;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.QueryTranslator;
 import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -31,6 +32,15 @@ public class AccountResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@RequestBody FrontEndQuery query) {
+        return accountProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), translate(query));
+    }
+
+    @RequestMapping(value = "/count/restriction", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the number of rows for the specified restriction")
+    public long getCountForRestriction(@RequestBody FrontEndRestriction restriction) {
+        FrontEndQuery query = new FrontEndQuery();
+        query.setRestriction(restriction);
         return accountProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), translate(query));
     }
 

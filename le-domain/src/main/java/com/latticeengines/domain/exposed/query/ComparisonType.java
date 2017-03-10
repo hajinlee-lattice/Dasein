@@ -11,5 +11,7 @@ public enum ComparisonType {
 
     GREATER_THAN,
 
-    GREATER_OR_EQUAL
+    GREATER_OR_EQUAL,
+
+    IN_RANGE
 }

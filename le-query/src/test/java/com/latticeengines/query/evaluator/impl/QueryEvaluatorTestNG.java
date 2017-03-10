@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.ValueLookup;
@@ -91,20 +93,6 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testBucketRestriction() {
-        DataCollection collection = getDataCollection();
-        LogicalRestriction restriction = new LogicalRestriction();
-        restriction.setOperator(LogicalOperator.AND);
-        restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
-                "number_of_family_members"), 1));
-        Query query = new Query();
-        query.setObjectType(SchemaInterpretation.Account);
-        query.setRestriction(restriction);
-        long count = queryEvaluator.evaluate(collection, query).fetchCount();
-        assertEquals(count, 21263);
-    }
-
-    @Test(groups = "functional")
     public void testSelectAllColumns() {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
@@ -145,12 +133,25 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
         restriction.setOperator(LogicalOperator.AND);
-        restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
-                "poopy_cupcakes"), 1));
+        restriction.addRestriction(new ConcreteRestriction(false, new ColumnLookup(SchemaInterpretation.Account,
+                "poopy_cupcakes"), ComparisonType.EQUAL, new ValueLookup(12345)));
         Query query = new Query();
         query.setObjectType(SchemaInterpretation.Account);
         query.setRestriction(restriction);
         queryEvaluator.evaluate(collection, query).fetchCount();
+    }
+
+    @Test(groups = "functional")
+    public void testRangeLookup() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        restriction.addRestriction(new ConcreteRestriction(false, new ColumnLookup(SchemaInterpretation.Account,
+                "companyname"), ComparisonType.IN_RANGE, new RangeLookup("a", "z")));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
     }
 
     @Test(groups = "functional")
@@ -177,6 +178,22 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
             }
             lastName = name;
         }
+    }
+
+    @Test(groups = "functional")
+    public void testBucketRestriction() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        Bucket bucket = new Bucket();
+        bucket.setBucketLabel("1");
+        restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
+                "number_of_family_members"), bucket));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+        assertEquals(count, 5);
     }
 
     private DataCollection getDataCollection() {

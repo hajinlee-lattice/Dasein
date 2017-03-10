@@ -1,4 +1,4 @@
-package com.latticeengines.app.exposed.util;
+package com.latticeengines.domain.exposed.util;
 
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 
 public class QueryTranslator {
     FrontEndQuery frontEndQuery;
@@ -21,7 +22,7 @@ public class QueryTranslator {
         Query result = new Query();
         result.setObjectType(objectType);
 
-        Restriction restriction = translateRestrictions();
+        Restriction restriction = translateFrontEndRestriction(frontEndQuery.getRestriction());
         result.setRestriction(restriction);
         result.setFreeFormTextSearch(frontEndQuery.getFreeFormTextSearch());
         result.setPageFilter(frontEndQuery.getPageFilter());
@@ -32,10 +33,7 @@ public class QueryTranslator {
         return result;
     }
 
-    private Restriction translateRestrictions() {
-        if (frontEndQuery.getRestriction() == null) {
-            return null;
-        }
+    public static Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
 
         LogicalRestriction parent = new LogicalRestriction();
         parent.setOperator(LogicalOperator.AND);
@@ -49,8 +47,8 @@ public class QueryTranslator {
         parent.addRestriction(or);
         parent.addRestriction(and);
 
-        and.getRestrictions().addAll(frontEndQuery.getRestriction().getAll());
-        or.getRestrictions().addAll(frontEndQuery.getRestriction().getAny());
+        and.getRestrictions().addAll(frontEndRestriction.getAll());
+        or.getRestrictions().addAll(frontEndRestriction.getAny());
         return parent;
     }
 }

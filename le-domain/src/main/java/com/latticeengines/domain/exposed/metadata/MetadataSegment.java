@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.frontend.FlattenedRestriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_SEGMENT")
@@ -62,7 +62,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
 
     @JsonProperty("simple_restriction")
     @Transient
-    private FlattenedRestriction simpleRestriction;
+    private FrontEndRestriction simpleRestriction;
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
@@ -129,11 +129,11 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
         this.restrictionString = JsonUtils.serialize(restriction);
     }
 
-    public FlattenedRestriction getSimpleRestriction() {
+    public FrontEndRestriction getSimpleRestriction() {
         return simpleRestriction;
     }
 
-    public void setSimpleRestriction(FlattenedRestriction simpleRestriction) {
+    public void setSimpleRestriction(FrontEndRestriction simpleRestriction) {
         this.simpleRestriction = simpleRestriction;
     }
 

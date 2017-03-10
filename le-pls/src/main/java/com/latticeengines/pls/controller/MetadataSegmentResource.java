@@ -19,7 +19,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 import com.wordnik.swagger.annotations.ApiOperation;
-
 import io.swagger.annotations.Api;
 
 @Api(value = "metadatasegments", description = "REST resource for metadata segments")
@@ -38,7 +37,8 @@ public class MetadataSegmentResource {
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments(HttpServletRequest httpRequest) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(httpRequest, sessionService);
-        return metadataProxy.getAllMetadataSegments(CustomerSpace.parse(tenant.getId()).toString());
+        return metadataProxy.getMetadataSegments(CustomerSpace.parse(tenant.getId()).toString()
+        );
     }
 
     @RequestMapping(value = "/name/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
