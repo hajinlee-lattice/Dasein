@@ -20,13 +20,13 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
@@ -73,13 +73,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private Table getTableFromParameters(SchemaInterpretation schemaInterpretation) {
         Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
         if (plsFeatureFlagService.isFuzzyMatchEnabled()) {
-            Attribute attr = table.getAttribute(InterfaceName.Email);
-            if (attr == null) {
-                attr = table.getAttribute(InterfaceName.Website);
-            }
-            if (attr != null) {
-                attr.setNullable(Boolean.TRUE);
-            }
+            SchemaInterpretationFunctionalInterface function = (interfaceName) -> {
+                Attribute domainAttribute = table.getAttribute(interfaceName);
+                if (domainAttribute != null) {
+                    domainAttribute.setNullable(Boolean.TRUE);
+                }
+            };
+            schemaInterpretation.apply(function);
         }
         return table;
     }
