@@ -188,11 +188,27 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     public Table saveFieldMappingDocument(String csvFileName, String modelId,
             FieldMappingDocument fieldMappingDocument) {
         List<Attribute> modelAttributes = modelMetadataService.getRequiredColumns(modelId);
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
 
         SourceFile sourceFile = sourceFileService.findByName(csvFileName);
         resolveModelAttributeBasedOnFieldMapping(modelAttributes, fieldMappingDocument);
         Table table = createTableFromMetadata(modelAttributes, sourceFile);
         table.deduplicateAttributeNames(modelMetadataService.getLatticeAttributeNames(modelId));
+
+        if (plsFeatureFlagService.isFuzzyMatchEnabled()) {
+            Attribute domainAttribute = null;
+            if (modelSummary.getSourceSchemaInterpretation()
+                    .equals(SchemaInterpretation.SalesforceLead.name())) {
+                domainAttribute = table.getAttribute(InterfaceName.Email);
+            } else if (modelSummary.getSourceSchemaInterpretation()
+                    .equals(SchemaInterpretation.SalesforceAccount.name())) {
+                domainAttribute = table.getAttribute(InterfaceName.Website);
+            }
+            if (domainAttribute != null) {
+                domainAttribute.setNullable(true);
+            }
+        }
+
         Tenant tenant = MultiTenantContext.getTenant();
         metadataProxy.createTable(tenant.getId(), table.getName(), table);
 
