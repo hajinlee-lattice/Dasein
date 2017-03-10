@@ -2,9 +2,9 @@ package com.latticeengines.redshiftdb.load;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -44,8 +44,8 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
 
             if (badColumns.size() > 0) {
 
-                String dropColumnSql = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
-                        "load/" + LoadTestStatementType.DDL_Drop.getScriptFileName()).getFile()));
+                String dropColumnSql = FileUtils.readFileToString(new File(ClassLoader
+                        .getSystemResource("load/" + LoadTestStatementType.DDL_Drop.getScriptFileName()).getFile()));
 
                 for (String column : badColumns) {
                     redshiftJdbcTemplate.execute(dropColumnSql.replaceAll("load_test_column", column));
@@ -59,19 +59,22 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "load")
     public void testPerformance1() {
         int maxSleepTime = 1000;
-        int stmtsPerTest = 15;
+        int stmtsPerTest = 10;
         int numSimultaneousUsers = 5;
 
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers, generateStatements(15),
+        Set<LoadTestStatementType> stmtTypes = new HashSet<>();
+        stmtTypes.add(LoadTestStatementType.Query_Multi_Conditional);
+
+        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers, stmtsPerTest, stmtTypes,
                 maxSleepTime, redshiftJdbcTemplate);
 
-        String testSummary = "No of threads: " + numSimultaneousUsers + "\n" + //
+        String testSummary = "No of simultaneous users " + numSimultaneousUsers + "\n" + //
                 "Statements per Thread: " + stmtsPerTest + "\n" + //
                 "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
 
         log.info("### Starting testPerformance1 ###");
-        log.info(test.run());
         log.info(testSummary);
+        log.info(test.run());
         log.info("### Finished testPerformance1 ###");
     }
 
@@ -81,16 +84,19 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
         int stmtsPerTest = 15;
         int numSimultaneousUsers = 10;
 
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers,
-                generateStatements(stmtsPerTest), maxSleepTime, redshiftJdbcTemplate);
+        Set<LoadTestStatementType> stmtTypes = new HashSet<>();
+        stmtTypes.add(LoadTestStatementType.Query_Multi_Conditional);
 
-        String testSummary = "No of threads: " + numSimultaneousUsers + "\n" + //
+        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers, stmtsPerTest, stmtTypes,
+                maxSleepTime, redshiftJdbcTemplate);
+
+        String testSummary = "No of simultaneous users " + numSimultaneousUsers + "\n" + //
                 "Statements per Thread: " + stmtsPerTest + "\n" + //
                 "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
 
         log.info("### Starting testPerformance2 ###");
-        log.info(test.run());
         log.info(testSummary);
+        log.info(test.run());
         log.info("### Finished testPerformance2 ###");
     }
 
@@ -99,17 +105,19 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
         int maxSleepTime = 1000;
         int stmtsPerTest = 15;
         int numSimultaneousUsers = 20;
+        Set<LoadTestStatementType> stmtTypes = new HashSet<>();
+        stmtTypes.add(LoadTestStatementType.Query_Multi_Conditional);
 
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers,
-                generateStatements(stmtsPerTest), maxSleepTime, redshiftJdbcTemplate);
+        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers, stmtsPerTest, stmtTypes,
+                maxSleepTime, redshiftJdbcTemplate);
 
-        String testSummary = "No of threads: " + numSimultaneousUsers + "\n" + //
+        String testSummary = "No of simultaneous users " + numSimultaneousUsers + "\n" + //
                 "Statements per Thread: " + stmtsPerTest + "\n" + //
                 "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
 
         log.info("### Starting testPerformance3 ###");
-        log.info(test.run());
         log.info(testSummary);
+        log.info(test.run());
         log.info("### Finished testPerformance3 ###");
     }
 
@@ -118,26 +126,19 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
         int maxSleepTime = 1000;
         int stmtsPerTest = 15;
         int numSimultaneousUsers = 25;
+        Set<LoadTestStatementType> stmtTypes = new HashSet<>();
+        stmtTypes.add(LoadTestStatementType.Query_Multi_Conditional);
 
-        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers,
-                generateStatements(stmtsPerTest), maxSleepTime, redshiftJdbcTemplate);
+        RedshiftLoadTestHarness test = new RedshiftLoadTestHarness(numSimultaneousUsers, stmtsPerTest, stmtTypes,
+                maxSleepTime, redshiftJdbcTemplate);
 
-        String testSummary = "No of threads: " + numSimultaneousUsers + "\n" + //
+        String testSummary = "No of simultaneous users " + numSimultaneousUsers + "\n" + //
                 "Statements per Thread: " + stmtsPerTest + "\n" + //
                 "Sleep time interval: 0-" + maxSleepTime / 1000 + " sec";
 
         log.info("### Starting testPerformance4 ###");
-        log.info(test.run());
         log.info(testSummary);
+        log.info(test.run());
         log.info("### Finished testPerformance4 ###");
-    }
-
-    private List<LoadTestStatementType> generateStatements(int stmtsPerTest) {
-        List<LoadTestStatementType> statements = new ArrayList<>();
-        Random random = new Random();
-        for (int i = 0; i < stmtsPerTest; ++i) {
-            statements.add(LoadTestStatementType.Query_Numeric_Join);
-        }
-        return statements;
     }
 }

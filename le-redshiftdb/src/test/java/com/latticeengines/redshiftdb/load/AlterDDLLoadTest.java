@@ -14,16 +14,20 @@ public class AlterDDLLoadTest extends AbstractLoadTest {
     }
 
     @Override
-    protected void executeStatement() {
+    public String getSqlStatement() {
         // Alternate between ADD and DROP
         if (sqlStatementType == null || sqlStatementType == LoadTestStatementType.DDL_Drop)
             sqlStatementType = LoadTestStatementType.DDL_Add;
         else
             sqlStatementType = LoadTestStatementType.DDL_Drop;
-
         String ddlStmt = getSqlStatementFromType(sqlStatementType);
-        ddlStmt = ddlStmt.replaceAll("load_test_column", testColumnName);
-        redshiftJdbcTemplate.execute(ddlStmt);
+        return ddlStmt.replaceAll("load_test_column", testColumnName);
+    }
+
+    @Override
+    protected void executeStatement(String sql) {
+
+        redshiftJdbcTemplate.execute(sql);
     }
 
     @Override

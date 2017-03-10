@@ -1,2 +1,2 @@
-ALTER TABLE test.public.loadtesteventtable
+ALTER TABLE test.public.loadtesteventtable2
 DROP COLUMN load_test_column cascade

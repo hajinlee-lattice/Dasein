@@ -1,10 +1,13 @@
 package com.latticeengines.redshiftdb.load;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,32 +20,41 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class RedshiftLoadTestHarness {
 
     private int loadLevel = 1;
-    private boolean timeseries;
-    private boolean encrypted;
     private JdbcTemplate redshiftJdbcTemplate;
-    private Random rng;
-    private List<LoadTestStatementType> statements;
-    private int maxSleepTime;
     private static final Log log = LogFactory.getLog(RedshiftLoadTestNG.class);
     List<AbstractLoadTest> testers = new ArrayList<>();
 
-    public RedshiftLoadTestHarness(int load, List<LoadTestStatementType> stmts, int sleepTime, JdbcTemplate jdbcTemplate) {
-        loadLevel = load;
+    public RedshiftLoadTestHarness(int load, int stmtsPerTester, Set<LoadTestStatementType> possibleStmtTypes,
+            int maxSleepTime, JdbcTemplate jdbcTemplate) {
         redshiftJdbcTemplate = jdbcTemplate;
-        rng = new Random();
-        statements = stmts;
-        maxSleepTime = sleepTime;
 
         // setup testers as per the config
-        for (int i = 0; i < getLoadLevel(); i++) {
-            AbstractLoadTest tester = null;
-            tester = new Tester(i + 1, statements, maxSleepTime, redshiftJdbcTemplate);
-            testers.add(tester);
+        Random random = new Random();
+        if (possibleStmtTypes.size() < 1)
+            possibleStmtTypes = new HashSet<>(Arrays.asList(LoadTestStatementType.Query_Numeric_Join));
+
+        LoadTestStatementType[] typesArray = possibleStmtTypes
+                .toArray(new LoadTestStatementType[possibleStmtTypes.size()]);
+
+        for (int i = 0; i < load; ++i) {
+            LoadTestStatementType statementType = typesArray[random.nextInt(possibleStmtTypes.size())];
+            switch (statementType.getTesterType()) {
+            case "QueryLoadTest":
+                testers.add(new QueryLoadTest(i, stmtsPerTester, maxSleepTime, redshiftJdbcTemplate, statementType));
+                break;
+
+            case "AlterDDLLoadTest":
+                testers.add(new AlterDDLLoadTest(i, stmtsPerTester, maxSleepTime, redshiftJdbcTemplate));
+                break;
+
+            case "QueryMultiConditionalTest":
+                testers.add(new MultiConditionalQueryLoadTest(i, stmtsPerTester, maxSleepTime, redshiftJdbcTemplate));
+                break;
+            }
         }
     }
 
     public String run() {
-        String resultString = "";
         if (loadLevel < 1) {
             return "loadLevel needs to be greater than 1. Terminating Test";
         }
@@ -64,39 +76,15 @@ public class RedshiftLoadTestHarness {
         return getMetrics().toString();
     }
 
-    public int getLoadLevel() {
-        return loadLevel;
-    }
-
-    public void setLoadLevel(int loadLevel) {
-        this.loadLevel = loadLevel;
-    }
-
-    public boolean isTimeseries() {
-        return timeseries;
-    }
-
-    public void setTimeseries(boolean timeseries) {
-        this.timeseries = timeseries;
-    }
-
-    public boolean isEncrypted() {
-        return encrypted;
-    }
-
-    public void setEncrypted(boolean encrypted) {
-        this.encrypted = encrypted;
-    }
-
     public Map<LoadTestStatementType, Double> getMetrics() {
-        Map<LoadTestStatementType, List<Long>> all = new HashMap<>();
+        Map<LoadTestStatementType, List<ResultMetrics>> all = new HashMap<>();
         for (AbstractLoadTest tester : testers) {
-            all.putAll(tester.getMetrics());
+            all.put(tester.sqlStatementType, tester.getMetrics());
         }
 
         Map<LoadTestStatementType, Double> results = new HashMap<>();
         for (LoadTestStatementType statementType : all.keySet()) {
-            double average = all.get(statementType).stream().mapToLong(x -> x).average().getAsDouble();
+            double average = all.get(statementType).stream().mapToLong(x -> x.getRuntime()).average().getAsDouble();
             results.put(statementType, average);
         }
         return results;

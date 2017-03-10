@@ -4,14 +4,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class QueryLoadTest extends AbstractLoadTest {
 
-    public QueryLoadTest(int testerNum, int noOfTestsPerThread, int maxSleepTime, JdbcTemplate jdbcTemplate) {
+    public QueryLoadTest(int testerNum, int noOfTestsPerThread, int maxSleepTime, JdbcTemplate jdbcTemplate,
+            LoadTestStatementType stmtType) {
         super(testerNum, noOfTestsPerThread, maxSleepTime, jdbcTemplate);
-        // pick a random select query
-        sqlStatementType = LoadTestStatementType.Query_Numeric;
+
+        sqlStatementType = stmtType;
     }
 
     @Override
-    public void executeStatement() {
-        redshiftJdbcTemplate.queryForObject(getSqlStatementFromType(sqlStatementType), Integer.class);
+    public String getSqlStatement() {
+        return getSqlStatementFromType(sqlStatementType);
+    }
+
+    @Override
+    public void executeStatement(String sql) {
+        redshiftJdbcTemplate.queryForObject(sql, Integer.class);
     }
 }

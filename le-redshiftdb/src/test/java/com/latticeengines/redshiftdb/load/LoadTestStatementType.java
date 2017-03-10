@@ -7,7 +7,8 @@ public enum LoadTestStatementType {
     DDL_Add("AlterDDLLoadTest", "AddColumnDDL.sql"), //
     DDL_Drop("AlterDDLLoadTest", "DropColumnDDL.sql"), //
     Query_Numeric_Join("QueryLoadTest", "NumericColumnJoinQuery.sql"), //
-    Query_Numeric_BitMask("QueryLoadTest", "NumericColumnBitMaskQuery.sql");
+    Query_Numeric_BitMask("QueryLoadTest", "NumericColumnBitMaskQuery.sql"), //
+    Query_Multi_Conditional("QueryMultiConditionalTest", "QueryMultiConditional.sql");
 
     private final String testerType;
     private final String scriptFileName;
