@@ -132,7 +132,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         long startTime = System.currentTimeMillis();
         List<String> waitingFlags = modelSummaryDownloadFlagEntityMgr.getWaitingFlags();
         long getWaitingFlagTime = System.currentTimeMillis() - startTime;
-        log.info(String.format("Get waiting flags duration: %d milliseconds.", getWaitingFlagTime));
+        log.debug(String.format("Get waiting flags duration: %d milliseconds.", getWaitingFlagTime));
         if (waitingFlags != null && waitingFlags.size() > 0) {
             HashSet<String> tenantIds = new HashSet<>(waitingFlags);
             Set<String> modelSummaryIds = getModelSummaryIds();
