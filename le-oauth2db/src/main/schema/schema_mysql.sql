@@ -14,6 +14,7 @@ create table oauth_client_details (
   additional_information varchar(4096),
   autoapprove tinyint
 );
+CREATE INDEX client_id_idx ON oauth_client_details (client_id);
 
 drop table if exists `oauth_client_token`;
 create table oauth_client_token (
@@ -23,6 +24,9 @@ create table oauth_client_token (
   user_name varchar(256),
   client_id varchar(256)
 );
+CREATE INDEX token_id_idx ON oauth_client_token(token_id);
+CREATE INDEX username_idx ON oauth_client_token (user_name);
+CREATE INDEX client_id_idx ON oauth_client_token(client_id);
 
 drop table if exists `oauth_access_token`;
 create table oauth_access_token (
@@ -34,6 +38,10 @@ create table oauth_access_token (
   authentication blob,
   refresh_token varchar(256)
 );
+CREATE UNIQUE INDEX token_id_idx ON oauth_access_token(token_id);
+CREATE INDEX username_idx ON oauth_access_token(user_name);
+CREATE INDEX client_id_idx ON oauth_access_token(client_id);
+CREATE INDEX authentication_id_idx ON oauth_access_token(authentication_id);
 
 drop table if exists `oauth_refresh_token`;
 create table oauth_refresh_token (
@@ -41,17 +49,20 @@ create table oauth_refresh_token (
   token blob,
   authentication blob
 );
+CREATE INDEX token_id_idx ON oauth_refresh_token (token_id);
 
 drop table if exists `oauth_code`;
 create table oauth_code (
   code varchar(256), authentication blob
 );
+CREATE INDEX code_idx ON oauth_code (code);
 
 drop table if exists `authorities`;
 create table authorities (
   username varchar(256),
   authority varchar(256)
 );
+CREATE INDEX username_idx ON authorities (username);
 
 drop table if exists `TENANT`;
 create table TENANT (
@@ -64,6 +75,7 @@ create table TENANT (
     JDBC_PASSWORD varchar(256) null,
     primary key(PID)
 );
+CREATE UNIQUE INDEX tenant_name_idx ON TENANT (TENANT_NAME);
 
 drop table if exists `OAuthUser`;
 create table OAuthUser (
@@ -74,6 +86,7 @@ create table OAuthUser (
     PasswordExpiration datetime null,
     primary key(PID)
 );
+CREATE UNIQUE INDEX IX_UserId ON OAuthUser (UserId);
 
 insert into oauth_client_details
            (client_id
