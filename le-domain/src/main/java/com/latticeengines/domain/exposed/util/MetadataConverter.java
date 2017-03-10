@@ -209,6 +209,7 @@ public class MetadataConverter {
             for (JsonNode bucketedAttr : (ArrayNode) bucketedAttrs) {
                 Attribute attr = new Attribute();
                 attr.setName(bucketedAttr.get("nominal_attr").asText());
+                attr.setDisplayName(attr.getName());
                 attr.setPhysicalDataType(Schema.Type.STRING.getName());
                 attr.setBitOffset(bucketedAttr.get("lowest_bit").asInt());
                 attr.setNumOfBits(bucketedAttr.get("num_bits").asInt());
