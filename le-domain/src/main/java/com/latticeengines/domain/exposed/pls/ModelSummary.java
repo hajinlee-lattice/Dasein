@@ -610,8 +610,9 @@ public class ModelSummary
         this.setPredefinedSelectionName(predefinedSelection.getName());
     }
 
+    @JsonProperty("CrossValidatedMean")
     @Column(name = "CROSS_VALIDATION_MEAN", nullable = true)
-    @JsonIgnore
+    @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
     @MetricField(name = "CrossValidatedMean", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedMean() {
         return crossValidatedMean;
@@ -622,8 +623,9 @@ public class ModelSummary
         this.crossValidatedMean = crossValidatedMean;
     }
 
+    @JsonProperty("CrossValidatedStd")
     @Column(name = "CROSS_VALIDATION_STD", nullable = true)
-    @JsonIgnore
+    @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
     @MetricField(name = "CrossValidatedStd", fieldType = MetricField.FieldType.DOUBLE)
     public Double getCrossValidatedStd() {
         return crossValidatedStd;

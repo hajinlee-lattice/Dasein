@@ -7,16 +7,92 @@
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
+        "params": "params",
+        "addedFeatures": "emptyList",
         "dsTitleImputation": "emptyDictionary",
         "targetCol": "targetColumn",
         "titleColName": "Title",
-        "maxTitleLen": 30,
-        "missingValues": ["0", "Null", ""]
+        "thldCnt": 500,
+        "thldPopPerc": 0.05,
+        "maxTitleLen": 30
       },
       "ColumnTransformFilePath": "addtitleattributesstep.py"
     },
-    "RemediateDataRulesStep": {
+    "AddCompanyNameAttributesStep": {
       "KeyWhenSortingByAscending": 2,
+      "Name": "addcompanyattributesstep",
+      "MainClassName": "AddCompanyNameAttributesStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "params": "params",
+        "addedFeatures": "emptyList",
+        "maxStrLen": 30,
+        "dsCompanyImputation": "emptyDictionary",
+        "companyNameColName": "CompanyName",
+        "thldCnt": 500,
+        "targetCol": "targetColumn",
+        "thldPopPerc": 0.05
+      },
+      "ColumnTransformFilePath": "addcompanyattributesstep.py"
+    },
+    "AddEmailAttributesStep": {
+      "KeyWhenSortingByAscending": 3,
+      "Name": "addemailattributesstep",
+      "MainClassName": "AddEmailAttributesStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "params": "params",
+        "addedFeatures": "emptyList",
+        "maxStrLen": 30,
+        "invalidEmailThld": 5,
+        "thldCnt": 500,
+        "dsEmailImputation": "emptyDictionary",
+        "targetCol": "targetColumn",
+        "thldPopPerc": 0.05,
+        "emailColName": "Email"
+      },
+      "ColumnTransformFilePath": "addemailattributesstep.py"
+    },
+    "AddPhoneAttributesStep": {
+      "KeyWhenSortingByAscending": 4,
+      "Name": "addphoneattributesstep",
+      "MainClassName": "AddPhoneAttributesStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "params": "params",
+        "addedFeatures": "emptyList",
+        "thldCnt": 500,
+        "phoneColName": "PhoneNumber",
+        "dsPhoneImputation": "emptyDictionary",
+        "thldPopPerc": 0.05,
+        "targetCol": "targetColumn"
+      },
+      "ColumnTransformFilePath": "addphoneattributesstep.py"
+    },
+    "AddNameAttributesStep": {
+      "KeyWhenSortingByAscending": 5,
+      "Name": "addnameattributesstep",
+      "MainClassName": "AddNameAttributesStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "params": "params",
+        "addedFeatures": "emptyList",
+        "maxStrLen": 30,
+        "dsNameImputation": "emptyDictionary",
+        "firstNameColName": "FirstName",
+        "thldCnt": 500,
+        "targetCol": "targetColumn",
+        "lastNameColName": "LastName",
+        "thldPopPerc": 0.05
+      },
+      "ColumnTransformFilePath": "addnameattributesstep.py"
+    },
+    "RemediateDataRulesStep": {
+      "KeyWhenSortingByAscending": 6,
       "Name": "remediatedatarulesstep",
       "MainClassName": "RemediateDataRulesStep",
       "UniqueColumnTransformName": "",
@@ -28,22 +104,8 @@
       },
       "ColumnTransformFilePath": "remediatedatarulesstep.py"
     },
-    "HighNumberUniqueValuesRemovalStep": {
-      "KeyWhenSortingByAscending": 3,
-      "Name": "highnumberuniquevaluesremovalstep",
-      "MainClassName": "HighNumberUniqueValuesRemovalStep",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "maxNumberUniqueValues": 200,
-        "categoricalColumns": "categoricalColumns",
-        "params": "params",
-        "profile": "dataprofile"
-      },
-      "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
-    },
     "PivotStep": {
-      "KeyWhenSortingByAscending": 4,
+      "KeyWhenSortingByAscending": 7,
       "Name": "pivotstep",
       "MainClassName": "PivotStep",
       "UniqueColumnTransformName": "",
@@ -59,7 +121,7 @@
       "ColumnTransformFilePath": "pivotstep.py"
     },
     "AssignConversionRateToAllCategoricalValues":{
-        "KeyWhenSortingByAscending": 5,
+        "KeyWhenSortingByAscending": 8,
         "Name": "assignconversionratetoallcategoricalvalues",
         "MainClassName": "AssignConversionRateToAllCategoricalValues",
         "UniqueColumnTransformName": "",
@@ -72,7 +134,7 @@
         "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
     },
     "ColumnTypeConversionStep": {
-      "KeyWhenSortingByAscending": 6,
+      "KeyWhenSortingByAscending": 9,
       "Name": "columntypeconversionstep",
       "MainClassName": "ColumnTypeConversionStep",
       "UniqueColumnTransformName": "",
@@ -83,7 +145,7 @@
       "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "ImputationStep": {
-      "KeyWhenSortingByAscending": 7,
+      "KeyWhenSortingByAscending": 10,
       "Name": "imputationstep",
       "MainClassName": "ImputationStep",
       "UniqueColumnTransformName": "",
@@ -98,7 +160,7 @@
       "ColumnTransformFilePath": "imputationstep.py"
     },
     "FeatureSelectionStep": {
-      "KeyWhenSortingByAscending": 8,
+      "KeyWhenSortingByAscending": 11,
       "Name": "featureselectionstep",
       "MainClassName": "FeatureSelectionStep",
       "UniqueColumnTransformName": "",
@@ -111,7 +173,7 @@
       "ColumnTransformFilePath": "featureselectionstep.py"
     },
     "ExportDataFrameStep": {
-      "KeyWhenSortingByAscending": 9,
+      "KeyWhenSortingByAscending": 12,
       "Name": "exportdfstep",
       "MainClassName": "ExportDataFrameStep",
       "UniqueColumnTransformName": "",

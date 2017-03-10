@@ -73,6 +73,8 @@ class ArgumentParser(object):
         companyKey = "Company".lower()
         lastNameKey = "LastName".lower()
         firstNameKey = "FirstName".lower()
+        phoneNumberKey = "PhoneNumber".lower()
+        emailKey = "Email".lower()
         websiteKey = "Website".lower()
         spamIndicatorKey = "SpamIndicator".lower()
         revenueKey = "Revenue".lower()
@@ -101,9 +103,15 @@ class ArgumentParser(object):
                 elif key == firstNameKey:
                     if columnExists(value): samples[firstNameKey] = value
                     else: logWarning(value, "firstname")
+                elif key == phoneNumberKey:
+                    if columnExists(value): samples[phoneNumberKey] = value
+                    else: logWarning(value, "phonenumber")
+                elif key == emailKey:
+                    if columnExists(value): samples[emailKey] = value
+                    else: logWarning(value, "email")
                 elif key == websiteKey:
                     if columnExists(value): samples[websiteKey] = value
-                    else: logWarning(value, "websiteKey")
+                    else: logWarning(value, "website")
                 elif key == spamIndicatorKey:
                     if columnExists(value): samples[spamIndicatorKey] = value
                     else: logWarning(value, "spamindicator")

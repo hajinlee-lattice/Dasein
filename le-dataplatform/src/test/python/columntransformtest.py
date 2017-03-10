@@ -2,8 +2,8 @@ from array import array
 import imp
 import json
 
-import columntransform
 from trainingtestbase import TrainingTestBase
+import columntransform
 
 class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
@@ -63,7 +63,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
             self.assertTrue(hasattr(step, "transform"), "Each transform in pipeline should have a transform method")
 
     def checkThatTransformsDontThrowExceptions(self):
-        keys = ["addtitleattributesstep","exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
+        keys = ["addtitleattributesstep","addcompanyattributesstep","addemailattributesstep","addphoneattributesstep","addnameattributesstep","exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
                 , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn", "remediatedatarulesstep", "assignconversionratetoallcategoricalvalues",
                 "featureselectionstep", "highnumberuniquevaluesremovalstep"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]

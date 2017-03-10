@@ -220,6 +220,16 @@ public class ModelSummaryParser {
         List<Predictor> predictors = parsePredictors(predictorsJsonNode, summary);
         summary.setPredictors(predictors);
 
+        JsonNode crossValidatedMeanOfModelAccuracy = json.get("CrossValidatedMeanOfModelAccuracy");
+        if (crossValidatedMeanOfModelAccuracy != null) {
+            summary.setCrossValidatedMean(crossValidatedMeanOfModelAccuracy.asDouble());
+        }
+
+        JsonNode crossValidatedStdOfModelAccuracy = json.get("CrossValidatedStdOfModelAccuracy");
+        if (crossValidatedStdOfModelAccuracy != null) {
+            summary.setCrossValidatedStd(crossValidatedStdOfModelAccuracy.asDouble());
+        }
+
         return summary;
     }
 

@@ -2,6 +2,7 @@ import json
 import os
 import pandas as pd
 from itertools import izip
+import re
 
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
@@ -10,11 +11,45 @@ import random
 
 logger = get_logger("pipeline")
 
-
 class TitleTrfFunction(object):
+
+    def __init__(self, unusualCharacterSet, badSet):
+        self.unusualCharacterSet = re.compile(unusualCharacterSet, re.IGNORECASE)
+        self.badSet = re.compile(badSet, re.IGNORECASE)
 
     def execute(self, x):
         pass
+
+    def valueReturn(self, x, mappingList):
+        if x is None:
+            return ''
+        if len(x)==0:
+            return ''
+
+        for title, keys in mappingList:
+            if keys.search(x) is not None:
+                return title
+
+        if self.dsHasUnusualChar(x):
+            return 'invalid'
+
+        return ''
+
+    def isNumber(self, x):
+        try:
+            y = float(x)
+            return True
+        except:
+            return False
+
+    def dsHasUnusualChar(self, x):
+        if self.isNumber(x):
+            return True
+        if self.unusualCharacterSet.search(x) is not None:
+            return True
+        if self.badSet.search(x) is not None:
+            return True
+        return False
 
 class GetStrLength(TitleTrfFunction):
 
@@ -24,6 +59,7 @@ class GetStrLength(TitleTrfFunction):
     def execute(self, inputStr):
         if inputStr is None:
             return None
+
         try:
             ## It is possible that inputStr is actually a byte array, which in Python 2.7 is stored
             ## in a string type.  If this is the case, then we need to decode the byte array
@@ -34,30 +70,183 @@ class GetStrLength(TitleTrfFunction):
         except TypeError:
             return 0.0
 
+class DSTitleMap(TitleTrfFunction):
+
+    def __init__(self, unusualCharacterSet, badSet, mapTitle):
+        super(DSTitleMap, self).__init__(unusualCharacterSet, badSet)
+        self.mapTitle = [[title, re.compile(pattern, re.IGNORECASE)] for title, pattern in mapTitle]
+
+    def execute(self, inputStr):
+        return self.valueReturn(inputStr, self.mapTitle)
+
+class DSTitleMapBool(TitleTrfFunction):
+
+    def __init__(self, mapTitle):
+        self.mapTitle = re.compile(mapTitle, re.IGNORECASE)
+
+    def execute(self, inputStr):
+        return self.mapTitle.search(inputStr) is not None
+
+class DSTitleLevelCategorical(TitleTrfFunction):
+
+    def __init__(self, unusualCharacterSet, badSet, mgrStr, dirStr, vpStr):
+        super(DSTitleLevelCategorical, self).__init__(unusualCharacterSet, badSet)
+        self.mgrStr = re.compile(mgrStr, re.IGNORECASE)
+        self.dirStr = re.compile(dirStr, re.IGNORECASE)
+        self.vpStr = re.compile(vpStr, re.IGNORECASE)
+
+    def execute(self, inputStr):
+        if self.vpStr.search(inputStr) is not None:  return 'VP'
+        if self.dirStr.search(inputStr) is not None: return 'Director'
+        if self.mgrStr.search(inputStr) is not None:  return 'Manager'
+        if self.dsHasUnusualChar(inputStr): return 'invalid'
+        return ''
+
+
+class DSTitleHasUnusualChar(TitleTrfFunction):
+
+    def execute(self, inputStr):
+        return self.dsHasUnusualChar(inputStr)
+
+
+class DSTitleLevel(TitleTrfFunction):
+
+    def __init__(self, senrStr, mgrStr, dirStr, vpStr):
+        self.senrStr = re.compile(senrStr, re.IGNORECASE)
+        self.mgrStr = re.compile(mgrStr, re.IGNORECASE)
+        self.dirStr = re.compile(dirStr, re.IGNORECASE)
+        self.vpStr = re.compile(vpStr, re.IGNORECASE)
+
+    def execute(self, inputStr):
+        isVPAbove = (self.vpStr.search(inputStr) is not None)
+        isDirector = (self.dirStr.search(inputStr) is not None)
+        isManager = (self.mgrStr.search(inputStr) is not None)
+        isSenior = (self.senrStr.search(inputStr) is not None)
+
+        return float(isVPAbove*8+isDirector*4+isManager*2+isSenior)
+
+
 class AddTitleAttributesStep(PipelineStep):
 
-    def __init__(self, dsTitleImputation, targetCol, titleColName, maxTitleLen, missingValues):
+    def __init__(self, params, addedFeatures, dsTitleImputation, targetCol, titleColName, thldCnt, thldPopPerc, maxTitleLen):
+
+        self.features = []
+        if params is not None and "features" in params["schema"] and params["schema"]["features"] != None:
+            self.features = params["schema"]["features"]
+
+        self.addedFeatures = addedFeatures
+
         self.dsTitleImputation = dsTitleImputation
         self.targetColumn = targetCol
         self.titleColumn = titleColName
+        self.thldCnt = thldCnt
+        self.thldPopPerc = thldPopPerc
         self.dsTitleImputationFilePath = None
         self.maxTitleLen = maxTitleLen
-        self.missingValues = missingValues
-        self.functionsToCall = {'DS_TitleLength': GetStrLength(maxTitleLen)}
-        self.columnsToRemove = set(['Title_Length'])
-        logger.info('AddTitleAttributesStep: maxTitleLen={0}; missingValues={1}'.format(maxTitleLen, str(missingValues)))
+
+        self.unusualCharacterSet = "[^\\w\\s]"
+
+        self.badSet = "(_|\\b)(none|no|not|delete|asd|sdf|unknown|undisclosed|null|don|donot|abc|xyz|nonname|nocompany|noname)(_|\\b)"
+
+        self.senrStr = "(_|\\b)(sr|senior)(_|\\b)"
+
+        self.mgrStr = "(_|\\b)(mgr|mngr|manager)(.*)"
+
+        self.dirStr = "(_|\\b)dir(ector)?(_|\\b)"
+
+        self.vpStr = "(_|\\b)(vp|chief|c[tefmxdosi]o|pres|president|head[_ ]of|managing[_ ]partner)(_|\\b)"
+
+        self.techStr = "(_|\\b)(eng|tech|info|programmer|developer)(.*)"
+
+        self.acadStr = "(_|\\b)(student|researcher|professor)(_|\\b)"
+
+        self.mapTitleChannelAny = [["Consumer", "(_|\\b)(consumer|retail)(_|\\b)"],
+                            ["Government", "(_|\\b)(government)(_|\\b)"],
+                            ["Corporate", "(_|\\b)(enterprise|corporate)(_|\\b)"]]
+
+        self.mapTitleFunctionAny=[["IT","(_|\\b)(it|database|network|middleware|security)(_|\\b)|(_|\\b)info(.*)tech(.*)"],
+                             ["Engineering","(_|\\b)(quality|system|engineer|developer?|software|testing|unix|linux|product)(_|\\b)"],
+                             ["Finance","(_|\\b)(treasurer|tax|loan|risk)(_|\\b)|(_|\\b)(financ|purchas|account[ia])(.*)"],
+                             ["Marketing","(_|\\b)(interactive|brand|mktg|content|social|event|media)(_|\\b)|(_|\\b)(market|generat|advertis|commerc)(.*)"],
+                             ["Sales","(_|\\b)(sales?|channel|crm|field|inside)(_|\\b)|(_|\\b)accounts?(_|\\b)"],
+                             ["Human Resource","(_|\\b)(hr|talent|benefits)(_|\\b)|(_|\\b)human(.*)resource(.*)"],
+                             ["Operations","(_|\\b)(warehouse|plan|chain)(_|\\b)|(_|\\b)(operat|strateg|distribut|facilit)(.*)"],
+                             ["Public Relations","(_|\\b)(communication|public|affairs|relation|community|pr)(_|\\b)"],
+                             ["Design","(_|\\b)(creative|design|art|designer)(_|\\b)"],
+                             ["Services","(_|\\b)(service|solution|training|implementation|user|help|care|maintenance|engage|instruction|account(.*)manager|account(.*)executive|soa)(_|\\b)"],
+                             ["Research","(_|\\b)(research)(_|\\b)"],
+                             ["Analytics","(_|\\b)data(_|\\b)|(_|\\b)analy(.*)"],
+                             ["Academic","(_|\\b)education(_|\\b)|(_|\\b)academi(.*)"],
+                             ["Consulting","(_|\\b)consult(.*)"]]
+
+        self.mapTitleRoleAny=[["Associate", "(_|\\b)(assoc)(.*)"],
+                      ["Assistant", "(_|\\b)(secret|assist)(.*)"],
+                      ["Leadership", "(_|\\b)(founder|vice|vp|evp|chief|owner|president|svp|c[tefmxdosi]o)(_|\\b)"],
+                      ["Manager", "(_|\\b)(mgr|gm|supervisor|lead)(_|\\b)|(_|\\b)(manager)(.*)"],
+                      ["Director", "(_|\\b)dir(ector)?(_|\\b)"],
+                      ["Engineer", "(_|\\b)(programmer|developer|dev|engineer)(_|\\b)"],
+                      ["Consultant", "(_|\\b)(consultant)(_|\\b)"],
+                      ["Student_Teacher", "(_|\\b)(instructor|coach|teacher|student|faculty)(_|\\b)"],
+                      ["Analyst", "(_|\\b)(analyst)(_|\\b)"],
+                      ["Admin", "(_|\\b)(admin|dba)(_|\\b)"],
+                      ["Investor_Partner", "(_|\\b)(partner|investor|board)(_|\\b)"],
+                      ["Controller_Accountant", "(_|\\b)(controller|accountant)(_|\\b)"],
+                      ["Specialist_Technician", "(_|\\b)(technician|specialist)(_|\\b)"],
+                      ["Architect", "(_|\\b)(architect)(_|\\b)"],
+                      ["Representative", "(_|\\b)(representative)(_|\\b)"],
+                      ["Editor", "(_|\\b)(editor)(_|\\b)"]]
+
+        self.mapTitleScopeAny=[["Continental","(_|\\b)(north(.*)america|emea|asia|africa|europe|south(.*)america)(_|\\b)"],
+                          ["Global","(_|\\b)(global|international|worldwide)(_|\\b)"],
+                          ["National","(_|\\b)(us|national)(_|\\b)"],
+                          ["Regional","(_|\\b)(region|branch|territory|district|central|western|eastern|northern|southern)(_|\\b)"]]
+        self.functionsToCall = {'DS_Title_Length': GetStrLength(maxTitleLen), \
+                                'DS_Title_Channel': DSTitleMap(self.unusualCharacterSet, self.badSet, self.mapTitleChannelAny), \
+                                'DS_Title_Function': DSTitleMap(self.unusualCharacterSet, self.badSet, self.mapTitleFunctionAny), \
+                                'DS_Title_Role': DSTitleMap(self.unusualCharacterSet, self.badSet, self.mapTitleRoleAny), \
+                                'DS_Title_Scope': DSTitleMap(self.unusualCharacterSet, self.badSet, self.mapTitleScopeAny), \
+                                'DS_Title_IsTechRelated':  DSTitleMapBool(self.techStr), \
+                                'DS_Title_IsAcademic': DSTitleMapBool(self.acadStr), \
+                                'DS_Title_IsVPAbove' : DSTitleMapBool(self.vpStr), \
+                                'DS_Title_IsDirector' : DSTitleMapBool(self.dirStr), \
+                                'DS_Title_IsManager' : DSTitleMapBool(self.mgrStr), \
+                                'DS_Title_IsSenior' : DSTitleMapBool(self.senrStr), \
+                                'DS_Title_Level_Categorical': DSTitleLevelCategorical(self.unusualCharacterSet, self.badSet, self.mgrStr, self.dirStr, self.vpStr), \
+                                'DS_Title_HasUnusualChar': DSTitleHasUnusualChar(self.unusualCharacterSet, self.badSet), \
+                                'DS_Title_Level':  DSTitleLevel(self.senrStr, self.mgrStr, self.dirStr, self.vpStr)
+                                }
+        self.columnsToRemove = set()
+        self.boolFeatures = set(['DS_Title_HasUnusualChar','DS_Title_IsAcademic','DS_Title_IsTechRelated', 'DS_Title_IsDirector', 'DS_Title_IsSenior', 'DS_Title_IsVPAbove', 'DS_Title_IsManager'])
+        self.numFeatures = set(['DS_Title_Length','DS_Title_Level'])
+        self.catFeatures = set(['DS_Title_Channel','DS_Title_Function','DS_Title_Level_Categorical', 'DS_Title_Role', 'DS_Title_Scope'])
+
+        logger.info('AddTitleAttributesStep: thldCnt={0}'.format(self.thldCnt))
+        logger.info('AddTitleAttributesStep: thldPopPerc={0}'.format(self.thldPopPerc))
+        logger.info('AddTitleAttributesStep: maxTitleLen={0}'.format(self.maxTitleLen))
+        logger.info('AddTitleAttributesStep: unusualCharacterSet={0}'.format(self.unusualCharacterSet))
+        logger.info('AddTitleAttributesStep: badSet={0}'.format(self.badSet))
+        logger.info('AddTitleAttributesStep: mapTitleChannelAny={0}'.format(self.mapTitleChannelAny))
+        logger.info('AddTitleAttributesStep: mapTitleFunctionAny={0}'.format(self.mapTitleFunctionAny))
+        logger.info('AddTitleAttributesStep: mapTitleRoleAny={0}'.format(self.mapTitleRoleAny))
+        logger.info('AddTitleAttributesStep: mapTitleScopeAny={0}'.format(self.mapTitleScopeAny))
+        logger.info('AddTitleAttributesStep: techStr={0}'.format(self.techStr))
+        logger.info('AddTitleAttributesStep: senrStr={0}'.format(self.senrStr))
+        logger.info('AddTitleAttributesStep: mgrStr={0}'.format(self.mgrStr))
+        logger.info('AddTitleAttributesStep: dirStr={0}'.format(self.dirStr))
+        logger.info('AddTitleAttributesStep: vpStr={0}'.format(self.vpStr))
+        logger.info('AddTitleAttributesStep: acadStr={0}'.format(self.acadStr))
 
     def getRTSMainModule(self):
-        return 'add_title_attributes'
+        return 'add_title_attributes_v2'
 
     def getRTSArtifacts(self):
         return [("dstitleimputations.json", self.dsTitleImputationFilePath)]
 
     def getDebugArtifacts(self):
-        return [{"dstitlefeaturesstep-dstitleimputationvalues.json": self.dsTitleImputation}]
+        return [{"dstitleattibutesstep-dstitleimputationvalues.json": self.dsTitleImputation}]
 
     def getOutputColumns(self):
-        return [(create_column(featureName, self.__getOutputColTypes(featureName)), [self.titleColumn, featureName]) for featureName, _ in self.functionsToCall.iteritems()]
+        return [(create_column(featureName, self.__getOutputColTypes(featureName)), [self.titleColumn, featureName]) for featureName in self.addedFeatures]
 
     def doColumnCheck(self):
         return False
@@ -65,58 +254,119 @@ class AddTitleAttributesStep(PipelineStep):
     def transform(self, dataFrame, configMetadata, test):
 
         if self.titleColumn not in dataFrame.columns.values:
+            logger.info('Title is not found in the dataFrame')
             return dataFrame
 
-        calculateImputationValues = True
+        if self.titleColumn not in self.features:
+            logger.info('Title is not a feature')
+            return dataFrame
+
         if len(self.dsTitleImputation) != 0:
             logger.info('Title imputations already exist: {}'.format(str(self.dsTitleImputation)))
-            calculateImputationValues = False
 
-        ## These parameters are needed to configure the RTS transformation
-        self.dsTitleImputation['maxTitleLen'] = self.maxTitleLen
-        self.dsTitleImputation['missingValues'] = self.missingValues
-
-        titleList = dataFrame[self.titleColumn].tolist()
-
+        nullBooleanInd = [pd.isnull(x) for x in dataFrame[self.titleColumn]]
         titleFeatureDict = {}
 
-        for featureName, function in self.functionsToCall.iteritems():
+        if not test:
+            ## These parameters are needed to configure the RTS transformation
+            self.dsTitleImputation['maxTitleLen'] = self.maxTitleLen
+            self.dsTitleImputation['unusualCharacterSet'] = self.unusualCharacterSet
+            self.dsTitleImputation['badSet'] = self.badSet
+            self.dsTitleImputation['mapTitleChannelAny'] = self.mapTitleChannelAny
+            self.dsTitleImputation['mapTitleFunctionAny'] = self.mapTitleFunctionAny
+            self.dsTitleImputation['mapTitleRoleAny'] = self.mapTitleRoleAny
+            self.dsTitleImputation['mapTitleScopeAny'] = self.mapTitleScopeAny
+            self.dsTitleImputation['techStr'] = self.techStr
+            self.dsTitleImputation['senrStr'] = self.senrStr
+            self.dsTitleImputation['mgrStr'] = self.mgrStr
+            self.dsTitleImputation['dirStr'] = self.dirStr
+            self.dsTitleImputation['vpStr'] = self.vpStr
+            self.dsTitleImputation['acadStr'] = self.acadStr
 
-            dsColVal = [function.execute(x) for x in titleList]
-            
-            if featureName in ['DS_Title_HasUnusualChar','DS_Title_IsAcademic','DS_Title_IsTechRelated', \
-                                 'DS_Title_IsDirector', 'DS_Title_IsSenior', 'DS_Title_IsVPAbove']:
-                continue
+            manyNullInd = False
+            if sum(nullBooleanInd) >= len(nullBooleanInd)*(1-self.thldPopPerc) or sum(nullBooleanInd) >= len(nullBooleanInd) - self.thldCnt:
+                logger.info('Title is null in {0} rows out of {1} rows in total'.format(str(sum(nullBooleanInd)), str(len(dataFrame.index))))
+                manyNullInd = True
 
-            nullBooleanInd = [self.__ismissing(x) for x in dsColVal]
+            if manyNullInd:
+                self.addedFeatures = []
+            else:
+                self.addedFeatures = self.functionsToCall.keys()
 
-            if calculateImputationValues:
-                self.dsTitleImputation[featureName] = 0.0
+                titleList = dataFrame[self.titleColumn].tolist()
+
                 eventList = dataFrame[self.targetColumn].tolist()
-                if sum(nullBooleanInd) > 1 and  sum(nullBooleanInd) < len(nullBooleanInd):
-                    if featureName == 'DS_TitleLength':
+
+                for featureName, function in self.functionsToCall.iteritems():
+                    if function is None:
+                        continue
+
+                    dsColVal = [function.execute(x) if not y else x for x,y in izip(titleList, nullBooleanInd)]
+
+                    if featureName in self.numFeatures:
                         imputedValue, dsColVal = self.__fullValueMap(eventList, dsColVal, nullBooleanInd, True)
                     else:
                         imputedValue, dsColVal = self.__fullValueMap(eventList, dsColVal, nullBooleanInd)
-                    self.dsTitleImputation[featureName] = round(imputedValue, 2)
-                    logger.info('Title column "{0}" has imputation value {1} (rounded to {2})'.format(featureName, imputedValue, self.dsTitleImputation[featureName]))
-            else:
-                try:
-                    dsColVal = [x[0] if not x[1] else self.dsTitleImputation[featureName] for x in izip(dsColVal, nullBooleanInd)]
-                except KeyError:
-                    logger.error('KeyError')
-                    pass
-            titleFeatureDict.update({featureName : dsColVal})
 
-        if calculateImputationValues:
+                    if type(imputedValue) == float:
+                        self.dsTitleImputation[featureName] = round(imputedValue, 2)
+                        logger.info('Title column "{0}" has imputation value {1} (rounded to {2})'.format(featureName, imputedValue, self.dsTitleImputation[featureName]))
+                    else:
+                        self.dsTitleImputation[featureName] = imputedValue
+                        logger.info('Title column "{0}" has imputation value {1}'.format(featureName, imputedValue))
+
+                    # code that can be deleted in the future
+                    if featureName in self.catFeatures:
+                        dd = self.__conversionRateEncoding(dsColVal, eventList)
+                        dsColVal = [dd[x] for x in dsColVal]
+                        self.dsTitleImputation[featureName] = [dd, imputedValue]
+                    else:
+                        dsColVal = [float(x) for x in dsColVal]
+                        imputedValue = float(imputedValue)
+                        self.dsTitleImputation[featureName] = round(imputedValue, 2)
+
+                    titleFeatureDict.update({featureName : dsColVal})
+
             self.__appendMetadataEntryInBatches(configMetadata)
             self.__writeRTSArtifacts()
 
-        logger.info('Columns that are being added to the event table: {}'.format(str(titleFeatureDict.keys())))
-        dataFrame = pd.concat([dataFrame, pd.DataFrame(titleFeatureDict, index = dataFrame.index.values)], axis = 1)
+        else:
+            if len(self.addedFeatures) > 0:
 
+                titleList = dataFrame[self.titleColumn].tolist()
+
+                for featureName, function in self.functionsToCall.iteritems():
+                    if function is None:
+                            continue
+
+                    dsColVal = [function.execute(x) if not y else x for x,y in izip(titleList, nullBooleanInd)]
+
+                    if featureName in self.catFeatures:
+                        try:
+                            valmap =  self.dsTitleImputation[featureName][0]
+                            imputedValue = valmap[self.dsTitleImputation[featureName][1]]
+                            dsColVal = [valmap[x[0]] if x[0] in valmap else 0.0 if not x[1] else imputedValue for x in izip(dsColVal, nullBooleanInd)]
+                        except KeyError:
+                            logger.error('KeyError: check if {} is in dsTitleImputation'.format(featureName))
+                            pass
+                    else:
+                        try:
+                            dsColVal = [float(x[0]) if not x[1] else self.dsTitleImputation[featureName] for x in izip(dsColVal, nullBooleanInd)]
+                        except KeyError:
+                            logger.error('KeyError: check if {} is in dsTitleImputation'.format(featureName))
+                            pass
+                    titleFeatureDict.update({featureName : dsColVal})
+
+        titleFeatureDict = {k: titleFeatureDict[k] for k in titleFeatureDict if k in self.addedFeatures}
+        if len(titleFeatureDict) > 0:
+            logger.info('Columns that are being added to the event table: {}'.format(str(titleFeatureDict.keys())))
+            dataFrame = pd.concat([dataFrame, pd.DataFrame(titleFeatureDict, index = dataFrame.index.values)], axis = 1)
+
+        colsToRemoveList = list(self.columnsToRemove)
+        self.columnsToRemove = set([x for x in colsToRemoveList if x in dataFrame.columns.values])
+        if len(self.columnsToRemove) > 0:
+            self.removeColumns(dataFrame, self.columnsToRemove)
         logger.info('Columns that have been replaced by new Title Attributes: {}'.format(str(list(self.columnsToRemove))))
-        self.removeColumns(dataFrame, self.columnsToRemove)
 
         return dataFrame
 
@@ -127,7 +377,7 @@ class AddTitleAttributesStep(PipelineStep):
             self.dsTitleImputationFilePath = os.path.abspath(fp.name)
 
     def __appendMetadataEntryInBatches(self, configMetadata):
-        for featureName, _ in self.functionsToCall.iteritems():
+        for featureName in self.addedFeatures:
             statisticalType, fundamentalType, dataType = self.__getMetadataTypes(featureName)
             logger.info('Setting metadata for column {0}: StatisticalType={1}, FundamentalType={2}, DataType={3}'.format(featureName, statisticalType, fundamentalType, dataType))
             self.__appendMetadataEntry(configMetadata, featureName, statisticalType, fundamentalType, dataType)
@@ -142,30 +392,23 @@ class AddTitleAttributesStep(PipelineStep):
         entry["DataType"] = DataType
         super(AddTitleAttributesStep, self).appendMetadataEntry(configMetadata, entry)
 
-    def __ismissing(self, x):
-        return pd.isnull(x) or (x in self.missingValues)
-
     def __getOutputColTypes(self, featureName):
-        if featureName in ['DS_TitleLength', 'DS_Title_Level']:
-            return 'FLOAT'
-        elif featureName in ['DS_Title_Channel', 'DS_Title_Function', 'DS_Title_Level_Categorical', 'DS_Title_Role', 'DS_TItle_Scope']:
-            return 'STRING'
-        else:
-            return 'BOOLEAN'
+        return 'FLOAT'
 
-    def __getMetadataTypes(self, featName):
-        if featName in ['DS_TitleLength', 'DS_Title_Level']:
-            return "ratio", "numeric", "Float"
-        elif featName in ['DS_Title_Channel', 'DS_Title_Function', 'DS_Title_Level_Categorical', 'DS_Title_Role', 'DS_TItle_Scope']:
-            return "nominal", "alpha", "String"
-        else:
-            return "nominal", "boolean", "Bool"
+    def __getMetadataTypes(self, featureName):
+        return "ratio", "numeric", "Float"
 
+    def __conversionRateEncoding(self, columnList, eventList):
+        def posrate(k):
+            ind=[i for i,x in enumerate(columnList) if x==k]
+            posEvents=sum([eventList[i] for i in ind])
+            return round(posEvents*100.0/len(ind), 2)
+        return dict((val,posrate(val)) for val in set(columnList))
 
     '''
     Assume a function f that operates on a customer provided field such as title and returns title length.
     We create an  imputed value to be used by the function and a new list of values
-    The event table can be called by populating this new list of  values and then calling the existing function
+    The event table can be called by populating this new list of values and then calling the existing function
 
     Edge cases that we won't consider:
         null conv rate< sample conv rate so use this as an additional null indicator

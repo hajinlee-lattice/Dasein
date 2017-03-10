@@ -1,0 +1,248 @@
+{
+  "techStr": "(_|\\b)(eng|tech|info|programmer|developer)(.*)",
+  "DS_Title_Function": [
+    {
+      "": 1.79,
+      "Operations": 4.05,
+      "Consulting": 1.56,
+      "Finance": 1.92,
+      "Analytics": 1.66,
+      "Public Relations": 0,
+      "Marketing": 1.59,
+      "IT": 3.78,
+      "Research": 0,
+      "Academic": 0,
+      "Engineering": 2.16,
+      "Human Resource": 0,
+      "Design": 1.23,
+      "Sales": 0,
+      "Services": 1.76
+    },
+    "Engineering"
+  ],
+  "DS_Title_Scope": [
+    {
+      "": 2.01,
+      "Continental": 0,
+      "National": 0,
+      "Global": 6.12,
+      "Regional": 0
+    },
+    ""
+  ],
+  "unusualCharacterSet": "[^\\w\\s]",
+  "mapTitleChannelAny": [
+    [
+      "Consumer",
+      "(_|\\b)(consumer|retail)(_|\\b)"
+    ],
+    [
+      "Government",
+      "(_|\\b)(government)(_|\\b)"
+    ],
+    [
+      "Corporate",
+      "(_|\\b)(enterprise|corporate)(_|\\b)"
+    ]
+  ],
+  "mgrStr": "(_|\\b)(mgr|mngr|manager)(.*)",
+  "senrStr": "(_|\\b)(sr|senior)(_|\\b)",
+  "mapTitleScopeAny": [
+    [
+      "Continental",
+      "(_|\\b)(north(.*)america|emea|asia|africa|europe|south(.*)america)(_|\\b)"
+    ],
+    [
+      "Global",
+      "(_|\\b)(global|international|worldwide)(_|\\b)"
+    ],
+    [
+      "National",
+      "(_|\\b)(us|national)(_|\\b)"
+    ],
+    [
+      "Regional",
+      "(_|\\b)(region|branch|territory|district|central|western|eastern|northern|southern)(_|\\b)"
+    ]
+  ],
+  "DS_Title_Level_Categorical": [
+    {
+      "invalid": 0.66,
+      "Director": 2.83,
+      "Manager": 3.45,
+      "VP": 3.06,
+      "": 1.73
+    },
+    ""
+  ],
+  "DS_Title_Channel": [
+    {
+      "": 2,
+      "Corporate": 4.58,
+      "Consumer": 3.1,
+      "Government": 5.4,
+      "invalid": 1.11
+    },
+    ""
+  ],
+  "mapTitleFunctionAny": [
+    [
+      "IT",
+      "(_|\\b)(it|database|network|middleware|security)(_|\\b)|(_|\\b)info(.*)tech(.*)"
+    ],
+    [
+      "Engineering",
+      "(_|\\b)(quality|system|engineer|developer?|software|testing|unix|linux|product)(_|\\b)"
+    ],
+    [
+      "Finance",
+      "(_|\\b)(treasurer|tax|loan|risk)(_|\\b)|(_|\\b)(financ|purchas|account[ia])(.*)"
+    ],
+    [
+      "Marketing",
+      "(_|\\b)(interactive|brand|mktg|content|social|event|media)(_|\\b)|(_|\\b)(market|generat|advertis|commerc)(.*)"
+    ],
+    [
+      "Sales",
+      "(_|\\b)(sales?|channel|crm|field|inside)(_|\\b)|(_|\\b)accounts?(_|\\b)"
+    ],
+    [
+      "Human Resource",
+      "(_|\\b)(hr|talent|benefits)(_|\\b)|(_|\\b)human(.*)resource(.*)"
+    ],
+    [
+      "Operations",
+      "(_|\\b)(warehouse|plan|chain)(_|\\b)|(_|\\b)(operat|strateg|distribut|facilit)(.*)"
+    ],
+    [
+      "Public Relations",
+      "(_|\\b)(communication|public|affairs|relation|community|pr)(_|\\b)"
+    ],
+    [
+      "Design",
+      "(_|\\b)(creative|design|art|designer)(_|\\b)"
+    ],
+    [
+      "Services",
+      "(_|\\b)(service|solution|training|implementation|user|help|care|maintenance|engage|instruction|account(.*)manager|account(.*)executive|soa)(_|\\b)"
+    ],
+    [
+      "Research",
+      "(_|\\b)(research)(_|\\b)"
+    ],
+    [
+      "Analytics",
+      "(_|\\b)data(_|\\b)|(_|\\b)analy(.*)"
+    ],
+    [
+      "Academic",
+      "(_|\\b)education(_|\\b)|(_|\\b)academi(.*)"
+    ],
+    [
+      "Consulting",
+      "(_|\\b)consult(.*)"
+    ]
+  ],
+  "acadStr": "(_|\\b)(student|researcher|professor)(_|\\b)",
+  "DS_Title_IsVPAbove": 0,
+  "DS_Title_HasUnusualChar": 0,
+  "DS_Title_IsManager": 0,
+  "DS_Title_IsDirector": 0,
+  "DS_Title_IsTechRelated": 1,
+  "DS_Title_IsAcademic": 0,
+  "badSet": "(_|\\b)(none|no|not|delete|asd|sdf|unknown|undisclosed|null|don|donot|abc|xyz|nonname|nocompany|noname)(_|\\b)",
+  "mapTitleRoleAny": [
+    [
+      "Associate",
+      "(_|\\b)(assoc)(.*)"
+    ],
+    [
+      "Assistant",
+      "(_|\\b)(secret|assist)(.*)"
+    ],
+    [
+      "Leadership",
+      "(_|\\b)(founder|vice|vp|evp|chief|owner|president|svp|c[tefmxdosi]o)(_|\\b)"
+    ],
+    [
+      "Manager",
+      "(_|\\b)(mgr|gm|supervisor|lead)(_|\\b)|(_|\\b)(manager)(.*)"
+    ],
+    [
+      "Director",
+      "(_|\\b)dir(ector)?(_|\\b)"
+    ],
+    [
+      "Engineer",
+      "(_|\\b)(programmer|developer|dev|engineer)(_|\\b)"
+    ],
+    [
+      "Consultant",
+      "(_|\\b)(consultant)(_|\\b)"
+    ],
+    [
+      "Student_Teacher",
+      "(_|\\b)(instructor|coach|teacher|student|faculty)(_|\\b)"
+    ],
+    [
+      "Analyst",
+      "(_|\\b)(analyst)(_|\\b)"
+    ],
+    [
+      "Admin",
+      "(_|\\b)(admin|dba)(_|\\b)"
+    ],
+    [
+      "Investor_Partner",
+      "(_|\\b)(partner|investor|board)(_|\\b)"
+    ],
+    [
+      "Controller_Accountant",
+      "(_|\\b)(controller|accountant)(_|\\b)"
+    ],
+    [
+      "Specialist_Technician",
+      "(_|\\b)(technician|specialist)(_|\\b)"
+    ],
+    [
+      "Architect",
+      "(_|\\b)(architect)(_|\\b)"
+    ],
+    [
+      "Representative",
+      "(_|\\b)(representative)(_|\\b)"
+    ],
+    [
+      "Editor",
+      "(_|\\b)(editor)(_|\\b)"
+    ]
+  ],
+  "vpStr": "(_|\\b)(vp|chief|c[tefmxdosi]o|pres|president|head[_ ]of|managing[_ ]partner)(_|\\b)",
+  "DS_Title_Level": 15,
+  "DS_Title_Length": 15.06,
+  "DS_Title_IsSenior": 1,
+  "DS_Title_Role": [
+    {
+      "": 1.28,
+      "Engineer": 2.07,
+      "Specialist_Technician": 5.91,
+      "Associate": 2.08,
+      "Admin": 2.78,
+      "Consultant": 2.08,
+      "Controller_Accountant": 0,
+      "Director": 2.9,
+      "Manager": 3.17,
+      "Leadership": 2.54,
+      "Architect": 3.48,
+      "Representative": 0,
+      "Assistant": 1.49,
+      "Student_Teacher": 0.4,
+      "Investor_Partner": 0,
+      "Analyst": 1.63,
+      "Editor": 0
+    },
+    "Engineer"
+  ],
+  "dirStr": "(_|\\b)dir(ector)?(_|\\b)",
+  "maxTitleLen": 30
+}

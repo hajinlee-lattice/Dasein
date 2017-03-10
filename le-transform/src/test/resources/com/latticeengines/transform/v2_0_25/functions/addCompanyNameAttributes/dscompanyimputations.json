@@ -1,0 +1,8 @@
+{
+  "maxStrLen": 30,
+  "DS_Company_Entropy": 0.19,
+  "DS_Company_NameHasUnusualChar": 0,
+  "DS_Company_Length": 7.48,
+  "unusualCharacterSet": "[^\\w\\s]",
+  "badSet": "(_|\\b)(none|no|not|delete|asd|sdf|unknown|undisclosed|null|don|donot|abc|xyz|nonname|nocompany|noname)(_|\\b)"
+}

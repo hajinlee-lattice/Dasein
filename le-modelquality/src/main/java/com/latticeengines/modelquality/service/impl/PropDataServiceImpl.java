@@ -39,7 +39,7 @@ public class PropDataServiceImpl extends BaseServiceImpl implements PropDataServ
         }
         propData = new PropData();
         propData.setName(propDataName);
-        propData.setDataCloudVersion("2.0.2");
+        propData.setDataCloudVersion("2.0.3");
         PropData previousLatest = propDataEntityMgr.getLatestProductionVersion();
         int versionNo = 1;
         if (previousLatest != null) {

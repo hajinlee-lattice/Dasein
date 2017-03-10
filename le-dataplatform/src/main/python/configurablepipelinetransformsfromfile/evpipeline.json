@@ -1,7 +1,7 @@
 {
   "columnTransformFiles": {
     "EnumeratedColumnTransformStep": {
-        "KeyWhenSortingByAscending": "0",
+        "KeyWhenSortingByAscending": 0,
         "Name": "enumeratedcolumntransformstep",
         "MainClassName": "EnumeratedColumnTransformStep",
         "UniqueColumnTransformName": "",
@@ -10,7 +10,7 @@
         "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
     },
     "ColumnTypeConversionStep": {
-        "KeyWhenSortingByAscending": "1",
+        "KeyWhenSortingByAscending": 1,
         "Name": "columntypeconversionstep",
         "MainClassName": "ColumnTypeConversionStep",
         "UniqueColumnTransformName": "",
@@ -19,7 +19,7 @@
         "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "RevenueColumnTransformStep": {
-        "KeyWhenSortingByAscending": "2",
+        "KeyWhenSortingByAscending": 2,
         "Name": "revenuecolumntransformstep",
         "MainClassName": "RevenueColumnTransformStep",
         "UniqueColumnTransformName": "",
@@ -28,7 +28,7 @@
         "ColumnTransformFilePath": "revenuecolumntransformstep.py"
     },
     "ImputationStepEVPipeline":{
-        "KeyWhenSortingByAscending": "3",
+        "KeyWhenSortingByAscending": 3,
         "Name": "imputationstepevpipeline",
         "MainClassName": "ImputationStep",
         "UniqueColumnTransformName": "",
@@ -37,22 +37,22 @@
         "ColumnTransformFilePath": "imputationstepevpipeline.py"
     },
     "CleanCategoricalColumn":{
-        "KeyWhenSortingByAscending": "4",
+        "KeyWhenSortingByAscending": 4,
         "Name": "cleancategoricalcolumn",
         "MainClassName": "CleanCategoricalColumn",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Categorical"],
         "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
         "ColumnTransformFilePath": "cleancategoricalcolumn.py"
-    }, 
+    },
     "AssignConversionRateToAllCategoricalValues":{
-        "KeyWhenSortingByAscending": "5",
+        "KeyWhenSortingByAscending": 5,
         "Name": "assignconversionratetoallcategoricalvalues",
         "MainClassName": "AssignConversionRateToAllCategoricalValues",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Categorical"],
         "NamedParameterListToInit": {
-            "categoricalColumns": "categoricalColumns", 
+            "categoricalColumns": "categoricalColumns",
             "targetColumn": "targetColumn",
             "totalPositiveThreshold": 12
         },

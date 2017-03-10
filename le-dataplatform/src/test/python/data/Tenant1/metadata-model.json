@@ -208,5 +208,6 @@
   "config_metadata": "/user/s-analytics/customers/Tenant1/data/EventMetadata/metadata.avsc",
   "diagnostics_path": "/user/s-analytics/customers/Tenant1/data/EventMetadata/diagnostics.json",
   "python_pipeline_lib": "/app/dataplatform/scripts/lepipeline.tar.gz",
-  "python_pipeline_script": "/app/dataplatform/scripts/pipeline.py"
+  "python_pipeline_script": "/app/dataplatform/scripts/pipeline.py",
+  "pipeline_properties": "remediatedatarulesstep.enabledRules={\"DistinctValueCount\":[\"FirstName\",\"LastName\",\"Company\"]}"
 }

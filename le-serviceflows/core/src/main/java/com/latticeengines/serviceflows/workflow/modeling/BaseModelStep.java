@@ -92,6 +92,12 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         } else {
             log.info("No website attribute in this event table.");
         }
+        Attribute phoneNumber = eventTable.getAttribute(InterfaceName.PhoneNumber);
+        if (phoneNumber != null) {
+            targets.add("PhoneNumber: " + phoneNumber.getName());
+        } else {
+            log.info("No phone number attribute in this event table.");
+        }
 
         Attribute id = eventTable.getAttribute(InterfaceName.Id);
         Attribute email = eventTable.getAttribute(InterfaceName.Email);
@@ -103,6 +109,8 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         }
         if (email != null) {
             readoutAttributes.add(email.getName());
+            // We need to make sure that Email is available for pipeline steps
+            targets.add("Email: " + email.getName());
         }
         if (creationDate != null) {
             readoutAttributes.add(creationDate.getName());

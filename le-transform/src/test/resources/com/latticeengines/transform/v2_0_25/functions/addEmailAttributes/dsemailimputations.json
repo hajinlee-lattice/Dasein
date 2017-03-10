@@ -1,0 +1,8 @@
+{
+  "maxStrLen": 30,
+  "invalidEmailThld": 5,
+  "DS_Email_Length": 15.3,
+  "DS_Email_IsInvalid": 1,
+  "DS_Email_PrefixLength": 7.1,
+  "DS_Domain_Length": 8.2
+}

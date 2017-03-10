@@ -30,7 +30,7 @@ class PipelineStep(EntityBase):
         self._scriptpath = '.'
         self._hdfspath = ''
         self._config['Name'] = name
-        self._config['KeyWhenSortingByAscending'] = '100'
+        self._config['KeyWhenSortingByAscending'] = 100
         self._config['MainClassName'] = name
         self._config['UniqueColumnTransformName'] = ''
         self._config['OperatesOnColumns'] = []

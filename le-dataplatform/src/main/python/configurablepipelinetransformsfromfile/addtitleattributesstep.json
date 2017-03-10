@@ -1,15 +1,18 @@
 {
-      "KeyWhenSortingByAscending": "1",
+      "KeyWhenSortingByAscending": 100,
       "Name": "addtitleattributesstep",
       "MainClassName": "AddTitleAttributesStep",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
+        "params": "params",
+        "addedFeatures": "emptyList",
         "dsTitleImputation": "emptyDictionary",
         "targetCol": "targetColumn",
         "titleColName": "Title",
-        "maxTitleLen": 30,
-        "missingValues": [0, "Null", ""]
+        "thldCnt": 500,
+        "thldPopPerc": 0.05,
+        "maxTitleLen": 30
       },
       "ColumnTransformFilePath": "addtitleattributesstep.py"
 }
