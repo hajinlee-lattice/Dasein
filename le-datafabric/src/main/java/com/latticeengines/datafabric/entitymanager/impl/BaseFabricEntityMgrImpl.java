@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -19,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.AvroReflectionUtils;
@@ -81,6 +84,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     protected DynamoIndex tableIndex;
 
     private boolean enforceRemoteDynamo;
+
+    private boolean initialized = false;
 
     public BaseFabricEntityMgrImpl(Builder builder) {
         this.store = builder.store;
@@ -267,18 +272,26 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             GenericRecord record = (pair == null) ? null : pair.getLeft();
             producer.send(recordKey, record);
         } catch (Exception e) {
-            log.info("Publish entity failed " + recordType + " " + entity.getId());
-            log.info(e);
+            log.error("Publish entity failed " + recordType + " " + entity.getId(), e);
         }
     }
 
     @Override
     public void publish(GenericRecordRequest recordRequest, GenericRecord record) {
+        if (disabled || record == null)
+            return;
+        Future<RecordMetadata> future = producer.send(recordRequest, record);
         try {
-            producer.send(recordRequest, record);
-        } catch (Exception e) {
-            log.info("Publish generic record failed " + recordType + " " + recordRequest.getId(), e);
+            if (!initialized) {
+                future.get(5, TimeUnit.SECONDS);
+            }
+        } catch (Exception ex) {
+            future.cancel(true);
+            throw new RuntimeException("Publish timeout!", ex);
+        } finally {
+            initialized = true;
         }
+
     }
 
     @Override
@@ -314,6 +327,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         return disabled;
     }
 
+    public void setIsDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
     protected Pair<GenericRecord, Map<String, Object>> entityToPair(T entity) {
         try {
             if (entity instanceof FabricEntity) {
@@ -337,14 +354,14 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
                 return Pair.of(record, tags);
             }
             Schema schema = FabricEntityFactory.getFabricSchema(clazz, recordType);
-            log.info("Create Entity " + entity + "Schema " + schema.toString());
+            log.debug("Create Entity " + entity + "Schema " + schema.toString());
             return Pair.of(AvroReflectionUtils.toGenericRecord(entity, schema), null);
         } catch (Exception e) {
             log.error("Failed to convert entity to generic record", e);
             return null;
         }
     }
-    
+
     private T pairToEntity(Pair<GenericRecord, Map<String, Object>> pair) {
         if (pair == null || pair.getLeft() == null) {
             return null;
@@ -362,7 +379,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         ParameterizedType paramType = (ParameterizedType) type;
         Type actualType = paramType.getActualTypeArguments()[0];
         if (actualType.getTypeName().equals("T")) {
-           return null;
+            return null;
         }
         return (Class<T>) actualType;
     }

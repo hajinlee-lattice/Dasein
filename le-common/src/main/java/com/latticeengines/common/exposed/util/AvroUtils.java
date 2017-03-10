@@ -607,7 +607,7 @@ public class AvroUtils {
                         try {
                             appender.append(datum);
                         } catch (Exception e) {
-                            log.warn("Data for the error row: " + datum.toString());
+                            log.warn("Data for the error row: " + datum.toString() + " filePath:" + filePath);
                             throw new IOException(e);
                         }
                     }
@@ -706,7 +706,7 @@ public class AvroUtils {
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         for (Object[] tuple : data) {
             int i = 0;
-            for (Schema.Field field: schema.getFields()) {
+            for (Schema.Field field : schema.getFields()) {
                 builder.set(field, tuple[i]);
                 i++;
             }

@@ -47,66 +47,109 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
         boolean result = messageService.createTopic(FABRIC_GENERIC_CONNECTOR, ENVIRONMENT_PRIVATE, 100, 2);
         if (result) {
             log.info("Topic was created! topic=" + FABRIC_GENERIC_CONNECTOR);
+        } else {
+            log.warn("Could not create/find topic=" + FABRIC_GENERIC_CONNECTOR
+                    + " disabling the generic fabric entity manager!.");
+            setIsDisabled(true);
         }
     }
 
     @Override
     public String createUniqueBatchId(Long totalCount) {
-        String uuid = UUID.randomUUID().toString();
-        GenericFabricNode node = new GenericFabricNode();
-        node.setName(uuid);
-        if (totalCount != null) {
-            node.setTotalCount(totalCount);
+        if (isDisabled()) {
+            log.warn("Generic Fabric entity manager is disabled!");
+            return null;
         }
-        String data = JsonUtils.serialize(node);
-        messageService.createZNode(uuid, data, true);
-        return uuid;
+        try {
+            String uuid = UUID.randomUUID().toString();
+            GenericFabricNode node = new GenericFabricNode();
+            node.setName(uuid);
+            if (totalCount != null) {
+                node.setTotalCount(totalCount);
+            }
+            String data = JsonUtils.serialize(node);
+            messageService.createZNode(uuid, data, true);
+            return uuid;
+        } catch (Exception ex) {
+            log.warn("Can not create batch Id. Disable the entity manager!", ex);
+            setIsDisabled(true);
+            return null;
+        }
     }
 
     @Override
     public String createOrGetNamedBatchId(String batchName, Long totalCount, boolean createNew) {
-        GenericFabricNode node = new GenericFabricNode();
-        node.setName(batchName);
-        if (totalCount != null) {
-            node.setTotalCount(totalCount);
+        if (isDisabled()) {
+            log.warn("Generic Fabric entity manager is disabled!");
+            return batchName;
         }
-        String data = JsonUtils.serialize(node);
-        messageService.createZNode(batchName, data, createNew);
+        try {
+            GenericFabricNode node = new GenericFabricNode();
+            node.setName(batchName);
+            if (totalCount != null) {
+                node.setTotalCount(totalCount);
+            }
+            String data = JsonUtils.serialize(node);
+            messageService.createZNode(batchName, data, createNew);
+        } catch (Exception ex) {
+            log.warn("Can not create batch Id=" + batchName + " disable the entity manager!", ex);
+            setIsDisabled(true);
+        }
         return batchName;
     }
 
     @Override
     public GenericFabricStatus getBatchStatus(String batchId) {
         GenericFabricStatus status = new GenericFabricStatus();
-        String data = messageService.readData(batchId);
-        if (StringUtils.isBlank(data)) {
-            status.setStatus(GenericFabricStatusEnum.UNKNOWN);
+        status.setStatus(GenericFabricStatusEnum.UNKNOWN);
+        if (isDisabled()) {
+            log.warn("Generic Fabric entity manager is disabled!");
             return status;
         }
+        try {
+            String data = messageService.readData(batchId);
+            if (StringUtils.isBlank(data)) {
+                return status;
+            }
 
-        GenericFabricNode fabricNode = JsonUtils.deserialize(data, GenericFabricNode.class);
-        status.setStatus(getStatusEnum(batchId, fabricNode));
-        setStatusProgress(batchId, status, fabricNode);
-        status.setMessage(fabricNode.getMessage());
+            GenericFabricNode fabricNode = JsonUtils.deserialize(data, GenericFabricNode.class);
+            status.setStatus(getStatusEnum(batchId, fabricNode));
+            setStatusProgress(batchId, status, fabricNode);
+            status.setMessage(fabricNode.getMessage());
+        } catch (Exception ex) {
+            log.warn("Can not get status for batch Id=" + batchId + " disable the entity manager!", ex);
+            setIsDisabled(true);
+        }
         return status;
     }
 
     @Override
     public void publishEntity(GenericRecordRequest request, T entity, Class<T> clazz) {
+        if (isDisabled()) {
+            return;
+        }
         try {
             Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
             GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
             publish(request, genericRecord);
 
-        } catch (Exception e) {
-            log.warn("Publish entity failed! entity Id=" + entity.getId(), e);
-            throw new RuntimeException("Publish entity failed! entity Id=" + entity.getId(), e);
+        } catch (Exception ex) {
+            log.warn("Publish entity failed! entity Id=" + entity.getId() + " disable the entity manager!", ex);
+            setIsDisabled(true);
         }
     }
 
     @Override
     public void publishRecord(GenericRecordRequest request, GenericRecord genericRecord) {
-        publish(request, genericRecord);
+        if (isDisabled()) {
+            return;
+        }
+        try {
+            publish(request, genericRecord);
+        } catch (Exception ex) {
+            log.warn("Publish record failed! request Id=" + request.getId() + " disable the entity manager!", ex);
+            setIsDisabled(true);
+        }
     }
 
     private void setStatusProgress(String batchId, GenericFabricStatus status, GenericFabricNode fabricNode) {
@@ -143,30 +186,43 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
 
     @Override
     public void updateBatchCount(String batchId, long delta) {
-        messageService.incrementalUpdate(batchId, (origData) -> {
-            try {
-                if (StringUtils.isBlank(origData)) {
-                    GenericFabricNode node = new GenericFabricNode();
-                    node.setCount(delta);
-                    return JsonUtils.serialize(node);
-                }
-                if (delta <= 0) {
-                    return origData;
-                }
-                GenericFabricNode node = JsonUtils.deserialize(origData, GenericFabricNode.class);
-                if (node.getCount() + delta < Long.MAX_VALUE) {
-                    node.setCount(node.getCount() + delta);
-                }
-                return JsonUtils.serialize(node);
-            } catch (Exception ex) {
-                log.warn("Failed to update, batchIdName=" + batchId + " delta=" + delta);
-                return origData;
-            }
-        });
+        if (isDisabled()) {
+            log.warn("Generic Fabric entity manager is disabled!");
+            return;
+        }
+
+        messageService.incrementalUpdate(
+                batchId,
+                (origData) -> {
+                    try {
+                        if (StringUtils.isBlank(origData)) {
+                            GenericFabricNode node = new GenericFabricNode();
+                            node.setCount(delta);
+                            return JsonUtils.serialize(node);
+                        }
+                        if (delta <= 0) {
+                            return origData;
+                        }
+                        GenericFabricNode node = JsonUtils.deserialize(origData, GenericFabricNode.class);
+                        if (node.getCount() + delta < Long.MAX_VALUE) {
+                            node.setCount(node.getCount() + delta);
+                        }
+                        return JsonUtils.serialize(node);
+                    } catch (Exception ex) {
+                        log.error("Failed to update, batchIdName=" + batchId + " delta=" + delta
+                                + " disable the entity manager!");
+                        setIsDisabled(true);
+                        return origData;
+                    }
+                });
     }
 
     @Override
     public boolean cleanup(String batchId) {
+        if (isDisabled()) {
+            log.warn("Generic Fabric entity manager is disabled!");
+            return false;
+        }
         return messageService.cleanup(batchId);
     }
 

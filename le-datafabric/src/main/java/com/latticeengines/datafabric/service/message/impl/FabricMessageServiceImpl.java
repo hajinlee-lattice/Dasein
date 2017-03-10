@@ -272,7 +272,10 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     public boolean createZNode(String entityName, String data, boolean createNew) {
         boolean result = false;
         Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
+        String lockName = entityName;
         try {
+            LockManager.registerCrossDivisionLock(lockName);
+            LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
             if (createNew) {
                 try {
                     camille.delete(path);
@@ -280,12 +283,20 @@ public class FabricMessageServiceImpl implements FabricMessageService {
                     log.warn("Can not delete znode, entityName=" + entityName + " reason=" + ex.getMessage());
                 }
             }
-            camille.create(path, new Document(data), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            log.info("Created node, path " + path);
-            result = true;
+            if (!camille.exists(path)) {
+                camille.create(path, new Document(data), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                log.info("Created node, path " + path);
+                result = true;
+            } else {
+                log.info("Path already exists, path " + path);
+            }
         } catch (Exception ex) {
             log.error("Failed to create znode, path " + path, ex);
+            throw new RuntimeException("Failed to create znode, path " + path);
+        } finally {
+            LockManager.releaseWriteLock(lockName);
         }
+
         return result;
     }
 
