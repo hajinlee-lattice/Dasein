@@ -9,7 +9,8 @@ var app = angular.module('TenantConsoleApp', [
     'app.tenants.controller.TenantConfigCtrl',
     'app.modelquality',
     'app.datacloud',
-    'pd.navigation.pagination'
+    'pd.navigation.pagination',
+    'templates-main'
 ]);
 
 app.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {

@@ -253,7 +253,7 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= app.dir %>',
-                    src: ['<%= app.dir %>/assets/img/**/*', '<%= app.dir %>/lib/css/**/*', '<%= app.dir %>/app/**/*.html'],
+                    src: ['<%= app.dir %>/assets/img/**/*'],
                     dest: '<%= app.dist %>'
                 }]
             }
@@ -359,6 +359,21 @@ module.exports = function(grunt) {
             },
             wget: ['wget:js', 'wget:css', 'wget:fonts', 'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages'],
             test: ['jshint', 'karma:unit']
+        },
+        html2js: {
+            options: {
+                base: '',
+                htmlmin: {
+                    removeComments: true,
+                    collapseWhitespace: true,
+                    conservativeCollapse: true,
+                    minifyCSS: true
+                }
+            },
+            main: {
+                src: ['app/**/*.html', '404.html'],
+                dest: '<%= app.dist %>/assets/js/templates.js'
+            },
         }
 
     });
@@ -370,6 +385,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-processhtml');
+    grunt.loadNpmTasks('grunt-html2js');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-karma');
@@ -385,6 +401,7 @@ module.exports = function(grunt) {
         'cssmin',
         'processhtml:dist',
         'clean:postDist',
+        'html2js',
         'copy:assets'
     ]);
 

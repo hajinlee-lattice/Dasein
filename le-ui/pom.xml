@@ -35,6 +35,7 @@
                                 <argument>--exclude=target</argument>
                                 <argument>--exclude=src</argument>
 
+                                <argument>--exclude=projects/**/app</argument>
                                 <argument>--exclude=projects/**/lib</argument>
                                 <argument>--exclude=projects/**/test</argument>
                                 <argument>--exclude=projects/**/node_modules</argument>
