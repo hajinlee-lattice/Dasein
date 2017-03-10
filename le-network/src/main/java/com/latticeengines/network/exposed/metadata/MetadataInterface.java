@@ -41,7 +41,7 @@ public interface MetadataInterface {
 
     MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName);
 
-    List<MetadataSegment> getMetadataSegments(String customerSpace, String selection);
+    List<MetadataSegment> getAllMetadataSegments(String customerSpace);
 
     VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier);
 
