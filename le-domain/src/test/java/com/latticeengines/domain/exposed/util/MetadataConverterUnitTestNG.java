@@ -2,15 +2,20 @@ package com.latticeengines.domain.exposed.util;
 
 import static org.testng.AssertJUnit.assertEquals;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.JdbcStorage.DatabaseName;
 
 public class MetadataConverterUnitTestNG {
     private Configuration configuration = new Configuration();
@@ -44,12 +49,18 @@ public class MetadataConverterUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testBucketedTable() {
+    public void testBucketedTable() throws IOException {
         String path = getResourceAbsolutePath(
                 "com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/am.avsc");
-        Table table = MetadataConverter.getBucketedTableFromSchemaPath(configuration, path, null, null);
-        assertEquals(table.getAttributes().size(), 134);
-        assertEquals(table.getAttribute("Attr1_8").getBucketList().toString(),
+        Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(configuration, path, null, null);
+        JdbcStorage storage = new JdbcStorage();
+        storage.setDatabaseName(DatabaseName.REDSHIFT);
+        storage.setTableNameInStorage("redshift_bucketedaccountmaster");
+        bucketedTable.setStorageMechanism(storage);
+
+        //FileUtils.write(new File("bucketedaccountmastertable.json"), bucketedTable.toString());
+        assertEquals(bucketedTable.getAttributes().size(), 134);
+        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketList().toString(),
                 Arrays.asList(new String[] { null, "Value1", "Value2", "Value3"}).toString());
     }
 }
