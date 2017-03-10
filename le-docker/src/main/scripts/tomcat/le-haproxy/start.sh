@@ -21,6 +21,8 @@ function replace_token() {
 
 if [ ! -z "${HOSTS}" ]; then
 
+    LPI_HOSTPORTS=""
+    ADMINCONSOLE_HOSTPORTS=""
     SWAGGER_HOSTPORTS=""
     PLS_HOSTPORTS=""
     ADMIN_HOSTPORTS=""
@@ -42,6 +44,8 @@ if [ ! -z "${HOSTS}" ]; then
     for h in $(echo $HOSTS | sed "s/,/ /g")
         do
             echo "add ${h} to server pools"
+            LPI_HOSTPORTS="${LPI_HOSTPORTS}${h}:3000,"
+            ADMINCONSOLE_HOSTPORTS="${ADMINCONSOLE_HOSTPORTS}${h}:3002,"
             SWAGGER_HOSTPORTS="${SWAGGER_HOSTPORTS}${h}:8080,"
             PLS_HOSTPORTS="${PLS_HOSTPORTS}${h}:8081,"
             ADMIN_HOSTPORTS="${ADMIN_HOSTPORTS}${h}:8085,"
@@ -63,6 +67,8 @@ if [ ! -z "${HOSTS}" ]; then
 
 fi
 
+replace_token lpinodes ${LPI_HOSTPORTS}
+replace_token adminconsolenodes ${ADMINCONSOLE_HOSTPORTS}
 replace_token swagger ${SWAGGER_HOSTPORTS}
 replace_token pls ${PLS_HOSTPORTS}
 replace_token admin ${ADMIN_HOSTPORTS}
