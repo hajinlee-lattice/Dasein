@@ -213,7 +213,7 @@ module.exports = function (grunt) {
         uglify: {
             dist: {
                 options: {
-                    mangle: true,
+                    mangle: false,
                     compress: {
                         drop_console: true
                     }
@@ -230,7 +230,7 @@ module.exports = function (grunt) {
             },
             production: {
                 options: {
-                    mangle: true,
+                    mangle: false,
                     compress: {
                         drop_console: true
                     }
