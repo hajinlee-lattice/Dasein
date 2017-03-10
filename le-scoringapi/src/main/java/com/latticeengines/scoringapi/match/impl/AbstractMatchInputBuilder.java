@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
@@ -197,10 +196,12 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             Map<String, Object> record, MatchInput matchInput) {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         if (modelSummary.getSourceSchemaInterpretation()
-                .equals(SchemaInterpretation.SalesforceAccount.toString())) {
+                .equals(SchemaInterpretation.SalesforceAccount.toString())
+                && interpreted.getWebsite() != null) {
             keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getWebsite()));
         } else if (modelSummary.getSourceSchemaInterpretation()
-                .equals(SchemaInterpretation.SalesforceLead.toString())) {
+                .equals(SchemaInterpretation.SalesforceLead.toString())
+                && interpreted.getEmailAddress() != null) {
             keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getEmailAddress()));
         }
         addToKeyMapIfValueExists(keyMap, MatchKey.Name, interpreted.getCompanyName(), record);
