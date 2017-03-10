@@ -30,7 +30,7 @@
                             <executable>tar</executable>
                             <workingDirectory>..</workingDirectory>
                             <arguments>
-                                <argument>czvf</argument>
+                                <argument>czf</argument>
                                 <argument>le-ui.tar.gz</argument>
                                 <argument>--exclude=target</argument>
                                 <argument>--exclude=src</argument>
