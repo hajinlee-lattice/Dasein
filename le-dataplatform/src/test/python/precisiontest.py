@@ -32,10 +32,13 @@ class PrecisionTest(TestCase):
             np.float64(-2.71828182846e15), \
             np.float64(2.71828182846e-15), \
             0.00057615364, \
-            24756 \
+            24756, \
+            0.3333333333333, \
+            3.33e-1 \
         ]
 
-        valuesAtPrecision3 = [3.14, -3.14, 2.72e15, -2.72e15, 2.72e-15, 5.76e-4, 2.48e4]
+        valuesAtPrecision3 = [3.14, -3.14, 2.72e15, -2.72e15, 2.72e-15, 5.76e-4, 2.48e4, 0.333, 0.333]
+        print valuesAtPrecision3
 
         vs = pd.DataFrame(data=[{'value':v} for v in valuesToTest])
         vss = vs[['value']].apply(lambda x : PrecisionUtil.setPrecision(x, 3))
