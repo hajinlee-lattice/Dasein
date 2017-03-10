@@ -22,4 +22,5 @@ sed -i "/export LOGGING=/d" /opt/node/app/ENV_VARS
 
 source /opt/node/app/ENV_VARS
 
+npm install debug
 node /opt/node/app/app.js
