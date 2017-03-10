@@ -59,7 +59,9 @@ public class MatchResource {
     public void matchRealTime(@RequestBody MatchInput input, HttpServletResponse response) {
         try {
             MatchOutput output = realTimeMatchService.match(input);
-            GzipUtils.writeToGzipStream(response, output);
+            if (output != null) {
+                GzipUtils.writeToGzipStream(response, output);
+            }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
         }
@@ -77,7 +79,9 @@ public class MatchResource {
         long time = System.currentTimeMillis();
         try {
             BulkMatchOutput output = realTimeMatchService.matchBulk(input);
-            GzipUtils.writeToGzipStream(response, output);
+            if (output != null) {
+                GzipUtils.writeToGzipStream(response, output);
+            }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed.", e);
         } finally {
