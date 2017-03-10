@@ -2,7 +2,7 @@
 
 module.exports = function (grunt) {
     // version of our software. This should really be in the package.json
-    // but it gets passed in through 
+    // but it gets passed in through
     var versionStringConfig = grunt.option('versionString') || new Date().getTime();
 
     // Define the configuration for all the tasks
@@ -21,14 +21,13 @@ module.exports = function (grunt) {
 
         // https://confluence.lattice-engines.com/pages/viewpage.action?pageId=16909888
         env: {
-            dev: {
-                NODE_APPS: 'leui',
+            devall: { // all populated
+                NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'development',
-                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 API_URL: 'https://testapp.lattice-engines.com',
-                //API_URL: 'https://10.41.0.13:8081',
-                API_ADMIN_URL: 'https://10.41.0.25:8085',
                 API_CON_URL: 'https://testapi.lattice-engines.com:8073',
+                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                API_ADMIN_URL: 'https://10.41.0.25:8085',
                 API_MCSVC_URL: 'https://10.41.0.25:8080',
                 API_MATCHAPI_URL: 'https://10.41.0.25:8076',
                 API_INFLUXDB_URL: 'http://10.41.1.188:8086',
@@ -42,20 +41,29 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
+            dev: {
+                NODE_APPS: 'leui',
+                NODE_ENV: 'development',
+                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                API_URL: 'https://testapp.lattice-engines.com',
+                API_CON_URL: 'https://testapi.lattice-engines.com:8073',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
+            },
             dev_admin: {
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
-                API_URL: 'https://testapp.lattice-engines.com',
-                //API_URL: 'https://10.41.0.13:8081',
                 API_ADMIN_URL: 'https://10.41.0.25:8085',
-                API_CON_URL: 'https://testapi.lattice-engines.com:8073',
                 API_MCSVC_URL: 'https://10.41.0.25:8080',
                 API_MATCHAPI_URL: 'https://10.41.0.25:8076',
                 API_INFLUXDB_URL: 'http://10.41.1.188:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
-                HTTP_PORT: 3001,
-                HTTPS_PORT: 3000,
                 ADMIN_HTTP_PORT: 3003,
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
@@ -67,11 +75,8 @@ module.exports = function (grunt) {
                 NODE_ENV: 'development',
                 ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
-                API_ADMIN_URL: 'https://10.41.0.26:8085',
                 API_CON_URL: 'https://bodcdevsvipb26.lattice.local:8073',
-                API_MCSVC_URL: 'https://10.41.0.26:8080',
                 API_MATCHAPI_URL: 'https://10.41.0.26:8076',
-                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -102,17 +107,11 @@ module.exports = function (grunt) {
                 NODE_ENV: 'development',
                 ULYSSES_URL: 'http://localhost:8075',
                 API_URL: 'http://localhost:8081',
-                API_ADMIN_URL: 'http://localhost:8085',
                 API_CON_URL: 'http://localhost:8073',
-                API_MCSVC_URL: 'http://localhost:8080',
-                API_MATCHAPI_URL: 'http://localhost:8076',
-                API_INFLUXDB_URL: 'http://localhost:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
                 HTTPS_PORT: 3000,
-                ADMIN_HTTP_PORT: 3003,
-                ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
@@ -120,17 +119,12 @@ module.exports = function (grunt) {
             local_admin: {
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
-                ULYSSES_URL: 'http://localhost:8075',
-                API_URL: 'http://localhost:8081',
                 API_ADMIN_URL: 'http://localhost:8085',
-                API_CON_URL: 'http://localhost:8073',
                 API_MCSVC_URL: 'http://localhost:8080',
                 API_MATCHAPI_URL: 'http://localhost:8076',
                 API_INFLUXDB_URL: 'http://localhost:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
-                HTTP_PORT: 3001,
-                HTTPS_PORT: 3000,
                 ADMIN_HTTP_PORT: 3003,
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
@@ -141,9 +135,7 @@ module.exports = function (grunt) {
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
                 ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
-                //API_URL: 'https://testapp.lattice-engines.com',
                 API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
-                //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
                 API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
                 API_CON_URL: 'https://testapi.lattice-engines.com',
                 API_MCSVC_URL: 'https://admin-qa.lattice.local:8080',
@@ -165,7 +157,6 @@ module.exports = function (grunt) {
                 NODE_ENV: 'qa',
                 ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
                 API_URL: 'https://testapp.lattice-engines.com',
-                //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
                 API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
                 API_CON_URL: 'https://testapi.lattice-engines.com',
                 API_MCSVC_URL: 'https://admin-qa.lattice.local:8080',
@@ -295,7 +286,7 @@ module.exports = function (grunt) {
                 }
             },
             devWatchAndServe: {
-                tasks: [ 
+                tasks: [
                     [ 'env:dev', 'run:node' ], 'concurrent:watch'
                 ],
                 options: {
@@ -303,7 +294,7 @@ module.exports = function (grunt) {
                 }
             },
             devbWatchAndServe: {
-                tasks: [ 
+                tasks: [
                     [ 'env:devb', 'run:node' ], 'concurrent:watch'
                 ],
                 options: {
@@ -311,7 +302,7 @@ module.exports = function (grunt) {
                 }
             },
             localWatchAndServe: {
-                tasks: [ 
+                tasks: [
                     [ 'env:local', 'run:node' ], 'concurrent:watch'
                 ],
                 options: {
@@ -319,7 +310,7 @@ module.exports = function (grunt) {
                 }
             },
             qaWatchAndServe: {
-                tasks: [ 
+                tasks: [
                     [ 'env:qa', 'run:node' ], 'concurrent:watch'
                 ],
                 options: {
@@ -327,7 +318,7 @@ module.exports = function (grunt) {
                 }
             },
             prodWatchAndServe: {
-                tasks: [ 
+                tasks: [
                     [ 'env:proddev', 'run:node' ], 'concurrent:watch'
                 ],
                 options: {
@@ -478,6 +469,16 @@ module.exports = function (grunt) {
     grunt.registerTask('local_admin', [
         'env:local_admin',
         'run:node'
+    ]);
+
+    grunt.registerTask('devallnowatch', [
+        'env:devall',
+        'run:node'
+    ]);
+
+    grunt.registerTask('devallmon', [
+        'env:devall',
+        'run:nodemon'
     ]);
 
     grunt.registerTask('local', [
