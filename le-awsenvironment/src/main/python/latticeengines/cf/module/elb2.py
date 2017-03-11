@@ -7,41 +7,43 @@ class TargetGroup(Resource):
         Resource.__init__(self, logicalId)
 
         self.__name = {
-            "Fn::Join": [ "-", [
+            "Fn::Join": ["-", [
                 logicalId,
-                { "Ref" : "AWS::StackName" }
-            ] ] }
+                {"Ref": "AWS::StackName"}
+            ]]}
 
         self._template = {
             "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-            "Properties" : {
-                "HealthCheckPath" : checkon,
-                "Name" : self.__name,
-                "Port" : port,
-                "Protocol" : protocol,
-                "VpcId" : PARAM_VPC_ID.ref()
+            "Properties": {
+                "HealthCheckPath": checkon,
+                "Name": self.__name,
+                "Port": port,
+                "Protocol": protocol,
+                "VpcId": PARAM_VPC_ID.ref()
             }
         }
+
 
 class Listener(Resource):
     def __init__(self, logicalId, lb, tg, port=443, protocol="HTTPS"):
         assert isinstance(lb, ApplicationLoadBalancer)
         Resource.__init__(self, logicalId)
         self._template = {
-            "Type" : "AWS::ElasticLoadBalancingV2::Listener",
-            "Properties" : {
-                "Certificates" : [ {
-                    "CertificateArn" : PARAM_SSL_CERTIFICATE_ARN.ref()
-                } ],
-                "DefaultActions" : [ {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "Certificates": [{
+                    "CertificateArn": PARAM_SSL_CERTIFICATE_ARN.ref()
+                }],
+                "DefaultActions": [{
                     "TargetGroupArn": tg.ref(),
                     "Type": "forward"
-                } ],
-                "LoadBalancerArn" : lb.ref(),
-                "Port" : port,
-                "Protocol" : protocol
+                }],
+                "LoadBalancerArn": lb.ref(),
+                "Port": port,
+                "Protocol": protocol
             }
         }
+
 
 class ListenerRule(Resource):
     def __init__(self, logicalId, listener, priority, tg, path_patterns):
@@ -49,20 +51,21 @@ class ListenerRule(Resource):
         assert isinstance(tg, TargetGroup)
         Resource.__init__(self, logicalId)
         self._template = {
-            "Type" : "AWS::ElasticLoadBalancingV2::ListenerRule",
-            "Properties" : {
-                "Actions" : [ {
-                    "TargetGroupArn" : tg.ref(),
-                    "Type" : "forward"
-                } ],
-                "Conditions" : [ {
+            "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+            "Properties": {
+                "Actions": [{
+                    "TargetGroupArn": tg.ref(),
+                    "Type": "forward"
+                }],
+                "Conditions": [{
                     "Field": "path-pattern",
-                    "Values": [ path_patterns ]
-                } ],
-                "ListenerArn" : listener.ref(),
-                "Priority" : priority
+                    "Values": [path_patterns]
+                }],
+                "ListenerArn": listener.ref(),
+                "Priority": priority
             }
         }
+
 
 class ApplicationLoadBalancer(Resource):
     def __init__(self, name, sg, subnet_params):
@@ -70,16 +73,16 @@ class ApplicationLoadBalancer(Resource):
         Resource.__init__(self, logicalId)
         self.__name = name
         self._template = {
-            "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
-            "Properties" : {
-                "Name" : {
-                    "Fn::Join": [ "-", [
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties": {
+                "Name": {
+                    "Fn::Join": ["-", [
                         name,
-                        { "Ref" : "AWS::StackName" }
-                    ] ] },
-                "Scheme" : "internal",
-                "SecurityGroups" : [ sg.ref() ],
-                "Subnets" : [ p.ref() for p in subnet_params ]
+                        {"Ref": "AWS::StackName"}
+                    ]]},
+                "Scheme": "internal",
+                "SecurityGroups": [sg.ref()],
+                "Subnets": [p.ref() for p in subnet_params]
             }
         }
 
@@ -89,7 +92,10 @@ class ApplicationLoadBalancer(Resource):
     def idle_timeout(self, second):
         if "LoadBalancerAttributes" not in self._template["Properties"]:
             self._template["Properties"]["LoadBalancerAttributes"] = []
-        self._template["Properties"]["LoadBalancerAttributes"]["idle_timeout.timeout_seconds"] = str(second)
+        for kv in self._template["Properties"]["LoadBalancerAttributes"]:
+            if kv["Key"] == "idle_timeout.timeout_seconds":
+                kv["Value"] = str(second)
+                return self
+        self._template["Properties"]["LoadBalancerAttributes"].append(
+            {"Key": "idle_timeout.timeout_seconds", "Value": str(second)})
         return self
-
-
