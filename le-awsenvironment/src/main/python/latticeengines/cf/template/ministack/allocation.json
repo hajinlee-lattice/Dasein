@@ -20,7 +20,7 @@
     },
     "scoringapi": {
         "cpu": 1024,
-        "mem": 2048,
+        "mem": 3096,
         "port": 8073,
         "capacity": 1
     },
@@ -29,7 +29,7 @@
         "port": 8072
     },
     "playmaker": {
-        "mem": 1024,
+        "mem": 2048,
         "port": 8071
     },
     "eai": {
