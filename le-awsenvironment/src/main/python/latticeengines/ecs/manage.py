@@ -20,6 +20,16 @@ def restart_service_internal(cluster, service):
     update_tasks_count(cluster_arn, service_arn, 0)
     update_tasks_count(cluster_arn, service_arn, count)
 
+def stop_service(args):
+    stop_service_internal(args.cluster, args.service)
+
+def stop_service_internal(cluster, service):
+    cluster_arn = find_cluster(cluster)
+    service_arn = find_service(cluster, service)
+
+    count = count_tasks_in_service(cluster_arn, service_arn)
+    update_tasks_count(cluster_arn, service_arn, 0)
+
 def find_service(cluster, service):
     cluster_arn = find_cluster(cluster)
     response = ECS_CLIENT.list_services(cluster=cluster_arn)
@@ -177,6 +187,11 @@ def parse_args():
     subparser.add_argument('cluster', metavar='CLUSTER', type=str, help='ecs cluster name')
     subparser.add_argument('service', metavar='SERVICE', type=str, help='ecs service name')
     subparser.set_defaults(func=restart_service)
+
+    subparser = commands.add_parser("stop-service", description="Clean up a log group")
+    subparser.add_argument('cluster', metavar='CLUSTER', type=str, help='ecs cluster name')
+    subparser.add_argument('service', metavar='SERVICE', type=str, help='ecs service name')
+    subparser.set_defaults(func=stop_service)
 
     args = parser.parse_args()
     return args
