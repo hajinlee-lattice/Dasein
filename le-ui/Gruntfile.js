@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                 NODE_ENV: 'development',
                 API_URL: 'https://testapp.lattice-engines.com',
                 API_CON_URL: 'https://testapi.lattice-engines.com:8073',
-                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1652785524.us-east-1.elb.amazonaws.com',
                 API_ADMIN_URL: 'https://10.41.0.25:8085',
                 API_MCSVC_URL: 'https://10.41.0.25:8080',
                 API_MATCHAPI_URL: 'https://10.41.0.25:8076',
@@ -44,7 +44,7 @@ module.exports = function (grunt) {
             dev: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
-                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1652785524.us-east-1.elb.amazonaws.com',
                 API_URL: 'https://testapp.lattice-engines.com',
                 API_CON_URL: 'https://testapi.lattice-engines.com:8073',
                 COMPRESSED: false,
@@ -73,7 +73,7 @@ module.exports = function (grunt) {
             devb: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
-                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1652785524.us-east-1.elb.amazonaws.com',
                 API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
                 API_CON_URL: 'https://bodcdevsvipb26.lattice.local:8073',
                 API_MATCHAPI_URL: 'https://10.41.0.26:8076',
@@ -134,7 +134,7 @@ module.exports = function (grunt) {
             qa: {
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
-                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1652785524.us-east-1.elb.amazonaws.com',
                 API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
                 API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
                 API_CON_URL: 'https://testapi.lattice-engines.com',
@@ -155,7 +155,7 @@ module.exports = function (grunt) {
             qadev: {
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
-                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1652785524.us-east-1.elb.amazonaws.com',
                 API_URL: 'https://testapp.lattice-engines.com',
                 API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
                 API_CON_URL: 'https://testapi.lattice-engines.com',
@@ -176,7 +176,7 @@ module.exports = function (grunt) {
             production: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'production',
-                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1652785524.us-east-1.elb.amazonaws.com',
                 API_URL: 'https://app.lattice-engines.com',
                 API_ADMIN_URL: ' https://admin.prod.lattice.local:8085/',
                 API_CON_URL: 'https://api.lattice-engines.com',
@@ -194,7 +194,7 @@ module.exports = function (grunt) {
             proddev: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'production',
-                ULYSSES_URL: 'https://bodcdevsvipa25.lattice.local:8075',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1652785524.us-east-1.elb.amazonaws.com',
                 API_URL: 'https://app.lattice-engines.com',
                 API_ADMIN_URL: 'https://admin.prod.lattice.local:8085/',
                 API_CON_URL: 'https://api.lattice-engines.com',
