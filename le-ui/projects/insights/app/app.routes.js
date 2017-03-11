@@ -54,7 +54,6 @@ angular.module('insightsApp')
                             LookupStore.add('timestamp', timestamp);
                             LookupStore.add('request', data.request);
                             AuthStore.set('Bearer ' + data.Authentication);
-                            
                             $state.go('home.datacloud.insights');
                         }, false);
                     }

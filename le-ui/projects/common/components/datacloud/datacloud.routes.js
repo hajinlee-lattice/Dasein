@@ -236,7 +236,7 @@ angular
 });
 
 var DataCloudResolve = {
-    EnrichmentCount: function($q, DataCloudStore, ApiHost) {
+    EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
         var deferred = $q.defer();
 
         DataCloudStore.setHost(ApiHost);
@@ -246,8 +246,8 @@ var DataCloudResolve = {
         });
 
         return deferred.promise;
-    },
-    EnrichmentTopAttributes: function($q, DataCloudStore, ApiHost) {
+    }],
+    EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
         var deferred = $q.defer();
 
         DataCloudStore.setHost(ApiHost);
@@ -257,8 +257,8 @@ var DataCloudResolve = {
         });
 
         return deferred.promise;
-    },
-    EnrichmentPremiumSelectMaximum: function($q, DataCloudStore, ApiHost) {
+    }],
+    EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
         var deferred = $q.defer();
 
         DataCloudStore.setHost(ApiHost);
@@ -268,5 +268,5 @@ var DataCloudResolve = {
         });
 
         return deferred.promise;
-    }
+    }]
 };

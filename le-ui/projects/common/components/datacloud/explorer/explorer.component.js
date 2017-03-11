@@ -1,11 +1,12 @@
 // grid view multple of 12 (24), dynamic across
 angular.module('common.datacloud.explorer', [
+    'common.datacloud.explorer.filters',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount,
-    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
+    EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore
 ){
     var vm = this,
         enrichment_chunk_size = 5000,
@@ -33,22 +34,7 @@ angular.module('common.datacloud.explorer', [
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
         },
-        orders: {
-            attributeLookupMode: [ '-Value', 'DisplayName' ],
-            attribute: 'DisplayName',
-            subcategory: 'toString()',
-            category: 'toString()'
-        },
-        download_button: {
-            class: 'orange-button select-label',
-            icon: 'fa fa-download',
-            iconclass: 'white-button select-more',
-            iconrotate: false,
-            tooltip: 'Download Enrichments'
-        },
-        sortPrefix: '+',
-        view: 'list',
-        queryText: '',
+        EnrichmentPremiumSelectMaximum: EnrichmentPremiumSelectMaximum,
         category: '',
         lookupMode: EnrichmentAccountLookup !== null,
         lookupFiltered: EnrichmentAccountLookup,
@@ -94,17 +80,6 @@ angular.module('common.datacloud.explorer', [
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
-    vm.download_button.items = [{
-            href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
-            label: vm.label.button_download,
-            icon: 'fa fa-file-o'
-        },{
-            href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=true&Authorization=' + vm.authToken,
-            label: vm.label.button_download_selected,
-            icon: 'fa fa-file-o'
-        }
-    ];
-
     /* some rules that might hide the page */
     vm.hidePage = function() {
         if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
@@ -123,214 +98,7 @@ angular.module('common.datacloud.explorer', [
         return false;
     }
 
-    vm.setCategory = function(category) {
-        vm.category = category;
-        DataCloudStore.setMetadata('category', category);
-    }
-
-    vm.setSubcategory = function(subcategory) {
-        vm.subcategory = subcategory;
-        DataCloudStore.setMetadata('subcategory', subcategory);
-    }
-
-
-    vm.updateStateParams = function() {
-        $state.go('.', {
-            category: vm.category,
-            subcategory: vm.subcategory
-        }, {
-            notify: false
-        });
-    }
-
-    var clearFilters = function() {
-        for(var i in vm.metadata.toggle) {
-            for(var j in vm.metadata.toggle[i]) {
-                vm.metadata.toggle[i][j] = '';
-            }
-        }
-    }
-
-    vm.init = function() {
-        clearFilters();
-        $scope.$watchGroup([
-                'vm.metadata.toggle.show.nulls',
-                'vm.metadata.toggle.show.selected',
-                'vm.metadata.toggle.hide.selected',
-                'vm.metadata.toggle.show.premium',
-                'vm.metadata.toggle.hide.premium',
-                'vm.metadata.toggle.show.internal',
-                'vm.metadata.toggle.show.enabled',
-                'vm.metadata.toggle.hide.enabled',
-                'vm.metadata.toggle.show.highlighted',
-                'vm.metadata.toggle.hide.highlighted'
-            ], function(newValues, oldValues, scope) {
-
-            vm.filterEmptySubcategories();
-        });
-
-        $scope.$watchGroup([
-                'vm.premiumSelectedTotal',
-                'vm.generalSelectedTotal'
-            ], function(newValues, oldValues, scope) {
-
-            DataCloudStore.setMetadata('generalSelectedTotal', vm.generalSelectedTotal);
-            DataCloudStore.setMetadata('premiumSelectedTotal', vm.premiumSelectedTotal);
-        });
-
-        $scope.$watch('vm.queryText', function(newvalue, oldvalue){
-            vm.queryInProgress = true;
-
-            if (vm.queryTimeout) {
-                $timeout.cancel(vm.queryTimeout);
-            }
-
-            // debounce timeout to speed things up
-            vm.queryTimeout = $timeout(function() {
-                if(!vm.category && newvalue) {
-                    vm.setCategory(vm.categories[0]);
-                    vm.updateStateParams();
-                }
-
-                vm.query = vm.queryText;
-                vm.queryInProgress = false;
-
-                if (vm.section != 'browse') {
-                    vm.updateStateParams();
-                }
-
-                var categories = Object.keys(vm.categoryCounts).filter(function(value, index) {
-                    return vm.categoryCounts[value] > 0;
-                });
-
-                if (categories.length == 1) {
-                    vm.setCategory(categories[0]);
-                }
-
-                vm.filterEmptySubcategories();
-            }, 500);
-        });
-
-        var find_dropdown_buttons = $interval(dropdown_buttons, 300),
-            find_dropdown_buttons_count = 0;
-
-        function dropdown_buttons() {
-            var buttons = angular.element('.dropdown-container > h2');
-            find_dropdown_buttons_count++;
-            if(buttons.length > 0 || find_dropdown_buttons_count > 5) {
-                $interval.cancel(find_dropdown_buttons);
-            }
-            buttons.click(function(e){
-                var button = angular.element(this),
-                    toggle_on = !button.hasClass('active'),
-                    parent = button.closest('.dropdown-container');
-
-                parent.removeClass('active');
-                buttons.removeClass('selected');
-                buttons.parents().find('.dropdown-container').removeClass('active');
-                buttons.siblings('ul.dropdown').removeClass('open');
-
-                if(toggle_on) {
-                    parent.addClass('active');
-                    button.addClass('active');
-                    button.siblings('ul.dropdown').addClass('open');
-                }
-
-                e.stopPropagation();
-
-            });
-        }
-
-        vm.closeHighlighterButtons = function(index){
-            var index = index || '';
-            for(var i in vm.openHighlighter) {
-                if(i !== index && vm.openHighlighter[i].open === true) {
-                    vm.openHighlighter[i].open = false;
-                }
-            }
-        }
-
-        angular.element(document).click(function(event) {
-            var target = angular.element(event.target),
-                el = angular.element('.dropdown-container ul.dropdown, button ul.button-dropdown, .button ul.button-dropdown'),
-                has_parent = target.parents().is('.dropdown-container'),
-                parent = el.parents().find('.dropdown-container'),
-                is_visible = el.is(':visible');
-
-            if(!has_parent) {
-                vm.closeHighlighterButtons();
-                el.removeClass('open');
-                parent.removeClass('active');
-                el.siblings('.button.active').removeClass('active');
-            }
-            if(is_visible && !has_parent) {
-                $scope.$digest(); //ben -- hrmmm, works for now
-            }
-
-        });
-
-        if (vm.lookupMode && vm.LookupResponse.errorCode) {
-            $state.go('home.datacloud.lookup.form');
-        }
-
-        getEnrichmentCategories();
-        getEnrichmentData();
-
-        DataCloudStore.setMetadata('premiumSelectLimit', (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10);
-        DataCloudStore.setMetadata('generalSelectLimit', 100);
-        vm.premiumSelectLimit = DataCloudStore.getMetadata('premiumSelectLimit'); //(EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
-        vm.generalSelectLimit = DataCloudStore.getMetadata('generalSelectLimit');
-
-        vm.statusMessageBox = angular.element('.status-alert');
-
-        if(vm.show_internal_filter) {
-            /*
-             * this is the default for the internal filter
-             * this also effectivly hides internal attributes when the filter is hidden
-            */
-            vm.metadata.toggle.show.internal = true;
-        } else {
-            vm.metadata.toggle.show.internal = false;
-        }
-
-        if(vm.section === 'insights') {
-            /* hide disabled for sales team from iframe */
-            vm.metadata.toggle.show.enabled = true;
-        } else {
-            vm.metadata.toggle.show.enabled = '';
-        }
-
-        if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
-            vm.status_alert.show = true;
-            vm.status_alert.type = 'no_results';
-            vm.status_alert.message = 'No results to show';
-        }
-    }
-
-    vm.sortOrder = function() {
-        var sortPrefix = vm.sortPrefix.replace('+','');
-
-        if (!vm.category) {
-            return sortPrefix + vm.orders.category;
-        } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
-            return sortPrefix + vm.orders.subcategory;
-        } else {
-            if (vm.lookupMode && vm.category == 'Technology Profile' || vm.category == 'Website Profile') {
-                var sortArr = vm.orders.attributeLookupMode,
-                    retArr = [];
-
-                sortArr.forEach(function(item, index) {
-                    retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
-                });
-
-                return retArr;
-            } else {
-                return sortPrefix + vm.orders.attribute;
-            }
-        }
-    }
-
-    function walkObject(obj, j) {
+    var walkObject = function(obj, j) {
         if (obj && j) {
             return obj[j];
         }
@@ -358,6 +126,52 @@ angular.module('common.datacloud.explorer', [
         }
 
         return result;
+    }
+
+    vm.setCategory = function(category) {
+        vm.category = category;
+        DataCloudStore.setMetadata('category', category);
+    }
+
+    vm.setSubcategory = function(subcategory) {
+        vm.subcategory = subcategory;
+        DataCloudStore.setMetadata('subcategory', subcategory);
+    }
+
+
+    vm.updateStateParams = function() {
+        $state.go('.', {
+            category: vm.category,
+            subcategory: vm.subcategory
+        }, {
+            notify: false
+        });
+    }
+
+    vm.init = function() {
+        vm.closeHighlighterButtons = function(index){
+            var index = index || '';
+            for(var i in vm.openHighlighter) {
+                if(i !== index && vm.openHighlighter[i].open === true) {
+                    vm.openHighlighter[i].open = false;
+                }
+            }
+        }
+
+        if (vm.lookupMode && vm.LookupResponse.errorCode) {
+            $state.go('home.datacloud.lookup.form');
+        }
+
+        getEnrichmentCategories();
+        getEnrichmentData();
+
+        vm.statusMessageBox = angular.element('.status-alert');
+
+        if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
+            vm.status_alert.show = true;
+            vm.status_alert.type = 'no_results';
+            vm.status_alert.message = 'No results to show';
+        }
     }
 
     var stopNumbersInterval = function(){
@@ -999,32 +813,6 @@ angular.module('common.datacloud.explorer', [
             : '';
     }
 
-    var textSearch = function(haystack, needle, case_insensitive) {
-        var case_insensitive = (case_insensitive === false ? false : true);
-
-        if (case_insensitive) {
-            var haystack = haystack.toLowerCase(),
-            needle = needle.toLowerCase();
-        }
-
-        // .indexOf is faster and more supported than .includes
-        return (haystack.indexOf(needle) >= 0);
-    }
-
-    vm.searchFields = function(enrichment){
-        if (vm.query) {
-            if (textSearch(enrichment.DisplayName, vm.query)) {
-                return true;
-            } else if (textSearch(enrichment.Description, vm.query)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     vm.inCategory = function(enrichment){
         if (enrichment.DisplayName && !(_.size(vm.selected_categories))) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
             return true;
@@ -1190,45 +978,6 @@ angular.module('common.datacloud.explorer', [
         return fieldTypes[fieldType] || fieldTypes.default;
     }
 
-    vm.enrichmentsFilter = function() {
-        var filter = {};
-
-        if (vm.metadata.toggle.show.selected && !vm.metadata.toggle.hide.selected) {
-            filter.IsSelected = true;
-        }
-
-        if (!vm.metadata.toggle.show.selected && vm.metadata.toggle.hide.selected) {
-            filter.IsSelected = false;
-        }
-
-        if (vm.metadata.toggle.show.premium && !vm.metadata.toggle.hide.premium) {
-            filter.IsPremium = true;
-        }
-
-        if (!vm.metadata.toggle.show.premium && vm.metadata.toggle.hide.premium) {
-            filter.IsPremium = false;
-        }
-
-        if (!vm.metadata.toggle.show.internal) {
-            filter.IsInternal = false;
-        }
-
-        if (vm.subcategory) {
-            filter.Subcategory = vm.subcategory;
-        }
-
-        if (vm.section == 'team' || vm.section == 'insights') {
-            filter.HighlightHidden = (!vm.metadata.toggle.hide.enabled ? '' : true) || (!vm.metadata.toggle.show.enabled ? '' : false);
-            filter.HighlightHighlighted = (!vm.metadata.toggle.show.highlighted ? '' : true) || (!vm.metadata.toggle.hide.highlighted ? '' : false);
-        }
-
-        if (vm.lookupMode && vm.isYesNoCategory(vm.category)) {
-            filter.AttributeValue = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
-        }
-
-        return filter;
-    }
-
     var subcategoryRenamer = function(string, replacement){
         if (string) {
             var replacement = replacement || '';
@@ -1247,47 +996,6 @@ angular.module('common.datacloud.explorer', [
         return path + icon;
     }
 
-    vm.subcategoryFilter = function(subcategory) {
-        if(!vm.enrichments_completed) {
-            return true;
-        }
-        var category = vm.category,
-            count = vm.subcategoryCount(category, subcategory);
-
-        return (count ? true : false);
-    }
-
-    vm.subcategoryCount = function(category, subcategory) {
-        var filtered = vm.enrichmentsObj[category];
-
-        if (!filtered || filtered.length <= 0) {
-            return 0;
-        }
-
-        for (var i=0, result=[]; i < filtered.length; i++) {
-            var item = filtered[i];
-            if (item && vm.searchFields(item)) {
-                if ((item.Category != category)
-                || (item.Subcategory != subcategory)
-                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
-                || (vm.metadata.toggle.show.selected && !item.IsSelected)
-                || (vm.metadata.toggle.hide.selected && item.IsSelected)
-                || (vm.metadata.toggle.show.premium && !item.IsPremium)
-                || (vm.metadata.toggle.hide.premium && item.IsPremium)
-                || (!vm.metadata.toggle.show.internal && item.IsInternal)
-                || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
-                || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
-                || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
-                    continue;
-                }
-                result.push(item);
-            }
-        }
-
-        return result.length;
-    }
-
     vm.subcategoryClick = function(subcategory, $event) {
         var target = angular.element($event.target),
             currentTarget = angular.element($event.currentTarget);
@@ -1299,39 +1007,6 @@ angular.module('common.datacloud.explorer', [
             vm.metadata.current = 1;
             vm.updateStateParams();
         }
-    }
-
-    vm.categoryCount = function(category) {
-        var filtered = vm.enrichmentsObj[category];
-
-        if (!filtered) {
-            return 0;
-        }
-
-        for (var i=0, result=[]; i < filtered.length; i++) {
-            var item = filtered[i];
-            if (item && vm.searchFields(item)) {
-                if ((item.Category != category)
-                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
-                || (vm.metadata.toggle.show.selected && !item.IsSelected)
-                || (vm.metadata.toggle.hide.selected && item.IsSelected)
-                || (vm.metadata.toggle.show.premium && !item.IsPremium)
-                || (vm.metadata.toggle.hide.premium && item.IsPremium)
-                || (!vm.metadata.toggle.show.internal && item.IsInternal)
-                || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
-                || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
-                || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
-                    continue;
-                }
-                result.push(item);
-            }
-        }
-        vm.categoryCounts[item.Category] = result.length;
-        if(result.length <= 1) {
-            //gotoNonemptyCategory();
-        }
-        return result.length;
     }
 
     /* jumps you to non-empty category when you filter */

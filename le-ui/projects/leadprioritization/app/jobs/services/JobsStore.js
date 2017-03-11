@@ -7,7 +7,7 @@ angular
 
     var pending = false;
 
-    setInterval(function() {
+    $interval(function() {
         var modelId = $stateParams.modelId || '';
         
         if (!pending) {
