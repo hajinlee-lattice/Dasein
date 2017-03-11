@@ -9,6 +9,8 @@ SPECIAL_CONTEXT_PATH = {
 def generate_options(options):
     lines = []
     for opt in options.split(","):
+        if opt == 'ui':
+            continue
         context_path = opt
         if opt in SPECIAL_CONTEXT_PATH:
             context_path = SPECIAL_CONTEXT_PATH[opt]
