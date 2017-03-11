@@ -67,8 +67,8 @@ if [ ! -z "${HOSTS}" ]; then
 
 fi
 
-replace_token lpinodes ${LPI_HOSTPORTS}
-replace_token adminconsolenodes ${ADMINCONSOLE_HOSTPORTS}
+replace_token lpi ${LPI_HOSTPORTS}
+replace_token adminconsole ${ADMINCONSOLE_HOSTPORTS}
 replace_token swagger ${SWAGGER_HOSTPORTS}
 replace_token pls ${PLS_HOSTPORTS}
 replace_token admin ${ADMIN_HOSTPORTS}
