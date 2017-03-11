@@ -134,12 +134,12 @@ module.exports = function (grunt) {
             qa: {
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
-                ULYSSES_URL: 'https://internal-public-lpi-a-1652785524.us-east-1.elb.amazonaws.com',
-                API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
-                API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
-                API_CON_URL: 'https://testapi.lattice-engines.com',
-                API_MCSVC_URL: 'https://admin-qa.lattice.local:8080',
-                API_MATCHAPI_URL: 'https://admin-qa.lattice.local:8076',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_ADMIN_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_CON_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_MCSVC_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_MATCHAPI_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
                 API_INFLUXDB_URL: 'http://localhost:8086',
                 COMPRESSED: true,
                 LOGGING: './server/log',
@@ -150,7 +150,7 @@ module.exports = function (grunt) {
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
-                WHITELIST: '10.41.0.14, 10.41.0.16'
+                WHITELIST: 'internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com, internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com'
             },
             qadev: {
                 NODE_APPS: 'leui,leadmin',
