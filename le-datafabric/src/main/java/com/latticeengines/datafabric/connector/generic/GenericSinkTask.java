@@ -94,7 +94,6 @@ public class GenericSinkTask extends SinkTask {
 
         } catch (Exception e) {
             log.error("Failed to execute connector tasks", e);
-            throw new ConnectException(e);
         }
 
     }

@@ -30,7 +30,7 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
     static final WorkerProperty<String> HADOOP_CONF_DIR = new WorkerProperty<String>("hadoop.conf.dir",
             "The Hadoop configuration directory.", "Hadoop Configuration Directory").setDefaultValue("");
     static final WorkerProperty<String> HDFS_BASE_DIR = new WorkerProperty<String>("hdfs.base.dir",
-            "HDFS base directory to save files.", "HDFS base Directory").setDefaultValue("/Pods/FabricConnectors");
+            "HDFS base directory to save files.", "HDFS base Directory").setDefaultValue("/Pods/Default/Services/PropData/Sources");
     static final WorkerProperty<String> POD = new WorkerProperty<String>("datafabric.message.pod",
             "The pod name used in Zookeeper", "The pod used in Zookeeper").setDefaultValue("FabricConnectors");
 

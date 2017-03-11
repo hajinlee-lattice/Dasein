@@ -1,9 +1,12 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -19,12 +22,21 @@ import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 public class HDFSDataStoreImpl implements FabricDataStore {
 
     private static final Log log = LogFactory.getLog(HDFSDataStoreImpl.class);
+
+    public static final String DATE_FORMAT_STRING = "yyyy-MM-dd_z";
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+    public static final String UTC = "UTC";
+
     private Configuration config;
     private String fileName;
     private String reordType;
     private Schema schema;
     private String repositoryDir;
     private String baseDir;
+
+    static {
+        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+    }
 
     public HDFSDataStoreImpl(Configuration config, String baseDir, String repositoryDir, String fileName,
             String recordType, Schema schema) {
@@ -39,7 +51,8 @@ public class HDFSDataStoreImpl implements FabricDataStore {
 
     @Override
     public void createRecord(String id, Pair<GenericRecord, Map<String, Object>> pair) {
-        String fullPath = baseDir + "/" + repositoryDir + "/" + fileName;
+
+        String fullPath = getFilePath();
         try {
             if (!HdfsUtils.fileExists(config, fullPath)) {
                 AvroUtils.writeToHdfsFile(config, schema, fullPath, Arrays.asList(pair.getKey()));
@@ -51,6 +64,13 @@ public class HDFSDataStoreImpl implements FabricDataStore {
         }
     }
 
+    private String getFilePath() {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        String dateStr = dateFormat.format(c.getTime());
+        return baseDir + "/" + repositoryDir + "/Snapshot/" + dateStr + "/" + fileName;
+    }
+
     @Override
     public void updateRecord(String id, Pair<GenericRecord, Map<String, Object>> pair) {
         throw new UnsupportedOperationException("updateRecord");
@@ -58,7 +78,7 @@ public class HDFSDataStoreImpl implements FabricDataStore {
 
     @Override
     public void createRecords(Map<String, Pair<GenericRecord, Map<String, Object>>> pairs) {
-        String fullPath = baseDir + "/" + repositoryDir + "/" + fileName;
+        String fullPath = getFilePath();
         List<GenericRecord> records = new ArrayList<>();
         for (Map.Entry<String, Pair<GenericRecord, Map<String, Object>>> pair : pairs.entrySet()) {
             records.add(pair.getValue().getKey());

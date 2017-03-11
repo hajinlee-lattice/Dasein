@@ -52,7 +52,9 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
     private static final String POD = "FabricConnectors";
     private static final String STACK = "b";
-    private static final String BASE_DIR = "/Pods/FabricConnectors";
+    private static final String BASE_DIR = "/Pods/Default/Services/PropData/Sources";
+
+    private static final String FILE_PATTERN = "Snapshot/*/*.avro";
 
     @Resource(name = "genericFabricEntityManager")
     private GenericFabricEntityManager<SampleEntity> entityManager;
@@ -230,10 +232,10 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
         waitInSeconds(batchId, 10);
 
-        long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/*.avro");
+        long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
         Assert.assertEquals(count1, RECORD_COUNT);
 
-        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/*.avro");
+        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
         Assert.assertEquals(records1.get(0).get("latticeId").toString(), "latticeId1");
 
     }
@@ -267,14 +269,16 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         waitInSeconds(batchId1, 20);
         waitInSeconds(batchId2, 20);
 
-        long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/*.avro");
-        long count2 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile2/*.avro");
+        long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
+        long count2 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
         Assert.assertEquals(count1, count2);
         Assert.assertEquals(count1, RECORD_COUNT);
 
-        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/*.avro");
+        List<GenericRecord> records1 = AvroUtils
+                .getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
         Assert.assertTrue(records1.get(0).get("age") == null);
-        List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile2/*.avro");
+        List<GenericRecord> records2 = AvroUtils
+                .getDataFromGlob(conf, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
         Assert.assertTrue(records2.get(0).get("age") != null);
 
     }
@@ -299,14 +303,16 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
                 Assert.assertTrue(result);
             }
 
-            long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/*.avro");
-            long count2 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile2/*.avro");
+            long count1 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
+            long count2 = AvroUtils.count(conf, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
             Assert.assertEquals(count1, count2);
             Assert.assertEquals(count1, LARGE_RECORD_COUNT);
 
-            List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/*.avro");
+            List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR
+                    + "/testGenericFile1/Snapshot/*/*.avro");
             Assert.assertTrue(records1.get(0).get("age") == null);
-            List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile2/*.avro");
+            List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf, BASE_DIR
+                    + "/testGenericFile2/Snapshot/*/*.avro");
             Assert.assertTrue(records2.get(0).get("age") != null);
 
         } catch (Exception ex) {

@@ -45,7 +45,6 @@ public class HDFSProcessorAdapter extends AbstractProcessorAdapter {
 
         conf.addResource(new Path(hadoopConfDir + "/core-site.xml"));
         conf.addResource(new Path(hadoopConfDir + "/hdfs-site.xml"));
-
         HDFSDataServiceProvider hdfsProvider = new HDFSDataServiceProvider(conf, hdfsBaseDir, repository);
         FabricDataService dataService = new FabricDataServiceImpl();
         dataService.addServiceProvider(hdfsProvider);
