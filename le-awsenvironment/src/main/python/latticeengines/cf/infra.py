@@ -58,10 +58,10 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, ui=args.ui, upload=args.upload)
+    template(args.environment, args.stack, ui=args.ui, upload=args.upload)
 
-def template(environment, ui=False, upload=False):
-    stack = create_template(ui)
+def template(environment, stack, ui=False, upload=False):
+    stack = create_template(stack, ui)
     if upload:
         stack.validate()
         stack.upload(environment, _S3_CF_PATH)
@@ -69,28 +69,28 @@ def template(environment, ui=False, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(ui):
+def create_template(stack, ui):
     stack = Stack("AWS CloudFormation template for LPI infrastructure.")
     stack.add_params([PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3, PARAM_LE_STACK])
 
     # target groups
-    tgs, tg_map = create_taget_groups()
+    tgs, tg_map = create_taget_groups(stack)
     stack.add_resources(tgs)
 
-    resources, albs = create_load_balancers(tg_map, ui=ui)
+    resources, albs = create_load_balancers(tg_map, stack, ui=ui)
     stack.add_resources(resources)
 
     stack.add_ouputs(add_outputs(albs))
     return stack
 
-def create_taget_groups():
+def create_taget_groups(stack):
     tgs = []
     tg_map = {}
     for app, health in TOMCAT_APP_HEALTH_MAP.items():
         tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health)
         tg.add_tag("le-product", "lpi")
         tg.add_tag("le-service", app)
-        tg.add_tag("le-stack", PARAM_LE_STACK.ref())
+        tg.add_tag("le-stack", stack)
         tgs.append(tg)
         tg_map[app] = tg
 
@@ -98,12 +98,12 @@ def create_taget_groups():
         tg = TargetGroup(app, port="443", protocol="HTTPS", checkon="/")
         tg.add_tag("le-product", "lpi")
         tg.add_tag("le-service", app)
-        tg.add_tag("le-stack", PARAM_LE_STACK.ref())
+        tg.add_tag("le-stack", stack)
         tgs.append(tg)
         tg_map[app] = tg
     return tgs, tg_map
 
-def create_load_balancers(tg_map, ui=False):
+def create_load_balancers(tg_map, stack, ui=False):
     albs = {}
     resources = []
 
@@ -111,7 +111,7 @@ def create_load_balancers(tg_map, ui=False):
     private_lb = ApplicationLoadBalancer("private", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
     private_lb.idle_timeout(600)
     private_lb.add_tag("le-product", "lpi")
-    private_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
+    private_lb.add_tag("le-stack", stack)
     for k, v in tg_map.items():
         private_lb.depends_on(v)
     resources.append(private_lb)
@@ -121,7 +121,7 @@ def create_load_balancers(tg_map, ui=False):
     private2_lb = ApplicationLoadBalancer("private2", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
     private2_lb.idle_timeout(600)
     private2_lb.add_tag("le-product", "lpi")
-    private2_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
+    private2_lb.add_tag("le-stack", stack)
     for k, v in tg_map.items():
         private2_lb.depends_on(v)
     resources.append(private2_lb)
@@ -131,7 +131,7 @@ def create_load_balancers(tg_map, ui=False):
     public_lb = ApplicationLoadBalancer("public", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
     public_lb.idle_timeout(600)
     public_lb.add_tag("le-product", "lpi")
-    public_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
+    public_lb.add_tag("le-stack", stack)
     for k, v in tg_map.items():
         private_lb.depends_on(v)
     resources.append(public_lb)
@@ -291,6 +291,7 @@ def parse_args():
     parser1 = commands.add_parser("template")
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
+    parser1.add_argument('-s', dest='stack', type=str, required=True, help='the short stack name for tagging')
     parser1.add_argument('--include-ui', dest='ui', action='store_true', help='include ui load balancers')
     parser1.set_defaults(func=template_cli)
 
