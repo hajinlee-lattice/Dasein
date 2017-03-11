@@ -142,15 +142,10 @@ def deregister_task(name_prefix):
         familyPrefix=name_prefix
     )
     for arn in response["taskDefinitionArns"]:
-        response2 = ECS_CLIENT.describe_task_definition(
+        print "deregistering task %s" % arn
+        ECS_CLIENT.deregister_task_definition(
             taskDefinition=arn
         )
-        arn2 = response2["taskDefinition"]["taskDefinitionArn"]
-        print "deregistering task %s" % arn2
-        ECS_CLIENT.deregister_task_definition(
-            taskDefinition=arn2
-        )
-
 
 def create_service(cluster, service, task, count):
     delete_service(cluster, service)
