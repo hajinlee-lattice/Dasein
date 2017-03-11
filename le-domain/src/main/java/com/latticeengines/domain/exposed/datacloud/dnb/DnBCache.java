@@ -15,6 +15,7 @@ public class DnBCache extends MatchCache<DnBCache> {
     private static final String MATCH_GRADE = "MatchGrade";
     private static final String NAME_LOCATION = "NameLocation";
     private static final String OUT_OF_BUSINESS = "OutOfBusiness";
+    private static final String DUNS_IN_AM = "DunsInAM";
 
     private static final String NAME_TOKEN = "_NAME_";
     private static final String COUNTRY_CODE_TOKEN = "_COUNTRYCODE_";
@@ -35,6 +36,8 @@ public class DnBCache extends MatchCache<DnBCache> {
     private NameLocation matchedNameLocation;
 
     private Boolean outOfBusiness;
+
+    private Boolean dunsInAM;
 
     // Identify it is white cache or black cache
     private boolean whiteCache;
@@ -70,7 +73,7 @@ public class DnBCache extends MatchCache<DnBCache> {
 
     // For white cache write
     public DnBCache(NameLocation nameLocation, String duns, Integer confidenceCode, DnBMatchGrade matchGrade,
-            NameLocation matchedNameLocation, Boolean outOfBusiness) {
+            NameLocation matchedNameLocation, Boolean outOfBusiness, Boolean dunsInAM) {
         getKeyTokenValues().put(NAME_TOKEN, nameLocation.getName());
         getKeyTokenValues().put(COUNTRY_CODE_TOKEN, nameLocation.getCountryCode());
         getKeyTokenValues().put(STATE_TOKEN, nameLocation.getState());
@@ -84,6 +87,7 @@ public class DnBCache extends MatchCache<DnBCache> {
         cacheContext.put(MATCH_GRADE, matchGrade.getRawCode());
         cacheContext.put(NAME_LOCATION, matchedNameLocation);
         cacheContext.put(OUT_OF_BUSINESS, outOfBusiness);
+        cacheContext.put(DUNS_IN_AM, dunsInAM);
         setCacheContext(cacheContext);
         setTimestamp(System.currentTimeMillis() / DAY_IN_MILLIS);
     }
@@ -117,6 +121,7 @@ public class DnBCache extends MatchCache<DnBCache> {
         }
         outOfBusiness = getCacheContext().containsKey(OUT_OF_BUSINESS)
                 ? (Boolean) getCacheContext().get(OUT_OF_BUSINESS) : null;
+        dunsInAM = getCacheContext().containsKey(DUNS_IN_AM) ? (Boolean) getCacheContext().get(DUNS_IN_AM) : null;
         whiteCache = true;
     }
 
@@ -168,12 +173,20 @@ public class DnBCache extends MatchCache<DnBCache> {
         this.timestamp = timestamp;
     }
 
-    public Boolean getOutOfBusiness() {
+    public Boolean isOutOfBusiness() {
         return outOfBusiness;
     }
 
     public void setOutOfBusiness(Boolean outOfBusiness) {
         this.outOfBusiness = outOfBusiness;
+    }
+
+    public Boolean isDunsInAM() {
+        return dunsInAM;
+    }
+
+    public void setDunsInAM(Boolean dunsInAM) {
+        this.dunsInAM = dunsInAM;
     }
 
 }

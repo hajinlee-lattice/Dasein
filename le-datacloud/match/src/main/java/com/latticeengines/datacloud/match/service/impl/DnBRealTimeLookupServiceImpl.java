@@ -158,8 +158,6 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                     response));
             context.setDnbCode(DnBReturnCode.BAD_RESPONSE);
         }
-
-        dnbMatchResultValidator.validate(context);
     }
 
     @Override

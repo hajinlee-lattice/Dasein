@@ -132,7 +132,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
         Assert.assertEquals(whiteCache.getDuns(), (String) data[0][7]);
         Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[0][8]);
         Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), (String) data[0][9]);
-        Assert.assertEquals(whiteCache.getOutOfBusiness(), (Boolean) data[0][10]);
+        Assert.assertEquals(whiteCache.isOutOfBusiness(), (Boolean) data[0][10]);
         Assert.assertNotNull(whiteCache.getTimestamp());
         log.info(String.format("Timestamp of white cache: %d", whiteCache.getTimestamp()));
 
@@ -183,7 +183,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
             Assert.assertEquals(whiteCache.getDuns(), (String) data[i][7]);
             Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[i][8]);
             Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), (String) data[i][9]);
-            Assert.assertEquals(whiteCache.getOutOfBusiness(), (Boolean) data[i][10]);
+            Assert.assertEquals(whiteCache.isOutOfBusiness(), (Boolean) data[i][10]);
         }
         Assert.assertTrue(!whiteCaches.containsKey(String.valueOf(data.length - 1)));
 

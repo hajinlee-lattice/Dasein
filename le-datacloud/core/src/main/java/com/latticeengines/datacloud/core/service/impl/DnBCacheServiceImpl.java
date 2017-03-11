@@ -29,11 +29,11 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     @Value("${datacloud.dnb.cache.version}")
     private String cacheVersion;
 
-    @Value("${datacloud.dnb.cache.white.expire.days}")
-    private long whiteCacheExpireDays;
+    @Value("${datacloud.dnb.cache.long.expire.days}")
+    private long longExpireDays;
 
-    @Value("${datacloud.dnb.cache.black.expire.days}")
-    private long blackCacheExpireDays;
+    @Value("${datacloud.dnb.cache.short.expire.days}")
+    private long shortExpireDays;
 
     @Value("${datacloud.dnb.cache.expire.factor}")
     private double expireFactor;
@@ -102,9 +102,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
             cache.setPatched(context.getPatched());
         }
         getCacheMgr().create(cache);
-        log.info(String.format("Added Id = %s to %s cache. DnBCode = %s. OutOfBusiness = %b", cache.getId(),
-                cache.isWhiteCache() ? "white" : "black", context.getDnbCode().getMessage(),
-                context.isOutOfBusiness()));
+        log.info(String.format("Added Id = %s to %s cache. DnBCode = %s. OutOfBusiness = %s, DunsInAM = %s",
+                cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDnbCode().getMessage(),
+                context.isOutOfBusinessString(), context.isDunsInAMString()));
         return cache;
     }
 
@@ -126,9 +126,10 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 cache.setPatched(context.getPatched());
             }
             caches.add(cache);
-            log.info(String.format("Added Id = %s to %s cache. DnBCode = %s. OutOfBusiness = %b", cache.getId(),
+            log.info(String.format("Added Id = %s to %s cache. DnBCode = %s. OutOfBusiness = %s, DunsInAM = %s",
+                    cache.getId(),
                     cache.isWhiteCache() ? "white" : "black", context.getDnbCode().getMessage(),
-                    context.isOutOfBusiness()));
+                    context.isOutOfBusinessString(), context.isDunsInAMString()));
         }
         getCacheMgr().batchCreate(caches);
         return caches;
@@ -172,7 +173,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 return new DnBCache(context.getInputNameLocation());
             } else {
                 return new DnBCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade(), context.getMatchedNameLocation(), context.isOutOfBusiness());
+                        context.getMatchGrade(), context.getMatchedNameLocation(), context.isOutOfBusiness(),
+                        context.isDunsInAM());
             }
         case EMAIL:
             if (noMatchedContext) {
@@ -185,7 +187,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 return new DnBCache(context.getInputNameLocation());
             } else {
                 return new DnBCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade(), context.getMatchedNameLocation(), context.isOutOfBusiness());
+                        context.getMatchGrade(), context.getMatchedNameLocation(), context.isOutOfBusiness(),
+                        context.isDunsInAM());
             }
         default:
             throw new UnsupportedOperationException(
@@ -198,12 +201,12 @@ public class DnBCacheServiceImpl implements DnBCacheService {
             return false;
         }
         long currentDays = System.currentTimeMillis() / DnBCache.DAY_IN_MILLIS;
-        if (cache.isWhiteCache() && cache.getTimestamp() != null
-                && currentDays <= (cache.getTimestamp().longValue() + whiteCacheExpireDays)) {
+        if ((!cache.isWhiteCache() || Boolean.FALSE.equals(cache.isDunsInAM())) && cache.getTimestamp() != null
+                && currentDays <= (cache.getTimestamp().longValue() + shortExpireDays)) {
             return false;
         }
-        if (!cache.isWhiteCache() && cache.getTimestamp() != null
-                && currentDays <= (cache.getTimestamp().longValue() + blackCacheExpireDays)) {
+        if (cache.isWhiteCache() && !Boolean.FALSE.equals(cache.isDunsInAM()) && cache.getTimestamp() != null
+                && currentDays <= (cache.getTimestamp().longValue() + longExpireDays)) {
             return false;
         }
         if (Math.random() <= expireFactor) {

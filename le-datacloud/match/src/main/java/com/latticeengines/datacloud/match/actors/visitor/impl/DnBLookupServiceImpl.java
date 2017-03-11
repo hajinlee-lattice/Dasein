@@ -142,7 +142,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             context.setDnbCode(DnBReturnCode.UNMATCH_TIMEOUT);
             readyToReturn = true;
         }
-
         // Check country code
         if (!readyToReturn && StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
             context.setDnbCode(DnBReturnCode.UNMATCH);
@@ -150,6 +149,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         }
 
         MatchTraveler traveler = request.getMatchTravelerContext();
+        context.setDataCloudVersion(traveler.getDataCloudVersion());
         if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBCache cache = dnbCacheService.lookupCache(context);
@@ -157,17 +157,19 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 if (cache.isWhiteCache()) {
                     if ((request.getMatchTravelerContext().getMatchInput() != null
                             && request.getMatchTravelerContext().getMatchInput().isDisableDunsValidation())
-                            || isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
+                            || adoptWhiteCache(cache, context.getDataCloudVersion())) {
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
                         log.info(String.format(
                                 "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                        + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s, Duration = %d",
+                                        + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s, "
+                                        + "OutOfBusiness = %s, IsDunsInAM = %s, Duration = %d",
                                 context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
                                 context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                                 context.getInputNameLocation().getZipcode(),
                                 context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
                                 context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
+                                context.isOutOfBusinessString(), context.isDunsInAMString(),
                                 System.currentTimeMillis() - startTime));
                         readyToReturn = true;
                     } else {
@@ -199,6 +201,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 throw new RuntimeException(e);
             }
 
+            validateDuns(context);
+            dnbMatchResultValidator.validate(context);
             DnBCache dnBCache = dnbCacheService.addCache(context);
             if (dnBCache != null) {
                 context.setCacheId(dnBCache.getId());
@@ -247,6 +251,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setTimestamp(request.getTimestamp());
 
         MatchTraveler traveler = request.getMatchTravelerContext();
+        context.setDataCloudVersion(traveler.getDataCloudVersion());
         context.setLogDnBBulkResult(traveler.getMatchInput().isLogDnBBulkResult());
         if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
@@ -255,19 +260,21 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 if (cache.isWhiteCache()) {
                     if ((request.getMatchTravelerContext().getMatchInput() != null
                             && request.getMatchTravelerContext().getMatchInput().isDisableDunsValidation())
-                            || isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
+                            || adoptWhiteCache(cache, context.getDataCloudVersion())) {
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
                         if (context.getLogDnBBulkResult()) {
                             log.info(String.format(
                                     "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                            + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s,Duration = %d",
+                                            + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s, "
+                                            + "OutOfBusiness = %s, IsDunsInAM = %s, Duration = %d",
                                     context.getInputNameLocation().getName(),
                                     context.getInputNameLocation().getCountry(),
                                     context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                                     context.getInputNameLocation().getZipcode(),
                                     context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
                                     context.getConfidenceCode(), context.getMatchGrade().getRawCode(),
+                                    context.isOutOfBusinessString(), context.isDunsInAMString(),
                                     System.currentTimeMillis() - startTime));
                         }
                         readyToReturn = true;
@@ -442,6 +449,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             if (!success) {
                 context.setDnbCode(batchContext.getDnbCode());
             } else {
+                validateDuns(context);
+                dnbMatchResultValidator.validate(context);
                 dnbCacheService.addCache(context);
             }
             String returnAddr = getReqReturnAddr(lookupRequestId);
@@ -452,7 +461,46 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         writeDnBMatchHistory(dnBMatchHistories);
     }
 
-    private boolean isValidDuns(String duns, String dataCloudVersion) {
+    /**
+     * Called after DnB cache lookup, but before DnB remote lookup
+     * If dunsInAM = true in cache, validate again:
+     *      If still dunsInAM = true, adopt the cache
+     *      If dunsInAM changed to false, reject the cache, go to remote DnB
+     * If dunsInAM = false in cache, adopt the cache (result will be discarded in DnBMatchResultValidator)
+     */
+    private boolean adoptWhiteCache(DnBCache cache, String dataCloudVersion) {
+        if (Boolean.TRUE.equals(cache.isOutOfBusiness()) || Boolean.FALSE.equals(cache.isDunsInAM())) {
+            cache.setDunsInAM(Boolean.FALSE);
+            return true;
+        }
+        if (isDunsInAM(cache.getDuns(), dataCloudVersion)) {
+            cache.setDunsInAM(Boolean.TRUE);
+            return true;
+        } else {
+            cache.setDunsInAM(Boolean.FALSE);
+            return false;
+        }
+    }
+
+    /**
+     * Called after DnB remote lookup
+     */
+    private void validateDuns(DnBMatchContext context) {
+        if (StringUtils.isEmpty(context.getDuns())) {
+            return;
+        }
+        if (Boolean.TRUE.equals(context.isOutOfBusiness())) {
+            context.setDunsInAM(Boolean.FALSE);
+            return;
+        }
+        if (isDunsInAM(context.getDuns(), context.getDataCloudVersion())) {
+            context.setDunsInAM(Boolean.TRUE);
+        } else {
+            context.setDunsInAM(Boolean.FALSE);
+        }
+    }
+
+    private boolean isDunsInAM(String duns, String dataCloudVersion) {
         AccountLookupRequest lookupRequest = new AccountLookupRequest(dataCloudVersion);
         lookupRequest.addLookupPair(null, duns);
         List<String> ids = accountLookupService.batchLookupIds(lookupRequest);

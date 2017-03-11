@@ -243,7 +243,6 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             matchedNameLocation.setCountryCode(countryCode);
             matchedNameLocation.setZipcode(zipCode);
             matchedNameLocation.setPhoneNumber(phoneNumber);
-            dnbMatchResultValidator.validate(output);
         } catch (Exception e) {
             log.warn(String.format("Fail to extract duns from match result of DnB bulk match request %s: %s",
                     serviceBatchId, record));

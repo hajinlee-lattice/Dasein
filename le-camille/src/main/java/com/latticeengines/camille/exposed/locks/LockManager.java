@@ -29,6 +29,7 @@ public class LockManager {
 
     public static void registerCrossDivisionLock(String lockName) {
         registerLock(lockName, "");
+        privateLocks.remove(lockName); // Remove if present
     }
 
     private static void registerLock(String lockName, String division) {

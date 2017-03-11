@@ -46,11 +46,16 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private Boolean outOfBusiness;
 
+    private Boolean dunsInAM;
+
+    private String dataCloudVersion;
+
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
         matchedNameLocation = new NameLocation();
     }
 
+    // Used to copy bulk match result. Should not copy dataCloudVersion & dunsInAM
     public void copyMatchResult(DnBMatchContext result) {
         duns = result.getDuns();
         dnbCode = result.getDnbCode();
@@ -70,7 +75,8 @@ public class DnBMatchContext implements Fact, Dimension {
             matchGrade = cache.getMatchGrade();
             cacheId = cache.getId();
             matchedNameLocation = cache.getMatchedNameLocation();
-            outOfBusiness = cache.getOutOfBusiness();
+            outOfBusiness = cache.isOutOfBusiness();
+            dunsInAM = cache.isDunsInAM();
             hitWhiteCache = true;
             patched = cache.getPatched();
         } else {
@@ -271,6 +277,30 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setOutOfBusiness(Boolean outOfBusiness) {
         this.outOfBusiness = outOfBusiness;
+    }
+
+    public String isOutOfBusinessString() {
+        return outOfBusiness == null ? null : String.valueOf(outOfBusiness);
+    }
+
+    public Boolean isDunsInAM() {
+        return dunsInAM;
+    }
+
+    public void setDunsInAM(Boolean dunsInAM) {
+        this.dunsInAM = dunsInAM;
+    }
+
+    public String isDunsInAMString() {
+        return dunsInAM == null ? null : String.valueOf(dunsInAM);
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
     public enum DnBMatchStrategy {
