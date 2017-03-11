@@ -136,21 +136,21 @@ def register_task(name, containers, volumes):
         volumes=[v.template() for v in volumes]
     )
 
-def deregister_task(name):
-    print "looking for task %s" % name
+def deregister_task(name_prefix):
+    print "looking for task %s" % name_prefix
     response = ECS_CLIENT.list_task_definitions(
-        familyPrefix=name
+        familyPrefix=name_prefix
     )
     for arn in response["taskDefinitionArns"]:
         response2 = ECS_CLIENT.describe_task_definition(
             taskDefinition=arn
         )
-        if response2["taskDefinition"]["family"] == name:
-            arn2 = response2["taskDefinition"]["taskDefinitionArn"]
-            print "deregistering task %s" % arn2
-            ECS_CLIENT.deregister_task_definition(
-                taskDefinition=arn2
-            )
+        arn2 = response2["taskDefinition"]["taskDefinitionArn"]
+        print "deregistering task %s" % arn2
+        ECS_CLIENT.deregister_task_definition(
+            taskDefinition=arn2
+        )
+
 
 def create_service(cluster, service, task, count):
     delete_service(cluster, service)

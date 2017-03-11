@@ -69,8 +69,7 @@ class DeleteServiceThread (threading.Thread):
 
     def run(self):
         delete_service(self.stackname, self.app)
-        token = find_cluster_random_token(self.stackname)
-        task = "%s-%s-%s" % (self.stackname, self.app, token)
+        task = "%s-%s-" % (self.stackname, self.app)
         deregister_task(task)
 
 def main():
