@@ -69,15 +69,15 @@ def template(environment, stack, ui=False, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(stack, ui):
+def create_template(stack_tag, ui):
     stack = Stack("AWS CloudFormation template for LPI infrastructure.")
     stack.add_params([PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3, PARAM_LE_STACK])
 
     # target groups
-    tgs, tg_map = create_taget_groups(stack)
+    tgs, tg_map = create_taget_groups(stack_tag)
     stack.add_resources(tgs)
 
-    resources, albs = create_load_balancers(tg_map, stack, ui=ui)
+    resources, albs = create_load_balancers(tg_map, stack_tag, ui=ui)
     stack.add_resources(resources)
 
     stack.add_ouputs(add_outputs(albs))
