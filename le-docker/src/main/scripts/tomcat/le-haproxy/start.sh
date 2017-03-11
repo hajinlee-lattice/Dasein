@@ -3,6 +3,7 @@
 function replace_token() {
     SERVER=$1
     VALUE=$2
+    SSL=$3
 
     if [ ! -z "${VALUE}" ]; then
         HOSTPORTS=""
@@ -11,7 +12,12 @@ function replace_token() {
             if [ ! -z "${hp}" ]; then
                 echo "add ${hp} to ${SERVER}"
                 h=$(echo ${hp} | cut -d : -f 1)
-                HOSTPORTS="${HOSTPORTS}\n  server ${h} ${hp} check"
+                if [ "${SSL}" = "true" ]; then
+                    HOSTPORTS="${HOSTPORTS}\n  server ${h} ${hp} check ssl verify none"
+                else
+                    HOSTPORTS="${HOSTPORTS}\n  server ${h} ${hp} check"
+                fi
+
             fi
         done
         sed -i "s/#{{${SERVER}}}/${HOSTPORTS}/" /usr/local/etc/haproxy/haproxy.cfg
@@ -67,8 +73,8 @@ if [ ! -z "${HOSTS}" ]; then
 
 fi
 
-replace_token lpi ${LPI_HOSTPORTS}
-replace_token adminconsole ${ADMINCONSOLE_HOSTPORTS}
+replace_token lpi ${LPI_HOSTPORTS} true
+replace_token adminconsole ${ADMINCONSOLE_HOSTPORTS} true
 replace_token swagger ${SWAGGER_HOSTPORTS}
 replace_token pls ${PLS_HOSTPORTS}
 replace_token admin ${ADMIN_HOSTPORTS}
