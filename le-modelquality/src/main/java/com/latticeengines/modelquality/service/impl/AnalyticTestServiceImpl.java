@@ -47,17 +47,26 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
     @Value("${common.pls.url}")
     private String apiHostPort;
 
+    @Value("${modelquality.pls.login.tenant}")
+    private String tenant;
+
+    @Value("${modelquality.pls.login.username")
+    private String username;
+
+    @Value("${modelquality.pls.login.password")
+    private String password;
+
     @Override
     public AnalyticTest createAnalyticTest(AnalyticTestEntityNames analyticTestEntityNames) {
 
         AnalyticTest analyticTest = new AnalyticTest();
         if (analyticTestEntityNames.getName() == null || analyticTestEntityNames.getName().trim().isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_35003, new String[] { "AnalyticTest Name" });
+            throw new LedpException(LedpCode.LEDP_35003, new String[]{"AnalyticTest Name"});
         }
 
         if (analyticTestEntityMgr.findByName(analyticTestEntityNames.getName()) != null) {
             throw new LedpException(LedpCode.LEDP_35002,
-                    new String[] { "AnalyticTest", analyticTestEntityNames.getName() });
+                    new String[]{"AnalyticTest", analyticTestEntityNames.getName()});
         }
 
         analyticTest.setName(analyticTestEntityNames.getName());
@@ -66,7 +75,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
 
         if (analyticTestEntityNames.getAnalyticPipelineNames() == null
                 || analyticTestEntityNames.getAnalyticPipelineNames().isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_35003, new String[] { "AnalyticPipelines" });
+            throw new LedpException(LedpCode.LEDP_35003, new String[]{"AnalyticPipelines"});
         } else {
             ArrayList<AnalyticPipeline> analyticPipelines = new ArrayList<AnalyticPipeline>();
             for (String analyticPipelineName : analyticTestEntityNames.getAnalyticPipelineNames()) {
@@ -75,14 +84,14 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
                     analyticPipelines.add(ap);
                 } else {
                     throw new LedpException(LedpCode.LEDP_35000,
-                            new String[] { "Analytic pipeline", analyticPipelineName });
+                            new String[]{"Analytic pipeline", analyticPipelineName});
                 }
             }
             analyticTest.setAnalyticPipelines(analyticPipelines);
         }
 
         if (analyticTestEntityNames.getDataSetNames() == null || analyticTestEntityNames.getDataSetNames().isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_35003, new String[] { "Datasets" });
+            throw new LedpException(LedpCode.LEDP_35003, new String[]{"Datasets"});
         } else {
             ArrayList<DataSet> dataSets = new ArrayList<DataSet>();
             for (String datasetName : analyticTestEntityNames.getDataSetNames()) {
@@ -90,7 +99,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
                 if (ds != null) {
                     dataSets.add(ds);
                 } else {
-                    throw new LedpException(LedpCode.LEDP_35000, new String[] { "Dataset", datasetName });
+                    throw new LedpException(LedpCode.LEDP_35000, new String[]{"Dataset", datasetName});
                 }
             }
             analyticTest.setDataSets(dataSets);
@@ -106,7 +115,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
         ArrayList<ModelRun> resultSet = new ArrayList<ModelRun>();
         AnalyticTest analyticTest = analyticTestEntityMgr.findByName(analyticTestName);
         if (analyticTest == null) {
-            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Analytic Test", analyticTestName });
+            throw new LedpException(LedpCode.LEDP_35000, new String[]{"Analytic Test", analyticTestName});
         }
         if (analyticTest.isExecuted()) {
             return modelRunEntityMgr.findModelRunsByAnalyticTest(analyticTestName);
@@ -127,7 +136,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
     public AnalyticTestEntityNames getByName(String analyticTestName) {
         AnalyticTest atest = analyticTestEntityMgr.findByName(analyticTestName);
         if (atest == null) {
-            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Analytic Test", analyticTestName });
+            throw new LedpException(LedpCode.LEDP_35000, new String[]{"Analytic Test", analyticTestName});
         }
 
         AnalyticTestEntityNames result = new AnalyticTestEntityNames();
@@ -191,7 +200,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
 
     @Transactional
     private void updateProductionPipline(AnalyticTest aTestToUpdate, AnalyticPipeline latestProdPipeline,
-            AnalyticPipeline previousProdPipeline) {
+                                         AnalyticPipeline previousProdPipeline) {
         if (aTestToUpdate.getAnalyticTestType() == AnalyticTestType.SelectedPipelines) {
             for (int i = 0; i < aTestToUpdate.getAnalyticPipelines().size(); i++) {
                 if (aTestToUpdate.getAnalyticPipelines().get(i).getName().equals(previousProdPipeline.getName())) {
@@ -207,9 +216,9 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
     private ModelRun createModelRun(AnalyticTest analyticTest, AnalyticPipeline ap, DataSet ds) {
         Environment env = new Environment();
         env.apiHostPort = this.apiHostPort;
-        env.tenant = "ModelQuality_Test.ModelQuality_Test.Production";
-        env.username = "bnguyen@lattice-engines.com";
-        env.password = "tahoe";
+        env.tenant = this.tenant;
+        env.username = this.username;
+        env.password = this.password;
 
         String validatedAnalyticTestName = (analyticTest.getName() != null)
                 ? analyticTest.getName().replaceAll("[^A-Za-z0-9_]", "") : "";

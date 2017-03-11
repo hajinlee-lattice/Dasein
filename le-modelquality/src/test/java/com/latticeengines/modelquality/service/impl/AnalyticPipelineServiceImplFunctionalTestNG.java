@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 
 public class AnalyticPipelineServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
+
     @Test(groups = "functional", enabled = false)
     public void createLatestWithValidVersion() {
         try {

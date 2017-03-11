@@ -44,7 +44,7 @@ public class PropDataTenantServiceImpl implements PropDataTenantService {
             Tenant tenant = new Tenant();
             tenant.setId(tenantId);
             tenant.setName("PropData Service Tenant");
-            tenant.setUiVersion("2.0");
+            tenant.setUiVersion("3.0");
             tenantService.registerTenant(tenant);
         }
 
@@ -56,7 +56,7 @@ public class PropDataTenantServiceImpl implements PropDataTenantService {
 
             User user = new User();
             user.setFirstName("Propdata");
-            user.setFirstName("Service");
+            user.setLastName("Service");
             user.setUsername(username);
             user.setEmail(username);
             user.setActive(true);
