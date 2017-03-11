@@ -138,14 +138,19 @@ def register_task(name, containers, volumes):
 
 def deregister_task(name_prefix):
     print "looking for task %s" % name_prefix
-    response = ECS_CLIENT.list_task_definitions(
+    response = ECS_CLIENT.list_task_definition_families(
         familyPrefix=name_prefix
     )
-    for arn in response["taskDefinitionArns"]:
-        print "deregistering task %s" % arn
-        ECS_CLIENT.deregister_task_definition(
-            taskDefinition=arn
+
+    for family in response['families']:
+        response2 = ECS_CLIENT.list_task_definitions(
+            familyPrefix=family
         )
+        for arn in response2["taskDefinitionArns"]:
+            print "deregistering task %s" % arn
+            ECS_CLIENT.deregister_task_definition(
+                taskDefinition=arn
+            )
 
 def create_service(cluster, service, task, count):
     delete_service(cluster, service)
