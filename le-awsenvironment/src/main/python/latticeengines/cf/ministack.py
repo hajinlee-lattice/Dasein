@@ -7,6 +7,7 @@ import boto3
 import json
 import os
 import threading
+import time
 
 from .consul import write_to_stack, read_from_stack
 from .module.ecs import ContainerDefinition, TaskDefinition
@@ -336,6 +337,8 @@ def teardown(stackname, apps=None, completely=False):
 
     for thread in threads:
         thread.join(120)
+
+    time.sleep(20)
 
     if completely:
         client = boto3.client('cloudformation')
