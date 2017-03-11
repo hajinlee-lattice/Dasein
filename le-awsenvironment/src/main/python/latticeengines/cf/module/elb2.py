@@ -85,3 +85,11 @@ class ApplicationLoadBalancer(Resource):
 
     def name(self):
         return self.__name
+
+    def idle_timeout(self, second):
+        if "LoadBalancerAttributes" not in self._template["Properties"]:
+            self._template["Properties"]["LoadBalancerAttributes"] = []
+        self._template["Properties"]["LoadBalancerAttributes"]["idle_timeout.timeout_seconds"] = str(second)
+        return self
+
+

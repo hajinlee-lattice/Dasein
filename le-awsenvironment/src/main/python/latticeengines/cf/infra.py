@@ -109,6 +109,7 @@ def create_load_balancers(tg_map, ui=False):
 
     # private tomcat
     private_lb = ApplicationLoadBalancer("private", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+    private_lb.idle_timeout(600)
     private_lb.add_tag("le-product", "lpi")
     private_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
     for k, v in tg_map.items():
@@ -118,6 +119,7 @@ def create_load_balancers(tg_map, ui=False):
 
     # 2nd tier private tomcat
     private2_lb = ApplicationLoadBalancer("private2", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+    private2_lb.idle_timeout(600)
     private2_lb.add_tag("le-product", "lpi")
     private2_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
     for k, v in tg_map.items():
@@ -127,6 +129,7 @@ def create_load_balancers(tg_map, ui=False):
 
     # public tomcat
     public_lb = ApplicationLoadBalancer("public", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    public_lb.idle_timeout(600)
     public_lb.add_tag("le-product", "lpi")
     public_lb.add_tag("le-stack", PARAM_LE_STACK.ref())
     for k, v in tg_map.items():
@@ -169,6 +172,7 @@ def create_load_balancers(tg_map, ui=False):
     if ui:
         # lpi
         lpi_lb = ApplicationLoadBalancer("lpi", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+        lpi_lb.idle_timeout(600)
         lpi_lb.depends_on(tg_map["lpi"])
         lpi_lb.add_tag("le-product", "lpi")
         resources.append(lpi_lb)
@@ -176,6 +180,7 @@ def create_load_balancers(tg_map, ui=False):
 
         # adminconsole
         ac_lb = ApplicationLoadBalancer("adminconsole", PARAM_NODEJS_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+        ac_lb.idle_timeout(600)
         ac_lb.depends_on(tg_map["adminconsole"])
         ac_lb.add_tag("le-product", "lpi")
         resources.append(ac_lb)
