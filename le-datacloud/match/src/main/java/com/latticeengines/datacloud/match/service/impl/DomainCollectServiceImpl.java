@@ -85,7 +85,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
             }
             Set<String> domainBuffer = new HashSet<>();
             String transferId = UUID.randomUUID().toString();
-            while (!domains.isEmpty()) {
+            if (!domains.isEmpty()) {
                 log.info("Splitting " + domains.size() + " domains to be inserted into collector's url stream.");
                 for (String domain: domains) {
                     domainBuffer.add(domain);
@@ -95,10 +95,10 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                         domainBuffer = new HashSet<>();
                     }
                 }
-            }
-            if (!domainBuffer.isEmpty()) {
-                log.info("Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
-                putDomainsInAccountTransferTable(transferId, domainBuffer);
+                if (!domainBuffer.isEmpty()) {
+                    log.info("Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
+                    putDomainsInAccountTransferTable(transferId, domainBuffer);
+                }
             }
             executeDomainCollectionTransfer(transferId);
         }
