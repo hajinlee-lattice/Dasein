@@ -44,6 +44,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     private static final Set<String> domainSet = new ConcurrentSkipListSet<>();
     public static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+    private static final int BUFFER_SIZE = 800;
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -82,12 +83,24 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                 domains.addAll(domainSet);
                 domainSet.clear();
             }
-            if (!domains.isEmpty()) {
-                log.info("Dumping " + domains.size() + " domains to collector's url stream.");
-                String transferId = UUID.randomUUID().toString();
-                putDomainsInAccountTransferTable(transferId, domains);
-                executeDomainCollectionTransfer(transferId);
+            Set<String> domainBuffer = new HashSet<>();
+            String transferId = UUID.randomUUID().toString();
+            while (!domains.isEmpty()) {
+                log.info("Splitting " + domains.size() + " domains to be inserted into collector's url stream.");
+                for (String domain: domains) {
+                    domainBuffer.add(domain);
+                    if (domainBuffer.size() >= BUFFER_SIZE) {
+                        log.info("Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
+                        putDomainsInAccountTransferTable(transferId, domainBuffer);
+                        domainBuffer = new HashSet<>();
+                    }
+                }
             }
+            if (!domainBuffer.isEmpty()) {
+                log.info("Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
+                putDomainsInAccountTransferTable(transferId, domainBuffer);
+            }
+            executeDomainCollectionTransfer(transferId);
         }
     }
 
