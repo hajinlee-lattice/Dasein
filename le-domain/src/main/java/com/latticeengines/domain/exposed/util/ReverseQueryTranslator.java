@@ -30,6 +30,10 @@ public class ReverseQueryTranslator {
     }
 
     public static FrontEndRestriction translateRestriction(Restriction restriction) {
+        if (restriction == null) {
+            return null;
+        }
+
         FrontEndRestriction result = new FrontEndRestriction();
         if (restriction instanceof LogicalRestriction) {
             LogicalRestriction casted = (LogicalRestriction) restriction;

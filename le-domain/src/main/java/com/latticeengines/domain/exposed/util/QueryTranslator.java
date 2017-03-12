@@ -34,6 +34,9 @@ public class QueryTranslator {
     }
 
     public static Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
+        if (frontEndRestriction == null) {
+            return null;
+        }
 
         LogicalRestriction parent = new LogicalRestriction();
         parent.setOperator(LogicalOperator.AND);
