@@ -34,8 +34,8 @@ public class AssignconversionrateUnitTestNG {
     @DataProvider(name = "columnValueProvider")
     private Object[][] columnValueProvider() {
         return new Object[][] { //
-            { "TechIndicator_HewlettPackard", null, 0.03, false }, //
-            { "TechIndicator_HewlettPackard", "Yes", 0.03, false }, //
+            { "TechIndicator_HewlettPackard", null, 1.0, false }, //
+            { "TechIndicator_HewlettPackard", "Yes", 1.0, false }, //
             { "TechIndicator_HewlettPackard", "No", 0.03, false }, //
             { "TechIndicator_HewlettPackard", "null", 0.02, false }, //
             { "COLUMN_DOES_NOT_EXIST", null, -1.0, true }, //
