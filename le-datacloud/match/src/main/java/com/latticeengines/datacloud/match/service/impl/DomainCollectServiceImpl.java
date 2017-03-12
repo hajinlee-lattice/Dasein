@@ -83,9 +83,9 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                 domains.addAll(domainSet);
                 domainSet.clear();
             }
-            Set<String> domainBuffer = new HashSet<>();
-            String transferId = UUID.randomUUID().toString();
             if (!domains.isEmpty()) {
+                Set<String> domainBuffer = new HashSet<>();
+                String transferId = UUID.randomUUID().toString();
                 log.info("Splitting " + domains.size() + " domains to be inserted into collector's url stream.");
                 for (String domain: domains) {
                     domainBuffer.add(domain);
