@@ -1,3 +1,5 @@
+
+from json import encoder
 import json
 from math import sqrt
 import os
@@ -12,9 +14,8 @@ logger = get_logger("categoricalgroupingstep")
 
 class CategoricalGroupingStep(PipelineStep):
 
-    groupedFeatures = []
-
-    def __init__(self, dsCategVarGroupingInfo, \
+    def __init__(self, groupedFeatures,
+                 dsCategVarGroupingInfo, \
                  maxNumberUniqueValues, \
                  targetCol, \
                  categoricalColumns, \
@@ -22,6 +23,7 @@ class CategoricalGroupingStep(PipelineStep):
                  thresholdError, \
                  thresholdSigSize, \
                  thresholdBinSize):
+        self.groupedFeatures = groupedFeatures
         self.dsCategVarGroupingInfo = dsCategVarGroupingInfo
         self.maxNumberUniqueValues = maxNumberUniqueValues
         self.categoricalColumns = categoricalColumns
@@ -72,7 +74,7 @@ class CategoricalGroupingStep(PipelineStep):
         return [{"dscategvargroupingstep-dscategvargroupingstep.json": self.dsCategVarGroupingInfo}]
 
     def getOutputColumns(self):
-        return [(create_column(featureName, self.__getOutputColTypes(featureName)), [self.outputColumnsInput[featureName], featureName]) for featureName in self.groupedFeatures]
+        return [(create_column(featureName, self.__getOutputColTypes(featureName)), [self.outputColumnsInput[featureName]]) for featureName in self.groupedFeatures]
 
     def doColumnCheck(self):
         return False
@@ -81,8 +83,7 @@ class CategoricalGroupingStep(PipelineStep):
         featureValueDict = {}
 
         if not test:
-            logger.info('groupedFeatures in training(begin) = {}'.format(self.groupedFeatures))
-
+            
             eventList = dataFrame[self.targetColumn].tolist()
             popCount = len(eventList)
             popRate = sum(eventList) * 1.0 / len(eventList)
@@ -126,31 +127,28 @@ class CategoricalGroupingStep(PipelineStep):
 
             self.__appendMetadataEntryInBatches(configMetadata)
             self.__writeRTSArtifacts()
-            
-            logger.info('groupedFeatures in training(end) = {}'.format(self.groupedFeatures))
 
         else:
-            groupedFeatureList = self.dsCategVarGroupingInfo.keys()
 
-            logger.info('groupedFeatures in testing = {}'.format(groupedFeatureList))
-
-            for origFeatName in groupedFeatureList:
+            for newFeatName in self.groupedFeatures:
+                origFeatName = newFeatName[:-7]
 
                 logger.info('feature to be looked at in testing process {}'.format(origFeatName))
 
                 if origFeatName not in dataFrame.columns:
                     logger.error('{} not in dataframe'.format(origFeatName))
 
+                if origFeatName not in self.dsCategVarGroupingInfo:
+                    logger.error('{} not found in dsCategVarGroupingInfo'.format(origFeatName))
+            
                 origColValue = dataFrame[origFeatName].tolist()
                 if any([pd.isnull(x) for x in origColValue]):
                     origColValue = ['LE-missing' if pd.isnull(x) else x for x in origColValue]
 
                 valmap = self.dsCategVarGroupingInfo[origFeatName]
                 dsColVal = [valmap[x] if x in valmap else 0.0 for x in origColValue]
-
-                newFeatureName = ''.join([origFeatName, 'Grouped'])
                     
-                featureValueDict.update({newFeatureName : dsColVal})
+                featureValueDict.update({newFeatName : dsColVal})
         
         featureValueDict = {k: featureValueDict[k] for k in featureValueDict if k in self.groupedFeatures}
         if len(featureValueDict) > 0:
@@ -179,10 +177,13 @@ class CategoricalGroupingStep(PipelineStep):
         return dict((val, posrate(val)) for val in set(columnList))
 
     def __writeRTSArtifacts(self):
+        e = encoder.FLOAT_REPR
+        encoder.FLOAT_REPR = lambda o: format(o, ".2f")
         with open("dsCategVarGroupingInfo.json", "wb") as fp:
             logger.info('Writing RTS artifacts: {}'.format(json.dumps(self.dsCategVarGroupingInfo)))
             json.dump(self.dsCategVarGroupingInfo, fp)
             self.dsCategVarGroupingInfoFilePath = os.path.abspath(fp.name)
+        encoder.FLOAT_REPR = e
 
     def __appendMetadataEntryInBatches(self, configMetadata):
         for featureName in self.groupedFeatures:

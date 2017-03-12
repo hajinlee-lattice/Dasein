@@ -104,8 +104,29 @@
       },
       "ColumnTransformFilePath": "remediatedatarulesstep.py"
     },
-    "PivotStep": {
+    "CategoricalGroupingStep": {
       "KeyWhenSortingByAscending": 7,
+      "Name": "categoricalgroupingstep",
+      "MainClassName": "CategoricalGroupingStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [
+        "Categorical"
+      ],
+      "NamedParameterListToInit": {
+        "groupedFeatures": [],
+        "dsCategVarGroupingInfo": "emptyDictionary",
+        "maxNumberUniqueValues": 10,
+        "targetCol": "targetColumn",
+        "categoricalColumns": "categoricalColumns",
+        "params": "params",
+        "thresholdError": 3,
+        "thresholdSigSize": 0.01,
+        "thresholdBinSize": 0.05
+      },
+      "ColumnTransformFilePath": "categoricalgroupingstep.py"
+    },
+    "PivotStep": {
+      "KeyWhenSortingByAscending": 8,
       "Name": "pivotstep",
       "MainClassName": "PivotStep",
       "UniqueColumnTransformName": "",
@@ -114,14 +135,14 @@
         "columnsToPivot": "emptyDictionary",
         "categoricalColumns": "categoricalColumns",
         "dataprofile": "dataprofile",
-        "pvalueThreshold": 0.10,
+        "pvalueThreshold": 0.1,
         "minCategoricalCount": 5,
         "maxCategoricalCount": 10
       },
       "ColumnTransformFilePath": "pivotstep.py"
     },
     "AssignConversionRateToAllCategoricalValues":{
-        "KeyWhenSortingByAscending": 8,
+        "KeyWhenSortingByAscending": 9,
         "Name": "assignconversionratetoallcategoricalvalues",
         "MainClassName": "AssignConversionRateToAllCategoricalValues",
         "UniqueColumnTransformName": "",
@@ -134,7 +155,7 @@
         "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
     },
     "ColumnTypeConversionStep": {
-      "KeyWhenSortingByAscending": 9,
+      "KeyWhenSortingByAscending": 10,
       "Name": "columntypeconversionstep",
       "MainClassName": "ColumnTypeConversionStep",
       "UniqueColumnTransformName": "",
@@ -145,7 +166,7 @@
       "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "ImputationStep": {
-      "KeyWhenSortingByAscending": 10,
+      "KeyWhenSortingByAscending": 11,
       "Name": "imputationstep",
       "MainClassName": "ImputationStep",
       "UniqueColumnTransformName": "",
@@ -160,7 +181,7 @@
       "ColumnTransformFilePath": "imputationstep.py"
     },
     "FeatureSelectionStep": {
-      "KeyWhenSortingByAscending": 11,
+      "KeyWhenSortingByAscending": 12,
       "Name": "featureselectionstep",
       "MainClassName": "FeatureSelectionStep",
       "UniqueColumnTransformName": "",
@@ -173,7 +194,7 @@
       "ColumnTransformFilePath": "featureselectionstep.py"
     },
     "ExportDataFrameStep": {
-      "KeyWhenSortingByAscending": 12,
+      "KeyWhenSortingByAscending": 13,
       "Name": "exportdfstep",
       "MainClassName": "ExportDataFrameStep",
       "UniqueColumnTransformName": "",

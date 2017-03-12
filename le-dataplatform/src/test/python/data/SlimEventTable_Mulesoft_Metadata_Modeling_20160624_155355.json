@@ -65,5 +65,5 @@
     "python_pipeline_script":"/app/a/2.0.33/dataplatform/scripts/pipeline.py",
     "python_mr_config":null,
     "pipeline_driver":"/app/a/2.0.33/dataplatform/scripts/pipeline.json",
-    "pipeline_properties":"remediatedatarulesstep.enabledRules={\"PopulatedRowCountDS\":[\"Title_IsAcademic\"],\"UniqueValueCountDS\":[]} featureselectionstep.numFeatures=30 featureselectionstep.enabled=true"
+    "pipeline_properties":"remediatedatarulesstep.enabledRules={\"PopulatedRowCountDS\":[\"Title_IsAcademic\"],\"UniqueValueCountDS\":[]} featureselectionstep.numFeatures=35 featureselectionstep.enabled=true"
 }

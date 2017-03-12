@@ -3,6 +3,7 @@ Description:
 If the choice is made to assign a categorical variable to numeric values, the choice should be the conversion rate for that specitic categorical value.
 For example, category A has 0% conversion, B has 1% conversion, and C has 8% conversion in the training set.  Reassign A,B, and C to 0,.01 and .08, respectively
 '''
+from collections import Counter
 from json import encoder
 import json
 import os
@@ -39,47 +40,49 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
                     + ", positiveThreshold=" + str(self.totalPositiveThreshold))
     
     def transform(self, dataFrame, configMetadata, test):
+        totalPositiveEventCount = float(sum(dataFrame[self.targetColumn]))
+        meanConversionRate = round(totalPositiveEventCount / float(len(dataFrame[self.targetColumn])), 2)
+        if meanConversionRate == 0.0:
+            for i in xrange(3, 5):
+                meanConversionRate = round(totalPositiveEventCount / float(len(dataFrame[self.targetColumn])), i)
+                if meanConversionRate != 0.0:
+                    break
+        
         for column, _ in self.categoricalColumns.iteritems():
             if column in dataFrame.columns:
                 self.currentColumn = column
-                self.__assignConversionRateToCategoricalColumns(column, dataFrame, self.targetColumn)
+                
+                if not test:
+                    self.__assignConversionRateToCategoricalColumns(column, dataFrame, meanConversionRate)
+                    self.__writeRTSArtifacts()
                 dataFrame[column] = dataFrame[column].apply(self.__applyConversionRate)
-        self.__writeRTSArtifacts()
+
         return dataFrame
 
-    def __assignConversionRateToCategoricalColumns(self, column, dataFrame, targetColumn):
+    def __assignConversionRateToCategoricalColumns(self, column, dataFrame, meanConversionRate):
         if self.targetColumn in dataFrame and len(dataFrame[column]) == len(dataFrame[self.targetColumn]):
             logger.info("AssignConversionRate training phase. Converting column: " + column)
-            allKeys = set(dataFrame[column])
-            listOfValues = [x for x in enumerate(dataFrame[column])]
-            totalPositiveEventCount = float(sum(dataFrame[self.targetColumn]))
-            meanConversionRate = round(totalPositiveEventCount / (len(dataFrame[self.targetColumn])), 2)
-            keyConversionRate = {}
-            for key in allKeys:
-                ind = [i for i, x in listOfValues if x == key]
-                count = len(ind)
-                if count > 0:
-                    totalPositives = sum([dataFrame[self.targetColumn].iloc[i] for i in ind])
-                    if totalPositives >= self.totalPositiveThreshold:
-                        perc = round(sum([dataFrame[self.targetColumn].iloc[i] for i in ind]) * 1.0 / count, 2)
-                        keyConversionRate[key] = perc
-                    else:
-                        keyConversionRate[key] = meanConversionRate
-                else:
-                    keyConversionRate[key] = 0.0
-            keyConversionRate["UNKNOWN"] = meanConversionRate
+            workingColumn = list(dataFrame[column])
+            cCount = Counter(workingColumn)
+            targetColumn = list(dataFrame[self.targetColumn])
+            posCount = Counter([workingColumn[i] for i in range(len(workingColumn)) if targetColumn[i] == 1])
+            yy = { k:(cCount[k], float(posCount[k])) for k in posCount.keys() }
+            yy2 = { k:(cCount[k], 0.0) for k in set(cCount.keys()) - set(posCount.keys()) }
+            yy = dict(yy.items() + yy2.items())
+            def conversionRateCalc(k):
+                if yy[k][0] == 0 or yy[k][1] < self.totalPositiveThreshold:
+                    return 1.0
+                return (yy[k][1] / yy[k][0]) / meanConversionRate
+            keyConversionRate = { k:conversionRateCalc(k) for k in yy.keys() }
             self.categoricalColumnMapping[column] = keyConversionRate
 
     def __applyConversionRate(self, categoryValue):
         if self.currentColumn in self.categoricalColumnMapping:
             if pd.isnull(categoryValue):
-                return self.categoricalColumnMapping[self.currentColumn]["UNKNOWN"]
+                return 1.0
             if categoryValue in self.categoricalColumnMapping[self.currentColumn]:
-                if self.categoricalColumnMapping[self.currentColumn][categoryValue]:
-                    return self.categoricalColumnMapping[self.currentColumn][categoryValue]
-                else:
-                    return self.categoricalColumnMapping[self.currentColumn]["UNKNOWN"]
-        return categoryValue
+                return self.categoricalColumnMapping[self.currentColumn][categoryValue]
+        return 1.0
 
     def __writeRTSArtifacts(self):
         e = encoder.FLOAT_REPR
@@ -96,7 +99,7 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
         return False
 
     def getDebugArtifacts(self):
-        return [{"categoricalmapping.json": self.categoricalColumnMapping}]
+        return [{"applyconversionratestep-conversionratemapping.json": self.categoricalColumnMapping}]
 
     def getOutputColumns(self):
         return [(create_column(k, "FLOAT"), [k]) for k, _ in self.categoricalColumnMapping.iteritems()]
