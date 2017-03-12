@@ -99,8 +99,8 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                     log.info("Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
                     putDomainsInAccountTransferTable(transferId, domainBuffer);
                 }
+                executeDomainCollectionTransfer(transferId);
             }
-            executeDomainCollectionTransfer(transferId);
         }
     }
 
