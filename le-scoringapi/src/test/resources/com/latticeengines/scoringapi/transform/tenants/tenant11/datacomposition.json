@@ -1,0 +1,699 @@
+{
+    "fields": {
+        "City": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "City"
+        }, 
+        "FirstName": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "FirstName"
+        }, 
+        "Title": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "Title"
+        }, 
+        "SemrushAdwordsKeywords": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "Twitter_Followers": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "Title_Length": {
+            "source": "TRANSFORMS", 
+            "type": "LONG", 
+            "interpretation": "Feature"
+        }, 
+        "FeatureTermSearch": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "State": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "State"
+        }, 
+        "Title_IsAcademic": {
+            "source": "TRANSFORMS", 
+            "type": "BOOLEAN", 
+            "interpretation": "Feature"
+        }, 
+        "PercentileModel": {
+            "source": "PROPRIETARY", 
+            "type": "FLOAT", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_SIEM": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "ModelAction1": {
+            "source": "TRANSFORMS", 
+            "type": "LONG", 
+            "interpretation": "Feature"
+        }, 
+        "Id": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "Id"
+        }, 
+        "Email": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "Email"
+        }, 
+        "Title_Level": {
+            "source": "TRANSFORMS", 
+            "type": "LONG", 
+            "interpretation": "Feature"
+        }, 
+        "SpamIndicator": {
+            "source": "TRANSFORMS", 
+            "type": "LONG", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_DataCenterSolutions_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "BusinessTechnologiesDocinfo": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_SCM": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "Phone_Entropy": {
+            "source": "TRANSFORMS", 
+            "type": "FLOAT", 
+            "interpretation": "Feature"
+        }, 
+        "kickboxAcceptAll": {
+            "source": "REQUEST", 
+            "type": "BOOLEAN", 
+            "interpretation": "Feature"
+        }, 
+        "AlexaViewsRank": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "AlexaReachRank": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "SemrushOrganicKeywords": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "JobsTrendString": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "Feature"
+        }, 
+        "Industry": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "Industry"
+        }, 
+        "CloudTechnologies_ITInfrastructureOperations": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "ModelAction": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "Feature"
+        }, 
+        "Country": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "Country"
+        }, 
+        "AlexaRank": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "LastName": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "LastName"
+        }, 
+        "Website_Age_Months": {
+            "source": "TRANSFORMS", 
+            "type": "LONG", 
+            "interpretation": "Feature"
+        }, 
+        "PhoneNumber": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "PhoneNumber"
+        }, 
+        "Activity_Count_Visit_Webpage": {
+            "source": "REQUEST", 
+            "type": "FLOAT", 
+            "interpretation": "Feature"
+        }, 
+        "CompanyName_Entropy": {
+            "source": "TRANSFORMS", 
+            "type": "FLOAT", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_CloudInfrastructureComputing": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "Title_IsTechRelated": {
+            "source": "TRANSFORMS", 
+            "type": "BOOLEAN", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_ApplicationDevelopmentMgmt": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "Intelliscore": {
+            "source": "PROPRIETARY", 
+            "type": "FLOAT", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_CloudService_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "ActiveRetirementParticipants": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "CompanyName": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "CompanyName"
+        }, 
+        "Industry_Group": {
+            "source": "TRANSFORMS", 
+            "type": "STRING", 
+            "interpretation": "Feature"
+        }, 
+        "SemrushRank": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_Collaboration": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "Event": {
+            "source": "REQUEST", 
+            "type": "BOOLEAN", 
+            "interpretation": "Event"
+        }, 
+        "CompanyName_Length": {
+            "source": "TRANSFORMS", 
+            "type": "LONG", 
+            "interpretation": "Feature"
+        }, 
+        "CreatedDate": {
+            "source": "REQUEST", 
+            "type": "LONG", 
+            "interpretation": "Date"
+        }, 
+        "AlexaUSRank": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_QualityManagementSystem": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_WebOrntdArch_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }, 
+        "CloudTechnologies_DatabaseManagementSoftware": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "Feature"
+        }
+    }, 
+    "transforms": [
+        {
+            "name": "add_title_attributes", 
+            "output": "DS_TitleLength", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column1": "Title", 
+                "column2": "DS_TitleLength"
+            }
+        }, 
+        {
+            "name": "categorical_grouping", 
+            "output": "ModelAction1Grouped", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "ModelAction1"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction_LOWMEDIUMRISK", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction", 
+                "column2": "ModelAction_LOWMEDIUMRISK"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction_RECENTBANKRUPTCYONFILE", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction", 
+                "column2": "ModelAction_RECENTBANKRUPTCYONFILE"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction1_30", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction1", 
+                "column2": "ModelAction1_30"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction1_10", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction1", 
+                "column2": "ModelAction1_10"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction_MEDIUMRISK", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction", 
+                "column2": "ModelAction_MEDIUMRISK"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction1_20", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction1", 
+                "column2": "ModelAction1_20"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction1___ISNULL__", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction1", 
+                "column2": "ModelAction1___ISNULL__"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction1_00", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction1", 
+                "column2": "ModelAction1_00"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction_INSUFFICIENTDATATOSCORE", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction", 
+                "column2": "ModelAction_INSUFFICIENTDATATOSCORE"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction1_40", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction1", 
+                "column2": "ModelAction1_40"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction1_50", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction1", 
+                "column2": "ModelAction1_50"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction_LOWRISK", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction", 
+                "column2": "ModelAction_LOWRISK"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction_HIGHRISK", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction", 
+                "column2": "ModelAction_HIGHRISK"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction1_60", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction1", 
+                "column2": "ModelAction1_60"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction___ISNULL__", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction", 
+                "column2": "ModelAction___ISNULL__"
+            }
+        }, 
+        {
+            "name": "pivot_v2", 
+            "output": "ModelAction_MEDIUMHIGHRISK", 
+            "type": "INTEGER", 
+            "arguments": {
+                "column1": "ModelAction", 
+                "column2": "ModelAction_MEDIUMHIGHRISK"
+            }
+        }, 
+        {
+            "name": "assignconversionrate", 
+            "output": "JobsTrendString", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "JobsTrendString"
+            }
+        }, 
+        {
+            "name": "assignconversionrate", 
+            "output": "SpamIndicator", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "SpamIndicator"
+            }
+        }, 
+        {
+            "name": "assignconversionrate", 
+            "output": "Title_IsTechRelated", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Title_IsTechRelated"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "Phone_Entropy", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Phone_Entropy"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "SemrushAdwordsKeywords", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "SemrushAdwordsKeywords"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "Title_Length", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Title_Length"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "FeatureTermSearch", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "FeatureTermSearch"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "PercentileModel", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "PercentileModel"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_SIEM", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_SIEM"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "BusinessTechnologiesDocinfo", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesDocinfo"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "kickboxAcceptAll", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "kickboxAcceptAll"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "AlexaViewsRank", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "AlexaViewsRank"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "AlexaReachRank", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "AlexaReachRank"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "SemrushOrganicKeywords", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "SemrushOrganicKeywords"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_DataCenterSolutions_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_DataCenterSolutions_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_ITInfrastructureOperations", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_ITInfrastructureOperations"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "AlexaRank", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "AlexaRank"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "Website_Age_Months", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Website_Age_Months"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_QualityManagementSystem", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_QualityManagementSystem"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "Activity_Count_Visit_Webpage", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_Count_Visit_Webpage"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_CloudInfrastructureComputing", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_CloudInfrastructureComputing"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_ApplicationDevelopmentMgmt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_ApplicationDevelopmentMgmt"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "Intelliscore", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Intelliscore"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_CloudService_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_CloudService_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "ActiveRetirementParticipants", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "ActiveRetirementParticipants"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CompanyName_Entropy", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CompanyName_Entropy"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_SCM", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_SCM"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_Collaboration", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_Collaboration"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_DatabaseManagementSoftware", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_DatabaseManagementSoftware"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CompanyName_Length", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CompanyName_Length"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "AlexaUSRank", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "AlexaUSRank"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "Twitter_Followers", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Twitter_Followers"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "CloudTechnologies_WebOrntdArch_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_WebOrntdArch_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value_v2", 
+            "output": "SemrushRank", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "SemrushRank"
+            }
+        }
+    ]
+}

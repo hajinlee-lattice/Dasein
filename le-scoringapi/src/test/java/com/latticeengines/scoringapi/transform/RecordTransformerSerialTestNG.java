@@ -2,6 +2,8 @@ package com.latticeengines.scoringapi.transform;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.AbstractMap;
@@ -16,6 +18,9 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -25,6 +30,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.jython.JythonEngine;
 import com.latticeengines.common.exposed.modeling.ModelExtractor;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -112,6 +118,7 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         String scoreDerivationPath = tenantPath + "/scorederivation.json";
         String pmmlXmlPath = tenantPath + "/rfpmml.xml";
         String expectedScoresPath = tenantPath + "/scored.txt";
+        String exportCSVPath = tenantPath + "/exportdfstep.csv";
         String tenantName = new File(tenantPath).getName();
 
         if (skip(tenantName)) {
@@ -129,8 +136,42 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 new File(scoreDerivationPath)), ScoreDerivation.class);
 
         System.out.println("Processing tenant " + tenantName);
+        
+        Map<Double, Map<String, String>> records = extractRecords(keyColumn, exportCSVPath);
         transformAndScore(dataToScorePath, dataComposition.transforms, pmmlXmlPath, scoreDerivation, expectedScoresPath,
-                keyColumn);
+                keyColumn, records);
+    }
+    
+    private Map<Double, Map<String, String>> extractRecords(String keyColumn, String exportCSVPath) throws Exception {
+        String[] headers = null;
+        try (CSVParser parser = new CSVParser(new InputStreamReader((new FileInputStream(exportCSVPath))),
+                LECSVFormat.format)) {
+            headers = new ArrayList<String>(parser.getHeaderMap().keySet()).toArray(new String[] {});
+        } catch (Exception e) {
+            return null;
+        }
+
+        Map<Double, Map<String, String>> records = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(exportCSVPath)))) {
+            CSVFormat format = LECSVFormat.format.withHeader(headers);
+            String line = reader.readLine(); // skip header
+            for (; (line = reader.readLine()) != null;) {
+                try (CSVParser parser = CSVParser.parse(line, format)) {
+                    CSVRecord csvRecord = parser.getRecords().get(0);
+                    Double id = Double.valueOf(csvRecord.get(keyColumn));
+                    
+                    Map<String, String> record = new HashMap<>();
+                    
+                    for (String header : headers) {
+                        record.put(header, csvRecord.get(header));
+                    }
+                    records.put(id, record);
+                }
+            }
+        } catch (Exception e) {
+            
+        }
+        return records;
     }
 
     private void transformAndScore(String avroFile, //
@@ -138,7 +179,8 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
             String pmmlXmlPath, //
             ScoreDerivation derivation, //
             String expectedScoresPath, //
-            String keyColumn) throws Exception {
+            String keyColumn, //
+            Map<Double, Map<String, String>> records) throws Exception {
         Configuration config = new Configuration();
         config.set("fs.defaultFS", "file:///");
         FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config, new Path(avroFile));
@@ -183,6 +225,7 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
 //            Map<String, Object> transformedFast = recordTransformer.transformJython(engine, transforms, recordAsMap);
 //            Map<String, Object> transformedFast = recordTransformer.transformJython(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
             Map<String, Object> transformedFast = recordTransformer.transform(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
+
             long time10 = System.currentTimeMillis();
             totalFastTransformTime += (time10 - time9);
 
@@ -193,6 +236,11 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY_OR_VALUE);
 
                 if (Math.abs(expectedScore - scoreFast) > 0.000001) {
+                    
+                    if (records != null) {
+                        getDiffRecords(recIdAsDouble, records.get(recIdAsDouble), transformedFast);
+                    }
+                    
                     errors++;
                     errorKeys.add(new AbstractMap.SimpleEntry<Double, Double>(recIdAsDouble,
                             Math.abs(expectedScore - scoreFast)));
@@ -226,6 +274,29 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         System.out.println("Number of errors = " + errors);
         for (Map.Entry<Double, Double> entry : errorKeys) {
             System.out.println("Record id = " + entry.getKey() + " value = " + entry.getValue());
+        }
+    }
+
+    private void getDiffRecords(Double k, Map<String, String> recordAsMap, Map<String, Object> transformedFast) {
+        System.out.println(String.format("Key: %f", k));
+        for (Map.Entry<String, String> entry : recordAsMap.entrySet()) {
+            String key = entry.getKey();
+            Object transformedValue = transformedFast.get(key);
+            if (transformedFast.containsKey(key)) {
+                if (transformedValue == null && entry.getValue() == null) {
+                    
+                } else if (transformedValue != null) {
+                    Object v = entry.getValue();
+                    if (transformedValue instanceof Double) {
+                        v = Double.valueOf(entry.getValue());
+                    }
+                    
+                    if (!transformedValue.equals(v)) {
+                        System.out.println("Column = " + key + " " + String.valueOf(v) + " != " + String.valueOf(transformedValue));
+                    }
+                    
+                }
+            }
         }
     }
 
