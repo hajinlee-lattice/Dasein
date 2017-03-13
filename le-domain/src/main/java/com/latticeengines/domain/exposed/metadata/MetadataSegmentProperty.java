@@ -34,9 +34,9 @@ public class MetadataSegmentProperty implements HasOptionAndValue, HasPid {
     private MetadataSegment metadataSegment;
 
     @Column(name = "PROPERTY", nullable = false)
-    @JsonProperty("property")
+    @JsonProperty("option")
     @Index(name = "SEGMENT_PROPERTY_IDX")
-    private String property;
+    private String option;
 
     @Column(name = "VALUE", nullable = true, length = 2048)
     @JsonProperty("value")
@@ -54,12 +54,12 @@ public class MetadataSegmentProperty implements HasOptionAndValue, HasPid {
 
     @Override
     public String getOption() {
-        return property;
+        return option;
     }
 
     @Override
-    public void setOption(String property) {
-        this.property = property;
+    public void setOption(String option) {
+        this.option = option;
     }
 
     @Override
