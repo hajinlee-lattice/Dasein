@@ -11,7 +11,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
@@ -38,9 +37,6 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private JobHistoryEntityMgr jobHistoryEntityMgr;
 
-    @Autowired
-    private ApplicationContext appContext;
-
     @Value("${quartz.test.functional.testjob.primary.url:}")
     private String testJobPrimaryUrl;
 
@@ -62,7 +58,6 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
         jobHistoryEntityMgr.deleteAllJobHistory(JOB_GROUP, JOB_NAME);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void addJob() {
         schedulerEntityMgr.deleteJob(JOB_GROUP, JOB_NAME);
