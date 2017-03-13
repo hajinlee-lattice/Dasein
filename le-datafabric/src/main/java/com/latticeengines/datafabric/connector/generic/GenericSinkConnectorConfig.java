@@ -20,7 +20,7 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
 
     // common
     static final WorkerProperty<String> STACK = new WorkerProperty<String>("datafabric.message.stack",
-            "The stack name used in Zookeeper", "The stack used in Zookeeper").setDefaultValue("b");
+            "The stack name used in Zookeeper", "The stack used in Zookeeper").setDefaultValue("global");
     static final WorkerProperty<String> KAFKA_ZKCONNECT = new WorkerProperty<String>("kafka.zkConnect",
             "The zookeeper servers for sink generic cluster", "Zookeeper servers").setDefaultValue("localhost:2181");
     static final WorkerProperty<String> REPOSITORIES = new WorkerProperty<String>("datafabric.connect.repositories",

@@ -51,7 +51,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
     private static final Log log = LogFactory.getLog(GenericFabricEntityManagerImplFunctionalTestNG.class);
 
     private static final String POD = "FabricConnectors";
-    private static final String STACK = "b";
+    private static final String STACK = "global";
     private static final String BASE_DIR = "/Pods/Default/Services/PropData/Sources";
 
     private static final String FILE_PATTERN = "Snapshot/*/*.avro";
