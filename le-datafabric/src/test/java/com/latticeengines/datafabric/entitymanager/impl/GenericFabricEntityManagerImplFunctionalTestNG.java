@@ -386,9 +386,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
                 List<String> repositories = Arrays.asList("testGenericFile" + type, "DataCloud");
                 recordRequest.setBatchId(batchId).setCustomerSpace("generic").setStores(stores)
                         .setRepositories(repositories).setId(i + "").setRecordType("DynamoConnector");
-                ;
             }
-
             recordRequests.add(recordRequest);
         }
 

@@ -582,12 +582,22 @@ public class AvroUtils {
                 .namespace(schema.getNamespace()) //
                 .doc(schema.getDoc()) //
                 .fields();
-
         for (Field field : schema.getFields()) {
             FieldBuilder<Schema> fieldBuilder = assembler.name(field.name());
             assembler = constructFieldWithType(assembler, fieldBuilder, getType(field));
         }
+        return assembler.endRecord();
+    }
 
+    public static Schema extractSimpleSchema(Schema schema) {
+        FieldAssembler<Schema> assembler = SchemaBuilder //
+                .record(schema.getName()) //
+                .doc(schema.getDoc()) //
+                .fields();
+        for (Field field : schema.getFields()) {
+            FieldBuilder<Schema> fieldBuilder = assembler.name(field.name());
+            assembler = constructFieldWithType(assembler, fieldBuilder, getType(field));
+        }
         return assembler.endRecord();
     }
 

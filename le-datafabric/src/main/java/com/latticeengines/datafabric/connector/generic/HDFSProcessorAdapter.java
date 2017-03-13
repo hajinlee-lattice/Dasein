@@ -3,6 +3,7 @@ package com.latticeengines.datafabric.connector.generic;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,6 +13,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.kafka.common.TopicPartition;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 import com.latticeengines.datafabric.service.datastore.impl.FabricDataServiceImpl;
@@ -50,11 +52,12 @@ public class HDFSProcessorAdapter extends AbstractProcessorAdapter {
         dataService.addServiceProvider(hdfsProvider);
 
         Pair<GenericRecordRequest, GenericRecord> pair = pairs.values().iterator().next().get(0);
+        Schema schema = pair.getValue().getSchema();
+        schema = AvroUtils.extractSimpleSchema(schema);
         for (Map.Entry<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>> entry : pairs.entrySet()) {
             String fileName = getFileName(entry.getKey());
             FabricDataStore dataStore = dataService.constructDataStore(hdfsProvider.getName(), fileName, pair.getKey()
-                    .getRecordType(), pair.getValue().getSchema());
-
+                    .getRecordType(), schema);
             Map<String, Pair<GenericRecord, Map<String, Object>>> pairMap = getPairMap(entry.getValue());
             count += entry.getValue().size();
             dataStore.createRecords(pairMap);
@@ -63,4 +66,5 @@ public class HDFSProcessorAdapter extends AbstractProcessorAdapter {
                 + " repository=" + repository);
         return count;
     }
+
 }

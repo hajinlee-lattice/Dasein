@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 public class MatchHistory implements HasId<String> {
 
     @Nullable
-    @AvroName("Id")
+    @AvroName("ID")
     private String id;
 
     @Nullable
