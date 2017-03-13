@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /*
                 Lattice Engines Express Server
@@ -13,22 +13,23 @@ const morgan    = require('morgan');
 const fs        = require('graceful-fs');
 const helmet    = require('helmet');
 const compress  = require('compression');
+const chalk     = require('chalk');
 const cors      = require('cors');
-const fmt       = require('util').format;
-const log4js    = require('log4js');
-
+/*
+const proxy     = require('express-http-proxy');
+const session   = require('express-session');
+*/
 const DateUtil = require('./utilities/DateUtil');
 
 class Server {
     constructor(express, app, options) {
+        console.log(chalk.white('>') + ' SETTINGS', JSON.stringify(options, null, 4));
+        console.log('\n');
 
         this.options = options;
         this.express = express;
         this.app = app;
         //this.setCors();
-
-        const log = this.log = log4js.getLogger(this.options.name);
-        this.startLogging();
 
         if (options.config.protocols.http) {
             const http = require('http');
@@ -59,7 +60,7 @@ class Server {
 
                 this.httpsServer = https.createServer(tlsOptions, this.app);
             } catch(err) {
-                log(fmt(':httpserror> %s\n%s', err, err.stack));
+                console.log(chalk.red(DateUtil.getTimeStamp() + ':httpserror>'), err);
             }
         }
 
@@ -67,6 +68,7 @@ class Server {
         this.setRenderer();
         this.setMiddleware();
         options.config.WHITELIST ? this.trustProxy(options.config.WHITELIST) : null;
+        options.config.LOGGING ? this.startLogging(options.config.LOGGING) : null;
         options.routes ? this.setAppRoutes(options.routes) : null;
         this.setProxies();
         this.setDefaultRoutes(options.config.NODE_ENV);
@@ -104,48 +106,44 @@ class Server {
         */
     }
 
-    startLogging() {
-        const self = this;
-
-        const logPath = this.options.config.LOGGING ? path.resolve(this.options.config.LOGGING + '/le-ui.log') : null;
-        if (logPath) {
-            log4js.addAppender(log4js.appenders.file(logPath), this.options.name);
-        }
-
-        const log = this.log;
-        log.info(fmt("%s\n", JSON.stringify(this.options, null, 4)));
+    startLogging(log_path) {
+        let logDirectory = log_path;
 
         try {
+            const accessLogStream = fs.createWriteStream(logDirectory + '/' + this.options.name + '_access.log', {
+                flags: 'a'
+            });
+
             const map = {
                 default:'dev',
                 verbose:'combined'
             };
 
-            morgan.token("datetime", function getDateTime() {
+            morgan.token('datetime', function getDateTime() {
                 return DateUtil.getTimeStamp();
             });
 
-            morgan.token("utctime", function getDateTime() {
+            morgan.token('utctime', function getDateTime() {
                 return new Date().getTime();
             });
 
             this.app.use(morgan(
                 map[this.options.config.LOG_LEVEL],
                 {
-                    stream: {
-                        write: (msg) => { log.info(msg); }
-                    },
-                    skip: function (req, res) {
-                        if (self.options.config.NODE_ENV === 'development') {
-                            return res.statusCode < 400;
-                        }
+                    stream: accessLogStream
+                }
+            ));
 
-                        return false;
+            this.app.use(morgan(
+                'dev',
+                {
+                    skip: function (req, res) {
+                        return res.statusCode < 400;
                     }
                 }
             ));
         } catch(err) {
-            log.error(fmt(':logging> %s \n %s', err, err.stack));
+            console.log(chalk.red(DateUtil.getTimeStamp() + ':logging>') + err);
         }
     }
 
@@ -177,7 +175,8 @@ class Server {
                     this.createApiProxy(proxy.remote_host, proxy.local_path, proxy.remote_path);
                     break;
                 default:
-                    throw new Error(fmt('Invalid proxy type: %s', proxy.type));
+                    // throw error invalid configuration?
+                    break;
             }
         }
     }
@@ -185,12 +184,11 @@ class Server {
     // forward API requests for dev
     createApiProxy(API_URL, API_LOCAL_PATH, API_PATH) {
         // check if internal IP
-        const log = this.log;
 
         if (API_URL) {
             API_PATH = API_PATH || '/pls';
 
-            log.info(fmt('> API PROXY\t %s\t%s%s', API_LOCAL_PATH, API_URL, API_PATH));
+            console.log(chalk.white('>') + ' API PROXY\t', API_LOCAL_PATH, '\n\t' + API_URL+API_PATH);
 
             try {
                 this.app.use(API_LOCAL_PATH, (req, res) => {
@@ -215,11 +213,11 @@ class Server {
 
                         req.pipe(r).pipe(res);
                     } catch(err) {
-                        log.error(fmt(':apiproxy> %s\n%s', err, err.stack));
+                        console.log(chalk.red(DateUtil.getTimeStamp() + ':apiproxy>') + err);
                     }
                 });
             } catch (err) {
-                log.error(fmt(':apiroute> %s\n%s', err, err.stack));
+                console.log(chalk.red(DateUtil.getTimeStamp() + ':apiroute>') + err);
             }
         }
     }
@@ -227,13 +225,11 @@ class Server {
     // this is needed so that the browser can download files
     // that need to be hidden behind the Authorization token
     createFileProxy(API_URL, API_PATH, PATH) {
-        const log = this.log;
-
         if (API_URL) {
             API_PATH = API_PATH || '/files',
                 PATH = PATH || '/pls';
 
-            log.info(fmt('> FILE PROXY %s\t%s%s', API_PATH, API_URL, PATH));
+            console.log(chalk.white('>') + ' FILE PROXY', API_PATH, '\n\t' + API_URL+PATH);
 
             this.app.use(API_PATH, (req, res) => {
                 // urls heading to /files/* will go to /pls/* with Auth token
@@ -246,26 +242,24 @@ class Server {
                         if (req.query.Authorization) {
                             // Since the token was in the URL, +'s got converted to spaces
                             let token = req.query.Authorization.replace(/ /g,'+');
-                            req.headers["Authorization"] = token || '';
+                            req.headers['Authorization'] = token || '';
                         }
 
                         if (req.query.TenantId) {
                             let tenant = req.query.TenantId;
-                            req.headers["TenantId"] = tenant || '';
+                            req.headers['TenantId'] = tenant || '';
                         }
                     }
 
                     req.pipe(r).pipe(res);
                 } catch(err) {
-                    log.error(fmt(':fileproxy> %s\n%s', err, err.stack));
+                    console.log(chalk.red(DateUtil.getTimeStamp() + ':fileproxy>') + err);
                 }
             });
         }
     }
 
     setAppRoutes(routes) {
-        const log = this.log;
-
         routes.forEach(route => {
             const dir = this.options.config.APP_ROOT + route.path;
             var displayString = '';
@@ -280,21 +274,26 @@ class Server {
                 });
             }
 
-            log.info(fmt('> ROUTE\t%s\t[%s]', route.path.replace(this.options.SRC_PATH,""), displayString));
+            console.log(
+                chalk.white('>') + ' ROUTE\t'+route.path.replace(this.options.SRC_PATH,''),
+                '\n\t[ '+displayString+' ]'
+            );
 
             displayString = '';
             // users will see the desired render page when entering these routes
             if (route.pages) {
                 const html5mode = route.html5mode === true;
                 Object.keys(route.pages).forEach(page => {
-                    // log.info(fmt('\t%s\t->%s', route.pages[page], page));
-
+                    //console.log('\t'+route.pages[page]+'\t->',page);
+                    // if !internal ip && page == '/admin'
                     this.app.get(
                         page + (html5mode ? '*' : ''),
                         (req, res) => res.render(dir + '/' + route.pages[page])
                     );
                 });
             }
+
+            console.log('\n');
         });
     }
 
@@ -311,7 +310,7 @@ class Server {
             this.app.use((err, req, res, next) => {
                 res.status(err.status || 500);
                 res.render('server/error', {
-                    options: JSON.stringify(this.options, null, "\t"),
+                    options: JSON.stringify(this.options, null, '\t'),
                     url: req.originalUrl,
                     status: err.status,
                     message: err.message,
@@ -334,8 +333,7 @@ class Server {
         });
     }
 
-    start(cb) {
-        cb = cb || Function.prototype;
+    start() {
         const options = this.options;
         const config = options.config;
 
@@ -344,15 +342,17 @@ class Server {
             process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
         //}
 
+        console.log('\n');
         if (this.httpServer) {
-            this.httpServer.listen(config.protocols.http, (err) => {
-                cb(err, { proto:'http', port: config.protocols.http, app: options.name });
+            this.httpServer.listen(config.protocols.http, () => {
+                console.log(chalk.green(config.TIMESTAMP + '>') + ' LISTENING: http://localhost:' + config.protocols.http);
             });
         }
 
         if (this.httpsServer) {
-            this.httpsServer.listen(config.protocols.https, (err) => {
-                cb(err, { proto:'https', port: config.protocols.https, app: options.name });
+            this.httpsServer.listen(config.protocols.https, () => {
+                console.log(chalk.green(config.TIMESTAMP + '>') + ' LISTENING: https://localhost:' + config.protocols.https);
+                console.log('\n');
             });
         }
 
