@@ -21,6 +21,7 @@ import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 
 public class HDFSDataStoreImpl implements FabricDataStore {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(HDFSDataStoreImpl.class);
 
     public static final String DATE_FORMAT_STRING = "yyyy-MM-dd_z";
@@ -29,7 +30,7 @@ public class HDFSDataStoreImpl implements FabricDataStore {
 
     private Configuration config;
     private String fileName;
-    private String reordType;
+    private String recordType;
     private Schema schema;
     private String repositoryDir;
     private String baseDir;
@@ -44,7 +45,7 @@ public class HDFSDataStoreImpl implements FabricDataStore {
         this.baseDir = baseDir;
         this.repositoryDir = repositoryDir;
         this.fileName = fileName;
-        this.reordType = recordType;
+        this.recordType = recordType;
         this.schema = schema;
 
     }
