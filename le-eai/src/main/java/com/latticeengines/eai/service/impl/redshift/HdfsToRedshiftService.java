@@ -58,10 +58,9 @@ public class HdfsToRedshiftService {
 
         hdfsToS3ExportService.downloadToLocal(s3Configuration);
         hdfsToS3ExportService.upload(s3Configuration);
-
     }
 
-    public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
+    public void createRedshiftTable(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         redshiftService.dropTable(redshiftTableConfig.getTableName());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -75,9 +74,13 @@ public class HdfsToRedshiftService {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new RuntimeException(e);
         }
+
+    }
+
+    public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
+        RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         redshiftService.loadTableFromAvroInS3(redshiftTableConfig.getTableName(), s3Bucket,
                 s3Prefix(redshiftTableConfig), redshiftTableConfig.getJsonPathPrefix());
-
     }
 
     // should only be used for testing purpose
