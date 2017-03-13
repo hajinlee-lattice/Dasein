@@ -179,8 +179,9 @@ angular
                         "   var file = e.data.file,"+
                         "       FR = new FileReaderSync(),"+
                         "       totalSize = file.size, curSize = 0,"+
-                        "       chunkSize = 16384, chunks = 0, chunk,"+
-                        "       deflator = new pako.Deflate({gzip:true});"+
+                        "       maxChunk = 16384, chunks = 0, chunk,"+
+                        "       chunkSize = totalSize < maxChunk ? totalSize : maxChunk,"+
+                        "       deflator = new pako.Deflate({ gzip:true });"+
                         ""+
                         "   while (curSize < totalSize) { "+ 
                         "       if (chunks++ % 100 == 0) {"+
