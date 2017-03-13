@@ -99,9 +99,9 @@ public class MetadataConverter {
             List<Schema.Field> fields = schema.getFields();
 
             if (!isBucketed) {
-                fields.stream().forEach(field -> table.addAttribute(getAttribute(field)));
+                fields.forEach(field -> table.addAttribute(getAttribute(field)));
             } else {
-                fields.stream().forEach(field -> table.addAttributes(getBucketedAttributes(field)));
+                fields.forEach(field -> table.addAttributes(getBucketedAttributes(field)));
             }
 
             table.setExtracts(extracts);

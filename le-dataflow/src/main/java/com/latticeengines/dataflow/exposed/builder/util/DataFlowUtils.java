@@ -47,11 +47,11 @@ public class DataFlowUtils {
     }
 
     public static Map<String, FieldMetadata> getFieldMetadataMap(List<FieldMetadata> fieldMetadata) {
-        return fieldMetadata.stream().collect(Collectors.toMap(fm -> fm.getFieldName(), fm -> fm));
+        return fieldMetadata.stream().collect(Collectors.toMap(FieldMetadata::getFieldName, fm -> fm));
     }
 
     public static List<String> getFieldNames(List<FieldMetadata> fieldMetadata) {
-        return fieldMetadata.stream().map(a -> a.getFieldName()).collect(Collectors.toList());
+        return fieldMetadata.stream().map(FieldMetadata::getFieldName).collect(Collectors.toList());
     }
 
     public static Fields convertToFields(List<String> fields) {

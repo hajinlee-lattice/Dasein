@@ -9,29 +9,29 @@ LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn20
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy)
-SET IsPremium = (@var1 = 'True'), IsInternalEnrichment = (@var2 = 'True');
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,BucketForSegment)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn201.csv' INTO TABLE `AccountMasterColumn`
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy)
-SET IsPremium = (@var1 = 'True'), IsInternalEnrichment = (@var2 = 'True');
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,BucketForSegment)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn202.csv' INTO TABLE `AccountMasterColumn`
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy)
-SET IsPremium = (@var1 = 'True'), IsInternalEnrichment = (@var2 = 'True');
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,BucketForSegment)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn203.csv' INTO TABLE `AccountMasterColumn`
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy)
-SET IsPremium = (@var1 = 'True'), IsInternalEnrichment = (@var2 = 'True');
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,BucketForSegment)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1);
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv' INTO TABLE `SourceColumn`
 FIELDS TERMINATED BY ','
@@ -111,23 +111,31 @@ SET SQL_SAFE_UPDATES = 0;
 
 UPDATE ExternalColumn
 SET StatisticalType = NULL
-WHERE StatisticalType = '';
+WHERE StatisticalType = '' OR StatisticalType = 'NULL';
 
 UPDATE ExternalColumn
 SET FundamentalType = NULL
-WHERE FundamentalType = '';
+WHERE FundamentalType = '' OR FundamentalType = 'NULL';
 
 UPDATE ExternalColumn
 SET DataType = NULL
-WHERE DataType = '';
+WHERE DataType = '' OR DataType = 'NULL';
 
 UPDATE AccountMasterColumn
 SET StatisticalType = NULL
-WHERE StatisticalType = '';
+WHERE StatisticalType = '' OR StatisticalType = 'NULL';
 
 UPDATE AccountMasterColumn
 SET FundamentalType = NULL
-WHERE FundamentalType = '';
+WHERE FundamentalType = '' OR FundamentalType = 'NULL';
+
+UPDATE AccountMasterColumn
+SET DecodeStrategy = NULL
+WHERE DecodeStrategy = '' OR DecodeStrategy = 'NULL';
+
+UPDATE AccountMasterColumn
+SET DisplayDiscretizationStrategy = NULL
+WHERE DisplayDiscretizationStrategy = '' OR DisplayDiscretizationStrategy = 'NULL';
 
 UPDATE SourceColumn
 SET Arguments = REPLACE(Arguments, 'Â', '')

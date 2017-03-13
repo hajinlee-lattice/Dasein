@@ -82,6 +82,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "ApprovedUsage")
     private String approvedUsage;
 
+    @Index(name = "IX_GROUPS")
     @Column(name = "Groups", nullable = false, length = 1000)
     private String groups;
 
@@ -96,6 +97,9 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
 
     @Column(name = "DecodeStrategy", length = 1000)
     private String decodeStrategy;
+
+    @Column(name = "BucketForSegment", nullable = false)
+    private boolean bucketForSegment;
 
     @Override
     @JsonIgnore
@@ -267,6 +271,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @JsonIgnore
+    public boolean isBucketForSegment() {
+        return bucketForSegment;
+    }
+
+    @JsonIgnore
+    public void setBucketForSegment(boolean bucketForSegment) {
+        this.bucketForSegment = bucketForSegment;
+    }
+
+    @JsonIgnore
     private String getFundamentalTypeAsString() {
         if (fundamentalType == null) {
             return null;
@@ -339,6 +353,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setIsPremium(isPremium());
         metadata.setMatchDestination(getMatchDestination());
         metadata.setDecodeStrategy(getDecodeStrategy());
+        metadata.setBucketForSegment(isBucketForSegment());
 
         if (approvedUsages != null) {
             if (approvedUsages.contains(ApprovedUsage.MODEL)

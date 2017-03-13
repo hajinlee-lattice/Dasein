@@ -118,6 +118,7 @@ public class ColumnSelection {
         Enrichment("Enrichment"), //
         DerivedColumns("DerivedColumns"), //
         Model("Model"), //
+        Segment("Segment"), //
         ID("ID"), //
         RTS("RTS");
 

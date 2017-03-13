@@ -30,6 +30,9 @@ public class ColumnMetadata {
     private boolean isPremium;
     private String decodeStrategy;
 
+    @JsonProperty("BucketForSegment")
+    private boolean bucketForSegment;
+
     @JsonProperty("CanModel")
     private boolean canModel;
 
@@ -203,6 +206,14 @@ public class ColumnMetadata {
 
     public void setCanBis(boolean canBis) {
         this.canBis = canBis;
+    }
+
+    public boolean isBucketForSegment() {
+        return bucketForSegment;
+    }
+
+    public void setBucketForSegment(boolean bucketForSegment) {
+        this.bucketForSegment = bucketForSegment;
     }
 
     @JsonProperty("FundamentalType")

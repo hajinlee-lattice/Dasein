@@ -35,6 +35,8 @@ gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/CategoricalAttribute.csv.gz 
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterFact.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterFact.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterFact.csv
 
+source $WSHOME/le-dev/scripts/setupdb_parameters.sh
+
 mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true
 if [ -z "${mysql_version}" ]; then
     mysql_version=5.5
