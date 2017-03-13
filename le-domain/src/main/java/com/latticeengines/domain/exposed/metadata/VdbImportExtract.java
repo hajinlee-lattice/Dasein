@@ -8,6 +8,8 @@ import org.hibernate.annotations.Index;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -42,6 +44,7 @@ public class VdbImportExtract implements HasPid, Serializable {
 
     @Column(name = "IMPORT_STATUS", nullable = false)
     @JsonProperty("vdb_import_status")
+    @Enumerated(EnumType.STRING)
     private VdbImportStatus status;
 
     @Column(name = "PROCESSED_RECORDS", nullable = false)

@@ -67,6 +67,7 @@ public class VdbImportServiceImpl implements VdbImportService {
         } catch (LedpException e) {
             VdbLoadTableStatus status = new VdbLoadTableStatus();
             status.setMessage(e.getMessage());
+            status.setVisiDBQueryHandle(loadConfig.getVdbQueryHandle());
             switch (e.getCode()) {
                 case LEDP_18136:
                 case LEDP_18137:
@@ -74,6 +75,9 @@ public class VdbImportServiceImpl implements VdbImportService {
                     break;
                 case LEDP_18138:
                     status.setJobStatus("Succeed");
+                    break;
+                default:
+                    status.setJobStatus("Failed");
                     break;
             }
             restTemplate.postForEntity(loadConfig.getReportStatusEndpoint(), status, Void.class);

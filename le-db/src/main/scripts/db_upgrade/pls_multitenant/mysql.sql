@@ -31,6 +31,10 @@ CREATE PROCEDURE `UpdateSchema`()
         create table `METADATA_LEVEL` (`PID` bigint not null auto_increment unique, `ATTRIBUTES` varchar(2048) not null, `DISPLAY_NAME` varchar(255) not null, `NAME` varchar(255) not null, `ORDER_IN_HIERARCHY` integer not null, FK_HIERARCHY_ID bigint not null, primary key (`PID`));
         alter table `METADATA_HIERARCHY` add index FK603219055FC50F27 (FK_TABLE_ID), add constraint FK603219055FC50F27 foreign key (FK_TABLE_ID) references `METADATA_TABLE` (`PID`) on delete cascade;
         alter table `METADATA_LEVEL` add index FK41081254F80C45B8 (FK_HIERARCHY_ID), add constraint FK41081254F80C45B8 foreign key (FK_HIERARCHY_ID) references `METADATA_HIERARCHY` (`PID`) on delete cascade;
+
+        --Metadata Vdb Extract
+        create table `METADATA_VDB_EXTRACT` (`PID` bigint not null auto_increment unique, `EXTRACT_IDENTIFIER` varchar(255) not null unique, `EXTRACTION_TS` datetime not null, `LINES_PER_FILE` integer, `LOAD_APPLICATION_ID` varchar(255), `PROCESSED_RECORDS` integer not null, `IMPORT_STATUS` varchar(255) not null, `TARGET_PATH` varchar(2048), primary key (`PID`)) ENGINE=InnoDB;
+        create index IX_EXTRACT_IDENTIFIER on `METADATA_VDB_EXTRACT` (`EXTRACT_IDENTIFIER`);
      COMMIT;
   END; //
 DELIMITER ;

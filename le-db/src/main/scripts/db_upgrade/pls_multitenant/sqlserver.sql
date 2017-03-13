@@ -35,6 +35,10 @@ alter table [METADATA_SEGMENT_PROPERTY] add constraint FKF9BE749179DE23EE foreig
         alter table [METADATA_TABLE_RELATIONSHIP] add constraint FKE87FC63961584D17 foreign key (FK_SOURCE_TABLE_ID) references [METADATA_TABLE] on delete cascade;
         create nonclustered index FKE87FC63961584D17 on [METADATA_TABLE_RELATIONSHIP] (FK_SOURCE_TABLE_ID)
 
+        -- Metadata vdb extract
+        create table [METADATA_VDB_EXTRACT] ([PID] bigint identity not null unique, [EXTRACT_IDENTIFIER] nvarchar(255) not null unique, [EXTRACTION_TS] datetime2 not null, [LINES_PER_FILE] int, [LOAD_APPLICATION_ID] nvarchar(255), [PROCESSED_RECORDS] int not null, [IMPORT_STATUS] nvarchar(255) not null, [TARGET_PATH] nvarchar(2048), primary key ([PID]));
+        create index IX_EXTRACT_IDENTIFIER on [METADATA_VDB_EXTRACT] ([EXTRACT_IDENTIFIER]);
+
     COMMIT
 GO
 
