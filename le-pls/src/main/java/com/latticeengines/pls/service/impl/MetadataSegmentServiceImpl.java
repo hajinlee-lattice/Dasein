@@ -1,13 +1,12 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
@@ -21,6 +20,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
+@Component("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private static final Log log = LogFactory.getLog(MetadataSegmentServiceImpl.class);
 
@@ -71,6 +71,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         try {
             Restriction restriction = segment.getRestriction();
             segment.setSimpleRestriction(ReverseQueryTranslator.translateRestriction(restriction));
+            segment.setRestriction(null);
         } catch (Exception e) {
             log.error("Encountered error translating backend restriction for segment with name %s", e);
         }
@@ -78,11 +79,6 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     private void updateStatistics(MetadataSegment segment) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> doUpdateStatistics(segment));
-    }
-
-    private void doUpdateStatistics(MetadataSegment segment) {
         Query query = new Query();
         query.setRestriction(segment.getRestriction());
 

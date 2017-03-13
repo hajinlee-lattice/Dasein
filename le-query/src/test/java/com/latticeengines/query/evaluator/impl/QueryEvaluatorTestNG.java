@@ -9,12 +9,12 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
@@ -102,7 +102,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Query query = new Query();
         query.setObjectType(SchemaInterpretation.Account);
         query.setRestriction(restriction);
-        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query);
+        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query).getData();
         assertEquals(results.size(), 5);
         int expectedColumnCount = getDataCollection().getTables().get(0).getAttributes().size();
         for (Map<String, Object> row : results) {
@@ -121,7 +121,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         query.setObjectType(SchemaInterpretation.Account);
         query.setRestriction(restriction);
         query.setLookups(SchemaInterpretation.Account, "companyname", "city");
-        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query);
+        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query).getData();
         assertEquals(results.size(), 5);
         for (Map<String, Object> row : results) {
             assertEquals(2, row.size());
@@ -168,7 +168,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sort.setDescending(false);
         sort.setLookups(SchemaInterpretation.Account, "companyname");
         query.setSort(sort);
-        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query);
+        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query).getData();
         assertEquals(results.size(), 100);
         String lastName = null;
         for (Map<String, Object> result : results) {
@@ -185,8 +185,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
         restriction.setOperator(LogicalOperator.AND);
-        Bucket bucket = new Bucket();
-        bucket.setBucketLabel("1");
+        BucketRange bucket = new BucketRange(1);
         restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
                 "number_of_family_members"), bucket));
         Query query = new Query();

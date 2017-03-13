@@ -1,8 +1,5 @@
 package com.latticeengines.objectapi.controller;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.network.exposed.objectapi.AccountInterface;
 import com.latticeengines.objectapi.object.AccountObject;
@@ -43,7 +41,7 @@ public class AccountResource implements AccountInterface {
     @RequestMapping(value = "/accounts/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public List<Map<String, Object>> getData(@PathVariable String customerSpace, @RequestBody Query query) {
+    public DataPage getData(@PathVariable String customerSpace, @RequestBody Query query) {
         return accountObject.getData(query);
     }
 }

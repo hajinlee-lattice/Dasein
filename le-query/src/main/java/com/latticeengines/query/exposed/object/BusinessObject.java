@@ -1,8 +1,5 @@
 package com.latticeengines.query.exposed.object;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -10,6 +7,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
@@ -57,7 +55,7 @@ public abstract class BusinessObject {
         return queryEvaluator.evaluate(getDataCollection(), query).fetchCount();
     }
 
-    public final List<Map<String, Object>> getData(Query query) {
+    public final DataPage getData(Query query) {
         query.setObjectType(getObjectType());
         return queryEvaluator.getResults(getDataCollection(), query);
     }

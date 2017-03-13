@@ -5,8 +5,8 @@ import static org.testng.AssertJUnit.assertEquals;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
@@ -25,9 +25,9 @@ public class QueryTranslatorUnitTestNG {
         FrontEndQuery query = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndRestriction.setAll(Collections.singletonList(new BucketRestriction(new ColumnLookup(
-                "Some_Bucketed_Value"), new Bucket())));
+                "Some_Bucketed_Value"), new BucketRange())));
         frontEndRestriction.setAny(Collections.singletonList(new BucketRestriction(new ColumnLookup(
-                "Some_Other_Bucketed_Value"), new Bucket())));
+                "Some_Other_Bucketed_Value"), new BucketRange())));
         query.setRestriction(frontEndRestriction);
 
         QueryTranslator translator = new QueryTranslator(query, SchemaInterpretation.Account);

@@ -209,7 +209,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucketRestriction = (BucketRestriction) restriction;
             ConcreteRestriction placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(),
-                    ComparisonType.EQUAL, new ValueLookup(bucketRestriction.getBucket().getBucketLabel()));
+                    ComparisonType.EQUAL, new ValueLookup(bucketRestriction.getBucket().getMin()));
             return processRestriction(placeholder, rootObjectType, dataCollection);
         } else {
             throw new RuntimeException(String.format("Unsupported restriction %s", restriction.getClass().getName()));

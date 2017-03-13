@@ -30,6 +30,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import io.swagger.annotations.ApiModelProperty;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_SEGMENT")
@@ -62,6 +64,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
 
     @JsonProperty("simple_restriction")
     @Transient
+    @ApiModelProperty("Restriction for use in the front end")
     private FrontEndRestriction simpleRestriction;
 
     @JsonIgnore
@@ -120,11 +123,13 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     }
 
     @JsonProperty("restriction")
+    @ApiIgnore
     public Restriction getRestriction() {
         return JsonUtils.deserialize(restrictionString, Restriction.class);
     }
 
     @JsonProperty("restriction")
+    @ApiIgnore
     public void setRestriction(Restriction restriction) {
         this.restrictionString = JsonUtils.serialize(restriction);
     }

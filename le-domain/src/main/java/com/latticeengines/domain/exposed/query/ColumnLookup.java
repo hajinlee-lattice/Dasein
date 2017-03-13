@@ -7,12 +7,15 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ColumnLookup extends Lookup {
     @JsonProperty("column_name")
     private String columnName;
     @JsonProperty("object_type")
+    @ApiModelProperty("This may be left unspecified if the corresponding query is "
+            + "only against one logical object (e.g., Account)")
     private SchemaInterpretation objectType;
 
     public ColumnLookup(String columnName) {

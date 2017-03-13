@@ -35,7 +35,7 @@ public class SwaggerConfig {
         return new Docket(DocumentationType.SWAGGER_2) //
                 .select() //
                 .apis(SwaggerUtils.getApiSelector("com.latticeengines.pls.controller.*",
-                        "com.latticeengines.app.controller.*",
+                        "com.latticeengines.app.exposed.controller.*",
                         "com.latticeengines.security.controller.LoginResource",
                         "com.latticeengines.security.controller.UserResource")) //
                 .paths(PathSelectors.any()) //

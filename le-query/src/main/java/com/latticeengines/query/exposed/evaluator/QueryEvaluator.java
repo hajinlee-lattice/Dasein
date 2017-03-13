@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.impl.QueryProcessor;
 import com.querydsl.sql.SQLQuery;
@@ -25,9 +26,9 @@ public class QueryEvaluator {
         return processor.process(dataCollection, query);
     }
 
-    public List<Map<String, Object>> getResults(DataCollection dataCollection, Query query) {
+    public DataPage getResults(DataCollection dataCollection, Query query) {
         SQLQuery<?> sqlquery = evaluate(dataCollection, query);
-        List<Map<String, Object>> toReturn = new ArrayList<>();
+        List<Map<String, Object>> data = new ArrayList<>();
         try (ResultSet results = sqlquery.getResults()) {
             ResultSetMetaData metadata = results.getMetaData();
             while (results.next()) {
@@ -36,9 +37,9 @@ public class QueryEvaluator {
                     String columnName = metadata.getColumnName(i);
                     row.put(columnName, results.getObject(columnName));
                 }
-                toReturn.add(row);
+                data.add(row);
             }
-            return toReturn;
+            return new DataPage(data);
 
         } catch (SQLException e) {
             throw new RuntimeException(String.format("Failed to retrieve data for object %s", query.getObjectType()), e);
