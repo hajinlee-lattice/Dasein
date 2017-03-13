@@ -71,7 +71,7 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Value("${eai.vdb.rows.batch:2000}")
     private int rowsToGet;
 
-    @Value("${eai,vdb.cells.batch:10000000}")
+    @Value("${eai.vdb.cells.batch:1000000}")
     private int cellsPerFile;
 
 
