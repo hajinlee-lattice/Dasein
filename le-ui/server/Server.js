@@ -333,7 +333,7 @@ class Server {
         });
     }
 
-    start() {
+    start(cb) {
         const options = this.options;
         const config = options.config;
 
@@ -344,15 +344,19 @@ class Server {
 
         console.log('\n');
         if (this.httpServer) {
-            this.httpServer.listen(config.protocols.http, () => {
+            this.httpServer.listen(config.protocols.http, (err) => {
                 console.log(chalk.green(config.TIMESTAMP + '>') + ' LISTENING: http://localhost:' + config.protocols.http);
+
+                cb(err, { proto:'http', port: config.protocols.http, app: options.name });
             });
         }
 
         if (this.httpsServer) {
-            this.httpsServer.listen(config.protocols.https, () => {
+            this.httpsServer.listen(config.protocols.https, (err) => {
                 console.log(chalk.green(config.TIMESTAMP + '>') + ' LISTENING: https://localhost:' + config.protocols.https);
                 console.log('\n');
+
+                cb(err, { proto:'https', port: config.protocols.https, app: options.name });
             });
         }
 

@@ -13,12 +13,27 @@ const DateUtil  = require('./server/utilities/DateUtil');
 const Server    = require('./server/Server');
 
 const configs   = require('./server/configs/config');
-const apps      = process.env.NODE_APPS.split(',');
+const apps      = process.env.NODE_APPS ? process.env.NODE_APPS.split(',') : [];
+
+if (apps.length === 0) {
+    throw new Error('NODE_APPS environment variable not set');
+}
 
 apps.forEach(app => {
-    new Server(express, express(), configs[app]).start();
+    const config = configs[app];
+
+    if (typeof config !== 'undefined') {
+        new Server(express, express(), config).start(onStart);
+    } else {
+        console.log(chalk.red(DateUtil.getTimeStamp() + ':bootstrap> ') + 'Config missing for APP:' + app + ' in NODE_APPS:' + process.env.NODE_APPS);
+    }
 });
 
+function onStart(err, meta) {
+    if (err) {
+        console.log(chalk.red(DateUtil.getTimeStamp() + ':bootstrap> ') + 'Error starting ' + meta.app + ' ' + meta.proto + ' server on port ' + meta.port +'\n', err);
+    }
+}
 
 process.on('uncaughtException', err => {
     console.log(chalk.red(DateUtil.getTimeStamp() + ':uncaughtException>')+'\n', err);
