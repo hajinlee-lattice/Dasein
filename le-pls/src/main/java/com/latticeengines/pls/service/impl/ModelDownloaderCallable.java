@@ -91,8 +91,10 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             long startTime = System.currentTimeMillis();
             files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
             long recursiveGetFilesTime = System.currentTimeMillis() - startTime;
-            log.info(String.format("Recursive get files from Hdfs duration: %d milliseconds",
-                    recursiveGetFilesTime));
+            if (recursiveGetFilesTime > 1000) {
+                log.info(String.format("Recursive get files from %s duration: %d milliseconds", startingHdfsPoint,
+                        recursiveGetFilesTime));
+            }
             log.debug(String.format("%d file(s) downloaded from modeling service for tenant %s.",
                     files.size(), tenant.getId()));
         } catch (FileNotFoundException e) {
@@ -157,8 +159,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 log.fatal(ExceptionUtils.getFullStackTrace(e));
             } catch (ConstraintViolationException e) {
                 log.info(String.format(
-                        "Cannot create model summary with Id %s, constraint violation.",
-                        constraintViolationId));
+                        "Cannot create model summary with Id %s, constraint violation. Hdfs file: %s, TenantId: %s",
+                        constraintViolationId, file, tenant.getId()));
             } catch (Exception e) {
                 log.error(e);
             }
