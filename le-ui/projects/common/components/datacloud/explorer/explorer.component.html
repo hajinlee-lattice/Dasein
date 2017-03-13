@@ -349,4 +349,10 @@
             </div>
         </div>
     </div>
+    <div ng-if="vm.no_lookup_results_message" class="no-results-lookup">
+        <h2>Account Not Found</h2>
+        <p>We were unable to find a matching acocunt for the information provided</p>
+        <a class="lookup-back" ui-sref="home.datacloud.lookup.form"><ico class="fa fa-arrow-left"></ico> Try again</a>
+        
+    </div>
 </div>
