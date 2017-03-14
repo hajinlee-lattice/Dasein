@@ -108,7 +108,7 @@
 
             <ul id="bucketTiles" class="bucket-tiles large-buckets">
             	<li ng-repeat="bucket in vm.workingBuckets">
-            		<div class="bucket-label"></div>
+            		<div class="bucket-label">{{bucket.name}}</div>
             		<dl>
             			<dt>Lift</dt>
             			<dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>
@@ -123,10 +123,9 @@
             <hr/>
 
             <h3>Currently published configuration</h3>
-            <ul class="bucket-tiles published" ng-repeat="buckets in vm.historicalBuckets|limitTo:1">
-                <li ng-repeat="bucket in buckets"
-                    ng-if="bucket.right_bound_score!=2">
-                    <div class="bucket-label"></div>
+            <ul class="bucket-tiles published">
+                <li ng-repeat="bucket in vm.currentConfiguration">
+                    <div class="bucket-label">{{bucket.name}}</div>
                     <dl>
                         <dt>Lift</dt>
                         <dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>

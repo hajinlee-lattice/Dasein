@@ -3,7 +3,7 @@ angular.module('lp.models.ratings', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'
 ])
-.controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams,
+.controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
     ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, HistoricalABCDBuckets) {
 
     var vm = this;
@@ -20,7 +20,7 @@ angular.module('lp.models.ratings', [
         historicalBuckets: HistoricalABCDBuckets,
         ratingsSummary: RatingsSummary,
         workingBuckets: [],
-        bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
+        bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
         bucketTiles: document.getElementById("bucketTiles"),
         slidersContainer: document.getElementById("sliders")
     });
@@ -77,19 +77,23 @@ angular.module('lp.models.ratings', [
         refreshChartData();
    
     }
+
     function refreshChartData(){
           
         vm.buckets = vm.workingBuckets;
 
-        console.log(vm.ratingsSummary);
-
         if (vm.buckets.length === 6) {
+            vm.bucketNames = ['A+', 'A', 'B', 'C', 'D', 'F'];
             vm.bucketTiles.classList.add('six-buckets');
             vm.canAddBucket = false;
         } else if (vm.buckets.length < 6) {
+            vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
             vm.bucketTiles.classList.remove('six-buckets');
             vm.canAddBucket = true;            
+        } else if (vm.buckets.length === 1) {
+            vm.canAddBucket = false;
         };
+
 
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.buckets.length; i < len; i++) { 
@@ -116,11 +120,13 @@ angular.module('lp.models.ratings', [
             vm.buckets[i].num_leads = vm.rightLeads - vm.leftLeads;
 
             vm.buckets[i].lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
+
             vm.buckets[i].name = vm.bucketNames[i];
+
+
         }
         
     }
-
 
     vm.addBucket = function(ev){
         
@@ -173,19 +179,37 @@ angular.module('lp.models.ratings', [
         ev.preventDefault();
         ev.stopPropagation();
 
-        vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
-        vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
+  
+        vm.canAddBucket = false;
+        vm.firstBucket = vm.workingBuckets[Object.keys(vm.workingBuckets)[0]];
+        if(vm.index === 0){
+            vm.sliderBoundaryLeft = 98;
+            vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 1;  
+        } else {
+            vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 1;
+            vm.sliderBoundaryLeft = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index-1]].right_bound_score - 1;
+        };
 
-        // set right_bound_score from current percentage point on chart
+
+        vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
         vm.bucket.right_bound_score = parseInt(vm.slider.style.right.slice(0, -1));
 
-        if (ev.clientY > vm.containerBox.bottom + 10) {
+
+        if(vm.bucket.right_bound_score >= vm.sliderBoundaryLeft){
+            vm.slider.style.right = vm.sliderBoundaryLeft;
+        } else if(vm.bucket.right_bound_score <= vm.sliderBoundaryRight){
+            vm.slider.style.right = vm.sliderBoundaryRight;
+        } else {
+            vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
+        }
+
+
+        if (vm.workingBuckets.length > 2 && ev.clientY > vm.containerBox.bottom + 10 || ev.clientX < vm.containerBox.left + 15 || ev.clientX > vm.containerBox.right - 45) {
             vm.showRemoveBucketText = true;
             vm.slider.style.opacity = .25;
         } else {
-            vm.showRemoveBucketText = false;
             vm.slider.style.opacity = 1;
-        }
+        };
 
     }
     function eleMouseUp(ev, index){
@@ -198,17 +222,20 @@ angular.module('lp.models.ratings', [
 
         vm.workingBuckets.sort(function(a, b){return b.right_bound_score - a.right_bound_score});
 
-        if (ev.clientY > vm.containerBox.bottom + 10) {
+        if (vm.workingBuckets.length > 2 && ev.clientY > vm.containerBox.bottom + 10 || ev.clientX < vm.containerBox.left + 15 || ev.clientX > vm.containerBox.right - 45) {
             vm.chartNotUpdated = false;
             vm.showRemoveBucketText = false;
+
             vm.workingBuckets.splice(vm.index, 1);
 
             var buckets = vm.workingBuckets;
             for (var i = 0, len = buckets.length; i < len; i++) { 
+
                 var previousBucket = buckets[i-1];
                 for (var bucket in previousBucket) {
                   vm.previousRightBoundScore = previousBucket["right_bound_score"];
                 }
+
                 buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
                 buckets[0].left_bound_score = 99;
             }
@@ -218,14 +245,15 @@ angular.module('lp.models.ratings', [
 
         delete vm.slider;
 
-
-        refreshChartData();
+        vm.chartNotUpdated = false;
 
         document.removeEventListener('mousemove', eleMouseMove, false);
         document.removeEventListener('mouseup', eleMouseUp, false);
 
-    }
-    vm.bucketHover = function(ev, index){
+        $timeout( function(){
+            refreshChartData();    
+        }, 1);
+        
 
     }
 
@@ -236,11 +264,8 @@ angular.module('lp.models.ratings', [
 
         var modelId = $stateParams.modelId;
 
-
-
         ModelRatingsService.CreateABCDBuckets(modelId, vm.workingBuckets).then(function(result){
             
-            console.log(result);
             if (result != null && result.success === true) {
                 $state.go('home.model.ratings', {}, { reload: true });
             } else {
@@ -251,8 +276,8 @@ angular.module('lp.models.ratings', [
         });
     }
 
-
     vm.init();
+
 })
 .controller('ModelRatingsHistoryController', function ($scope, $rootScope, $stateParams,
     ResourceUtility, Model, ModelStore, ModelRatingsService, HistoricalABCDBuckets) {

@@ -355,8 +355,8 @@ angular
                 }
             }
         })
-        .state('home.model.ratings.demo', {
-            url: '/demo',
+        .state('home.model.ratings-demo', {
+            url: '/ratings-demo',
             params: {
                 pageIcon: 'ico-ratings',
                 pageTitle: ''

@@ -20,7 +20,6 @@
                     <a href="javascript:void(0)">Activate</a>
                     <i class="fa {{Activating ? 'fa-spinner fa-pulse fa-fw' : 'fa-play-circle-o'}}"></i>
                 </li>
-
                 <li
                     ui-sref="home.model.ratings({ modelId: '{{ data.Id | escape }}' })"
                     data-ng-if="isNotPmmlModel && hasRatingsAvailable"
@@ -29,14 +28,12 @@
                     </a>
                     <i class="ico ico-ratings"></i>
                 </li>
-
                 <li
                     data-ng-if="mayChangeModelNames"
                     data-ng-click="modelNameEditClick($event)">
                     <a href="javascript:void(0)" data-title="Enter Model Name">Rename</a>
                     <i class="fa fa-edit"></i>
                 </li>
-
                 <li
                     ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })"
                     data-ng-if="data.ModelType && showRefineAndClone && isNotPmmlModel && !data.Uploaded"
@@ -44,7 +41,6 @@
                     <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
                     <i class="fa fa-copy"></i>
                 </li>
-
                 <li
                     ui-sref="home.model.remodel({ modelId: '{{ data.Id | escape }}' })"
                     data-ng-if="data.ModelType && canRemodel"
@@ -52,7 +48,6 @@
                     <a href="javascript:void(0)" title="Remodel">Remodel</a>
                     <i class="fa fa-files-o"></i>
                 </li>
-
                 <li
                     ui-sref="home.model.review.columns({ modelId: '{{ data.Id | escape }}' })"
                     data-ng-if="data.ModelType && showReviewModel && isNotPmmlModel"

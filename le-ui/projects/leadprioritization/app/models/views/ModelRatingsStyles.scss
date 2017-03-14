@@ -217,41 +217,32 @@
     	&:nth-child(1){
     		.bucket-label{
     			background-color: #70bb56;
-    			&:before {
-    				content: "A"
-    			}
     		}
     	}
     	&:nth-child(2){
     		.bucket-label{
     			background-color: #ffb93d;
-    			&:before {
-    				content: "B"
-    			}
     		}
     	}
     	&:nth-child(3){
     		.bucket-label{
     			background-color: #f56c35;
-    			&:before {
-    				content: "C"
-    			}
+
     		}
     	}
     	&:nth-child(4){
     		.bucket-label{
     			background-color: #d62b30;
-    			&:before {
-    				content: "D"
-    			}
     		}
     	}    	
     	&:nth-child(5){
     		.bucket-label{
 				background-color: #24639b;
-    			&:before {
-    				content: "F"
-    			}
+    		}
+    	}    	
+    	&:nth-child(6){
+    		.bucket-label{
+				background-color: #494949;
     		}
     	}
     }
@@ -281,45 +272,6 @@
 	    	&:nth-child(1){
 	    		.bucket-label{
 	    			padding: 4px 8px 3px;
-	    			&:before {
-	    				content: "A+"
-	    			}
-	    		}
-	    	}
-	    	&:nth-child(2){
-	    		.bucket-label{
-	    			&:before {
-	    				content: "A"
-	    			}
-	    		}
-	    	}
-	    	&:nth-child(3){
-	    		.bucket-label{
-	    			&:before {
-	    				content: "B"
-	    			}
-	    		}
-	    	}
-	    	&:nth-child(4){
-	    		.bucket-label{
-	    			&:before {
-	    				content: "C"
-	    			}
-	    		}
-	    	}
-	    	&:nth-child(5){
-	    		.bucket-label{
-	    			&:before {
-	    				content: "D"
-	    			}
-	    		}
-	    	}
-	    	&:nth-child(6){
-	    		.bucket-label{
-    				background-color: #494949;
-	    			&:before {
-	    				content: "F"
-	    			}
 	    		}
 	    	}
 	    }
