@@ -195,12 +195,14 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
     private void setMatchKeyMap(ModelSummary modelSummary, InterpretedFields interpreted,
             Map<String, Object> record, MatchInput matchInput) {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        if (modelSummary.getSourceSchemaInterpretation()
-                .equals(SchemaInterpretation.SalesforceAccount.toString())
+        if (modelSummary != null
+                && SchemaInterpretation.SalesforceAccount.name()
+                        .equals(modelSummary.getSourceSchemaInterpretation())
                 && interpreted.getWebsite() != null) {
             keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getWebsite()));
-        } else if (modelSummary.getSourceSchemaInterpretation()
-                .equals(SchemaInterpretation.SalesforceLead.toString())
+        } else if (modelSummary != null
+                && SchemaInterpretation.SalesforceLead.name()
+                        .equals(modelSummary.getSourceSchemaInterpretation())
                 && interpreted.getEmailAddress() != null) {
             keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getEmailAddress()));
         }
