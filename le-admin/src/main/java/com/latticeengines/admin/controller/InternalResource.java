@@ -21,11 +21,13 @@ import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
 import com.latticeengines.admin.dynamicopts.impl.PermStoreProvider;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
@@ -85,8 +87,12 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "tenants/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")
-    public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
-        return tenantService.deleteTenant(contractId, tenantId, true);
+    public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId,
+                    HttpServletRequest request) {
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
+        String decrypted = CipherUtils.decrypt(ticket);
+        String[] tokens = decrypted.split("\\|");
+        return tenantService.deleteTenant(tokens[0], contractId, tenantId, true);
     }
 
     @RequestMapping(value = "datastore/{option}/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")

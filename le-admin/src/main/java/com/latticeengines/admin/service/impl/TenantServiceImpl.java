@@ -225,7 +225,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public boolean deleteTenant(final String contractId, final String tenantId, final boolean deleteZookeeper) {
+    public boolean deleteTenant(final String userName, final String contractId, final String tenantId,
+            final boolean deleteZookeeper) {
         CustomerSpace space = new CustomerSpace(contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         Map<String, Map<String, String>> props = new HashMap<>();
@@ -263,6 +264,7 @@ public class TenantServiceImpl implements TenantService {
                         orchestratorProps, prodAndExternalAminInfo, deleteZookeeper);
             }
         });
+        log.info(String.format("Tenant %s deleted by user %s", tenantId, userName));
         return true;
     }
 

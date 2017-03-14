@@ -16,7 +16,7 @@ public interface TenantService {
 
     Collection<TenantDocument> getTenants(String contractId);
 
-    boolean deleteTenant(String contractId, String tenantId, boolean uninstallComponent);
+    boolean deleteTenant(final String userName, String contractId, String tenantId, boolean uninstallComponent);
 
     TenantDocument getTenant(String contractId, String tenantId);
 

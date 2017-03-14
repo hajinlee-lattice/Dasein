@@ -1,11 +1,15 @@
 package com.latticeengines.admin.controller;
 
+
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,8 @@ import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.security.exposed.Constants;
 
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
@@ -88,8 +94,11 @@ public class TenantResource {
     @ApiOperation(value = "Delete tenant for a particular contract id")
     public boolean deleteTenant(@RequestParam(value = "contractId") String contractId,
             @RequestParam(value = "deleteZookeeper", required = false, defaultValue = "true") Boolean deleteZookeeper,
-            @PathVariable String tenantId) {
-        return tenantService.deleteTenant(contractId, tenantId, deleteZookeeper);
+            @PathVariable String tenantId, HttpServletRequest request) {
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
+        String decrypted = CipherUtils.decrypt(ticket);
+        String[] tokens = decrypted.split("\\|");
+        return tenantService.deleteTenant(tokens[0], contractId, tenantId, deleteZookeeper);
     }
 
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
