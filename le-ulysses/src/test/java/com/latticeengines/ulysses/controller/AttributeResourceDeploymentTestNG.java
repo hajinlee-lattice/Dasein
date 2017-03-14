@@ -10,9 +10,10 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
+import com.latticeengines.domain.exposed.ulysses.PrimaryField;
+import com.latticeengines.domain.exposed.ulysses.PrimaryFieldConfiguration;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
 public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBase {
@@ -32,7 +33,11 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
         List<PrimaryField> primaryFields = OM.convertValue(genericList, new TypeReference<List<PrimaryField>>() {
         });
         log.info("Converted Primary Fields: " + primaryFields);
-        Assert.assertNotNull(primaryFields);
+        verifyPrimaryFields(primaryFields);
+    }
+
+	private void verifyPrimaryFields(List<PrimaryField> primaryFields) {
+		Assert.assertNotNull(primaryFields);
         Assert.assertTrue(primaryFields.size() > 0);
         Assert.assertEquals(FieldInterpretationCollections.PrimaryMatchingFields.size(), primaryFields.size());
         // Create a temporary set with Primary Field Names
@@ -44,14 +49,26 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
         for (FieldInterpretation field : FieldInterpretationCollections.PrimaryMatchingFields) {
             Assert.assertTrue(fieldNames.contains(field.getFieldName()));
         }
-    }
+	}
 
     @Test(groups = "deployment")
-    public void testGetPrimaryAttributesValidationExpressionSimplified() {
+    public void testGetPrimaryAttributesValidationExpression() {
         String url = getAttributeResourceUrl() + "/primary/validation-expression";
         String expression = getOAuth2RestTemplate().getForObject(url, String.class);
         log.info("Primary Fields Expression: " + expression);
         Assert.assertNotNull(expression);
         Assert.assertEquals(expression, "((Website||Email||CompanyName)&&(Id))");
+    }
+    
+    @Test(groups = "deployment")
+    public void testGetPrimaryAttributeConfiguration() {
+        String url = getAttributeResourceUrl() + "/primaryfield-configuration";
+        PrimaryFieldConfiguration primaryFieldConfig = getOAuth2RestTemplate().getForObject(url, PrimaryFieldConfiguration.class);
+        List<PrimaryField> primaryFields = primaryFieldConfig.getPrimaryFields();
+        log.info("Primary Fields: " + primaryFields);
+        verifyPrimaryFields(primaryFields);
+        Assert.assertNotNull(primaryFieldConfig.getValidationExpression());
+        log.info("Primary Field Default Validation Expression: " + primaryFieldConfig.getValidationExpression().getExpression());
+        Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(), FieldInterpretationCollections.NON_FUZZY_MATCH_VALIDATION_EXPRESSION);
     }
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.attribute.PrimaryField;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.ulysses.PrimaryField;
+import com.latticeengines.domain.exposed.ulysses.PrimaryFieldConfiguration;
+import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.ulysses.service.AttributeService;
 
 import io.swagger.annotations.Api;
@@ -23,22 +28,26 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/attributes")
 public class AttributeResource {
 
+	@Autowired
+    protected OAuthUserEntityMgr oAuthUserEntityMgr;
+	
     @Autowired
     private AttributeService attributeService;
 
+    @Deprecated
     @RequestMapping(value = "/primary", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Provides all matching attrinutes that are supported for ModelMapping or Scoring or Company Lookup API")
+    @ApiOperation(value = "(@Deprecated - Start using /primaryfield-configuration) Provides all matching attrinutes that are supported for ModelMapping or Scoring or Company Lookup API")
     public List<PrimaryField> getPrimaryAttributes() {
         return attributeService.getPrimaryFields();
     }
 
+    @Deprecated
     @RequestMapping(value = "/primary/validation-expression", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Validation Expression with different business rules,"
+    @ApiOperation(value = "(@Deprecated - Start using /primaryfield-configuration) Validation Expression with different business rules,"
             + " to invoke Scoring API / Company Profile API / enforcing " + "Model Mapping", response = String.class)
     public void getSimplifiedValidationExpression(HttpServletResponse response) {
-
         String result = "((Website||Email||CompanyName)&&(Id))";
         writePlainTextToResponse(response, result);
     }
@@ -53,5 +62,17 @@ public class AttributeResource {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @RequestMapping(value = "/primaryfield-configuration", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Provides all matching attributes and its validation expression that are required for Scoring, Company Lookup API using Global Field Mappings")
+    public PrimaryFieldConfiguration getPrimaryAttributeConfiguration(HttpServletRequest request) {
+    	PrimaryFieldConfiguration primaryConfig = new  PrimaryFieldConfiguration();
+    	primaryConfig.setPrimaryFields(attributeService.getPrimaryFields());
+    	
+    	CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+    	primaryConfig.setValidationExpression(attributeService.getPrimaryFieldValidationExpression(customerSpace));
+        return primaryConfig;
     }
 }

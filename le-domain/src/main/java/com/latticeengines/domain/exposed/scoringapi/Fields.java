@@ -16,7 +16,13 @@ public class Fields {
     @ApiModelProperty(required = true, value = "List of field")
     private List<Field> fields;
 
+    // This is marked as deprecated and will cleanup after dependent app starts using new Field
+    @Deprecated
     @JsonProperty("validation_expression")
+    @ApiModelProperty(required = true, value = "@Deprecated: Validation Expression")
+    private String validation_expression;
+    
+    @JsonProperty("validationExpression")
     @ApiModelProperty(required = true, value = "Validation Expression")
     private String validationExpression;
 
@@ -35,6 +41,7 @@ public class Fields {
         this.modelId = modelId;
         this.fields = fields;
         this.validationExpression = validationExpression;
+        this.validation_expression = validationExpression;
     }
 
     public String getModelId() {
@@ -59,6 +66,15 @@ public class Fields {
 
     public void setValidationExpression(String validationExpression) {
         this.validationExpression = validationExpression;
+        this.validation_expression = validationExpression;
     }
+
+	public String getValidation_expression() {
+		return validation_expression;
+	}
+
+	public void setValidation_expression(String validation_expression) {
+		this.validation_expression = validation_expression;
+	}
 
 }
