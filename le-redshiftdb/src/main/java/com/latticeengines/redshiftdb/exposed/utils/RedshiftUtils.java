@@ -49,7 +49,7 @@ public class RedshiftUtils {
     }
 
     public static String getColumnSQLStatement(Schema.Field field) {
-        return String.format("%s %s", field.name(), getSQLType(field.schema()));
+        return String.format("\"%s\" %s", field.name(), getSQLType(field.schema()));
     }
 
     public static String getSQLType(Schema schema) {
