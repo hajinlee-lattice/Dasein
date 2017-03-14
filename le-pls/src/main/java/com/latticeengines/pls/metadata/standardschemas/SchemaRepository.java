@@ -592,6 +592,14 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
+        table.addAttribute(attr("DUNS") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "DUNS", "DUNS NUMBER" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.DUNS) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
 
         table.addAttribute(attr("CreatedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CREATEDDATE", "CREATED DATE" })) //
