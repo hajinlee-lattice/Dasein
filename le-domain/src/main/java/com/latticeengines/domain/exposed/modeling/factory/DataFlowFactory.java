@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesPar
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 public class DataFlowFactory {
@@ -37,8 +38,11 @@ public class DataFlowFactory {
     }
 
     public static AddStandardAttributesParameters getAddStandardAttributesParameters(String eventTableName, //
-            List<TransformDefinition> transforms, Map<String, String> runTimeParams) {
-        AddStandardAttributesParameters params = new AddStandardAttributesParameters(eventTableName, transforms);
+            List<TransformDefinition> transforms, Map<String, String> runTimeParams, String schema) {
+        if (schema == null) {
+            throw new RuntimeException("schema is null!");
+        }
+        AddStandardAttributesParameters params = new AddStandardAttributesParameters(eventTableName, transforms, SchemaInterpretation.valueOf(schema));
 
         if (runTimeParams != null && runTimeParams.containsKey(DATAFLOW_DO_SORT_FOR_ATTR_FLOW)) {
             params.doSort = true;
