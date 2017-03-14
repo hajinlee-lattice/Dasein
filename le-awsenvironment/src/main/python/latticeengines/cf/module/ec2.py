@@ -193,8 +193,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "    sleep 1;\n",
                             "done;\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
-                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraf --container-instances ${instance_arn} --region ${region}",
-                            " --overrides {\"containerOverrides\": [{\"name\": \"telegraf\",\"environment\": [{\"name\": \"HOSTNAME\", \"value\": \"myhost\"}]}]}\n"
+                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraf --container-instances ${instance_arn} --region ${region}\n"
                         ] ] }
                     },
                     "30_mount_efs" : {
