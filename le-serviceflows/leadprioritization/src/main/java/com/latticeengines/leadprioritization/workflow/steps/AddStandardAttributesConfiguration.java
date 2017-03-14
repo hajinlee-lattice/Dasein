@@ -12,6 +12,7 @@ public class AddStandardAttributesConfiguration extends DataFlowStepConfiguratio
     private TransformationGroup transformationGroup;
     private Map<String, String> runTimeParams;
     private List<TransformDefinition> transforms;
+    private String sourceSchemaInterpretation;
 
     public AddStandardAttributesConfiguration() {
         setTargetTableName("addStandardAttributes");
@@ -40,5 +41,13 @@ public class AddStandardAttributesConfiguration extends DataFlowStepConfiguratio
 
     public void setTransforms(List<TransformDefinition> transforms) {
         this.transforms = transforms;
+    }
+
+    public String getSourceSchemaInterpretation() {
+        return sourceSchemaInterpretation;
+    }
+
+    public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {
+        this.sourceSchemaInterpretation = sourceSchemaInterpretation;
     }
 }

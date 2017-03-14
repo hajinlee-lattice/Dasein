@@ -84,6 +84,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
             match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 

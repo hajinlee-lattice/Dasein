@@ -116,7 +116,9 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             model.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 

@@ -14,6 +14,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Tag;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationMetadata;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
@@ -30,7 +32,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
 
         List<TransformDefinition> definitions = parameters.transforms;
 
-        fixTransformArgumentsAndMetadata(eventTable, definitions);
+        fixTransformArgumentsAndMetadata(eventTable, definitions, parameters.sourceSchemaInterpretation);
 
         for (TransformDefinition definition : definitions) {
             resolveDuplicateName(eventTable, definition);
@@ -45,21 +47,36 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         return last;
     }
 
-    private void fixTransformArgumentsAndMetadata(Node eventTable, List<TransformDefinition> definitions) {
+    private void fixTransformArgumentsAndMetadata(Node eventTable, List<TransformDefinition> definitions,
+            SchemaInterpretation schema) {
         fixStdLengthDomainArgs(eventTable, definitions.stream()
-                .filter(a -> a.output.equals(TransformationPipeline.stdLengthDomain.output)).findFirst().orElse(null));
+                .filter(a -> a.output.equals(TransformationPipeline.stdLengthDomain.output)).findFirst().orElse(null),
+                schema);
         fixStdVisidbDsIndustryGroupArgs(eventTable,
                 definitions.stream()
                         .filter(a -> a.output.equals(TransformationPipeline.stdVisidbDsIndustryGroup.output))
                         .findFirst().orElse(null));
     }
 
-    private void fixStdLengthDomainArgs(Node eventTable, TransformDefinition domainLength) {
+    private void fixStdLengthDomainArgs(Node eventTable, TransformDefinition domainLength,
+            SchemaInterpretation schema) {
         log.info("Fixing Domain Length");
         if (domainLength == null) {
             log.info("Domain Length is null");
             return;
         }
+
+//        SchemaInterpretationFunctionalInterface function = (interfaceName) -> {
+//            Attribute websiteOrEmail = eventTable.getSourceAttribute(interfaceName);
+//            log.info("websiteOrEmail is: " + (websiteOrEmail != null ? websiteOrEmail.getName() : "null"));
+//            if (websiteOrEmail != null && !domainLength.arguments.isEmpty()) {
+//                domainLength.arguments.put("column", websiteOrEmail.getName());
+//                log.info("set domain_length arguments to: " + domainLength.arguments);
+//            } else if (!domainLength.arguments.isEmpty()) {
+//                domainLength.arguments.put("column", "");
+//            }
+//        };
+//        schema.apply(function);
 
         Attribute websiteOrEmail = eventTable.getSourceAttribute(InterfaceName.Website);
 
