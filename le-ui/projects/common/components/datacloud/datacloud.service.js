@@ -237,7 +237,7 @@ angular.module('common.datacloud')
     }
 })
 .service('DataCloudService', function($q, $http, $state) {
-    this.host = '';
+    this.host = '/pls'; //default
 
     this.setHost = function(value) {
         this.host = value;
