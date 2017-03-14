@@ -1,6 +1,5 @@
 package com.latticeengines.pls.functionalframework;
 
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -42,6 +41,7 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.Quota;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
 import com.latticeengines.domain.exposed.query.ExistsRestriction;
@@ -78,9 +78,9 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
     protected static final Boolean IS_DEFAULT = false;
     protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(SchemaInterpretation.Account,
-            false, new ArrayList<Restriction>());
+            false);
     protected static final Restriction CONTACT_FILTER = new ExistsRestriction(SchemaInterpretation.Contact,
-            false, new ArrayList<Restriction>());
+            false);
     protected static final Integer OFFSET = 1;
     protected static final List<String> SELECTED_INTENT = new ArrayList<>(Arrays.asList("Intent1", "Intent2"));
     protected static final Integer MAX_PROSPECTS_PER_ACCOUNT = 3;

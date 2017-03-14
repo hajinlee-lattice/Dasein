@@ -73,9 +73,9 @@ public abstract class PlsAbstractTestNGBaseDeprecated extends SecurityFunctional
     protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
     protected static final Boolean IS_DEFAULT = false;
     protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(SchemaInterpretation.Account,
-            false, new ArrayList<Restriction>());
+            false);
     protected static final Restriction CONTACT_FILTER = new ExistsRestriction(SchemaInterpretation.Contact,
-            false, new ArrayList<Restriction>());
+            false);
     protected static final Integer OFFSET = 1;
     protected static final List<String> SELECTED_INTENT = new ArrayList<>(Arrays.asList("Intent1", "Intent2"));
     protected static final Integer MAX_PROSPECTS_PER_ACCOUNT = 3;
