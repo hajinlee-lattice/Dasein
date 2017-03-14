@@ -67,9 +67,6 @@
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster_aws/latticeengines.properties"
                                       tofile="${project.basedir}/${config.docker.context}/conf/env/prodcluster_aws/latticeengines.properties"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../le-ui.tar.gz"
-                                      tofile="${project.basedir}/${express.docker.context}/le-ui.tar.gz"
-                                      overwrite="true" />
 
                                 <!-- special wars -->
                                 <copy file="${project.basedir}/../le-oauth2/target/le-oauth2-${project.version}.war"
