@@ -43,18 +43,21 @@ public class RedshiftPublishStep extends RunDataFlow<RedshiftPublishStepConfigur
     @Override
     public void onConfigurationInitialized() {
         RedshiftPublishStepConfiguration configuration = getConfiguration();
-        Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
+        Table sourceTable = getObjectFromContext(EVENT_TABLE, Table.class);
+        if (sourceTable == null) {
+            sourceTable = configuration.getSourceTable();
+        }
         Properties jobProperties = new Properties();
         jobProperties.setProperty("fs.s3n.awsAccessKeyId", awsAccessKey);
         jobProperties.setProperty("fs.s3n.awsSecretAccessKey", awsSecretKey);
 
-        configuration.setTargetTableName(eventTable.getName() + "_redshift_export");
-        configuration.setDataFlowParams(new RedshiftPublishDataFlowParameters(eventTable.getName(),
+        configuration.setTargetTableName(sourceTable.getName() + "_redshift_export");
+        configuration.setDataFlowParams(new RedshiftPublishDataFlowParameters(sourceTable.getName(),
                 configuration.getRedshiftTableConfiguration()));
         configuration.setSkipStep(Boolean.TRUE);
         configuration.setJobProperties(jobProperties);
 
-        uploadJsonPathToS3(eventTable);
+        uploadJsonPathToS3(sourceTable);
     }
 
     private void uploadJsonPathToS3(Table eventTable) {
@@ -79,14 +82,13 @@ public class RedshiftPublishStep extends RunDataFlow<RedshiftPublishStepConfigur
 
     @Override
     public void onExecutionCompleted() {
-        Table bucketedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                configuration.getBucketedTableName());
+        String bucketedTableName = configuration.getRedshiftTableConfiguration().getTableName();
+        Table bucketedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), bucketedTableName);
         JdbcStorage storage = new JdbcStorage();
         storage.setDatabaseName(DatabaseName.REDSHIFT);
         storage.setTableNameInStorage(bucketedTable.getStorageMechanism().getTableNameInStorage());
         bucketedTable.setStorageMechanism(storage);
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), configuration.getBucketedTableName(),
-                bucketedTable);
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), bucketedTableName, bucketedTable);
         putObjectInContext(EVENT_TABLE, bucketedTable);
     }
 }

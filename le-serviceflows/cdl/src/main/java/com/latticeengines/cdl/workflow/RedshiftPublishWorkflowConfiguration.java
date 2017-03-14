@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow;
 
 import com.latticeengines.cdl.workflow.steps.export.RedshiftPublishStepConfiguration;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
@@ -19,8 +20,13 @@ public class RedshiftPublishWorkflowConfiguration extends WorkflowConfiguration 
             return this;
         }
 
-        public Builder bucketedTableName(String bucketedTableName) {
-            redshiftExportStepConfiguration.setBucketedTableName(bucketedTableName);
+        public Builder sourceTable(Table sourceTable) {
+            redshiftExportStepConfiguration.setSourceTable(sourceTable);
+            return this;
+        }
+
+        public Builder partitionNumber(Integer partitions) {
+            redshiftExportStepConfiguration.setPartitions(partitions);
             return this;
         }
 
