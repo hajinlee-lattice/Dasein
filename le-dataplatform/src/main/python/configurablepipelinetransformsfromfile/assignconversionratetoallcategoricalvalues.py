@@ -28,7 +28,7 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
         self.categoricalColumns = categoricalColumns
         self.targetColumn = targetColumn
         self.totalPositiveThreshold = totalPositiveThreshold
-        
+
         if self.categoricalColumnMapping is None:
             self.categoricalColumnMapping = {}
         if categoricalColumns:
@@ -38,20 +38,26 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
         logger.info("Initialized AssignConversionRate with categoricalColumns " + str(categoricalColumns)
                     + ", targetColumn=" + str(targetColumn)
                     + ", positiveThreshold=" + str(self.totalPositiveThreshold))
-    
+
     def transform(self, dataFrame, configMetadata, test):
-        totalPositiveEventCount = float(sum(dataFrame[self.targetColumn]))
-        meanConversionRate = round(totalPositiveEventCount / float(len(dataFrame[self.targetColumn])), 2)
-        if meanConversionRate == 0.0:
-            for i in xrange(3, 5):
-                meanConversionRate = round(totalPositiveEventCount / float(len(dataFrame[self.targetColumn])), i)
-                if meanConversionRate != 0.0:
-                    break
-        
+
+        totalPositiveEventCount = 0.0
+        meanConversionRate = 0.0
+
+        if not test:
+            totalPositiveEventCount = float(sum(dataFrame[self.targetColumn]))
+            meanConversionRate = round(totalPositiveEventCount / float(len(dataFrame[self.targetColumn])), 2)
+
+            if meanConversionRate == 0.0:
+                for i in xrange(3, 5):
+                    meanConversionRate = round(totalPositiveEventCount / float(len(dataFrame[self.targetColumn])), i)
+                    if meanConversionRate != 0.0:
+                        break
+
         for column, _ in self.categoricalColumns.iteritems():
             if column in dataFrame.columns:
                 self.currentColumn = column
-                
+
                 if not test:
                     self.__assignConversionRateToCategoricalColumns(column, dataFrame, meanConversionRate)
                     self.__writeRTSArtifacts()
