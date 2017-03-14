@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
@@ -45,10 +46,14 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Pair.of("IntervalDouble", Double.class), //
                 Pair.of("CatString", String.class), //
                 Pair.of("CatMapString", String.class), //
+                Pair.of("Boolean1", String.class), //
+                Pair.of("Boolean2", String.class), //
+                Pair.of("Boolean3", Integer.class), //
+                Pair.of("Boolean4", Boolean.class), //
                 Pair.of("Encoded", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1L, "String1", 1, 1, 11.0, "Value2", "Group3A", createEncodedString() }
+                { 1L, "String1", 1, 1, 11.0, "Value2", "Group3A", "Y", "0", 1, true, createEncodedString() }
         };
         uploadDataToSharedAvroInput(data, fields);
 
@@ -75,7 +80,7 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         bktAttr21.setBucketAlgo(categoricalBucket1);
         attr2.addBktAttr(bktAttr21);
 
-        DCBucketedAttr bktAttr22 = new DCBucketedAttr("CatMapString", 20, 3);
+        DCBucketedAttr bktAttr22 = new DCBucketedAttr("CatMapString", 6, 3);
         CategoricalBucket categoricalBucket2 = new CategoricalBucket();
         categoricalBucket2.setCategories(Arrays.asList("Group1", "Group2", "Group3"));
         Map<String, List<String>> mapping = new HashMap<>();
@@ -86,11 +91,26 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         bktAttr22.setBucketAlgo(categoricalBucket2);
         attr2.addBktAttr(bktAttr22);
 
+        DCBucketedAttr bktAttr23 = new DCBucketedAttr("Boolean1", 10, 3);
+        BooleanBucket booleanBucket = new BooleanBucket();
+        bktAttr23.setBucketAlgo(booleanBucket);
+        attr2.addBktAttr(bktAttr23);
+
+        DCBucketedAttr bktAttr24 = new DCBucketedAttr("Boolean2", 13, 3);
+        bktAttr24.setBucketAlgo(booleanBucket);
+        attr2.addBktAttr(bktAttr24);
+
+        DCBucketedAttr bktAttr25 = new DCBucketedAttr("Boolean3", 16, 3);
+        bktAttr25.setBucketAlgo(booleanBucket);
+        attr2.addBktAttr(bktAttr25);
+
+        DCBucketedAttr bktAttr26 = new DCBucketedAttr("Boolean4", 19, 3);
+        bktAttr26.setBucketAlgo(booleanBucket);
+        attr2.addBktAttr(bktAttr26);
+
         DCEncodedAttr attr3 = new DCEncodedAttr("EAttr3");
 
         DCBucketedAttr bktAttr31 = new DCBucketedAttr("BitEncodeYes", 4, 2);
-        CategoricalBucket booleanBucket = new CategoricalBucket();
-        booleanBucket.setCategories(Arrays.asList("Yes", "No"));
         bktAttr31.setBucketAlgo(booleanBucket);
         BitDecodeStrategy decodeStrategy1 = new BitDecodeStrategy();
         decodeStrategy1.setBitInterpretation(BOOLEAN_YESNO);
@@ -131,12 +151,20 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                             "IntervalDlb=%d, " + //
                             "CatString=%d, " + //
                             "CatMapString=%d, " + //
+                            "Boolean1=%d, " + //
+                            "Boolean2=%d, " + //
+                            "Boolean3=%d, " + //
+                            "Boolean4=%d, " + //
                             "BitEncode1=%d, " + //
                             "BitEncode2=%d", //
                     getIntervalIntBkt(record), //
                     getIntervalDlbBkt(record), //
                     getCatStringBkt(record), //
                     getCatMapStringBkt(record), //
+                    getBoolean1Bkt(record), //
+                    getBoolean2Bkt(record), //
+                    getBoolean3Bkt(record), //
+                    getBoolean4Bkt(record), //
                     getBitEncodeYesBkt(record), //
                     getBitEncodeNoBkt(record) //
                     ));
@@ -144,6 +172,10 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
             Assert.assertEquals(getIntervalDlbBkt(record), 3);
             Assert.assertEquals(getCatStringBkt(record), 2);
             Assert.assertEquals(getCatMapStringBkt(record), 3);
+            Assert.assertEquals(getBoolean1Bkt(record), 1);
+            Assert.assertEquals(getBoolean2Bkt(record), 2);
+            Assert.assertEquals(getBoolean3Bkt(record), 1);
+            Assert.assertEquals(getBoolean4Bkt(record), 1);
             Assert.assertEquals(getBitEncodeYesBkt(record), 1);
             Assert.assertEquals(getBitEncodeNoBkt(record), 2);
         }
@@ -166,7 +198,27 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
     private int getCatMapStringBkt(GenericRecord record) {
         long encoded = (Long) record.get("EAttr2");
-        return BitCodecUtils.getBits(encoded, 20, 3);
+        return BitCodecUtils.getBits(encoded, 6, 3);
+    }
+
+    private int getBoolean1Bkt(GenericRecord record) {
+        long encoded = (Long) record.get("EAttr2");
+        return BitCodecUtils.getBits(encoded, 10, 3);
+    }
+
+    private int getBoolean2Bkt(GenericRecord record) {
+        long encoded = (Long) record.get("EAttr2");
+        return BitCodecUtils.getBits(encoded, 13, 3);
+    }
+
+    private int getBoolean3Bkt(GenericRecord record) {
+        long encoded = (Long) record.get("EAttr2");
+        return BitCodecUtils.getBits(encoded, 16, 3);
+    }
+
+    private int getBoolean4Bkt(GenericRecord record) {
+        long encoded = (Long) record.get("EAttr2");
+        return BitCodecUtils.getBits(encoded, 19, 3);
     }
 
     private int getBitEncodeYesBkt(GenericRecord record) {

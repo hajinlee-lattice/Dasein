@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -74,7 +76,10 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
         // TODO: hook up with API configurations, for now hard coded
         // AccountMaster fake bucketing
         parameters.encAttrs = readConfigJson();
+        parameters.excludeAttrs = excludeAttrs();
+        // legacy code just to rename LatticeID to LatticeAccountId
         parameters.rowIdField = "LatticeID";
+        parameters.renameRowIdField = "LatticeAccountId";
     }
 
     @Override
@@ -150,6 +155,27 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
             throw new RuntimeException("Failed to parse json config.", e);
         }
         return encAttrs;
+    }
+
+
+    private List<String> excludeAttrs() {
+        // exclude fields
+        List<String> excludeAttrs = new ArrayList<>();
+
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("exclude.txt");
+        if (is == null) {
+            throw new RuntimeException("Cannot find resource PublicDomains.txt");
+        }
+        Scanner scanner = new Scanner(is);
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            if (StringUtils.isNotEmpty(line)) {
+                excludeAttrs.add(line);
+            }
+        }
+        scanner.close();
+        return excludeAttrs;
     }
 
 }

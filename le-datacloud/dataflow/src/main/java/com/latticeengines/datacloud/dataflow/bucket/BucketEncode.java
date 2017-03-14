@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,22 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
     @Override
     public Node construct(BucketEncodeParameters parameters) {
         Node am = addSource(parameters.getBaseTables().get(0));
+
+        // rename row id column
+        // this is legacy code, just to rename LatticeId to LatticeAccountId
+        if (StringUtils.isNotBlank(parameters.rowIdField) && StringUtils.isNotBlank(parameters.renameRowIdField)) {
+            am = am.rename(new FieldList(parameters.rowIdField), new FieldList(parameters.renameRowIdField));
+        }
+
+        // handle exclude fields
+        List<String> excludeFields = parameters.excludeAttrs;
+        if (excludeFields != null) {
+            excludeFields.retainAll(am.getFieldNames());
+            if (!excludeFields.isEmpty()){
+                am = am.discard(new FieldList(excludeFields));
+                am = am.retain(new FieldList(am.getFieldNames()));
+            }
+        }
 
         // handle encoded fields
         Node encoded = processEncodedFields(am, parameters.encAttrs);

@@ -3,10 +3,13 @@ package com.latticeengines.datacloud.dataflow.bucket;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -51,10 +54,30 @@ public class BucketEncodeAccountMasterTestNG extends DataCloudDataFlowFunctional
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse json config.", e);
         }
-
         parameters.encAttrs = encAttrs;
+
+        // exclude fields
+        List<String> excludeAttrs = new ArrayList<>();
+
+        InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(getDirectory() + File.separator + "exclude.txt");
+        if (is == null) {
+            throw new RuntimeException("Cannot find resource PublicDomains.txt");
+        }
+        Scanner scanner = new Scanner(is);
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            if (StringUtils.isNotEmpty(line)) {
+                excludeAttrs.add(line);
+            }
+        }
+        scanner.close();
+        parameters.excludeAttrs = excludeAttrs;
+
         parameters.setBaseTables(Collections.singletonList("AccountMaster"));
         parameters.rowIdField = "LatticeID";
+        parameters.renameRowIdField = "LatticeAccountId";
 
         return parameters;
     }

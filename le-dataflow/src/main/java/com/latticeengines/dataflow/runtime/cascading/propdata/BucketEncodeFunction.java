@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
@@ -159,6 +161,9 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         if (value == null) {
             return 0;
         }
+        if (algo instanceof BooleanBucket) {
+            return bucketBoolean(value);
+        }
         if (algo instanceof CategoricalBucket) {
             return bucketCategorical(value, (CategoricalBucket) algo);
         }
@@ -166,6 +171,18 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
             return bucketInterval(value, (IntervalBucket) algo);
         }
         return 0;
+    }
+
+    private int bucketBoolean(Object value) {
+        String str = value.toString().toLowerCase();
+        if (Arrays.asList("1", "t", "true", "y", "yes").contains(str)) {
+            return 1;
+        } else if (Arrays.asList("0", "f", "false", "n", "no").contains(str)) {
+            return 2;
+        } else {
+            log.warn("Cannot parse value " + value + " to a boolean");
+            return 0;
+        }
     }
 
     private int bucketCategorical(Object value, CategoricalBucket bucket) {
