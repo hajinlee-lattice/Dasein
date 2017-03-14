@@ -17,8 +17,8 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.latticeengines.testframework.exposed.service.InternalTestUserService;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 @Component("internalTestUserServiceNew")
 public class InternalTestUserServiceImpl implements InternalTestUserService {

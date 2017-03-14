@@ -235,7 +235,6 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         return tenant;
     }
 
-    @SuppressWarnings("deprecation")
     private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson,
             Map<String, Boolean> featureFlagMap) throws IOException {
         String url = "tenantconsole/" + tenantRegJson;
