@@ -10,15 +10,18 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Cardinality;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRelationship;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -155,6 +158,20 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testExistsRestriction() {
+        DataCollection collection = getDataCollection();
+        ExistsRestriction exists = new ExistsRestriction();
+        exists.setObjectType(SchemaInterpretation.Contact);
+        exists.setRestriction(new ConcreteRestriction(false, new ColumnLookup(SchemaInterpretation.Account,
+                "companyname"), ComparisonType.IN_RANGE, new RangeLookup("a", "z")));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(exists);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+        assertEquals(count, 77058);
+    }
+
+    @Test(groups = "functional")
     public void testSortAndPage() {
         DataCollection collection = getDataCollection();
         Restriction restriction = new ConcreteRestriction(false, new ColumnLookup("companyname"), ComparisonType.EQUAL,
@@ -197,9 +214,26 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
     private DataCollection getDataCollection() {
         DataCollection collection = new DataCollection();
+        Table parent = getTable("querytest_table", SchemaInterpretation.Account);
+        Table child = getTable("querytest_table_dup", SchemaInterpretation.Contact);
+
+        TableRelationship relationship = new TableRelationship();
+        relationship.setSourceTable(parent);
+        relationship.setTargetTableName("querytest_table_dup");
+        relationship.setSourceCardinality(Cardinality.ONE);
+        relationship.setTargetCardinality(Cardinality.MANY);
+        relationship.setTargetAttributes("id");
+        relationship.setSourceAttributes("id");
+        parent.addRelationship(relationship);
+        collection.getTables().add(parent);
+        collection.getTables().add(child);
+        return collection;
+    }
+
+    private Table getTable(String name, SchemaInterpretation schemaInterpretation) {
         Table table = new Table();
-        table.setName("querytest_table");
-        table.setInterpretation(SchemaInterpretation.Account.toString());
+        table.setName(name);
+        table.setInterpretation(schemaInterpretation.toString());
         Attribute companyName = new Attribute();
         companyName.setName("companyname");
         table.addAttribute(companyName);
@@ -223,9 +257,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         table.addAttribute(alexaViews);
         JdbcStorage storage = new JdbcStorage();
         storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
-        storage.setTableNameInStorage("querytest_table");
+        storage.setTableNameInStorage(name);
         table.setStorageMechanism(storage);
-        collection.getTables().add(table);
-        return collection;
+        return table;
     }
 }

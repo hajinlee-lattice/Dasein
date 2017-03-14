@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.query;
 
-import java.util.List;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -16,13 +14,13 @@ public class ExistsRestriction extends Restriction {
     private SchemaInterpretation objectType;
     @JsonProperty("negate")
     private boolean negate;
-    @JsonProperty("restrictions")
-    private List<Restriction> restrictions;
+    @JsonProperty("restriction")
+    private Restriction restriction;
 
-    public ExistsRestriction(SchemaInterpretation objectType, boolean negate, List<Restriction> restrictions) {
+    public ExistsRestriction(SchemaInterpretation objectType, boolean negate, Restriction restriction) {
         this.objectType = objectType;
         this.negate = negate;
-        this.restrictions = restrictions;
+        this.restriction = restriction;
     }
 
     public ExistsRestriction(SchemaInterpretation objectType) {
@@ -45,20 +43,20 @@ public class ExistsRestriction extends Restriction {
         this.negate = negate;
     }
 
-    public SchemaInterpretation getobjectName() {
+    public SchemaInterpretation getObjectType() {
         return objectType;
     }
 
-    public void setobjectName(SchemaInterpretation objectName) {
+    public void setObjectType(SchemaInterpretation objectName) {
         this.objectType = objectName;
     }
 
-    public List<Restriction> getRestrictions() {
-        return restrictions;
+    public Restriction getRestriction() {
+        return restriction;
     }
 
-    public void setRestrictions(List<Restriction> restrictions) {
-        this.restrictions = restrictions;
+    public void setRestriction(Restriction restriction) {
+        this.restriction = restriction;
     }
 
     @Override

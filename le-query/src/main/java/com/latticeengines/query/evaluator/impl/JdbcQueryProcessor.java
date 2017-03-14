@@ -10,13 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Cardinality;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRelationship;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
@@ -211,6 +214,42 @@ public class JdbcQueryProcessor extends QueryProcessor {
             ConcreteRestriction placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(),
                     ComparisonType.EQUAL, new ValueLookup(bucketRestriction.getBucket().getMin()));
             return processRestriction(placeholder, rootObjectType, dataCollection);
+        } else if (restriction instanceof ExistsRestriction) {
+            ExistsRestriction existsRestriction = (ExistsRestriction) restriction;
+
+            Table parent = dataCollection.getTable(rootObjectType);
+            TableRelationship relationship = parent
+                    .getRelationships()
+                    .stream()
+                    .filter(r -> r.getSourceCardinality() == Cardinality.ONE
+                            && r.getTargetCardinality() == Cardinality.MANY //
+                            && r.getTargetTableName() != null)
+                    .filter(r -> r.getTargetTableName().equals(
+                            dataCollection.getTable(existsRestriction.getObjectType()).getName())) //
+                    .findFirst() //
+                    .orElse(null);
+
+            if (relationship == null) {
+                throw new RuntimeException(
+                        String.format(
+                                "Could not find a one-to-many relationship from table %s to table of type %s to process exists restriction %s",
+                                parent.getName(), existsRestriction.getObjectType(), existsRestriction));
+            }
+            Table child = dataCollection.getTable(existsRestriction.getObjectType());
+
+            StringPath parentJoinColumn = QueryUtils.getColumnPath(parent, relationship.getSourceAttributes().get(0));
+            StringPath childJoinColumn = QueryUtils.getColumnPath(child, relationship.getTargetAttributes().get(0));
+
+            Restriction innerRestriction = existsRestriction.getRestriction();
+            SQLQuery<?> query = queryFactory.getQuery(dataCollection).from(QueryUtils.getTablePath(child));
+            BooleanExpression innerPredicate = processRestriction(innerRestriction, existsRestriction.getObjectType(),
+                    dataCollection);
+            query = query.where(innerPredicate.and(parentJoinColumn.eq(childJoinColumn)));
+            if (existsRestriction.getNegate()) {
+                return query.notExists();
+            } else {
+                return query.exists();
+            }
         } else {
             throw new RuntimeException(String.format("Unsupported restriction %s", restriction.getClass().getName()));
         }

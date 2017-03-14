@@ -9,8 +9,12 @@ import com.querydsl.core.types.dsl.StringPath;
 
 public final class QueryUtils {
     public static StringPath getColumnPath(Table table, Attribute attribute) {
+        return getColumnPath(table, attribute.getName());
+    }
+
+    public static StringPath getColumnPath(Table table, String name) {
         StringPath tablePath = getTablePath(table);
-        return Expressions.stringPath(tablePath, attribute.getName());
+        return Expressions.stringPath(tablePath, name);
     }
 
     public static StringPath getTablePath(Table table) {
