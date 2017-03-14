@@ -5,7 +5,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
-    'mainApp.models.controllers.ModelDetailController',
     'mainApp.models.services.ModelService',
     'mainApp.appCommon.services.TopPredictorService',
     'mainApp.appCommon.services.ThresholdExplorerService',

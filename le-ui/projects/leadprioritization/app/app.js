@@ -9,9 +9,7 @@ var mainApp = angular.module('mainApp', [
     'angulartics',
     'angulartics.mixpanel',
 
-    'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.appCommon.utilities.WidgetConfigUtility',
-
+    'mainApp.appCommon.widgets',
     'common.modules',
     'common.datacloud',
 

@@ -1,14 +1,12 @@
 angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.services.TopPredictorService',
     'mainApp.appCommon.widgets.TopPredictorAttributeWidget',
     'ngSanitize'
 ])
 
 .controller('TopPredictorWidgetController', function (
-        $scope, $sce, $element, $compile, $rootScope, ResourceUtility,
-        WidgetFrameworkService, TopPredictorService, ModelStore, FeatureFlagService
+        $scope, $sce, $compile, $rootScope, ResourceUtility, TopPredictorService, ModelStore, FeatureFlagService
     ) {
 
     var widgetConfig = ModelStore.widgetConfig;
@@ -17,18 +15,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     var parentData = $scope.parentData;
     var flags = FeatureFlagService.Flags();
     $scope.ResourceUtility = ResourceUtility;
-
-    var container = $('<div></div>');
-    $($element).append(container);
-
-    var options = {
-        element: container,
-        widgetConfig: widgetConfig,
-        metadata: metadata,
-        data: data,
-        parentData: parentData
-    };
-    WidgetFrameworkService.CreateChildWidgets(options, $scope.data);
 
     var chartData = data.ChartData;
     if (chartData && chartData.children) {
