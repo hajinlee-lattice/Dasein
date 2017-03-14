@@ -35,7 +35,7 @@ public class AccountResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         metadataProxy.createDataCollection(mainTestTenant.getId(), collection);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testGetCount() {
         FrontEndQuery query = new FrontEndQuery();
         try (PerformanceTimer timer = new PerformanceTimer("testGetCount")) {

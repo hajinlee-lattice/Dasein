@@ -49,7 +49,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         metadataProxy.createDataCollection(mainTestTenant.getId(), collection);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void createSegment() {
         segment = new MetadataSegment();
         segment.setDisplayName("Test");
@@ -60,7 +60,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
                 .get(MetadataSegmentPropertyName.NumAccounts, 0L, Long.class), 611136);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "createSegment")
+    @Test(groups = "deployment", dependsOnMethods = "createSegment", enabled = false)
     public void getNumAccountsForSegment() {
         FrontEndRestriction restriction = getArbitraryRestriction();
 
@@ -69,7 +69,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(count, 5);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getNumAccountsForSegment")
+    @Test(groups = "deployment", dependsOnMethods = "getNumAccountsForSegment", enabled = false)
     public void viewAccountsForSegment() {
         FrontEndRestriction restriction = getArbitraryRestriction();
         FrontEndQuery query = new FrontEndQuery();
@@ -80,7 +80,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(page.getData().size(), 5);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "viewAccountsForSegment")
+    @Test(groups = "deployment", dependsOnMethods = "viewAccountsForSegment", enabled = false)
     public void modifySegment() {
         segment.setSimpleRestriction(getArbitraryRestriction());
         segment = restTemplate.postForObject(String.format("%s/pls/metadatasegments/", getRestAPIHostPort()), segment,
