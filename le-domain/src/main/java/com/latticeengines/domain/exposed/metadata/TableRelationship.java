@@ -106,10 +106,6 @@ public class TableRelationship implements HasPid {
         this.sourceAttributesString = StringUtils.join(sourceAttributes, ",");
     }
 
-    public void setSourceAttributes(String... sourceAttributes) {
-        setSourceAttributes(Arrays.asList(sourceAttributes));
-    }
-
     @JsonProperty("target_attributes")
     public List<String> getTargetAttributes() {
         if (targetAttributesString == null) {
@@ -120,10 +116,6 @@ public class TableRelationship implements HasPid {
 
     public void setTargetAttributes(List<String> targetAttributes) {
         this.targetAttributesString = StringUtils.join(targetAttributes, ",");
-    }
-
-    public void setTargetAttributes(String... targetAttributes) {
-        setTargetAttributes(Arrays.asList(targetAttributes));
     }
 
     public String getTargetTableName() {

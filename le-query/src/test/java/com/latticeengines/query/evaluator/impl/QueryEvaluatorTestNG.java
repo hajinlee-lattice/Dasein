@@ -4,6 +4,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -222,8 +223,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         relationship.setTargetTableName("querytest_table_dup");
         relationship.setSourceCardinality(Cardinality.ONE);
         relationship.setTargetCardinality(Cardinality.MANY);
-        relationship.setTargetAttributes("id");
-        relationship.setSourceAttributes("id");
+        relationship.setTargetAttributes(Collections.singletonList("id"));
+        relationship.setSourceAttributes(Collections.singletonList("id"));
         parent.addRelationship(relationship);
         collection.getTables().add(parent);
         collection.getTables().add(child);
