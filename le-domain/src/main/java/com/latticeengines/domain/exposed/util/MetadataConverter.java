@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
 
 public class MetadataConverter {
     private static Set<Schema.Type> supportedAvroTypes = new HashSet<Schema.Type>();
@@ -133,7 +134,7 @@ public class MetadataConverter {
                 lastModifiedKey.setLastModifiedTimestamp(DateTime.now().getMillis());
                 table.setLastModifiedKey(lastModifiedKey);
             }
-
+            table.setTableType(TableType.DATATABLE);
             return table;
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to read avro schema from %s", schema.getName()), e);
