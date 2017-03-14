@@ -47,6 +47,11 @@ AlexaDomains
 AlexaKeywords
 AlexaRelatedLinks
 AlexaTitle
+FeatureAverageDocumentSizeFetched
+FeatureAverageDocumentSizeProcessed
+FeatureExecutionEvaluate
+FeatureExecutionFetch
+FeatureExecutionFull
 HPAEmailSuffix
 Facebook_Url
 GooglePlus_Url
