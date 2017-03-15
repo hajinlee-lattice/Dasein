@@ -8,7 +8,7 @@ public class VdbLoadTableCancel {
     private String tenantId;
 
     @JsonProperty("launch_id")
-    private int launchId;
+    private String launchId;
 
     @JsonProperty("table_name")
     private String tableName;
@@ -43,11 +43,11 @@ public class VdbLoadTableCancel {
         this.tenantId = tenantId;
     }
 
-    public int getLaunchId() {
+    public String getLaunchId() {
         return launchId;
     }
 
-    public void setLaunchId(int launchId) {
+    public void setLaunchId(String launchId) {
         this.launchId = launchId;
     }
 

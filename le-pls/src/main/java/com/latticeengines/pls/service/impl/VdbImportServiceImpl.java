@@ -18,6 +18,7 @@ import com.latticeengines.pls.workflow.ImportVdbTableAndPublishWorkflowSubmitter
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -45,6 +46,9 @@ public class VdbImportServiceImpl implements VdbImportService {
     private Configuration yarnConfiguration;
 
     @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
     private ImportVdbTableAndPublishWorkflowSubmitter importVdbTableAndPublishWorkflowSubmitter;
 
     private MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader =
@@ -61,8 +65,8 @@ public class VdbImportServiceImpl implements VdbImportService {
 
     @Override
     public String submitLoadTableJob(VdbLoadTableConfig loadConfig) {
-        checkLoadConfig(loadConfig);
         try {
+            checkLoadConfig(loadConfig);
             return importVdbTableAndPublishWorkflowSubmitter.submit(loadConfig).toString();
         } catch (LedpException e) {
             VdbLoadTableStatus status = new VdbLoadTableStatus();
@@ -95,7 +99,7 @@ public class VdbImportServiceImpl implements VdbImportService {
             try {
                 workflowProxy.stopWorkflow(String.valueOf(workflowExecutionId.getId()));
                 String customSpace = CustomerSpace.parse(cancelConfig.getTenantId()).toString();
-                String extractIdentifier = String.format("%s_%s_%d", customSpace, cancelConfig.getTableName(),
+                String extractIdentifier = String.format("%s_%s_%s", customSpace, cancelConfig.getTableName(),
                         cancelConfig.getLaunchId());
                 VdbImportExtract vdbImportExtract = metadataProxy.getVdbImportExtract(customSpace, extractIdentifier);
                 if (vdbImportExtract != null) {
@@ -172,6 +176,9 @@ public class VdbImportServiceImpl implements VdbImportService {
         }
         if (VdbCreateTableRule.getCreateRule(loadConfig.getCreateTableRule()) == null) {
             throw new LedpException(LedpCode.LEDP_18135, new String[] {loadConfig.getCreateTableRule()});
+        }
+        if (tenantEntityMgr.findByTenantId(CustomerSpace.parse(loadConfig.getTenantId()).toString()) == null) {
+            throw new LedpException(LedpCode.LEDP_18074, new String[] {loadConfig.getTenantId()});
         }
     }
 

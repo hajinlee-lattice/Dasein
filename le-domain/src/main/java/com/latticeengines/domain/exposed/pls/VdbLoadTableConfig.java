@@ -10,7 +10,7 @@ public class VdbLoadTableConfig {
     private String tenantId;
 
     @JsonProperty("launch_id")
-    private int launchId;
+    private String launchId;
 
     @JsonProperty("data_category")
     private String dataCategory;
@@ -55,11 +55,11 @@ public class VdbLoadTableConfig {
         this.tenantId = tenantId;
     }
 
-    public int getLaunchId() {
+    public String getLaunchId() {
         return launchId;
     }
 
-    public void setLaunchId(int launchId) {
+    public void setLaunchId(String launchId) {
         this.launchId = launchId;
     }
 

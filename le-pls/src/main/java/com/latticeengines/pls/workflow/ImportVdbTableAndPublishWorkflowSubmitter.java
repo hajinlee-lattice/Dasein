@@ -25,7 +25,7 @@ public class ImportVdbTableAndPublishWorkflowSubmitter extends WorkflowSubmitter
 
     public ApplicationId submit(VdbLoadTableConfig loadConfig) {
         String customSpace = CustomerSpace.parse(loadConfig.getTenantId()).toString();
-        String extractIdentifier = String.format("%s_%s_%d", customSpace, loadConfig.getTableName(),
+        String extractIdentifier = String.format("%s_%s_%s", customSpace, loadConfig.getTableName(),
                 loadConfig.getLaunchId());
         VdbImportExtract vdbImportExtract = metadataProxy.getVdbImportExtract(customSpace, extractIdentifier);
         if (vdbImportExtract != null) {
