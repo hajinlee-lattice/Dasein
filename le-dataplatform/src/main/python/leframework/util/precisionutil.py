@@ -14,11 +14,13 @@ class PrecisionUtil(object):
             return x
         if type(x) == int:
             return x
+        if x == 0.0:
+            return x
         l = np.log10(np.fabs(x))
         e = np.int64(l)
         n = precision if l < 0.0 else precision - 1
-        m = round(float(x) / 10**e, n)
-        return m*10**e
+        m = round(float(x) / 10.0**e, n)
+        return m*10.0**e
 
     @classmethod
     def setPrecisionOfNPArray(cls, a, precision):

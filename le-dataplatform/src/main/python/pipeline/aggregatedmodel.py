@@ -22,7 +22,10 @@ import os
 import numpy as np
 import pickle
 
-from sklearn.utils import array2d
+try:
+    from sklearn.utils import array2d as check_array
+except:
+    from sklearn.utils import check_array
 from sklearn.externals.joblib import Parallel, delayed, cpu_count
 from sklearn.tree._tree import DTYPE
 
@@ -121,17 +124,17 @@ class AggregatedModel(object):
                 ordered by arithmetical order.
         """
         return self.predict(X, True)
-    
+
     def predict_regression(self, X):
         if (len(self.regressionModels) == 0):
             return None
         return self.predict(X, False)
-    
+
     def predict(self, X, isPredictPossibility):
-        
+
         # Check data
         if getattr(X, "dtype", None) != DTYPE or X.ndim != 2:
-            X = array2d(X, dtype=DTYPE)
+            X = check_array(X, dtype=DTYPE)
 
         jobs, _, starts = self.__partition_individual_models(self)
 

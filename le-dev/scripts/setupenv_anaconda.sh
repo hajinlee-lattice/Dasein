@@ -37,15 +37,25 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         popd
     fi
 
-    sudo rm -rf $ANACONDA_HOME/envs/lattice || true
-    $ANACONDA_HOME/bin/conda create -n lattice -y python=2.7.13 pip
+    echo "Removing existing Anaconda environments"
+    sudo rm -rf $ANACONDA_HOME/envs/* || true
 
     CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
-    cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/lattice/lib
-    ln -s $ANACONDA_HOME/envs/lattice/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/lattice/lib/libgcrypt.so.11
+
+    CONDAENV_LATTICE="lattice"
+    echo "Creating Anaconda environment: $CONDAENV_LATTICE"
+    $ANACONDA_HOME/bin/conda create -n $CONDAENV_LATTICE -y python=2.7.13 pip
+    cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$CONDAENV_LATTICE/lib
+    ln -s $ANACONDA_HOME/envs/$CONDAENV_LATTICE/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$CONDAENV_LATTICE/lib/libgcrypt.so.11
+
+    CONDAENV_V01="v01"
+    echo "Creating Anaconda environment: $CONDAENV_V01"
+    $ANACONDA_HOME/bin/conda create -n $CONDAENV_V01 -y python=2.7.13 pip
+    cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$CONDAENV_V01/lib
+    ln -s $ANACONDA_HOME/envs/$CONDAENV_V01/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$CONDAENV_V01/lib/libgcrypt.so.11
 fi
 
-source $ANACONDA_HOME/bin/activate lattice
+source $ANACONDA_HOME/bin/activate $CONDAENV_LATTICE
 
 pip install \
     avro==1.7.7 \
@@ -80,7 +90,47 @@ $ANACONDA_HOME/bin/conda install -y \
     zlib=1.2.8=3
 
 sudo mkdir -p /usr/local/bin || true
-sudo ln -sf $ANACONDA_HOME/envs/lattice/bin/python /usr/local/bin/python2.7
+sudo ln -sf $ANACONDA_HOME/envs/$CONDAENV_LATTICE/bin/python /usr/local/bin/python2.7
+
+source $ANACONDA_HOME/bin/deactivate
+
+
+source $ANACONDA_HOME/bin/activate $CONDAENV_V01
+
+pip install \
+    avro==1.8.1 \
+    fastavro==0.12.1 \
+    kazoo==2.2.1 \
+    patsy==0.4.1 \
+    pexpect==4.2.1 \
+    psutil==5.2.0 \
+    python-dateutil==2.6.0
+
+$ANACONDA_HOME/bin/conda install -y pandas=0.19.2=np112py27_1
+
+pip install statsmodels==0.8.0
+
+
+$ANACONDA_HOME/bin/conda install -y \
+    libiconv=1.14=0 \
+    libxml2=2.9.4=0 \
+    libxslt=1.1.29=0 \
+    lxml=3.7.3=py27_0 \
+    numpy=1.12.0=py27_0 \
+    openssl=1.0.2k=1 \
+    py=1.4.32=py27_0 \
+    pytest=3.0.6=py27_0 \
+    pytz=2016.10=py27_0 \
+    readline=6.2=2 \
+    scikit-learn=0.18.1=np112py27_1 \
+    setuptools=27.2.0=py27_0 \
+    sqlite=3.13.0=0 \
+    tk=8.5.18=0 \
+    wheel=0.29.0=py27_0 \
+    zlib=1.2.8=3
+
+pip install sklearn-pandas==1.3.0
+pip install git+https://github.com/jpmml/sklearn2pmml.git@0.17.4
 
 source $ANACONDA_HOME/bin/deactivate
 

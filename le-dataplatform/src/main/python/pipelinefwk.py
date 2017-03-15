@@ -167,7 +167,21 @@ class ModelStep(PipelineStep):
         return ModelStep(model, modelInputColumns, scoreColumnName)
 
     def transform(self, dataFrame, configMetadata, test):
-        dataFrame = dataFrame.convert_objects(convert_numeric=True)
+        ## From pandas release 0.17.0, .convert_objects is no longer available.
+        ## .convert_objects(convert_numeric=True) had the behavior that, for a column "A",
+        ## it would convert values to a numerical type if ANY of the values could be
+        ## converted; values that could not be converted would be set to NaN.  If NONE
+        ## of the values could be converted, the column would remain as-is.
+        ## To reproduce this behavior with .to_numeric, the code below is needed.
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            try:
+                dataFrame = dataFrame.convert_objects(convert_numeric=True)
+            except:
+                for col in dataFrame.columns:
+                    convertedCol = pd.to_numeric(dataFrame[col], errors='coerce')
+                    dataFrame[col] = convertedCol if not pd.isnull(convertedCol).all() else dataFrame[col]
         dataFrame.fillna(0, inplace=True)
 
         for columnName, columnData in dataFrame.iteritems():

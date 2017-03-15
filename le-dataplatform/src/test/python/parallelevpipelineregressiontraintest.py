@@ -11,10 +11,10 @@ from trainingtestbase import TrainingTestBase
 
 
 class ParallelEVPipelineRegressionTrainingTest(TrainingTestBase):
-    
+
     def setUp(self):
         super(ParallelEVPipelineRegressionTrainingTest, self).setUp()
-    
+
     def tearDown(self):
         super(ParallelEVPipelineRegressionTrainingTest, self).tearDown()
         shutil.rmtree("./evpipeline.tar.gz", ignore_errors=True)
@@ -26,18 +26,18 @@ class ParallelEVPipelineRegressionTrainingTest(TrainingTestBase):
         from evpipelinesteps import EVModelStep
         from launcher import Launcher
         from aggregatedmodel import AggregatedModel
-        
+
         traininglauncher = Launcher("modeldriver-regression-evpipeline.json")
         traininglauncher.execute(False)
 
         print("Modeling pipeline done.")
         os.unlink("model.p")
         os.symlink("./results/model.p", "model.p")
-        
+
         traininglauncher = Launcher("modeldriver-regression-aggregation-evpipeline.json")
         traininglauncher.execute(False)
         print("Modeling aggregation pipeline done.")
-        
+
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
 
@@ -53,16 +53,16 @@ class ParallelEVPipelineRegressionTrainingTest(TrainingTestBase):
                 self.assertTrue(isinstance(pipeline.getPipeline()[5].model, AggregatedModel), "clf not instance of AggregatedModel.")
                 self.assertTrue(len(pipeline.getPipeline()[5].model.models) == 1, "There no models found.")
                 self.assertTrue(len(pipeline.getPipeline()[5].model.regressionModels) == 1, "There no regression models found.")
-                
+
             os.rename(fileName, "./results/" + entry["Key"])
 
         self.createCSVFromModel("modeldriver-regression-aggregation-evpipeline.json", "./results/scoreinputfile.txt")
-        
+
         print("CSV from model created.")
         with open("./results/scoringengine.py", "w") as scoringScript:
             scoringScript.write(jsonDict["Model"]["Script"])
 
-        os.environ["PYTHONPATH"] = '/usr/local/lib/python2.7/site-packages:./evpipeline.tar.gz:./lepipeline.tar.gz'
+        os.environ["PYTHONPATH"] = './evpipeline.tar.gz:./lepipeline.tar.gz'
         popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print("Scoring done.")
