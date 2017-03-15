@@ -475,6 +475,8 @@ public class SqlServerHelper implements DbHelper {
     }
 
     private void setMatchedValues(InternalOutputRecord record) {
+        Long latticeAccountId = (Long) record.getQueryResult().get(MatchConstants.LID_FIELD);
+        record.setLatticeAccountId(latticeAccountId == null ? null : String.valueOf(latticeAccountId));
         record.setMatchedDomain((String) record.getQueryResult().get(MatchConstants.DOMAIN_FIELD));
         String name = (String) record.getQueryResult().get(MatchConstants.NAME_FIELD);
         String city = (String) record.getQueryResult().get(MatchConstants.CITY_FIELD);
