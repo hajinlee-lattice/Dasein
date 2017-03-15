@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.dao.ModelRunDao;
 import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
@@ -39,8 +40,8 @@ public class ModelRunEntityMgrImpl extends BaseEntityMgrImpl<ModelRun> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ModelRun> findModelRunsByAnalyticTest(String analyticTestName) {
-        return modelRunDao.findAllByField("ANALYTIC_TEST_NAME", analyticTestName);
+    public List<ModelRun> findModelRunsByAnalyticTest(AnalyticTest analyticTest) {
+        return modelRunDao.findAllByAnalyticTest(analyticTest);
     }
 
 }

@@ -59,15 +59,15 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
         AnalyticTestEntityNames analyticTestEntityNames = new AnalyticTestEntityNames();
         analyticTestEntityNames.setName(spFunctionalTestName);
         analyticTestEntityNames.setAnalyticTestType(AnalyticTestType.SelectedPipelines);
-        analyticTestEntityNames.setAnalyticPipelineNames(new ArrayList<String>(Arrays.asList(oldProdAp.getName())));
-        analyticTestEntityNames.setDataSetNames(new ArrayList<String>(Arrays.asList(functionalTestDatasetName)));
+        analyticTestEntityNames.setAnalyticPipelineNames(new ArrayList<>(Arrays.asList(oldProdAp.getName())));
+        analyticTestEntityNames.setDataSetNames(new ArrayList<>(Arrays.asList(functionalTestDatasetName)));
         analyticTestService.createAnalyticTest(analyticTestEntityNames);
 
         analyticTestEntityNames = new AnalyticTestEntityNames();
         analyticTestEntityNames.setName(prodfunctionalTestName);
         analyticTestEntityNames.setAnalyticTestType(AnalyticTestType.Production);
-        analyticTestEntityNames.setAnalyticPipelineNames(new ArrayList<String>(Arrays.asList(oldProdAp.getName())));
-        analyticTestEntityNames.setDataSetNames(new ArrayList<String>(Arrays.asList(functionalTestDatasetName)));
+        analyticTestEntityNames.setAnalyticPipelineNames(new ArrayList<>(Arrays.asList(oldProdAp.getName())));
+        analyticTestEntityNames.setDataSetNames(new ArrayList<>(Arrays.asList(functionalTestDatasetName)));
         analyticTestService.createAnalyticTest(analyticTestEntityNames);
 
         // create a t prod pipeline
@@ -81,9 +81,9 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
         Assert.assertTrue(spTest.getAnalyticPipelines().get(0).getName().equals(newProdAp.getName()));
         Assert.assertTrue(prodTest.getAnalyticPipelines().get(0).getName().equals(newProdAp.getName()));
 
-        List<ModelRun> spRuns = modelRunEntityMgr.findModelRunsByAnalyticTest(spFunctionalTestName);
+        List<ModelRun> spRuns = modelRunEntityMgr.findModelRunsByAnalyticTest(spTest);
         Assert.assertEquals(spRuns.size(), 1);
-        List<ModelRun> prodRuns = modelRunEntityMgr.findModelRunsByAnalyticTest(prodfunctionalTestName);
+        List<ModelRun> prodRuns = modelRunEntityMgr.findModelRunsByAnalyticTest(prodTest);
         Assert.assertEquals(prodRuns.size(), 1);
     }
 
