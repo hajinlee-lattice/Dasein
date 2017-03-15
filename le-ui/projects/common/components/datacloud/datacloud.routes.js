@@ -81,6 +81,7 @@ angular
                         if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
                             && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
                             var accessLevel = BrowserStorageUtility.getSessionDocument().User.AccessLevel;
+                            
                             if (accessLevel == "INTERNAL_USER" || accessLevel == "INTERNAL_ADMIN" || accessLevel == "SUPER_ADMIN") {
                                 this.isInternalUser = true;
                             }
@@ -157,6 +158,9 @@ angular
                         // Note: this is needed for Account Lookup, dont remove!
                         EnrichmentAccountLookup: function() {
                             return null;
+                        },
+                        AnalysisLookup: function() {
+                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -196,6 +200,9 @@ angular
                             deferred.resolve(LookupResponse.attributes || {});
 
                             return deferred.promise;
+                        },
+                        AnalysisLookup: function() {
+                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -225,6 +232,16 @@ angular
                         // Note: this is needed for Account Lookup, dont remove!
                         EnrichmentAccountLookup: function() {
                             return null;
+                        },
+                        AnalysisLookup: function($q) {
+                            // load default segment from API
+                            var deferred = $q.defer();
+                            
+                            //DataCloudStore.getCount().then(function(result) {
+                                deferred.resolve(result);
+                            //});
+
+                            return deferred.promise;
                         }
                     },
                     controller: 'DataCloudController',

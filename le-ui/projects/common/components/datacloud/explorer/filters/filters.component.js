@@ -203,32 +203,6 @@ angular
                 }
             }
 
-            var textSearch = function(haystack, needle, case_insensitive) {
-                var case_insensitive = (case_insensitive === false ? false : true);
-
-                if (case_insensitive) {
-                    var haystack = haystack.toLowerCase(),
-                    needle = needle.toLowerCase();
-                }
-
-                // .indexOf is faster and more supported than .includes
-                return (haystack.indexOf(needle) >= 0);
-            }
-
-            vm.searchFields = function(enrichment){
-                if (vm.query) {
-                    if (textSearch(enrichment.DisplayName, vm.query)) {
-                        return true;
-                    } else if (textSearch(enrichment.Description, vm.query)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
             vm.enrichmentsFilter = function() {
                 var filter = {};
 
@@ -276,70 +250,6 @@ angular
                     count = vm.subcategoryCount(category, subcategory);
 
                 return (count ? true : false);
-            }
-
-            vm.subcategoryCount = function(category, subcategory) {
-                var filtered = vm.enrichmentsObj[category];
-
-                if (!filtered || filtered.length <= 0) {
-                    return 0;
-                }
-
-                for (var i=0, result=[]; i < filtered.length; i++) {
-                    var item = filtered[i];
-                    if (item && vm.searchFields(item)) {
-                        if ((item.Category != category)
-                        || (item.Subcategory != subcategory)
-                        || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
-                        || (vm.metadata.toggle.show.selected && !item.IsSelected)
-                        || (vm.metadata.toggle.hide.selected && item.IsSelected)
-                        || (vm.metadata.toggle.show.premium && !item.IsPremium)
-                        || (vm.metadata.toggle.hide.premium && item.IsPremium)
-                        || (!vm.metadata.toggle.show.internal && item.IsInternal)
-                        || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
-                        || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
-                        || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                        || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
-                            continue;
-                        }
-                        result.push(item);
-                    }
-                }
-
-                return result.length;
-            }
-
-            vm.categoryCount = function(category) {
-                var filtered = vm.enrichmentsObj[category];
-
-                if (!filtered) {
-                    return 0;
-                }
-
-                for (var i=0, result=[]; i < filtered.length; i++) {
-                    var item = filtered[i];
-                    if (item && vm.searchFields(item)) {
-                        if ((item.Category != category)
-                        || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
-                        || (vm.metadata.toggle.show.selected && !item.IsSelected)
-                        || (vm.metadata.toggle.hide.selected && item.IsSelected)
-                        || (vm.metadata.toggle.show.premium && !item.IsPremium)
-                        || (vm.metadata.toggle.hide.premium && item.IsPremium)
-                        || (!vm.metadata.toggle.show.internal && item.IsInternal)
-                        || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
-                        || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
-                        || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                        || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
-                            continue;
-                        }
-                        result.push(item);
-                    }
-                }
-                vm.categoryCounts[item.Category] = result.length;
-                if(result.length <= 1) {
-                    //gotoNonemptyCategory();
-                }
-                return result.length;
             }
 
             vm.init_filters();

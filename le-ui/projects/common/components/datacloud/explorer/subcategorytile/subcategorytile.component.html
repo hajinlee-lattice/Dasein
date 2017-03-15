@@ -1,0 +1,58 @@
+
+<div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
+     ng-class="{active: vm.subcategory == subcategory}">
+
+    <h2 class="noselect-children">
+        <div class="category-icon">
+            <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
+        </div>
+        <div class="category-label">{{subcategory}}</div>
+    </h2>
+
+    <span class="count noselect-children">
+        <strong ng-if="vm.enrichments_completed">{{ count|number }}</strong>
+        <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
+    </span>
+
+    <div class="attributes-container">
+        <ul class="attributes noselect-children">
+            <li class="header" ng-show="subcategoryAttributes.length > 0">
+                <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(subcategoryAttributes) }}</div>
+                <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
+            </li>
+            <li ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
+                    | filter: vm.enrichmentsFilter(vm.lookupMode) 
+                    | orderBy: [ '-Value' ]
+                    | limitTo: 5))">
+                <div class="column label" title="{{attribute.DisplayName}}">
+                    {{ attribute.DisplayName }}
+                </div>
+
+                <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode">
+                    {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}
+                </div>
+                <div class="column data records" ng-if="!vm.lookupMode">
+                    {{ attribute.NonNullCount|number }}
+                </div>
+            </li>
+        </ul>
+
+        <div class="attributes-more noselect" ng-if="subcategoryAttributes.length > 5">More</div>
+    </div>
+    <ul class="controls noselect" ng-if="!vm.lookupMode">
+        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">
+            <!-- this can't be a <button> element because IE and FF don't like it -->
+            <div class="button"
+                    ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'enabled' || vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'dirty'}"
+                    ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
+                <span class="highlight-icon {{vm.highlightTypesCategoryLabel(vm.category, subcategory).type}}">
+                    {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
+                </span>
+                <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
+                    <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
+                </ul>
+
+            </div>
+        </li>
+    </ul>
+</div>

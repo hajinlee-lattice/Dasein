@@ -1,6 +1,10 @@
 // grid view multple of 12 (24), dynamic across
 angular.module('common.datacloud.explorer', [
     'common.datacloud.explorer.filters',
+    'common.datacloud.explorer.companyprofile',
+    'common.datacloud.explorer.categorytile',
+    'common.datacloud.explorer.subcategorytile',
+    'common.datacloud.explorer.attributetile',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('DataCloudController', function(
@@ -55,8 +59,10 @@ angular.module('common.datacloud.explorer', [
         status_alert: {},
         _subcategories: [],
         subcategories: [],
+        subcategoriesExclude: [],
         categories: [],
         topAttributes: [],
+        cube: [],
         selected_categories: {},
         categoryOption: null,
         metadata: DataCloudStore.metadata,
@@ -129,36 +135,7 @@ angular.module('common.datacloud.explorer', [
         return result;
     }
 
-    vm.setCategory = function(category) {
-        vm.category = category;
-        DataCloudStore.setMetadata('category', category);
-    }
-
-    vm.setSubcategory = function(subcategory) {
-        vm.subcategory = subcategory;
-        DataCloudStore.setMetadata('subcategory', subcategory);
-    }
-
-
-    vm.updateStateParams = function() {
-        $state.go('.', {
-            category: vm.category,
-            subcategory: vm.subcategory
-        }, {
-            notify: false
-        });
-    }
-
     vm.init = function() {
-        vm.closeHighlighterButtons = function(index){
-            var index = index || '';
-            for(var i in vm.openHighlighter) {
-                if(i !== index && vm.openHighlighter[i].open === true) {
-                    vm.openHighlighter[i].open = false;
-                }
-            }
-        }
-
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
             $state.go('home.datacloud.lookup.form');
         }
@@ -172,6 +149,38 @@ angular.module('common.datacloud.explorer', [
             //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
             vm.no_lookup_results_message = true;
         }
+    }
+
+    vm.closeHighlighterButtons = function(index) {
+        var index = index || '';
+        for(var i in vm.openHighlighter) {
+            if(i !== index && vm.openHighlighter[i].open === true) {
+                vm.openHighlighter[i].open = false;
+            }
+        }
+    }
+
+    vm.setSubcategory = function(subcategory) {
+        vm.subcategory = subcategory;
+        DataCloudStore.setMetadata('subcategory', subcategory);
+    }
+
+    vm.subcategoryRenamer = function(string, replacement){
+        if (string) {
+            var replacement = replacement || '';
+            return string.toLowerCase().replace(/\W+/g, replacement);
+        }
+
+        return '';
+    }
+
+    vm.updateStateParams = function() {
+        $state.go('.', {
+            category: vm.category,
+            subcategory: vm.subcategory
+        }, {
+            notify: false
+        });
     }
 
     var stopNumbersInterval = function(){
@@ -205,7 +214,6 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.cube = [];
     vm.xhrResult = function(result, cached) {
         var timestamp = new Date().getTime();
         var _store, key, item;
@@ -330,6 +338,59 @@ angular.module('common.datacloud.explorer', [
             getTopAttributes();
             getHighlightMetadata();
             console.log('vm.highlightMetadata:\t ', vm.highlightMetadata); //ben
+        }
+    }
+            
+    var getEnrichmentSubcategories = function(category, subcategories) {
+        vm._subcategories[category] = subcategories;
+        vm.subcategories[category] = subcategories;
+
+        if (subcategories.length <= 1) {
+            vm.subcategoriesExclude.push(category);
+        }
+
+        vm.filterEmptySubcategories();
+    }
+
+    vm.removeFromArray = function(array, item) {
+        if (array && item) {
+            var index = array.indexOf(item);
+            if (index > -1) {
+                array.splice(index, 1);
+            }
+        }
+    }
+
+    vm.filterEmptySubcategories = function() {
+        if (vm._subcategories[vm.category]) {
+            for (var i=0, newCategories = []; i<vm._subcategories[vm.category].length; i++) {
+                var subcategory = vm._subcategories[vm.category][i];
+
+                if (vm.subcategoryCount(vm.category, subcategory) > 0) {
+                    newCategories.push(subcategory);
+                }
+            }
+
+            if (newCategories.length <= 1) {
+                addUniqueToArray(vm.subcategoriesExclude, vm.category);
+                vm.setSubcategory(newCategories[0]);
+                vm.updateStateParams();
+            } else {
+                if (vm.subcategoriesExclude.indexOf(vm.category)) {
+                    vm.setSubcategory('');
+                    vm.updateStateParams();
+                }
+
+                vm.removeFromArray(vm.subcategoriesExclude, vm.category);
+            }
+
+            vm.subcategories[vm.category] = newCategories;
+        }
+    }
+
+    var addUniqueToArray = function(array, item) {
+        if (array && item && !array.indexOf(item)) {
+            array.push(item);
         }
     }
 
@@ -695,19 +756,7 @@ angular.module('common.datacloud.explorer', [
             vm.enable_category_dropdown = true;
         }
     }
-
-    var subcategoriesExclude = [];
-    var getEnrichmentSubcategories = function(category, subcategories) {
-        vm._subcategories[category] = subcategories;
-        vm.subcategories[category] = subcategories;
-
-        if (subcategories.length <= 1) {
-            subcategoriesExclude.push(category);
-        }
-
-        vm.filterEmptySubcategories();
-    }
-    console.log('init',vm);
+    
     vm.getTileTableItems = function(category, subcategory, segment, limit, debug) {
         var items = [],
             limit = (limit === 0 ? 0 : null) || limit || null;
@@ -823,28 +872,6 @@ angular.module('common.datacloud.explorer', [
         return selected;
     };
 
-    vm.inSubcategory = function(enrichment){
-        var category = vm.selected_categories[enrichment.Category],
-            subcategories = (category && category['subcategories'] ? category['subcategories'] : []),
-            subcategory = enrichment.Subcategory;
-
-        if (enrichment.DisplayName && !subcategories.length) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
-            return true;
-        }
-
-        if (!subcategories.length) {
-            return false;
-        }
-
-        var selected = (typeof category === 'object' && subcategories.indexOf(subcategory) > -1);
-        return selected;
-    };
-
-    vm.categoryClass = function(category){
-        var category = 'category-' + category.toLowerCase().replace(' ','-');
-        return category;
-    }
-
     vm.selectEnrichment = function(enrichment){
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
@@ -858,7 +885,7 @@ angular.module('common.datacloud.explorer', [
                 enrichment.IsDirty = false;
                 vm.statusMessage(vm.label.premiumTotalSelectError);
                 return false;
-            }
+            }1 
         }
 
         vm.generalSelectedTotal = selectedTotal.length;
@@ -978,37 +1005,6 @@ angular.module('common.datacloud.explorer', [
         return fieldTypes[fieldType] || fieldTypes.default;
     }
 
-    var subcategoryRenamer = function(string, replacement){
-        if (string) {
-            var replacement = replacement || '';
-            return string.toLowerCase().replace(/\W+/g, replacement);
-        }
-
-        return '';
-    }
-
-    vm.subcategoryIcon = function(category, subcategory){
-        var path = '/assets/images/enrichments/subcategories/',
-            category = subcategoryRenamer(category),
-            subcategory = subcategoryRenamer(subcategory),
-            icon = category + (subcategory ? '-'+subcategory : '') + '.png';
-
-        return path + icon;
-    }
-
-    vm.subcategoryClick = function(subcategory, $event) {
-        var target = angular.element($event.target),
-            currentTarget = angular.element($event.currentTarget);
-
-        if(target.closest("[ng-click]")[0] !== currentTarget[0]) {
-            // do nothing, user is clicking something with it's own click event
-        } else {
-            vm.setSubcategory((vm.subcategory === subcategory ? '' : subcategory));
-            vm.metadata.current = 1;
-            vm.updateStateParams();
-        }
-    }
-
     /* jumps you to non-empty category when you filter */
     var gotoNonemptyCategory = function() {
         var categories = [],
@@ -1025,101 +1021,6 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.categoryIcon = function(category){
-        var path = '/assets/images/enrichments/subcategories/',
-            category = subcategoryRenamer(category, ''),
-            icon = category + '.png';
-
-        return path + icon;
-    }
-
-    vm.categoryClick = function(category, $event) {
-        var target = angular.element($event.target),
-            currentTarget = angular.element($event.currentTarget);
-
-        if(target.closest("[ng-click]")[0] !== currentTarget[0]) {
-            // do nothing, user is clicking something with it's own click event
-        } else {
-            var category = category || '';
-            if(vm.subcategory && vm.category == category) {
-                vm.setSubcategory('');
-                if(subcategoriesExclude.indexOf(category) >= 0) { // don't show subcategories
-                    vm.setSubcategory(vm.subcategories[category][0]);
-                }
-            } else if(vm.category == category) {
-                vm.setSubcategory('');
-                //vm.category = '';
-            } else {
-                vm.setSubcategory('');
-                if(subcategoriesExclude.indexOf(category)) {
-                    vm.setSubcategory(vm.subcategories[category][0]);
-                }
-                vm.setCategory(category);
-
-                vm.filterEmptySubcategories();
-            }
-            vm.metadata.current = 1;
-            vm.updateStateParams();
-        }
-    }
-
-    vm.companyInfoFormatted = function (type, value) {
-        if (!vm.LookupResponse.companyInfo) {
-            return false;
-        }
-
-        if(!vm.LookupResponse || !vm.LookupResponse.companyInfo){
-            return false;
-        }
-
-        var value = value || '',
-            info = vm.LookupResponse.companyInfo;
-
-        switch (type) {
-            case 'address':
-                var address = [];
-
-                if (info.LDC_Street) {
-                    address.push(info.LDC_Street);
-                }
-
-                if (info.LDC_City) {
-                    address.push(info.LDC_City);
-                }
-
-                if (info.LDC_State) {
-                    address.push(info.LDC_State);
-                }
-
-                if (info.LDC_ZipCode) {
-                    address.push(info.LDC_ZipCode.substr(0,5) + ',');
-                }
-
-                if (info.LE_COUNTRY) {
-                    address.push(info.LE_COUNTRY);
-                }
-
-                return address.join(' ');
-
-            case 'phone':
-                if (info.LE_COMPANY_PHONE) {
-                    var phone = info.LE_COMPANY_PHONE;
-                    return phone.replace(/\D+/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
-                }
-
-                break;
-
-            case 'range':
-                if (value) {
-                    var range = value;
-                    range = range.replace('-',' - ');
-                    return range;
-                }
-
-                break;
-        }
-    }
-
     vm.isYesNoCategory = function(category, includeKeywords) {
         var list = ['Website Profile','Technology Profile'];
 
@@ -1128,48 +1029,6 @@ angular.module('common.datacloud.explorer', [
         }
 
         return list.indexOf(category) >= 0;
-    }
-
-    var addUniqueToArray = function(array, item) {
-        if (array && item && !array.indexOf(item)) {
-            array.push(item);
-        }
-    }
-
-    var removeFromArray = function(array, item) {
-        if (array && item) {
-            var index = array.indexOf(item);
-            if (index > -1) {
-                array.splice(index, 1);
-            }
-        }
-    }
-
-    vm.filterEmptySubcategories = function() {
-        if (vm._subcategories[vm.category]) {
-            for (var i=0, newCategories = []; i<vm._subcategories[vm.category].length; i++) {
-                var subcategory = vm._subcategories[vm.category][i];
-
-                if (vm.subcategoryCount(vm.category, subcategory) > 0) {
-                    newCategories.push(subcategory);
-                }
-            }
-
-            if (newCategories.length <= 1) {
-                addUniqueToArray(subcategoriesExclude, vm.category);
-                vm.setSubcategory(newCategories[0]);
-                vm.updateStateParams();
-            } else {
-                if (subcategoriesExclude.indexOf(vm.category)) {
-                    vm.setSubcategory('');
-                    vm.updateStateParams();
-                }
-
-                removeFromArray(subcategoriesExclude, vm.category);
-            }
-
-            vm.subcategories[vm.category] = newCategories;
-        }
     }
 
     vm.percentage = function(number, total, suffix, limit) {
@@ -1197,6 +1056,96 @@ angular.module('common.datacloud.explorer', [
         });
 
         return deferred.promise;
+    }
+
+    var textSearch = function(haystack, needle, case_insensitive) {
+        var case_insensitive = (case_insensitive === false ? false : true);
+
+        if (case_insensitive) {
+            var haystack = haystack.toLowerCase(),
+            needle = needle.toLowerCase();
+        }
+
+        // .indexOf is faster and more supported than .includes
+        return (haystack.indexOf(needle) >= 0);
+    }
+
+    vm.searchFields = function(enrichment){
+        if (vm.query) {
+            if (textSearch(enrichment.DisplayName, vm.query)) {
+                return true;
+            } else if (textSearch(enrichment.Description, vm.query)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    vm.subcategoryCount = function(category, subcategory) {
+        var filtered = vm.enrichmentsObj[category];
+
+        if (!filtered || filtered.length <= 0) {
+            return 0;
+        }
+
+        for (var i=0, result=[]; i < filtered.length; i++) {
+            var item = filtered[i];
+            if (item && vm.searchFields(item)) {
+                if ((item.Category != category)
+                || (item.Subcategory != subcategory)
+                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
+                || (vm.metadata.toggle.show.selected && !item.IsSelected)
+                || (vm.metadata.toggle.hide.selected && item.IsSelected)
+                || (vm.metadata.toggle.show.premium && !item.IsPremium)
+                || (vm.metadata.toggle.hide.premium && item.IsPremium)
+                || (!vm.metadata.toggle.show.internal && item.IsInternal)
+                || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
+                || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
+                || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
+                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
+                    continue;
+                }
+                result.push(item);
+            }
+        }
+
+        return result.length;
+    }
+
+    vm.categoryCount = function(category) {
+        var filtered = vm.enrichmentsObj[category];
+
+        if (!filtered) {
+            return 0;
+        }
+
+        for (var i=0, result=[]; i < filtered.length; i++) {
+            var item = filtered[i];
+            if (item && vm.searchFields(item)) {
+                if ((item.Category != category)
+                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue == "No" && vm.isYesNoCategory(category))
+                || (vm.metadata.toggle.show.selected && !item.IsSelected)
+                || (vm.metadata.toggle.hide.selected && item.IsSelected)
+                || (vm.metadata.toggle.show.premium && !item.IsPremium)
+                || (vm.metadata.toggle.hide.premium && item.IsPremium)
+                || (!vm.metadata.toggle.show.internal && item.IsInternal)
+                || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
+                || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
+                || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
+                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
+                    continue;
+                }
+                result.push(item);
+            }
+        }
+        vm.categoryCounts[item.Category] = result.length;
+        if(result.length <= 1) {
+            //gotoNonemptyCategory();
+        }
+        return result.length;
     }
 
     vm.init();

@@ -1,0 +1,76 @@
+<div ng-if="vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
+<div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
+     ng-class="{'active': enrichment.IsSelected}">
+    <div class="header">
+        <h2 title="{{enrichment.DisplayName}}">
+            <div class="category-icon">
+                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted">
+                    <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
+                </div>
+                <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" />
+                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted">
+                    <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
+                </div>
+            </div>
+            <strong>{{enrichment.DisplayName}}</strong>
+        </h2>
+        <!--// keep this below the h2 so that the z-indexes work with out setting z-index in the css -->
+        <ul class="tags">
+            <li data-corner-ribbon="premium" ng-if="enrichment.IsPremium" class="premium noselect-children"><strong>premium</strong></li>
+            <li data-corner-ribbon="internal" ng-if="enrichment.IsInternal" class="internal noselect-children"><strong>internal</strong></li>
+        </ul>
+    </div>
+
+    <p class="description" title="{{enrichment.Description}}">
+        <a ng-if="enrichment.FundamentalType === 'URI'" ng-href="{{vm.lookupFiltered[enrichment.FieldName]}}" target="_blank" class="{{vm.categoryClass(enrichment.Category)}} color"><strong>{{vm.lookupFiltered[enrichment.FieldName]}}</strong></a>
+        <strong ng-if="vm.lookupFiltered[enrichment.FieldName] && enrichment.FundamentalType !== 'URI'" title="{{vm.lookupFiltered[enrichment.FieldName]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.FieldName], enrichment.FundamentalType)}}</strong>
+        <span ng-if="!vm.lookupFiltered[enrichment.FieldName]">{{enrichment.Description}}</span>
+    </p>
+
+    <span class="lesser-description" ng-if="vm.lookupMode">
+        {{ enrichment.Description }}
+    </span>
+    <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' && !vm.lookupMode">
+        <h5><label>Attribute range</label><label>Records</label></h5>
+        <ul>
+            <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List">
+                <ul class="graph">
+                    <li class="label" title="{{stat.Lbl}}">
+                        {{stat.Lbl}}
+                    </li>
+                    <li class="bar_">
+                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}}">
+                            <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
+                        </div>
+                    </li>
+                    <li class="count">
+                        <span>{{stat.Cnt|number}}</span>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <ul class="controls noselect" ng-if="!vm.lookupMode">
+        <li class="control enrich" ng-if="vm.section == 'edit'">
+            <button class="button"
+                    ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}"
+                    ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
+                <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
+            </button>
+        </li>
+        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[enrichment.FieldName] = {}">
+            <!-- this can't be a <button> element because IE and FF don't like it -->
+            <div class="button"
+                    ng-class="{'selected': vm.openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}"
+                    ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[enrichment.FieldName].open = !vm.openHighlighter[enrichment.FieldName].open">
+                <span class="highlight-icon {{vm.openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">
+                    {{vm.openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}
+                </span>
+                <ul ng-class="{open: vm.openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
+                    <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}" ng-click="vm.openHighlighter[enrichment.FieldName].state = vm.setFlags(type, enrichment)">{{label}}</li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</div>

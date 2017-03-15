@@ -17,110 +17,17 @@
         </ul>
 
         <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="vm.enrichments_completed">
-            <li ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" class="category company">
-                <div class="box-inner company-info round-box">
-                    <ul class="info">
-                        <li><h2 title="{{vm.LookupResponse.companyInfo.LDC_Name}}">{{vm.LookupResponse.companyInfo.LDC_Name}}</h2></li>
-                        <li>{{vm.companyInfoFormatted('address')}}</li>
-                        <li><a href="tel:+1{{vm.LookupResponse.companyInfo.LE_COMPANY_PHONE}}">{{vm.companyInfoFormatted('phone')}}</a></li>
-                        <li><a href="http://{{vm.LookupResponse.companyInfo.LDC_Domain}}">{{vm.LookupResponse.companyInfo.LDC_Domain}}</a></li>
-                    </ul>
-
-                    <div class="details">
-                        <ul>
-                            <li ng-if="vm.LookupResponse.companyInfo.LDC_DUNS"><h3>Duns Number</h3> {{vm.LookupResponse.companyInfo.LDC_DUNS}}</li>
-                            <li ng-if="vm.LookupResponse.companyInfo.LE_NUMBER_OF_LOCATIONS"><h3>Locations</h3> {{vm.LookupResponse.companyInfo.LE_NUMBER_OF_LOCATIONS}}</li>
-                            <li ng-if="vm.LookupResponse.companyInfo.LE_IS_PRIMARY_LOCATION"><h3>Primary Location</h3> {{vm.LookupResponse.companyInfo.LE_IS_PRIMARY_LOCATION}}</li>
-                        </ul>
-
-                        <div class="industry" ng-if="vm.LookupResponse.companyInfo.LE_INDUSTRY">
-                            <h3>Industry</h3>
-                            {{vm.LookupResponse.companyInfo.LE_INDUSTRY}}
-                        </div>
-
-                        <div class="sales-employees">
-                            <div class="sales" ng-if="vm.LookupResponse.companyInfo.LE_REVENUE_RANGE">
-                                <h3>Annual Sales</h3>
-                                {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_REVENUE_RANGE)}}
-                            </div>
-
-                            <div class="employees" ng-if="vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE">
-                                <h3>Employees</h3>
-                                {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE)}}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <li explorer-company-profile
+                ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" 
+                class="category company"
+                vm="vm">
             </li>
-            <li ng-repeat="category in vm.categories" class="category"
+            <li explorer-category-tile
+                ng-repeat="category in vm.categories" class="category"
                 ng-if="count = vm.categoryCount(category)"
                 ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].enabled && vm.section == 'team'}"
-                ng-click="vm.categoryClick(category, $event);">
-
-                <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
-                    <span>
-                        <h2 title="{{category}}">
-                            <div class="category-icon">
-                                <img ng-src="{{vm.categoryIcon(category)}}" />
-                            </div>
-                            <div class="category-label">{{category}}</div>
-                        </h2>
-
-                        <span class="count">
-                            <strong ng-if="vm.enrichments_completed">{{ count|number }}</strong>
-                            <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
-                        </span>
-
-                        <div class="attributes-container" ng-if="!vm.category">
-                            <ul class="attributes noselect-children">
-                                <li class="header" ng-show="highlightAttributes.length > 0">
-                                    <div class="column label">Highlighted Insights</div>
-                                </li>
-                                <li ng-repeat="attribute in (highlightAttributes = ((TileTableItems = vm.getTileTableItems(category, false, 'HighlightHighlighted', 5)).HighlightHighlighted 
-                                        | filter: vm.enrichmentsFilter() 
-                                        | orderBy: [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ] 
-                                        | limitTo: 5))"
-                                        class="attribute"
-                                        ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
-                                    <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
-                                    <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
-                                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.NonNullCount|number }}</div>
-                                </li>
-                            </ul>
-                            <ul class="attributes noselect-children">
-                                <li class="header" ng-show="categoryAttributes.length > 0">
-                                    <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
-                                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
-                                </li>
-                                <li ng-repeat="attribute in (categoryAttributes = (TileTableItems.other 
-                                        | filter: vm.enrichmentsFilter() 
-                                        | orderBy: [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ] 
-                                        | limitTo: 5 - (highlightAttributes.length || 0)))"
-                                        class="attribute"
-                                        ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
-                                    <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
-                                    <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
-                                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.NonNullCount|number }}</div>
-                                </li>
-                            </ul>
-                        </div>
-                    </span>
-                    <ul class="controls noselect" ng-if="!vm.lookupMode && !vm.category">
-                        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[category] = {}">
-                            <div class="button"
-                                    ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': vm.highlightTypesCategoryLabel(category).type == 'enabled' || vm.highlightTypesCategoryLabel(category).type == 'dirty'}"
-                                    ng-click="vm.closeHighlighterButtons(category); vm.openHighlighter[category].open = !vm.openHighlighter[category].open;">
-                                <span class="highlight-icon {{vm.highlightTypesCategoryLabel(category).type}}">
-                                    {{vm.highlightTypesCategoryLabel(category).label}} 
-                                </span>
-                                <ul ng-class="{open: vm.openHighlighter[category].open}" class="highlightOptions button-dropdown">
-                                    <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, category)">{{label}}</li>
-                                </ul>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+                ng-click="vm.categoryClick(category, $event);"
+                vm="vm" category="category" count="count">
             </li>
         </ul>
         <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && !vm.subcategory">
@@ -137,7 +44,8 @@
             </div>
 
             <ul class="subcategories">
-                <li ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category])
+                <li explorer-subcategory-tile
+                    ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category])
                         | orderBy: vm.sortOrder()
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize
                         | limitTo: vm.pagesize
@@ -145,65 +53,8 @@
                     class="subcategory"
                     ng-if="count = vm.subcategoryCount(vm.category, subcategory)"
                     ng-class="{active: vm.subcategory == subcategory, 'disabled-grayout': vm.highlightMetadata.categories[vm.category].subcategories[subcategory] && !vm.highlightMetadata.categories[vm.category].subcategories[subcategory].enabled && vm.section == 'team'}"
-                    ng-click="vm.subcategoryClick(subcategory, $event)">
-
-                    <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
-                         ng-class="{active: vm.subcategory == subcategory}">
-
-                        <h2 class="noselect-children">
-                            <div class="category-icon">
-                                <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
-                            </div>
-                            <div class="category-label">{{subcategory}}</div>
-                        </h2>
-
-                        <span class="count noselect-children">
-                            <strong ng-if="vm.enrichments_completed">{{ count|number }}</strong>
-                            <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
-                        </span>
-
-                        <div class="attributes-container">
-                            <ul class="attributes noselect-children">
-                                <li class="header" ng-show="subcategoryAttributes.length > 0">
-                                    <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(subcategoryAttributes) }}</div>
-                                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
-                                </li>
-                                <li ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
-                                        | filter: vm.enrichmentsFilter(vm.lookupMode) 
-                                        | orderBy: [ '-Value' ]
-                                        | limitTo: 5))">
-                                    <div class="column label" title="{{attribute.DisplayName}}">
-                                        {{ attribute.DisplayName }}
-                                    </div>
-
-                                    <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode">
-                                        {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}
-                                    </div>
-                                    <div class="column data records" ng-if="!vm.lookupMode">
-                                        {{ attribute.NonNullCount|number }}
-                                    </div>
-                                </li>
-                            </ul>
-
-                            <div class="attributes-more noselect" ng-if="subcategoryAttributes.length > 5">More</div>
-                        </div>
-                        <ul class="controls noselect" ng-if="!vm.lookupMode">
-                            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[vm.category + subcategory] = {}">
-                                <!-- this can't be a <button> element because IE and FF don't like it -->
-                                <div class="button"
-                                        ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'enabled' || vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'dirty'}"
-                                        ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
-                                    <span class="highlight-icon {{vm.highlightTypesCategoryLabel(vm.category, subcategory).type}}">
-                                        {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
-                                    </span>
-                                    <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
-                                        <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
-                                    </ul>
-
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
+                    ng-click="vm.subcategoryClick(subcategory, $event)"
+                    vm="vm" subcategory="subcategory" count="count">
                 </li>
 
                 <li class="load-status" ng-show="!subcategoriesList.length" ng-if="loading_image" ng-init="loading_image">
@@ -244,7 +95,8 @@
             </div>
 
             <ul class="enrichments {{vm.view}}">
-                <li class="box enrichment"
+                <li explorer-attribute-tile
+                    class="box enrichment"
                     ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category]
                         | filter: vm.searchFields
                         | filter: vm.enrichmentsFilter()
@@ -253,83 +105,8 @@
                         | limitTo: vm.pagesize
                         track by enrichment.FieldNameInTarget"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
-                    ng-class="{'active': enrichment.IsSelected, 'disabled-grayout': enrichment.HighlightHidden && vm.section == 'team'}">
-                    <div ng-if="vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
-                    <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
-                         ng-class="{'active': enrichment.IsSelected}">
-                        <div class="header">
-                            <h2 title="{{enrichment.DisplayName}}">
-                                <div class="category-icon">
-                                    <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted">
-                                        <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
-                                    </div>
-                                    <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" />
-                                    <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted">
-                                        <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
-                                    </div>
-                                </div>
-                                <strong>{{enrichment.DisplayName}}</strong>
-                            </h2>
-                            <!--// keep this below the h2 so that the z-indexes work with out setting z-index in the css -->
-                            <ul class="tags">
-                                <li data-corner-ribbon="premium" ng-if="enrichment.IsPremium" class="premium noselect-children"><strong>premium</strong></li>
-                                <li data-corner-ribbon="internal" ng-if="enrichment.IsInternal" class="internal noselect-children"><strong>internal</strong></li>
-                            </ul>
-                        </div>
-
-                        <p class="description" title="{{enrichment.Description}}">
-                            <a ng-if="enrichment.FundamentalType === 'URI'" ng-href="{{vm.lookupFiltered[enrichment.FieldName]}}" target="_blank" class="{{vm.categoryClass(enrichment.Category)}} color"><strong>{{vm.lookupFiltered[enrichment.FieldName]}}</strong></a>
-                            <strong ng-if="vm.lookupFiltered[enrichment.FieldName] && enrichment.FundamentalType !== 'URI'" title="{{vm.lookupFiltered[enrichment.FieldName]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.FieldName], enrichment.FundamentalType)}}</strong>
-                            <span ng-if="!vm.lookupFiltered[enrichment.FieldName]">{{enrichment.Description}}</span>
-                        </p>
-
-                        <span class="lesser-description" ng-if="vm.lookupMode">
-                            {{ enrichment.Description }}
-                        </span>
-                        <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' && !vm.lookupMode">
-                            <h5><label>Attribute range</label><label>Records</label></h5>
-                            <ul>
-                                <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List">
-                                    <ul class="graph">
-                                        <li class="label" title="{{stat.Lbl}}">
-                                            {{stat.Lbl}}
-                                        </li>
-                                        <li class="bar_">
-                                            <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}}">
-                                                <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
-                                            </div>
-                                        </li>
-                                        <li class="count">
-                                            <span>{{stat.Cnt|number}}</span>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <ul class="controls noselect" ng-if="!vm.lookupMode">
-                            <li class="control enrich" ng-if="vm.section == 'edit'">
-                                <button class="button"
-                                        ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}"
-                                        ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
-                                    <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
-                                </button>
-                            </li>
-                            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[enrichment.FieldName] = {}">
-                                <!-- this can't be a <button> element because IE and FF don't like it -->
-                                <div class="button"
-                                        ng-class="{'selected': vm.openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}"
-                                        ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[enrichment.FieldName].open = !vm.openHighlighter[enrichment.FieldName].open">
-                                    <span class="highlight-icon {{vm.openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">
-                                        {{vm.openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}
-                                    </span>
-                                    <ul ng-class="{open: vm.openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
-                                        <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}" ng-click="vm.openHighlighter[enrichment.FieldName].state = vm.setFlags(type, enrichment)">{{label}}</li>
-                                    </ul>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
+                    ng-class="{'active': enrichment.IsSelected, 'disabled-grayout': enrichment.HighlightHidden && vm.section == 'team'}"
+                    vm="vm" enrichment="enrichment">
                 </li>
                 <li class="load-status" ng-show="!filteredList.length" ng-if="loading_image" ng-init="loading_image">
                     <div ng-show="!vm.enrichments_loaded">

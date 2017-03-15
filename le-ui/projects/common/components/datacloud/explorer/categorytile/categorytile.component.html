@@ -1,0 +1,63 @@
+<div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
+    <span>
+        <h2 title="{{category}}">
+            <div class="category-icon">
+                <img ng-src="{{vm.categoryIcon(category)}}" />
+            </div>
+            <div class="category-label">{{category}}</div>
+        </h2>
+
+        <span class="count">
+            <strong ng-if="vm.enrichments_completed">{{ count|number }}</strong>
+            <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
+        </span>
+
+        <div class="attributes-container" ng-if="!vm.category">
+            <ul class="attributes noselect-children">
+                <li class="header" ng-show="highlightAttributes.length > 0">
+                    <div class="column label">Highlighted Insights</div>
+                </li>
+                <li ng-repeat="attribute in (highlightAttributes = ((TileTableItems = vm.getTileTableItems(category, false, 'HighlightHighlighted', 5)).HighlightHighlighted 
+                        | filter: vm.enrichmentsFilter() 
+                        | orderBy: vm.categoryOrderBy()
+                        | limitTo: 5))"
+                        class="attribute"
+                        ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
+                    <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
+                    <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
+                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.NonNullCount|number }}</div>
+                </li>
+            </ul>
+            <ul class="attributes noselect-children">
+                <li class="header" ng-show="categoryAttributes.length > 0">
+                    <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
+                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
+                </li>
+                <li ng-repeat="attribute in (categoryAttributes = (TileTableItems.other 
+                        | filter: vm.enrichmentsFilter() 
+                        | orderBy: vm.categoryOrderBy()
+                        | limitTo: 5 - (highlightAttributes.length || 0)))"
+                        class="attribute"
+                        ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
+                    <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
+                    <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
+                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.NonNullCount|number }}</div>
+                </li>
+            </ul>
+        </div>
+    </span>
+    <ul class="controls noselect" ng-if="!vm.lookupMode && !vm.category">
+        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[category] = {}">
+            <div class="button"
+                    ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': vm.highlightTypesCategoryLabel(category).type == 'enabled' || vm.highlightTypesCategoryLabel(category).type == 'dirty'}"
+                    ng-click="vm.closeHighlighterButtons(category); vm.openHighlighter[category].open = !vm.openHighlighter[category].open;">
+                <span class="highlight-icon {{vm.highlightTypesCategoryLabel(category).type}}">
+                    {{vm.highlightTypesCategoryLabel(category).label}} 
+                </span>
+                <ul ng-class="{open: vm.openHighlighter[category].open}" class="highlightOptions button-dropdown">
+                    <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, category)">{{label}}</li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</div>
