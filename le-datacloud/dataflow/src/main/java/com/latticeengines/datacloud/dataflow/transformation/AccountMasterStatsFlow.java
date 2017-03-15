@@ -156,22 +156,24 @@ public class AccountMasterStatsFlow
             newValueColumnsForSubstitution.add(dim);
         }
 
-        oldValueColumnsForSubstitution.add(getMinMaxKey());
-        newValueColumnsForSubstitution.add(getMinMaxKey());
+        if (parameters.isNumericalBucketsRequired()) {
+            oldValueColumnsForSubstitution.add(getMinMaxKey());
+            newValueColumnsForSubstitution.add(getMinMaxKey());
+        }
 
         node = createLeafFieldSubstitutionNode(node, parameters, //
                 inputSchemaForFieldSubstituteFunction, outputSchemaForFieldSubstituteFunction, //
                 minMaxAndDimensionList, renamedMinMaxAndDimensionIds, dimensionIdFieldNames, //
                 oldValueColumnsForSubstitution, newValueColumnsForSubstitution, renamedNonDimensionFieldIds);
 
-          node = createDimensionBasedAggregateNode(node, dimensionIdFieldNames);
+        node = createDimensionBasedAggregateNode(node, dimensionIdFieldNames);
 
-          node = createDimensionBasedExpandAndMergeNodes(requiredDimensionsValuesMap, //
+        node = createDimensionBasedExpandAndMergeNodes(requiredDimensionsValuesMap, //
                      node, dimensionDefinitionMap, node.getSchema(), //
                      groupByFields, dimensionIdFieldNames);
 
-          List<FieldMetadata> fms = node.getSchema();
-          node = createReportGenerationNode(parameters, dimensionIdFieldNames, fms, node, dataCloudVersion);
+        List<FieldMetadata> fms = node.getSchema();
+        node = createReportGenerationNode(parameters, dimensionIdFieldNames, fms, node, dataCloudVersion);
 
         return node;
     }
