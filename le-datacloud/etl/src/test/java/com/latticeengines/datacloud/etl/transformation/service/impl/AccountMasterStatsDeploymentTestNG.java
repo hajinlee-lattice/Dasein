@@ -171,7 +171,7 @@ public class AccountMasterStatsDeploymentTestNG
         Map<String, Map<String, Long>> dimensionValuesIdMap = new HashMap<>();
         param.setDimensionValuesIdMap(dimensionValuesIdMap);
         param.setCubeColumnName("EncodedCube");
-        param.setNumericalBucketsRequired(true);
+        param.setNumericalBucketsRequired(false);
         param.setDataCloudVersion(DATA_CLOUD_VERSION);
 
         List<String> dimensions = new ArrayList<>();

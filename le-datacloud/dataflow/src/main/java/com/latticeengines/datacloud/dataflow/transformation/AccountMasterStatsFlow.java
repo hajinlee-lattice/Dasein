@@ -164,7 +164,8 @@ public class AccountMasterStatsFlow
         node = createLeafFieldSubstitutionNode(node, parameters, //
                 inputSchemaForFieldSubstituteFunction, outputSchemaForFieldSubstituteFunction, //
                 minMaxAndDimensionList, renamedMinMaxAndDimensionIds, dimensionIdFieldNames, //
-                oldValueColumnsForSubstitution, newValueColumnsForSubstitution, renamedNonDimensionFieldIds);
+                oldValueColumnsForSubstitution, newValueColumnsForSubstitution, renamedNonDimensionFieldIds, //
+                parameters.isNumericalBucketsRequired());
 
         node = createDimensionBasedAggregateNode(node, dimensionIdFieldNames);
 
@@ -185,7 +186,8 @@ public class AccountMasterStatsFlow
             List<FieldMetadata> minMaxAndDimensionList, //
             List<String> renamedMinMaxAndDimensionIds, //
             String[] dimensionIdFieldNames, List<String> oldValueColumnsForSubstitution, //
-            List<String> newValueColumnsForSubstitution, List<String> renamedNonDimensionFieldIds) {
+            List<String> newValueColumnsForSubstitution, List<String> renamedNonDimensionFieldIds, //
+            boolean isNumericalBucketsRequired) {
 
         List<FieldMetadata> combinedOutputSchemaForFieldSubstituteFunction = new ArrayList<>();
         combinedOutputSchemaForFieldSubstituteFunction.addAll(outputSchemaForFieldSubstituteFunction);
@@ -241,7 +243,9 @@ public class AccountMasterStatsFlow
 
         // since we have already made use of minMax info in stats obj
         // calculation, discard this column
-        node = node.discard(new FieldList(getMinMaxKey()));
+        if (isNumericalBucketsRequired) {
+            node = node.discard(new FieldList(getMinMaxKey()));
+        }
         return node;
     }
 

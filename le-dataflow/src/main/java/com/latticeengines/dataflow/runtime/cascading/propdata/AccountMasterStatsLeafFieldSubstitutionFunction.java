@@ -139,7 +139,7 @@ public class AccountMasterStatsLeafFieldSubstitutionFunction extends BaseOperati
         boolean isEncodedAttr = isEncodedAttr(pos);
 
         if (val != null) {
-            if (minMaxInfo.containsKey(fieldName)) {
+            if ((minMaxInfo != null) && minMaxInfo.containsKey(fieldName)) {
                 parseNumericField(result, pos, attributeParser, minMaxInfo, fieldName, val);
             } else if (isBooleanField(fieldFundamentalTypeMap, fieldName, val, isEncodedAttr)) {
                 parseBooleanField(result, pos, attributeParser, minMaxInfo, fieldName, val, isEncodedAttr);
