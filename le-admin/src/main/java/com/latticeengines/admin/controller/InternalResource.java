@@ -8,6 +8,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -90,9 +91,13 @@ public class InternalResource extends InternalResourceBase {
     public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId,
                     HttpServletRequest request) {
         String ticket = request.getHeader(Constants.AUTHORIZATION);
-        String decrypted = CipherUtils.decrypt(ticket);
-        String[] tokens = decrypted.split("\\|");
-        return tenantService.deleteTenant(tokens[0], contractId, tenantId, true);
+        String userName = "_defaultUser";
+        if (!StringUtils.isEmpty(ticket)) {
+            String decrypted = CipherUtils.decrypt(ticket);
+            String[] tokens = decrypted.split("\\|");
+            userName = tokens[0];
+        }
+        return tenantService.deleteTenant(userName, contractId, tenantId, true);
     }
 
     @RequestMapping(value = "datastore/{option}/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")

@@ -96,9 +96,13 @@ public class TenantResource {
             @RequestParam(value = "deleteZookeeper", required = false, defaultValue = "true") Boolean deleteZookeeper,
             @PathVariable String tenantId, HttpServletRequest request) {
         String ticket = request.getHeader(Constants.AUTHORIZATION);
-        String decrypted = CipherUtils.decrypt(ticket);
-        String[] tokens = decrypted.split("\\|");
-        return tenantService.deleteTenant(tokens[0], contractId, tenantId, deleteZookeeper);
+        String userName = "_defaultUser";
+        if (!StringUtils.isEmpty(ticket)) {
+            String decrypted = CipherUtils.decrypt(ticket);
+            String[] tokens = decrypted.split("\\|");
+            userName = tokens[0];
+        }
+        return tenantService.deleteTenant(userName, contractId, tenantId, deleteZookeeper);
     }
 
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
