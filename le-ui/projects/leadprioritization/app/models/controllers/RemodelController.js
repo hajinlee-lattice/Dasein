@@ -21,6 +21,7 @@ angular.module('mainApp.models.remodel', [
         message: null,
         successs: null,
         error: null,
+        disableRemodelOnError: false,
         dataRulesMap: {},
         attributes: [],
         newModelName: Model.ModelDetails.DisplayName.replace(/\s+/g, '_') + $filter('date')(new Date().getTime(), '_yyyyMMdd') + '_Remodel',
@@ -49,37 +50,42 @@ angular.module('mainApp.models.remodel', [
         vm.dataRulesMap[dataRule.name] = dataRule;
     }
 
-    vm.attributes = Attributes.map(function(attribute) {
-        var attributeObj = {
-            name: attribute.DisplayName,
-            value: attribute.ApprovedUsage !== 'None',
-            recommendations: [],
-            disabled: false,
-            warning: null,
-            attribute: angular.copy(attribute)
-        };
+    if (typeof Attributes === "string") {
+        vm.attributes = [];
+        vm.disableRemodelOnError = true;
+    } else {
+        vm.attributes = Attributes.map(function(attribute) {
+            var attributeObj = {
+                name: attribute.DisplayName,
+                value: attribute.ApprovedUsage !== 'None',
+                recommendations: [],
+                disabled: false,
+                warning: null,
+                attribute: angular.copy(attribute)
+            };
 
-        if (attribute.IsCoveredByMandatoryRule) {
-            attributeObj.disabled = true;
-            attributeObj.warning = 'mandatory';
-        } else if (attribute.IsCoveredByOptionalRule) {
-            attributeObj.disabled = false;
-            attributeObj.warning = 'optional';
-        }
+            if (attribute.IsCoveredByMandatoryRule) {
+                attributeObj.disabled = true;
+                attributeObj.warning = 'mandatory';
+            } else if (attribute.IsCoveredByOptionalRule) {
+                attributeObj.disabled = false;
+                attributeObj.warning = 'optional';
+            }
 
-        if (attribute.AssociatedRules) {
-            for (var i = 0; i < attribute.AssociatedRules.length; i++) {
-                var associatedRule = attribute.AssociatedRules[i];
+            if (attribute.AssociatedRules) {
+                for (var i = 0; i < attribute.AssociatedRules.length; i++) {
+                    var associatedRule = attribute.AssociatedRules[i];
 
-                var dataRuleList = vm.dataRulesMap[associatedRule];
-                if (dataRuleList) {
-                    attributeObj.recommendations.push(dataRuleList);
+                    var dataRuleList = vm.dataRulesMap[associatedRule];
+                    if (dataRuleList) {
+                        attributeObj.recommendations.push(dataRuleList);
+                    }
                 }
             }
-        }
 
-        return attributeObj;
-    });
+            return attributeObj;
+        });
+    }
 
     vm.sort = function(sortBy) {
         if (vm.sortBy === sortBy) {

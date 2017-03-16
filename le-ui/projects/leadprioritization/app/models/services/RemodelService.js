@@ -19,7 +19,7 @@ angular
                     RemodelStore.remodelAttributesMap[modelId] = result.Result;
                     deferred.resolve(result.Result);
                 } else {
-                    deferred.reject(result.ResultErrors);
+                    deferred.resolve(result.ResultErrors);
                 }
             });
         }

@@ -535,8 +535,6 @@ angular
 
                     RemodelStore.GetModelReviewDataRules(modelId).then(function(result) {
                         deferred.resolve(result);
-                    }).catch(function(error) {
-                        deferred.reject(error);
                     });
 
                     return deferred.promise;
@@ -547,8 +545,6 @@ angular
 
                     RemodelStore.GetModelReviewAttributes(modelId).then(function(result) {
                         deferred.resolve(result);
-                    }).catch(function(error) {
-                        deferred.reject(error);
                     });
 
                     return deferred.promise;
