@@ -31,17 +31,18 @@ public abstract class BusinessObject {
 
     public abstract SchemaInterpretation getObjectType();
 
-    public SQLQuery<?> startQuery(DataCollection dataCollection, Query query) {
-        Table table = dataCollection.getTable(query.getObjectType());
-        StringPath path = QueryUtils.getTablePath(table);
-        return queryFactory.getQuery(dataCollection).from(path);
-    }
-
     public Predicate processFreeFormSearch(DataCollection dataCollection, String freeFormRestriction) {
         if (!StringUtils.isEmpty(freeFormRestriction)) {
             throw new RuntimeException("Must implement BusinessObject.processFreeFormSearch");
         }
         return Expressions.TRUE;
+    }
+
+    public final SQLQuery<?> startQuery(DataCollection dataCollection) {
+        StringPath path = QueryUtils.getTablePath(getTable(dataCollection));
+        SQLQuery<?> sqlQuery = queryFactory.getQuery(dataCollection).from(path);
+
+        return sqlQuery;
     }
 
     public final Table getTable(DataCollection collection) {
@@ -64,4 +65,5 @@ public abstract class BusinessObject {
         return metadataProxy.getDataCollectionByType(MultiTenantContext.getTenant().getId(),
                 DataCollectionType.Segmentation);
     }
+
 }

@@ -2,19 +2,27 @@ package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Sort {
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+public class Sort implements GraphNode {
     @JsonProperty("lookups")
     private List<Lookup> lookups;
     @JsonProperty("descending")
@@ -73,5 +81,22 @@ public class Sort {
         this.lookups = new ArrayList<String>(Arrays.asList(columnNames)).stream() //
                 .map((columnName) -> new ColumnLookup(objectType, columnName)) //
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<? extends GraphNode> getChildren() {
+        return lookups.stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Collection<? extends GraphNode>> getChildMap() {
+        Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
+        map.put("lookups", lookups);
+        return map;
+    }
+
+    @Override
+    public void accept(Visitor visitor, VisitorContext ctx) {
+        visitor.visit(this, ctx);
     }
 }

@@ -9,26 +9,30 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Cardinality;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRelationship;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.ExistsRestriction;
+import com.latticeengines.domain.exposed.query.JoinSpecification;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.ObjectUsage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.ValueLookup;
+import com.latticeengines.query.evaluator.impl.lookup.LookupResolver;
+import com.latticeengines.query.evaluator.impl.lookup.LookupResolverFactory;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.object.BusinessObject;
 import com.latticeengines.query.util.QueryUtils;
@@ -37,13 +41,13 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLQuery;
 
 @Component("jdbcQueryProcessor")
 public class JdbcQueryProcessor extends QueryProcessor {
     private static final Log log = LogFactory.getLog(JdbcQueryProcessor.class);
-    private static final int MAX_PAGE_SIZE = 500;
 
     @Autowired
     private QueryFactory queryFactory;
@@ -59,7 +63,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
                     query.getObjectType()));
         }
 
-        SQLQuery<?> sqlQuery = businessObject.startQuery(dataCollection, query) //
+        SQLQuery<?> sqlQuery = startQuery(dataCollection, query) //
                 .where(processFreeFormSearch(dataCollection, query, businessObject)) //
                 .where(processRestriction(query.getRestriction(), query.getObjectType(), dataCollection)) //
                 .select(getSelect(query, dataCollection));
@@ -72,9 +76,84 @@ public class JdbcQueryProcessor extends QueryProcessor {
         return sqlQuery;
     }
 
+    private SQLQuery<?> startQuery(DataCollection dataCollection, Query query) {
+        List<JoinSpecification> joins = query.getNecessaryJoins();
+        Table rootTable = dataCollection.getTable(query.getObjectType());
+
+        joins = joins.stream() //
+                .filter(js -> js.getDestinationObjectUsage().equals(ObjectUsage.LOOKUP)) //
+                .collect(Collectors.toList());
+
+        // FROM TABLE
+        SQLQuery<?> sqlQuery = getBusinessObject(query.getObjectType()).startQuery(dataCollection);
+
+        // JOIN T1, T2, T3, etc...
+        List<TableRelationship> relationships = getRelationships(joins, rootTable, dataCollection);
+        for (TableRelationship relationship : relationships) {
+            if (!relationship.getSourceTable().getName().equals(rootTable.getName())) {
+                continue;
+            }
+            if (!relationship.getTargetCardinality().equals(Cardinality.ONE)) {
+                continue;
+            }
+
+            Table targetTable = dataCollection.getTable(relationship.getTargetTableName());
+            PathBuilder<Object> targetTableName = new PathBuilder<>(Object.class, targetTable.getName());
+
+            StringPath sourceColumn = QueryUtils.getColumnPath(rootTable, relationship.getSourceAttributes().get(0));
+            StringPath targetColumn = QueryUtils.getColumnPath(targetTable, relationship.getTargetAttributes().get(0));
+
+            sqlQuery = sqlQuery.leftJoin(targetTableName).on(sourceColumn.eq(targetColumn));
+        }
+        return sqlQuery;
+    }
+
+    private List<TableRelationship> getRelationships(List<JoinSpecification> joins, Table rootTable,
+            DataCollection dataCollection) {
+        List<TableRelationship> sourceRelationships = rootTable.getRelationships();
+        // relationships necessary to satisfy all joins
+        List<TableRelationship> relationships = new ArrayList<>();
+        for (JoinSpecification join : joins) {
+            Table destinationTable = dataCollection.getTable(join.getDestinationType());
+            if (destinationTable == null) {
+                throw new RuntimeException(String.format(
+                        "Could not find destination table of type %s in data collection",
+                        join.getDestinationObjectUsage()));
+            }
+
+            if (join.getDestinationObjectUsage().equals(ObjectUsage.LOOKUP)) {
+                TableRelationship relationship = sourceRelationships.stream()
+                        .filter(r -> destinationTable.getName().equals(r.getTargetTableName())) //
+                        .filter(r -> r.getSourceCardinality().equals(Cardinality.ONE)) //
+                        .filter(r -> r.getTargetCardinality().equals(Cardinality.ONE)) //
+                        .findFirst() //
+                        .orElse(null);
+                if (relationship == null) {
+                    throw new RuntimeException(String.format(
+                            "Cannot find 1-to-1 relationship to satisfy necessary join %s", join));
+                }
+                relationships.add(relationship);
+
+            } else if (join.getDestinationObjectUsage().equals(ObjectUsage.EXISTS)) {
+                TableRelationship relationship = sourceRelationships.stream()
+                        .filter(r -> destinationTable.getName().equals(r.getTargetTableName())) //
+                        .filter(r -> r.getSourceCardinality().equals(Cardinality.ONE)) //
+                        .filter(r -> r.getTargetCardinality().equals(Cardinality.MANY)) //
+                        .findFirst().orElse(null);
+                if (relationship == null) {
+                    throw new RuntimeException(String.format(
+                            "Cannot find 1-to-many relationship to satisfy necessary join %s", join));
+                }
+
+                relationships.add(relationship);
+            }
+        }
+        return relationships;
+    }
+
     private SQLQuery<?> addPaging(SQLQuery<?> sqlQuery, PageFilter pageFilter) {
         if (pageFilter != null) {
-            return sqlQuery.limit(Math.min(MAX_PAGE_SIZE, pageFilter.getNumRows())).offset(pageFilter.getRowOffset());
+            return sqlQuery.limit(pageFilter.getNumRows()).offset(pageFilter.getRowOffset());
         }
         return sqlQuery;
     }
@@ -84,7 +163,8 @@ public class JdbcQueryProcessor extends QueryProcessor {
         if (sort != null) {
             for (Lookup lookup : sort.getLookups()) {
                 if (lookup instanceof ColumnLookup) {
-                    ComparableExpression<String> resolved = resolveLookup(lookup, rootObjectType, dataCollection);
+                    ComparableExpression<String> resolved = resolveLookup(lookup, rootObjectType, dataCollection)
+                            .get(0);
                     if (sort.getDescending()) {
                         sqlQuery = sqlQuery.orderBy(resolved.desc());
                     } else {
@@ -107,53 +187,34 @@ public class JdbcQueryProcessor extends QueryProcessor {
 
     private Expression<?> getSelect(Query query, DataCollection dataCollection) {
         List<Lookup> lookups = query.getLookups();
-        if (lookups == null) {
-            Table table = dataCollection.getTable(query.getObjectType());
-            List<StringPath> columnPaths = table.getAttributes().stream() //
-                    .map((attribute) -> QueryUtils.getColumnPath(table, attribute)) //
-                    .collect(Collectors.toList());
-            return Expressions.list(columnPaths.toArray(new Expression<?>[columnPaths.size()]));
-        } else {
-            List<Expression<?>> expressions = new ArrayList<>();
-            for (Lookup lookup : lookups) {
-                try {
-                    expressions.add(resolveLookup(lookup, query.getObjectType(), dataCollection));
-                } catch (Exception e) {
-                    log.warn(String.format("Could not resolve lookup %s", lookup));
-                }
-            }
-            return Expressions.list(expressions.toArray(new Expression<?>[expressions.size()]));
+        if (lookups == null || lookups.size() == 0) {
+            return Expressions.constant(1);
         }
+        List<Expression<?>> expressions = new ArrayList<>();
+        for (Lookup lookup : lookups) {
+            try {
+                expressions.add(resolveLookup(lookup, query.getObjectType(), dataCollection).get(0));
+            } catch (Exception e) {
+                log.warn(String.format("Could not resolve lookup %s", lookup));
+            }
+        }
+        return Expressions.list(expressions.toArray(new Expression<?>[expressions.size()]));
     }
 
-    private ComparableExpression<String> resolveLookup(Lookup lookup, SchemaInterpretation rootObjectType,
+    private List<ComparableExpression<String>> resolveLookup(Lookup lookup, SchemaInterpretation rootObjectType,
+            DataCollection dataCollection, Lookup optionalLhsLookup) {
+        LookupResolverFactory factory = new LookupResolverFactory(new LookupResolverFactory.Builder() //
+                .lookup(lookup) //
+                .rootObjectType(rootObjectType) //
+                .dataCollection(dataCollection) //
+                .secondaryLookup(optionalLhsLookup));
+        LookupResolver resolver = factory.getLookupResolver();
+        return resolver.resolve();
+    }
+
+    private List<ComparableExpression<String>> resolveLookup(Lookup lookup, SchemaInterpretation rootObjectType,
             DataCollection dataCollection) {
-        if (lookup instanceof ColumnLookup) {
-            ColumnLookup columnLookup = (ColumnLookup) lookup;
-            if (columnLookup.getObjectType() == null) {
-                columnLookup.setObjectType(rootObjectType);
-            }
-            Table table = dataCollection.getTable(rootObjectType);
-            if (table == null) {
-                throw new RuntimeException(String.format("Could not find table of type %s in data collection %s",
-                        columnLookup.getObjectType(), dataCollection.getName()));
-            }
-
-            Attribute attribute = table.getAttributes().stream()
-                    .filter(a -> a.getName() != null && a.getName().equals(columnLookup.getColumnName())) //
-                    .findFirst().orElse(null);
-            if (attribute == null) {
-                throw new RuntimeException(String.format("Could not find attribute with name %s in table %s",
-                        columnLookup.getColumnName(), table.getName()));
-            }
-
-            return QueryUtils.getColumnPath(table, attribute);
-
-        } else if (lookup instanceof ValueLookup) {
-            return Expressions.asComparable(((ValueLookup) lookup).getValue().toString());
-        } else {
-            throw new RuntimeException(String.format("Unsupported lookup type %s", lookup.getClass().getName()));
-        }
+        return resolveLookup(lookup, rootObjectType, dataCollection, null);
     }
 
     private BusinessObject getBusinessObject(SchemaInterpretation objectType) {
@@ -183,36 +244,40 @@ public class JdbcQueryProcessor extends QueryProcessor {
             }
         } else if (restriction instanceof ConcreteRestriction) {
             ConcreteRestriction concreteRestriction = (ConcreteRestriction) restriction;
+
             Lookup lhs = concreteRestriction.getLhs();
             Lookup rhs = concreteRestriction.getRhs();
 
-            ComparableExpression<String> lhsPath = resolveLookup(lhs, rootObjectType, dataCollection);
+            ComparableExpression<String> lhsPath = resolveLookup(lhs, rootObjectType, dataCollection).get(0);
+            List<ComparableExpression<String>> rhsPaths = resolveLookup(rhs, rootObjectType, dataCollection, lhs);
 
             switch (concreteRestriction.getRelation()) {
             case EQUAL:
-                return lhsPath.eq(resolveLookup(rhs, rootObjectType, dataCollection));
+                return lhsPath.eq(rhsPaths.get(0));
             case GREATER_OR_EQUAL:
-                return lhsPath.goe(resolveLookup(rhs, rootObjectType, dataCollection));
+                return lhsPath.goe(rhsPaths.get(0));
             case GREATER_THAN:
-                return lhsPath.gt(resolveLookup(rhs, rootObjectType, dataCollection));
+                return lhsPath.gt(rhsPaths.get(0));
             case LESS_OR_EQUAL:
-                return lhsPath.loe(resolveLookup(rhs, rootObjectType, dataCollection));
+                return lhsPath.loe(rhsPaths.get(0));
             case LESS_THAN:
-                return lhsPath.lt(resolveLookup(rhs, rootObjectType, dataCollection));
+                return lhsPath.lt(rhsPaths.get(0));
             case IN_RANGE:
-                RangeLookup casted = (RangeLookup) rhs;
-                if (casted == null) {
-                    throw new RuntimeException(String.format("Expected RangeLookup in restriction %s", restriction));
-                }
-                return lhsPath.between(Expressions.constant(casted.getMin().toString()),
-                        Expressions.constant(casted.getMax().toString()));
+                return lhsPath.between(rhsPaths.get(0), rhsPaths.get(1));
             default:
                 throw new RuntimeException(String.format("Unsupported relation %s", concreteRestriction.getRelation()));
             }
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucketRestriction = (BucketRestriction) restriction;
-            ConcreteRestriction placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(),
-                    ComparisonType.EQUAL, new ValueLookup(bucketRestriction.getBucket().getMin()));
+            BucketRange range = bucketRestriction.getBucket();
+            ConcreteRestriction placeholder;
+            if (range.getMin() != null && range.getMax() != null && range.getMin().equals(range.getMax())) {
+                placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(), ComparisonType.EQUAL, //
+                        new ValueLookup(bucketRestriction.getBucket().getMin()));
+            } else {
+                placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(), ComparisonType.IN_RANGE, //
+                        new RangeLookup(bucketRestriction.getBucket().getMin(), bucketRestriction.getBucket().getMax()));
+            }
             return processRestriction(placeholder, rootObjectType, dataCollection);
         } else if (restriction instanceof ExistsRestriction) {
             ExistsRestriction existsRestriction = (ExistsRestriction) restriction;

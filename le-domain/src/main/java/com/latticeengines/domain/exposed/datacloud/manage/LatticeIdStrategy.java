@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Entity
 @Access(AccessType.FIELD)

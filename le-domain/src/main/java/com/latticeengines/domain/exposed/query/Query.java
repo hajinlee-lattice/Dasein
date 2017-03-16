@@ -2,23 +2,33 @@ package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Query {
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+public class Query implements GraphNode {
     @JsonProperty("object_type")
     private SchemaInterpretation objectType;
     @JsonProperty("lookups")
-    private List<Lookup> lookups;
+    private List<Lookup> lookups = new ArrayList<>();
     @JsonProperty("restriction")
     private Restriction restriction;
     @JsonProperty("sort")
@@ -62,6 +72,10 @@ public class Query {
         this.lookups = new ArrayList<String>(Arrays.asList(columnNames)).stream() //
                 .map((columnName) -> new ColumnLookup(objectType, columnName)) //
                 .collect(Collectors.toList());
+    }
+
+    public void addLookup(Lookup lookup) {
+        lookups.add(lookup);
     }
 
     public Sort getSort() {
@@ -110,4 +124,49 @@ public class Query {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+
+    @SuppressWarnings("unchecked")
+    public List<JoinSpecification> getNecessaryJoins() {
+        DepthFirstSearch search = new DepthFirstSearch();
+        List<JoinSpecification> joins = new ArrayList<>();
+
+        search.run(this, (object, ctx) -> {
+            GraphNode node = (GraphNode) object;
+            if (node instanceof ColumnLookup) {
+                ColumnLookup lookup = (ColumnLookup) node;
+                if (lookup.getObjectType() != null && !lookup.getObjectType().equals(getObjectType())) {
+                    joins.add(new JoinSpecification(getObjectType(), lookup.getObjectType(), ObjectUsage.LOOKUP));
+                }
+            } else if (node instanceof ExistsRestriction) {
+                ExistsRestriction exists = (ExistsRestriction) node;
+                joins.add(new JoinSpecification(getObjectType(), exists.getObjectType(), ObjectUsage.EXISTS));
+            }
+        });
+
+        return joins;
+    }
+
+    @Override
+    public Collection<? extends GraphNode> getChildren() {
+        List<GraphNode> children = lookups.stream().collect(Collectors.toList());
+        children.add(restriction);
+        children.add(sort);
+        return children;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Map<String, Collection<? extends GraphNode>> getChildMap() {
+        Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
+        map.put("lookups", lookups);
+        map.put("restriction", Collections.singletonList(restriction));
+        map.put("sort", Collections.singletonList(sort));
+        return map;
+    }
+
+    @Override
+    public void accept(Visitor visitor, VisitorContext ctx) {
+        visitor.visit(this, ctx);
+    }
+
 }

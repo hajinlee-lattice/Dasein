@@ -59,7 +59,13 @@ public class DepthFirstSearch extends AbstractTraversalAlgorithm {
 
         stack.push(ctx);
         currentPath.push(node);
+        if (children == null) {
+            return;
+        }
         for (GraphNode child : children) {
+            if (child == null) {
+                continue;
+            }
             if (!currentPath.contains(child) && !seenNodes.contains(child)) {
                 runSearch(child, visitor, reverse);
             }

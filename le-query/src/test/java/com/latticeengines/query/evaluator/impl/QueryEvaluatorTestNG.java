@@ -97,24 +97,6 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testSelectAllColumns() {
-        DataCollection collection = getDataCollection();
-        LogicalRestriction restriction = new LogicalRestriction();
-        restriction.setOperator(LogicalOperator.AND);
-        restriction.addRestriction(new ConcreteRestriction(false, new ColumnLookup(SchemaInterpretation.Account, "id"),
-                ComparisonType.EQUAL, new ValueLookup("59129793")));
-        Query query = new Query();
-        query.setObjectType(SchemaInterpretation.Account);
-        query.setRestriction(restriction);
-        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query).getData();
-        assertEquals(results.size(), 5);
-        int expectedColumnCount = getDataCollection().getTables().get(0).getAttributes().size();
-        for (Map<String, Object> row : results) {
-            assertEquals(row.size(), expectedColumnCount);
-        }
-    }
-
-    @Test(groups = "functional")
     public void testSelectSomeColumns() {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
@@ -213,21 +195,56 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         assertEquals(count, 5);
     }
 
+    @Test(groups = "functional")
+    public void testOneToOneRelationshipJoin() {
+        DataCollection collection = getDataCollection();
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.addLookup(new ColumnLookup(SchemaInterpretation.BucketedAccountMaster, "number_of_family_members"));
+        query.addLookup(new ColumnLookup(SchemaInterpretation.Account, "companyname"));
+        query.setPageFilter(new PageFilter(0, 100));
+        List<Map<String, Object>> results = queryEvaluator.getResults(collection, query).getData();
+        for (Map<String, Object> result : results) {
+            assertEquals(result.size(), 2);
+        }
+    }
+
+    @Test(groups = "functional", expectedExceptions = RuntimeException.class)
+    public void testUnableToFindObjectForJoin() {
+        DataCollection collection = getDataCollection();
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.addLookup(new ColumnLookup(SchemaInterpretation.Category, "foo"));
+        queryEvaluator.evaluate(collection, query);
+    }
+
     private DataCollection getDataCollection() {
         DataCollection collection = new DataCollection();
-        Table parent = getTable("querytest_table", SchemaInterpretation.Account);
-        Table child = getTable("querytest_table_dup", SchemaInterpretation.Contact);
+        Table account = getTable("querytest_table", SchemaInterpretation.Account);
+        Table accountMaster = getTable("querytest_table_dup", SchemaInterpretation.BucketedAccountMaster);
+        Table contact = getTable("querytest_table_dup", SchemaInterpretation.Contact);
 
         TableRelationship relationship = new TableRelationship();
-        relationship.setSourceTable(parent);
+        relationship.setSourceTable(account);
         relationship.setTargetTableName("querytest_table_dup");
         relationship.setSourceCardinality(Cardinality.ONE);
         relationship.setTargetCardinality(Cardinality.MANY);
-        relationship.setTargetAttributes(Collections.singletonList("id"));
         relationship.setSourceAttributes(Collections.singletonList("id"));
-        parent.addRelationship(relationship);
-        collection.getTables().add(parent);
-        collection.getTables().add(child);
+        relationship.setTargetAttributes(Collections.singletonList("id"));
+        account.addRelationship(relationship);
+
+        relationship = new TableRelationship();
+        relationship.setSourceTable(account);
+        relationship.setTargetTableName("querytest_table_dup");
+        relationship.setSourceCardinality(Cardinality.ONE);
+        relationship.setTargetCardinality(Cardinality.ONE);
+        relationship.setSourceAttributes(Collections.singletonList("id"));
+        relationship.setTargetAttributes(Collections.singletonList("id"));
+        account.addRelationship(relationship);
+
+        collection.getTables().add(account);
+        collection.getTables().add(accountMaster);
+        collection.getTables().add(contact);
         return collection;
     }
 
@@ -253,9 +270,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Attribute familyMembers = new Attribute();
         familyMembers.setName("number_of_family_members");
         table.addAttribute(familyMembers);
-        Attribute alexaViews = new Attribute();
-        alexaViews.setName("alexaviewsperuser");
-        table.addAttribute(alexaViews);
+        Attribute alexaViewsPerUser = new Attribute();
+        alexaViewsPerUser.setName("alexaviewsperuser");
+        table.addAttribute(alexaViewsPerUser);
         JdbcStorage storage = new JdbcStorage();
         storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
         storage.setTableNameInStorage(name);
