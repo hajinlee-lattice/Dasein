@@ -183,6 +183,39 @@ angular.module('common.datacloud.explorer', [
         });
     }
 
+    vm.init = function() {
+        vm.closeHighlighterButtons = function(index){
+            var index = index || '';
+            for(var i in vm.openHighlighter) {
+                if(i !== index && vm.openHighlighter[i].open === true) {
+                    vm.openHighlighter[i].open = false;
+                }
+            }
+        }
+
+        if (vm.lookupMode && vm.LookupResponse.errorCode) {
+            $state.go('home.datacloud.lookup.form');
+        }
+
+        getEnrichmentCategories();
+        getEnrichmentData();
+
+        vm.statusMessageBox = angular.element('.status-alert');
+
+        if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
+            //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
+            vm.no_lookup_results_message = true;
+        }
+
+        if(vm.section === 'analysis') {
+            getMetadataSegements().then(function(result){
+                vm.metadataSegments = result.data;
+                console.log('getMetadataSegements:\t ', vm.getMetadataSegements);
+            });
+        }
+
+    }
+
     var stopNumbersInterval = function(){
         if (numbersInterval) {
             $interval.cancel(numbersInterval);
@@ -337,7 +370,7 @@ angular.module('common.datacloud.explorer', [
 
             getTopAttributes();
             getHighlightMetadata();
-            console.log('vm.highlightMetadata:\t ', vm.highlightMetadata); //ben
+            //console.log('vm.highlightMetadata:\t ', vm.highlightMetadata); //ben
         }
     }
             
@@ -588,6 +621,7 @@ angular.module('common.datacloud.explorer', [
 
         setFlags(opts, flags).then(function(){
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+            vm.closeHighlighterButtons();
 
             enrichment.HighlightState = {type: type, label: label, enabled: !flags.hidden, highlighted: flags.highlighted};
             enrichment.HighlightHidden = flags.hidden;
@@ -636,6 +670,7 @@ angular.module('common.datacloud.explorer', [
 
         setFlagsByCategory(opts, flags).then(function(){
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+            vm.closeHighlighterButtons();
             var enrichments = vm.filter(vm.enrichments, 'Category', category);
 
             if (subcategory) {
@@ -906,7 +941,7 @@ angular.module('common.datacloud.explorer', [
 
             if (!enrichment.WasDirty) {
                 enrichment.WasDirty = true;
-                var notselected = vm.filter(vm.enrichments, 'IsSelected', false).length;
+                var notselected = vm.filter(vm.enrichments, 'IsSelected', false);
                 vm.disabled_count = vm.filter(notselected, 'IsDirty', true).length;
                 vm.label.disabled_alert = '<p><strong>You have disabled ' + vm.disabled_count + ' attribute' + (vm.disabled_count > 1 ? 's' : '') + '</strong>. If you are using any of these attributes for real-time scoring, these attributes will no longer be updated in your system.</p>';
                 vm.label.disabled_alert += '<p>No changes will be saved until you press the \'Save\' button.</p>';
@@ -1016,7 +1051,7 @@ angular.module('common.datacloud.explorer', [
                 }
             }
         }
-        if(categories.length <= 1) {
+        if(categories.length <= 1 && !vm.lookupMode) {
             vm.setCategory(categories[0]);
         }
     }
@@ -1052,6 +1087,16 @@ angular.module('common.datacloud.explorer', [
         var deferred = $q.defer();
 
         DataCloudStore.getCube().then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    }
+
+    var getMetadataSegements = function() {
+        var deferred = $q.defer();
+
+        DataCloudStore.getMetadataSegements().then(function(result) {
             deferred.resolve(result);
         });
 

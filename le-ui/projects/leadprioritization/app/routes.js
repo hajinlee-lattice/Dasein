@@ -656,9 +656,9 @@ angular
             },
             views: {
                 "navigation@": {
-                    // -- ben::bookmark 
-                    // templateUrl: 'app/navigation/sidebar/MarketoSettingsView.html'
-                    controller: function($scope, $state, FeatureFlagService) {
+                    controller: function($scope, $state, FeatureFlagService, ApiHost, DataCloudStore) {
+                        DataCloudStore.setHost(ApiHost);
+
                         FeatureFlagService.GetAllFlags().then(function() {
 
                             var flags = FeatureFlagService.Flags();

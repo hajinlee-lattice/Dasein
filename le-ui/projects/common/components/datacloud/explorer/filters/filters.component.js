@@ -12,8 +12,8 @@ angular
             
             angular.extend(vm, {
                 orders: {
-                    attributeLookupMode: [ '-Value', 'DisplayName' ],
-                    attribute: 'DisplayName',
+                    attributeLookupMode: [ '-Value', 'DisplayName'],
+                    attribute: ['-HighlightHighlighted', 'DisplayName'],
                     subcategory: 'toString()',
                     category: 'toString()'
                 },
@@ -184,25 +184,59 @@ angular
                 var sortPrefix = vm.sortPrefix.replace('+','');
 
                 if (!vm.category) {
-                    return sortPrefix + vm.orders.category;
+                    return handleFilterOrder(vm.orders.category);
                 } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
-                    return sortPrefix + vm.orders.subcategory;
+                    return handleFilterOrder(vm.orders.subcategory);
                 } else {
                     if (vm.lookupMode && vm.category == 'Technology Profile' || vm.category == 'Website Profile') {
-                        var sortArr = vm.orders.attributeLookupMode,
-                            retArr = [];
-
-                        sortArr.forEach(function(item, index) {
-                            retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
-                        });
-
-                        return retArr;
+                        return handleFilterOrder(vm.orders.attributeLookupMode);
                     } else {
-                        return sortPrefix + vm.orders.attribute;
+                        return handleFilterOrder(vm.orders.attribute);
                     }
                 }
             }
+            
+            var handleFilterOrder = function(order, sortPrefix) {
+                var sortPrefix = sortPrefix || vm.sortPrefix.replace('+','');
+                if(typeof order === 'object') {
+                    var sortArr = order,
+                        retArr = [];
 
+                    sortArr.forEach(function(item, index) {
+                        retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
+                    });
+
+                    return retArr;
+                }
+                return sortPrefix + order;
+            }
+
+            var textSearch = function(haystack, needle, case_insensitive) {
+                var case_insensitive = (case_insensitive === false ? false : true);
+
+                if (case_insensitive) {
+                    var haystack = haystack.toLowerCase(),
+                    needle = needle.toLowerCase();
+                }
+
+                // .indexOf is faster and more supported than .includes
+                return (haystack.indexOf(needle) >= 0);
+            }
+
+            vm.searchFields = function(enrichment){
+                if (vm.query) {
+                    if (textSearch(enrichment.DisplayName, vm.query)) {
+                        return true;
+                    } else if (textSearch(enrichment.Description, vm.query)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            
             vm.enrichmentsFilter = function() {
                 var filter = {};
 

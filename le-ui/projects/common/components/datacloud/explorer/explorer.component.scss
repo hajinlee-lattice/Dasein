@@ -683,7 +683,9 @@
         &:hover .attributes-more {
             text-decoration: underline;
         }
-
+        input.segment-select {
+            vertical-align: middle;
+        }
         .controls {
             position: absolute;
             left: 0;

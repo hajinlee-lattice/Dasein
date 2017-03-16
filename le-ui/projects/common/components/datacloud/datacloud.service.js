@@ -11,6 +11,7 @@ angular.module('common.datacloud')
         this.premiumSelectMaximum = null;
         this.topAttributes = null;
         this.cube = this.cube || null;
+        this.metadataSegments = this.metadataSegments || null;
         this.metadata = this.metadata || {
             current: 1,
             toggle: {
@@ -235,6 +236,23 @@ angular.module('common.datacloud')
     this.setCube = function(items) {
         this.cube = items;
     }
+
+    this.getMetadataSegements = function() {
+        var deferred = $q.defer();
+        if (this.metadataSegments) {
+            deferred.resolve(this.metadataSegments);
+        } else {
+            DataCloudService.getMetadataSegements().then(function(response){
+                DataCloudStore.setMetadataSegements(response);
+                deferred.resolve(response);
+            });
+        }
+        return deferred.promise;
+    }
+
+    this.setMetadataSegements = function(items) {
+        this.metadataSegments = items;
+    }
 })
 .service('DataCloudService', function($q, $http, $state) {
     this.host = '/pls'; //default
@@ -438,6 +456,7 @@ angular.module('common.datacloud')
         });
         return deferred.promise;
     }
+
     this.setFlagsBySubcategory = function(opts, flags){
         var deferred = $q.defer(),
             opts = opts || {},
@@ -452,6 +471,18 @@ angular.module('common.datacloud')
             data: flags
         }).then(function(response){
             deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.getMetadataSegements = function(opts){
+        var deferred = $q.defer(),
+            opts = opts || {};
+        $http({
+            method: 'get',
+            url: this.host + '/metadatasegments/all'
+        }).then(function(response){
+            deferred.resolve(response);
         });
         return deferred.promise;
     }
