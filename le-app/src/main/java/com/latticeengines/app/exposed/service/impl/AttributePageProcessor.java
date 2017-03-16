@@ -149,7 +149,7 @@ public class AttributePageProcessor {
             return;
         }
         Map<String, Integer> orderingMap = new HashMap<>();
-        orderingMap.put("LE_INDUSTRY", 100);
+        orderingMap.put("LDC_PrimaryIndustry", 100);
         orderingMap.put("LE_REVENUE_RANGE", 90);
         orderingMap.put("LE_EMPLOYEE_RANGE", 80);
         orderingMap.put("LDC_Domain", 70);
