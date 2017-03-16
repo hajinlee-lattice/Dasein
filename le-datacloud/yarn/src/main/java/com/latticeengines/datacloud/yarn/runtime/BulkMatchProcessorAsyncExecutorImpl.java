@@ -6,21 +6,27 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Future;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.service.RateLimitingService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
+import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+
+import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
     private static final int NUM_10K = 10_000;
     private static final Log log = LogFactory.getLog(BulkMatchProcessorAsyncExecutorImpl.class);
+
+    @Autowired
+    private RateLimitingService rateLimitingService;
 
     @Override
     public void execute(ProcessorContext processorContext) {
@@ -33,6 +39,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         List<InternalOutputRecord> internalCompletedRecords = new ArrayList<>();
         MatchContext combinedContext = null;
         int block = 0;
+        checkIfProceed(processorContext);
         while (processorContext.getDivider().hasNextGroup()) {
             MatchInput input = constructMatchInputFromData(processorContext);
             // cache an input to generate output metric
@@ -178,6 +185,65 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             internalCompletedRecords.addAll(currentCompletedRecords);
             internalRecords.removeAll(currentCompletedRecords);
         }
+    }
+
+    private void checkIfProceed(ProcessorContext processorContext) {
+        if (!processorContext.getDivider().hasNextGroup() || !processorContext.isUseRemoteDnB()) {
+            return;
+        }
+        long timeout = (long) (processorContext.getTimeOut() * 0.75);
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < timeout) {
+            if (isQuotaAvaiable()) {
+                return;
+            }
+            try {
+                log.info(String.format(
+                        "DnB bulk match quota is not available. Wait for 4 mins. Have waited for %d mins up to now. Plan to wait for %d mins for total.",
+                        (System.currentTimeMillis() - startTime) / 60000, timeout / 60000));
+                Thread.sleep(240_000L);
+            } catch (Exception ex) {
+                log.warn("Failed to sleep!");
+            }
+        }
+        throw new RuntimeException("DnB bulk match is congested. Fail the bulk match job!");
+    }
+
+    private boolean isQuotaAvaiable() {
+        for (int i = 0; i < 4; i++) {
+            RateLimitedAcquisition rlAcq = rateLimitingService.acquireDnBBulkRequest(1, true);
+            if (!rlAcq.isAllowed()) {
+                logRateLimitingRejection(rlAcq);
+                return false;
+            }
+            if (i == 3) {
+                return true;
+            }
+            try {
+                log.info(String.format("Wait for 15 seconds to ensure DnB bulk match quota is available. Try times: %d",
+                        i + 1));
+                Thread.sleep(15_000L);
+            } catch (Exception ex) {
+                log.warn("Failed to sleep!");
+            }
+        }
+        return true;
+    }
+
+    protected void logRateLimitingRejection(RateLimitedAcquisition rlAcq) {
+        StringBuilder sb1 = new StringBuilder();
+        if (rlAcq.getRejectionReasons() != null) {
+            for (String rejectionReason : rlAcq.getRejectionReasons()) {
+                sb1.append(rejectionReason + " ");
+            }
+        }
+        StringBuilder sb2 = new StringBuilder();
+        if (rlAcq.getExceedingQuotas() != null) {
+            for (String exceedingQuota : rlAcq.getExceedingQuotas()) {
+                sb2.append(exceedingQuota + " ");
+            }
+        }
+        log.info("DnB bulk match is congested. Rejection reasons: %s   Exceeding quotas: %s");
     }
 
 }

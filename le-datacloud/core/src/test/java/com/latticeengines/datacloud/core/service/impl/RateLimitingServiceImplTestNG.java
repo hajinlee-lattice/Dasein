@@ -17,7 +17,10 @@ public class RateLimitingServiceImplTestNG extends DataCloudCoreFunctionalTestNG
 
     @Test(groups = "functional")
     public void testSimpleAcquisition() {
-        RateLimitedAcquisition acquisition = rateLimitingService.acquireDnBBulkRequest(100L);
+        RateLimitedAcquisition acquisition = rateLimitingService.acquireDnBBulkRequest(100L, true);
+        Assert.assertNotNull(acquisition);
+
+        acquisition = rateLimitingService.acquireDnBBulkRequest(100L, false);
         Assert.assertNotNull(acquisition);
 
         acquisition = rateLimitingService.acquireDnBBulkStatus();

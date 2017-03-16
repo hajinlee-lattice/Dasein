@@ -83,7 +83,8 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
     @Override
     public DnBBatchMatchContext sendRequest(DnBBatchMatchContext batchContext) {
         for (int i = 0; i < retries; i++) {
-            RateLimitedAcquisition rlAcq = rateLimitingService.acquireDnBBulkRequest(batchContext.getContexts().size());
+            RateLimitedAcquisition rlAcq = rateLimitingService.acquireDnBBulkRequest(batchContext.getContexts().size(),
+                    false);
             if (!rlAcq.isAllowed()) {
                 logRateLimitingRejection(rlAcq, DnBAPIType.BATCH_DISPATCH);
                 batchContext.setDnbCode(DnBReturnCode.RATE_LIMITING);

@@ -54,6 +54,11 @@ public class RateLimitedResourceManager {
 
     public static RateLimitedAcquisition acquire(String resourceName, Map<String, Long> quantities, long duration,
             TimeUnit timeUnit) {
+        return acquire(resourceName, quantities, duration, timeUnit, false);
+    }
+
+    public static RateLimitedAcquisition acquire(String resourceName, Map<String, Long> quantities, long duration,
+            TimeUnit timeUnit, boolean withoutAcquireQuota) {
         localMode.set(false);
 
         if (!definitions.containsKey(resourceName)) {
@@ -73,6 +78,10 @@ public class RateLimitedResourceManager {
 
         RateLimitedAcquisition answerByPeek = isPossible(resourceName, quantities, duration, timeUnit);
         if (!answerByPeek.isAllowed()) {
+            return answerByPeek;
+        }
+
+        if (withoutAcquireQuota) {
             return answerByPeek;
         }
 

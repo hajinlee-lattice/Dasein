@@ -44,7 +44,7 @@ public class RateLimitingServiceImpl implements RateLimitingService {
     private int bulkStatusPerHour;
 
     @Override
-    public RateLimitedAcquisition acquireDnBBulkRequest(long numRows) {
+    public RateLimitedAcquisition acquireDnBBulkRequest(long numRows, boolean withoutAcquireQuota) {
         if (!dnbBulkRequestRegulatorRegistered) {
             registerDnBBulkRequestRegulator();
         }
@@ -52,7 +52,7 @@ public class RateLimitingServiceImpl implements RateLimitingService {
         inquiringQuantities.put(COUNTER_REQUEST, 1L);
         inquiringQuantities.put(COUNTER_ROWS, numRows);
         RateLimitedAcquisition acquisition = RateLimitedResourceManager.acquire(DNB_BULK_REQUEST_REGULATOR,
-                inquiringQuantities, 1, TimeUnit.SECONDS);
+                inquiringQuantities, 1, TimeUnit.SECONDS, withoutAcquireQuota);
         logRejectedAcquisition(acquisition, DNB_BULK_REQUEST_REGULATOR);
         return acquisition;
     }
