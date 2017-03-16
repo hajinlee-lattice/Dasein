@@ -2,9 +2,11 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
@@ -178,8 +180,8 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
 
     private void prepareAMDataSetSeed() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of("Domain", String.class));
-        columns.add(Pair.of("DUNS", String.class));
+        columns.add(Pair.of("DOMAIN", String.class));
+        columns.add(Pair.of("Duns", String.class));
         Object[][] data = new Object[][] { { "dom1.com", "111111111" }, { "dom2.com", "222222222" },
                 { "dom3.com", "333333333" }, { "dom44.com", "888888888" } };
         uploadBaseSourceData(baseSourceAccountMasterSeed.getSourceName(), baseSourceVersion, columns, data);
@@ -196,12 +198,20 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
 
     private String getMiniDnbAMDomainDunsConfig() throws JsonProcessingException {
         MiniAMDomainDunsConfig conf = new MiniAMDomainDunsConfig();
+        // For storing DOMAINS of all seeds as {seed, domain_name}
+        Map<String, String> domain = new HashMap<String, String>();
+        domain.put("DnbSeed", "Domain");
+        domain.put("AccountMasterSeed", "DOMAIN");
+        // For storing DUNS of all seeds as {seed, duns_name}
+        Map<String, String> duns = new HashMap<String, String>();
+        duns.put("DnbSeed", "DUNS");
+        duns.put("AccountMasterSeed", "Duns");
         conf.setDnbInputDataSetDomain("Domain");
         conf.setDnbInputDataSetDuns("DUNS");
         conf.setDnbInputDataSetGU("GU");
         conf.setDnbInputDataSetDU("DU");
-        conf.setAmInputDataSetDomain("Domain");
-        conf.setAmInputDataSetDuns("DUNS");
+        conf.setSeedInputDataSetDomain(domain);
+        conf.setSeedInputDataSetDuns(duns);
         conf.setMiniInputDataSetDomain("Type");
         conf.setMiniInputDataSetDuns("Value");
         conf.setOutputDataSetType("Type");
