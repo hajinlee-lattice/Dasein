@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -55,6 +56,9 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
     @Autowired
     private MatchCommandService matchCommandService;
+
+    @Autowired
+    private ZkConfigurationService zkConfigurationService;
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
@@ -101,8 +105,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         applicationIds = new ArrayList<>();
         putObjectInContext(BulkMatchContextKey.APPLICATION_IDS, applicationIds);
         for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
-            ApplicationId appId = ConverterUtils
-                    .toApplicationId(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+            ApplicationId appId = ConverterUtils.toApplicationId(matchInternalProxy.submitYarnJob(jobConfiguration)
+                    .getApplicationIds().get(0));
             blockUuidMap.put(appId.toString(), jobConfiguration.getBlockOperationUid());
             applicationIds.add(appId);
 
@@ -151,7 +155,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             }
 
             String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
-            
+
             if (!StringUtils.isEmpty(configuration.getResultLocation())) {
                 avroDir = configuration.getResultLocation();
             }
@@ -270,12 +274,12 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         String errorMsg = "Application [" + appId + "] ended abnormally with the final status " + status;
 
         String blockUid = blockUuidMap.get(appId.toString());
-        if (matchCommandService.blockIsRetriable(blockUid)) {
+        if (doRetry(blockUid)) {
             log.info(errorMsg + ". Retry the block.");
             for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
                 if (jobConfiguration.getBlockOperationUid().equals(blockUid)) {
-                    ApplicationId newAppId = ConverterUtils
-                            .toApplicationId(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+                    ApplicationId newAppId = ConverterUtils.toApplicationId(matchInternalProxy
+                            .submitYarnJob(jobConfiguration).getApplicationIds().get(0));
                     blockUuidMap.remove(appId.toString());
                     blockUuidMap.put(newAppId.toString(), jobConfiguration.getBlockOperationUid());
                     applicationIds.add(newAppId);
@@ -289,6 +293,22 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     : MatchStatus.ABORTED;
             failTheWorkflowByFailedBlock(terminalStatus, report);
         }
+    }
+
+    private Boolean doRetry(String blockUid) {
+        boolean useRemoteDnB = false;
+        DataCloudJobConfiguration jobConfiguration = jobConfigurations.get(0);
+        if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
+            useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
+        } else {
+            useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(jobConfiguration.getCustomerSpace());
+        }
+        useRemoteDnB = useRemoteDnB
+                && MatchUtils.isValidForAccountMasterBasedMatch(jobConfiguration.getMatchInput().getDataCloudVersion());
+        if (useRemoteDnB) {
+            return false;
+        }
+        return matchCommandService.blockIsRetriable(blockUid);
     }
 
     private void failTheWorkflowByFailedBlock(MatchStatus terminalStatus, ApplicationReport failedReport) {
@@ -371,7 +391,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             String blockResultAvro = hdfsPathBuilder.constructMatchBlockAvro(rootOperationUid, blockOperationUid)
                     .toString();
             String matchAvro = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
-            
+
             if (!StringUtils.isEmpty(configuration.getResultLocation())) {
                 matchAvro = configuration.getResultLocation();
             }
