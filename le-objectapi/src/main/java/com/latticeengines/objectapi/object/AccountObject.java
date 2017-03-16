@@ -20,7 +20,8 @@ public class AccountObject extends BusinessObject {
 
     @Override
     public SchemaInterpretation getObjectType() {
-        return SchemaInterpretation.Account;
+        // TODO TEMPORARY FOR M10
+        return SchemaInterpretation.BucketedAccountMaster;
     }
 
     @Override

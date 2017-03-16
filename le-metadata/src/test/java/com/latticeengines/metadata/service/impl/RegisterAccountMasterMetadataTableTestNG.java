@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage.DatabaseName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
@@ -27,8 +28,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
 
     @Test(groups = "registertable")
     public void registerMetadataTable() {
-        File file = new File(
-                System.getenv("WSHOME") + "/le-dev/testartifacts/AccountMaster/AccountMasterBucketed.avsc");
+        File file = new File(System.getenv("WSHOME") + "/le-dev/testartifacts/AccountMaster/AccountMasterBucketed.avsc");
         Configuration config = new Configuration();
         config.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
         Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(config, file.getPath(), null, null);
@@ -36,7 +36,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
         storage.setDatabaseName(DatabaseName.REDSHIFT);
         storage.setTableNameInStorage("redshift_bucketedaccountmaster");
         bucketedTable.setStorageMechanism(storage);
-
+        bucketedTable.setInterpretation(SchemaInterpretation.BucketedAccountMaster.toString());
         log.info("Registering AccountMaster Bucketed Metadata Table");
         mdService.createTable(CustomerSpace.parse(DataCloudConstants.SERVICE_TENANT), bucketedTable);
     }

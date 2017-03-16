@@ -41,7 +41,7 @@ public class Bucket {
     public void setBucketLabel(String bucketLabel) {
         this.bucketLabel = bucketLabel;
         // TODO TEMPORARY FOR M10
-        this.range = new BucketRange(bucketLabel, bucketLabel);
+        this.range = BucketRange.value(bucketLabel);
     }
 
     public Long getCount() {

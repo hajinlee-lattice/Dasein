@@ -185,7 +185,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
         restriction.setOperator(LogicalOperator.AND);
-        BucketRange bucket = new BucketRange(1);
+        BucketRange bucket = BucketRange.value(1);
         restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
                 "number_of_family_members"), bucket));
         Query query = new Query();

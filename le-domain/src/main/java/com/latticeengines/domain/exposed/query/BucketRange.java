@@ -7,8 +7,13 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel("Represents a range of values, or a single value, either categorical or numerical.")
+@ApiModel("Represents a range of values, or a single value, either categorical or numerical.  "
+        + "All ranges are inclusive, like SQL between statements.")
 public class BucketRange {
+
+    @ApiModelProperty("Whether this range only includes null values.  Otherwise nulls aren't allowed in a BucketRange.")
+    @JsonProperty("is_null_only")
+    private boolean isNullOnly;
 
     @ApiModelProperty("Minimum value of the range.  If this is a single value, min and max are set to that value.  "
             + "Null is negative infinity.")
@@ -20,13 +25,24 @@ public class BucketRange {
     @JsonProperty("max")
     private Object max;
 
-    public BucketRange(Object min, Object max) {
-        this.min = min;
-        this.max = max;
+    public static BucketRange minAndMax(Object min, Object max) {
+        BucketRange range = new BucketRange();
+        range.setMin(min);
+        range.setMax(max);
+        return range;
     }
 
-    public BucketRange(Object val) {
-        this.min = this.max = val;
+    public static BucketRange value(Object val) {
+        BucketRange range = new BucketRange();
+        range.setMin(val);
+        range.setMax(val);
+        return range;
+    }
+
+    public static BucketRange nullBucket() {
+        BucketRange range = new BucketRange();
+        range.setNullOnly(true);
+        return range;
     }
 
     public BucketRange() {
@@ -46,5 +62,13 @@ public class BucketRange {
 
     public void setMax(Object max) {
         this.max = max;
+    }
+
+    public boolean isNullOnly() {
+        return isNullOnly;
+    }
+
+    public void setNullOnly(boolean nullOnly) {
+        isNullOnly = nullOnly;
     }
 }
