@@ -3,7 +3,7 @@ angular.module('lp.models.ratings', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'
 ])
-.controller('ModelRatingsController', function ($rootScope, $state, $stateParams, $timeout, 
+.controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
     ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, HistoricalABCDBuckets) {
 
     var vm = this;
@@ -25,7 +25,6 @@ angular.module('lp.models.ratings', [
     });
 
     vm.init = function() {
-
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
         
@@ -40,7 +39,6 @@ angular.module('lp.models.ratings', [
     }
 
     function renderChart(){
-
         var verticalAxis = document.getElementById("verticalAxis");
 
         // Get tallest bar in set
@@ -75,7 +73,6 @@ angular.module('lp.models.ratings', [
     }
 
     function refreshChartData(){
-          
         vm.buckets = vm.workingBuckets;
 
         if (vm.buckets.length === 6) {
@@ -89,7 +86,6 @@ angular.module('lp.models.ratings', [
         } else if (vm.buckets.length === 1) {
             vm.canAddBucket = false;
         };
-
 
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.buckets.length; i < len; i++) { 
@@ -125,9 +121,7 @@ angular.module('lp.models.ratings', [
     }
 
     vm.addBucket = function(ev){
-        
         if (vm.workingBuckets.length < 6 && vm.canAddBucket) {
-            
             vm.containerBox = vm.slidersContainer.getBoundingClientRect();
             vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
 
@@ -147,7 +141,6 @@ angular.module('lp.models.ratings', [
             vm.canAddBucket = true;
 
             refreshChartData();
-
         } else {
             vm.canAddBucket = false;
         }
@@ -155,7 +148,6 @@ angular.module('lp.models.ratings', [
     }
 
     vm.eleMouseDown = function(ev, bucket, index) {
-        
         ev.preventDefault();
         ev.stopPropagation();
 
@@ -168,57 +160,57 @@ angular.module('lp.models.ratings', [
         
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);
-
     }
-    function eleMouseMove(ev) {
 
+    function eleMouseMove(ev) {
         ev.preventDefault();
         ev.stopPropagation();
 
         vm.canAddBucket = false;
         vm.firstBucket = vm.workingBuckets[Object.keys(vm.workingBuckets)[0]];
-        var oldPos = vm.relativeSliderChartPosition;
         vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
-        
 
-
-        if(vm.index === 0){
+        if (vm.index === 0){
             vm.sliderBoundaryLeft = 98;
             vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 1;  
         } else {
             vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 1;
             vm.sliderBoundaryLeft = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index-1]].right_bound_score - 1;
-        };
-
+        }
 
         var right = 100 - Math.round(vm.relativeSliderChartPosition * 100);
+        var leftCheck = right <= vm.sliderBoundaryLeft;
+        var rightCheck = right >= vm.sliderBoundaryRight;
 
-
-        if(vm.bucket.right_bound_score <= vm.sliderBoundaryLeft - 1 && vm.bucket.right_bound_score >= vm.sliderBoundaryRight + 1){
+        if (leftCheck && rightCheck) {
+            this.right = right;
             vm.slider.style.right = right + '%';
-            vm.bucket.right_bound_score = right;
-            this.old = right;
         } else {
-            console.log("false", this.old, right, vm.old);
-            vm.slider.style.right = this.old + '%';
-            vm.bucket.right_bound_score = this.old;
-        };
-    
+            vm.slider.style.right = (leftCheck ? vm.sliderBoundaryRight : vm.sliderBoundaryLeft) + '%';
+        }
 
-
-        if (vm.workingBuckets.length > 2 && ev.clientY > vm.containerBox.bottom + 10 || ev.clientX < vm.containerBox.left + 15 || ev.clientX > vm.containerBox.right - 45) {
+        if (vm.workingBuckets.length > 2 && (ev.clientY > vm.containerBox.bottom + 10 || ev.clientX < vm.containerBox.left + 15 || ev.clientX > vm.containerBox.right - 45)) {
             vm.showRemoveBucketText = true;
             vm.slider.style.opacity = .25;
+
+            if (vm.showRemoveBucketText) {
+                $scope.$apply();
+            }
         } else {
+            vm.showRemoveBucketText = false;
             vm.slider.style.opacity = 1;
-        };
 
+            if (!vm.showRemoveBucketText) {
+                $scope.$apply();
+            }
+        }
     }
-    function eleMouseUp(ev, index){
 
+    function eleMouseUp(ev, index){
         ev.preventDefault();
         ev.stopPropagation();
 
+        vm.bucket.right_bound_score = this.right;
         vm.slider.style.opacity = 1;
         vm.canAddBucket = false;
 
@@ -231,9 +223,10 @@ angular.module('lp.models.ratings', [
             vm.workingBuckets.splice(vm.index, 1);
 
             var buckets = vm.workingBuckets;
-            for (var i = 0, len = buckets.length; i < len; i++) { 
 
+            for (var i = 0, len = buckets.length; i < len; i++) { 
                 var previousBucket = buckets[i-1];
+
                 for (var bucket in previousBucket) {
                   vm.previousRightBoundScore = previousBucket["right_bound_score"];
                 }
@@ -252,15 +245,12 @@ angular.module('lp.models.ratings', [
         document.removeEventListener('mousemove', eleMouseMove, false);
         document.removeEventListener('mouseup', eleMouseUp, false);
 
-        $timeout( function(){
+        $timeout(function() {
             refreshChartData();    
         }, 1);
-        
-
     }
 
     vm.publishConfiguration = function() {
-        
         vm.chartNotUpdated = false;
         vm.savingConfiguration = true;
 

@@ -22,12 +22,14 @@
                 </div>
             </div><!-- End .chart-header -->
 
-            <div class="remove-text" ng-show="vm.showRemoveBucketText">Drop to remove bucket</div>
 
             <div 
                 id="ratingsChart"
                 class="ratings-chart"
                 ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}">
+
+                <div class="remove-text" ng-show="vm.showRemoveBucketText">Drop to remove bucket</div>
+                
                 <div 
                     id="sliders" 
                     class="sliders-container" 
