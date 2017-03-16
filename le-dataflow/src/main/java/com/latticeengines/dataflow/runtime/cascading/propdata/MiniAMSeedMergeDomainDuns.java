@@ -20,8 +20,8 @@ public class MiniAMSeedMergeDomainDuns extends BaseOperation implements Function
     private String dunsColumn;
     private String typeColumn;
     private String valueColumn;
-    private final static String DOMAIN_TYPE = "DOMAIN";
-    private final static String DUNS_TYPE = "DUNS";
+    private final static String DOMAIN_TYPE = "Domain";
+    private final static String DUNS_TYPE = "Duns";
     private Map<String, Integer> namePositionMap;
 
     public MiniAMSeedMergeDomainDuns(Fields fieldDeclaration, String domainColumn, String dunsColumn, String typeColumn,
