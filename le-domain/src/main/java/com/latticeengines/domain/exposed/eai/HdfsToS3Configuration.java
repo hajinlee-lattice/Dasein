@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.eai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HdfsToS3Configuration extends ExportConfiguration {
@@ -22,6 +24,8 @@ public class HdfsToS3Configuration extends ExportConfiguration {
     private Long splitSize;
 
     @JsonProperty("target_filename")
+    @NotNull
+    @NotEmptyString
     private String targetFilename; // the file name to be used in s3, may be suffixed by partition number if splitted.
 
     public String getS3Bucket() {

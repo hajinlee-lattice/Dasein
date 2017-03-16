@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
@@ -13,9 +15,12 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public class ExportConfiguration extends EaiJobConfiguration {
 
     private ExportFormat exportFormat;
+    @NotNull
     private ExportDestination exportDestination;
     private Table table;
     private String exportInputPath;
+    @NotNull
+    @NotEmptyString
     private String exportTargetPath;
     private boolean exportUsingDisplayName = Boolean.TRUE;
 

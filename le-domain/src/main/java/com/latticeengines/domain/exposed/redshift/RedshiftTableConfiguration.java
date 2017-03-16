@@ -3,10 +3,14 @@ package com.latticeengines.domain.exposed.redshift;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public class RedshiftTableConfiguration {
 
     @JsonProperty("table_name")
+    @NotNull
+    @NotEmptyString
     private String tableName;
 
     @JsonProperty("sort_key_type")
@@ -22,6 +26,8 @@ public class RedshiftTableConfiguration {
     private String distKey;
 
     @JsonProperty("json_path_prefix")
+    @NotNull
+    @NotEmptyString
     private String jsonPathPrefix;
 
     public String getTableName() {
