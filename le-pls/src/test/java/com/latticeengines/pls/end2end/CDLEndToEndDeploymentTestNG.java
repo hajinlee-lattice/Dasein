@@ -91,7 +91,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private FrontEndRestriction getArbitraryRestriction() {
         FrontEndRestriction restriction = new FrontEndRestriction();
-        BucketRange bucket = new BucketRange(1);
+        BucketRange bucket = BucketRange.value(1);
         BucketRestriction bucketRestriction = new BucketRestriction(new ColumnLookup("number_of_family_members"),
                 bucket);
         restriction.setAll(Collections.singletonList(bucketRestriction));
