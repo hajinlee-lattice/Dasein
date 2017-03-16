@@ -114,6 +114,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort) //
                 .modelId(modelId) //
                 .inputTableName(tableToScoreName) //
+                .sourceSchemaInterpretation(summary.getSourceSchemaInterpretation()) //
                 .excludeDataCloudAttrs(summary.getModelSummaryConfiguration()
                         .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
