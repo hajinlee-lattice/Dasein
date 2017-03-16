@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MiniAMDomainDunsConfig extends TransformerConfig {
@@ -11,10 +13,10 @@ public class MiniAMDomainDunsConfig extends TransformerConfig {
     private String dnbInputDataSetGU;
     @JsonProperty("DnbInputDataSetDU")
     private String dnbInputDataSetDU;
-    @JsonProperty("AmInputDataSetDomain")
-    private String amInputDataSetDomain;
-    @JsonProperty("AmInputDataSetDuns")
-    private String amInputDataSetDuns;
+    @JsonProperty("SeedInputDataSetDomain")
+    private Map<String, String> seedInputDataSetDomain;
+    @JsonProperty("SeedInputDataSetDuns")
+    private Map<String, String> seedInputDataSetDuns;
     @JsonProperty("MiniInputDataSetDomain")
     private String miniInputDataSetDomain;
     @JsonProperty("MiniInputDataSetDuns")
@@ -23,6 +25,7 @@ public class MiniAMDomainDunsConfig extends TransformerConfig {
     private String outputDataSetType;
     @JsonProperty("OutputDataSetValue")
     private String outputDataSetValue;
+
 
     public String getDnbInputDataSetDomain() {
         return dnbInputDataSetDomain;
@@ -56,20 +59,20 @@ public class MiniAMDomainDunsConfig extends TransformerConfig {
         this.dnbInputDataSetDU = dnbInputDataSetDU;
     }
 
-    public String getAmInputDataSetDomain() {
-        return amInputDataSetDomain;
+    public Map<String, String> getSeedInputDataSetDomain() {
+        return seedInputDataSetDomain;
     }
 
-    public void setAmInputDataSetDomain(String amInputDataSetDomain) {
-        this.amInputDataSetDomain = amInputDataSetDomain;
+    public void setSeedInputDataSetDomain(Map<String, String> seedInputDataSetDomain) {
+        this.seedInputDataSetDomain = seedInputDataSetDomain;
     }
 
-    public String getAmInputDataSetDuns() {
-        return amInputDataSetDuns;
+    public Map<String, String> getSeedInputDataSetDuns() {
+        return seedInputDataSetDuns;
     }
 
-    public void setAmInputDataSetDuns(String amInputDataSetDuns) {
-        this.amInputDataSetDuns = amInputDataSetDuns;
+    public void setSeedInputDataSetDuns(Map<String, String> seedInputDataSetDuns) {
+        this.seedInputDataSetDuns = seedInputDataSetDuns;
     }
 
     public String getMiniInputDataSetDomain() {
