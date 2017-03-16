@@ -3,7 +3,7 @@ angular.module('lp.models.ratings', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'
 ])
-.controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
+.controller('ModelRatingsController', function ($rootScope, $state, $stateParams, $timeout, 
     ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, HistoricalABCDBuckets) {
 
     var vm = this;
@@ -11,7 +11,6 @@ angular.module('lp.models.ratings', [
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
         model: Model,
-        data: ModelStore.data,
         chartNotUpdated: true,
         saveInProgress: false,
         showSaveBucketsError: false,
@@ -19,7 +18,7 @@ angular.module('lp.models.ratings', [
         currentConfiguration: CurrentConfiguration,
         historicalBuckets: HistoricalABCDBuckets,
         ratingsSummary: RatingsSummary,
-        workingBuckets: [],
+        workingBuckets: CurrentConfiguration,
         bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
         bucketTiles: document.getElementById("bucketTiles"),
         slidersContainer: document.getElementById("sliders")
@@ -27,23 +26,20 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
 
-        $scope.data = ModelStore.data;
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
-        $scope.Math = window.Math;
+        vm.Math = window.Math;
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
         } else {
             vm.modelType = "Accounts";
-        }
+        };
 
         renderChart();
 
     }
 
     function renderChart(){
-        
-        vm.workingBuckets = vm.currentConfiguration;
 
         var verticalAxis = document.getElementById("verticalAxis");
 
@@ -169,7 +165,7 @@ angular.module('lp.models.ratings', [
         vm.index = index;
         vm.canAddBucket = false;
         vm.showRemoveBucketText = false;
-
+        
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);
 
@@ -179,9 +175,13 @@ angular.module('lp.models.ratings', [
         ev.preventDefault();
         ev.stopPropagation();
 
-  
         vm.canAddBucket = false;
         vm.firstBucket = vm.workingBuckets[Object.keys(vm.workingBuckets)[0]];
+        var oldPos = vm.relativeSliderChartPosition;
+        vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
+        
+
+
         if(vm.index === 0){
             vm.sliderBoundaryLeft = 98;
             vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 1;  
@@ -191,17 +191,19 @@ angular.module('lp.models.ratings', [
         };
 
 
-        vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
-        vm.bucket.right_bound_score = parseInt(vm.slider.style.right.slice(0, -1));
+        var right = 100 - Math.round(vm.relativeSliderChartPosition * 100);
 
 
-        if(vm.bucket.right_bound_score >= vm.sliderBoundaryLeft){
-            vm.slider.style.right = vm.sliderBoundaryLeft;
-        } else if(vm.bucket.right_bound_score <= vm.sliderBoundaryRight){
-            vm.slider.style.right = vm.sliderBoundaryRight;
+        if(vm.bucket.right_bound_score <= vm.sliderBoundaryLeft - 1 && vm.bucket.right_bound_score >= vm.sliderBoundaryRight + 1){
+            vm.slider.style.right = right + '%';
+            vm.bucket.right_bound_score = right;
+            this.old = right;
         } else {
-            vm.slider.style.right = 100 - Math.round(vm.relativeSliderChartPosition * 100) + '%';
-        }
+            console.log("false", this.old, right, vm.old);
+            vm.slider.style.right = this.old + '%';
+            vm.bucket.right_bound_score = this.old;
+        };
+    
 
 
         if (vm.workingBuckets.length > 2 && ev.clientY > vm.containerBox.bottom + 10 || ev.clientX < vm.containerBox.left + 15 || ev.clientX > vm.containerBox.right - 45) {
@@ -260,7 +262,7 @@ angular.module('lp.models.ratings', [
     vm.publishConfiguration = function() {
         
         vm.chartNotUpdated = false;
-        vm.saveInProgress = true;
+        vm.savingConfiguration = true;
 
         var modelId = $stateParams.modelId;
 
@@ -268,8 +270,11 @@ angular.module('lp.models.ratings', [
             
             if (result != null && result.success === true) {
                 $state.go('home.model.ratings', {}, { reload: true });
+                $timeout( function(){
+                    vm.showSuccess = true;
+                }, 1);
             } else {
-                vm.saveInProgress = false;
+                vm.savingConfiguration = false;
                 vm.createBucketsErrorMessage = result;
                 vm.showSaveBucketsError = true;
             }
