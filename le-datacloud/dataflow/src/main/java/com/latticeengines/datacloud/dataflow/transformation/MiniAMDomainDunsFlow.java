@@ -2,7 +2,10 @@ package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -15,28 +18,43 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("miniAMDomainDunsFlow")
 public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsConfig> {
+    private static final Log log = LogFactory.getLog(MiniAMDomainDunsFlow.class);
     private final static String DNB_GU_VALUE = "GuDnbValue";
     private final static String DNB_DU_VALUE = "DuDnbValue";
+    private final static String DOMAIN_TYPE = "Domain";
+    private final static String DUNS_TYPE = "Duns";
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         List<String> miniTargetTableAttr = getMiniTargetTableAttr(parameters);
         MiniAMDomainDunsConfig config = getTransformerConfig(parameters);
         Node miniDomainDunsList = addSource(parameters.getBaseTables().get(0));
         Node dnbSeedDataSet = addSource(parameters.getBaseTables().get(1));
+        // Renaming the source name to pipeName to ensure they are consistent
+        dnbSeedDataSet.renamePipe(dnbSeedDataSet.getPipeName());
         List<Node> storeList = new ArrayList<Node>();
+        Map<String, String> seedsDomain = config.getSeedInputDataSetDomain();
+        Map<String, String> seedsDuns = config.getSeedInputDataSetDuns();
         storeList.add(dnbSeedDataSet);
         for (int i = 2; i < parameters.getBaseTables().size(); i++) {
+            Node seed = addSource(parameters.getBaseTables().get(i));
+            // Renaming source name to pipeName to ensure they are consistent
+            seed.renamePipe(seed.getPipeName());
             storeList.add(addSource(parameters.getBaseTables().get(i)));
         }
-
+       
         // Adding DUNS by matching with domains
         List<Node> storeDunsValues = new ArrayList<Node>();
         for (Node seedDataSet : storeList) {
+            log.info("domain : " + seedsDomain.get(seedDataSet.getPipeName()) + "duns : "
+                    + seedsDuns.get(seedDataSet.getPipeName()));
             Node storeDomainsMatched = miniDomainDunsList
-                    .join(config.getOutputDataSetValue(), seedDataSet, "Domain", JoinType.INNER) //
-                    .retain("DUNS") //
-                    .rename(new FieldList("DUNS"), new FieldList(config.getOutputDataSetValue())) //
-                    .addColumnWithFixedValue(config.getOutputDataSetType(), "DUNS", String.class) //
+                    .join(config.getOutputDataSetValue(), seedDataSet, seedsDomain.get(seedDataSet.getPipeName()),
+                            JoinType.INNER) //
+                    .retain(seedsDuns.get(seedDataSet.getPipeName())) //
+                    .rename(new FieldList(seedsDuns.get(seedDataSet.getPipeName())),
+                            new FieldList(config.getOutputDataSetValue()))
+                    .addColumnWithFixedValue(config.getOutputDataSetType(), DUNS_TYPE,
+                            String.class) //
                     .retain(new FieldList(miniDomainDunsList.getFieldNames())) //
                     .renamePipe(seedDataSet + "duns");
             storeDunsValues.add(storeDomainsMatched);
@@ -44,14 +62,12 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
 
         // Merge into target table
         miniDomainDunsList = miniDomainDunsList.merge(storeDunsValues);
-
         // Remove Nulls
         String checkNullExpression = config.getOutputDataSetValue() + " != null ";
         miniDomainDunsList = miniDomainDunsList.filter(checkNullExpression,
                 new FieldList(config.getOutputDataSetValue()));
         // De-duplication
         miniDomainDunsList = miniDomainDunsList.groupByAndLimit(new FieldList(miniTargetTableAttr), 1);
-
         /*
          * Adding DUNS from DnbDataSeed by matching with GU, DU hierarchy and
          * storing the result into Node (Type{GU, DU}, Value{DUNS associated to
@@ -109,18 +125,18 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
         List<Node> dunsFromGuDu = new ArrayList<Node>();
         // DUNS from GuNode
         Node guDuns = storeDnbGu.join(DNB_GU_VALUE, dnbSeedDataSet, config.getDnbInputDataSetGU(), JoinType.INNER) //
-                .retain("DUNS") //
-                .rename(new FieldList("DUNS"), new FieldList(config.getOutputDataSetValue())) //
-                .addColumnWithFixedValue(config.getOutputDataSetType(), "DUNS", String.class) //
+                .retain(config.getDnbInputDataSetDuns()) //
+                .rename(new FieldList(config.getDnbInputDataSetDuns()), new FieldList(config.getOutputDataSetValue())) //
+                .addColumnWithFixedValue(config.getOutputDataSetType(), DUNS_TYPE, String.class) //
                 .retain(new FieldList(miniDomainDunsList.getFieldNames())) //
                 .renamePipe("GuDuns");
         dunsFromGuDu.add(guDuns);
 
         // DUNS from DuNode
         Node duDuns = storeDnbDu.join(DNB_DU_VALUE, dnbSeedDataSet, config.getDnbInputDataSetDU(), JoinType.INNER) //
-                .retain("DUNS") //
-                .rename(new FieldList("DUNS"), new FieldList(config.getOutputDataSetValue())) //
-                .addColumnWithFixedValue(config.getOutputDataSetType(), "DUNS", String.class) //
+                .retain(config.getDnbInputDataSetDuns()) //
+                .rename(new FieldList(config.getDnbInputDataSetDuns()), new FieldList(config.getOutputDataSetValue())) //
+                .addColumnWithFixedValue(config.getOutputDataSetType(), DUNS_TYPE, String.class) //
                 .retain(new FieldList(miniDomainDunsList.getFieldNames())) //
                 .renamePipe("DuDuns");
         dunsFromGuDu.add(duDuns);
@@ -138,10 +154,12 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
         List<Node> storeDomainValues = new ArrayList<Node>();
         for (Node seedDataSet : storeList) {
             Node storeDunsMatched = miniDomainDunsList
-                    .join(config.getOutputDataSetValue(), seedDataSet, "DUNS", JoinType.INNER) //
-                    .retain("Domain") //
-                    .rename(new FieldList("Domain"), new FieldList(config.getOutputDataSetValue())) //
-                    .addColumnWithFixedValue(config.getOutputDataSetType(), "DOMAIN", String.class) //
+                    .join(config.getOutputDataSetValue(), seedDataSet, seedsDuns.get(seedDataSet.getPipeName()), JoinType.INNER) //
+                    .retain(seedsDomain.get(seedDataSet.getPipeName())) //
+                    .rename(new FieldList(seedsDomain.get(seedDataSet.getPipeName())),
+                            new FieldList(config.getOutputDataSetValue())) //
+                    .addColumnWithFixedValue(config.getOutputDataSetType(), DOMAIN_TYPE,
+                            String.class) //
                     .retain(new FieldList(miniDomainDunsList.getFieldNames())) //
                     .renamePipe(seedDataSet + "domain");
             storeDomainValues.add(storeDunsMatched);
