@@ -83,7 +83,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     private String approvedUsage;
 
     @Index(name = "IX_GROUPS")
-    @Column(name = "Groups", nullable = false, length = 1000)
+    @Column(name = "Groups", nullable = false, length = 700)
     private String groups;
 
     @Column(name = "IsInternalEnrichment", nullable = false)
