@@ -25,7 +25,7 @@ public class BucketRange {
     @JsonProperty("max")
     private Object max;
 
-    public static BucketRange minAndMax(Object min, Object max) {
+    public static BucketRange range(Object min, Object max) {
         BucketRange range = new BucketRange();
         range.setMin(min);
         range.setMax(max);
