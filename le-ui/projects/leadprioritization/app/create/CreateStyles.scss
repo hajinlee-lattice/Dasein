@@ -369,6 +369,7 @@ section.container.custom-fields {
             height: 25px;
             background: none;
             visibility: hidden;
+            border: none;
         }
     }
     .field-mapping-actions {
@@ -499,7 +500,6 @@ Create Model: Import Job Status
             border: none;
             margin: 0;
             padding: 0;
-            height: 28px;
         }
         td:first-child {
             font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
