@@ -229,7 +229,9 @@ public class VdbTableImportServiceImpl extends ImportService {
                         break;
                     }
                     int rowsAppend = appendGenericRecord(attributeMap, schema, vdbQueryDataResult, dataFileWriter);
-                    log.info(String.format("Append %d rows to avro file", rowsAppend));
+                    if (rowsAppend != rowsToGet) {
+                        log.warn(String.format("Row batch is %d, but only %d rows append to avro.", rowsToGet, rowsAppend));
+                    }
 
                     startRow += rowsAppend;
                     fileRows += rowsAppend;
