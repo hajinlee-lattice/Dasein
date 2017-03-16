@@ -317,7 +317,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("y", function(d, i) {
             return (i * (barHeight + 2 * gap)) + 42;
         })
-        .attr("dx", -5)
+        .attr("dx", 5)
         .attr("dy", commonDy)
         .attr("font-weight", "semi-bold")
         .attr("font-size", fontSize)
