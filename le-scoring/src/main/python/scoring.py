@@ -1,7 +1,8 @@
-import sys
 import os
-import subprocess
+
 import shutil
+import subprocess
+import sys
 
 SCORING_SCRIPT_NAME = "scoringengine.py"
 PIPELINE_SCRIPT_NAME = "pipeline.py"
@@ -23,7 +24,7 @@ def main(argv):
         manipulateSupportedFiles(modelID, scoringSupportedFiles, leadFiles)
         # do scoring
         print "leadFiles are: ", leadFiles
-        print "scoringSupportedFiles are: " ,scoringSupportedFiles
+        print "scoringSupportedFiles are: " , scoringSupportedFiles
         if len(leadFiles) == 0:
             raise "leadFile is null"
         for leadFile in leadFiles:
@@ -56,8 +57,7 @@ def modelEvaluate(modelID, leadFile):
     scoringScriptPath = os.path.abspath(SCORING_SCRIPT_NAME)
     # scoringoutputfile name
     outputFile = modelID + SCORING_OUTPUT_PREFIX + leadFile[len(SCORING_INPUT_PREFIX):] + ".txt"
-    executable = "/usr/local/bin/python2.7"
-    popen = subprocess.Popen([executable, scoringScriptPath, leadFile, outputFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    popen = subprocess.Popen([sys.executable, scoringScriptPath, leadFile, outputFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     s, stderr = popen.communicate()
     print s
     print stderr

@@ -29,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.MapContext;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.annotations.VisibleForTesting;
@@ -56,15 +57,15 @@ public class ScoringMapperPredictUtil {
         for (String modelGuid : uuidSet) {
             sb.append(modelGuid + " ");
         }
-
-        log.info("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
+        String pythonCommand = "./pythonlauncher.sh lattice " + "scoring.py " + sb.toString();
+        log.info(pythonCommand);
         File pyFile = new File("scoring.py");
         if (!pyFile.exists()) {
             throw new LedpException(LedpCode.LEDP_20002);
         }
 
         // spawn python
-        Process p = Runtime.getRuntime().exec("/usr/local/bin/python2.7 " + "scoring.py " + sb.toString());
+        Process p = Runtime.getRuntime().exec(pythonCommand);
 
         try (BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
                 BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -154,8 +155,8 @@ public class ScoringMapperPredictUtil {
     }
 
     public static List<ScoreOutput> processScoreFilesUsingScoreDerivation(ModelAndRecordInfo modelAndRecordInfo,
-            Map<String, ScoreDerivation> scoreDerivationMap, long recordFileThreshold) throws IOException,
-            DecoderException {
+            Map<String, ScoreDerivation> scoreDerivationMap, long recordFileThreshold)
+            throws IOException, DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
         Set<String> uuidSet = modelInfoMap.keySet();
         // list of HashMap<leadId: score>
@@ -180,8 +181,8 @@ public class ScoringMapperPredictUtil {
             for (String key : keySet) {
                 List<Double> rawScoreList = scores.get(key);
                 for (Double rawScore : rawScoreList) {
-                    ScoreOutput result = calculateResult(scoreDerivationMap.get(uuid), modelInfoMap.get(uuid)
-                            .getModelGuid(), key, rawScore);
+                    ScoreOutput result = calculateResult(scoreDerivationMap.get(uuid),
+                            modelInfoMap.get(uuid).getModelGuid(), key, rawScore);
                     resultList.add(result);
                 }
             }
@@ -208,8 +209,8 @@ public class ScoringMapperPredictUtil {
         return duplicateLeadsList;
     }
 
-    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores) throws IOException,
-            DecoderException {
+    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores)
+            throws IOException, DecoderException {
 
         int rawScoreNum = 0;
         String fileName = uuid + ScoringDaemonService.SCORING_OUTPUT_PREFIX + index + ".txt";
@@ -245,7 +246,7 @@ public class ScoringMapperPredictUtil {
         ArrayNode calibrationRanges = (ArrayNode) model.get(ScoringDaemonService.CALIBRATION);
         if (calibrationRanges != null) {
             for (int i = 0; i < calibrationRanges.size(); i++) {
-                JsonNode range = (JsonNode) calibrationRanges.get(i);
+                JsonNode range = calibrationRanges.get(i);
                 JsonNode lowerBoundObj = range.get(ScoringDaemonService.CALIBRATION_MINIMUMSCORE);
                 JsonNode upperBoundObj = range.get(ScoringDaemonService.CALIBRATION_MAXIMUMSCORE);
                 Double lowerBound = lowerBoundObj.isNull() ? null : lowerBoundObj.asDouble();
@@ -260,8 +261,7 @@ public class ScoringMapperPredictUtil {
 
         JsonNode averageProbabilityObj = model.get(ScoringDaemonService.AVERAGE_PROBABILITY);
         Double averageProbability = averageProbabilityObj.isNull() ? null : averageProbabilityObj.asDouble();
-        Double lift = averageProbability != null && averageProbability != 0 ? (double) probability / averageProbability
-                : null;
+        Double lift = averageProbability != null && averageProbability != 0 ? probability / averageProbability : null;
 
         // perform bucketing
         String bucket = null;
@@ -292,8 +292,8 @@ public class ScoringMapperPredictUtil {
         Integer percentile = null;
         ArrayNode percentileRanges = (ArrayNode) model.get(ScoringDaemonService.PERCENTILE_BUCKETS);
         if (percentileRanges != null) {
-            Double topPercentileMaxScore = (Double) 0.0;
-            Double bottomPercentileMinScore = (Double) 1.0;
+            Double topPercentileMaxScore = 0.0;
+            Double bottomPercentileMinScore = 1.0;
             Integer topPercentile = 100;
             Integer bottomPercentile = 1;
             boolean foundTopPercentileMaxScore = false;

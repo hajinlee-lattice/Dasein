@@ -37,35 +37,33 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         popd
     fi
 
-    echo "Removing existing Anaconda environments"
-    sudo rm -rf $ANACONDA_HOME/envs/* || true
-
     CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
 
-    CONDAENV_LATTICE="lattice"
-    echo "Creating Anaconda environment: $CONDAENV_LATTICE"
-    $ANACONDA_HOME/bin/conda create -n $CONDAENV_LATTICE -y python=2.7.13 pip
-    cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$CONDAENV_LATTICE/lib
-    ln -s $ANACONDA_HOME/envs/$CONDAENV_LATTICE/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$CONDAENV_LATTICE/lib/libgcrypt.so.11
-
-    CONDAENV_V01="v01"
-    echo "Creating Anaconda environment: $CONDAENV_V01"
-    $ANACONDA_HOME/bin/conda create -n $CONDAENV_V01 -y python=2.7.13 pip
-    cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$CONDAENV_V01/lib
-    ln -s $ANACONDA_HOME/envs/$CONDAENV_V01/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$CONDAENV_V01/lib/libgcrypt.so.11
+    for CONDAENV in 'lattice|2.7.13' 'v01|2.7.13'
+    do
+        envname=`echo $CONDAENV | cut -d \| -f 1`
+        pythonversion=`echo $CONDAENV | cut -d \| -f 2`
+        if [ -d $ANACONDA_HOME/envs/$envname ]; then
+            echo "Removing existing Anaconda enironment: $envname"
+            $ANACONDA_HOME/bin/conda remove -y --name $envname --all 
+        fi
+        echo "Creating Anaconda environment: $envname"
+        $ANACONDA_HOME/bin/conda create -n $envname -y python=$pythonversion pip
+        cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$envname/lib
+        ln -s $ANACONDA_HOME/envs/$envname/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$envname/lib/libgcrypt.so.11
+    done
 fi
 
-source $ANACONDA_HOME/bin/activate $CONDAENV_LATTICE
+source $ANACONDA_HOME/bin/activate lattice
 
 pip install \
     avro==1.7.7 \
     fastavro==0.7.7 \
-    kazoo==2.2.1 \
-    patsy==0.3.0 \
     pexpect==4.0.1 \
     psutil==2.2.1 \
-    ptyprocess==0.5.1 \
-    python-dateutil==2.4.1
+    ptyprocess==0.5.1
+
+pip install --no-deps kazoo==2.2.1 patsy==0.3.0 python-dateutil==2.4.1
 
 $ANACONDA_HOME/bin/conda install -y pandas=0.13.1=np18py27_0
 
@@ -89,26 +87,23 @@ $ANACONDA_HOME/bin/conda install -y \
     wheel=0.29.0=py27_0 \
     zlib=1.2.8=3
 
-sudo mkdir -p /usr/local/bin || true
-sudo ln -sf $ANACONDA_HOME/envs/$CONDAENV_LATTICE/bin/python /usr/local/bin/python2.7
-
 source $ANACONDA_HOME/bin/deactivate
 
 
-source $ANACONDA_HOME/bin/activate $CONDAENV_V01
+source $ANACONDA_HOME/bin/activate v01
 
 pip install \
     avro==1.8.1 \
     fastavro==0.12.1 \
-    kazoo==2.2.1 \
-    patsy==0.4.1 \
     pexpect==4.2.1 \
     psutil==5.2.0 \
-    python-dateutil==2.6.0
+    ptyprocess==0.5.1
+
+pip install --no-deps kazoo==2.2.1 patsy==0.4.1
 
 $ANACONDA_HOME/bin/conda install -y pandas=0.19.2=np112py27_1
 
-pip install statsmodels==0.8.0
+pip install --no-deps statsmodels==0.8.0
 
 
 $ANACONDA_HOME/bin/conda install -y \
