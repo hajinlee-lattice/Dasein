@@ -10,13 +10,11 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.am.AppmasterRmTemplate;
@@ -27,10 +25,8 @@ import org.springframework.yarn.am.container.AbstractLauncher;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
 import com.latticeengines.common.exposed.yarn.RuntimeConfig;
-import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
-import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -41,8 +37,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     @Autowired
     private Configuration yarnConfiguration;
 
-    private LedpMetricsMgr ledpMetricsMgr = null;
-
     private ProgressMonitor monitor;
 
     private String containerId;
@@ -50,9 +44,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     private String customer;
 
     private String priority;
-
-    @Autowired
-    private YarnService yarnService;
 
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
@@ -108,36 +99,10 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
                 throw e;
             }
         }
-        String appAttemptId = getApplicationAttemptId().toString();
         final String appId = getApplicationAttemptId().getApplicationId().toString();
-
-        ledpMetricsMgr = LedpMetricsMgr.getInstance(appAttemptId);
-        ledpMetricsMgr.setPriority(priority);
-        ledpMetricsMgr.setCustomer(customer);
-        final long appStartTime = System.currentTimeMillis();
-        ledpMetricsMgr.setAppStartTime(appStartTime);
 
         log.info("Application submitted with Application id = " + appId);
 
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                ApplicationReport appReport = yarnService.getApplication(appId);
-
-                String queue = appReport.getQueue();
-                if (queue == null) {
-                    throw new LedpException(LedpCode.LEDP_12006);
-                }
-                ledpMetricsMgr.setQueue(queue);
-                ledpMetricsMgr.start();
-
-                long appSubmissionTime = appReport.getStartTime();
-                log.info("App start latency = " + (appStartTime - appSubmissionTime));
-                ledpMetricsMgr.setAppSubmissionTime(appSubmissionTime);
-            }
-
-        }).start();
     }
 
     @Override
@@ -155,8 +120,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     protected void onContainerLaunched(Container container) {
         String containerId = container.getId().toString();
         log.info("Launching container id = " + containerId + ".");
-        ledpMetricsMgr.setContainerId(containerId);
-        ledpMetricsMgr.setContainerLaunchTime(System.currentTimeMillis());
         super.onContainerLaunched(container);
     }
 
@@ -164,9 +127,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     protected void onContainerCompleted(ContainerStatus status) {
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
             log.info("Container id = " + status.getContainerId().toString() + " completed.");
-            ledpMetricsMgr.setContainerEndTime(System.currentTimeMillis());
-            // Immediately publish
-            ledpMetricsMgr.publishMetricsNow();
         }
 
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
@@ -180,9 +140,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
         String containerId = status.getContainerId().toString();
 
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
-            ledpMetricsMgr.incrementNumberPreemptions();
-            // Immediately publish
-            ledpMetricsMgr.publishMetricsNow();
             try {
                 Thread.sleep(5000L);
                 log.info("Container " + containerId + " preempted. Reallocating.");
@@ -227,9 +184,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
             }
         }
         cleanupJobDir();
-        ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
-        // Immediately publish
-        ledpMetricsMgr.publishMetricsNow();
         // Shut down monitor
         monitor.stop();
     }
