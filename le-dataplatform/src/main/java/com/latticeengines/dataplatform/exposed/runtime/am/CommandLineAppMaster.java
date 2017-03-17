@@ -10,11 +10,11 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.am.AppmasterRmTemplate;
@@ -25,6 +25,7 @@ import org.springframework.yarn.am.container.AbstractLauncher;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
 import com.latticeengines.common.exposed.yarn.RuntimeConfig;
+import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -36,6 +37,9 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private YarnService yarnService;
 
     private ProgressMonitor monitor;
 
@@ -91,17 +95,13 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
             }
             super.submitApplication();
         } catch (Exception e) {
-            if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
-                log.info("Retry submit application.");
-                //performFailover();
-                //super.submitApplication();
-            } else {
-                throw e;
-            }
+            throw e;
         }
         final String appId = getApplicationAttemptId().getApplicationId().toString();
 
         log.info("Application submitted with Application id = " + appId);
+        ApplicationReport appReport = yarnService.getApplication(appId);
+        log.info("ApplicationReport: " + appReport);
 
     }
 
@@ -175,13 +175,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
             }
             super.doStop();
         } catch (Exception e) {
-            if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
-                log.info("Retry doStop.");
-                //performFailover();
-                //super.doStop();
-            } else {
-                throw e;
-            }
+            throw e;
         }
         cleanupJobDir();
         // Shut down monitor
@@ -228,38 +222,4 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
             log.info(it.next().getAbsolutePath());
         }
     }
-
-//    private void performFailover() {
-//        Configuration conf = getConfiguration();
-//        log.info(String.format("RM address before fail over: %s", conf.get(YarnConfiguration.RM_ADDRESS)));
-//        Collection<String> rmIds = HAUtil.getRMHAIds(conf);
-//        String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
-//        int currentIndex = 0;
-//        String currentHAId = conf.get(YarnConfiguration.RM_HA_ID);
-//        for (int i = 0; i < rmServiceIds.length; i++) {
-//            if (currentHAId.equals(rmServiceIds[i])) {
-//                currentIndex = i;
-//                break;
-//            }
-//        }
-//        currentIndex = (currentIndex + 1) % rmServiceIds.length;
-//        conf.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
-//        String address = conf.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
-//        String webappAddress = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
-//                + rmServiceIds[currentIndex]);
-//        String schedulerAddress = conf.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "."
-//                + rmServiceIds[currentIndex]);
-//        conf.set(YarnConfiguration.RM_ADDRESS, address);
-//        conf.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
-//        conf.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);
-//        setConfiguration(conf);
-//        log.info(String.format("Fail over from %s to %s.", currentHAId, rmServiceIds[currentIndex]));
-//        log.info(String.format("RM address after fail over: %s", conf.get(YarnConfiguration.RM_ADDRESS)));
-//        AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
-//        try {
-//            rmTemplate.afterPropertiesSet();
-//        } catch (Exception e) {
-//            log.error("AppmasterRmTemplate refresh properties failed.");
-//        }
-//    }
 }

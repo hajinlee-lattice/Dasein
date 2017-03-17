@@ -36,9 +36,9 @@ public class YarnServiceImpl implements YarnService {
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
-    private YarnClient defaultYarnClient;
+    private YarnClient yarnClient;
 
     private String getResourceManagerEndpoint() {
         if (yarnConfiguration.getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
@@ -135,14 +135,16 @@ public class YarnServiceImpl implements YarnService {
 
     @Override
     public ApplicationReport getApplication(String appId) {
-//        try {
-//            String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-//            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
-//        } catch (Exception e) {
-//            String rmRestEndpointBaseUrl = performFailover();
-//            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
-//        }
-    	return defaultYarnClient.getApplicationReport(ConverterUtils.toApplicationId(appId));
+        // try {
+        // String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
+        // return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" +
+        // appId, AppInfo.class);
+        // } catch (Exception e) {
+        // String rmRestEndpointBaseUrl = performFailover();
+        // return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" +
+        // appId, AppInfo.class);
+        // }
+        return yarnClient.getApplicationReport(ConverterUtils.toApplicationId(appId));
     }
 
     private String performFailover() {
@@ -158,13 +160,13 @@ public class YarnServiceImpl implements YarnService {
         }
         currentIndex = (currentIndex + 1) % rmServiceIds.length;
         yarnConfiguration.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
-        String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
-                + rmServiceIds[currentIndex]);
+        String rmHostPort = yarnConfiguration
+                .get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
         String address = yarnConfiguration.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
-        String webappAddress = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
-                + rmServiceIds[currentIndex]);
-        String schedulerAddress = yarnConfiguration.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "."
-                + rmServiceIds[currentIndex]);
+        String webappAddress = yarnConfiguration
+                .get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String schedulerAddress = yarnConfiguration
+                .get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "." + rmServiceIds[currentIndex]);
         yarnConfiguration.set(YarnConfiguration.RM_ADDRESS, address);
         yarnConfiguration.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
         yarnConfiguration.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);

@@ -37,7 +37,5 @@
             <ref bean="defaultYarnLocalResources" />
         </property>
     </bean>
-   
 
-   
 </beans>

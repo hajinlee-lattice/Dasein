@@ -55,7 +55,9 @@
         </yarn:container-command>
 
     </yarn:master>
-    
-    <context:component-scan base-package="com.latticeengines.dataplatform.runtime.python"/>
+
+    <context:component-scan base-package="com.latticeengines.dataplatform.exposed.service"/>
+    <yarn:client app-name="pythonAppMaster" />
+    <bean id="yarnService" class="com.latticeengines.dataplatform.service.impl.YarnServiceImpl"/>
 
 </beans>
