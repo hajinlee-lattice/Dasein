@@ -14,6 +14,10 @@ public class RangeLookup extends Lookup {
         range = BucketRange.range(min, max);
     }
 
+    public RangeLookup(BucketRange range) {
+        this.range = range;
+    }
+
     public RangeLookup() {
     }
 

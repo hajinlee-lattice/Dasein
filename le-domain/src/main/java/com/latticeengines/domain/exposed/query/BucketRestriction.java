@@ -20,12 +20,12 @@ public class BucketRestriction extends Restriction {
     @JsonProperty("lhs")
     private ColumnLookup lhs;
 
-    @JsonProperty("bucket")
-    private BucketRange bucket;
+    @JsonProperty("range")
+    private BucketRange range;
 
-    public BucketRestriction(ColumnLookup lhs, BucketRange bucket) {
+    public BucketRestriction(ColumnLookup lhs, BucketRange range) {
         this.lhs = lhs;
-        this.bucket = bucket;
+        this.range = range;
     }
 
     public BucketRestriction() {
@@ -39,12 +39,12 @@ public class BucketRestriction extends Restriction {
         this.lhs = lhs;
     }
 
-    public BucketRange getBucket() {
-        return bucket;
+    public BucketRange getRange() {
+        return range;
     }
 
-    public void setBucket(BucketRange bucket) {
-        this.bucket = bucket;
+    public void setRange(BucketRange range) {
+        this.range = range;
     }
 
     @Override

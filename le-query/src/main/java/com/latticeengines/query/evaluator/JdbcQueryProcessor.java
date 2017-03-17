@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRelationship;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
@@ -30,7 +29,6 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
-import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.latticeengines.query.evaluator.lookup.LookupResolverFactory;
 import com.latticeengines.query.exposed.factory.QueryFactory;
@@ -272,15 +270,8 @@ public class JdbcQueryProcessor extends QueryProcessor {
             }
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucketRestriction = (BucketRestriction) restriction;
-            BucketRange range = bucketRestriction.getBucket();
-            ConcreteRestriction placeholder;
-            if (range.getMin() != null && range.getMax() != null && range.getMin().equals(range.getMax())) {
-                placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(), ComparisonType.EQUAL, //
-                        new ValueLookup(bucketRestriction.getBucket().getMin()));
-            } else {
-                placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(), ComparisonType.IN_RANGE, //
-                        new RangeLookup(bucketRestriction.getBucket().getMin(), bucketRestriction.getBucket().getMax()));
-            }
+            ConcreteRestriction placeholder = new ConcreteRestriction(false, bucketRestriction.getLhs(),
+                    ComparisonType.IN_RANGE, new RangeLookup(bucketRestriction.getRange()));
             return processRestriction(placeholder, rootObjectType, dataCollection);
         } else if (restriction instanceof ExistsRestriction) {
             ExistsRestriction existsRestriction = (ExistsRestriction) restriction;
