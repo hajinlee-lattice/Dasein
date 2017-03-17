@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.dsl.ComparableExpression;
@@ -28,7 +29,7 @@ public class ColumnLookupResolver extends LookupResolver {
         Table table = getTable(lookup);
         Attribute attribute = getAttribute(lookup);
 
-        List<String> buckets = attribute.getBucketList();
+        List<BucketRange> buckets = attribute.getBucketList();
         if (buckets != null && buckets.size() > 0) {
             String physicalColumnName = attribute.getPhysicalName();
             Integer offset = attribute.getBitOffset();
@@ -37,7 +38,7 @@ public class ColumnLookupResolver extends LookupResolver {
             }
             Integer numBits = attribute.getNumOfBits();
             if (numBits == null) {
-                // warn
+                // TODO warn
                 return Collections.singletonList(QueryUtils.getColumnPath(table, attribute));
             }
             return Collections.singletonList(Expressions.stringTemplate("({0}>>{1})&{2}",

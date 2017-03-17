@@ -6,6 +6,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
@@ -30,16 +31,17 @@ public class ValueLookupResolver extends LookupResolver {
             if (columnLookup != null) {
                 Attribute attribute = getAttribute(columnLookup);
 
-                List<String> buckets = attribute.getBucketList();
+                List<BucketRange> buckets = attribute.getBucketList();
                 if (buckets != null && buckets.size() > 0) {
                     // TODO temporary implementation
                     int bucketIdx = 0;
                     while (bucketIdx < buckets.size()) {
-                        String bucket = buckets.get(bucketIdx);
+                        BucketRange bucket = buckets.get(bucketIdx);
 
-                        if (bucket != null && bucket.equals(lookup.getValue().toString())) {
-                            break;
-                        }
+                        // TODO
+//                        if (bucket != null && bucket.equals(lookup.getValue().toString())) {
+//                            break;
+//                        }
                     }
                     if (bucketIdx == buckets.size()) {
                         throw new RuntimeException(String.format(
