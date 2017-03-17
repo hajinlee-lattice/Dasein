@@ -4,7 +4,7 @@ angular.module('lp.models.ratings', [
     'mainApp.models.services.ModelService'
 ])
 .controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, HistoricalABCDBuckets) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
 
     var vm = this;
     angular.extend(vm, {
@@ -16,7 +16,6 @@ angular.module('lp.models.ratings', [
         showSaveBucketsError: false,
         ResourceUtility: ResourceUtility,
         currentConfiguration: CurrentConfiguration,
-        historicalBuckets: HistoricalABCDBuckets,
         ratingsSummary: RatingsSummary,
         workingBuckets: CurrentConfiguration,
         bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
@@ -189,7 +188,7 @@ angular.module('lp.models.ratings', [
             vm.slider.style.right = (leftCheck ? vm.sliderBoundaryRight : vm.sliderBoundaryLeft) + '%';
         }
 
-        if (vm.workingBuckets.length > 2 && (ev.clientY > vm.containerBox.bottom + 10 || ev.clientX < vm.containerBox.left + 15 || ev.clientX > vm.containerBox.right - 45)) {
+        if (vm.workingBuckets.length > 2 && (ev.clientY > vm.containerBox.bottom + 10)) {
             vm.showRemoveBucketText = true;
             vm.slider.style.opacity = .25;
 
@@ -216,7 +215,7 @@ angular.module('lp.models.ratings', [
 
         vm.workingBuckets.sort(function(a, b){return b.right_bound_score - a.right_bound_score});
 
-        if (vm.workingBuckets.length > 2 && ev.clientY > vm.containerBox.bottom + 10 || ev.clientX < vm.containerBox.left + 15 || ev.clientX > vm.containerBox.right - 45) {
+        if (vm.workingBuckets.length > 2 && ev.clientY > vm.containerBox.bottom + 10) {
             vm.chartNotUpdated = false;
             vm.showRemoveBucketText = false;
 
@@ -290,7 +289,7 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-        $scope.Math = window.Math;
+        vm.Math = window.Math;
 
         vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
 
@@ -299,6 +298,11 @@ angular.module('lp.models.ratings', [
         } else {
             vm.modelType = "Accounts";
         }
+
+
+        vm.historySorting = Object.keys(vm.historicalBuckets);
+        console.log(vm.historicalBuckets);
+
 
         // Set value for total leads in set
         // This will need to get changed when we're saving configurations
