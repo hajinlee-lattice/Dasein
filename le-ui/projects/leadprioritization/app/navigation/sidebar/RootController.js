@@ -24,7 +24,7 @@ angular
                 $rootScope.$broadcast('sidebar:toggle');
             }
         }
-        
+
         FeatureFlagService.GetAllFlags().then(function(result) {
             var flags = FeatureFlagService.Flags();
             $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
@@ -35,11 +35,13 @@ angular
             $scope.showSalesforceSettings = FeatureFlagService.FlagIsEnabled(flags.USE_SALESFORCE_SETTINGS);
             $scope.showJobsPage = FeatureFlagService.FlagIsEnabled(flags.JOBS_PAGE);
             $scope.showCampaignsPage = FeatureFlagService.FlagIsEnabled(flags.CAMPAIGNS_PAGE);
-            $scope.showLeadEnrichmentPage = 1; 
+            $scope.showAnalysisPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+            $scope.showSegmentationPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+            $scope.showLeadEnrichmentPage = 1;
         });
 
-        $scope.statusFilter = function (item) { 
-            return item.jobStatus === 'Running' || item.jobStatus === 'Pending'; 
+        $scope.statusFilter = function (item) {
+            return item.jobStatus === 'Running' || item.jobStatus === 'Pending';
         };
 
         angular.extend($scope, {
@@ -55,5 +57,5 @@ angular
         })
 
         $scope.init();
-        
+
     });

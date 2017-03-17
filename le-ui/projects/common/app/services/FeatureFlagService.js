@@ -65,9 +65,11 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES: 'EnableInternalEnrichmentAttributes',
         ENABLE_DATA_PROFILING_V2: 'EnableDataProfilingV2',
         ENABLE_FUZZY_MATCH: 'EnableFuzzyMatch',
+        ENABLE_CDL: 'EnableCdl',
 
         LATTICE_INSIGHTS: 'LatticeInsights'
     };
+
     this.Flags = function(){ return flags; };
 
     var flagValues = {};
