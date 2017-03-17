@@ -37,7 +37,6 @@ public class FabricDataServiceImpl implements FabricDataService {
         if (serviceProviders == null)
             initServiceProviders();
         FabricDataServiceProvider dsp = serviceProviders.get(store);
-        ;
         if (dsp != null) {
             log.info("Initialize data store " + store + " repo " + repository);
             dataStore = dsp.constructDataStore(repository, recordType, schema);

@@ -327,10 +327,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         return disabled;
     }
 
-    public void setIsDisabled(boolean disabled) {
-        this.disabled = disabled;
-    }
-
     protected Pair<GenericRecord, Map<String, Object>> entityToPair(T entity) {
         try {
             if (entity instanceof FabricEntity) {

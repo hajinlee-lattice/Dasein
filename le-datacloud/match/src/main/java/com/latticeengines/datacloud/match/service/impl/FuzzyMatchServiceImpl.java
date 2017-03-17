@@ -135,7 +135,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 traveler.setBatchMode(actorSystem.isBatchMode());
                 fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
                 if (isMatchHistoryEnabled)
-                    matchHistories.add(getMatchHistory(matchRecord));
+                    matchHistories.add(getMatchHistory(matchRecord, traveler));
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
             }
@@ -145,13 +145,19 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         publishMatchHistory(matchHistories);
     }
 
-    private MatchHistory getMatchHistory(InternalOutputRecord matchRecord) {
+    private MatchHistory getMatchHistory(InternalOutputRecord matchRecord, MatchTraveler traveler) {
         MatchHistory matchHistory = new MatchHistory();
         matchHistory.setDomain(matchRecord.getParsedDomain()).setDuns(matchRecord.getParsedDuns())
                 .setEmail(matchRecord.getParsedEmail()).setIsPublicDomain(matchRecord.isPublicDomain());
         matchHistory.withNameLocation(matchRecord.getParsedNameLocation()).setMatched(matchRecord.isMatched())
-                .setLatticeAccountId(matchRecord.getLatticeAccountId())
+                .setLatticeAccountId(matchRecord.getLatticeAccountId()).setMatchMode(traveler.getMode())
                 .setTimestampSeconds(System.currentTimeMillis() / 1000);
+        if (CollectionUtils.isNotEmpty(traveler.getDnBMatchContexts())) {
+            DnBMatchContext matchContext = traveler.getDnBMatchContexts().get(0);
+            if (matchContext != null) {
+                matchHistory.withDnBMatchResult(matchContext);
+            }
+        }
         return matchHistory;
     }
 

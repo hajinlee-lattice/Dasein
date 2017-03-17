@@ -1,11 +1,14 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricNode;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatus;
@@ -27,11 +31,16 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends BaseFabricEntityMgrImpl<T> implements
         GenericFabricEntityManager<T> {
 
+    private static final int TEN_MINUTES = 600_000;
+
     private static final Log log = LogFactory.getLog(GenericFabricEntityManagerImpl.class);
 
     public static final String FABRIC_GENERIC_CONNECTOR = "FabricGenericConnector";
     public static final String FABRIC_GENERIC_RECORD = "FabricGenericRecord";
     private static final TopicScope ENVIRONMENT_PRIVATE = TopicScope.ENVIRONMENT_PRIVATE;
+
+    private volatile boolean disabled;
+    private volatile long lastDisabledTime;
 
     public GenericFabricEntityManagerImpl() {
         super(new BaseFabricEntityMgrImpl.Builder().recordType(FABRIC_GENERIC_RECORD).topic(FABRIC_GENERIC_CONNECTOR)
@@ -50,13 +59,13 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
         } else {
             log.warn("Could not create/find topic=" + FABRIC_GENERIC_CONNECTOR
                     + " disabling the generic fabric entity manager!.");
-            setIsDisabled(true);
+            setDisable();
         }
     }
 
     @Override
     public String createUniqueBatchId(Long totalCount) {
-        if (isDisabled()) {
+        if (disabled && isInDisablePeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return null;
         }
@@ -69,17 +78,18 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             }
             String data = JsonUtils.serialize(node);
             messageService.createZNode(uuid, data, true);
+            setEnable();
             return uuid;
         } catch (Exception ex) {
             log.warn("Can not create batch Id. Disable the entity manager!", ex);
-            setIsDisabled(true);
+            setDisable();
             return null;
         }
     }
 
     @Override
     public String createOrGetNamedBatchId(String batchName, Long totalCount, boolean createNew) {
-        if (isDisabled()) {
+        if (disabled && isInDisablePeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return batchName;
         }
@@ -91,9 +101,10 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             }
             String data = JsonUtils.serialize(node);
             messageService.createZNode(batchName, data, createNew);
+            setEnable();
         } catch (Exception ex) {
             log.warn("Can not create batch Id=" + batchName + " disable the entity manager!", ex);
-            setIsDisabled(true);
+            setDisable();
         }
         return batchName;
     }
@@ -102,7 +113,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
     public GenericFabricStatus getBatchStatus(String batchId) {
         GenericFabricStatus status = new GenericFabricStatus();
         status.setStatus(GenericFabricStatusEnum.UNKNOWN);
-        if (isDisabled()) {
+        if (disabled && isInDisablePeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return status;
         }
@@ -115,41 +126,145 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             GenericFabricNode fabricNode = JsonUtils.deserialize(data, GenericFabricNode.class);
             status.setStatus(getStatusEnum(batchId, fabricNode));
             setStatusProgress(batchId, status, fabricNode);
-            status.setMessage(fabricNode.getMessage());
+            status.setMessage(fabricNode.toString());
+            setEnable();
         } catch (Exception ex) {
             log.warn("Can not get status for batch Id=" + batchId + " disable the entity manager!", ex);
-            setIsDisabled(true);
+            setDisable();
         }
         return status;
     }
 
     @Override
     public void publishEntity(GenericRecordRequest request, T entity, Class<T> clazz) {
-        if (isDisabled()) {
+        if (disabled && isInDisablePeriod()) {
+            log.warn("Generic Fabric entity manager is disabled!");
+            return;
+        }
+        boolean isValid = validateRequest(request);
+        if (!isValid) {
             return;
         }
         try {
             Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
             GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
             publish(request, genericRecord);
-
+            setEnable();
         } catch (Exception ex) {
             log.warn("Publish entity failed! entity Id=" + entity.getId() + " disable the entity manager!", ex);
-            setIsDisabled(true);
+            setDisable();
+        }
+    }
+
+    @Override
+    public void publishEntityBatch(String batchId, String recordType, FabricStoreEnum store, String repository,
+            List<GenericRecordRequest> requests, List<T> entities, Class<T> clazz) {
+        if (disabled && isInDisablePeriod()) {
+            log.warn("Generic Fabric entity manager is disabled!");
+            return;
+        }
+        boolean isValid = validateRequest(batchId, recordType, store, repository);
+        if (!isValid) {
+            return;
+        }
+        if (requests.size() != entities.size()) {
+            log.error("Sizes does not match for requests and entities!");
+            return;
+        }
+        try {
+            for (int i = 0; i < requests.size(); i++) {
+                T entity = entities.get(i);
+                GenericRecordRequest request = requests.get(i);
+                request.setStores(Arrays.asList(store));
+                request.setBatchId(batchId);
+                request.setRecordType(recordType);
+                request.setRepositories(Arrays.asList(repository));
+                Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
+                GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
+                publish(request, genericRecord);
+            }
+            setEnable();
+        } catch (Exception ex) {
+            log.warn("Publish entities failed! store=" + store.toString() + " repository=" + repository
+                    + " disable the entity manager!", ex);
+            setDisable();
         }
     }
 
     @Override
     public void publishRecord(GenericRecordRequest request, GenericRecord genericRecord) {
-        if (isDisabled()) {
+        if (disabled && isInDisablePeriod()) {
+            log.warn("Generic Fabric entity manager is disabled!");
+            return;
+        }
+        boolean isValid = validateRequest(request);
+        if (!isValid) {
             return;
         }
         try {
             publish(request, genericRecord);
+            setEnable();
         } catch (Exception ex) {
             log.warn("Publish record failed! request Id=" + request.getId() + " disable the entity manager!", ex);
-            setIsDisabled(true);
+            setDisable();
         }
+    }
+
+    @Override
+    public void publishRecordBatch(String batchId, String recordType, FabricStoreEnum store, String repository,
+            List<GenericRecordRequest> requests, List<GenericRecord> genericRecords) {
+        if (disabled && isInDisablePeriod()) {
+            log.warn("Generic Fabric entity manager is disabled!");
+            return;
+        }
+        boolean isValid = validateRequest(batchId, recordType, store, repository);
+        if (!isValid) {
+            return;
+        }
+        if (requests.size() != genericRecords.size()) {
+            log.error("Sizes does not match for requests and records!");
+            return;
+        }
+        try {
+            for (int i = 0; i < requests.size(); i++) {
+                GenericRecordRequest request = requests.get(i);
+                GenericRecord genericRecord = genericRecords.get(i);
+                request.setBatchId(batchId);
+                request.setRecordType(recordType);
+                request.setStores(Arrays.asList(store));
+                request.setRepositories(Arrays.asList(repository));
+                publish(request, genericRecord);
+            }
+            setEnable();
+        } catch (Exception ex) {
+            log.warn("Publish records failed! store=" + store.toString() + " repository=" + repository
+                    + " disable the entity manager!", ex);
+            setDisable();
+        }
+    }
+
+    private boolean validateRequest(String batchId, String recordType, FabricStoreEnum store, String repository) {
+        if (store == null || StringUtils.isBlank(repository)) {
+            log.error("Store or repository is not specified!");
+            return false;
+        }
+        if (StringUtils.isBlank(batchId) || StringUtils.isBlank(recordType)) {
+            log.error("batchId or recordType is not specified!");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateRequest(GenericRecordRequest request) {
+        if (CollectionUtils.isEmpty(request.getStores())) {
+            log.error("No stores specified!");
+            return false;
+        }
+        if (CollectionUtils.isEmpty(request.getRepositories())) {
+            log.error("No repository specified!");
+            return false;
+        }
+        return true;
     }
 
     private void setStatusProgress(String batchId, GenericFabricStatus status, GenericFabricNode fabricNode) {
@@ -161,32 +276,32 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             status.setProgress(1.0f);
             return;
         }
-        float result = fabricNode.getCount() == fabricNode.getTotalCount() ? 1.0f : 1.0f * fabricNode.getCount()
-                / fabricNode.getTotalCount();
+        float result = fabricNode.getFinishedCount() == fabricNode.getTotalCount() ? 1.0f : 1.0f
+                * fabricNode.getFinishedCount() / fabricNode.getTotalCount();
         status.setProgress(result);
     }
 
     private GenericFabricStatusEnum getStatusEnum(String batchId, GenericFabricNode fabricNode) {
 
-        if (StringUtils.isNotBlank(fabricNode.getMessage())) {
-            log.error("Batch failed for batch Id=" + batchId + " error=" + fabricNode.getMessage());
-            return GenericFabricStatusEnum.ERROR;
-        }
         if (fabricNode.getTotalCount() <= -1) {
             return GenericFabricStatusEnum.PROCESSING;
         }
-        if (fabricNode.getCount() >= fabricNode.getTotalCount()) {
+        if (fabricNode.getFailedCount() > 0) {
+            log.error("Batch failed for batch Id=" + batchId + " error=" + fabricNode.toString());
+            return GenericFabricStatusEnum.ERROR;
+        }
+        if (fabricNode.getFinishedCount() >= fabricNode.getTotalCount()) {
             return GenericFabricStatusEnum.FINISHED;
         }
-        if (fabricNode.getCount() < fabricNode.getTotalCount()) {
+        if (fabricNode.getFinishedCount() < fabricNode.getTotalCount()) {
             return GenericFabricStatusEnum.PROCESSING;
         }
         return GenericFabricStatusEnum.UNKNOWN;
     }
 
     @Override
-    public void updateBatchCount(String batchId, long delta) {
-        if (isDisabled()) {
+    public void updateBatchCount(String batchId, long delta, boolean isFinished) {
+        if (disabled && isInDisablePeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return;
         }
@@ -196,34 +311,83 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
                 (origData) -> {
                     try {
                         if (StringUtils.isBlank(origData)) {
-                            GenericFabricNode node = new GenericFabricNode();
-                            node.setCount(delta);
-                            return JsonUtils.serialize(node);
+                            return resetCount(delta, isFinished);
                         }
                         if (delta <= 0) {
                             return origData;
                         }
-                        GenericFabricNode node = JsonUtils.deserialize(origData, GenericFabricNode.class);
-                        if (node.getCount() + delta < Long.MAX_VALUE) {
-                            node.setCount(node.getCount() + delta);
-                        }
+                        GenericFabricNode node = addCount(delta, isFinished, origData);
+                        setEnable();
                         return JsonUtils.serialize(node);
                     } catch (Exception ex) {
                         log.error("Failed to update, batchIdName=" + batchId + " delta=" + delta
                                 + " disable the entity manager!");
-                        setIsDisabled(true);
+                        setDisable();
                         return origData;
                     }
                 });
     }
 
+    private String resetCount(long delta, boolean isFinished) {
+        GenericFabricNode node = new GenericFabricNode();
+        if (isFinished) {
+            node.setFinishedCount(delta);
+        } else {
+            node.setFailedCount(delta);
+        }
+        return JsonUtils.serialize(node);
+    }
+
+    private GenericFabricNode addCount(long delta, boolean isFinished, String origData) {
+        GenericFabricNode node = JsonUtils.deserialize(origData, GenericFabricNode.class);
+        if (isFinished) {
+            long newCount = node.getFinishedCount() + delta;
+            if (newCount < Long.MAX_VALUE) {
+                node.setFinishedCount(newCount);
+            }
+        } else {
+            long newCount = node.getFailedCount() + delta;
+            if (newCount < Long.MAX_VALUE) {
+                node.setFailedCount(newCount);
+            }
+        }
+        return node;
+    }
+
     @Override
     public boolean cleanup(String batchId) {
-        if (isDisabled()) {
+        if (disabled && isInDisablePeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return false;
         }
         return messageService.cleanup(batchId);
+    }
+
+    public void setDisable() {
+        if (!disabled) {
+            synchronized (this) {
+                if (!disabled) {
+                    disabled = true;
+                    lastDisabledTime = System.currentTimeMillis();
+                    log.warn("Set GenericFabricEntityManagerImpl to be Disabled!");
+                }
+            }
+        }
+    }
+
+    public void setEnable() {
+        if (disabled) {
+            synchronized (this) {
+                if (disabled) {
+                    disabled = false;
+                    log.warn("Set GenericFabricEntityManagerImpl to be Enabled!");
+                }
+            }
+        }
+    }
+
+    private boolean isInDisablePeriod() {
+        return System.currentTimeMillis() - lastDisabledTime <= TEN_MINUTES;
     }
 
 }

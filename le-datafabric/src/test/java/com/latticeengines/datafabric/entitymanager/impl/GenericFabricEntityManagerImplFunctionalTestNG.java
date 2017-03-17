@@ -110,7 +110,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         String data = messageService.readData(id);
         Assert.assertNotNull(data);
         GenericFabricNode node = JsonUtils.deserialize(data, GenericFabricNode.class);
-        Assert.assertEquals(node.getCount(), 0);
+        Assert.assertEquals(node.getFinishedCount(), 0);
         Assert.assertEquals(node.getTotalCount(), 5);
         Assert.assertEquals(node.getName(), id);
 
@@ -128,14 +128,14 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         String data = messageService.readData(name);
         Assert.assertNotNull(data);
         GenericFabricNode node = JsonUtils.deserialize(data, GenericFabricNode.class);
-        Assert.assertEquals(node.getCount(), 0);
+        Assert.assertEquals(node.getFinishedCount(), 0);
         Assert.assertEquals(node.getTotalCount(), 6);
         Assert.assertEquals(node.getName(), "connectors");
 
     }
 
     @Test(groups = "functional", enabled = true)
-    public void updateBatchCount() throws Exception {
+    public void updateBatchCountFinished() throws Exception {
         // bulk use case
         String name = entityManager.createOrGetNamedBatchId("connectors", 10L, true);
         batchIds.add(name);
@@ -144,35 +144,35 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         String data = messageService.readData(name);
         Assert.assertNotNull(data);
         GenericFabricNode node = JsonUtils.deserialize(data, GenericFabricNode.class);
-        Assert.assertEquals(node.getCount(), 0);
+        Assert.assertEquals(node.getFinishedCount(), 0);
         Assert.assertEquals(node.getTotalCount(), 10);
         Assert.assertEquals(node.getName(), "connectors");
         GenericFabricStatus batchStatus = entityManager.getBatchStatus(name);
         Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
 
-        entityManager.updateBatchCount(name, 3);
+        entityManager.updateBatchCount(name, 3, true);
         data = messageService.readData(name);
         Assert.assertNotNull(data);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
-        Assert.assertEquals(node.getCount(), 3);
+        Assert.assertEquals(node.getFinishedCount(), 3);
         Assert.assertEquals(node.getTotalCount(), 10);
         Assert.assertEquals(node.getName(), "connectors");
         batchStatus = entityManager.getBatchStatus(name);
         Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
         Assert.assertEquals(batchStatus.getProgress(), new Float(0.30f));
 
-        entityManager.updateBatchCount(name, 6);
+        entityManager.updateBatchCount(name, 6, true);
         data = messageService.readData(name);
         Assert.assertNotNull(data);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
-        Assert.assertEquals(node.getCount(), 9);
+        Assert.assertEquals(node.getFinishedCount(), 9);
         Assert.assertEquals(node.getTotalCount(), 10);
         Assert.assertEquals(node.getName(), "connectors");
         batchStatus = entityManager.getBatchStatus(name);
         Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
         Assert.assertEquals(batchStatus.getProgress(), new Float(0.9f));
 
-        entityManager.updateBatchCount(name, 1);
+        entityManager.updateBatchCount(name, 1, true);
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
         batchStatus = entityManager.getBatchStatus(name);
@@ -185,11 +185,11 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
         Assert.assertEquals(node.getTotalCount(), -1);
-        entityManager.updateBatchCount(name, 8);
-        entityManager.updateBatchCount(name, 10);
+        entityManager.updateBatchCount(name, 8, true);
+        entityManager.updateBatchCount(name, 10, true);
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
-        Assert.assertEquals(node.getCount(), 18);
+        Assert.assertEquals(node.getFinishedCount(), 18);
         batchStatus = entityManager.getBatchStatus(name);
         Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
         Assert.assertEquals(batchStatus.getProgress(), new Float(0.01f));
@@ -199,14 +199,61 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
         Assert.assertEquals(node.getTotalCount(), -1);
-        entityManager.updateBatchCount(name, 8);
-        entityManager.updateBatchCount(name, 10);
+        entityManager.updateBatchCount(name, 8, true);
+        entityManager.updateBatchCount(name, 10, true);
         data = messageService.readData(name);
         node = JsonUtils.deserialize(data, GenericFabricNode.class);
-        Assert.assertEquals(node.getCount(), 18);
+        Assert.assertEquals(node.getFinishedCount(), 18);
         batchStatus = entityManager.getBatchStatus(name);
         Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
         Assert.assertEquals(batchStatus.getProgress(), new Float(0.01f));
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void updateBatchCountNotFinished() throws Exception {
+        // bulk use case
+        String name = entityManager.createOrGetNamedBatchId("connectors", 10L, true);
+        batchIds.add(name);
+        Assert.assertNotNull(name);
+
+        String data = messageService.readData(name);
+        Assert.assertNotNull(data);
+        GenericFabricNode node = JsonUtils.deserialize(data, GenericFabricNode.class);
+        Assert.assertEquals(node.getFinishedCount(), 0);
+        Assert.assertEquals(node.getTotalCount(), 10);
+        Assert.assertEquals(node.getName(), "connectors");
+        GenericFabricStatus batchStatus = entityManager.getBatchStatus(name);
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
+
+        entityManager.updateBatchCount(name, 3, true);
+        entityManager.updateBatchCount(name, 3, false);
+        data = messageService.readData(name);
+        node = JsonUtils.deserialize(data, GenericFabricNode.class);
+        Assert.assertEquals(node.getFinishedCount(), 3);
+        Assert.assertEquals(node.getFailedCount(), 3);
+        Assert.assertEquals(node.getTotalCount(), 10);
+        Assert.assertEquals(node.getName(), "connectors");
+        batchStatus = entityManager.getBatchStatus(name);
+        log.info(batchStatus.getMessage());
+        Assert.assertEquals(batchStatus.getProgress(), new Float(0.3f));
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.ERROR);
+
+        name = entityManager.createOrGetNamedBatchId("connectors", null, true);
+        batchIds.add(name);
+        Assert.assertNotNull(name);
+
+        entityManager.updateBatchCount(name, 3, false);
+        data = messageService.readData(name);
+        node = JsonUtils.deserialize(data, GenericFabricNode.class);
+        Assert.assertEquals(node.getFinishedCount(), 0);
+        Assert.assertEquals(node.getFailedCount(), 3);
+        Assert.assertEquals(node.getTotalCount(), -1);
+        Assert.assertEquals(node.getName(), "connectors");
+        batchStatus = entityManager.getBatchStatus(name);
+        log.info(batchStatus.getMessage());
+        Assert.assertEquals(batchStatus.getProgress(), new Float(0.01f));
+        Assert.assertEquals(batchStatus.getStatus(), GenericFabricStatusEnum.PROCESSING);
+
     }
 
     @Test(groups = "manual", enabled = true)
@@ -274,11 +321,9 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         Assert.assertEquals(count1, count2);
         Assert.assertEquals(count1, RECORD_COUNT);
 
-        List<GenericRecord> records1 = AvroUtils
-                .getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
+        List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile1/" + FILE_PATTERN);
         Assert.assertTrue(records1.get(0).get("age") == null);
-        List<GenericRecord> records2 = AvroUtils
-                .getDataFromGlob(conf, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
+        List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf, BASE_DIR + "/testGenericFile2/" + FILE_PATTERN);
         Assert.assertTrue(records2.get(0).get("age") != null);
 
     }

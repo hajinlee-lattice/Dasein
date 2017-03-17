@@ -56,16 +56,22 @@ public class GenericRecordProcessor {
 
     public void process() {
         Map<FabricStoreEnum, Map<String, Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>>>> recordMap = populateRecords();
-        writeRecords(recordMap);
-        updateRecordCount();
+        try {
+            writeRecords(recordMap);
+            updateRecordCount(true);
+        } catch (Exception ex) {
+            log.warn("Failed to write records!", ex);
+            updateRecordCount(false);
+        }
     }
 
-    private void updateRecordCount() {
+    private void updateRecordCount(boolean isFinished) {
         if (batchCountMap.size() == 0) {
             return;
         }
+
         for (Map.Entry<String, Long> entry : batchCountMap.entrySet()) {
-            entityManager.updateBatchCount(entry.getKey(), entry.getValue());
+            entityManager.updateBatchCount(entry.getKey(), entry.getValue(), isFinished);
         }
     }
 

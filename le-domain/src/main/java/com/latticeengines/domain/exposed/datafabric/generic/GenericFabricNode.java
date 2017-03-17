@@ -9,10 +9,10 @@ public class GenericFabricNode implements HasName {
     private String name;
     @JsonProperty("TotalCount")
     private long totalCount = -1;
-    @JsonProperty("Count")
-    private long count = 0;
-    @JsonProperty("Message")
-    private String message;
+    @JsonProperty("FinishedCount")
+    private long finishedCount = 0;
+    @JsonProperty("FailedCount")
+    private long failedCount;
 
     @Override
     public String getName() {
@@ -32,20 +32,28 @@ public class GenericFabricNode implements HasName {
         this.totalCount = totalCount;
     }
 
-    public long getCount() {
-        return count;
+    public long getFinishedCount() {
+        return finishedCount;
     }
 
-    public void setCount(long count) {
-        this.count = count;
+    public void setFinishedCount(long finishedCount) {
+        this.finishedCount = finishedCount;
     }
 
-    public String getMessage() {
-        return message;
+    public long getFailedCount() {
+        return failedCount;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setFailedCount(long failedCount) {
+        this.failedCount = failedCount;
     }
+
+    @Override
+    public String toString() {
+        return "GenericFabricNode [name=" + name + ", totalCount=" + totalCount + ", finishedCount=" + finishedCount
+                + ", failedCount=" + failedCount + "]";
+    }
+    
+    
 
 }

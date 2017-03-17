@@ -4,6 +4,7 @@ import org.apache.avro.reflect.AvroName;
 import org.apache.avro.reflect.Nullable;
 import org.apache.avro.reflect.Union;
 
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class MatchHistory implements HasId<String> {
@@ -54,14 +55,31 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("Matched")
     private Boolean matched;
-
     @Nullable
     @AvroName("LatticeAccountId")
     private String latticeAccountId;
+    @Nullable
+    @AvroName("TimestampSeconds")
+    private Long timestampSeconds;
+    @Nullable
+    @AvroName("HitWhiteCache")
+    private Boolean hitWhiteCache;
+    @Nullable
+    @AvroName("MatchMode")
+    private String matchMode;
 
     @Nullable
-    @AvroName("Timestamp")
-    private Long timestampSeconds;
+    @AvroName("MatchedDuns")
+    private String matchedDuns;
+    @Nullable
+    @AvroName("MatchedConfidenceCode")
+    private Integer matchedConfidenceCode;
+    @Nullable
+    @AvroName("MatchedMatchGrade")
+    private String matchedMatchGrade;
+    @Nullable
+    @AvroName("MatchedReturnCode")
+    private String matchedReturnCode;
 
     @Override
     @Union({})
@@ -81,20 +99,8 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public MatchHistory setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    @Union({})
     public String getCity() {
         return city;
-    }
-
-    @Union({})
-    public MatchHistory setCity(String city) {
-        this.city = city;
-        return this;
     }
 
     @Union({})
@@ -103,20 +109,8 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public MatchHistory setCountry(String country) {
-        this.country = country;
-        return this;
-    }
-
-    @Union({})
     public String getCountryCode() {
         return countryCode;
-    }
-
-    @Union({})
-    public MatchHistory setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
-        return this;
     }
 
     @Union({})
@@ -125,20 +119,8 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public MatchHistory setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-        return this;
-    }
-
-    @Union({})
     public String getState() {
         return state;
-    }
-
-    @Union({})
-    public MatchHistory setState(String state) {
-        this.state = state;
-        return this;
     }
 
     @Union({})
@@ -147,20 +129,8 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public MatchHistory setStreet(String street) {
-        this.street = street;
-        return this;
-    }
-
-    @Union({})
     public String getZipcode() {
         return zipcode;
-    }
-
-    @Union({})
-    public MatchHistory setZipcode(String zipcode) {
-        this.zipcode = zipcode;
-        return this;
     }
 
     @Union({})
@@ -191,25 +161,25 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public String getDuns() {
-        return duns;
-    }
-
-    @Union({})
-    public String getEmail() {
-        return email;
-    }
-
-    @Union({})
     public MatchHistory setDomain(String domain) {
         this.domain = domain;
         return this;
     }
 
     @Union({})
+    public String getDuns() {
+        return duns;
+    }
+
+    @Union({})
     public MatchHistory setDuns(String duns) {
         this.duns = duns;
         return this;
+    }
+
+    @Union({})
+    public String getEmail() {
+        return email;
     }
 
     @Union({})
@@ -230,13 +200,50 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public Long getTimestamp() {
-        return timestampSeconds;
+    public Long getTimestampSeconds() {
+        return this.timestampSeconds;
     }
 
     @Union({})
-    public void setTimestampSeconds(Long timestampSeconds) {
+    public MatchHistory setTimestampSeconds(Long timestampSeconds) {
         this.timestampSeconds = timestampSeconds;
+        return this;
+    }
+
+    @Union({})
+    public Boolean getHitWhiteCache() {
+        return hitWhiteCache;
+    }
+
+    @Union({})
+    public String getMatchedDuns() {
+        return matchedDuns;
+    }
+
+    @Union({})
+    public Integer getMatchedConfidenceCode() {
+        return matchedConfidenceCode;
+    }
+
+    @Union({})
+    public Object getMatchedMatchGrade() {
+        return matchedMatchGrade;
+    }
+
+    @Union({})
+    public String getMatchedReturnCode() {
+        return matchedReturnCode;
+    }
+
+    @Union({})
+    public String getMatchMode() {
+        return matchMode;
+    }
+
+    @Union({})
+    public MatchHistory setMatchMode(String mode) {
+        this.matchMode = mode;
+        return this;
     }
 
     public MatchHistory withNameLocation(NameLocation nameLocation) {
@@ -254,4 +261,14 @@ public class MatchHistory implements HasId<String> {
         return this;
     }
 
+    public MatchHistory withDnBMatchResult(DnBMatchContext matchContext) {
+        this.matchedDuns = matchContext.getDuns();
+        this.matchedConfidenceCode = matchContext.getConfidenceCode();
+        this.matchedMatchGrade = matchContext.getMatchGrade() != null
+                && matchContext.getMatchGrade().getRawCode() != null ? matchContext.getMatchGrade().getRawCode() : null;
+        this.hitWhiteCache = matchContext.getHitWhiteCache();
+        if (matchContext.getDnbCode() != null)
+            this.matchedReturnCode = matchContext.getDnbCode().toString();
+        return this;
+    }
 }
