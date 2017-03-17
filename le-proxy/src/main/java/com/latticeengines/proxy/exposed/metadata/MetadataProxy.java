@@ -218,7 +218,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     @SuppressWarnings("unchecked")
     @Override
     public List<MetadataSegment> getMetadataSegments(String customerSpace) {
-        String url = constructUrl("/all/customerspaces/{customerSpace}/segments", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/segments/all", customerSpace);
         return get("getSegments", url, List.class);
     }
 
