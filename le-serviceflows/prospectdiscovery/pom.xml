@@ -310,6 +310,12 @@
             <artifactId>tez-runtime-library</artifactId>
             <version>${tez.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-auth</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
