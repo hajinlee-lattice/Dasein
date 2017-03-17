@@ -53,7 +53,8 @@ angular.module('lp.jobs', [
                     { label: "Completed", action: { jobStatus: 'Completed' } },
                     { label: "Pending", action: { jobStatus: 'Pending' } },
                     { label: "Running", action: { jobStatus: 'Running' } },
-                    { label: "Failed", action: { jobStatus: "Failed" } }
+                    { label: "Failed", action: { jobStatus: "Failed" } },
+                    { label: "Cancelled", action: { jobStatus: "Cancelled" } }
                 ]
             },
             maxperpage: {
