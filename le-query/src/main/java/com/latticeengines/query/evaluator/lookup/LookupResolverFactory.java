@@ -1,4 +1,4 @@
-package com.latticeengines.query.evaluator.impl.lookup;
+package com.latticeengines.query.evaluator.lookup;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;

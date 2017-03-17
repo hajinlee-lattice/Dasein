@@ -1,4 +1,4 @@
-package com.latticeengines.query.evaluator.impl.lookup;
+package com.latticeengines.query.evaluator.lookup;
 
 import java.util.ArrayList;
 import java.util.List;

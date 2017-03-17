@@ -1,4 +1,4 @@
-package com.latticeengines.query.factory.impl;
+package com.latticeengines.query.factory;
 
 import javax.sql.DataSource;
 

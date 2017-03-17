@@ -1,4 +1,4 @@
-package com.latticeengines.query.evaluator.impl;
+package com.latticeengines.query.evaluator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,8 @@ import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.ValueLookup;
-import com.latticeengines.query.evaluator.impl.lookup.LookupResolver;
-import com.latticeengines.query.evaluator.impl.lookup.LookupResolverFactory;
+import com.latticeengines.query.evaluator.lookup.LookupResolver;
+import com.latticeengines.query.evaluator.lookup.LookupResolverFactory;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.object.BusinessObject;
 import com.latticeengines.query.util.QueryUtils;
@@ -124,13 +124,12 @@ public class JdbcQueryProcessor extends QueryProcessor {
             if (join.getDestinationObjectUsage().equals(ObjectUsage.LOOKUP)) {
                 TableRelationship relationship = sourceRelationships.stream()
                         .filter(r -> destinationTable.getName().equals(r.getTargetTableName())) //
-                        .filter(r -> r.getSourceCardinality().equals(Cardinality.ONE)) //
                         .filter(r -> r.getTargetCardinality().equals(Cardinality.ONE)) //
                         .findFirst() //
                         .orElse(null);
                 if (relationship == null) {
                     throw new RuntimeException(String.format(
-                            "Cannot find 1-to-1 relationship to satisfy necessary join %s", join));
+                            "Cannot find 1-to-1 or many-to-1 relationship to satisfy necessary join %s", join));
                 }
                 relationships.add(relationship);
 

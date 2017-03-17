@@ -1,4 +1,4 @@
-package com.latticeengines.query.evaluator.impl;
+package com.latticeengines.query.evaluator;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;

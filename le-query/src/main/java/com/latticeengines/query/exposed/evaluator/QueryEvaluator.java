@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.query.evaluator.impl.QueryProcessor;
+import com.latticeengines.query.evaluator.QueryProcessor;
 import com.querydsl.sql.SQLQuery;
 
 @Component("queryEvaluator")

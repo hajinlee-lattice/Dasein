@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.query.factory.impl.QueryProvider;
+import com.latticeengines.query.factory.QueryProvider;
 import com.querydsl.sql.SQLQuery;
 
 @Component("queryFactory")
