@@ -58,9 +58,9 @@ module.exports = function (grunt) {
             dev_admin: {
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
-                API_ADMIN_URL: 'https://10.41.0.25:8085',
-                API_MCSVC_URL: 'https://10.41.0.25:8080',
-                API_MATCHAPI_URL: 'https://10.41.0.25:8076',
+                API_ADMIN_URL: 'https://internal-adminconsole-lpi-a-48494326.us-east-1.elb.amazonaws.com',
+                API_MCSVC_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_MATCHAPI_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
                 API_INFLUXDB_URL: 'http://10.41.1.188:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
