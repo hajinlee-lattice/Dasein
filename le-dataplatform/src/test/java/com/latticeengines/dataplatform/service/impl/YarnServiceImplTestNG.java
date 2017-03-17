@@ -61,8 +61,8 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient",
                 appMasterProperties,
                 containerProperties);
-        AppInfo appInfo = yarnService.getApplication(applicationId.toString());
-        assertNotNull(appInfo);
+        ApplicationReport appReport = yarnService.getApplication(applicationId.toString());
+        assertNotNull(appReport);
 
         FinalApplicationStatus status = waitForStatus(applicationId,
                 FinalApplicationStatus.SUCCEEDED);
@@ -83,8 +83,8 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 appMasterProperties,
                 containerProperties);
         ApplicationReport applicationReport = modelingJobService.getJobReportById(applicationId);
-        AppInfo appInfo = yarnService.getApplication(applicationId.toString());
-        assertNotNull(appInfo);
+        ApplicationReport appReport = yarnService.getApplication(applicationId.toString());
+        assertNotNull(appReport);
         assertNotNull(applicationReport);
 
         modelingJobService.killJob(applicationId);

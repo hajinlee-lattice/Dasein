@@ -182,7 +182,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
                 jobMetric.setJobName("NA");
             }
 
-            if (app.getState().equalsIgnoreCase(YarnApplicationState.RUNNING.name())) {
+            if (app.getState() == YarnApplicationState.RUNNING) {
                 jobMetric.setIsRunning(true);
                 jobMetric.setIsWaiting(false);
             } else {

@@ -10,6 +10,7 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
@@ -122,16 +123,16 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
             @Override
             public void run() {
-                AppInfo appInfo = yarnService.getApplication(appId);
+                ApplicationReport appReport = yarnService.getApplication(appId);
 
-                String queue = appInfo.getQueue();
+                String queue = appReport.getQueue();
                 if (queue == null) {
                     throw new LedpException(LedpCode.LEDP_12006);
                 }
                 ledpMetricsMgr.setQueue(queue);
                 ledpMetricsMgr.start();
 
-                long appSubmissionTime = appInfo.getStartTime();
+                long appSubmissionTime = appReport.getStartTime();
                 log.info("App start latency = " + (appStartTime - appSubmissionTime));
                 ledpMetricsMgr.setAppSubmissionTime(appSubmissionTime);
             }

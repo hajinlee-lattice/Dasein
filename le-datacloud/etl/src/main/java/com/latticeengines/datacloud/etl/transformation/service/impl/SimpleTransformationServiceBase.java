@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.metadata.Table;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,7 +27,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-import reactor.util.CollectionUtils;
 
 /**
  * This is the base implementation of the transformatin service

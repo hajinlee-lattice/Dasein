@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.exposed.service;
 
 import java.util.List;
 
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
@@ -15,7 +16,7 @@ public interface YarnService {
 
     AppsInfo getApplications(String queryString);
 
-    AppInfo getApplication(String appId);
+    ApplicationReport getApplication(String appId);
 
     List<AppInfo> getPreemptedApps();
 

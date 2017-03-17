@@ -18,14 +18,6 @@
         <yarn:classpath />
     </yarn:environment>
     
-    <bean id="defaultYarnClientCustomization" class="com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization" >
-        <constructor-arg ref="yarnConfiguration"/>
-        <constructor-arg ref="versionManager"/>
-        <constructor-arg value="${dataplatform.hdfs.stack:}"/>
-        <constructor-arg ref="softwareLibraryService"/>
-        <constructor-arg value="${dataplatform.yarn.job.basedir}"/>
-        <constructor-arg value="${hadoop.fs.web.defaultFS}"/>
-    </bean>
 
     <!-- This is for creating the default yarn client that will be used in the code -->        
     <bean id="defaultYarnClient" class="org.springframework.yarn.fs.PrototypeYarnClientFactoryBean" scope="prototype">

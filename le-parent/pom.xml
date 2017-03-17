@@ -47,7 +47,7 @@
         <reflections.version>0.9.9</reflections.version>
         <scala.version>2.11.8</scala.version>
 
-        <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
+        <hadoop.version>2.7.1.2.3.6.0-3796</hadoop.version>
         <hadoop.aws.version>2.6.0</hadoop.aws.version>
         <hive.version>1.1.0</hive.version>
         <avro.version>1.7.7</avro.version>
@@ -58,7 +58,7 @@
         <cascading.flink.version>0.3.0</cascading.flink.version>
         <flink.version>1.2.0</flink.version> <!-- compatible with cascading flink 0.3 -->
         <lingual.version>2.0.0-wip-78</lingual.version>
-        <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
+        <spring.data.version>2.4.0.RELEASE-hdp23</spring.data.version>
         <tez.version>0.8.2</tez.version>
         <jython.version>2.7.0</jython.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
@@ -83,7 +83,7 @@
         <jpmml.model.version>1.2.15</jpmml.model.version>
         <cronutils.version>4.0.1</cronutils.version>
         <snappy.version>1.1.1.6</snappy.version>
-        <curator.version>2.6.0</curator.version>
+        <curator.version>2.7.1</curator.version>
         <redshift.jdbc.version>1.2.1.1001</redshift.jdbc.version>
         <querydsl.version>4.1.3</querydsl.version>
 

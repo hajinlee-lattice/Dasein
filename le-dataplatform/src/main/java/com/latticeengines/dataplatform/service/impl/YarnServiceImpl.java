@@ -8,16 +8,19 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.conf.HAUtil;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.yarn.client.YarnClient;
 
 import com.google.common.collect.ComparisonChain;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -33,6 +36,9 @@ public class YarnServiceImpl implements YarnService {
 
     @Autowired
     private Configuration yarnConfiguration;
+    
+    @Autowired
+    private YarnClient defaultYarnClient;
 
     private String getResourceManagerEndpoint() {
         if (yarnConfiguration.getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
@@ -128,14 +134,15 @@ public class YarnServiceImpl implements YarnService {
     }
 
     @Override
-    public AppInfo getApplication(String appId) {
-        try {
-            String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
-        } catch (Exception e) {
-            String rmRestEndpointBaseUrl = performFailover();
-            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
-        }
+    public ApplicationReport getApplication(String appId) {
+//        try {
+//            String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
+//            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
+//        } catch (Exception e) {
+//            String rmRestEndpointBaseUrl = performFailover();
+//            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
+//        }
+    	return defaultYarnClient.getApplicationReport(ConverterUtils.toApplicationId(appId));
     }
 
     private String performFailover() {
