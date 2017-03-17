@@ -181,12 +181,20 @@ public class DnBCache extends MatchCache<DnBCache> {
         this.outOfBusiness = outOfBusiness;
     }
 
+    public String isOutOfBusinessString() {
+        return outOfBusiness == null ? null : String.valueOf(outOfBusiness);
+    }
+
     public Boolean isDunsInAM() {
         return dunsInAM;
     }
 
     public void setDunsInAM(Boolean dunsInAM) {
         this.dunsInAM = dunsInAM;
+    }
+
+    public String isDunsInAMString() {
+        return dunsInAM == null ? null : String.valueOf(dunsInAM);
     }
 
 }

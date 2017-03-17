@@ -173,7 +173,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                 System.currentTimeMillis() - startTime));
                         readyToReturn = true;
                     } else {
-                        log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS = " + cache.getDuns());
+                        log.info(String.format(
+                                "Remove invalid white cache: Id=%s DUNS=%s OutOfBusiness=%s IsDunsInAM=%s",
+                                cache.getId(), cache.getDuns(), cache.isOutOfBusinessString(),
+                                cache.isDunsInAMString()));
                         dnbCacheService.removeCache(cache);
                     }
                 } else {
@@ -279,7 +282,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                         }
                         readyToReturn = true;
                     } else {
-                        log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS = " + cache.getDuns());
+                        log.info(String.format(
+                                "Remove invalid white cache: Id=%s DUNS=%s OutOfBusiness=%s IsDunsInAM=%s",
+                                cache.getId(), cache.getDuns(), cache.isOutOfBusinessString(),
+                                cache.isDunsInAMString()));
                         dnbCacheService.removeCache(cache);
                     }
                 } else {
@@ -487,6 +493,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
      */
     private void validateDuns(DnBMatchContext context) {
         if (StringUtils.isEmpty(context.getDuns())) {
+            context.setDunsInAM(Boolean.FALSE);
             return;
         }
         if (Boolean.TRUE.equals(context.isOutOfBusiness())) {

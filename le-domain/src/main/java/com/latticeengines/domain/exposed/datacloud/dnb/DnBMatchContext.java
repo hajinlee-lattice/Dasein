@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.dnb;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
@@ -123,7 +125,11 @@ public class DnBMatchContext implements Fact, Dimension {
     }
 
     public void setDuns(String duns) {
-        this.duns = duns;
+        if (StringUtils.isNotEmpty(duns)) {
+            this.duns = duns;
+        } else {
+            this.duns = null;
+        }
     }
 
     public NameLocation getMatchedNameLocation() {
@@ -149,7 +155,12 @@ public class DnBMatchContext implements Fact, Dimension {
     }
 
     public void setMatchGrade(String matchGrade) {
-        this.matchGrade = new DnBMatchGrade(matchGrade);
+        if (StringUtils.isNotEmpty(matchGrade)) {
+            this.matchGrade = new DnBMatchGrade(matchGrade);
+        } else {
+            this.matchGrade = null;
+        }
+
     }
 
     public void setMatchGrade(DnBMatchGrade matchGrade) {

@@ -17,7 +17,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
-import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
@@ -35,9 +34,6 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
 
     @Autowired
     private DnBAuthenticationService dnBAuthenticationService;
-
-    @Autowired
-    private DnBMatchResultValidator dnbMatchResultValidator;
 
     @Value("${datacloud.dnb.bulk.url}")
     private String url;
@@ -192,24 +188,32 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             record = record.substring(1, record.length() - 1);
             String[] values = record.split("\",\"");
 
+            if (values.length < 2) {
+                output.setDnbCode(DnBReturnCode.UNMATCH);
+                return output;
+            }
+            String lookupRequestId = StringUtils.strip(values[1]);
+            output.setLookupRequestId(lookupRequestId);
             if (values.length < 50) {
-                output.setDnbCode(DnBReturnCode.DISCARD);
+                output.setDnbCode(DnBReturnCode.UNMATCH);
                 return output;
             }
             if (!StringUtils.isNumeric(StringUtils.strip(values[48]))) {
-                output.setDnbCode(DnBReturnCode.DISCARD);
+                output.setDnbCode(DnBReturnCode.UNMATCH);
                 return output;
             }
             int confidenceCode = Integer.parseInt(StringUtils.strip(values[48]));
             String matchGrade = StringUtils.strip(values[49]);
             if (StringUtils.isEmpty(matchGrade)) {
-                output.setDnbCode(DnBReturnCode.DISCARD);
+                output.setDnbCode(DnBReturnCode.UNMATCH);
                 return output;
             }
-            String lookupRequestId = StringUtils.strip(values[1]);
-            output.setLookupRequestId(lookupRequestId);
             String duns = StringUtils.strip(values[25]);
             duns = StringUtils.isNotEmpty(duns) ? duns : null;
+            if (duns == null) {
+                output.setDnbCode(DnBReturnCode.UNMATCH);
+                return output;
+            }
             String name = StringUtils.strip(values[26]);
             name = StringUtils.isNotEmpty(name) ? name : null;
             String street = StringUtils.strip(values[29]);
@@ -234,7 +238,6 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             output.setDuns(duns);
             output.setConfidenceCode(confidenceCode);
             output.setMatchGrade(matchGrade);
-            output.setDnbCode(DnBReturnCode.OK);
             NameLocation matchedNameLocation = output.getMatchedNameLocation();
             matchedNameLocation.setName(name);
             matchedNameLocation.setStreet(street);
@@ -243,10 +246,11 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             matchedNameLocation.setCountryCode(countryCode);
             matchedNameLocation.setZipcode(zipCode);
             matchedNameLocation.setPhoneNumber(phoneNumber);
+            output.setDnbCode(DnBReturnCode.OK);
         } catch (Exception e) {
             log.warn(String.format("Fail to extract duns from match result of DnB bulk match request %s: %s",
                     serviceBatchId, record));
-            output.setDnbCode(DnBReturnCode.BAD_RESPONSE);
+            output.setDnbCode(DnBReturnCode.UNMATCH);
         }
         return output;
     }

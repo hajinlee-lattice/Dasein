@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
@@ -28,9 +27,6 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
 
     @Autowired
     private DnBAuthenticationServiceImpl dnBAuthenticationService;
-
-    @Autowired
-    private DnBMatchResultValidator dnbMatchResultValidator;
 
     @Value("${datacloud.dnb.realtime.url.prefix}")
     private String realTimeUrlPrefix;
@@ -126,6 +122,10 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             context.setConfidenceCode(
                     (Integer) retrieveJsonValueFromResponse(entityConfidenceCodeJsonPath, response, false));
             context.setMatchGrade((String) retrieveJsonValueFromResponse(entityMatchGradeJsonPath, response, false));
+            if (context.getDuns() == null || context.getConfidenceCode() == null || context.getMatchGrade() == null) {
+                context.setDnbCode(DnBReturnCode.UNMATCH);
+                return;
+            }
             NameLocation matchedNameLocation = context.getMatchedNameLocation();
             matchedNameLocation.setName((String) retrieveJsonValueFromResponse(entityNameJsonPath, response, false));
             matchedNameLocation
@@ -147,17 +147,15 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             break;
         case REALTIME_EMAIL:
             context.setDuns((String) retrieveJsonValueFromResponse(emailDunsJsonPath, response, false));
+            if (context.getDuns() == null) {
+                context.setDnbCode(DnBReturnCode.UNMATCH);
+                return;
+            }
             break;
         default:
             throw new LedpException(LedpCode.LEDP_25025, new String[] { apiType.name() });
         }
-        if (!StringUtils.isEmpty(context.getDuns())) {
-            context.setDnbCode(DnBReturnCode.OK);
-        } else {
-            log.error(String.format("Fail to extract duns from response of request %: %", context.getLookupRequestId(),
-                    response));
-            context.setDnbCode(DnBReturnCode.BAD_RESPONSE);
-        }
+        context.setDnbCode(DnBReturnCode.OK);
     }
 
     @Override
