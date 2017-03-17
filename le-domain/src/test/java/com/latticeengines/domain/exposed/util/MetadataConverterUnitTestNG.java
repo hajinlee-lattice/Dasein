@@ -58,9 +58,13 @@ public class MetadataConverterUnitTestNG {
         storage.setTableNameInStorage("redshift_bucketedaccountmaster");
         bucketedTable.setStorageMechanism(storage);
 
-        FileUtils.write(new File("bucketedaccountmastertable.json"), bucketedTable.toString());
+        // FileUtils.write(new File("bucketedaccountmastertable.json"),
+        // bucketedTable.toString());
         assertEquals(bucketedTable.getAttributes().size(), 134);
-        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketList().toString(),
-                Arrays.asList(new String[] { null, "Value1", "Value2", "Value3"}).toString());
+        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketList().size(), 4);
+        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketList().get(0).isNullOnly(),
+                Boolean.TRUE.booleanValue());
+        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketList().get(1).getMin(), "Value1");
+        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketList().get(2).getMax(), "Value2");
     }
 }

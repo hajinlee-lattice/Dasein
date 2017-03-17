@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
 import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
+import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -844,32 +845,55 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setBucketList(List<String> bucketList) {
-        properties.put("BucketList", bucketList);
+    public void setBucketRangeList(List<BucketRange> bucketRangeList) {
+        properties.put("BucketRangeList", bucketRangeList);
     }
 
     @Transient
     @JsonIgnore
-    public void addBucket(String bucket) {
-        List<String> bucketList = getBucketList();
+    public void addBucket(BucketRange bucketRange) {
+        List<BucketRange> bucketList = getBucketList();
         if (bucketList == null) {
             bucketList = new ArrayList<>();
-            setBucketList(bucketList);
+            setBucketRangeList(bucketList);
         }
-        getBucketList().add(bucket);
+        getBucketList().add(bucketRange);
     }
 
     @Transient
     @JsonIgnore
-    public void setBucketList(String bucketList) {
-        setListPropertyFromString("BucketList", bucketList);
+    public void addBucket(String bucketRangeStr) {
+        BucketRange bucketRange = null;
+        Pattern pattern = Pattern.compile("^\\[(.*)\\]$");
+        if (bucketRangeStr != null) {
+            Matcher matcher = pattern.matcher(bucketRangeStr);
+            if (matcher.matches()) {
+                String contents = matcher.group(1);
+                if (!contents.isEmpty()) {
+                    String[] array = contents.split(",");
+                    if (array.length == 2) {
+                        Object min = array[0].trim();
+                        Object max = array[1].trim();
+                        Object nullObj = null;
+                        if (min.equals(String.valueOf(nullObj)) && max.equals(String.valueOf(nullObj))) {
+                            bucketRange = BucketRange.nullBucket();
+                        } else {
+                            bucketRange = BucketRange.range(min, max);
+                        }
+                    }
+                }
+            }
+        }
+        if (bucketRange != null) {
+            addBucket(bucketRange);
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Transient
     @JsonIgnore
-    public List<String> getBucketList() {
-        return (List<String>) properties.get("BucketList");
+    public List<BucketRange> getBucketList() {
+        return (List<BucketRange>) properties.get("BucketRangeList");
     }
 
     @Override
