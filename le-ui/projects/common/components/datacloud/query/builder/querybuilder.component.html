@@ -1,0 +1,41 @@
+<div class="container query-builder">
+    <div class="row controls">
+        <div class="columns six">
+            <h2>Build a segment with records that have:</h2>
+        </div>
+        <div class="columns six">
+            <div class="pull-right">
+                <button class="button icon-button white-button"><i class="fa fa-download"></i></button>
+                <button class="button icon-button white-button" ng-click="vm.goAttributes()">Select Attributes</button>
+                <button class="button icon-button blue-button">Save Segment</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <p><strong>All</strong> of the selected attribute value combinations:</p>
+        <query-filter
+            ng-repeat="a in vm.AllAttributes"
+            attribute="a"
+            group="all"
+            on-move="vm.moveToAny($index)"
+            on-delete="vm.delete(vm.AllAttributes, $index)">
+        </query-filter>
+        <p class="text-center" ng-if="!vm.AllAttributes.length">
+            what should it say when All is empty?
+        </p>
+    </div>
+    <hr>
+    <div class="row">
+        <p>And <strong>Any</strong> of the selected attribute value combinations:</p>
+        <query-filter
+            ng-repeat="a in vm.AnyAttributes"
+            attribute="a"
+            group="any"
+            on-move="vm.moveToAll($index)"
+            on-delete="vm.delete(vm.AnyAttributes, $index)">
+        </query-filter>
+        <p class="text-center" ng-if="!vm.AnyAttributes.length">
+            what should it say when Any is empty?
+        </p>
+    </div>
+</div>

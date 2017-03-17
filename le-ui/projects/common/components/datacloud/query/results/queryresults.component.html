@@ -1,0 +1,52 @@
+<section class="container segment-accounts-list">
+
+    <ul class="filters">
+        <li class="query">
+            <div class="ng-search">
+                <form ng-enter="vm.submitQuery()">
+                    <a class="button icon-button white-button" ng-click="vm.clearSearch()">
+                        <span class="fa fa-search" ng-show="!vm.search.length"></span>
+                        <span class="fa fa-times" ng-show="vm.search.length"></span>
+                    </a>
+                    <input type="text" name="SegmentResultSearch" class="form-control" placeholder="Search" ng-model="vm.search" ng-blur="vm.submitQuery()"/>
+                </form>
+            </div>
+        </li>
+        <li class="buttons">
+            <div class="pull-right">
+                <button class="button icon-button white-button"><i class="fa fa-download"></i></button>
+                <button class="button icon-button white-button" ui-sref="home.model.analysis.explorer.query">Refine Query</button>
+                <button class="button icon-button blue-button">Save Segment</button>
+            </div>
+        </li>
+        <li class="paging">
+            <pd-pagination-controls
+                ng-show="vm.count > 0"
+                current="vm.current"
+                max="vm.count">
+            </pd-pagination-controls>
+        </li>
+    </ul>
+
+    <table class="list-table" ng-show="vm.count > 0">
+        <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
+            <tr>
+                <th ng-repeat="col in ::vm.columns" ng-click="vm.sort(col.key);">
+                    <span ng-class="{'sort': vm.sortBy === col.key}">{{::col.displayName}}</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="c in vm.list">
+                 <td ng-repeat="col in ::vm.columns">
+                    {{::c[col.key]}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p ng-if="vm.count === 0">
+        No Records Found
+    <p>
+
+</section>

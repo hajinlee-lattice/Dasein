@@ -1,0 +1,159 @@
+.segment-accounts-list {
+    min-width: 680px;
+
+    .pd-pagination {
+        float: right;
+        display: inline-block;
+        text-align: right;
+    }
+
+    .filters {
+        @include flex-container;
+        padding-bottom: 10px;
+
+        .query,
+        .paging {
+            @include flex-item(0 1 auto);
+        }
+
+        .buttons {
+            @include flex-item(1 1 auto);
+            text-align: right;
+            margin: 0 8px;
+        }
+    }
+
+    table {
+        font-weight: bold;
+
+        thead {
+            border: 1px solid #d0d2d3;
+            border-width: 2px 0;
+        }
+
+        th {
+            border: none;
+            cursor: pointer;
+        }
+
+        .sort:after {
+          font-family: FontAwesome;
+          text-anchor: middle;
+          margin-left: 5px;
+          position: absolute;
+        }
+
+        .sort-dsc .sort:after {
+          content: "\f0d7";
+        }
+
+        .sort-asc .sort:after {
+          content: "\f0d8";
+        }
+    }
+}
+
+.query-builder {
+    margin-top: 1.5em;
+
+    hr {
+        opacity: 0.25;
+        margin: 24px 0;
+        border-style: dashed;
+    }
+
+    .controls {
+        margin-bottom: 10px;
+    }
+
+    strong {
+        font-weight: bold;
+    }
+}
+
+.query-filter {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 1em 0;
+    padding: 0.3em 0;
+}
+
+.query-filter-action {
+    width: 60px;
+    text-align: center;
+    position: relative;
+
+    a {
+        color: black;
+        position: relative;
+        top: 50%;
+    }
+}
+.query-filter-name {
+    flex: 1 0 auto;
+}
+.query-filter-type {
+    width: 120px;
+    padding-top: 18px;
+    padding-left: 2px;
+    color: #888888;
+}
+.query-filter-buckets {
+    flex: 1 0 auto;
+}
+
+.query-filter-table {
+    display: table;
+    width: 100%;
+}
+.query-filter-row {
+    display: table-row;
+    height: 1.8em;
+}
+.query-filter-cell {
+    display: table-cell;
+    vertical-align: top;
+    padding: 1px 4px;
+}
+.query-filter-header {
+    text-transform: uppercase;
+    color: #bbb;
+    font-size: 12px;
+    height: auto;
+}
+
+.query-filter-delete {
+    color: black;
+    text-align: center;
+    a {
+        color: black;
+        text-decoration: none;
+    }
+}
+
+.query-filter.query-any .fa.arrow:before {
+    content: "\f062"; /* up */
+}
+
+.query-filter.query-all .fa.arrow:before {
+    content: "\f063"; /* down */
+}
+
+.query-filter-lift {
+    display: inline-block;
+    text-align: center;
+    color: white;
+    background: black;
+    width: 42px;
+    border-radius: 4px;
+}
+
+.query-filter-category {
+    font-size: 12px;
+}

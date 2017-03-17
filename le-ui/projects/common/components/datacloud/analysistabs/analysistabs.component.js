@@ -1,7 +1,7 @@
-angular.module('common.datacloud.explorertabs', [
+angular.module('common.datacloud.analysistabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
     ])
-.controller('ExplorerTabsController', function ($state, $stateParams, $scope,
+.controller('AnalysisTabsController', function ($state, $stateParams, $scope,
     FeatureFlagService, BrowserStorageUtility, ResourceUtility, DataCloudStore) {
 
     var vm = this,
@@ -21,13 +21,13 @@ angular.module('common.datacloud.explorertabs', [
         }
         vm.section = section;
         var params = {
-            section: vm.section   
+            section: vm.section
         }
         if(goHome) {
             params.category = '';
             params.subcategory = '';
         }
-        $state.go('home.datacloud.explorer', params, { notify: true });
+        $state.go('home.model.analysis', params, { notify: true });
     }
 
     vm.init = function() {

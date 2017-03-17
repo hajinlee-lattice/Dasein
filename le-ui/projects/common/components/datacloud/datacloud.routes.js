@@ -3,6 +3,8 @@ angular
     'common.datacloud.explorer',
     'common.datacloud.lookup',
     'common.datacloud.explorertabs',
+    'common.datacloud.analysistabs',
+    'common.datacloud.query',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .config(function($stateProvider) {
@@ -81,7 +83,7 @@ angular
                         if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
                             && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
                             var accessLevel = BrowserStorageUtility.getSessionDocument().User.AccessLevel;
-                            
+
                             if (accessLevel == "INTERNAL_USER" || accessLevel == "INTERNAL_ADMIN" || accessLevel == "SUPER_ADMIN") {
                                 this.isInternalUser = true;
                             }
@@ -212,21 +214,31 @@ angular
             }
         })
         .state('home.model.analysis', {
-            url: '/analysis/:category/:subcategory',
+            url: '/analysis',
+            resolve: DataCloudResolve,
+            redirectTo: 'home.model.analysis.explorer',
+            views: {
+                "summary@": {
+                    controller: 'AnalysisTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/analysistabs/analysistabs.component.html'
+                }
+            }
+        })
+        .state('home.model.analysis.explorer', {
+            url: '/explorer',
+            redirectTo: 'home.model.analysis.explorer.attributes'
+        })
+        .state('home.model.analysis.explorer.attributes', {
+            url: '/attributes/:category/:subcategory',
             params: {
                 pageIcon: 'ico-performance',
                 pageTitle: 'Analysis',
-                section: 'analysis',
+                section: 'explorer',
                 category: {value: null, squash: true},
                 subcategory: {value: null, squash: true}
             },
-            resolve: DataCloudResolve,
             views: {
-                "summary@": {
-                    controller: 'ExplorerTabsController',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/analysistabs/analysistabs.component.html'
-                },
                 "main@": {
                     resolve: {
                         // Note: this is needed for Account Lookup, dont remove!
@@ -236,9 +248,9 @@ angular
                         AnalysisLookup: function($q) {
                             // load default segment from API
                             var deferred = $q.defer();
-                            
+
                             //DataCloudStore.getCount().then(function(result) {
-                                deferred.resolve(result);
+                                deferred.resolve(null);
                             //});
 
                             return deferred.promise;
@@ -247,6 +259,79 @@ angular
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
+                }
+            }
+        })
+        .state('home.model.analysis.explorer.query', {
+            url: '/query',
+            params: {
+                pageIcon: 'ico-performance',
+                pageTitle: 'Analysis',
+                section: 'query',
+            },
+            views: {
+                "main@": {
+                    resolve: {
+                        QueryRestriction: function(QueryStore) {
+                            QueryStore.loadRestrictions();
+                            return QueryStore.getRestrictions();
+                        }
+                    },
+                    controller: 'QueryBuilderCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/query/builder/querybuilder.component.html'
+                }
+            }
+        })
+        .state('home.model.analysis.accounts', {
+            url: '/accounts',
+            params: {
+                pageIcon: 'ico-segment',
+                pageTitle: 'Segment - Accounts'
+            },
+            views: {
+                "main@": {
+                    resolve: {
+                        Columns: function ($q, QueryStore) {
+                            var deferred = $q.defer();
+                            deferred.resolve(QueryStore.getAccountColumns());
+                            return deferred.promise;
+                        },
+                        Count: function ($q, QueryStore) {
+                           var deferred = $q.defer();
+                           deferred.resolve(QueryStore.getAccountCount());
+                           return deferred.promise;
+                        }
+                    },
+                    controller: 'QueryResultsCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/query/results/queryresults.component.html'
+                }
+            }
+        })
+        .state('home.model.analysis.contacts', {
+            url: '/contacts',
+            params: {
+                pageIcon: 'ico-segment',
+                pageTitle: 'Segment - Accounts'
+            },
+            views: {
+                "main@": {
+                    resolve: {
+                        Columns: function ($q, QueryStore) {
+                            var deferred = $q.defer();
+                            deferred.resolve(QueryStore.getContactColumns());
+                            return deferred.promise;
+                        },
+                        Count: function ($q, QueryStore) {
+                           var deferred = $q.defer();
+                           deferred.resolve(QueryStore.getContactCount());
+                           return deferred.promise;
+                        }
+                    },
+                    controller: 'QueryResultsCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/query/results/queryresults.component.html'
                 }
             }
         });

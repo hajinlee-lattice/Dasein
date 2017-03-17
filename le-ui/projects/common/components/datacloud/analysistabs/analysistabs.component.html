@@ -1,6 +1,6 @@
-<section id="ExplorerTabsView" class="containerx">
+<section id="AnalysisTabsView" class="containerx">
     <ul>
-        <li class="tab-browse">
+        <li class="tab-browse" ui-sref="home.model.analysis.explorer" ui-sref-active="active">
             <div class="tab-container">
                 <h2>Attributes
                     <span class="more-info">&#105;
@@ -20,7 +20,7 @@
                 <div class="count" ng-if="vm.DataCloudStore.metadata.enrichmentsTotal">{{vm.DataCloudStore.metadata.enrichmentsTotal|number}}</div>
             </div>
         </li>
-        <li class="tab-edit info noselect-children">
+        <li class="tab-edit info noselect-children" ui-sref="home.model.analysis.accounts" ui-sref-active="active">
             <div class="tab-container">
                 <h2>Accounts</h2>
                 <div class="enrichmentCounts">
@@ -28,7 +28,7 @@
                 </div>
             </div>
         </li>
-        <li class="tab-team">
+        <li class="tab-team" ui-sref="home.model.analysis.contacts" ui-sref-active="active">
             <div class="tab-container">
                 <h2>Contacts</h2>
                 <div class="enrichmentCounts">
