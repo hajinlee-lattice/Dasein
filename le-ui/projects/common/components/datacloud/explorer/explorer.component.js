@@ -27,6 +27,8 @@ angular.module('common.datacloud.explorer', [
             button_select: 'Enrichment Disabled',
             button_selected: 'Enrichment Enabled',
             button_deselect: 'Enrichment Enabled',
+            button_refine_query: 'Refine Query',
+            button_save_segment: 'Save Segment',
             deselected_messsage: 'Attribute will be turned off for enrichment',
             categories_see_all: 'See All Categories',
             categories_select_all: 'All Categories',
@@ -1191,6 +1193,12 @@ angular.module('common.datacloud.explorer', [
             //gotoNonemptyCategory();
         }
         return result.length;
+    }
+
+    vm.segmentAttributeInput = {};
+    vm.selectSegmentAttribute = function(attribute) {
+        vm.segmentAttributeInput[attribute.Attribute] = !vm.segmentAttributeInput[attribute.Attribute];
+        console.log(vm.segmentAttributeInput);
     }
 
     vm.init();

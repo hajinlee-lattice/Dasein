@@ -158,6 +158,9 @@
                     .attributes {
                         .attribute {
                             padding-left: 20px;
+                            & > * {
+                                pointer-events: none;
+                            }
                             &.has-highlight {
                                 position: relative; 
                                 &:before {
