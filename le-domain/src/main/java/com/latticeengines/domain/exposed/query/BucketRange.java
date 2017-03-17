@@ -1,9 +1,10 @@
 package com.latticeengines.domain.exposed.query;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -50,6 +51,11 @@ public class BucketRange {
     public BucketRange() {
     }
 
+    @Override
+    public boolean equals(Object range) {
+        return EqualsBuilder.reflectionEquals(this, range);
+    }
+
     public Object getMin() {
         return min;
     }
@@ -75,6 +81,6 @@ public class BucketRange {
     }
 
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return JsonUtils.serialize(this);
     }
 }

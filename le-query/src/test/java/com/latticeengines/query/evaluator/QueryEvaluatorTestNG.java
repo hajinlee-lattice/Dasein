@@ -218,6 +218,49 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         queryEvaluator.evaluate(collection, query);
     }
 
+    @Test(groups = "functional")
+    public void testBitBucketedAttributeValue() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        BucketRange bucket = BucketRange.value("My Bucket");
+        restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
+                "bucketed_attribute"), bucket));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+    }
+
+    @Test(groups = "functional")
+    public void testBitBucketedAttributeRange() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        BucketRange bucket = BucketRange.range(0, 100);
+        restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
+                "bucketed_attribute"), bucket));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+    }
+
+    @Test(groups = "functional", expectedExceptions = RuntimeException.class)
+    public void testBitBucketedAttributeCouldNotFindBucket() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        BucketRange bucket = BucketRange.value("can't find me");
+        restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
+                "bucketed_attribute"), bucket));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+        assertEquals(count, 5);
+    }
+
     private DataCollection getDataCollection() {
         DataCollection collection = new DataCollection();
         Table account = getTable("querytest_table", SchemaInterpretation.Account);
@@ -252,27 +295,48 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Table table = new Table();
         table.setName(name);
         table.setInterpretation(schemaInterpretation.toString());
+
         Attribute companyName = new Attribute();
         companyName.setName("companyname");
         table.addAttribute(companyName);
+
         Attribute id = new Attribute();
         id.setName("id");
         table.addAttribute(id);
+
         Attribute city = new Attribute();
         city.setName("city");
         table.addAttribute(city);
+
         Attribute state = new Attribute();
         state.setName("state");
         table.addAttribute(state);
+
         Attribute lastName = new Attribute();
         lastName.setName("lastname");
         table.addAttribute(lastName);
+
         Attribute familyMembers = new Attribute();
         familyMembers.setName("number_of_family_members");
         table.addAttribute(familyMembers);
+
         Attribute alexaViewsPerUser = new Attribute();
         alexaViewsPerUser.setName("alexaviewsperuser");
         table.addAttribute(alexaViewsPerUser);
+
+        Attribute bucketedAttribute = new Attribute();
+        bucketedAttribute.setName("bucketed_attribute");
+        bucketedAttribute.setPhysicalName("businesstechnologiespayment");
+        bucketedAttribute.setBitOffset(1);
+        bucketedAttribute.setNumOfBits(2);
+        BucketRange nullBucket = BucketRange.nullBucket();
+        BucketRange value = BucketRange.value("My Bucket");
+        BucketRange range = BucketRange.range(0, 100);
+        bucketedAttribute.addBucket(nullBucket);
+        bucketedAttribute.addBucket(value);
+        bucketedAttribute.addBucket(range);
+        table.addAttribute(bucketedAttribute);
+
         JdbcStorage storage = new JdbcStorage();
         storage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
         storage.setTableNameInStorage(name);

@@ -262,7 +262,11 @@ public class JdbcQueryProcessor extends QueryProcessor {
             case LESS_THAN:
                 return lhsPath.lt(rhsPaths.get(0));
             case IN_RANGE:
-                return lhsPath.between(rhsPaths.get(0), rhsPaths.get(1));
+                if (rhsPaths.size() > 1) {
+                    return lhsPath.between(rhsPaths.get(0), rhsPaths.get(1));
+                } else {
+                    return lhsPath.eq(rhsPaths.get(0));
+                }
             default:
                 throw new RuntimeException(String.format("Unsupported relation %s", concreteRestriction.getRelation()));
             }

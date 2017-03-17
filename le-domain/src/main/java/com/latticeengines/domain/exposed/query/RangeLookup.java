@@ -7,34 +7,22 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RangeLookup extends Lookup {
-    @JsonProperty("min")
-    private Object min;
-
-    @JsonProperty("max")
-    private Object max;
+    @JsonProperty("range")
+    private BucketRange range;
 
     public RangeLookup(Object min, Object max) {
-        this.min = min;
-        this.max = max;
+        range = BucketRange.range(min, max);
     }
 
     public RangeLookup() {
     }
 
-    public Object getMin() {
-        return min;
+    public BucketRange getRange() {
+        return range;
     }
 
-    public void setMin(Object min) {
-        this.min = min;
-    }
-
-    public Object getMax() {
-        return max;
-    }
-
-    public void setMax(Object max) {
-        this.max = max;
+    public void setRange(BucketRange range) {
+        this.range = range;
     }
 
     @Override

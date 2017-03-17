@@ -2,6 +2,7 @@ package com.latticeengines.query.evaluator.lookup;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -26,31 +27,34 @@ public class ValueLookupResolver extends LookupResolver {
 
     @Override
     public List<ComparableExpression<String>> resolve() {
-        if (secondaryLookup != null) {
-            ColumnLookup columnLookup = (ColumnLookup) secondaryLookup;
-            if (columnLookup != null) {
-                Attribute attribute = getAttribute(columnLookup);
+        ColumnLookup columnLookup = (ColumnLookup) secondaryLookup;
+        if (columnLookup != null) {
+            Attribute attribute = getAttribute(columnLookup);
 
-                List<BucketRange> buckets = attribute.getBucketList();
-                if (buckets != null && buckets.size() > 0) {
-                    // TODO temporary implementation
-                    int bucketIdx = 0;
-                    while (bucketIdx < buckets.size()) {
-                        BucketRange bucket = buckets.get(bucketIdx);
+            List<BucketRange> buckets = attribute.getBucketList();
+            if (buckets != null && buckets.size() > 0) {
+                int bucketIdx = 0;
+                while (bucketIdx < buckets.size()) {
+                    BucketRange bucket = buckets.get(bucketIdx);
 
-                        // TODO
-//                        if (bucket != null && bucket.equals(lookup.getValue().toString())) {
-//                            break;
-//                        }
+                    String lookupValue = Objects.toString(lookup.getValue());
+
+                    if (lookup.getValue() == null && bucket.isNullOnly()) {
+                        break;
+                    } else if (lookupValue.equals(Objects.toString(bucket.getMin()))
+                            && lookupValue.equals(Objects.toString(bucket.getMax()))) {
+                        break;
                     }
-                    if (bucketIdx == buckets.size()) {
-                        throw new RuntimeException(String.format(
-                                "Could not locate bucket to resolve bucketed attribute %s for specified value %s",
-                                attribute.getName(), lookup.getValue()));
-                    }
-
-                    return Collections.singletonList(Expressions.asComparable(Integer.toString(bucketIdx)));
+                    bucketIdx++;
                 }
+
+                if (bucketIdx == buckets.size()) {
+                    throw new RuntimeException(String.format(
+                            "Could not locate bucket to resolve bucketed attribute %s for specified value %s",
+                            attribute.getName(), lookup.getValue()));
+                }
+
+                return Collections.singletonList(Expressions.asComparable(Integer.toString(bucketIdx)));
             }
         }
 
