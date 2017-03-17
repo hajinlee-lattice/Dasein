@@ -10,7 +10,7 @@
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <!-- These configurations are for the default client that will only serve as a template -->
-    <yarn:client app-name="template" />
+    <yarn:client app-name="template" configuration="yarnConfiguration"/>
 
     <yarn:localresources />
 

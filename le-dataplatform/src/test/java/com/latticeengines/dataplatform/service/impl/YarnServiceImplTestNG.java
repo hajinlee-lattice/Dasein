@@ -42,7 +42,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertNotNull(schedulerInfo);
     }
 
-    @Test(groups = { "functional.platform", "functional.production" })
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = false)
     public void getApps() {
         AppsInfo appsInfo = yarnService.getApplications(null);
         assertNotNull(appsInfo);
