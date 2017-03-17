@@ -81,8 +81,8 @@ angular
                 vm.params.importError = true;
             }
 
-            var hasWebsite = columns.indexOf('Website') != -1,
-                hasEmail = columns.indexOf('Email') != -1;
+            var hasWebsite = columns.indexOf('Website') != -1 || columns.indexOf('"Website"') != -1,
+                hasEmail = columns.indexOf('Email') != -1 || columns.indexOf('"Email"') != -1;
 
             if (hasWebsite && !hasEmail) {
                 schemaSuggestion = 'SalesforceAccount';
