@@ -129,14 +129,14 @@
             <h3>Currently published configuration</h3>
             <ul class="bucket-tiles published">
                 <li ng-repeat="bucket in vm.currentConfiguration">
-                    <div class="bucket-label">{{bucket.name}}</div>
+                    <div class="bucket-label">{{::bucket.name}}</div>
                     <dl>
                         <dt>Lift</dt>
-                        <dd class="lift">{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
+                        <dd class="lift">{{::vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
                         <dt>{{vm.modelType}} %</dt>
-                        <dd>{{vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%</dd>
+                        <dd>{{::vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%</dd>
                         <dt>{{vm.modelType}}</dt>
-                        <dd>{{bucket.num_leads | number}}</dd>
+                        <dd>{{::bucket.num_leads | number}}</dd>
                     </dl>
                 </li>
             </ul><!-- End .bucket-tiles -->

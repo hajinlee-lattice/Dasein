@@ -10,14 +10,14 @@
 
             <ul class="history-list">
 
-            	<li ng-repeat="configuration in vm.historicalBuckets track by $key">
+            	<li ng-repeat="configuration in vm.historicalBuckets">
 		            <div class="chart-header clearfix">
-		                <div class="list-data pull-left">Created by: bnguyen@lattice-engines.com</div>
+		                <!-- <div class="list-data pull-left">Created by: bnguyen@lattice-engines.com</div> -->
 		                <div class="list-data pull-right">Published on: {{configuration[0].creation_timestamp | date : 'MMM d, y h:mm:ss a'}}</div>
 		            </div><!-- End .chart-header -->
 		            <ul class="bucket-tiles published">
 		            	<li ng-repeat="bucket in configuration">
-		                    <div class="bucket-label"></div>
+		                    <div class="bucket-label">{{bucket.name}}</div>
 		                    <dl>
 		                        <dt>Lift</dt>
 		                        <dd class="lift">{{Math.max(bucket.lift).toFixed(1);}}x</dd>

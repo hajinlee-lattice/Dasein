@@ -172,10 +172,10 @@ angular.module('lp.models.ratings', [
 
         if (vm.index === 0){
             vm.sliderBoundaryLeft = 98;
-            vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 1;  
+            vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 2;  
         } else {
-            vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 1;
-            vm.sliderBoundaryLeft = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index-1]].right_bound_score - 1;
+            vm.sliderBoundaryRight = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index+1]].right_bound_score + 2;
+            vm.sliderBoundaryLeft = vm.workingBuckets[Object.keys(vm.workingBuckets)[vm.index-1]].right_bound_score - 2;
         }
 
         var right = 100 - Math.round(vm.relativeSliderChartPosition * 100);
@@ -283,6 +283,7 @@ angular.module('lp.models.ratings', [
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
         data: ModelStore,
+        bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
         ResourceUtility: ResourceUtility,
         historicalBuckets: HistoricalABCDBuckets
     });
