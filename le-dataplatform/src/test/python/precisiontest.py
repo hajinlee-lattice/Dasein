@@ -49,3 +49,11 @@ class PrecisionTest(TestCase):
         ## Integer values should not be affected
         intValue = 12345678910111213
         self.assertEquals(PrecisionUtil.setPrecision(intValue, 3), intValue)
+
+        ## String values should not be affected
+        strValue = 'Company Name'
+        self.assertEquals(PrecisionUtil.setPrecision(strValue, 3), strValue)
+
+        ## Boolean values should not be affected
+        boolValue = False
+        self.assertEquals(PrecisionUtil.setPrecision(boolValue, 3), boolValue)

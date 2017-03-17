@@ -1,4 +1,5 @@
 import numpy as np
+import numbers
 
 class PrecisionUtil(object):
 
@@ -10,11 +11,7 @@ class PrecisionUtil(object):
 
     @classmethod
     def setPrecisionOfValue(cls, x, precision):
-        if x is np.isnan(x):
-            return x
-        if type(x) == int:
-            return x
-        if x == 0.0:
+        if x is None or not isinstance(x, numbers.Real) or isinstance(x, numbers.Integral) or np.isnan(x) or x == 0.0:
             return x
         l = np.log10(np.fabs(x))
         e = np.int64(l)

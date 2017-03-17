@@ -2,8 +2,8 @@ from array import array
 import imp
 import json
 
-import columntransform
 from trainingtestbase import TrainingTestBase
+import columntransform
 
 
 class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):

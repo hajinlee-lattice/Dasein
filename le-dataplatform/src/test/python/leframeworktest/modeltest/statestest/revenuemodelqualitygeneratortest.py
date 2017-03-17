@@ -1,7 +1,7 @@
 import random
 
-from leframework.model.states.revenuemodelqualitygenerator import RevenueModelQualityGenerator
 from leframeworktest.modeltest.statestest.scoretargetbase import ScoreTargetBase
+from leframework.model.states.revenuemodelqualitygenerator import RevenueModelQualityGenerator
 
 
 class RevenueModelQualityGeneratorTest(ScoreTargetBase):

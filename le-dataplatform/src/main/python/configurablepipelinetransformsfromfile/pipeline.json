@@ -164,7 +164,8 @@
         "NamedParameterListToInit": {
             "categoricalColumns": "categoricalColumns", 
             "targetColumn": "targetColumn",
-            "totalPositiveThreshold": 12
+            "totalPositiveThreshold": 12,
+            "categoricalColumnMapping": "emptyDictionary"
         },
         "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
     },

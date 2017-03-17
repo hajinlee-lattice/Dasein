@@ -2,6 +2,8 @@ from collections import Counter
 from json import encoder
 import json
 from math import sqrt
+import numbers
+import numpy as np
 import os
 
 import pandas as pd
@@ -83,7 +85,7 @@ class CategoricalGroupingStep(PipelineStep):
         featureValueDict = {}
 
         if not test:
-            
+
             eventList = dataFrame[self.targetColumn].tolist()
             popCount = len(eventList)
             popRate = sum(eventList) * 1.0 / len(eventList)
@@ -105,7 +107,7 @@ class CategoricalGroupingStep(PipelineStep):
 
                 if any([pd.isnull(x) for x in xList]):
                     xList = ['LE-missing' if pd.isnull(x) else x for x in xList]
-                
+
                 featValMapping = self.__getGroupMapping(xList, eventList, popCount, popRate, self.thresholdError, self.thresholdSigSize, self.thresholdBinSize)
 
                 if len(featValMapping) > 0 :
@@ -117,7 +119,7 @@ class CategoricalGroupingStep(PipelineStep):
 
                     # code below that can be deleted in the future 
                     dd = self.__conversionRateEncoding(xListNew, eventList)
-                    featValMapping = {k:round(dd[v] / popRate, 2) for k, v in featValMapping.iteritems()}
+                    featValMapping = {self.__convertFloatToString(k):round(dd[v] / popRate, 2) for k, v in featValMapping.iteritems()}
                     xListNew = [round(dd[x] / popRate, 2) for x in xListNew]
                     # code above that can be deleted in the future
 
@@ -140,16 +142,16 @@ class CategoricalGroupingStep(PipelineStep):
 
                 if origFeatName not in self.dsCategVarGroupingInfo:
                     logger.error('{} not found in dsCategVarGroupingInfo'.format(origFeatName))
-            
-                origColValue = dataFrame[origFeatName].tolist()
+
+                origColValue = dataFrame[origFeatName].apply(self.__convertFloatToString).tolist()
                 if any([pd.isnull(x) for x in origColValue]):
                     origColValue = ['LE-missing' if pd.isnull(x) else x for x in origColValue]
 
                 valmap = self.dsCategVarGroupingInfo[origFeatName]
                 dsColVal = [valmap[x] if x in valmap else 1.0 for x in origColValue]
-                    
+
                 featureValueDict.update({newFeatName : dsColVal})
-        
+
         featureValueDict = {k: featureValueDict[k] for k in featureValueDict if k in self.groupedFeatures}
         if len(featureValueDict) > 0:
             logger.info('Columns that are being added to the event table: {}'.format(str(featureValueDict.keys())))
@@ -163,12 +165,15 @@ class CategoricalGroupingStep(PipelineStep):
 
         return dataFrame
 
+    def __convertFloatToString(self, x):
+        return '{0:.2f}'.format(x) if (x is not None and isinstance(x, numbers.Real) and not np.isnan(x)) else x
+
     def __findFeatures(self, dataFrame):
         featureList = [featureName for featureName in self.categoricalColumns if featureName in dataFrame.columns \
                 and featureName not in self.keys and featureName not in self.samples and featureName not in self.readouts \
                 and featureName not in self.target and featureName not in self.featuresToExclude]
         return featureList
-        
+
     def __conversionRateEncoding(self, columnList, eventList):
         cCount = Counter(columnList)
         posCount = Counter([columnList[i] for i in range(len(columnList)) if eventList[i] == 1])
@@ -178,15 +183,10 @@ class CategoricalGroupingStep(PipelineStep):
         return {k:yy[k][1] / yy[k][0] for k in yy.keys()}
 
     def __writeRTSArtifacts(self):
-        e = encoder.FLOAT_REPR
-        encoder.FLOAT_REPR = lambda o: format(o, ".2f")
-
         with open("dsCategVarGroupingInfo.json", "wb") as fp:
             logger.info('Writing RTS artifacts: {}'.format(json.dumps(self.dsCategVarGroupingInfo)))
             json.dump(self.dsCategVarGroupingInfo, fp)
             self.dsCategVarGroupingInfoFilePath = os.path.abspath(fp.name)
-            
-        encoder.FLOAT_REPR = e
 
     def __appendMetadataEntryInBatches(self, configMetadata):
         for featureName in self.groupedFeatures:
@@ -222,12 +222,12 @@ class CategoricalGroupingStep(PipelineStep):
             return 0
         else:
             return (subRate - oaRate) / (sqrt(r * (1.0 - r) * (1.0 / subCnt + 1.0 / oaCnt)))
-        
+
     def __getTuple(self, xList, eventList, k):
         """
         input:  xList : feature column
                 eventList: event column
-                k : special value to look 
+                k : special value to look
         output: return (sub-population size, sub-population rate) with respect to the value of k
         """
         if pd.isnull(k):
@@ -254,7 +254,7 @@ class CategoricalGroupingStep(PipelineStep):
             sig = self.__getSig((count, rate), (popCount, popRate))
             output.update({k: (count, rate, sig)})
         return output
-        
+
     def __groupCategoricalVar(self, xList, eventList, popCount, popRate, thresholdError=3, thresholdSigSize=0.01, threshBinSize=0.05):
         '''
         input:  xList : feature column
@@ -269,18 +269,18 @@ class CategoricalGroupingStep(PipelineStep):
             4. don't belong to any of the 3 above sets
         '''
         groupingResults = self.__getGroupingResults(xList, eventList, popCount, popRate)
-        
+
         featureValBigsize = dict([(x, y) for x, y in groupingResults.items() if y[0] >= popCount * threshBinSize])
         featureValSignificant = dict([(x, y) for x, y in groupingResults.items() if abs(y[2]) >= thresholdError * 0.05 * sqrt(popCount * popRate) and y[0] >= popCount * thresholdSigSize and x not in featureValBigsize.keys()])
         featureValClosetomean = dict([(x, y) for x, y in groupingResults.items() if abs(y[2]) <= thresholdError * 0.025 * sqrt(popCount * popRate) and x not in featureValBigsize.keys()])
         featureValLeftOver = dict([(x, y) for x, y in groupingResults.items() if x not in featureValBigsize.keys() and x not in featureValSignificant and x not in featureValClosetomean])
-        
+
         return (featureValBigsize, featureValSignificant, featureValClosetomean, featureValLeftOver)
-        
+
     def __getGroupMapping(self, xList, eventList, popCount, popRate, thresholdError=3, thresholdSigSize=0.01, threshBinSize=0.05):
 
         featValMapping = {}
-        
+
         featureValBigsize, featureValSignificant, featureValClosetomean, featureValLeftOver = self.__groupCategoricalVar(xList, eventList, popCount, popRate, thresholdError, thresholdSigSize, threshBinSize)
 
         logger.info('featureValBigsize={}'.format(featureValBigsize))
@@ -322,7 +322,7 @@ class CategoricalGroupingStep(PipelineStep):
                         featValMapping = {}
                 else:
                     featValMapping = {}
-                    
+
                 if len(featValMapping) == 0:
                     logger.info('feature values in left_over are too significant; original column is to be deleted and not grouped')
 

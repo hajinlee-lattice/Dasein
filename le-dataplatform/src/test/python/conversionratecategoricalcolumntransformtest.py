@@ -1,7 +1,7 @@
+from trainingtestbase import TrainingTestBase
 from assignconversionratetoallcategoricalvalues import AssignConversionRateToAllCategoricalValues
 import numpy as np
 import pandas as pd
-from trainingtestbase import TrainingTestBase
 
 
 class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
@@ -35,7 +35,8 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         columnsNotToPivot = {'F':1}  # Not used in "training" phase. This column will be added to testing data frame
         conversionRateAssigner = AssignConversionRateToAllCategoricalValues(categoricalColumns=columnsToTransform, \
                                                                             targetColumn=targetColumn, \
-                                                                            totalPositiveThreshold=1)
+                                                                            totalPositiveThreshold=1, \
+                                                                            categoricalColumnMapping={})
 
         conversionRateAssigner.learnParameters(trainingDataFrame, None, configMetadata=None)
         convertedDF = conversionRateAssigner.transform(trainingDataFrame, configMetadata=None, test=None)
