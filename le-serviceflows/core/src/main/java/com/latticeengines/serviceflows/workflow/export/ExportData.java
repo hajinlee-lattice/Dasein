@@ -42,7 +42,7 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
         AppSubmission submission = eaiProxy.submitEaiJob(exportConfig);
         putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
         waitForAppId(submission.getApplicationIds().get(0).toString());
-        saveToContext();
+        // saveToContext();
     }
 
     private ExportConfiguration setupExportConfig() {
@@ -55,8 +55,15 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
         if (StringUtils.isNotEmpty(getStringValueFromContext(EXPORT_INPUT_PATH))) {
             exportConfig.setExportInputPath(getStringValueFromContext(EXPORT_INPUT_PATH));
         }
+        Map<String, String> properties = configuration.getProperties();
         if (StringUtils.isNotEmpty(getStringValueFromContext(EXPORT_OUTPUT_PATH))) {
             exportConfig.setExportTargetPath(getStringValueFromContext(EXPORT_OUTPUT_PATH));
+        } else if (properties.containsKey(ExportProperty.TARGET_FILE_NAME)) {
+            String targetPath = PathBuilder
+                    .buildDataFileExportPath(CamilleEnvironment.getPodId(), configuration.getCustomerSpace())
+                    .append(properties.get(ExportProperty.TARGET_FILE_NAME)).toString();
+            exportConfig.setExportTargetPath(targetPath);
+            saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH, targetPath);
         }
         for (String propertyName : configuration.getProperties().keySet()) {
             exportConfig.setProperty(propertyName, configuration.getProperties().get(propertyName));
@@ -75,16 +82,5 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
             tableName = configuration.getTableName();
         }
         return tableName;
-    }
-
-    private void saveToContext() {
-        if (StringUtils.isEmpty(getStringValueFromContext(EXPORT_OUTPUT_PATH))) {
-            Map<String, String> properties = configuration.getProperties();
-            if (properties.containsKey(ExportProperty.TARGET_FILE_NAME)) {
-                saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH, PathBuilder
-                        .buildDataFileExportPath(CamilleEnvironment.getPodId(), configuration.getCustomerSpace())
-                        .append(properties.get(ExportProperty.TARGET_FILE_NAME)).toString());
-            }
-        }
     }
 }

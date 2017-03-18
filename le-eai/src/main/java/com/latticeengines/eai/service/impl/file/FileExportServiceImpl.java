@@ -5,8 +5,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -28,14 +26,7 @@ public class FileExportServiceImpl extends ExportService {
 
     @Override
     public void exportDataFromHdfs(ExportConfiguration exportConfig, ExportContext context) {
-        if (StringUtils.isNotEmpty(exportConfig.getExportTargetPath())) {
-            context.setProperty(ExportProperty.TARGETPATH, exportConfig.getExportTargetPath());
-        } else {
-            String targetPath = exportConfig.getProperties().get(ExportProperty.TARGET_FILE_NAME);
-            context.setProperty(ExportProperty.TARGETPATH, //
-                    PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), exportConfig.getCustomerSpace())
-                            .append(targetPath).toString());
-        }
+        context.setProperty(ExportProperty.TARGETPATH, exportConfig.getExportTargetPath());
         context.setProperty(ExportProperty.CUSTOMER, exportConfig.getCustomerSpace().toString());
         ExportStrategy strategy = ExportStrategy.getExportStrategy(exportConfig.getExportFormat());
         Table table = exportConfig.getTable();
