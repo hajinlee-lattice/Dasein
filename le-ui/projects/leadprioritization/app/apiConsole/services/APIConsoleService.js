@@ -113,7 +113,9 @@ angular.module('lp.apiconsole.APIConsoleService', [
             data: scoreRequest,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
+                'Authorization': 'Bearer ' + accessToken,
+                'ErrorDisplayMethod': 'none',
+                'Accept-Encoding': 'gzip'
             }
         })
         .success(function (data, status, headers, config) {

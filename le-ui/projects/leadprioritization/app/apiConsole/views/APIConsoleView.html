@@ -3,9 +3,6 @@
         <div class="loader"> </div>
         <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
     </div>
-    <div data-ng-show="showLoadingError" class="global-error local-error">
-        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{loadingError}}</span>
-    </div>
     <div data-ng-if="!loading && !showLoadingError">
         <div class="summary blue-fire">
             <div class="caption left"><label>{{ResourceUtility.getString('API_CONSOLE_TITLE_REQUEST')}}</label></div>
