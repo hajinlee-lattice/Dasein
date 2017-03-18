@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.actors.visitor.LookupMicroEngineActorTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -25,13 +26,13 @@ public class DomainCountryZipCodeBasedMicroEngineActor extends LookupMicroEngine
     @Override
     protected boolean accept(Traveler traveler) {
         MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
-        return (matchKeyTuple.getDomain() != null && matchKeyTuple.getCountry() != null
-                && matchKeyTuple.getZipcode() != null);
+        return (matchKeyTuple.getDomain() != null && matchKeyTuple.getZipcode() != null);
     }
 
     @Override
     protected String usedKeys(MatchKeyTuple keyTuple) {
-        return String.format("( Domain=%s Country=%s ZipCode=%s )", keyTuple.getDomain(), keyTuple.getCountry(),
+        return String.format("( Domain=%s Country=%s ZipCode=%s )", keyTuple.getDomain(),
+                keyTuple.getCountry() != null ? keyTuple.getCountry() : LocationUtils.USA,
                 keyTuple.getZipcode());
     }
 
@@ -39,7 +40,7 @@ public class DomainCountryZipCodeBasedMicroEngineActor extends LookupMicroEngine
     protected MatchKeyTuple prepareInputData(MatchKeyTuple input) {
         MatchKeyTuple domainCountryZipCode = new MatchKeyTuple();
         domainCountryZipCode.setDomain(input.getDomain());
-        domainCountryZipCode.setCountry(input.getCountry());
+        domainCountryZipCode.setCountry(input.getCountry() != null ? input.getCountry() : LocationUtils.USA);
         domainCountryZipCode.setZipcode(input.getZipcode());
         return domainCountryZipCode;
     }

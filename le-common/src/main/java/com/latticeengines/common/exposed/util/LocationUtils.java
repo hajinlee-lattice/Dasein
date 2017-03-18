@@ -444,6 +444,7 @@ public class LocationUtils {
         if (StringUtils.isEmpty(state)) {
             return null;
         }
+        standardCountry = StringUtils.isNotEmpty(standardCountry) ? standardCountry : USA;
 
         if (USA.equalsIgnoreCase(standardCountry)) {
             Map<String, String> stateLookUp = usStateSynonMap;
