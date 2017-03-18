@@ -87,6 +87,8 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         fileExportConfig.setExportFormat(ExportFormat.CSV);
         fileExportConfig.setExportDestination(ExportDestination.FILE);
         fileExportConfig.setCustomerSpace(TEST_CUSTOMER);
+        fileExportConfig.setExportTargetPath(PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), TEST_CUSTOMER)
+                .append(targetCSVPath).toString());
         // fileExportConfig.setUsingDisplayName(Boolean.FALSE);
         Table table = createFile(new File(csvUrl.getPath()).getParentFile(), "file2");
         Extract extract = new Extract();
