@@ -11,10 +11,11 @@ public class FieldInterpretationCollections {
 	/**
 	 * Matching Field Validation Expression if Fuzzy Matching feature is enabled
 	 */
-	public static final String FUZZY_MATCH_VALIDATION_EXPRESSION = String.format("( %s || %s || %s ) && %s ",
+	public static final String FUZZY_MATCH_VALIDATION_EXPRESSION = String.format("( %s || %s || %s || %s ) && %s ",
 			FieldInterpretation.Email, 
 			FieldInterpretation.Website,
 			FieldInterpretation.CompanyName,
+			FieldInterpretation.DUNS,
 			FieldInterpretation.Id);
 	
 	/**

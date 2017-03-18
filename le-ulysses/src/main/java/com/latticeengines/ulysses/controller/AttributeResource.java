@@ -16,8 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.ulysses.PrimaryField;
 import com.latticeengines.domain.exposed.ulysses.PrimaryFieldConfiguration;
-import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
-import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.ulysses.service.AttributeService;
 
 import io.swagger.annotations.Api;
@@ -29,9 +28,6 @@ import io.swagger.annotations.ApiOperation;
 public class AttributeResource {
 
 	@Autowired
-    protected OAuthUserEntityMgr oAuthUserEntityMgr;
-	
-    @Autowired
     private AttributeService attributeService;
 
     @Deprecated
@@ -71,7 +67,7 @@ public class AttributeResource {
     	PrimaryFieldConfiguration primaryConfig = new  PrimaryFieldConfiguration();
     	primaryConfig.setPrimaryFields(attributeService.getPrimaryFields());
     	
-    	CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+    	CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
     	primaryConfig.setValidationExpression(attributeService.getPrimaryFieldValidationExpression(customerSpace));
         return primaryConfig;
     }
