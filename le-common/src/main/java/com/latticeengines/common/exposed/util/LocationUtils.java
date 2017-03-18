@@ -452,7 +452,7 @@ public class LocationUtils {
             if (usStateAbbrToFullNameMap.containsKey(guess)) {
                 return LocationStringStandardizationUtils.getStandardString(usStateAbbrToFullNameMap.get(guess));
             } else {
-                return null;
+                return LocationStringStandardizationUtils.getStandardString(state);
             }
         } else if (CANADA.equalsIgnoreCase(standardCountry)) {
             Map<String, String> stateLookUp = caStateSynonMap;
@@ -460,7 +460,7 @@ public class LocationUtils {
             if (caStateAbbrToFullNameMap.containsKey(guess)) {
                 return LocationStringStandardizationUtils.getStandardString(caStateAbbrToFullNameMap.get(guess));
             } else {
-                return null;
+                return LocationStringStandardizationUtils.getStandardString(state);
             }
         } else {
             return LocationStringStandardizationUtils.getStandardString(state);
