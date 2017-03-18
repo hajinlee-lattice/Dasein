@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -13,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +43,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
     private static final TopicScope ENVIRONMENT_PRIVATE = TopicScope.ENVIRONMENT_PRIVATE;
 
     private volatile boolean disabled;
-    private volatile long lastDisabledTime;
+    private volatile long lastCheckTime;
 
     public GenericFabricEntityManagerImpl() {
         super(new BaseFabricEntityMgrImpl.Builder().recordType(FABRIC_GENERIC_RECORD).topic(FABRIC_GENERIC_CONNECTOR)
@@ -65,7 +68,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
 
     @Override
     public String createUniqueBatchId(Long totalCount) {
-        if (disabled && isInDisablePeriod()) {
+        if (disabled && isInCheckPeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return null;
         }
@@ -89,7 +92,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
 
     @Override
     public String createOrGetNamedBatchId(String batchName, Long totalCount, boolean createNew) {
-        if (disabled && isInDisablePeriod()) {
+        if (disabled && isInCheckPeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return batchName;
         }
@@ -113,7 +116,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
     public GenericFabricStatus getBatchStatus(String batchId) {
         GenericFabricStatus status = new GenericFabricStatus();
         status.setStatus(GenericFabricStatusEnum.UNKNOWN);
-        if (disabled && isInDisablePeriod()) {
+        if (disabled && isInCheckPeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return status;
         }
@@ -137,7 +140,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
 
     @Override
     public void publishEntity(GenericRecordRequest request, T entity, Class<T> clazz) {
-        if (disabled && isInDisablePeriod()) {
+        if (disabled && isInCheckPeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return;
         }
@@ -145,24 +148,14 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
         if (!isValid) {
             return;
         }
-        try {
-            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
-            GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
-            publish(request, genericRecord);
-            setEnable();
-        } catch (Exception ex) {
-            log.warn("Publish entity failed! entity Id=" + entity.getId() + " disable the entity manager!", ex);
-            setDisable();
-        }
+        Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
+        GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
+        publishInternal(request, genericRecord);
     }
 
     @Override
     public void publishEntityBatch(String batchId, String recordType, FabricStoreEnum store, String repository,
             List<GenericRecordRequest> requests, List<T> entities, Class<T> clazz) {
-        if (disabled && isInDisablePeriod()) {
-            log.warn("Generic Fabric entity manager is disabled!");
-            return;
-        }
         boolean isValid = validateRequest(batchId, recordType, store, repository);
         if (!isValid) {
             return;
@@ -171,29 +164,26 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             log.error("Sizes does not match for requests and entities!");
             return;
         }
-        try {
-            for (int i = 0; i < requests.size(); i++) {
-                T entity = entities.get(i);
-                GenericRecordRequest request = requests.get(i);
-                request.setStores(Arrays.asList(store));
-                request.setBatchId(batchId);
-                request.setRecordType(recordType);
-                request.setRepositories(Arrays.asList(repository));
-                Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
-                GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
-                publish(request, genericRecord);
+        for (int i = 0; i < requests.size(); i++) {
+            if (disabled && isInCheckPeriod()) {
+                log.warn("Generic Fabric entity manager is disabled!");
+                return;
             }
-            setEnable();
-        } catch (Exception ex) {
-            log.warn("Publish entities failed! store=" + store.toString() + " repository=" + repository
-                    + " disable the entity manager!", ex);
-            setDisable();
+            T entity = entities.get(i);
+            GenericRecordRequest request = requests.get(i);
+            request.setStores(Arrays.asList(store));
+            request.setBatchId(batchId);
+            request.setRecordType(recordType);
+            request.setRepositories(Arrays.asList(repository));
+            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
+            GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
+            publishInternal(request, genericRecord);
         }
     }
 
     @Override
     public void publishRecord(GenericRecordRequest request, GenericRecord genericRecord) {
-        if (disabled && isInDisablePeriod()) {
+        if (disabled && isInCheckPeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return;
         }
@@ -201,22 +191,12 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
         if (!isValid) {
             return;
         }
-        try {
-            publish(request, genericRecord);
-            setEnable();
-        } catch (Exception ex) {
-            log.warn("Publish record failed! request Id=" + request.getId() + " disable the entity manager!", ex);
-            setDisable();
-        }
+        publishInternal(request, genericRecord);
     }
 
     @Override
     public void publishRecordBatch(String batchId, String recordType, FabricStoreEnum store, String repository,
             List<GenericRecordRequest> requests, List<GenericRecord> genericRecords) {
-        if (disabled && isInDisablePeriod()) {
-            log.warn("Generic Fabric entity manager is disabled!");
-            return;
-        }
         boolean isValid = validateRequest(batchId, recordType, store, repository);
         if (!isValid) {
             return;
@@ -225,21 +205,36 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             log.error("Sizes does not match for requests and records!");
             return;
         }
-        try {
-            for (int i = 0; i < requests.size(); i++) {
-                GenericRecordRequest request = requests.get(i);
-                GenericRecord genericRecord = genericRecords.get(i);
-                request.setBatchId(batchId);
-                request.setRecordType(recordType);
-                request.setStores(Arrays.asList(store));
-                request.setRepositories(Arrays.asList(repository));
-                publish(request, genericRecord);
+        for (int i = 0; i < requests.size(); i++) {
+            if (disabled && isInCheckPeriod()) {
+                log.warn("Generic Fabric entity manager is disabled!");
+                return;
             }
-            setEnable();
-        } catch (Exception ex) {
-            log.warn("Publish records failed! store=" + store.toString() + " repository=" + repository
-                    + " disable the entity manager!", ex);
-            setDisable();
+            GenericRecordRequest request = requests.get(i);
+            GenericRecord genericRecord = genericRecords.get(i);
+            request.setBatchId(batchId);
+            request.setRecordType(recordType);
+            request.setStores(Arrays.asList(store));
+            request.setRepositories(Arrays.asList(repository));
+            publishInternal(request, genericRecord);
+        }
+    }
+
+    public void publishInternal(GenericRecordRequest recordRequest, GenericRecord record) {
+        Future<RecordMetadata> future = publish(recordRequest, record);
+        if (!isInCheckPeriod()) {
+            synchronized (this) {
+                if (!isInCheckPeriod()) {
+                    try {
+                        future.get(10, TimeUnit.SECONDS);
+                        setEnable();
+                    } catch (Exception ex) {
+                        setDisable();
+                        future.cancel(true);
+                        log.error("Publish timeout! Disable Generic Entity Manager", ex);
+                    }
+                }
+            }
         }
     }
 
@@ -301,7 +296,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
 
     @Override
     public void updateBatchCount(String batchId, long delta, boolean isFinished) {
-        if (disabled && isInDisablePeriod()) {
+        if (disabled && isInCheckPeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return;
         }
@@ -356,7 +351,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
 
     @Override
     public boolean cleanup(String batchId) {
-        if (disabled && isInDisablePeriod()) {
+        if (disabled && isInCheckPeriod()) {
             log.warn("Generic Fabric entity manager is disabled!");
             return false;
         }
@@ -368,8 +363,8 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             synchronized (this) {
                 if (!disabled) {
                     disabled = true;
-                    lastDisabledTime = System.currentTimeMillis();
-                    log.warn("Set GenericFabricEntityManagerImpl to be Disabled!");
+                    lastCheckTime = System.currentTimeMillis();
+                    log.error("Set GenericFabricEntityManagerImpl to be Disabled!");
                 }
             }
         }
@@ -380,14 +375,15 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             synchronized (this) {
                 if (disabled) {
                     disabled = false;
+                    lastCheckTime = System.currentTimeMillis();
                     log.warn("Set GenericFabricEntityManagerImpl to be Enabled!");
                 }
             }
         }
     }
 
-    private boolean isInDisablePeriod() {
-        return System.currentTimeMillis() - lastDisabledTime <= TEN_MINUTES;
+    private boolean isInCheckPeriod() {
+        return System.currentTimeMillis() - lastCheckTime <= TEN_MINUTES;
     }
 
 }

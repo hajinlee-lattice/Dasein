@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -84,8 +83,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     protected DynamoIndex tableIndex;
 
     private boolean enforceRemoteDynamo;
-
-    private boolean initialized = false;
 
     public BaseFabricEntityMgrImpl(Builder builder) {
         this.store = builder.store;
@@ -277,21 +274,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     @Override
-    public void publish(GenericRecordRequest recordRequest, GenericRecord record) {
+    public Future<RecordMetadata> publish(GenericRecordRequest recordRequest, GenericRecord record) {
         if (disabled || record == null)
-            return;
-        Future<RecordMetadata> future = producer.send(recordRequest, record);
-        try {
-            if (!initialized) {
-                future.get(5, TimeUnit.SECONDS);
-            }
-        } catch (Exception ex) {
-            future.cancel(true);
-            throw new RuntimeException("Publish timeout!", ex);
-        } finally {
-            initialized = true;
-        }
-
+            return null;
+        return producer.send(recordRequest, record);
     }
 
     @Override
