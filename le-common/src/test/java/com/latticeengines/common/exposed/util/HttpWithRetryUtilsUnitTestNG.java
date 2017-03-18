@@ -24,6 +24,7 @@ public class HttpWithRetryUtilsUnitTestNG {
 
     private Request request = new Request("abc", "xyz");
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testExecutePostRequestNormalTransport() throws Exception {
         String result = HttpWithRetryUtils.executePostRequest("http://httpbin.org/post", request, null);
@@ -31,7 +32,8 @@ public class HttpWithRetryUtilsUnitTestNG {
 
     }
 
-    @Test(groups = "unit")
+    @SuppressWarnings("deprecation")
+    @Test(groups = "unit", enabled = false)
     public void testExecutePostRequestSSLTransport() throws Exception {
         String result = HttpWithRetryUtils.executePostRequest("https://httpbin.org/post", request, null);
         assertTrue(result.contains("httpbin.org"));
