@@ -19,10 +19,10 @@ import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class LocationStandardizationServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
@@ -129,6 +129,7 @@ public class LocationStandardizationServiceTestNG
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
+            log.info(record);
             String name = String.valueOf(record.get("Name"));
             String country = String.valueOf(record.get("Country"));
             String state = String.valueOf(record.get("State"));
