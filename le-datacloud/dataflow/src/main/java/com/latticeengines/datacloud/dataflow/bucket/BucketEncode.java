@@ -66,6 +66,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
     private List<String> findDiscardFields(List<String> originalFields, List<DCEncodedAttr> encAttrs) {
         List<String> discardFields = new ArrayList<>(originalFields);
         List<String> relayFields = findRelayFields(originalFields, encAttrs);
+        relayFields.removeIf(s -> s.length() > 64);
         discardFields.removeAll(relayFields);
         return discardFields;
     }
