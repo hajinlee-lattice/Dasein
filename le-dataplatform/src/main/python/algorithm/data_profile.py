@@ -399,6 +399,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
 
         if math.isnan(median):
             logger.warn("Median to impute for column name: " + colName + " is null; excluding this column.")
+            diagnostics["SkippedNullMedian"] = "True"
             return (index, diagnostics)
         if bucketingParams is not None:
             # Apply bucketing with specified type and parameters
@@ -629,11 +630,23 @@ def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attrib
         highUCThreshold = parser.highUCThreshold
 
     highUCColumns = []
+    skippedNullColumns = []
+    skippedNullMedianColumns = []
     for columnDiagnostics in dataDiagnostics:
         if columnDiagnostics.has_key("UncertaintyCoefficient") and columnDiagnostics["UncertaintyCoefficient"] > highUCThreshold:
             highUCColumns.append(columnDiagnostics['Colname'])
+        if columnDiagnostics.has_key("PopulationRate") and columnDiagnostics["PopulationRate"] == 0.0:
+            skippedNullColumns.append(columnDiagnostics['Colname'])
+        if columnDiagnostics.has_key("SkippedNullMedian") and columnDiagnostics["SkippedNullMedian"] == "True":
+            skippedNullMedianColumns.append(columnDiagnostics['Colname'])
+            
     if len(highUCColumns) > 0:
         summary["HighUCColumns"] = ",".join(highUCColumns)
+    if len(skippedNullColumns) > 0:
+        summary["SkippedNullColumns"] = ",".join(skippedNullColumns)
+    if len(skippedNullMedianColumns) > 0:
+        summary["SkippedNullMedianColumns"] = ",".join(skippedNullMedianColumns)
+        
     return summary
 
 def getCountWhereEventIsOne(valueVector, eventVector):

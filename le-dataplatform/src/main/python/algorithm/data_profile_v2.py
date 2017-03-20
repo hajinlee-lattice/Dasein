@@ -396,6 +396,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         # do we still need this?
         if math.isnan(median):
             logger.warn("Median to impute for column name: " + colName + " is null; excluding this column.")
+            diagnostics["SkippedNullMedian"] = "True"
             return (index, diagnostics)
         # use only unified bucketer and return different things
         # Apply bucketing with specified parameters for MI
@@ -556,6 +557,7 @@ def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attrib
     summary["PositiveEventRate"] = sum(eventVector) / float(len(eventVector))
     summary.update(attributeStats)
     highUCThreshold = 0.2
+    
     if params is not None:
         parser = params["parser"]
         summary["NumberOfSkippedRows"] = parser.numOfSkippedRow
@@ -563,11 +565,22 @@ def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attrib
         highUCThreshold = parser.highUCThreshold
 
     highUCColumns = []
+    skippedNullColumns = []
+    skippedNullMedianColumns = []
     for columnDiagnostics in dataDiagnostics:
         if columnDiagnostics.has_key("UncertaintyCoefficient") and columnDiagnostics["UncertaintyCoefficient"] > highUCThreshold:
             highUCColumns.append(columnDiagnostics['Colname'])
+        if columnDiagnostics.has_key("PopulationRate") and columnDiagnostics["PopulationRate"] == 0.0:
+            skippedNullColumns.append(columnDiagnostics['Colname'])
+        if columnDiagnostics.has_key("SkippedNullMedian") and columnDiagnostics["SkippedNullMedian"] == "True":
+            skippedNullMedianColumns.append(columnDiagnostics['Colname'])
+        
     if len(highUCColumns) > 0:
         summary["HighUCColumns"] = ",".join(highUCColumns)
+    if len(skippedNullColumns) > 0:
+        summary["SkippedNullColumns"] = ",".join(skippedNullColumns)
+    if len(skippedNullMedianColumns) > 0:
+        summary["SkippedNullMedianColumns"] = ",".join(skippedNullMedianColumns)
     return summary
 
 def uncertaintyCoefficient(mi, entropyVal):
