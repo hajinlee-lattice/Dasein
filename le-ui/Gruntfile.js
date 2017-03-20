@@ -61,7 +61,7 @@ module.exports = function (grunt) {
                 API_ADMIN_URL: 'https://internal-adminconsole-lpi-a-48494326.us-east-1.elb.amazonaws.com',
                 API_MCSVC_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
                 API_MATCHAPI_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
-                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
+                API_INFLUXDB_URL: 'http://internal-influx-1992709958.us-east-1.elb.amazonaws.com:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 ADMIN_HTTP_PORT: 3003,
