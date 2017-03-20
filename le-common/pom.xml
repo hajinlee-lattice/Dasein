@@ -153,7 +153,7 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-yarn-core</artifactId>
             <version>${spring.data.version}</version>
-            <classifier>ledp2</classifier>
+            <classifier>ledp</classifier>
         </dependency>
         <dependency>
             <groupId>org.apache.avro</groupId>
