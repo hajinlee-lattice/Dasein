@@ -131,6 +131,9 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
             attribute.setApprovedUsage(ApprovedUsage.NONE);
             if (!derivedAttribute.getFlaggedColumnNames().contains(attribute.getName()))
                 derivedAttribute.getFlaggedColumnNames().add(attribute.getName());
+            if (attribute.isCustomerPredictor()) {
+                derivedAttribute.addCustomerPredictor(attribute.getName());
+            }
             if (parentChild.containsKey(attribute)) {
                 setApprovedUsageNoneRecursively(parentChild.get(attribute), derivedAttribute, parentChild);
             }

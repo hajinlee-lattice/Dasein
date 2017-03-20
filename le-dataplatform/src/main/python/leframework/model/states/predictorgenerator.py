@@ -20,7 +20,9 @@ class PredictorGenerator(State):
             if key + "_1" in mediator.schema["targets"]:
                 continue
             self.logger.info("Generating predictors for " + key)
-            predictors.append(self.generatePredictors(key, profileMetadata, configMetadata))
+            predictor = self.generatePredictors(key, profileMetadata, configMetadata)
+            if predictor is not None:
+                predictors.append(predictor)
 
         self.result = sorted(predictors, key = lambda x: x["UncertaintyCoefficient"], reverse = True)
 
@@ -81,6 +83,9 @@ class PredictorGenerator(State):
 
             element["IsVisible"] = True
             elements.append(element)
+
+        if len(elements) < 2:
+            return None
 
         predictor = OrderedDict()
         predictor["Elements"] = elements
