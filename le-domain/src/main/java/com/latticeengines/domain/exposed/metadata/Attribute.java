@@ -28,9 +28,11 @@ import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -851,13 +853,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void addBucket(BucketRange bucketRange) {
-        List<BucketRange> bucketList = getBucketList();
-        if (bucketList == null) {
-            bucketList = new ArrayList<>();
-            setBucketRangeList(bucketList);
+    public void addBucketRange(BucketRange bucketRange) {
+        List<BucketRange> bucketRangeList = getBucketRangeList();
+        if (bucketRangeList == null) {
+            bucketRangeList = new ArrayList<>();
         }
-        getBucketList().add(bucketRange);
+        bucketRangeList.add(bucketRange);
+        setBucketRangeList(bucketRangeList);
     }
 
     @Transient
@@ -885,15 +887,15 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             }
         }
         if (bucketRange != null) {
-            addBucket(bucketRange);
+            addBucketRange(bucketRange);
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Transient
     @JsonIgnore
-    public List<BucketRange> getBucketList() {
-        return (List<BucketRange>) properties.get("BucketRangeList");
+    public List<BucketRange> getBucketRangeList() {
+        Object obj = properties.get("BucketRangeList");
+        return obj == null ? null : JsonUtils.getObjectMapper().convertValue(obj, new TypeReference<List<BucketRange>>() {});
     }
 
     @Override

@@ -31,7 +31,7 @@ public class ValueLookupResolver extends LookupResolver {
         if (columnLookup != null) {
             Attribute attribute = getAttribute(columnLookup);
 
-            List<BucketRange> buckets = attribute.getBucketList();
+            List<BucketRange> buckets = attribute.getBucketRangeList();
             if (buckets != null && buckets.size() > 0) {
                 int bucketIdx = 0;
                 while (bucketIdx < buckets.size()) {

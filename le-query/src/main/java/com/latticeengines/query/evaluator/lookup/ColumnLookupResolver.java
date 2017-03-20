@@ -29,7 +29,7 @@ public class ColumnLookupResolver extends LookupResolver {
         Table table = getTable(lookup);
         Attribute attribute = getAttribute(lookup);
 
-        List<BucketRange> buckets = attribute.getBucketList();
+        List<BucketRange> buckets = attribute.getBucketRangeList();
         if (buckets != null && buckets.size() > 0) {
             String physicalColumnName = attribute.getPhysicalName();
             Integer offset = attribute.getBitOffset();

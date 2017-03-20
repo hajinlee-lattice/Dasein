@@ -332,9 +332,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         BucketRange nullBucket = BucketRange.nullBucket();
         BucketRange value = BucketRange.value("My Bucket");
         BucketRange range = BucketRange.range(0, 100);
-        bucketedAttribute.addBucket(nullBucket);
-        bucketedAttribute.addBucket(value);
-        bucketedAttribute.addBucket(range);
+        bucketedAttribute.addBucketRange(nullBucket);
+        bucketedAttribute.addBucketRange(value);
+        bucketedAttribute.addBucketRange(range);
         table.addAttribute(bucketedAttribute);
 
         JdbcStorage storage = new JdbcStorage();

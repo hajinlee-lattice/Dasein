@@ -1,7 +1,9 @@
 package com.latticeengines.metadata.service.impl;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -27,7 +29,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
     private MetadataService mdService;
 
     @Test(groups = "registertable")
-    public void registerMetadataTable() {
+    public void registerMetadataTable() throws IOException {
         File file = new File(System.getenv("WSHOME") + "/le-dev/testartifacts/AccountMaster/AccountMasterBucketed.avsc");
         Configuration config = new Configuration();
         config.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
@@ -38,6 +40,8 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
         bucketedTable.setStorageMechanism(storage);
         bucketedTable.setInterpretation(SchemaInterpretation.BucketedAccountMaster.toString());
         log.info("Registering AccountMaster Bucketed Metadata Table");
-        mdService.createTable(CustomerSpace.parse(DataCloudConstants.SERVICE_TENANT), bucketedTable);
+        mdService.updateTable(CustomerSpace.parse(DataCloudConstants.SERVICE_TENANT), bucketedTable);
+        
+        FileUtils.write(new File("a.json"), bucketedTable.toString());
     }
 }
