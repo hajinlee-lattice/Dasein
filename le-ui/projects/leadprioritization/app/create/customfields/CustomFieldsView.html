@@ -62,7 +62,7 @@
 							ng-init="fieldMapping = vm.standardFieldMappings[field]"
 							ng-include="'field-mapping-row-template.html'">
 						</tr>
-						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr class="field-mapping-row-spacer field-mapping-row-spacer-odd"><td colspan=100></td></tr>
 						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
 						<tr ng-repeat="field in vm.standardFieldsList | limitTo:vm.standardFieldsList.length:2"
 							ng-init="fieldMapping = vm.standardFieldMappings[field]"

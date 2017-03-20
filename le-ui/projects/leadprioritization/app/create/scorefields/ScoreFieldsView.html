@@ -52,7 +52,7 @@
 							ng-if="field.mappedField !== null"
 							ng-include="'score-field-mapping-row-template.html'">
 						</tr>
-						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr class="field-mapping-row-spacer field-mapping-row-spacer-odd"><td colspan=100></td></tr>
 						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
 						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:vm.standardFieldsList.length:1"
 							ng-init="field = vm.standardFieldMappings[standardField]"
