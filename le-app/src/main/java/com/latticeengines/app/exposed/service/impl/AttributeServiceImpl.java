@@ -40,8 +40,8 @@ public class AttributeServiceImpl implements AttributeService {
 
     private static final int MAX_SAVE_RETRY = 5;
 
-    private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "Description", "Data Type",
-            "Status", "Premium");
+    private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "SubCategory",
+            "Description", "Data Type", "Status", "Premium");
 
     @Autowired
     private SelectedAttrEntityMgr selectedAttrEntityMgr;
@@ -59,8 +59,8 @@ public class AttributeServiceImpl implements AttributeService {
     private AttributeCustomizationService attributeCustomizationService;
 
     @Override
-    public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Map<String, Integer> limitationMap,
-            Boolean considerInternalAttributes) {
+    public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
+            Map<String, Integer> limitationMap, Boolean considerInternalAttributes) {
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         Integer premiumAttributeLimitation = getTotalMaxCount(limitationMap);
         checkAmbiguityInFieldNames(attributes);
@@ -68,13 +68,14 @@ public class AttributeServiceImpl implements AttributeService {
         int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant,
                 considerInternalAttributes);
         int additionalPremiumAttrCount = 0;
-        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false, null, null,
-                considerInternalAttributes);
+        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false,
+                null, null, considerInternalAttributes);
 
         final List<SelectedAttribute> addAttrList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
             for (String selectedAttrStr : attributes.getSelectedAttributes()) {
-                LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes, selectedAttrStr);
+                LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes,
+                        selectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(selectedAttr, tenant);
                 addAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -87,8 +88,8 @@ public class AttributeServiceImpl implements AttributeService {
 
         if (!CollectionUtils.isEmpty(attributes.getDeselectedAttributes())) {
             for (String deselectedAttrStr : attributes.getDeselectedAttributes()) {
-                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes,
-                        deselectedAttrStr);
+                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(
+                        allAttributes, deselectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(deselectedAttr, tenant);
                 deleteAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -98,12 +99,15 @@ public class AttributeServiceImpl implements AttributeService {
         }
 
         // TODO - add check for per datasource limitation as well
-        if (premiumAttributeLimitation < existingSelectedAttributePremiumCount + additionalPremiumAttrCount) {
+        if (premiumAttributeLimitation < existingSelectedAttributePremiumCount
+                + additionalPremiumAttrCount) {
             // throw exception if effective premium count crosses limitation
-            throw new LedpException(LedpCode.LEDP_18112, new String[] { premiumAttributeLimitation.toString() });
+            throw new LedpException(LedpCode.LEDP_18112,
+                    new String[] { premiumAttributeLimitation.toString() });
         }
 
-        DatabaseUtils.retry("saveEnrichmentAttributeSelection", MAX_SAVE_RETRY, ConstraintViolationException.class,
+        DatabaseUtils.retry("saveEnrichmentAttributeSelection", MAX_SAVE_RETRY,
+                ConstraintViolationException.class,
                 "Ignoring ConstraintViolationException exception and retrying save operation",
                 UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES, new Closure() {
                     @Override
@@ -114,10 +118,12 @@ public class AttributeServiceImpl implements AttributeService {
     }
 
     @Override
-    public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
-            Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
+    public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant,
+            String attributeDisplayNameFilter, Category category, String subcategory,
+            Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes) {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .attributeCustomizationService(attributeCustomizationService) //
                 .attributeDisplayNameFilter(attributeDisplayNameFilter) //
@@ -134,7 +140,8 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Override
     public List<LeadEnrichmentAttribute> getAllAttributes() {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .considerInternalAttributes(true) //
                 .skipTenantLevelCustomization(true) //
@@ -143,10 +150,12 @@ public class AttributeServiceImpl implements AttributeService {
     }
 
     @Override
-    public int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter, Category category,
-            String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
-        List<LeadEnrichmentAttribute> matchingAttr = getAttributes(tenant, attributeDisplayNameFilter, category,
-                subcategory, onlySelectedAttributes, null, null, considerInternalAttributes);
+    public int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter,
+            Category category, String subcategory, Boolean onlySelectedAttributes,
+            Boolean considerInternalAttributes) {
+        List<LeadEnrichmentAttribute> matchingAttr = getAttributes(tenant,
+                attributeDisplayNameFilter, category, subcategory, onlySelectedAttributes, null,
+                null, considerInternalAttributes);
         return (matchingAttr == null) ? 0 : matchingAttr.size();
     }
 
@@ -156,14 +165,15 @@ public class AttributeServiceImpl implements AttributeService {
     }
 
     @Override
-    public Integer getSelectedAttributePremiumCount(Tenant tenant, Boolean considerInternalAttributes) {
+    public Integer getSelectedAttributePremiumCount(Tenant tenant,
+            Boolean considerInternalAttributes) {
         return getSelectedAttrCount(tenant, Boolean.TRUE, considerInternalAttributes);
     }
 
     protected Integer getSelectedAttrCount(Tenant tenant, Boolean countOnlySelectedPremiumAttr,
             Boolean considerInternalAttributes) {
-        List<LeadEnrichmentAttribute> attributeList = getAttributes(tenant, null, null, null, null, null, null,
-                considerInternalAttributes);
+        List<LeadEnrichmentAttribute> attributeList = getAttributes(tenant, null, null, null, null,
+                null, null, considerInternalAttributes);
         int count = 0;
         for (LeadEnrichmentAttribute attr : attributeList) {
             if (attr.getIsSelected()) {
@@ -182,15 +192,18 @@ public class AttributeServiceImpl implements AttributeService {
     @Override
     public Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant) {
         Map<String, Integer> limitationMap = new HashMap<>();
-        int premiumAttributesLimitation = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
+        int premiumAttributesLimitation = appTenantConfigService
+                .getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
         limitationMap.put("HGData_Pivoted_Source", premiumAttributesLimitation);
         return limitationMap;
     }
 
     @Override
-    public void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType,
-            String fileName, Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes) {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+    public void downloadAttributes(HttpServletRequest request, HttpServletResponse response,
+            String mimeType, String fileName, Tenant tenant, Boolean isSelected,
+            Boolean considerInternalAttributes) {
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .onlySelectedAttributes(isSelected) //
                 .considerInternalAttributes(considerInternalAttributes) //
@@ -216,7 +229,8 @@ public class AttributeServiceImpl implements AttributeService {
     @Override
     public List<LeadEnrichmentAttribute> getAttributesBaseOnCategory(Category category) {
         List<LeadEnrichmentAttribute> matches = getAllAttributes().stream()
-                .filter(a -> a.getCategory().equals(category.getName())).collect(Collectors.toList());
+                .filter(a -> a.getCategory().equals(category.getName()))
+                .collect(Collectors.toList());
         if (matches.size() == 0) {
             return null;
         }
@@ -224,9 +238,11 @@ public class AttributeServiceImpl implements AttributeService {
     }
 
     @Override
-    public List<LeadEnrichmentAttribute> getAttributesBaseOnSubCategory(Category category, String subCategory) {
+    public List<LeadEnrichmentAttribute> getAttributesBaseOnSubCategory(Category category,
+            String subCategory) {
         List<LeadEnrichmentAttribute> matches = getAllAttributes().stream()
-                .filter(a -> a.getCategory().equals(category.getName()) && a.getSubcategory().equals(subCategory))
+                .filter(a -> a.getCategory().equals(category.getName())
+                        && a.getSubcategory().equals(subCategory))
                 .collect(Collectors.toList());
         if (matches.size() == 0) {
             return null;
@@ -248,8 +264,10 @@ public class AttributeServiceImpl implements AttributeService {
         for (LeadEnrichmentAttribute attribute : attributes) {
             stringBuffer.append(modifyStringForCSV(attribute.getDisplayName()) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getCategory()) + ",");
+            stringBuffer.append(modifyStringForCSV(attribute.getSubcategory()) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getDescription()) + ",");
-            stringBuffer.append(modifyStringForCSV(getDataTypeDisplay(attribute.getFieldJavaType())) + ",");
+            stringBuffer.append(
+                    modifyStringForCSV(getDataTypeDisplay(attribute.getFieldJavaType())) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getIsSelected() ? "On" : "Off") + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getIsPremium() ? "Yes" : "No"));
             stringBuffer.append("\r\n");
@@ -286,8 +304,8 @@ public class AttributeServiceImpl implements AttributeService {
         return displayName;
     }
 
-    private LeadEnrichmentAttribute findEnrichmentAttributeByName(List<LeadEnrichmentAttribute> allAttributes,
-            String selectedAttrStr) {
+    private LeadEnrichmentAttribute findEnrichmentAttributeByName(
+            List<LeadEnrichmentAttribute> allAttributes, String selectedAttrStr) {
         for (LeadEnrichmentAttribute attr : allAttributes) {
             if (attr.getFieldName().equals(selectedAttrStr)) {
                 return attr;
@@ -297,7 +315,8 @@ public class AttributeServiceImpl implements AttributeService {
         throw new LedpException(LedpCode.LEDP_18114, new String[] { selectedAttrStr });
     }
 
-    private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr, Tenant tenant) {
+    private SelectedAttribute populateAttrObj(LeadEnrichmentAttribute leadEnrichmentAttr,
+            Tenant tenant) {
         SelectedAttribute attr = new SelectedAttribute(leadEnrichmentAttr.getFieldName(), tenant);
         attr.setIsPremium(leadEnrichmentAttr.getIsPremium());
         return attr;
