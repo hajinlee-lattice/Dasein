@@ -8,8 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class LocationUtils {
+
+    private static final Log log = LogFactory.getLog(LocationUtils.class);
 
     private static Map<String, String> countrySynonMap;
     private static Map<String, String> usStateSynonMap;
@@ -452,7 +456,8 @@ public class LocationUtils {
             if (usStateAbbrToFullNameMap.containsKey(guess)) {
                 return LocationStringStandardizationUtils.getStandardString(usStateAbbrToFullNameMap.get(guess));
             } else {
-                return LocationStringStandardizationUtils.getStandardString(state);
+                log.info(String.format("Fail to map USA state %s to standardized state code", state));
+                return null;
             }
         } else if (CANADA.equalsIgnoreCase(standardCountry)) {
             Map<String, String> stateLookUp = caStateSynonMap;
@@ -460,7 +465,8 @@ public class LocationUtils {
             if (caStateAbbrToFullNameMap.containsKey(guess)) {
                 return LocationStringStandardizationUtils.getStandardString(caStateAbbrToFullNameMap.get(guess));
             } else {
-                return LocationStringStandardizationUtils.getStandardString(state);
+                log.info(String.format("Fail to map Canada state %s to standardized state code", state));
+                return null;
             }
         } else {
             return LocationStringStandardizationUtils.getStandardString(state);

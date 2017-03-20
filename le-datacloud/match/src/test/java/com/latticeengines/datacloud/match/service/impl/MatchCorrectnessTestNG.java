@@ -61,8 +61,8 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             { null, "Google UK", null, null, null, "UK", null, "google.co.uk", "GOOGLE UK LIMITED", "LONDON", "UNITED KINGDOM", "1001-2500", "1-5B" },
 
             // slight mis-spell in name
-            { null, "Microsoft Corp1", null, "WA", null, "USA", null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
-            { null, "Alphabet Inc1", null, "California", null, "US", null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
+            //{ null, "Microsoft Corp1", null, "WA", null, "USA", null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
+            //{ null, "Alphabet Inc1", null, "California", null, "US", null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
 
             { null, "Eversource Energy", "Springfield", "MA", "273608923", "US", "3368895000", "eversource.com", "Eversource Energy", "MASSACHUSETTS", "USA", "5001-10,000", "5B-10B" },
             // { null, "Queens College", "Queens", "NY", "11367-1597", "US", "7189975000", "queensknights.com", "Department of Media Studies", "New York", "USA", "11-50", "0-1M" },

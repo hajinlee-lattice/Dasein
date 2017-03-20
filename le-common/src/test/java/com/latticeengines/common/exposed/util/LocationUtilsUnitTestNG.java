@@ -71,8 +71,8 @@ public class LocationUtilsUnitTestNG {
                 { "Canada", "ONTARIO", "ONTARIO", "CANADA" }, //
                 { "China", "Beijing", "BEIJING", "CHINA" }, //
                 { "Japan", "Nowhere", "NOWHERE", "JAPAN" }, //
-                { "USA", "Beijing", "BEIJING", "OTHER" }, //
-                { "Canada", "Nowhere", "NOWHERE", "CANADA" }, //
+                { "USA", "Beijing", null, "OTHER" }, //
+                { "Canada", "Nowhere", null, "CANADA" }, //
         };
     }
 

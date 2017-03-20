@@ -124,7 +124,7 @@ public class LocationStandardizationServiceTestNG
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         Object[][] data = { { "Name1", "USA", "CALIFORNIA", "94404" },
-                { "Name2", "UNITED KINGDOM", "SCOTLAND", "null" }, { "Name3", "null", "SCOTLAND", "null" },
+                { "Name2", "UNITED KINGDOM", "SCOTLAND", "null" }, { "Name3", "null", "null", "null" },
                 { "Name4", "USA", "null", "null" } };
         int rowNum = 0;
         while (records.hasNext()) {
