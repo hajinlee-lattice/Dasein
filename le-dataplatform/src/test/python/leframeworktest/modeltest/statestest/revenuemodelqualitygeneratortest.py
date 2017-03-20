@@ -1,5 +1,6 @@
 import random
 
+import simulatehadoop
 from leframeworktest.modeltest.statestest.scoretargetbase import ScoreTargetBase
 from leframework.model.states.revenuemodelqualitygenerator import RevenueModelQualityGenerator
 
@@ -22,7 +23,7 @@ class RevenueModelQualityGeneratorTest(ScoreTargetBase):
         mediator.data['PredictedRevenue'] = predictedRevenue
         mediator.revenueColumn = "Revenue"
         mediator.data['Revenue'] = revenue
-        mediator.data['Period_ID'] = periodId
+        mediator.data['Offset'] = periodId
 
         generator.execute()
 
