@@ -38,10 +38,6 @@ class ImputationStep(PipelineStep):
         return [{"imputationstep-imputationvalues.json": self.imputationValues}]
 
     def transform(self, dataFrame, configMetadata, test):
-        if self.targetColumn not in dataFrame.columns.values:
-            logger.error('ImputationStep: targetCol does not exist in the dataFrame: {}'.format(str(self.targetColumn)))
-            return dataFrame
-    
         if len(self.imputationValues) == 0:
             self.imputationValues = self.__computeImputationValues(dataFrame)
             self.__writeRTSArtifacts()

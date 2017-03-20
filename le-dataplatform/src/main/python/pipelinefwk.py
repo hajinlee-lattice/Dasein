@@ -2,6 +2,7 @@ import logging
 import sys
 
 import pandas as pd
+import time as t
 
 try:
     from precisionutil import PrecisionUtil
@@ -38,8 +39,12 @@ class Pipeline(object):
             transformed = dataFrame.apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
         for step in self.pipelineSteps:
             step.setMediator(self.mediator)
+            
             try:
+                start = t.time()
                 transformed = step.transform(transformed, configMetadata, test)
+                end = t.time()
+                logger.info("Step took %f s." % (end - start))
                 modifiedCols = [c[0]['name'] for c in step.getOutputColumns() if c[0]['name'] in transformed.columns.values]
                 if len(modifiedCols) > 0:
                     transformed[modifiedCols] = transformed[modifiedCols].apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
@@ -167,12 +172,12 @@ class ModelStep(PipelineStep):
         return ModelStep(model, modelInputColumns, scoreColumnName)
 
     def transform(self, dataFrame, configMetadata, test):
-        ## From pandas release 0.17.0, .convert_objects is no longer available.
-        ## .convert_objects(convert_numeric=True) had the behavior that, for a column "A",
-        ## it would convert values to a numerical type if ANY of the values could be
-        ## converted; values that could not be converted would be set to NaN.  If NONE
-        ## of the values could be converted, the column would remain as-is.
-        ## To reproduce this behavior with .to_numeric, the code below is needed.
+        # # From pandas release 0.17.0, .convert_objects is no longer available.
+        # # .convert_objects(convert_numeric=True) had the behavior that, for a column "A",
+        # # it would convert values to a numerical type if ANY of the values could be
+        # # converted; values that could not be converted would be set to NaN.  If NONE
+        # # of the values could be converted, the column would remain as-is.
+        # # To reproduce this behavior with .to_numeric, the code below is needed.
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
