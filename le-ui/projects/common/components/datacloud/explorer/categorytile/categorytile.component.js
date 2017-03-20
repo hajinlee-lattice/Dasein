@@ -33,7 +33,7 @@ angular
                 return path + icon;
             }
 
-            vm.categoryOrderBy = function() {
+            vm.categoryOrderBy = function(test) {
                 return vm.lookupMode 
                     ? [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ]
                     : [ '-HighlightHighlighted', '-Value' ];

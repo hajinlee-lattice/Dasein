@@ -16,6 +16,7 @@
             <ul class="attributes noselect-children">
                 <li class="header" ng-show="highlightAttributes.length > 0">
                     <div class="column label">Highlighted Insights</div>
+                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
                 </li>
                 <li ng-repeat="attribute in (highlightAttributes = ((TileTableItems = vm.getTileTableItems(category, false, 'HighlightHighlighted', 5)).HighlightHighlighted 
                         | filter: vm.enrichmentsFilter() 
@@ -31,14 +32,18 @@
             <ul class="attributes noselect-children">
                 <li class="header" ng-show="categoryAttributes.length > 0">
                     <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
-                    <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
+                    <div class="column data" ng-if="highlightAttributes.length == 0">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
                 </li>
                 <li ng-repeat="attribute in (categoryAttributes = (TileTableItems.other 
                         | filter: vm.enrichmentsFilter() 
                         | orderBy: vm.categoryOrderBy()
                         | limitTo: 5 - (highlightAttributes.length || 0)))"
                         class="attribute"
-                        ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}"
+                        ng-class="{
+                            'has-highlight': attribute.HighlightHighlighted,
+                            'no-highlight': !attribute.HighlightHighlighted,
+                            'no-highlights': highlightAttributes.length == 0
+                        }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
                     <div class="column label" title="{{attribute.DisplayName}}">
                         <input mg-model="vm.segmentAttributeInput[attribute.Attribute]" ng-checked="vm.segmentAttributeInput[attribute.Attribute]" name="{{attribute.Attribute}}" id="{{attribute.Attribute}}" type="checkbox" ng-if="vm.section == 'analysis'" />

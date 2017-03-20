@@ -802,13 +802,10 @@ angular.module('common.datacloud.explorer', [
             vm.TileTableItems[category] = {};
         }
 
-        if (!vm.TileTableItems[category][(subcategory || 'Other')]) {
-            vm.TileTableItems[category][(subcategory || 'Other')] = {};
+        if (!vm.TileTableItems[category][(subcategory || 'all')]) {
+            vm.TileTableItems[category][(subcategory || 'all')] = {};
         } else {
-            //var timestamp4 = new Date().getTime();
-            //console.log('getTileTableItems();\t', '[cached]\t', (timestamp4 - timestamp) + 'ms\t', category, subcategory);
-            //console.log('getTileTableItems();\t [cached]\t ', vm.TileTableItems[category][(subcategory || 'Other')]);
-            return vm.TileTableItems[category][(subcategory || 'Other')];
+            return vm.TileTableItems[category][(subcategory || 'all')];
         }
 
         var timestamp = new Date().getTime();
@@ -819,9 +816,9 @@ angular.module('common.datacloud.explorer', [
             if (!subcategory && vm.isYesNoCategory(category, true)) {
                 Object.keys(vm.topAttributes[category].SubCategories).forEach(function(key, index) {
                     items = items.concat(vm.topAttributes[category].SubCategories[key]);
-                })
+                });
             } else {
-                items = vm.topAttributes[category].SubCategories[subcategory || 'Other'];
+                items = vm.topAttributes[category].SubCategories[subcategory];
             }
             
             var timestamp_b = new Date().getTime();
@@ -851,16 +848,16 @@ angular.module('common.datacloud.explorer', [
         if (vm.lookupMode || (!items || items.length == 0)) {
             items = vm.enrichmentsObj[category];
 
-            if (subcategory || vm.isYesNoCategory(category)) {
-                var subcategory = subcategory || 'Other';
+            if (subcategory || vm.isYesNoCategory(category, true)) {
+                //var subcategory = subcategory || 'Other';
 
                 items = items.filter(function(item) {
-                    var isSubcategory = item.Subcategory == subcategory;
+                    var isSubcategory = subcategory ? item.Subcategory == subcategory : true;
                     var attrValue = vm.lookupFiltered[item.FieldName];
 
                     if (vm.lookupMode && attrValue && isSubcategory) {
                         item.Value = attrValue;
-                        if ((!vm.metadata.toggle.show.nulls && attrValue == 'No')) {
+                        if (!vm.metadata.toggle.show.nulls && attrValue == 'No') {
                             return false;
                         } else {
                             return true;
@@ -886,10 +883,10 @@ angular.module('common.datacloud.explorer', [
 
         items = _items;
 
-        vm.TileTableItems[category][(subcategory || 'Other')] = items;
+        vm.TileTableItems[category][(subcategory || 'all')] = items;
 
         var timestamp4 = new Date().getTime();
-        console.log('getTileTableItems();\t', '[' + (timestamp_b - timestamp_a) + ':' + (timestamp_c - timestamp_b) + ':' + (timestamp3 - timestamp2) + ':' + (timestamp4 - timestamp3) + ']\t '+ (timestamp4 - timestamp) + 'ms\t', category, '\t', subcategory, '\t', (items[segment]||[]).length + ':' + items.other.length);
+        console.log('getTileTableItems();\t', '[' + (timestamp_b - timestamp_a) + ':' + (timestamp_c - timestamp_b) + ':' + (timestamp3 - timestamp2) + ':' + (timestamp4 - timestamp3) + ']\t '+ (timestamp4 - timestamp) + 'ms\t', category, '\t', subcategory, '\t', (items[segment]||[]).length + ':' + items.other.length, items);
         return items;
     }
 
