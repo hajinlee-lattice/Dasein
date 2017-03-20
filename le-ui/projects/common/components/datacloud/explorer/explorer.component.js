@@ -209,7 +209,7 @@ angular.module('common.datacloud.explorer', [
             vm.no_lookup_results_message = true;
         }
 
-        if(vm.section === 'analysis') {
+        if(vm.section === 'segment.analysis') {
             getMetadataSegements().then(function(result){
                 vm.metadataSegments = result.data;
                 console.log('getMetadataSegements:\t ', vm.getMetadataSegements);

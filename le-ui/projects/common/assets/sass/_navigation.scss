@@ -500,10 +500,12 @@ html.no-cssmask {
         }
     }
     .model-name {
+        /*
         position: absolute;
         left: 3em;
         right: 260px;
         margin-top: 18px;
+        */
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;

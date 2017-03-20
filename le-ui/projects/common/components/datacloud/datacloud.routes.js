@@ -234,7 +234,7 @@ angular
             params: {
                 pageIcon: 'ico-performance',
                 pageTitle: 'Analysis',
-                section: 'explorer',
+                section: 'segment.analysis',
                 category: {value: null, squash: true},
                 subcategory: {value: null, squash: true}
             },
@@ -246,6 +246,7 @@ angular
                             return null;
                         },
                         AnalysisLookup: function($q) {
+                            return false;
                             // load default segment from API
                             var deferred = $q.defer();
 

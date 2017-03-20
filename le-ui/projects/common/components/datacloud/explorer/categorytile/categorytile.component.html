@@ -21,7 +21,7 @@
                 <li ng-repeat="attribute in (highlightAttributes = ((TileTableItems = vm.getTileTableItems(category, false, 'HighlightHighlighted', 5)).HighlightHighlighted 
                         | filter: vm.enrichmentsFilter() 
                         | orderBy: vm.categoryOrderBy()
-                        | limitTo: (vm.section == 'analysis' ? 0 : 5)))"
+                        | limitTo: (vm.section == 'segment.analysis' ? 0 : 5)))"
                         class="attribute"
                         ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
@@ -46,7 +46,7 @@
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
                     <div class="column label" title="{{attribute.DisplayName}}">
-                        <input mg-model="vm.segmentAttributeInput[attribute.Attribute]" ng-checked="vm.segmentAttributeInput[attribute.Attribute]" name="{{attribute.Attribute}}" id="{{attribute.Attribute}}" type="checkbox" ng-if="vm.section == 'analysis'" />
+                        <input ng-model="vm.segmentAttributeInput[attribute.Attribute]" ng-checked="vm.segmentAttributeInput[attribute.Attribute]" name="{{attribute.Attribute}}" id="{{attribute.Attribute}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
                         {{ attribute.DisplayName }}
                     </div>
                     <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
