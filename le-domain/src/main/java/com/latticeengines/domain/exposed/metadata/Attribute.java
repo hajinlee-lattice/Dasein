@@ -864,7 +864,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void addBucket(String bucketRangeStr) {
+    public void addBucketRange(String bucketRangeStr) {
         BucketRange bucketRange = null;
         Pattern pattern = Pattern.compile("^\\[(.*)\\]$");
         if (bucketRangeStr != null) {
