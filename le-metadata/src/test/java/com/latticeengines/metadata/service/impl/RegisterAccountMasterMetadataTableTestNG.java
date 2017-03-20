@@ -41,7 +41,5 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
         bucketedTable.setInterpretation(SchemaInterpretation.BucketedAccountMaster.toString());
         log.info("Registering AccountMaster Bucketed Metadata Table");
         mdService.updateTable(CustomerSpace.parse(DataCloudConstants.SERVICE_TENANT), bucketedTable);
-        
-        FileUtils.write(new File("a.json"), bucketedTable.toString());
     }
 }
