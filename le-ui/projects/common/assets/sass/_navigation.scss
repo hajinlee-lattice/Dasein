@@ -1,6 +1,8 @@
 $max-height: 500px;
 $slide-transition: 200ms;
 
+@import "./mixins.scss";
+/*
 @mixin transition($args...) {
     -webkit-transition: $args;
     -moz-transition: $args;
@@ -27,7 +29,7 @@ $slide-transition: 200ms;
     overflow: hidden;
     white-space: nowrap;
 }
-
+*/
 #inner-wrap {
     @include flex-container;
     min-height: 100vh;
@@ -470,7 +472,16 @@ html.no-cssmask {
             outline: 0;
         }
     }
-    .ng-animate {
+
+    ul.secondary-nav-grid {
+        @include flex-container;
+        & > li {
+            @include flex-item(0 1 auto);
+            position: relative;
+            &:nth-last-child(2) {
+                @include flex-item(1 1 auto);
+            }
+        }
     }
     .page-icon,
     .page-name,
@@ -500,15 +511,21 @@ html.no-cssmask {
         }
     }
     .model-name {
-        /*
-        position: absolute;
-        left: 3em;
-        right: 260px;
-        margin-top: 18px;
-        */
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
+        @include text-ellipsis;
+        position: relative;
+        max-width: 500px;
+        padding-right: 15px;
+        border-right: 1px solid #ededed;
+        padding-left: 20px;
+        margin-top: 20px;
+        font-size: 16px;
+        &:before {
+            @include font-awesome-inline("\f053");
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
     }
     .header-tenant-name {
         padding: 20px 20px 20px 52px;

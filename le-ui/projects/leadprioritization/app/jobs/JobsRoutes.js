@@ -16,7 +16,7 @@ angular
             url: '/jobs',
             params: {
                 pageIcon: 'ico-scoring',
-                pageTitle: '',
+                pageTitle: 'Jobs',
                 jobCreationSuccess: null
             },
             views: {

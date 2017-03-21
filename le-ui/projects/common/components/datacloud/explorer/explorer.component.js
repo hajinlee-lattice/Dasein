@@ -1192,9 +1192,9 @@ angular.module('common.datacloud.explorer', [
         return result.length;
     }
 
-    vm.segmentAttributeInput = {};
+    vm.segmentAttributeInput = vm.segmentAttributeInput || {};
     vm.selectSegmentAttribute = function(attribute) {
-        vm.segmentAttributeInput[attribute.Attribute] = !vm.segmentAttributeInput[attribute.Attribute];
+        vm.segmentAttributeInput[attribute.FieldName] = !vm.segmentAttributeInput[attribute.FieldName];
         console.log(vm.segmentAttributeInput);
     }
 

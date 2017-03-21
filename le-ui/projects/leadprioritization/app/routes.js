@@ -229,7 +229,7 @@ angular
             url: '/segmentation',
             params: {
                 pageIcon: 'ico-scoring',
-                pageTitle: ''
+                pageTitle: 'Segmentation'
             },
             views: {
                 "main@": {
@@ -241,7 +241,7 @@ angular
             url: '/attributes',
             params: {
                 pageIcon: 'ico-attributes',
-                pageTitle: ''
+                pageTitle: 'Attributes'
             },
             views: {
                 "main@": {
@@ -260,7 +260,7 @@ angular
             url: '/performance',
             params: {
                 pageIcon: 'ico-performance',
-                pageTitle: ''
+                pageTitle: 'Performance'
             },
             views: {
                 "main@": {
@@ -311,7 +311,7 @@ angular
             },
             params: {
                 pageIcon: 'ico-ratings',
-                pageTitle: ''
+                pageTitle: 'Ratings'
             },
             views: {
                 "summary@": {
@@ -329,7 +329,7 @@ angular
             url: '/history',
             params: {
                 pageIcon: 'ico-ratings',
-                pageTitle: ''
+                pageTitle: 'History'
             },
             views: {
                 "summary@": {
@@ -359,7 +359,7 @@ angular
             url: '/ratings-demo',
             params: {
                 pageIcon: 'ico-ratings',
-                pageTitle: ''
+                pageTitle: 'Ratings'
             },
             views: {
                 "summary@": {
@@ -375,7 +375,7 @@ angular
             url: '/leads',
             params: {
                 pageIcon: 'ico-leads',
-                pageTitle: ''
+                pageTitle: 'Leads'
             },
             views: {
                 "main@": {
@@ -394,7 +394,7 @@ angular
             url: '/summary',
             params: {
                 pageIcon: 'ico-datatable',
-                pageTitle: ''
+                pageTitle: 'Summary'
             },
             views: {
                 "main@": {
@@ -455,7 +455,7 @@ angular
             url: '/refine',
             params: {
                 pageIcon: 'ico-refine',
-                pageTitle: ''
+                pageTitle: 'Refine'
             },
             resolve: {
                 loadKendo: ['$ocLazyLoad', function($ocLazyLoad) {
@@ -526,7 +526,7 @@ angular
             url: '/remodel',
             params: {
                 pageIcon: 'ico-remodel',
-                pageTitle: ''
+                pageTitle: 'Remodel'
             },
             resolve: {
                 DataRules: function($q, $stateParams, $http, RemodelStore) {
