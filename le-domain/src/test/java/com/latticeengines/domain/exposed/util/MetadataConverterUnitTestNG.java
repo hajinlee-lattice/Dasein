@@ -1,21 +1,23 @@
 package com.latticeengines.domain.exposed.util;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage.DatabaseName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BucketRange;
 
 public class MetadataConverterUnitTestNG {
     private Configuration configuration = new Configuration();
@@ -32,8 +34,7 @@ public class MetadataConverterUnitTestNG {
 
     @Test(groups = "unit")
     public void testMultipleExtractsWhenProvideDirectory() throws Exception {
-        String path = getResourceAbsolutePath(
-                "com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/extracts");
+        String path = getResourceAbsolutePath("com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/extracts");
         Table table = MetadataConverter.getTable(configuration, path);
         String extractDir = table.getExtractsDirectory();
         assertEquals(extractDir, path);
@@ -41,8 +42,7 @@ public class MetadataConverterUnitTestNG {
 
     @Test(groups = "unit")
     public void testMultipleExtractsWhenProvideGlob() throws Exception {
-        String path = getResourceAbsolutePath(
-                "com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/extracts");
+        String path = getResourceAbsolutePath("com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/extracts");
         Table table = MetadataConverter.getTable(configuration, path + "/*.avro");
         String extractDir = table.getExtractsDirectory();
         assertEquals(extractDir, path);
@@ -50,21 +50,23 @@ public class MetadataConverterUnitTestNG {
 
     @Test(groups = "unit")
     public void testBucketedTable() throws IOException {
-        String path = getResourceAbsolutePath(
-                "com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/am.avsc");
+        String path = getResourceAbsolutePath("com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/am.avsc");
         Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(configuration, path, null, null);
         JdbcStorage storage = new JdbcStorage();
         storage.setDatabaseName(DatabaseName.REDSHIFT);
         storage.setTableNameInStorage("redshift_bucketedaccountmaster");
         bucketedTable.setStorageMechanism(storage);
 
-        // FileUtils.write(new File("bucketedaccountmastertable.json"),
-        // bucketedTable.toString());
-        assertEquals(bucketedTable.getAttributes().size(), 134);
-        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketRangeList().size(), 4);
-        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketRangeList().get(0).isNullOnly(),
-                Boolean.TRUE.booleanValue());
-        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketRangeList().get(1).getMin(), "Value1");
-        assertEquals(bucketedTable.getAttribute("Attr1_8").getBucketRangeList().get(2).getMax(), "Value2");
+        assertEquals(bucketedTable.getAttributes().size(), 16483);
+        Attribute attribute = bucketedTable.getAttribute("TechIndicator_AdRoll");
+        assertNotNull(attribute);
+        List<BucketRange> bucketRangeList = attribute.getBucketRangeList();
+        assertNotNull(bucketRangeList);
+        assertEquals(bucketRangeList.size(), 3);
+        assertTrue(bucketRangeList.get(0).isNullOnly());
+        assertEquals(bucketRangeList.get(1).getMin(), "Yes");
+        assertEquals(bucketRangeList.get(1).getMax(), "Yes");
+        assertEquals(bucketRangeList.get(2).getMin(), "No");
+        assertEquals(bucketRangeList.get(2).getMax(), "No");
     }
 }

@@ -363,7 +363,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Override
     @JsonIgnore
-
     public Long getTenantId() {
         return tenantId;
     }
@@ -864,30 +863,11 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void addBucketRange(String bucketRangeStr) {
-        BucketRange bucketRange = null;
-        Pattern pattern = Pattern.compile("^\\[(.*)\\]$");
-        if (bucketRangeStr != null) {
-            Matcher matcher = pattern.matcher(bucketRangeStr);
-            if (matcher.matches()) {
-                String contents = matcher.group(1);
-                if (!contents.isEmpty()) {
-                    String[] array = contents.split(",");
-                    if (array.length == 2) {
-                        Object min = array[0].trim();
-                        Object max = array[1].trim();
-                        Object nullObj = null;
-                        if (min.equals(String.valueOf(nullObj)) && max.equals(String.valueOf(nullObj))) {
-                            bucketRange = BucketRange.nullBucket();
-                        } else {
-                            bucketRange = BucketRange.range(min, max);
-                        }
-                    }
-                }
-            }
-        }
-        if (bucketRange != null) {
-            addBucketRange(bucketRange);
+    public void addBucketedValue(String bucketRangeStr) {
+        if (bucketRangeStr == null || bucketRangeStr.equals("null")) {
+            addBucketRange(BucketRange.nullBucket());
+        } else {
+            addBucketRange(BucketRange.value(bucketRangeStr));
         }
     }
 
@@ -895,7 +875,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public List<BucketRange> getBucketRangeList() {
         Object obj = properties.get("BucketRangeList");
-        return obj == null ? null : JsonUtils.getObjectMapper().convertValue(obj, new TypeReference<List<BucketRange>>() {});
+        return obj == null ? null : JsonUtils.getObjectMapper().convertValue(obj,
+                new TypeReference<List<BucketRange>>() {
+                });
     }
 
     @Override

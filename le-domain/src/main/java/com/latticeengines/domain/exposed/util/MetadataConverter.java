@@ -214,7 +214,7 @@ public class MetadataConverter {
                 attr.setPhysicalDataType(Schema.Type.STRING.getName());
                 attr.setBitOffset(bucketedAttr.get("lowest_bit").asInt());
                 attr.setNumOfBits(bucketedAttr.get("num_bits").asInt());
-                ((ArrayNode) bucketedAttr.get("buckets")).forEach(node -> attr.addBucketRange(node.asText()));
+                ((ArrayNode) bucketedAttr.get("buckets")).forEach(node -> attr.addBucketedValue(node.asText()));
                 attr.setPhysicalName(fieldName);
                 attr.setNullable(Boolean.TRUE);
                 attrs.add(attr);
