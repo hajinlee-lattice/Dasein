@@ -165,4 +165,8 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     public Table getTable(String tableName) {
         return getTables().stream().filter(t -> t.getName().equals(tableName)).findFirst().orElse(null);
     }
+
+    public void addTable(Table table) {
+        tables.add(table);
+    }
 }

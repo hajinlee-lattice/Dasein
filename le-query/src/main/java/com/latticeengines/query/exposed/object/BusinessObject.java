@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.util.QueryUtils;
@@ -21,7 +21,7 @@ import com.querydsl.sql.SQLQuery;
 
 public abstract class BusinessObject {
     @Autowired
-    private MetadataProxy metadataProxy;
+    private DataCollectionProxy dataCollectionProxy;
 
     @Autowired
     private QueryFactory queryFactory;
@@ -62,8 +62,7 @@ public abstract class BusinessObject {
     }
 
     protected final DataCollection getDataCollection() {
-        return metadataProxy.getDataCollectionByType(MultiTenantContext.getTenant().getId(),
+        return dataCollectionProxy.getDataCollectionByType(MultiTenantContext.getTenant().getId(),
                 DataCollectionType.Segmentation);
     }
-
 }

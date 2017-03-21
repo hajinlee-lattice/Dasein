@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.query;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -10,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @ApiModel("Represents a range of values, or a single value, either categorical or numerical.  "
         + "All ranges are inclusive, like SQL between statements.")
 public class BucketRange {
@@ -72,10 +75,12 @@ public class BucketRange {
         this.max = max;
     }
 
+    @JsonIgnore
     public boolean isNullOnly() {
         return isNullOnly;
     }
 
+    @JsonIgnore
     public void setNullOnly(boolean nullOnly) {
         isNullOnly = nullOnly;
     }

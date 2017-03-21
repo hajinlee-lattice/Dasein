@@ -6,11 +6,11 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <context:component-scan base-package="com.latticeengines.metadata">
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.metadata.controller.*" />
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.metadata.hive.*" />
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.metadata.controller.*"/>
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.metadata.hive.*"/>
     </context:component-scan>
 
-    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl"/>
 
     <import resource="classpath:monitor-alerts-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
@@ -20,4 +20,5 @@
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
+    <import resource="classpath:proxy-context.xml"/>
 </beans>

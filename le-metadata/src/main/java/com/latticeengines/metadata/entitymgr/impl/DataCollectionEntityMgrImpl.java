@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.HibernateUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -24,11 +23,11 @@ import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
+import com.latticeengines.metadata.service.SegmentationDataCollectionService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataCollectionEntityMgr")
-public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollection>
-        implements DataCollectionEntityMgr {
+public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollection> implements DataCollectionEntityMgr {
 
     @Autowired
     private DataCollectionDao dataCollectionDao;
@@ -40,7 +39,10 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     private TableTagEntityMgr tableTagEntityMgr;
 
     @Autowired
-    DataCollectionPropertyDao dataCollectionPropertyDao;
+    private DataCollectionPropertyDao dataCollectionPropertyDao;
+
+    @Autowired
+    private SegmentationDataCollectionService segmentationDataCollectionService;
 
     @Override
     public DataCollectionDao getDao() {
@@ -56,8 +58,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
                 .map(name -> tableEntityMgr.findByName(name)) //
                 .collect(Collectors.toList());
         if (tables.stream().anyMatch(table -> table == null)) {
-            throw new LedpException(LedpCode.LEDP_11006,
-                    new String[] { String.join(",", tableNames) });
+            throw new LedpException(LedpCode.LEDP_11006, new String[] { String.join(",", tableNames) });
         }
         dataCollection.setName("DataCollection_" + UUID.randomUUID());
 
@@ -86,18 +87,19 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
         DataCollection dataCollection = candidates.get(0);
         HibernateUtils.inflateDetails(dataCollection.getProperties());
-        fillInTables(dataCollection);
         return dataCollection;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public DataCollection getDataCollection(DataCollectionType type) {
         DataCollection collection = findByField("type", type);
         if (collection != null) {
-            fillInTables(collection);
             HibernateUtils.inflateDetails(collection.getProperties());
+        } else {
+            collection = registerDefault(type);
         }
+
         return collection;
     }
 
@@ -113,9 +115,12 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         dataCollectionDao.delete(dataCollection);
     }
 
-    private void fillInTables(DataCollection dataCollection) {
-        List<Table> tables = tableTagEntityMgr.getTablesForTag(dataCollection.getName());
-        dataCollection.setTables(tables);
+    private DataCollection registerDefault(DataCollectionType type) {
+        if (type == DataCollectionType.Segmentation) {
+            DataCollection collection = segmentationDataCollectionService.getDefaultDataCollection();
+            return createDataCollection(collection);
+        }
+        return null;
     }
 
 }

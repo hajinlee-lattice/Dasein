@@ -17,6 +17,7 @@
         <le.baton.version>3.3.0-SNAPSHOT</le.baton.version>
         <le.network.version>3.3.0-SNAPSHOT</le.network.version>
         <le.dataplatform.version>3.3.0-SNAPSHOT</le.dataplatform.version>
+        <le.proxy.version>3.3.0-SNAPSHOT</le.proxy.version>
     </properties>
 
     <parent>
@@ -61,6 +62,18 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>

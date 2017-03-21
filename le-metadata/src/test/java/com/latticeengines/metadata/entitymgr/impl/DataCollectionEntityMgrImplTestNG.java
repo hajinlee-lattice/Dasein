@@ -47,20 +47,14 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        DataCollection retrieved = dataCollectionEntityMgr
-                .getDataCollection(DataCollectionType.Segmentation);
-        assertEquals(retrieved.getTables().size(), 1);
-        assertEquals(retrieved.getTables().get(0).getName(), TABLE1);
+        DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(DataCollectionType.Segmentation);
         assertEquals(retrieved.getName(), dataCollection.getName());
         assertEquals(retrieved.getType(), dataCollection.getType());
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
     public void retrieveByName() {
-        DataCollection retrieved = dataCollectionEntityMgr
-                .getDataCollection(dataCollection.getName());
-        assertEquals(retrieved.getTables().size(), 1);
-        assertEquals(retrieved.getTables().get(0).getName(), TABLE1);
+        DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(dataCollection.getName());
         assertEquals(retrieved.getName(), dataCollection.getName());
         assertEquals(retrieved.getType(), dataCollection.getType());
     }

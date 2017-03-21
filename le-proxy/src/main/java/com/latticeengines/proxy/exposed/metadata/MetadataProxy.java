@@ -6,12 +6,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -20,7 +17,6 @@ import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.network.exposed.metadata.ArtifactInterface;
-import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
 import com.latticeengines.network.exposed.metadata.ModuleInterface;
 import com.latticeengines.network.exposed.metadata.RuleResultInterface;
@@ -28,7 +24,7 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
 public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataInterface, ArtifactInterface,
-        RuleResultInterface, ModuleInterface, DataCollectionInterface {
+        RuleResultInterface, ModuleInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -241,30 +237,4 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         return post("createVdbImportExtract", url, importExtract, Boolean.class);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<DataCollection> getDataCollections(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollections", customerSpace);
-        List list = get("getDataCollections", url, List.class);
-        return JsonUtils.convertList(list, DataCollection.class);
-    }
-
-    @Override
-    public DataCollection getDataCollectionByType(String customerSpace, DataCollectionType type) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollections/types/{type}", customerSpace, type);
-        return get("getDataCollection", url, DataCollection.class);
-    }
-
-    @Override
-    public DataCollection getDataCollection(String customerSpace, String dataCollectionName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollections/names/{dataCollectionName}",
-                customerSpace, dataCollectionName);
-        return get("getDataCollection", url, DataCollection.class);
-    }
-
-    @Override
-    public DataCollection createDataCollection(String customerSpace, DataCollection dataCollection) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollections", customerSpace);
-        return post("createDataCollection", url, dataCollection, DataCollection.class);
-    }
 }
