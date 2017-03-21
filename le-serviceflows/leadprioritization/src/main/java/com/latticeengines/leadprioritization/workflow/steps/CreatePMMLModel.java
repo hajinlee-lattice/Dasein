@@ -1,7 +1,8 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,21 +123,21 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         return bldr;
     }
 
-    private String fixPMMLFile(String pmmlPath) throws Exception {
+    private InputStream fixPMMLFile(String pmmlPath) throws Exception {
         PMML pmml = PmmlModelUtils.getPMML(HdfsUtils.getInputStream(yarnConfiguration, pmmlPath), false);
         new RegressionTargetCorrector().applyTo(pmml);
-        StringWriter stringWriter = new StringWriter();
-        Result result = new StreamResult(stringWriter);
-        JAXBUtil.marshalPMML(pmml, result);
-        return stringWriter.getBuffer().toString();
+        try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+            Result result = new StreamResult(stream);
+            JAXBUtil.marshalPMML(pmml, result);
+            return new ByteArrayInputStream(stream.toByteArray());
+        }
     }
 
     Map<ArtifactType, String> getMetadataArtifacts() {
         Map<ArtifactType, String> metadataArtifacts = new HashMap<>();
-        try {
-            String fixedPmmlContents = fixPMMLFile(configuration.getPmmlArtifactPath());
+        try (InputStream fixedPmmlContentsStream = fixPMMLFile(configuration.getPmmlArtifactPath())) {
             String fixedPmmlPath = configuration.getPmmlArtifactPath() + ".fixed.xml";
-            HdfsUtils.writeToFile(yarnConfiguration, fixedPmmlPath, fixedPmmlContents);
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fixedPmmlContentsStream, fixedPmmlPath);
             metadataArtifacts.put(ArtifactType.PMML, fixedPmmlPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -200,8 +201,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         for (PmmlField pmmlField : pmmlFields) {
             MiningField field = pmmlField.miningField;
             String name = field.getName().getValue();
-            if (field.getUsageType() == FieldUsageType.ACTIVE
-                    && !pivotValuesByTargetColumn.containsKey(name)) {
+            if (field.getUsageType() == FieldUsageType.ACTIVE && !pivotValuesByTargetColumn.containsKey(name)) {
                 features.add(name);
             } else if (field.getUsageType() == FieldUsageType.PREDICTED) {
                 event = name;
