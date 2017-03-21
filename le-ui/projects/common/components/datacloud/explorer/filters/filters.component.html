@@ -47,10 +47,10 @@
         </ul>
         <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
     </li>
-    <li class="refine-query" ng-if="vm.section == 'analysis'">
+    <li class="refine-query" ng-if="vm.section == 'segment.analysis'">
         <button class="save button white-button" ng-disabled="vm.refineQueryDisabled" ng-click="vm.refineQuery()">{{vm.label.button_refine_query}}</button>
     </li>
-    <li class="save-segment" ng-if="vm.section == 'analysis'">
+    <li class="save-segment" ng-if="vm.section == 'segment.analysis'">
         <button class="save button white-button" ng-disabled="vm.saveSegmentDisabled" ng-click="vm.saveSegment()">{{vm.label.button_save_segment}}</button>
     </li>
 </ul>
