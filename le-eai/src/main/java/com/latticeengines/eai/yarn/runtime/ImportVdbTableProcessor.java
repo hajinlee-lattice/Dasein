@@ -40,6 +40,8 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
                 importConfig.getProperty(ImportVdbProperty.REPORT_STATUS_ENDPOINT));
         importContext.setProperty(ImportVdbProperty.TOTAL_ROWS,
                 importConfig.getProperty(ImportVdbProperty.TOTAL_ROWS));
+        importContext.setProperty(ImportVdbProperty.BATCH_SIZE,
+                importConfig.getProperty(ImportVdbProperty.BATCH_SIZE));
         importContext.setProperty(ImportVdbProperty.VDB_QUERY_HANDLE,
                 importConfig.getProperty(ImportVdbProperty.VDB_QUERY_HANDLE));
         importContext.setProperty(ImportVdbProperty.METADATA_LIST,

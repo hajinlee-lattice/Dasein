@@ -30,6 +30,9 @@ public class VdbLoadTableConfig {
     @JsonProperty("total_rows")
     private int totalRows;
 
+    @JsonProperty("batch_size")
+    private int batchSize;
+
     @JsonProperty("get_query_data_endpoint")
     private String getQueryDataEndpoint;
 
@@ -109,6 +112,14 @@ public class VdbLoadTableConfig {
 
     public void setTotalRows(int totalRows) {
         this.totalRows = totalRows;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
     }
 
     public String getGetQueryDataEndpoint() {

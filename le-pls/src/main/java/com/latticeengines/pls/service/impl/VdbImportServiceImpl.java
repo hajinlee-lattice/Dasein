@@ -134,7 +134,7 @@ public class VdbImportServiceImpl implements VdbImportService {
         VdbLoadTableStatus vdbLoadTableStatus = new VdbLoadTableStatus();
         vdbLoadTableStatus.setVisiDBQueryHandle(config.getVdbQueryHandle());
         String customSpace = CustomerSpace.parse(config.getTenantId()).toString();
-        String extractIdentifier = String.format("%s_%s_%d", customSpace, config.getTableName(), config.getLaunchId());
+        String extractIdentifier = String.format("%s_%s_%s", customSpace, config.getTableName(), config.getLaunchId());
         VdbImportExtract vdbImportExtract = metadataProxy.getVdbImportExtract(customSpace, extractIdentifier);
         if (vdbImportExtract == null) {
             vdbLoadTableStatus.setJobStatus("DoesNotExist");

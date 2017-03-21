@@ -67,6 +67,7 @@ public class ImportVdbTableAndPublishWorkflowSubmitter extends WorkflowSubmitter
                 .vdbQueryHandle(loadConfig.getVdbQueryHandle())
                 .tableName(loadConfig.getTableName())
                 .totalRows(loadConfig.getTotalRows())
+                .batchSize(loadConfig.getBatchSize())
                 .metadataList(loadConfig.getMetadataList())
                 .mergeRule(loadConfig.getMergeRule())
                 .createTableRule(VdbCreateTableRule.getCreateRule(loadConfig.getCreateTableRule()))

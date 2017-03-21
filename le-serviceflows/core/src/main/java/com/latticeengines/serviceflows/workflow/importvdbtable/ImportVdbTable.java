@@ -73,6 +73,7 @@ public class ImportVdbTable extends BaseWorkflowStep<ImportVdbTableStepConfigura
         importConfig.setProperty(ImportVdbProperty.QUERY_DATA_ENDPOINT, configuration.getGetQueryDataEndpoint());
         importConfig.setProperty(ImportVdbProperty.REPORT_STATUS_ENDPOINT, configuration.getReportStatusEndpoint());
         importConfig.setProperty(ImportVdbProperty.TOTAL_ROWS, String.valueOf(configuration.getTotalRows()));
+        importConfig.setProperty(ImportVdbProperty.BATCH_SIZE, String.valueOf(configuration.getBatchSize()));
         importConfig.setProperty(ImportVdbProperty.VDB_QUERY_HANDLE, configuration.getVdbQueryHandle());
         importConfig.setProperty(ImportVdbProperty.EXTRACT_IDENTIFIER, configuration.getExtractIdentifier());
         importConfig.setProperty(ImportVdbProperty.METADATA_LIST, JsonUtils.serialize(configuration.getMetadataList()));

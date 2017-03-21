@@ -56,6 +56,11 @@ public class ImportVdbTableAndPublishWorkflowConfiguration extends WorkflowConfi
             return this;
         }
 
+        public Builder batchSize(int batchSize) {
+            importVdbTableConfiguration.setBatchSize(batchSize);
+            return this;
+        }
+
         public Builder reportStatusEndpoint(String reportStatusEndpoint) {
             importVdbTableConfiguration.setReportStatusEndpoint(reportStatusEndpoint);
             return this;

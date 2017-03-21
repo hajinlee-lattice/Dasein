@@ -68,8 +68,8 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Autowired
     private EaiMetadataService eaiMetadataService;
 
-    @Value("${eai.vdb.rows.batch:2000}")
-    private int rowsToGet;
+//    @Value("${eai.vdb.rows.batch:2000}")
+//    private int rowsToGet;
 
     @Value("${eai.vdb.cells.batch:1000000}")
     private int cellsPerFile;
@@ -164,6 +164,16 @@ public class VdbTableImportServiceImpl extends ImportService {
         @SuppressWarnings("unchecked")
         List<Object> rawList = JsonUtils.deserialize(metaDataJson, List.class);
         List<VdbSpecMetadata> vdbSpecMetadataList = JsonUtils.convertList(rawList, VdbSpecMetadata.class);
+        int totalRows;
+        int rowsToGet;
+        try {
+            totalRows = Integer.parseInt(context.getProperty(ImportVdbProperty.TOTAL_ROWS, String.class));
+            rowsToGet = Integer.parseInt(context.getProperty(ImportVdbProperty.BATCH_SIZE, String.class));
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Cannot parse total rows value: %s or batch size value: %s",
+                    context.getProperty(ImportVdbProperty.TOTAL_ROWS, String.class),
+                    context.getProperty(ImportVdbProperty.BATCH_SIZE, String.class)));
+        }
 
         VdbImportExtract vdbImportExtract = eaiMetadataService.getVdbImportExtract(customSpace, extractIdentifier);
         if (vdbImportExtract == null) {
@@ -181,18 +191,11 @@ public class VdbTableImportServiceImpl extends ImportService {
             fileIndex = proccessedLines / linesPerFile;
         }
         if (linesPerFile == 0) {
-            linesPerFile = getLinesPerFile(vdbSpecMetadataList.size());
+            linesPerFile = getLinesPerFile(vdbSpecMetadataList.size(), rowsToGet);
             vdbImportExtract.setLinesPerFile(linesPerFile);
             eaiMetadataService.updateVdbImportExtract(customSpace, vdbImportExtract);
         }
 
-        int totalRows;
-        try {
-            totalRows = Integer.parseInt(context.getProperty(ImportVdbProperty.TOTAL_ROWS, String.class));
-        } catch (Exception e) {
-            throw new RuntimeException(String.format("Can't parse total rows value: %s",
-                    context.getProperty(ImportVdbProperty.TOTAL_ROWS, String.class)));
-        }
         int startRow = proccessedLines;
         int fileRows = 0;
 
@@ -392,7 +395,7 @@ public class VdbTableImportServiceImpl extends ImportService {
         return numberFormatter.parse(inputStr, Locale.getDefault());
     }
 
-    private int getLinesPerFile(int columnCount) {
+    private int getLinesPerFile(int columnCount, int rowsToGet) {
         int linesPerFile = cellsPerFile / columnCount;
         int batch = linesPerFile / rowsToGet;
         if (batch == 0) {

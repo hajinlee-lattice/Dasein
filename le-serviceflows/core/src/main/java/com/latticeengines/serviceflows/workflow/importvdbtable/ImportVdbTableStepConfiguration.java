@@ -28,6 +28,8 @@ public class ImportVdbTableStepConfiguration extends BaseStepConfiguration {
 
     private int totalRows;
 
+    private int batchSize;
+
     private String reportStatusEndpoint;
 
     private String mergeRule;
@@ -94,6 +96,16 @@ public class ImportVdbTableStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("total_rows")
     public void setTotalRows(int totalRows) {
         this.totalRows = totalRows;
+    }
+
+    @JsonProperty("batch_size")
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    @JsonProperty("batch_size")
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
     }
 
     @JsonProperty("get_query_data_endpoint")
