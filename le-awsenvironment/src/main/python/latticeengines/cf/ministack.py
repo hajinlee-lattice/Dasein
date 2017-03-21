@@ -53,10 +53,11 @@ class CreateServiceThread (threading.Thread):
             container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, tag=self.tag, region=self.region)
         ledp = ECSVolume("ledp", "/etc/ledp")
         efsip = ECSVolume("efsip", "/etc/efsip.txt")
-        internalAddr = ECSVolume("intAddr", "/etc/internaladdr.txt")
+        internal_addr = ECSVolume("intAddr", "/etc/internaladdr.txt")
+        hadoop_conf = ECSVolume("hadoopConf", "/etc/hadoop/conf")
         token = find_cluster_random_token(self.stackname)
         task = "%s-%s-%s" % (self.stackname, self.app, token)
-        register_task(task, [container], [ledp, efsip, internalAddr])
+        register_task(task, [container], [ledp, efsip, internal_addr, hadoop_conf])
         create_service(self.stackname, self.app, task, self.instances)
 
 
@@ -268,10 +269,12 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
     params["CATALINA_OPTS"] = "-Xmx%dm -XX:ReservedCodeCacheSize=%dm" % (int(alloc["mem"] * 0.9), 256 if alloc["mem"] <= 1024 else 512)
     for k, v in params.items():
         container.set_env(k, v)
+    container.set_env("HADOOP_CONF_DIR", "/etc/hadoop/conf")
 
     container = container.mount("/etc/ledp", "ledp") \
         .mount("/etc/efsip.txt", "efsip") \
-        .mount("/etc/internaladdr.txt", "intAddr")
+        .mount("/etc/internaladdr.txt", "intAddr") \
+        .mount("/etc/hadoop/conf", "hadoopConf")
 
     return container
 

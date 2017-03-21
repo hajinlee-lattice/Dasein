@@ -21,6 +21,7 @@ COPY META-INF/context.xml /META-INF/context.xml
 COPY conf/env/devcluster_aws/latticeengines.properties /tmp/conf/env/devcluster/latticeengines.properties
 COPY conf/env/qacluster_aws/latticeengines.properties /tmp/conf/env/qacluster/latticeengines.properties
 COPY conf/env/prodcluster_aws/latticeengines.properties /tmp/conf/env/prodcluster/latticeengines.properties
+COPY catalina.sh /opt/apache-tomcat-8.5.8/bin/catalina.sh
 COPY start.sh /start.sh
 
 EXPOSE 8080 8443 1099

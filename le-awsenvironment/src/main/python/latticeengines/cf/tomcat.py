@@ -99,20 +99,24 @@ def tomcat_task(profile_vars, env="qa"):
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
+    container.set_env("HADOOP_CONF_DIR", "/etc/hadoop/conf")
 
     ledp = Volume("ledp", "/etc/ledp")
     efsip = Volume("efsip", "/etc/efsip.txt")
-    internalAddr = Volume("intAddr", "/etc/internaladdr.txt")
+    internal_addr = Volume("intAddr", "/etc/internaladdr.txt")
+    hadoop_conf = Volume("hadoopConf", "/etc/hadoop/conf")
 
     container = container.mount("/etc/ledp", ledp) \
         .mount("/etc/efsip.txt", efsip) \
-        .mount("/etc/internaladdr.txt", internalAddr)
+        .mount("/etc/internaladdr.txt", internal_addr) \
+        .mount("/etc/hadoop/conf", hadoop_conf)
 
     task = TaskDefinition("tomcattask")
     task.add_container(container)
     task.add_volume(ledp)
     task.add_volume(efsip)
-    task.add_volume(internalAddr)
+    task.add_volume(internal_addr)
+    task.add_volume(hadoop_conf)
     return task
 
 def provision_cli(args):

@@ -41,6 +41,7 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.manageme
 if [ ! -z "${CATALINA_OPTS}" ]; then
     export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
 fi
+export CATALINA_CLASSPATH=$CLASSPATH:$HADOOP_CONF_DIR
 
 echo ${JAVA_OPTS}
 
