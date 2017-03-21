@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
@@ -215,7 +216,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     @Override
     public List<MetadataSegment> getMetadataSegments(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/segments/all", customerSpace);
-        return get("getSegments", url, List.class);
+        List raw = get("getSegments", url, List.class);
+        return JsonUtils.convertList(raw, MetadataSegment.class);
     }
 
     @Override
