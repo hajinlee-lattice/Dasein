@@ -209,22 +209,12 @@ public class ModelingServiceExecutor {
     }
 
     void setPipelineProperties(Algorithm algorithm) {
-        String enabledRulesProp = getEnabledRulesAsPipelineProp(builder.getDataRules());
-        if (StringUtils.isNotEmpty(enabledRulesProp)) {
-            if (!algorithm.getPipelineProperties().isEmpty()) {
-                algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " " + enabledRulesProp);
-            } else {
-                algorithm.setPipelineProperties(enabledRulesProp);
-            }
-        }
-
+        // RemediateDataRuleStep has been removed from the pipeline for now.
         if (builder.dataCloudVersion != null && builder.dataCloudVersion.startsWith("2")) {
             if (!algorithm.getPipelineProperties().isEmpty()) {
-                algorithm.setPipelineProperties(
-                        algorithm.getPipelineProperties() + " featureselectionstep.enabled=true");
-            } else {
-                algorithm.setPipelineProperties("featureselectionstep.enabled=true");
+                algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " ");
             }
+            algorithm.setPipelineProperties("featureselectionstep.enabled=true");
         }
     }
 

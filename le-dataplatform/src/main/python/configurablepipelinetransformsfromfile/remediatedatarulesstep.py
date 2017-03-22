@@ -29,10 +29,11 @@ class RemediateDataRulesStep(PipelineStep):
             logger.info("Removing columns %s" % columnsToRemove)
             logger.info('Number of columns before rule remediation: %d' % len(dataFrame.columns))
             super(RemediateDataRulesStep, self).removeColumns(dataFrame, columnsToRemove)
-            for customerPredictor in self.customerPredictors:
-                if customerPredictor in original_features:
-                    logger.info("Removing customer predictor from features: {}".format(customerPredictor))
-                    original_features.remove(customerPredictor)
+            ## Note: If customerPredictors are not removed from original_features, then a customer column
+            ## may have ApprovedUsage=None and not be in the actual model, but the column will be included
+            ## in 'InputColumnMetadata' in model.json.  This will mean (1) the column is not requested
+            ## from the user when bulk scoring, but (2) validation will fail because the column is not present.
+            ## See PLS-2965.
             logger.info('Number of columns after rule remediation: %d' % len(dataFrame.columns))
         else:
             logger.info("No columns to remove")
