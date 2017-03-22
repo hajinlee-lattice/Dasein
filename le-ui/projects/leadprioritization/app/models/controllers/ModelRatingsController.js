@@ -300,10 +300,7 @@ angular.module('lp.models.ratings', [
             vm.modelType = "Accounts";
         }
 
-
-        vm.historySorting = Object.keys(vm.historicalBuckets);
-        console.log(vm.historicalBuckets);
-
+        vm.historicalBuckets[Object.keys(vm.historicalBuckets)[0]];
 
         // Set value for total leads in set
         // This will need to get changed when we're saving configurations

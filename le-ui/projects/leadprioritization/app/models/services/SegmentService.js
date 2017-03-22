@@ -40,7 +40,7 @@ angular
 
         $http({
             method: 'POST',
-            url: '/pls/metadatasegments/' + data.name,
+            url: '/pls/metadatasegments/',
             data: data,
             headers: { 'Content-Type': 'application/json' }
         }).then(

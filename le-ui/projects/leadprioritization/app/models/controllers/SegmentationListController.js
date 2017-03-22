@@ -1,9 +1,47 @@
 angular.module('lp.models.segments', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.widgets.ModelDetailsWidget'
+    'mainApp.appCommon.widgets.ModelDetailsWidget',
+    'mainApp.models.modals.DeleteSegmentModal'
 ])
 .controller('SegmentationListController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, ModelStore, SegmentService) {
+    ResourceUtility, Model, ModelStore, SegmentsList, SegmentService) {
+
+    var DummySegment = {
+  "name": "Test",
+  "description": null,
+  "updated": 1490197173235,
+  "created": 1490197173235,
+  "restriction": null,
+  "display_name": "Test",
+  "simple_restriction": {
+    "any": [],
+    "all": [
+      {
+        "bucketRestriction": {
+          "lhs": {
+            "columnLookup": {
+              "column_name": "TechIndicator_AdRoll",
+              "object_type": "BucketedAccountMaster"
+            }
+          },
+          "range": {
+            "min": "Yes",
+            "max": "Yes",
+            "is_null_only": false
+          }
+        }
+      }
+    ]
+  },
+  "segment_properties": [
+    {
+      "metadataSegmentProperty": {
+        "option": "NumAccounts",
+        "value": "1435"
+      }
+    }
+  ]
+}
 
     var vm = this;
     angular.extend(vm, {
@@ -11,7 +49,7 @@ angular.module('lp.models.segments', [
         tenantName: $stateParams.tenantName,
         model: Model,
         ResourceUtility: ResourceUtility,
-        segments: SegmentsList,
+        segments: DummySegment,
         editSegment: false,
         showCustomMenu: false
     });
@@ -19,6 +57,9 @@ angular.module('lp.models.segments', [
     vm.init = function() {
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
+        $scope.nameStatus = {
+            editing: false
+        };
 
         console.log(vm.segments);
     
@@ -51,7 +92,14 @@ angular.module('lp.models.segments', [
     };
 
     vm.tileClick = function ($event) {
-        $event.preventDefault();
+        if ($event != null && $scope.nameStatus.editing) {
+            $event.preventDefault();
+        }
+        if (!$scope.nameStatus.editing && !data.Incomplete) {
+            $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
+        } else if (!$scope.nameStatus.editing && data.Incomplete && $scope.data.ModelFileType != "PmmlModel") {
+            StaleModelModal.show($scope.data.Id);
+        }
     };
 
     vm.editSegmentClick = function(){
@@ -92,8 +140,9 @@ angular.module('lp.models.segments', [
         // Need help from Jamey on this one
     };
 
-    vm.deleteSegmentClick = function(){
-        // Open model for confirm
+    vm.showDeleteSegmentModalClick = function($event){
+        $event.preventDefault();
+        DeleteSegmentModal.show();
     };
 
 });
