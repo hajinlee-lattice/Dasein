@@ -30,7 +30,7 @@
 		</td>
 	</script>
 
-	<div class="row field-mapping-form">
+	<div class="row field-mapping-form" ng-if="vm.initialized">
 		<form novalidate name="RequiredFieldMappingForm">
 			<div class="ten offset-one columns box-outline">
 				<div class="section-header">
@@ -39,7 +39,7 @@
 				</div>
 				<hr />
 				<table class="section-body unstyled field-mapping-standard">
-					<thead ng-if="vm.initialized">
+					<thead>
 						<tr>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
@@ -99,7 +99,7 @@
 		</form>
 	</div>
 
-	<div class="row field-mapping-form">
+	<div class="row field-mapping-form" ng-if="vm.initialized">
 		<form novalidate name="AdditionalFieldMappingForm">
 			<div class="ten offset-one columns box-outline" ng-class="{ 'disabled': !vm.NextClicked }">
 				<div class="section-header">
@@ -111,7 +111,7 @@
 				<span ng-if="!vm.NextClicked" style="display:block;margin-top:1em;"></span>
 				<hr ng-if="vm.NextClicked" />
 				<table class="section-body unstyled field-mapping-additional" ng-if="vm.NextClicked">
-					<thead ng-if="vm.initialized">
+					<thead>
 						<tr>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>

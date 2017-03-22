@@ -198,5 +198,7 @@ angular
         }
     };
 
-    vm.init();
+    if (FieldDocument) {
+        vm.init();
+    }
 });

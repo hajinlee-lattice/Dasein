@@ -342,5 +342,7 @@ angular
         return true;
     };
 
-    vm.init();
+    if (FieldDocument) {
+        vm.init();
+    }
 });

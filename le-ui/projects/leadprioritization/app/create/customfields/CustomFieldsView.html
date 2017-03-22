@@ -38,7 +38,7 @@
 		</td>
 	</script>
 
-	<form novalidate name="standardFieldMappingForm">
+	<form novalidate name="standardFieldMappingForm" ng-if="vm.initialized">
 		<div class="row field-mapping-form">
 			<div class="ten offset-one columns box-outline">
 				<div class="section-header">
@@ -49,7 +49,7 @@
 				<hr />
 
 				<table class="section-body unstyled field-mapping-standard">
-					<thead ng-if="vm.initialized">
+					<thead>
 						<tr>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
@@ -101,7 +101,7 @@
 		</div>
 	</form>
 
-	<form novalidate name="fieldMappingForm">
+	<form novalidate name="fieldMappingForm" ng-if="vm.initialized">
 		<div class="row field-mapping-form">
 			<div class="ten offset-one columns box-outline">
 				<div class="section-header">
@@ -115,7 +115,7 @@
 				<hr ng-if="vm.NextClicked" />
 
 				<table class="section-body unstyled field-mapping-additional" ng-if="vm.NextClicked">
-					<thead ng-if="vm.initialized">
+					<thead>
 						<tr>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
