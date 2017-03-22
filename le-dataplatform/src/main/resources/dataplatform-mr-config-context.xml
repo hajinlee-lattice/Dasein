@@ -20,6 +20,7 @@
         mapreduce.job.user.classpath.first=true
         yarn.resourcemanager.system-metrics-publisher.enabled=true
         yarn.timeline-service.enabled=true
+        mapreduce.task.timeout=${dataplatform.mapreduce.task.timeout}
     </hdp:configuration>
 
 </beans>
