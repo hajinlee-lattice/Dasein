@@ -164,7 +164,7 @@
                             & > * {
                                 pointer-events: none;
                             }
-                            &.has-highlight {
+                            &.has-highlight:not(.no-highlights) {
                                 position: relative; 
                                 &:before {
                                     @include font-awesome-inline("\f005");

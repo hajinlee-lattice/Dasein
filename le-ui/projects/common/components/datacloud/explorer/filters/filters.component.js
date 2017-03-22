@@ -100,7 +100,7 @@ angular
                             return vm.categoryCounts[value] > 0;
                         });
 
-                        if (categories.length == 1) {
+                        if (categories.length == 1 && !vm.lookupMode) {
                             vm.setCategory(categories[0]);
                         }
 
