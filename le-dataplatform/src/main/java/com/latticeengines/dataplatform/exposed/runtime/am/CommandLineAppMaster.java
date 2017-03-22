@@ -15,6 +15,7 @@ import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.am.AppmasterRmTemplate;
@@ -42,8 +43,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     private YarnService yarnService;
 
     private ProgressMonitor monitor;
-
-    private String containerId;
 
     private String customer;
 
@@ -108,7 +107,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     @Override
     public ContainerLaunchContext preLaunch(Container container, ContainerLaunchContext context) {
         logFilesInLocalFilesystem();
-        containerId = container.getId().toString();
+        String containerId = container.getId().toString();
         log.info("Container id = " + containerId);
         // Start monitoring process
         monitor.start();
@@ -125,14 +124,24 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
     @Override
     protected void onContainerCompleted(ContainerStatus status) {
-        if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
+        String containerId = status.getContainerId().toString();
+        super.onContainerCompleted(status);
+        switch (status.getExitStatus()) {
+        case ContainerExitStatus.SUCCESS:
             log.info("Container id = " + status.getContainerId().toString() + " completed.");
+            break;
+        case ContainerExitStatus.PREEMPTED:
+            log.info("Printing out the status to find the reason: " + status.getExitStatus());
+            break;
+        case ContainerExitStatus.ABORTED:
+            log.info("Releasing container " + containerId + ". Ignoring abort error.");
+            setFinalApplicationStatus(FinalApplicationStatus.FAILED);
+            notifyCompleted();
+            break;
+        default:
+            break;
         }
 
-        if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
-            log.info("Printing out the status to find the reason: " + status.getExitStatus());
-        }
-        super.onContainerCompleted(status);
     }
 
     @Override
@@ -151,15 +160,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
             return true;
         }
         log.info(status.getDiagnostics());
-
-        if (status.getExitStatus() == ContainerExitStatus.ABORTED) {
-            if (!containerId.equals(containerId)) {
-                log.info("Releasing container " + containerId + ". Ignoring abort error.");
-                return true;
-            } else {
-                return false;
-            }
-        }
 
         return false;
     }
