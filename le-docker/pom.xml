@@ -113,6 +113,9 @@
                                 <copy file="${project.basedir}/../le-microservice/workflowapi/target/le-workflowapi-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/workflowapi.war"
                                       overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/objectapi/target/le-objectapi-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/objectapi.war"
+                                      overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/quartz/target/le-quartz-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/quartz.war"
                                       overwrite="true" />
