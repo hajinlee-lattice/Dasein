@@ -7,13 +7,16 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerLeafQueueInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerQueueInfo;
+import org.apache.hadoop.yarn.util.Times;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,27 +111,32 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
         String query = String.format("finalStatus=%s&finishedTimeBegin=%d&limit=%d", finalAppStatus, finishedTimeBegin,
                 completedJobQueryLimit);
         log.info(query);
-        AppsInfo appsInfo = getYarnService().getApplications(query);
-        List<AppInfo> apps = appsInfo.getApps();
-        log.info(String.format("Processing %d apps with %s status", apps.size(), finalAppStatus));
+        GetApplicationsRequest request = GetApplicationsRequest.newInstance();
+        request.setFinishRange(finishedTimeBegin, Long.MAX_VALUE);
+        request.setLimit(completedJobQueryLimit);
+        List<ApplicationReport> appReports = getYarnService().getApplications(request);
+        log.info(String.format("Processing %d apps with %s status", appReports.size(), finalAppStatus));
 
         long finishTime = finishedTimeBegin;
-        for (AppInfo app : apps) {
+        for (ApplicationReport appReport : appReports) {
             // Evaluate all (not just the workflow-driver) apps for the
             // finishTime
-            finishTime = Math.max(finishTime, app.getFinishTime());
+            if (appReport.getFinalApplicationStatus() != finalAppStatus) {
+                continue;
+            }
+            finishTime = Math.max(finishTime, appReport.getFinishTime());
 
-            List<String> splits = nameSplitter.splitToList(app.getName());
+            List<String> splits = nameSplitter.splitToList(appReport.getName());
             String suffix = splits.get(splits.size() - 1);
             if (!workflowJobNames.contains(suffix)) {
                 // skip non-workflow-driver jobs
                 continue;
             }
 
-            Map<String, Object> fieldMap = generateCompletedJobFieldMap(app);
+            Map<String, Object> fieldMap = generateCompletedJobFieldMap(appReport);
 
             CompletedJobMetric completedJobMetric = new CompletedJobMetric();
-            completedJobMetric.setQueue(app.getQueue());
+            completedJobMetric.setQueue(appReport.getQueue());
             completedJobMetric.setFinalAppStatus(FinalApplicationStatus.SUCCEEDED.name());
             completedJobMetric.setJobName(suffix);
             completedJobMetric.setTenantId(splits.get(0));
@@ -136,7 +144,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             metricService.write(MetricDB.LEYARN, completedJobMeasurement, fieldMap);
 
             CompletedJobByAppIdMetric completedJobByAppIdMetric = new CompletedJobByAppIdMetric();
-            completedJobByAppIdMetric.setApplicationId(app.getAppId());
+            completedJobByAppIdMetric.setApplicationId(appReport.getApplicationId().toString());
             CompletedJobByAppIdMeasurement completedJobByAppIdMeasurement = new CompletedJobByAppIdMeasurement(
                     completedJobByAppIdMetric);
             metricService.write(MetricDB.LEYARN, completedJobByAppIdMeasurement, fieldMap);
@@ -145,23 +153,24 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
     }
 
     private void generateInProgressJobMetrics() {
-        AppsInfo runningAppsInfo = getYarnService().getApplications("finalStatus=" + FinalApplicationStatus.UNDEFINED);
+        List<ApplicationReport> runningAppReports = getYarnService().getRunningApplications(GetApplicationsRequest.newInstance());
 
-        List<AppInfo> apps = runningAppsInfo.getApps();
-
-        log.info(String.format("Processing %d apps in progress", apps.size()));
-        for (AppInfo app : apps) {
-            List<String> splits = nameSplitter.splitToList(app.getName());
+        log.info(String.format("Processing %d apps in progress", runningAppReports.size()));
+        for (ApplicationReport runningAppReport : runningAppReports) {
+            List<String> splits = nameSplitter.splitToList(runningAppReport.getName());
             String suffix = splits.get(splits.size() - 1);
             InProgressJobMetric jobMetric = new InProgressJobMetric();
-            jobMetric.setApplicationId(app.getAppId());
-            jobMetric.setQueue(app.getQueue());
-            jobMetric.setAllocatedMB(app.getAllocatedMB());
-            jobMetric.setAllocatedVCores(app.getAllocatedVCores());
-            jobMetric.setMemorySeconds((int) app.getMemorySeconds());
-            jobMetric.setRunningContainers(app.getRunningContainers());
-            jobMetric.setVcoreSeconds((int) app.getVcoreSeconds());
-            jobMetric.setElapsedTimeSec(Integer.valueOf((int) app.getElapsedTime() / 1000));
+            ApplicationResourceUsageReport resourceReport = runningAppReport.getApplicationResourceUsageReport();
+            Resource usedResources = resourceReport.getUsedResources();
+            jobMetric.setApplicationId(runningAppReport.getApplicationId().toString());
+            jobMetric.setQueue(runningAppReport.getQueue());
+            jobMetric.setAllocatedMB(usedResources.getMemory());
+            jobMetric.setAllocatedVCores(usedResources.getVirtualCores());
+            jobMetric.setMemorySeconds((int) resourceReport.getMemorySeconds());
+            jobMetric.setRunningContainers(resourceReport.getNumUsedContainers());
+            jobMetric.setVcoreSeconds((int) resourceReport.getVcoreSeconds());
+            jobMetric.setElapsedTimeSec(Integer.valueOf(
+                    (int) Times.elapsed(runningAppReport.getStartTime(), runningAppReport.getFinishTime()) / 1000));
 
             jobMetric.setFinalAppStatus(FinalApplicationStatus.UNDEFINED.name());
 
@@ -170,7 +179,8 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
                     && (split.endsWith(".Production") || split.toLowerCase().endsWith("playmaker"))) {
                 jobMetric.setTenantId(split);
             } else {
-                log.info("Job does not contain proper tenant name:" + split + " split from: " + app.getName());
+                log.info("Job does not contain proper tenant name:" + split + " split from: "
+                        + runningAppReport.getName());
                 jobMetric.setTenantId("NA");
             }
 
@@ -182,7 +192,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
                 jobMetric.setJobName("NA");
             }
 
-            if (app.getState() == YarnApplicationState.RUNNING) {
+            if (runningAppReport.getYarnApplicationState() == YarnApplicationState.RUNNING) {
                 jobMetric.setIsRunning(true);
                 jobMetric.setIsWaiting(false);
             } else {
@@ -213,17 +223,20 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
         }
     }
 
-    private Map<String, Object> generateCompletedJobFieldMap(AppInfo app) {
+    private Map<String, Object> generateCompletedJobFieldMap(ApplicationReport appReport) {
         Map<String, Object> fieldMap = new HashMap<>();
-        fieldMap.put("AllocatedMB", app.getAllocatedMB());
-        fieldMap.put("AllocatedVCores", app.getAllocatedVCores());
-        fieldMap.put("MemorySec", app.getMemorySeconds());
-        fieldMap.put("VcoreSec", app.getVcoreSeconds());
-        fieldMap.put("ElapsedTimeSec", Integer.valueOf((int) app.getElapsedTime() / 1000));
+        ApplicationResourceUsageReport resourceReport = appReport.getApplicationResourceUsageReport();
+        Resource usedResources = resourceReport.getUsedResources();
+        fieldMap.put("AllocatedMB", usedResources.getMemory());
+        fieldMap.put("AllocatedVCores", usedResources.getVirtualCores());
+        fieldMap.put("MemorySec", (int) resourceReport.getMemorySeconds());
+        fieldMap.put("VcoreSec", (int) resourceReport.getVcoreSeconds());
+        fieldMap.put("ElapsedTimeSec",
+                Integer.valueOf((int) Times.elapsed(appReport.getStartTime(), appReport.getFinishTime()) / 1000));
 
         Job job = null;
         try {
-            job = workflowProxy.getWorkflowJobFromApplicationId(app.getAppId());
+            job = workflowProxy.getWorkflowJobFromApplicationId(appReport.getApplicationId().toString());
         } catch (Exception e) {
             // do nothing
         }

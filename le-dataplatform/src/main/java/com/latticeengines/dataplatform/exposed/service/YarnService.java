@@ -2,22 +2,24 @@ package com.latticeengines.dataplatform.exposed.service;
 
 import java.util.List;
 
+import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
+import org.apache.hadoop.yarn.api.records.QueueInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 
 public interface YarnService {
 
-    SchedulerTypeInfo getSchedulerInfo();
-
-    CapacitySchedulerInfo getCapacitySchedulerInfo();
-
-    AppsInfo getApplications(String queryString);
+    List<ApplicationReport> getApplications(GetApplicationsRequest request);
 
     ApplicationReport getApplication(String appId);
 
-    List<AppInfo> getPreemptedApps();
+    List<ApplicationReport> getPreemptedApps();
+
+    List<ApplicationReport> getRunningApplications(GetApplicationsRequest request);
+
+    CapacitySchedulerInfo getCapacitySchedulerInfo();
+
+    SchedulerTypeInfo getSchedulerInfo();
 
 }

@@ -3,13 +3,13 @@ package com.latticeengines.dataplatform.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.List;
 import java.util.Properties;
 
+import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +42,10 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertNotNull(schedulerInfo);
     }
 
-    @Test(groups = { "functional.platform", "functional.production" }, enabled = false)
+    @Test(groups = { "functional.platform", "functional.production" })
     public void getApps() {
-        AppsInfo appsInfo = yarnService.getApplications(null);
-        assertNotNull(appsInfo);
+        List<ApplicationReport> appReports = yarnService.getApplications(GetApplicationsRequest.newInstance());
+        assertNotNull(appReports);
     }
 
     @Test(groups = { "functional.platform", "functional.production" })

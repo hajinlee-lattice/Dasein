@@ -9,9 +9,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -86,16 +90,16 @@ public class ThrottleLongHangingJobsUnitTestNG {
 
     private YarnService generateYarnService(int testCase, float progress) {
         YarnService yarnService = mock(YarnServiceImpl.class);
-        AppsInfo appsInfo = new AppsInfo();
+        List<ApplicationReport> appReports = new ArrayList<>();
         String appPrefix = "application_1404235843612_";
         for (int i = 0; i < testCase; i++) {
-            AppInfo appInfo = mock(AppInfo.class);
-            when(appInfo.getAppId()).thenReturn(appPrefix + i);
-            when(appInfo.getProgress()).thenReturn(progress);
-            appsInfo.add(appInfo);
+            ApplicationReport appReport = mock(ApplicationReport.class);
+            when(appReport.getApplicationId()).thenReturn(ConverterUtils.toApplicationId(appPrefix + i));
+            when(appReport.getProgress()).thenReturn(progress);
+            appReports.add(appReport);
         }
 
-        when(yarnService.getApplications("states=RUNNING")).thenReturn(appsInfo);
+        when(yarnService.getRunningApplications(GetApplicationsRequest.newInstance())).thenReturn(appReports);
 
         return yarnService;
     }

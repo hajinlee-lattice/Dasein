@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,7 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
 
-    private Map<String, AppStatus> appRecords = new HashMap<String, AppStatus>();
+    private Map<ApplicationId, AppStatus> appRecords = new HashMap<>();
 
     public ThrottleLongHangingJobs() {
         // Disable this job.
@@ -43,29 +45,29 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
 
     @Override
     public void run(JobExecutionContext context) throws JobExecutionException {
-        ArrayList<AppInfo> appInfos = yarnService.getApplications("states=RUNNING").getApps();
+        List<ApplicationReport> appReports = yarnService.getRunningApplications(GetApplicationsRequest.newInstance());
 
-        if (appInfos.isEmpty()) {
+        if (appReports.isEmpty()) {
             log.info("No application is running, going to sleep");
             return;
         }
 
-        log.info("Throttle-hanging-jobs thread is monitoring " + appInfos.size() + " running applications.");
-        removeCompletedApps(appInfos);
-        List<String> appsToKill = updateAppRecords(appInfos);
+        log.info("Throttle-hanging-jobs thread is monitoring " + appReports.size() + " running applications.");
+        removeCompletedApps(appReports);
+        List<ApplicationId> appsToKill = updateAppRecords(appReports);
         throttle(appsToKill);
     }
 
-    private void removeCompletedApps(ArrayList<AppInfo> appInfos) {
-        List<String> runningAppIds = new ArrayList<String>();
-        for (AppInfo appInfo : appInfos) {
-            runningAppIds.add(appInfo.getAppId());
+    private void removeCompletedApps(List<ApplicationReport> appReports) {
+        List<ApplicationId> runningAppIds = new ArrayList<>();
+        for (ApplicationReport appReport : appReports) {
+            runningAppIds.add(appReport.getApplicationId());
         }
 
         // Deletes appIds from HashMap while iterating through it
-        Iterator<String> iter = appRecords.keySet().iterator();
+        Iterator<ApplicationId> iter = appRecords.keySet().iterator();
         while (iter.hasNext()) {
-            String appId = iter.next();
+            ApplicationId appId = iter.next();
             if (!runningAppIds.contains(appId)) {
                 log.debug("Removing completed application with id: " + appId);
                 iter.remove();
@@ -73,17 +75,17 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
         }
     }
 
-    private List<String> updateAppRecords(ArrayList<AppInfo> appInfos) {
-        List<String> appsToKill = new ArrayList<String>();
+    private List<ApplicationId> updateAppRecords(List<ApplicationReport> appReports) {
+        List<ApplicationId> appsToKill = new ArrayList<>();
 
-        for (AppInfo appInfo : appInfos) {
-            String appId = appInfo.getAppId();
+        for (ApplicationReport appReport : appReports) {
+            ApplicationId appId = appReport.getApplicationId();
             if (appRecords.containsKey(appId)) {
                 // Apps in progress
                 AppStatus status = appRecords.get(appId);
-                if (status.getProgress() != appInfo.getProgress()) {
+                if (status.getProgress() != appReport.getProgress()) {
                     // Update progress
-                    status.setProgress(appInfo.getProgress());
+                    status.setProgress(appReport.getProgress());
                     status.setTimeAtLastProgress(System.currentTimeMillis());
                     appRecords.put(appId, status);
                 } else {
@@ -96,7 +98,7 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
                 }
             } else {
                 // new Apps submitted
-                AppStatus status = new AppStatus(System.currentTimeMillis(), appInfo.getProgress());
+                AppStatus status = new AppStatus(System.currentTimeMillis(), appReport.getProgress());
                 appRecords.put(appId, status);
             }
         }
@@ -104,16 +106,16 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
         return appsToKill;
     }
 
-    private void throttle(List<String> appsToKill) {
+    private void throttle(List<ApplicationId> appsToKill) {
         if (appsToKill.isEmpty()) {
             return;
         }
 
         log.info("Throttling " + appsToKill.size() + " applications");
-        List<String> appsKilled = new ArrayList<String>();
-        for (String appId : appsToKill) {
+        List<ApplicationId> appsKilled = new ArrayList<>();
+        for (ApplicationId appId : appsToKill) {
             try {
-                modelingJobService.killJob(ConverterUtils.toApplicationId(appId));
+                modelingJobService.killJob(appId);
                 appsKilled.add(appId);
                 appRecords.remove(appId);
             } catch (Exception e) {
@@ -122,7 +124,8 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
         }
 
         // clean up job directories
-        List<Job> jobsKilled = jobEntityMgr.findAllByObjectIds(appsKilled);
+        List<Job> jobsKilled = jobEntityMgr
+                .findAllByObjectIds(appsKilled.stream().map(appId -> appId.toString()).collect(Collectors.toList()));
         for (Job job : jobsKilled) {
             String dir = hdfsJobBaseDir + "/" + job.getContainerPropertiesObject().get(ContainerProperty.JOBDIR.name());
             try {

@@ -12,9 +12,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
+import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,14 +68,14 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
             jobIdsToExcludeFromResubmission.add(modelingJob.getId());
         }
         List<String> appIds = new ArrayList<String>();
-        for (AppInfo appInfo : yarnService.getPreemptedApps()) {
-            String appId = appInfo.getAppId();
+        for (ApplicationReport appReport : yarnService.getPreemptedApps()) {
+            String appId = appReport.getApplicationId().toString();
             // if P0, resubmit immediately with no delay. If any other
             // priorities, delay by some latency
             if (!jobIdsToExcludeFromResubmission.contains(appId)
-                    && (appInfo.getQueue().contains("Priority0") || System.currentTimeMillis()
-                            - appInfo.getFinishTime() > retryWaitTime)//
-                    && System.currentTimeMillis() - appInfo.getFinishTime() < maxRetryTimeThreshold) {
+                    && (appReport.getQueue().contains("Priority0") || System.currentTimeMillis()
+                            - appReport.getFinishTime() > retryWaitTime)//
+                    && System.currentTimeMillis() - appReport.getFinishTime() < maxRetryTimeThreshold) {
                 appIds.add(appId);
             }
         }
@@ -117,36 +116,23 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         return jobsToKill;
     }
 
-    private List<AppInfo> getAppInfos() {
-        AppsInfo appsInfo = yarnService.getApplications("states=" + YarnApplicationState.NEW);
-        ArrayList<AppInfo> appInfos = appsInfo.getApps();
-
-        appsInfo = yarnService.getApplications("states=" + YarnApplicationState.NEW_SAVING);
-        appInfos.addAll(appsInfo.getApps());
-
-        appsInfo = yarnService.getApplications("states=" + YarnApplicationState.SUBMITTED);
-        appInfos.addAll(appsInfo.getApps());
-
-        appsInfo = yarnService.getApplications("states=" + YarnApplicationState.ACCEPTED);
-        appInfos.addAll(appsInfo.getApps());
-
-        appsInfo = yarnService.getApplications("states=" + YarnApplicationState.RUNNING);
-        appInfos.addAll(appsInfo.getApps());
-        Collections.sort(appInfos, new Comparator<AppInfo>() {
+    private List<ApplicationReport> getAppReports() {
+        List<ApplicationReport> appReports = yarnService.getRunningApplications(GetApplicationsRequest.newInstance());
+        Collections.sort(appReports, new Comparator<ApplicationReport>() {
 
             @Override
-            public int compare(AppInfo o1, AppInfo o2) {
+            public int compare(ApplicationReport o1, ApplicationReport o2) {
                 return o1.getStartTime() - o2.getStartTime() < 0 ? -1 : 1;
             }
         });
-        return appInfos;
+        return appReports;
     }
 
     private List<String> getRunningJobIds() {
-        List<AppInfo> appInfos = getAppInfos();
+        List<ApplicationReport> appReports = getAppReports();
         List<String> runningJobIds = new ArrayList<String>();
-        for (AppInfo appInfo : appInfos) {
-            runningJobIds.add(appInfo.getAppId());
+        for (ApplicationReport appReport : appReports) {
+            runningJobIds.add(appReport.getApplicationId().toString());
         }
         return runningJobIds;
     }

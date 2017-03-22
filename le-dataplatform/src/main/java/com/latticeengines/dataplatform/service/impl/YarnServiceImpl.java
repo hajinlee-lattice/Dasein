@@ -5,14 +5,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.conf.HAUtil;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -32,13 +33,13 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @Component("yarnService")
 public class YarnServiceImpl implements YarnService {
 
-    private RestTemplate rmRestTemplate = new RestTemplate();
+    @Autowired
+    private YarnClient yarnClient;
 
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private YarnClient yarnClient;
+    private RestTemplate rmRestTemplate = new RestTemplate();
 
     private String getResourceManagerEndpoint() {
         if (yarnConfiguration.getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
@@ -49,6 +50,55 @@ public class YarnServiceImpl implements YarnService {
             String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS);
             return "http://" + rmHostPort + "/ws/v1/cluster";
         }
+    }
+
+    @Override
+    public List<ApplicationReport> getApplications(GetApplicationsRequest request) {
+         return yarnClient.listApplications(request);
+    }
+
+    @Override
+    public List<ApplicationReport> getRunningApplications(GetApplicationsRequest request) {
+        request.setApplicationStates(EnumSet.of(YarnApplicationState.NEW, YarnApplicationState.NEW_SAVING,
+                YarnApplicationState.SUBMITTED, YarnApplicationState.ACCEPTED, YarnApplicationState.RUNNING));
+        return getApplications(request);
+    }
+
+    @Override
+    public List<ApplicationReport> getPreemptedApps() {
+        GetApplicationsRequest request = GetApplicationsRequest.newInstance(EnumSet.of(YarnApplicationState.FAILED));
+        List<ApplicationReport> appReports = getApplications(request);
+
+        List<ApplicationReport> preemptedApps = new ArrayList<ApplicationReport>();
+        for (ApplicationReport appReport : appReports) {
+            if (!appReport.getQueue().contains(LedpQueueAssigner.PRIORITY)) {
+                // Disregard non-Tahoe apps (ex: Ambari service diagnostic apps)
+                continue;
+            }
+            String diagnostics = appReport.getDiagnostics();
+            if (YarnUtils.isPrempted(diagnostics)) {
+                preemptedApps.add(appReport);
+            }
+        }
+        Collections.sort(preemptedApps, new Comparator<ApplicationReport>() {
+
+            @Override
+            public int compare(ApplicationReport o1, ApplicationReport o2) {
+                String q1 = o1.getQueue();
+                String q2 = o2.getQueue();
+                String wordBeingSearched = LedpQueueAssigner.PRIORITY;
+                int wordBeingSearchedLength = wordBeingSearched.length();
+                int priorityIndex = q1.indexOf(wordBeingSearched) + wordBeingSearchedLength;
+                int priorityNextIndex = priorityIndex + 1;
+                Integer p1 = Integer.parseInt(q1.substring(priorityIndex, priorityNextIndex));
+                Integer p2 = Integer.parseInt(q2.substring(priorityIndex, priorityNextIndex));
+
+                return ComparisonChain.start().compare(p1, p2).compare(o1.getStartTime(), o2.getStartTime()).result();
+            }
+
+        });
+
+        return preemptedApps;
     }
 
     @Override
@@ -78,75 +128,10 @@ public class YarnServiceImpl implements YarnService {
     }
 
     @Override
-    public AppsInfo getApplications(String queryString) {
-        try {
-            String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-            if (queryString == null || queryString.length() == 0) {
-                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps", AppsInfo.class);
-            } else {
-                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps?" + queryString, AppsInfo.class);
-            }
-        } catch (Exception e) {
-            String rmRestEndpointBaseUrl = performFailover();
-            if (queryString == null || queryString.length() == 0) {
-                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps", AppsInfo.class);
-            } else {
-                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps?" + queryString, AppsInfo.class);
-            }
-        }
-    }
-
-    @Override
-    public List<AppInfo> getPreemptedApps() {
-        AppsInfo appsInfo = getApplications("states=FAILED");
-        ArrayList<AppInfo> appInfos = appsInfo.getApps();
-
-        List<AppInfo> preemptedApps = new ArrayList<AppInfo>();
-        for (AppInfo appInfo : appInfos) {
-            if (!appInfo.getQueue().contains(LedpQueueAssigner.PRIORITY)) {
-                // Disregard non-Tahoe apps (ex: Ambari service diagnostic apps)
-                continue;
-            }
-            String diagnostics = appInfo.getNote();
-            if (YarnUtils.isPrempted(diagnostics)) {
-                preemptedApps.add(appInfo);
-            }
-        }
-        Collections.sort(preemptedApps, new Comparator<AppInfo>() {
-
-            @Override
-            public int compare(AppInfo o1, AppInfo o2) {
-                String q1 = o1.getQueue();
-                String q2 = o2.getQueue();
-                String wordBeingSearched = LedpQueueAssigner.PRIORITY;
-                int wordBeingSearchedLength = wordBeingSearched.length();
-                int priorityIndex = q1.indexOf(wordBeingSearched) + wordBeingSearchedLength;
-                int priorityNextIndex = priorityIndex + 1;
-                Integer p1 = Integer.parseInt(q1.substring(priorityIndex, priorityNextIndex));
-                Integer p2 = Integer.parseInt(q2.substring(priorityIndex, priorityNextIndex));
-
-                return ComparisonChain.start().compare(p1, p2).compare(o1.getStartTime(), o2.getStartTime()).result();
-            }
-
-        });
-
-        return preemptedApps;
-    }
-
-    @Override
     public ApplicationReport getApplication(String appId) {
-        // try {
-        // String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-        // return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" +
-        // appId, AppInfo.class);
-        // } catch (Exception e) {
-        // String rmRestEndpointBaseUrl = performFailover();
-        // return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" +
-        // appId, AppInfo.class);
-        // }
         return yarnClient.getApplicationReport(ConverterUtils.toApplicationId(appId));
     }
-
+    
     private String performFailover() {
         Collection<String> rmIds = HAUtil.getRMHAIds(yarnConfiguration);
         String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
