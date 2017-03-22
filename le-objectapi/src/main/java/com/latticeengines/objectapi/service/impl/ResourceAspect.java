@@ -20,7 +20,7 @@ public class ResourceAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.objectapi.controller.*.*(..))")
+    @Before("execution(* com.latticeengines.objectapi.controller.AccountResource.*(..))")
     public void allControllerMethods(JoinPoint joinPoint) {
         checkHeader(joinPoint);
         String customerSpace = (String) joinPoint.getArgs()[0];
