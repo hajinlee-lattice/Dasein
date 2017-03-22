@@ -1,8 +1,8 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +16,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.FieldUsageType;
 import org.dmg.pmml.MiningField;
@@ -123,21 +125,22 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         return bldr;
     }
 
-    private InputStream fixPMMLFile(String pmmlPath) throws Exception {
+    private void fixPMMLFile(String pmmlPath, String fixedPmmlPath) throws Exception {
         PMML pmml = PmmlModelUtils.getPMML(HdfsUtils.getInputStream(yarnConfiguration, pmmlPath), false);
         new RegressionTargetCorrector().applyTo(pmml);
-        try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
-            Result result = new StreamResult(stream);
-            JAXBUtil.marshalPMML(pmml, result);
-            return new ByteArrayInputStream(stream.toByteArray());
+        try (FileSystem fs = HdfsUtils.getFileSystem(yarnConfiguration)) {
+            try (OutputStream stream = new BufferedOutputStream(fs.create(new Path(fixedPmmlPath)))) {
+                Result result = new StreamResult(stream);
+                JAXBUtil.marshalPMML(pmml, result);
+            }
         }
     }
 
     Map<ArtifactType, String> getMetadataArtifacts() {
         Map<ArtifactType, String> metadataArtifacts = new HashMap<>();
-        try (InputStream fixedPmmlContentsStream = fixPMMLFile(configuration.getPmmlArtifactPath())) {
-            String fixedPmmlPath = configuration.getPmmlArtifactPath() + ".fixed.xml";
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fixedPmmlContentsStream, fixedPmmlPath);
+        String fixedPmmlPath = configuration.getPmmlArtifactPath() + ".fixed.xml";
+        try {
+            fixPMMLFile(configuration.getPmmlArtifactPath(), fixedPmmlPath);
             metadataArtifacts.put(ArtifactType.PMML, fixedPmmlPath);
         } catch (Exception e) {
             throw new RuntimeException(e);

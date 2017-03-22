@@ -131,6 +131,10 @@ public class HdfsUtils {
         }
     }
 
+    public static FileSystem getFileSystem(Configuration configuration) throws IOException {
+        return FileSystem.newInstance(configuration);
+    }
+
     public static final void copyLocalResourceToHdfs(Configuration configuration, String resourcePath, String hdfsPath)
             throws IOException {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
