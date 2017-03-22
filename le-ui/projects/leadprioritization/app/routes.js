@@ -228,12 +228,30 @@ angular
         .state('home.model.segmentation', {
             url: '/segmentation',
             params: {
-                pageIcon: 'ico-scoring',
-                pageTitle: 'Segmentation'
+                pageTitle: 'Segments',
+                pageIcon: 'ico-segments'
             },
             views: {
+                "summary@": {
+                    controller: '',
+                    template: ''
+                },
                 "main@": {
-                    template: 'segmentation'
+                    resolve: {
+                        SegmentsList: function($q, SegmentService) {
+
+                            var deferred = $q.defer();
+
+                            SegmentService.GetSegments().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'SegmentationListController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/models/views/SegmentationListView.html'
                 }
             }
         })

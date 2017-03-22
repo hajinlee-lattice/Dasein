@@ -258,9 +258,10 @@ angular.module('lp.models.ratings', [
         ModelRatingsService.CreateABCDBuckets(modelId, vm.workingBuckets).then(function(result){
             
             if (result != null && result.success === true) {
-                $state.go('home.model.ratings', {}, { reload: true });
+                // $state.go('home.model.ratings', {}, { reload: true });
                 $timeout( function(){
                     vm.showSuccess = true;
+                    
                 }, 1);
             } else {
                 vm.savingConfiguration = false;

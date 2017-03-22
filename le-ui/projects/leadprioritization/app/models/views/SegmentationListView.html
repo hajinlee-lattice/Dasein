@@ -1,0 +1,114 @@
+<section id="main-content" class="container tile-list">
+
+    <div class="row">
+        <div class="twelve columns">
+            <ul class="tiles">
+
+
+                <li
+                    ng-click="tileClick($event)" 
+                    ng-repeat="segment in vm.segments"
+                    ui-sref="home.model.analysis({segmentName:segmentName})"
+                    ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
+                >
+                    <div class="tile-header" ng-if="!vm.editSegment">
+                        <h2 title="{{segment.name}}">{{segment.name | limitTo: 36 }}{{segment.name.length > 36 ? '&hellip;' : ''}}</h2>
+                        <div class="edit">
+                            <button 
+                                    type="button"
+                                    ng-click="customMenuClick($event)" 
+                                    ng-class="{ 'open': showCustomMenu }">
+                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
+                            </button>
+                            <ul class="model-menu" ng-if="showCustomMenu">
+                                <li data-ng-click="editSegmentClick($event)">
+                                    <a href="javascript:void(0)">Edit</a>
+                                    <i class="fa fa-trash"></i>
+                                </li>
+                                <li data-ng-click="duplicateSegmentClick($event)">
+                                    <a href="javascript:void(0)">Duplicate</a>
+                                    <i class="fa fa-trash"></i>
+                                </li>
+                                <li data-ng-click="deleteSegmentClick($event)">
+                                    <a href="javascript:void(0)">Delete</a>
+                                    <i class="fa fa-trash"></i>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tile-body" ng-if="!vm.editSegment">
+                        <p title="{{campaign.name}}">{{segment.description | limitTo: 36 }}{{segment.name.length > 240 ? '&hellip;' : ''}}</p>
+                    </div>
+
+
+
+                    <div class="edit-form" ng-if="vm.editSegment">
+                        <div class="form-group">
+                            <label>Name
+                            <input 
+                                autofocus
+                                type="text" 
+                                id="segmentName" 
+                                name="segmentName"
+                                data-ng-model="vm.segmentName"
+                                class="form-control" />
+                                </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea 
+                                class="form-control"
+                                id="segmentDescription" 
+                                name="segmentDescription"
+                                data-ng-model="vm.segmentDescription"
+                            ></textarea>
+                        </div>  
+                        <div class="actions">
+                            <button 
+                                type="button" 
+                                class="button white-button pull-left" 
+                                ng-click="vm.cancelEditSegmentClicked($event)">
+                                Cancel</button>
+                            <button 
+                                type="button" 
+                                class="button orange-button pull-right" 
+                                ng-disabled="vm.canSave"
+                                ng-click="vm.saveSegmentClicked($event)">
+                                Save</button>
+                        </div>
+                    </div>
+
+
+
+                    <div class="meta-data">
+                        <dl class="stats">
+                            <dt>Accounts</dt>
+                            <dd class="small">{{segment.segment_properties.accounts}}</dd>
+                        </dl>
+                        <dl class="stats">
+                            <dt>Contacts</dt>
+                            <dd class="small">{{segment.segment_properties.contacts}}</dd>
+                        </dl>
+                        <dl class="stats">
+                            <dt>Lift</dt>
+                            <dd class="small">{{segment.segment_properties.lift}}</dd>
+                        </dl>
+                    </div>
+                </li>
+
+
+                <li class="no-style">
+                    <a
+                        class="button new-tile-button"
+                        ui-sref="home.model.analysis">
+                        <span>&#43;</span>
+                        Add Segment
+                    </a>
+                </li>
+
+
+            </ul>
+        </div>
+    </div><!-- End .row -->
+
+</section>
