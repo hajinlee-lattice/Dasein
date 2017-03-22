@@ -153,6 +153,7 @@ public class AttributePageProcessor {
         orderingMap.put("LE_REVENUE_RANGE", 90);
         orderingMap.put("LE_EMPLOYEE_RANGE", 80);
         orderingMap.put("LDC_Domain", 70);
+        orderingMap.put("LE_NUMBER_OF_LOCATIONS", 65);
         orderingMap.put("LDC_Country", 60);
         orderingMap.put("LDC_City", 50);
         orderingMap.put("LDC_State", 40);
