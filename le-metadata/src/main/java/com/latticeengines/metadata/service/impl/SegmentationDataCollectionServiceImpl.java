@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.MetadataService;
@@ -37,9 +38,11 @@ public class SegmentationDataCollectionServiceImpl implements SegmentationDataCo
             Tenant tenant = MultiTenantContext.getTenant();
             try {
                 MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(DataCloudConstants.SERVICE_CUSTOMERSPACE));
-                dataCollection.addTable(metadataService.getTable(
-                        CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE),
-                        DataCloudConstants.BUCKETED_ACCOUNT_MASTER_TABLE_NAME));
+                Table table = metadataService.getTable(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE),
+                        DataCloudConstants.BUCKETED_ACCOUNT_MASTER_TABLE_NAME);
+                if (table != null) {
+                    dataCollection.addTable(table);
+                }
             } finally {
                 MultiTenantContext.setTenant(tenant);
             }

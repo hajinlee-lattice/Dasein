@@ -16,14 +16,14 @@ AS
         create table [METADATA_DATA_COLLECTION_PROPERTY] ([PID] bigint identity not null unique, [PROPERTY] nvarchar(255) not null, [VALUE] nvarchar(2048), FK_DATA_COLLECTION_ID bigint not null, primary key ([PID]));
         create table [METADATA_DATA_COLLECTION] ([PID] bigint identity not null unique, [NAME] nvarchar(255) not null, [TENANT_ID] bigint not null, [TYPE] nvarchar(255) not null, FK_TENANT_ID bigint not null, primary key ([PID]));
         create table [METADATA_SEGMENT_PROPERTY] ([PID] bigint identity not null unique, [PROPERTY] nvarchar(255) not null, [VALUE] nvarchar(2048), METADATA_SEGMENT_ID bigint not null, primary key ([PID]));
-        create table [METADATA_SEGMENT] ([PID] bigint identity not null unique, [CREATED] datetime2 not null, [DESCRIPTION] nvarchar(255), [DISPLAY_NAME] nvarchar(255) not null, [NAME] nvarchar(255) not null, [RESTRICTION] varchar(MAX), [UPDATED] datetime2 not null, FK_QUERY_SOURCE_ID bigint not null, primary key ([PID]));
+        create table [METADATA_SEGMENT] ([PID] bigint identity not null unique, [CREATED] datetime2 not null, [DESCRIPTION] nvarchar(255), [DISPLAY_NAME] nvarchar(255) not null, [NAME] nvarchar(255) not null, [RESTRICTION] varchar(MAX), [TENANT_ID] bigint not null, [UPDATED] datetime2 not null, FK_DATA_COLLECTION_ID bigint not null, primary key ([PID]));
 
         -- Metadata Collection and Segment indices and foreign keys
         create index SEGMENT_PROPERTY_IDX on [METADATA_SEGMENT_PROPERTY] ([PROPERTY]);
 alter table [METADATA_SEGMENT_PROPERTY] add constraint FKF9BE749179DE23EE foreign key (METADATA_SEGMENT_ID) references [METADATA_SEGMENT] on delete cascade;
         create nonclustered index FKF9BE749179DE23EE on [METADATA_SEGMENT_PROPERTY] (METADATA_SEGMENT_ID)
-        alter table [METADATA_SEGMENT] add constraint FK90C89E03382C8AE3 foreign key (FK_QUERY_SOURCE_ID) references [METADATA_DATA_COLLECTION] on delete cascade;
-        create nonclustered index FK90C89E03382C8AE3 on [METADATA_SEGMENT] (FK_QUERY_SOURCE_ID)
+        alter table [METADATA_SEGMENT] add constraint FK90C89E03382C8AE3 foreign key (FK_DATA_COLLECTION_ID) references [METADATA_DATA_COLLECTION] on delete cascade;
+        create nonclustered index FK90C89E03382C8AE3 on [METADATA_SEGMENT] (FK_DATA_COLLECTION_ID)
         create index DATA_COLLECTION_PROPERTY_IDX on [METADATA_DATA_COLLECTION_PROPERTY] ([PROPERTY]);
         alter table [METADATA_DATA_COLLECTION_PROPERTY] add constraint FKA6E03D51D089E196 foreign key (FK_DATA_COLLECTION_ID) references [METADATA_DATA_COLLECTION] on delete cascade;
         create nonclustered index FKA6E03D51D089E196 on [METADATA_DATA_COLLECTION_PROPERTY] (FK_DATA_COLLECTION_ID)

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.impl.MultiTenantEntityMgrAspect;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Aspect
 public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
@@ -23,6 +24,13 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
 
     @Autowired
     private TableTypeHolder tableTypeHolder;
+
+    @Before("execution(* com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl.*(..))")
+    public void allBaseEntityMgrMethods(JoinPoint joinPoint) {
+        if (MultiTenantContext.getTenant() != null) {
+            enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+        }
+    }
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.TableEntityMgrImpl.*(..))")
     public void allTableMethods(JoinPoint joinPoint) {
@@ -54,7 +62,7 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     }
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.DataCollectionEntityMgrImpl.*(..))")
-    public void allQuerySourceMethods(JoinPoint joinPoint) {
+    public void allDataCollectionMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 }

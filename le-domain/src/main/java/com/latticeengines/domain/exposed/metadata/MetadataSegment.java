@@ -17,6 +17,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -32,12 +34,15 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.security.HasTenantId;
+import com.latticeengines.domain.exposed.security.Tenant;
 import io.swagger.annotations.ApiModelProperty;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_SEGMENT")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
+@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,7 +75,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_QUERY_SOURCE_ID", nullable = false)
+    @JoinColumn(name = "FK_DATA_COLLECTION_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private DataCollection dataCollection;
 
@@ -86,6 +91,10 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("segment_properties")
     private List<MetadataSegmentProperty> metadataSegmentProperties = new ArrayList<>();
+
+    @Column(name = "TENANT_ID", nullable = false)
+    @JsonIgnore
+    private Long tenantId;
 
     @Override
     public Long getPid() {
@@ -193,5 +202,24 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields {
     @JsonIgnore
     public void setSegmentPropertyBag(MetadataSegmentPropertyBag metadataSegmentPropertyBag) {
         this.metadataSegmentProperties = metadataSegmentPropertyBag.getBag();
+    }
+
+    @Override
+    @JsonIgnore
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    @JsonIgnore
+    public void setTenant(Tenant tenant) {
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
     }
 }

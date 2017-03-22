@@ -46,6 +46,8 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
+        createSegmentInOtherTenant();
+
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE1));
         Table table = new Table();
         table.setName(TABLE1);
@@ -54,6 +56,15 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
         METADATA_SEGMENT_PROPERTY_1.setValue("100");
         METADATA_SEGMENT_PROPERTY_2.setOption(MetadataSegmentPropertyName.NumContacts.getName());
         METADATA_SEGMENT_PROPERTY_2.setValue("200");
+
+    }
+
+    private void createSegmentInOtherTenant() {
+        MetadataSegment otherSegment = new MetadataSegment();
+        otherSegment.setName("Other");
+        otherSegment.setDisplayName("Other");
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE2));
+        segmentEntityMgr.createOrUpdate(otherSegment);
     }
 
     @Test(groups = "functional")

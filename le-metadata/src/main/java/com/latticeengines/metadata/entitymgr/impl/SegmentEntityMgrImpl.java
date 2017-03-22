@@ -14,10 +14,10 @@ import com.latticeengines.metadata.dao.SegmentDao;
 import com.latticeengines.metadata.dao.SegmentPropertyDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("segmentEntityMgr")
-public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment>
-        implements SegmentEntityMgr {
+public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> implements SegmentEntityMgr {
 
     @Autowired
     private SegmentDao segmentDao;
@@ -48,18 +48,17 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment>
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void createOrUpdate(MetadataSegment segment) {
+        segment.setTenant(MultiTenantContext.getTenant());
         MetadataSegment existing = findByName(segment.getName());
         if (existing != null) {
             delete(existing);
         }
         if (segment.getDataCollection() == null) {
-            segment.setDataCollection(
-                    dataCollectionEntityMgr.getDataCollection(DataCollectionType.Segmentation));
+            segment.setDataCollection(dataCollectionEntityMgr.getDataCollection(DataCollectionType.Segmentation));
         }
 
         super.createOrUpdate(segment);
-        for (MetadataSegmentProperty metadataSegmentProperty : segment
-                .getMetadataSegmentProperties()) {
+        for (MetadataSegmentProperty metadataSegmentProperty : segment.getMetadataSegmentProperties()) {
             metadataSegmentProperty.setMetadataSegment(segment);
             segmentPropertyDao.create(metadataSegmentProperty);
         }
