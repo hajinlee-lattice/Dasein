@@ -237,7 +237,7 @@ public class TransformationPipeline {
         case NONE:
             return Collections.emptyList();
         case ALL:
-            return ImmutableList.<TransformDefinition> builder()//
+            return ImmutableList.<TransformDefinition>builder()//
                     .addAll(getStandardTransforms()) //
                     .addAll(getPocTransforms()).build();
         case POC:
@@ -248,8 +248,12 @@ public class TransformationPipeline {
         }
     }
 
-    public static List<TransformDefinition> getStandardTransforms() {
-        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition> builder()
+    // getStandardTransformsV1() is the original definition that was deprecated
+    // in M10 with the introduction of replacement DS features in the modeling
+    // pipeline.
+
+    public static List<TransformDefinition> getStandardTransformsV1() {
+        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition>builder()
                 .add(stdVisidbDsCompanynameEntropy) //
                 .add(stdLengthTitle) //
                 .add(stdLengthCompanyName) //
@@ -276,8 +280,26 @@ public class TransformationPipeline {
         return stdTransformDefinitions;
     }
 
+    public static List<TransformDefinition> getStandardTransforms() {
+        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition>builder()
+                .add(stdVisidbDsPdAlexaRelatedlinksCount) //
+                .add(stdVisidbAlexaMonthssinceonline) //
+                .add(stdVisidbDsPdModelactionOrdered) //
+                .add(stdVisidbDsPdJobstrendstringOrdered) //
+                .add(stdVisidbDsPdFundingstageOrdered) //
+                .add(stdVisidbDsIndustryGroup) //
+                .add(dnbNaicsSector) //
+                .add(dnbNaicsSubsector) //
+                .add(dnbNaicsIndustryGroup) //
+                .add(dnbSicCategory) //
+                .add(dnbRevenueRangeOrdinal) //
+                .add(dnbEmployeeRangeOrdinal) //
+                .build();
+        return stdTransformDefinitions;
+    }
+
     public static List<TransformDefinition> getPocTransforms() {
-        List<TransformDefinition> pocTransformDefinitions = ImmutableList.<TransformDefinition> builder()
+        List<TransformDefinition> pocTransformDefinitions = ImmutableList.<TransformDefinition>builder()
                 .add(stdVisidbEmailIsInvalid) //
                 .add(stdVisidbEmailLength) //
                 .add(stdVisidbEmailPrefixLength) //
