@@ -33,6 +33,9 @@ public enum Category {
     public String toString() { return this.name; }
 
     public static Category fromName(String name) {
+        if (name == null) {
+            return null;
+        }
         if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else  {

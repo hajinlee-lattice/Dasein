@@ -28,12 +28,13 @@ public class AccountObject extends BusinessObject {
     public Predicate processFreeFormSearch(DataCollection dataCollection, String freeFormRestriction) {
         // Just check whether name LIKE '%freeFormRestriction%'
         Table table = dataCollection.getTable(getObjectType());
-        Attribute attribute = table.getAttribute("name");
+        // TODO Drive this from metadata
+        Attribute attribute = table.getAttribute("BUSINESS_NAME");
         if (attribute == null) {
-            log.warn(String.format("Could not find name column %s for free form search", "name"));
+            log.warn(String.format("Could not find name column %s for free form search", "BUSINESS_NAME"));
             return Expressions.TRUE;
         }
         StringPath columnPath = QueryUtils.getColumnPath(table, attribute);
-        return columnPath.contains(Expressions.stringPath(freeFormRestriction));
+        return columnPath.toUpperCase().contains(freeFormRestriction.toUpperCase());
     }
 }

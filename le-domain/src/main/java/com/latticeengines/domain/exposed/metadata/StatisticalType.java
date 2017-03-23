@@ -26,6 +26,9 @@ public enum StatisticalType {
     public String getName() { return this.name; }
 
     public static StatisticalType fromName(String name) {
+        if (name == null) {
+            return null;
+        }
         return nameMap.get(name);
     }
 

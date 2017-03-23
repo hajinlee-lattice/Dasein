@@ -950,4 +950,19 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return true;
     }
 
+    @Transient
+    @JsonIgnore
+    public ColumnMetadata getColumnMetadata() {
+        ColumnMetadata metadata = new ColumnMetadata();
+        metadata.setDisplayName(getDisplayName());
+        metadata.setColumnName(getName());
+        metadata.setColumnId(getName());
+        metadata.setDescription(getDescription());
+        metadata.setCategory(Category.fromName(getCategory()));
+        metadata.setDataType(getDataType());
+        metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
+        metadata.setStatisticalType(StatisticalType.fromName(getStatisticalType()));
+        metadata.setDiscretizationStrategy(getDisplayDiscretizationStrategy());
+        return metadata;
+    }
 }

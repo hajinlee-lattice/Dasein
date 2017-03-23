@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
@@ -52,15 +53,19 @@ public abstract class BusinessObject {
     }
 
     public final long getCount(Query query) {
-        query.setObjectType(getObjectType());
-        query.setPageFilter(null);
-        query.setSort(null);
-        return queryEvaluator.evaluate(getDataCollection(), query).fetchCount();
+        try (PerformanceTimer timer = new PerformanceTimer(getClass().getName() + ".getCount")) {
+            query.setObjectType(getObjectType());
+            query.setPageFilter(null);
+            query.setSort(null);
+            return queryEvaluator.evaluate(getDataCollection(), query).fetchCount();
+        }
     }
 
     public final DataPage getData(Query query) {
-        query.setObjectType(getObjectType());
-        return queryEvaluator.getResults(getDataCollection(), query);
+        try (PerformanceTimer timer = new PerformanceTimer(getClass().getName() + ".getData")) {
+            query.setObjectType(getObjectType());
+            return queryEvaluator.getResults(getDataCollection(), query);
+        }
     }
 
     protected final DataCollection getDataCollection() {

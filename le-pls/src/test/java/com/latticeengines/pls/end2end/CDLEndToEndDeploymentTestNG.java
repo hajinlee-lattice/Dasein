@@ -2,6 +2,7 @@ package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private DataCollection collection;
 
-    private FrontEndRestriction restriction;
+    private FrontEndRestriction arbitraryRestriction;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -75,15 +76,32 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "getNumAccountsForSegment")
     public void viewAccountsForSegment() {
-        FrontEndRestriction restriction = getArbitraryRestriction();
         FrontEndQuery query = new FrontEndQuery();
-        query.setRestriction(restriction);
         query.setPageFilter(new PageFilter(0, 50));
         DataPage page = restTemplate.postForObject(String.format("%s/pls/accounts/data/", getRestAPIHostPort()), query,
                 DataPage.class);
+        assertEquals(page.getData().size(), 50);
+        assertTrue(page.getMetadata().size() > 0);
+        assertTrue(page.getMetadata().values().stream().anyMatch(c -> c.getColumnName().toUpperCase().contains("NAME")));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "viewAccountsForSegment")
+    public void viewAccountsForSegmentWithFreeFormSearch() {
+        FrontEndQuery query = new FrontEndQuery();
+        query.setPageFilter(new PageFilter(0, 50));
+        query.setFreeFormTextSearch("a");
+        DataPage page = restTemplate.postForObject(String.format("%s/pls/accounts/data/", getRestAPIHostPort()), query,
+                DataPage.class);
+        assertEquals(page.getData().size(), 50);
+        assertEquals(page.getMetadata().size(), 1);
+        assertTrue(page.getMetadata().values().stream().anyMatch(c -> c.getColumnName().toUpperCase().contains("NAME")));
+
+        long count = restTemplate.postForObject(String.format("%s/pls/accounts/count", getRestAPIHostPort()), query,
+                Long.class);
+        assertTrue(count < 335045841);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "viewAccountsForSegmentWithFreeFormSearch")
     public void modifySegment() {
         segment.setSimpleRestriction(getArbitraryRestriction());
         segment = restTemplate.postForObject(String.format("%s/pls/metadatasegments/", getRestAPIHostPort()), segment,
@@ -92,8 +110,8 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings("unchecked")
     private FrontEndRestriction getArbitraryRestriction() {
-        if (restriction != null) {
-            return restriction;
+        if (arbitraryRestriction != null) {
+            return arbitraryRestriction;
         }
 
         AccountMasterCube cube = restTemplate.getForObject(
@@ -101,14 +119,14 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         List<Bucket> buckets = cube.getStatistics().get("TechIndicator_AdRoll").getRowBasedStatistics().getBuckets()
                 .getBucketList();
 
-        restriction = new FrontEndRestriction();
+        arbitraryRestriction = new FrontEndRestriction();
         BucketRange range = buckets.get(0).getRange();
         // TODO Temporary hack fix
         range.setMin(StringUtils.capitalize(range.getMin().toString().toLowerCase()));
         range.setMax(StringUtils.capitalize(range.getMax().toString().toLowerCase()));
         BucketRestriction bucketRestriction = new BucketRestriction(new ColumnLookup(
                 SchemaInterpretation.BucketedAccountMaster, "TechIndicator_AdRoll"), range);
-        restriction.setAll(Collections.singletonList(bucketRestriction));
-        return restriction;
+        arbitraryRestriction.setAll(Collections.singletonList(bucketRestriction));
+        return arbitraryRestriction;
     }
 }

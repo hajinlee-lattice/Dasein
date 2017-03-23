@@ -193,6 +193,9 @@ public class JdbcQueryProcessor extends QueryProcessor {
                 log.warn(String.format("Could not resolve lookup %s", lookup));
             }
         }
+        if (expressions.size() == 0) {
+            return Expressions.constant(1);
+        }
         return Expressions.list(expressions.toArray(new Expression<?>[expressions.size()]));
     }
 

@@ -51,6 +51,11 @@ public class AccountResource {
 
     private Query translate(FrontEndQuery query) {
         QueryTranslator translator = new QueryTranslator(query, SchemaInterpretation.Account);
-        return translator.translate();
+        Query translated = translator.translate();
+
+        // TODO drive this from metadata
+        // TODO need additional lookups from Yintao
+        translated.setLookups(SchemaInterpretation.BucketedAccountMaster, "BUSINESS_NAME");
+        return translated;
     }
 }
