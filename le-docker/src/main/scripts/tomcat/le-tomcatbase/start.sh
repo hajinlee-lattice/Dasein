@@ -35,7 +35,7 @@ if [ -f "/etc/efsip.txt" ]; then
     chmod 777 /var/cache/scoringapi
 fi
 
-export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
+export JAVA_OPTS="-Duser.timezone=US/Eastern -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099"
 if [ ! -z "${CATALINA_OPTS}" ]; then
