@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -26,9 +27,15 @@ import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTestNGBase;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+
 
 public abstract class TransformationServiceImplTestNGBase<T extends TransformationConfiguration>
         extends DataCloudEtlFunctionalTestNGBase {
@@ -43,6 +50,9 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     @Autowired
     protected SourceService sourceService;
+
+    @Autowired
+    protected MetadataProxy metadataProxy;
 
     Source source;
 
@@ -89,6 +99,38 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected void uploadAndRegisterTableSource(String avroFile, String tableName) {
+        uploadAndRegisterTableSource(Collections.singletonList(avroFile), tableName);
+    }
+
+    protected void uploadAndRegisterTableSource(List<String> avroFiles, String tableName) {
+        String tableDir = hdfsPathBuilder
+                .constructTablePath(tableName, CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE), "")
+                .toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, tableDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, tableDir);
+            }
+            for (String fileName : avroFiles) {
+                if (!fileName.endsWith(".avro")) {
+                    fileName = fileName + ".avro";
+                }
+                InputStream fileStream = ClassLoader.getSystemResourceAsStream("sources/" + fileName);
+                String targetPath = tableDir + "/" + fileName;
+                HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
+            }
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            String successPath = getPathToUploadBaseData() + SUCCESS_FLAG;
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        Table table = MetadataConverter.getTable(yarnConfiguration, tableDir);
+        table.setName(tableName);
+        metadataProxy.updateTable(DataCloudConstants.SERVICE_CUSTOMERSPACE, tableName, table);
     }
 
     protected TransformationProgress createNewProgress() {

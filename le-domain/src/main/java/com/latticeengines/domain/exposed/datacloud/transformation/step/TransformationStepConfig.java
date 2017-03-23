@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.step;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,6 +26,9 @@ public class TransformationStepConfig {
     @JsonProperty("BaseSources")
     private List<String> baseSources;
 
+    @JsonProperty("BaseTables")
+    private Map<String, SourceTable> baseTables;
+
     @JsonProperty("BaseVersions")
     private List<String> baseVersions;
 
@@ -33,6 +37,9 @@ public class TransformationStepConfig {
 
     @JsonProperty("TargetSource")
     private String targetSource;
+
+    @JsonProperty("TargetTable")
+    private TargetTable targetTable;
 
     @JsonProperty("TargetVersion")
     private String targetVersion;
@@ -80,6 +87,14 @@ public class TransformationStepConfig {
 
     public void setBaseSources(List<String> baseSources) {
         this.baseSources = baseSources;
+    }
+
+    public Map<String, SourceTable> getBaseTables() {
+        return baseTables;
+    }
+
+    public void setBaseTables(Map<String, SourceTable> baseTables) {
+        this.baseTables = baseTables;
     }
 
     public List<String> getBaseVersions() {
@@ -136,5 +151,13 @@ public class TransformationStepConfig {
 
     public void setStepType(String stepType) {
         this.stepType = stepType;
+    }
+
+    public TargetTable getTargetTable() {
+        return targetTable;
+    }
+
+    public void setTargetTable(TargetTable targetTable) {
+        this.targetTable = targetTable;
     }
 }

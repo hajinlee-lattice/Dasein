@@ -80,6 +80,22 @@ public final class PathBuilder {
         return path;
     }
 
+    public static Path buildDataTableSchemaPath(String podId, CustomerSpace space) {
+        return buildDataTableSchemaPath(podId, space, "");
+    }
+
+    public static Path buildDataTableSchemaPath(String podId, CustomerSpace space, String namespace) {
+        Path path = buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.TABLE_SCHEMAS);
+
+        if (!StringUtils.isEmpty(namespace)) {
+            String[] namespaceTokens = namespace.split("\\.");
+            for (String namespaceToken : namespaceTokens) {
+                path = path.append(namespaceToken);
+            }
+        }
+        return path;
+    }
+
     public static Path buildDataFilePath(String podId, CustomerSpace space) {
         return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES);
     }

@@ -20,10 +20,13 @@ import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.TransformedToAvroSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.TableUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 
 @Component("hdfsSourceEntityMgr")
 public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
@@ -46,9 +49,15 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     @Autowired
     YarnConfiguration yarnConfiguration;
 
+    @Deprecated
     @Override
     public String getCurrentVersion(Source source) {
-        String versionFile = hdfsPathBuilder.constructVersionFile(source).toString();
+        return getCurrentVersion(source.getSourceName());
+    }
+
+    @Override
+    public String getCurrentVersion(String sourceName) {
+        String versionFile = hdfsPathBuilder.constructVersionFile(sourceName).toString();
         int retries = 0;
         while (retries++ < 3) {
             try {
@@ -59,7 +68,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
             }
         }
-        throw new RuntimeException("Could not determine the current version of source " + source.getSourceName());
+        throw new RuntimeException("Could not determine the current version of source " + sourceName);
     }
 
     @Override
@@ -158,7 +167,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
         } else {
             String path = null;
-            if (source instanceof TransformedToAvroSource) {
+            if (source instanceof TableSource) {
+                return ((TableSource) source).getTable();
+            } else if (source instanceof TransformedToAvroSource) {
                 path = hdfsPathBuilder.constructRawDir(source).append(version).toString();
             } else {
                 path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
@@ -196,6 +207,14 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             return TableUtils.createTable(yarnConfiguration, source.getSourceName(), paths.toArray(new String[paths.size()]),
                     source.getPrimaryKey());
         }
+    }
+
+    @Override
+    public TableSource materializeTableSource(String tableName, CustomerSpace customerSpace) {
+        String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
+        Table table = MetadataConverter.getTable(yarnConfiguration, avroDir);
+        table.setName(tableName);
+        return new TableSource(table, customerSpace);
     }
 
     @Override

@@ -492,6 +492,16 @@ public class HdfsUtils {
         }
     }
 
+    public static final void copyGlobToDir(Configuration configuration, String sourceGlob, String targetDir) throws IOException {
+        for (String filePath : getFilesByGlob(configuration, sourceGlob)) {
+            if (!isDirectory(configuration, targetDir)) {
+                mkdir(configuration, targetDir);
+            }
+            String fileName = new Path(filePath).getName();
+            copyFiles(configuration, filePath, new Path(targetDir, fileName).toString());
+        }
+    }
+
     public static FileChecksum getCheckSum(Configuration configuration, String path) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             return fs.getFileChecksum(new Path(path));

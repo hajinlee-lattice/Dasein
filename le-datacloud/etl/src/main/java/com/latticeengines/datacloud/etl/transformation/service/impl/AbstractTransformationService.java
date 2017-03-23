@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class AbstractTransformationService<T extends TransformationConfiguration>
         implements TransformationService<T> {
@@ -69,6 +71,9 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     @Autowired
     private HiveTableService hiveTableService;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     abstract Log getLogger();
 
@@ -268,7 +273,13 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         if (success) {
             try {
                 // register hive table
-                hiveTableService.createTable(source.getSourceName(), version);
+                if (source instanceof TableSource) {
+                    TableSource tableSource = (TableSource) source;
+                    hiveTableService.createTable(tableSource.getTable().getName(), tableSource.getCustomerSpace(),
+                            tableSource.getTable().getNamespace());
+                } else {
+                    hiveTableService.createTable(source.getSourceName(), version);
+                }
             } catch (Exception e) {
                 getLogger().error("Failed to create hive table.", e);
             }
@@ -289,7 +300,12 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
         // copy result to source version dir
         try {
-            String sourceDir = sourceVersionDirInHdfs(source, version);
+            String sourceDir;
+            if (source instanceof TableSource) {
+                sourceDir = targetTableDirInHdfs((TableSource) source);
+            } else {
+                sourceDir = sourceVersionDirInHdfs(source, version);
+            }
             deleteFSEntry(progress, sourceDir);
             String currentMaxVersion = null;
 
@@ -303,17 +319,27 @@ public abstract class AbstractTransformationService<T extends TransformationConf
                 HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
             }
 
-            try {
-                currentMaxVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
-            } catch (Exception e) {
-                // We can log this exception and ignore this error as
-                // probably file does not even exists
-                LOG.debug("Could not read version file", e);
-                currentMaxVersion = null;
-            }
-            // overwrite max version if progress's version is higher
-            if (currentMaxVersion == null || version.compareTo(currentMaxVersion) > 0) {
-                hdfsSourceEntityMgr.setCurrentVersion(source, version);
+            if (source instanceof TableSource) {
+                // register table with metadata proxy
+                TableSource tableSource = (TableSource) source;
+                tableSource = hdfsSourceEntityMgr.materializeTableSource(tableSource.getTable().getName(),
+                        tableSource.getCustomerSpace());
+                metadataProxy.updateTable(tableSource.getCustomerSpace().toString(), tableSource.getTable().getName(),
+                        tableSource.getTable());
+            } else {
+                // update current version
+                try {
+                    currentMaxVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+                } catch (Exception e) {
+                    // We can log this exception and ignore this error as
+                    // probably file does not even exists
+                    LOG.debug("Could not read version file", e);
+                    currentMaxVersion = null;
+                }
+                // overwrite max version if progress's version is higher
+                if (currentMaxVersion == null || version.compareTo(currentMaxVersion) > 0) {
+                    hdfsSourceEntityMgr.setCurrentVersion(source, version);
+                }
             }
 
             HdfsUtils.writeToFile(yarnConfiguration, sourceDir + HDFS_PATH_SEPARATOR + SUCCESS_FLAG, "");
@@ -363,7 +389,14 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     }
 
     protected void extractSchema(Source source, Schema schema, String version, String avroDir) throws Exception {
-        String avscPath = hdfsPathBuilder.constructSchemaFile(source.getSourceName(), version).toString();
+        String avscPath;
+        if (source instanceof TableSource) {
+            TableSource tableSource = (TableSource) source;
+            avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableSource.getTable().getName(),
+                    tableSource.getCustomerSpace(), tableSource.getTable().getNamespace()).toString();
+        } else {
+            avscPath = hdfsPathBuilder.constructSchemaFile(source.getSourceName(), version).toString();
+        }
         if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
             HdfsUtils.rmdir(yarnConfiguration, avscPath);
         }
@@ -427,6 +460,13 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
         getLogger().info("sourceVersionDirInHdfs for " + source.getSourceName() + " = " + sourceDirInHdfs);
         return sourceDirInHdfs;
+    }
+
+    private String targetTableDirInHdfs(TableSource tableSource) {
+        String path = hdfsPathBuilder.constructTablePath(tableSource.getTable().getName(),
+                tableSource.getCustomerSpace(), tableSource.getTable().getNamespace()).toString();
+        getLogger().info("targetTableDirInHdfs for " + tableSource.getSourceName() + " = " + path);
+        return path;
     }
 
     protected String sourceVersionDirInHdfs(TransformationProgress progress) {

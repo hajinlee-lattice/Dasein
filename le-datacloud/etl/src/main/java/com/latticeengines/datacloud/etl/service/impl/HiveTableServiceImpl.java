@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.service.HiveTableService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.metadata.hive.HiveTableDao;
 
 @Component("hiveTableService")
@@ -30,6 +31,19 @@ public class HiveTableServiceImpl implements HiveTableService {
         if (hiveEnabled) {
             String avroDir = hdfsPathBuilder.constructSnapshotDir(sourceName, version).toString();
             String avscPath = hdfsPathBuilder.constructSchemaFile(sourceName, version).toString();
+            hiveTableDao.deleteIfExists(tableName);
+            hiveTableDao.create(tableName, avroDir, avscPath);
+            log.info("Registered the hive table " + tableName);
+        } else {
+            log.info("Hive is not enabled, skip registering hive table " + tableName);
+        }
+    }
+
+    @Override
+    public void createTable(String tableName, CustomerSpace customerSpace, String namespace) {
+        if (hiveEnabled) {
+            String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, namespace).toString();
+            String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName, customerSpace, namespace).toString();
             hiveTableDao.deleteIfExists(tableName);
             hiveTableDao.create(tableName, avroDir, avscPath);
             log.info("Registered the hive table " + tableName);

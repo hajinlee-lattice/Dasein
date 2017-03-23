@@ -7,10 +7,12 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.RefreshedSource;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -18,6 +20,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 /**
  * This is use to submit basic dataflows. It reads Map<Source, String>
@@ -28,6 +31,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public class SimpleTransformationDataFlowService extends AbstractTransformationDataFlowService {
 
     private static final Log log = LogFactory.getLog(SimpleTransformationDataFlowService.class);
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     public <P extends TransformationFlowParameters> Table executeDataFlow(Source source, String workflowDir,
             Map<Source, List<String>> baseSourceVersions, String flowBean, P parameters) {
@@ -71,7 +77,10 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
         String sourceName = source.getSourceName();
         Table sourceTable;
         try {
-            if (versions.size() == 1) {
+            if (source instanceof TableSource) {
+                TableSource tableSource = (TableSource) source;
+                sourceTable = metadataProxy.getTable(tableSource.getCustomerSpace().toString(), tableSource.getTable().getName());
+            } else if (versions.size() == 1) {
                 sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, versions.get(0));
             } else {
                 sourceTable = hdfsSourceEntityMgr.getTableAtVersions(source, versions);

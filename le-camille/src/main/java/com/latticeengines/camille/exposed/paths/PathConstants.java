@@ -12,6 +12,7 @@ public final class PathConstants {
     public static final String DIVISION = "Divisions";
     public static final String TABLES = "Tables";
     public static final String FILES = "Files";
+    public static final String TABLE_SCHEMAS = "TableSchemas";
     public static final String EXPORTS = "Exports";
     public static final String METADATA = "Metadata";
     public static final String LOCKS = "Locks";

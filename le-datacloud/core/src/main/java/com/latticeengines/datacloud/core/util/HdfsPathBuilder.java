@@ -7,11 +7,13 @@ import java.util.TimeZone;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
@@ -86,6 +88,15 @@ public class HdfsPathBuilder {
             }
         }
         return dir;
+    }
+
+    public Path constructTablePath(String tableName, CustomerSpace customerSpace, String namespace) {
+        return PathBuilder.buildDataTablePath(getHdfsPodId(), customerSpace, namespace).append(tableName);
+    }
+
+    public Path constructTableSchemaFilePath(String tableName, CustomerSpace customerSpace, String namespace) {
+        String avscFile = tableName + AVRO_SCHEMA_FILE_EXTENSION;
+        return PathBuilder.buildDataTableSchemaPath(getHdfsPodId(), customerSpace, namespace).append(tableName).append(avscFile);
     }
 
     @Deprecated

@@ -6,6 +6,7 @@ import static com.latticeengines.datacloud.etl.transformation.transformer.Iterat
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
@@ -44,7 +46,11 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 /**
  * This transformation service allows parameterizing the source and target,
@@ -71,6 +77,9 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     @Autowired
     private PipelineTransformationReportEntityMgr reportEntityMgr;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Value("${datacloud.slack.webhook.url}")
     private String slackWebhookUrl;
@@ -207,17 +216,39 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (inputSteps != null) {
                 for (Integer inputStep : inputSteps) {
                     baseSources[baseSourceIdx] = steps[inputStep].getTarget();
-                    baseTemplates[baseSourceIdx++] = steps[inputStep].getTargetTemplate();
+                    baseTemplates[baseSourceIdx] = steps[inputStep].getTargetTemplate();
                     baseVersions.add(steps[inputStep].getTargetVersion());
+                    baseSourceIdx++;
                 }
             }
 
             transformer.initBaseSources(config.getConfiguration(), baseSourceNames);
+            Map<String, SourceTable> baseTables = config.getBaseTables();
+            if (baseTables == null) {
+                baseTables = Collections.emptyMap();
+            }
 
             if ((baseSourceNames != null) && (baseSourceNames.size() != 0)) {
                 for (int i = 0; i < baseSourceNames.size(); i++, baseSourceIdx++) {
                     String sourceName = baseSourceNames.get(i);
-                    Source source = sourceService.findBySourceName(sourceName);
+                    Source source;
+                    if (baseTables.containsKey(sourceName)) {
+                        SourceTable baseTable = baseTables.get(sourceName);
+                        Table table;
+                        try {
+                            table = metadataProxy.getTable(baseTable.getCustomerSpace().toString(),
+                                    baseTable.getTableName());
+                        } catch (Exception e) {
+                            throw new RuntimeException("Failed to retrieve table from metadata proxy for "
+                                    + baseTable.getCustomerSpace() + " : " + baseTable.getTableName());
+                        }
+                        if (table == null) {
+                            throw new RuntimeException("There is no table named " + baseTable.getTableName() + " for customer " + baseTable.getCustomerSpace());
+                        }
+                        source = new TableSource(table, baseTable.getCustomerSpace());
+                    } else {
+                        source = sourceService.findBySourceName(sourceName);
+                    }
                     if (source == null) {
                         updateStatusToFailed(progress, "Base source " + sourceName + " not found", null);
                         return null;
@@ -259,10 +290,19 @@ public class PipelineTransformationService extends AbstractTransformationService
                 }
             }
 
+            String targetVersion = config.getTargetVersion();
+            if (targetVersion == null) {
+                targetVersion = pipelineVersion;
+            }
+
             Source target;
             Source targetTemplate = null;
             String targetName = config.getTargetSource();
-            if (targetName == null) {
+            TargetTable targetTable = config.getTargetTable();
+            if (targetTable != null) {
+                target = sourceService.createTableSource(targetTable.getNamePrefix(), targetVersion,
+                        targetTable.getCustomerSpace());
+            } else if (targetName == null) {
                 targetName = getTempSourceName(transConf.getName(), pipelineVersion, stepIdx);
                 target = sourceService.createSource(targetName);
             } else {
@@ -276,11 +316,6 @@ public class PipelineTransformationService extends AbstractTransformationService
             }
             if (targetTemplate == null) {
                 targetTemplate = baseTemplates[0];
-            }
-
-            String targetVersion = config.getTargetVersion();
-            if (targetVersion == null) {
-                targetVersion = pipelineVersion;
             }
 
             sourceVersions.put(target, targetVersion);
@@ -401,7 +436,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                 return true;
             } else {
                 boolean succeeded = transformer.transform(progress, workflowDir, step);
-                saveSourceVersion(progress, step.getTargetSchema(), step.getTarget(), step.getTargetVersion(), workflowDir);
+                saveSourceVersion(progress, step.getTargetSchema(), step.getTarget(), step.getTargetVersion(),
+                        workflowDir);
                 cleanupWorkflowDir(progress, workflowDir);
                 return succeeded;
             }
@@ -430,7 +466,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                 }
             } while (!converged && ((Integer) iterationContext.get(CTX_ITERATION)) < MAX_ITERATION);
             if (converged && succeeded) {
-                log.error("Iterative step " + step.getName() + " converged, final count = " + String.valueOf(step.getCount()));
+                log.error("Iterative step " + step.getName() + " converged, final count = "
+                        + String.valueOf(step.getCount()));
                 saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
                 return true;
             } else {
@@ -493,8 +530,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             updatedBaseSourceNames.add(updatedBaseSources[i].getSourceName());
         }
         step.setBaseSources(updatedBaseSources);
-        log.info("Updated the base sources of iterative step " + step.getName() + " to "
-                + updatedBaseSourceNames);
+        log.info("Updated the base sources of iterative step " + step.getName() + " to " + updatedBaseSourceNames);
     }
 
     private TransformationStepReport generateStepReport(TransformStep step, TransformationStepConfig stepConfig) {

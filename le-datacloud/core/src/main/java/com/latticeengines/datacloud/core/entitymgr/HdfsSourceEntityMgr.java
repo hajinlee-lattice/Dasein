@@ -5,11 +5,15 @@ import java.util.List;
 
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface HdfsSourceEntityMgr {
 
     String getCurrentVersion(Source source);
+
+    String getCurrentVersion(String sourceName);
 
     void setCurrentVersion(Source source, String version);
 
@@ -21,7 +25,13 @@ public interface HdfsSourceEntityMgr {
 
     Table getTableAtVersion(Source source, String version);
 
-    public Table getTableAtVersions(Source source, List<String> versions);
+    Table getTableAtVersions(Source source, List<String> versions);
+
+    /**
+     * This is to fill in more detail about the table, after generating avros
+     * Source service has another method to create a shell table before avro generation
+     */
+    TableSource materializeTableSource(String tableName, CustomerSpace customerSpace);
 
     Table getCollectedTableSince(IngestedRawSource source, Date earliest);
 
