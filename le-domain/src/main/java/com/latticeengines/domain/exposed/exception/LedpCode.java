@@ -554,7 +554,22 @@ public enum LedpCode {
     LEDP_35006("No SchemaInterpretation found for the training set specified for Tenant: {0} and modelID: {1}"),
 
     // le-app
-    LEDP_36001("Invalid attribute name: {0}");
+    LEDP_36001("Invalid attribute name: {0}"), //
+
+    // le-query
+    LEDP_37000("Lookup must have range specified"), //
+    LEDP_37001("Could not locate bucket to resolve bucketed attribute {0} for specified value {1}."), //
+    LEDP_37002("Must implement BusinessObject.processFreeFormSearch for object {0}"), //
+    LEDP_37003("Could not find table of type {0} in data collection"), //
+    LEDP_37004("Cannot find 1-to-1 or many-to-1 relationship to satisfy necessary join {0}"), //
+    LEDP_37005("Cannot find 1-to-many relationship to satisfy necessary join {0}"), //
+    LEDP_37006("Unsupported relation {0}"), //
+    LEDP_37007("Could not locate BusinessObject for ObjectType {0}"), //
+    LEDP_37008("Could not find a one-to-many relationship from table {0} to table of type {1} to process exists restriction {2}"), //
+    LEDP_37009("Unsupported restriction {0}"), //
+    LEDP_37010("Could not find attribute with name {0} in table {1}"), //
+    LEDP_37011("Unsupported lookup type {0}"), //
+    LEDP_37012("Failed to retrieve data for object {0}");
 
     private String message;
 

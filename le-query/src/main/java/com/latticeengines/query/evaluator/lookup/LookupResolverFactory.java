@@ -1,5 +1,7 @@
 package com.latticeengines.query.evaluator.lookup;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
@@ -71,7 +73,7 @@ public class LookupResolverFactory {
         } else if (lookup instanceof RangeLookup) {
             return new RangeLookupResolver((RangeLookup) lookup, rootObjectType, dataCollection, secondaryLookup);
         } else {
-            throw new RuntimeException(String.format("Unsupported lookup type %s", lookup.getClass().getName()));
+            throw new LedpException(LedpCode.LEDP_37011, new String[] { lookup.getClass().getName() });
         }
     }
 }

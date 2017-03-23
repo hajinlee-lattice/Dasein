@@ -3,6 +3,8 @@ package com.latticeengines.query.exposed.object;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -33,7 +35,7 @@ public abstract class BusinessObject {
 
     public Predicate processFreeFormSearch(DataCollection dataCollection, String freeFormRestriction) {
         if (!StringUtils.isEmpty(freeFormRestriction)) {
-            throw new RuntimeException("Must implement BusinessObject.processFreeFormSearch");
+            throw new LedpException(LedpCode.LEDP_37002, new String[] { getClass().getName() });
         }
         return Expressions.TRUE;
     }

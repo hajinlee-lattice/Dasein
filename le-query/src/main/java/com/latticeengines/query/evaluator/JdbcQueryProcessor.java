@@ -9,6 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Cardinality;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -57,8 +59,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
     public SQLQuery<?> process(DataCollection dataCollection, Query query) {
         BusinessObject businessObject = getBusinessObject(query.getObjectType());
         if (businessObject == null) {
-            throw new RuntimeException(String.format("Could not locate BusinessObject for ObjectType %s",
-                    query.getObjectType()));
+            throw new LedpException(LedpCode.LEDP_37007, new String[] { query.getObjectType().toString() });
         }
 
         SQLQuery<?> sqlQuery = startQuery(dataCollection, query) //
@@ -114,9 +115,8 @@ public class JdbcQueryProcessor extends QueryProcessor {
         for (JoinSpecification join : joins) {
             Table destinationTable = dataCollection.getTable(join.getDestinationType());
             if (destinationTable == null) {
-                throw new RuntimeException(String.format(
-                        "Could not find destination table of type %s in data collection",
-                        join.getDestinationObjectUsage()));
+                throw new LedpException(LedpCode.LEDP_37003,
+                        new String[] { join.getDestinationObjectUsage().toString() });
             }
 
             if (join.getDestinationObjectUsage().equals(ObjectUsage.LOOKUP)) {
@@ -126,8 +126,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
                         .findFirst() //
                         .orElse(null);
                 if (relationship == null) {
-                    throw new RuntimeException(String.format(
-                            "Cannot find 1-to-1 or many-to-1 relationship to satisfy necessary join %s", join));
+                    throw new LedpException(LedpCode.LEDP_37004, new String[] { join.toString() });
                 }
                 relationships.add(relationship);
 
@@ -138,8 +137,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
                         .filter(r -> r.getTargetCardinality().equals(Cardinality.MANY)) //
                         .findFirst().orElse(null);
                 if (relationship == null) {
-                    throw new RuntimeException(String.format(
-                            "Cannot find 1-to-many relationship to satisfy necessary join %s", join));
+                    throw new LedpException(LedpCode.LEDP_37005, new String[] { join.toString() });
                 }
 
                 relationships.add(relationship);
@@ -266,7 +264,8 @@ public class JdbcQueryProcessor extends QueryProcessor {
                     return lhsPath.eq(rhsPaths.get(0));
                 }
             default:
-                throw new RuntimeException(String.format("Unsupported relation %s", concreteRestriction.getRelation()));
+                throw new LedpException(LedpCode.LEDP_37006, new String[] { concreteRestriction.getRelation()
+                        .toString() });
             }
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucketRestriction = (BucketRestriction) restriction;
@@ -289,10 +288,8 @@ public class JdbcQueryProcessor extends QueryProcessor {
                     .orElse(null);
 
             if (relationship == null) {
-                throw new RuntimeException(
-                        String.format(
-                                "Could not find a one-to-many relationship from table %s to table of type %s to process exists restriction %s",
-                                parent.getName(), existsRestriction.getObjectType(), existsRestriction));
+                throw new LedpException(LedpCode.LEDP_37008, new String[] { parent.getName(),
+                        existsRestriction.getObjectType().toString(), existsRestriction.toString() });
             }
             Table child = dataCollection.getTable(existsRestriction.getObjectType());
 
@@ -310,7 +307,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
                 return query.exists();
             }
         } else {
-            throw new RuntimeException(String.format("Unsupported restriction %s", restriction.getClass().getName()));
+            throw new LedpException(LedpCode.LEDP_37009, new String[] { restriction.getClass().getName() });
         }
     }
 }

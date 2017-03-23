@@ -2,6 +2,8 @@ package com.latticeengines.query.evaluator.lookup;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -27,8 +29,7 @@ public abstract class LookupResolver {
                 .filter(a -> a.getName() != null && a.getName().equals(columnLookup.getColumnName())) //
                 .findFirst().orElse(null);
         if (attribute == null) {
-            throw new RuntimeException(String.format("Could not find attribute with name %s in table %s",
-                    columnLookup.getColumnName(), table.getName()));
+            throw new LedpException(LedpCode.LEDP_37010, new String[] { columnLookup.getColumnName(), table.getName() });
         }
         return attribute;
     }
@@ -36,8 +37,7 @@ public abstract class LookupResolver {
     public Table getTable(ColumnLookup columnLookup) {
         Table table = dataCollection.getTable(columnLookup.getObjectType());
         if (table == null) {
-            throw new RuntimeException(String.format("Could not find table of type %s in data collection %s",
-                    columnLookup.getObjectType(), dataCollection.getName()));
+            throw new LedpException(LedpCode.LEDP_37003, new String[] { columnLookup.getObjectType().toString() });
         }
         return table;
     }

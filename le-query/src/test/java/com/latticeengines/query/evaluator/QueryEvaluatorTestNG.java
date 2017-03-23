@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Cardinality;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -209,7 +210,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional", expectedExceptions = RuntimeException.class)
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
     public void testUnableToFindObjectForJoin() {
         DataCollection collection = getDataCollection();
         Query query = new Query();
@@ -233,6 +234,20 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testBitBucketedAttributeValueNullBucket() {
+        DataCollection collection = getDataCollection();
+        LogicalRestriction restriction = new LogicalRestriction();
+        restriction.setOperator(LogicalOperator.AND);
+        BucketRange bucket = BucketRange.nullBucket();
+        restriction.addRestriction(new BucketRestriction(new ColumnLookup(SchemaInterpretation.Account,
+                "bucketed_attribute"), bucket));
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.setRestriction(restriction);
+        long count = queryEvaluator.evaluate(collection, query).fetchCount();
+    }
+
+    @Test(groups = "functional")
     public void testBitBucketedAttributeRange() {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();
@@ -246,7 +261,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         long count = queryEvaluator.evaluate(collection, query).fetchCount();
     }
 
-    @Test(groups = "functional", expectedExceptions = RuntimeException.class)
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
     public void testBitBucketedAttributeCouldNotFindBucket() {
         DataCollection collection = getDataCollection();
         LogicalRestriction restriction = new LogicalRestriction();

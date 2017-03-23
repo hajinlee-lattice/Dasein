@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -49,9 +51,8 @@ public class ValueLookupResolver extends LookupResolver {
                 }
 
                 if (bucketIdx == buckets.size()) {
-                    throw new RuntimeException(String.format(
-                            "Could not locate bucket to resolve bucketed attribute %s for specified value %s",
-                            attribute.getName(), lookup.getValue()));
+                    throw new LedpException(LedpCode.LEDP_37001, new String[] { attribute.getName(),
+                            lookup.getValue().toString() });
                 }
 
                 return Collections.singletonList(Expressions.asComparable(Integer.toString(bucketIdx)));

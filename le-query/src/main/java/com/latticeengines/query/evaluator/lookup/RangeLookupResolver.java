@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -29,8 +31,8 @@ public class RangeLookupResolver extends LookupResolver {
     public List<ComparableExpression<String>> resolve() {
         ColumnLookup columnLookup = (ColumnLookup) secondaryLookup;
 
-        if (lookup.getRange() == null || lookup.getRange().getMin() == null || lookup.getRange().getMax() == null) {
-            throw new RuntimeException("Lookup must have both min and max range specified");
+        if (lookup.getRange() == null) {
+            throw new LedpException(LedpCode.LEDP_37000);
         }
 
         if (columnLookup != null) {
@@ -50,9 +52,8 @@ public class RangeLookupResolver extends LookupResolver {
                 }
 
                 if (bucketIdx == buckets.size()) {
-                    throw new RuntimeException(String.format(
-                            "Could not locate bucket to resolve bucketed attribute %s for specified value %s",
-                            attribute.getName(), lookup.getRange()));
+                    throw new LedpException(LedpCode.LEDP_37001, new String[] { attribute.getName(),
+                            lookup.getRange().toString() });
                 }
 
                 return Collections.singletonList(Expressions.asComparable(Integer.toString(bucketIdx)));

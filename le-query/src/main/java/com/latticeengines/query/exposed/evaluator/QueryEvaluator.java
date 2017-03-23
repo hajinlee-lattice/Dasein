@@ -11,6 +11,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
@@ -40,9 +42,8 @@ public class QueryEvaluator {
                 data.add(row);
             }
             return new DataPage(data);
-
         } catch (SQLException e) {
-            throw new RuntimeException(String.format("Failed to retrieve data for object %s", query.getObjectType()), e);
+            throw new LedpException(LedpCode.LEDP_37012, new String[] { query.getObjectType().toString() });
         }
     }
 }
