@@ -64,6 +64,7 @@ angular
                     ], function(newValues, oldValues, scope) {
 
                     vm.filterEmptySubcategories();
+                    vm.TileTableItems = {};
                 });
 
                 $scope.$watchGroup([
@@ -105,6 +106,7 @@ angular
                         }
 
                         vm.filterEmptySubcategories();
+                        vm.TileTableItems = {};
                     }, 500);
                 });
 

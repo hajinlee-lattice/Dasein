@@ -317,8 +317,9 @@ angular.module('common.datacloud.explorer', [
         }
 
         var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
-            DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
-            EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
+            EligibleEnrichments = vm.filter(vm.enrichments, 'IsInternal', false),
+            DisabledForSalesTeamTotal = vm.filter(EligibleEnrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
+            EnabledForSalesTeamTotal = EligibleEnrichments.length - DisabledForSalesTeamTotal.length;
 
         if(!vm.lookupMode) {
             DataCloudStore.setMetadata('generalSelectedTotal', selectedTotal.length);
@@ -634,8 +635,10 @@ angular.module('common.datacloud.explorer', [
             };
             DataCloudStore.updateEnrichments(vm.enrichments);
 
-            var DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'HighlightHidden', true),
-                EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
+
+            var EligibleEnrichments = vm.filter(vm.enrichments, 'IsInternal', false),
+                DisabledForSalesTeamTotal = vm.filter(EligibleEnrichments, 'HighlightHidden', true),
+                EnabledForSalesTeamTotal = EligibleEnrichments.length - DisabledForSalesTeamTotal.length;
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
             getHighlightMetadata();
@@ -712,11 +715,13 @@ angular.module('common.datacloud.explorer', [
             }
             DataCloudStore.updateEnrichments(vm.enrichments);
 
-            var DisabledForSalesTeamTotal = vm.filter(vm.enrichments, 'HighlightHidden', true),
-                EnabledForSalesTeamTotal = vm.filter(vm.enrichments, 'IsInternal', false).length - DisabledForSalesTeamTotal.length;
+            var EligibleEnrichments = vm.filter(vm.enrichments, 'IsInternal', false),
+                DisabledForSalesTeamTotal = vm.filter(EligibleEnrichments, 'HighlightHidden', true),
+                EnabledForSalesTeamTotal = EligibleEnrichments.length - DisabledForSalesTeamTotal.length;
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
             getHighlightMetadata();
+            vm.TileTableItems = {};
         });
     }
 
