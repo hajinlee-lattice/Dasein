@@ -26,10 +26,8 @@ public class ComparedRecord {
 
     private List<Warning> warnings;
 
-    @JsonIgnore
     private Map<String, Object> expectedTransformedRecord;
 
-    @JsonIgnore
     private Map<String, Object> scoreApiTransformedRecord;
 
     @JsonIgnore
@@ -38,16 +36,12 @@ public class ComparedRecord {
     @JsonIgnore
     private Map<String, Object> scoreApiMatchedRecord;
 
-    @JsonIgnore
     private List<String> scoreApiMatchExtraFields;
 
-    @JsonIgnore
     private List<String> scoreApiMatchMissingFields;
 
-    @JsonIgnore
     private List<String> scoreApiTransformExtraFields;
 
-    @JsonIgnore
     private List<String> scoreApiTransformMissingFields;
 
     public Object getId() {
