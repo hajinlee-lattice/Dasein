@@ -5,7 +5,6 @@
         <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
     </div>
     <div ng-if="!vm.hidePage()">
-        <div></div>
         <explorer-filters class="filters-container" vm="vm"></explorer-filters>
 
         <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="!vm.enrichments_completed" ng-if="loading_image" ng-init="loading_image">
