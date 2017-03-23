@@ -438,7 +438,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             VdbMetadataField field = JsonUtils.convertValue(rawField, VdbMetadataField.class);
             fields.add(field);
 
-            if (field.getColumnName().equals("Phone_Entropy")) {
+            if (field.getColumnName().equals("Industry_Group")) {
                 field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
             }
             if (field.getColumnName().equals("Activity_Count_Click_Email")) {
@@ -505,7 +505,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             public boolean apply(@Nullable Object raw) {
                 VdbMetadataField metadataField = new ObjectMapper().convertValue(raw,
                         VdbMetadataField.class);
-                return metadataField.getColumnName().equals("Phone_Entropy") && metadataField
+                return metadataField.getColumnName().equals("Industry_Group") && metadataField
                         .getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
             }
         }));
