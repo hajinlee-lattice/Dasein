@@ -40,6 +40,7 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
     private static final String baseSourceName = "Source1";
     private static final String targetSourceName = "Source2";
     private static final String avroFile = "HGData";
+    private static final String intermediateTable =  "IntermediateTable";
 
     private GeneralSource source1 = new GeneralSource(baseSourceName);
 
@@ -116,6 +117,10 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
         expectedCount.set(2538);
         confirmResultFile(progress);
         verifyRegisteredTable();
+
+        // cleanup intermediate table
+        String intermediateTableFullName = TableSource.getFullTableName(intermediateTable, targetVersion);
+        metadataProxy.deleteTable(DataCloudConstants.SERVICE_CUSTOMERSPACE, intermediateTableFullName);
     }
 
     @Override
@@ -240,7 +245,7 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
             step1.setTransformer(SourceCopier.TRANSFORMER_NAME);
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
-            targetTable.setNamePrefix("IntermediateTable");
+            targetTable.setNamePrefix(intermediateTable);
             step1.setTargetTable(targetTable);
             step1.setConfiguration("{}");
             // -----------

@@ -71,7 +71,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public TableSource createTableSource(String tableNamePrefix, String version, CustomerSpace customerSpace) {
         Table table = new Table();
-        String tableName = tableNamePrefix + "_" + version;
+        String tableName = TableSource.getFullTableName(tableNamePrefix, version);
         table.setName(tableName);
         table.setNamespace("");
         String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();

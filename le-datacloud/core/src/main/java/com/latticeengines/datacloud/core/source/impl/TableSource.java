@@ -67,4 +67,8 @@ public class TableSource implements Source {
          return null;
     }
 
+    public static String getFullTableName(String tableNamePrefix, String version) {
+        return tableNamePrefix + "_" + version;
+    }
+
 }
