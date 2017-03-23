@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Reducer.Context;
+import org.apache.hadoop.util.Progressable;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
@@ -17,9 +17,8 @@ import com.latticeengines.domain.exposed.modeling.algorithm.AggregationAlgorithm
 
 public class ModelPickleAggregator implements FileAggregator {
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public void aggregate(List<String> localPaths, Configuration config, Context context) throws Exception {
+    public void aggregate(List<String> localPaths, Configuration config, Progressable progressable) throws Exception {
         String metadata = config.get(PythonContainerProperty.METADATA_CONTENTS.name());
         Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
         String script = new AggregationAlgorithm().getScript();
@@ -30,8 +29,8 @@ public class ModelPickleAggregator implements FileAggregator {
 
         ProgressMonitor monitor = null;
         String runtimeConfigFile = null;
-        if (context != null) {
-            monitor = new ProgressMonitor(context);
+        if (progressable != null) {
+            monitor = new ProgressMonitor(progressable);
             runtimeConfigFile = PythonMRUtils.getRuntimeConfig(config, monitor);
         }
         PythonInvoker invoker = new PythonInvoker(classifier, runtimeConfigFile);

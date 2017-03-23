@@ -18,7 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.mapreduce.Reducer.Context;
+import org.apache.hadoop.util.Progressable;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
@@ -26,9 +26,8 @@ import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 public class FeatureImportanceAggregator implements FileAggregator {
     private static final Log log = LogFactory.getLog(FeatureImportanceAggregator.class);
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public void aggregate(List<String> localPaths, Configuration config, Context context) throws Exception {
+    public void aggregate(List<String> localPaths, Configuration config, Progressable progressable) throws Exception {
         HashMap<String, Double> featureImportanceValues = aggregateImportanceValues(localPaths);
         writeToLocal(featureImportanceValues);
         copyToHdfs(config);

@@ -13,8 +13,7 @@ import java.util.concurrent.Executors;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.util.Progressable;
 import org.springframework.yarn.am.allocate.ContainerAllocator;
 
 public class ProgressMonitor {
@@ -28,29 +27,18 @@ public class ProgressMonitor {
     private float progress = 0;
 
     private ContainerAllocator allocator;
+    private Progressable progressable;
 
     private ExecutorService executor;
 
-    @SuppressWarnings("rawtypes")
-    private Mapper.Context mapperContext;
-
-    @SuppressWarnings("rawtypes")
-    private Reducer.Context reducerContext;
 
     public ProgressMonitor(ContainerAllocator allocator) {
         this.allocator = allocator;
         init();
     }
 
-    @SuppressWarnings("rawtypes")
-    public ProgressMonitor(Mapper.Context mapperContext) {
-        this.mapperContext = mapperContext;
-        init();
-    }
-
-    @SuppressWarnings("rawtypes")
-    public ProgressMonitor(Reducer.Context reducerContext) {
-        this.reducerContext = reducerContext;
+    public ProgressMonitor(Progressable progressable) {
+        this.progressable = progressable;
         init();
     }
 
@@ -129,10 +117,8 @@ public class ProgressMonitor {
         // Allocator reports progress asynchronously to RM through heart beat
         if (allocator != null) {
             allocator.setProgress(progress);
-        } else if (mapperContext != null) {
-            mapperContext.progress();
         } else {
-            reducerContext.progress();
+            progressable.progress();
         }
     }
 
