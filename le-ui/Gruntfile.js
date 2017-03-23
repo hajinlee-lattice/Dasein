@@ -19,18 +19,18 @@ module.exports = function (grunt) {
             app: 'app'
         },
 
-        // https://confluence.lattice-engines.com/pages/viewpage.action?pageId=16909888
+        // https://confluence.lattice-engines.com/display/ENG/AWS+Stack+Topology
         env: {
-            devall: { // all populated
+            devall: { // all populated, qa stack a
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'development',
-                API_URL: 'https://testapp.lattice-engines.com',
-                API_CON_URL: 'https://testapi.lattice-engines.com:8073',
-                ULYSSES_URL: 'https://bodcdevsvipb13.lattice.local:8075',
-                API_ADMIN_URL: 'https://10.41.0.25:8085',
-                API_MCSVC_URL: 'https://10.41.0.25:8080',
-                API_MATCHAPI_URL: 'https://10.41.0.25:8076',
-                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
+                API_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_CON_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_ADMIN_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_MCSVC_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_MATCHAPI_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_INFLUXDB_URL: 'http://internal-influx-1992709958.us-east-1.elb.amazonaws.com:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -41,12 +41,12 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
-            dev: {
+            dev: { // qa stack a
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
-                ULYSSES_URL: 'https://bodcdevsvipb13.lattice.local:8075',
-                API_URL: 'https://testapp.lattice-engines.com',
-                API_CON_URL: 'https://testapi.lattice-engines.com:8073',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_CON_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -55,10 +55,10 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
-            dev_admin: {
+            dev_admin: { // qa stack a
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
-                API_ADMIN_URL: 'https://internal-adminconsole-lpi-a-48494326.us-east-1.elb.amazonaws.com',
+                API_ADMIN_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
                 API_MCSVC_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
                 API_MATCHAPI_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
                 API_INFLUXDB_URL: 'http://internal-influx-1992709958.us-east-1.elb.amazonaws.com:8086',
@@ -70,12 +70,44 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
-            devb: {
+            devb: { // qa stack b
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
-                ULYSSES_URL: 'https://bodcdevsvipb13.lattice.local:8075',
-                API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
-                API_CON_URL: 'https://bodcdevsvipb26.lattice.local:8073',
+                ULYSSES_URL: 'https://internal-public-lpi-b-507116299.us-east-1.elb.amazonaws.com',
+                API_URL: 'https://internal-public-lpi-b-507116299.us-east-1.elb.amazonaws.com',
+                API_CON_URL: 'https://internal-public-lpi-b-507116299.us-east-1.elb.amazonaws.com',
+                API_MATCHAPI_URL: 'https://internal-private-lpi-b-282775961.us-east-1.elb.amazonaws.com',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
+            },
+            devb_admin: { // qa stack b
+                NODE_APPS: 'leadmin',
+                NODE_ENV: 'development',
+                API_ADMIN_URL: 'https://internal-private-lpi-b-282775961.us-east-1.elb.amazonaws.com',
+                API_MCSVC_URL: 'https://internal-private-lpi-b-282775961.us-east-1.elb.amazonaws.com',
+                API_MATCHAPI_URL: 'https://internal-private-lpi-b-282775961.us-east-1.elb.amazonaws.com',
+                API_INFLUXDB_URL: 'http://internal-influx-1992709958.us-east-1.elb.amazonaws.com:8086',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
+            },
+            devb_bodc: { // qa stack b in bodc, to be deprecated
+                NODE_APPS: 'leui',
+                NODE_ENV: 'development',
+                ULYSSES_URL: 'https://10.41.0.13:8075',
+                API_URL: 'https://10.41.0.13:8081',
+                API_CON_URL: 'https://10.41.0.13:8073',
                 API_MATCHAPI_URL: 'https://10.41.0.26:8076',
                 COMPRESSED: false,
                 LOGGING: './server/log',
@@ -87,7 +119,7 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
-            devb_admin: {
+            devb_admin_bodc: { // qa stack b in bodc, to be deprecated
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
                 API_ADMIN_URL: 'https://10.41.0.26:8085',
@@ -131,16 +163,16 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
-            qa: {
+            qa: { // qa stack a
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
-                ULYSSES_URL: 'https://bodcdevsvipb13.lattice.local:8075',
-                API_URL: 'https://bodcdevsvipb13.lattice.local:8075',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
                 API_ADMIN_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
-                API_CON_URL: 'https://bodcdevsvipb13.lattice.local:8075',
+                API_CON_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
                 API_MCSVC_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
                 API_MATCHAPI_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
-                API_INFLUXDB_URL: 'http://localhost:8086',
+                API_INFLUXDB_URL: 'http://internal-influx-1992709958.us-east-1.elb.amazonaws.com:8086',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -152,16 +184,16 @@ module.exports = function (grunt) {
                 HTTPS_PASS: false,
                 WHITELIST: 'internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com, internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com'
             },
-            qadev: {
+            qadev: { // qa stack a
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
-                ULYSSES_URL: 'https://bodcdevsvipb13.lattice.local:8075',
-                API_URL: 'https://testapp.lattice-engines.com',
-                API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
-                API_CON_URL: 'https://testapi.lattice-engines.com',
-                API_MCSVC_URL: 'https://admin-qa.lattice.local:8080',
-                API_MATCHAPI_URL: 'https://admin-qa.lattice.local:8076',
-                API_INFLUXDB_URL: 'http://localhost:8086',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_ADMIN_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_CON_URL: 'https://internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com',
+                API_MCSVC_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_MATCHAPI_URL: 'https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com',
+                API_INFLUXDB_URL: 'http://internal-influx-1992709958.us-east-1.elb.amazonaws.com:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -171,7 +203,7 @@ module.exports = function (grunt) {
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
-                WHITELIST: '10.41.0.14, 10.41.0.16'
+                WHITELIST: 'internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com, internal-public-lpi-a-1482626327.us-east-1.elb.amazonaws.com'
             },
             production: {
                 NODE_APPS: 'leui',
@@ -208,6 +240,42 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
                 WHITELIST: '10.51.12.109, 10.51.51.109'
+            },
+            proda: { // prod stack a
+                NODE_APPS: 'leui',
+                NODE_ENV: 'production',
+                ULYSSES_URL: 'https://internal-public-lpi-a-1059974862.us-east-1.elb.amazonaws.com',
+                API_URL: 'https://internal-public-lpi-a-1059974862.us-east-1.elb.amazonaws.com',
+                API_ADMIN_URL: 'https://internal-private-lpi-a-418154873.us-east-1.elb.amazonaws.com',
+                API_CON_URL: 'https://internal-public-lpi-a-1059974862.us-east-1.elb.amazonaws.com',
+                COMPRESSED: true,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false,
+                WHITELIST: 'internal-public-lpi-a-1059974862.us-east-1.elb.amazonaws.com, internal-private-lpi-a-418154873.us-east-1.elb.amazonaws.com'
+            },
+            prodb: { // prod stack b
+                NODE_APPS: 'leui',
+                NODE_ENV: 'production',
+                ULYSSES_URL: 'https://internal-public-lpi-b-556082394.us-east-1.elb.amazonaws.com',
+                API_URL: 'https://internal-public-lpi-b-556082394.us-east-1.elb.amazonaws.com',
+                API_ADMIN_URL: 'https://internal-private-lpi-b-1755219837.us-east-1.elb.amazonaws.com',
+                API_CON_URL: 'https://internal-public-lpi-b-556082394.us-east-1.elb.amazonaws.com',
+                COMPRESSED: true,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false,
+                WHITELIST: 'internal-public-lpi-b-556082394.us-east-1.elb.amazonaws.com, internal-private-lpi-b-1755219837.us-east-1.elb.amazonaws.com'
             }
         },
 
