@@ -221,20 +221,25 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
     }
 
     public void publishInternal(GenericRecordRequest recordRequest, GenericRecord record) {
-        Future<RecordMetadata> future = publish(recordRequest, record);
-        if (!isInCheckPeriod()) {
-            synchronized (this) {
-                if (!isInCheckPeriod()) {
-                    try {
-                        future.get(10, TimeUnit.SECONDS);
-                        setEnable();
-                    } catch (Exception ex) {
-                        setDisable();
-                        future.cancel(true);
-                        log.error("Publish timeout! Disable Generic Entity Manager", ex);
+        try {
+            Future<RecordMetadata> future = publish(recordRequest, record);
+            if (!isInCheckPeriod()) {
+                synchronized (this) {
+                    if (!isInCheckPeriod()) {
+                        try {
+                            future.get(10, TimeUnit.SECONDS);
+                            setEnable();
+                        } catch (Exception ex) {
+                            setDisable();
+                            future.cancel(true);
+                            log.error("Publish timeout! Disable Generic Entity Manager", ex);
+                        }
                     }
                 }
             }
+        } catch (Throwable t) {
+            setDisable();
+            log.error("Publish failed! Disable Generic Entity Manager", t);
         }
     }
 
