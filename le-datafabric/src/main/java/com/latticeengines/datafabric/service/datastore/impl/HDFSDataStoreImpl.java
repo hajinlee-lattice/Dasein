@@ -28,6 +28,8 @@ public class HDFSDataStoreImpl implements FabricDataStore {
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
     public static final String UTC = "UTC";
 
+    private static final TimeZone TIME_ZONE = TimeZone.getTimeZone(UTC);
+
     private Configuration config;
     private String fileName;
     private String recordType;
@@ -36,7 +38,7 @@ public class HDFSDataStoreImpl implements FabricDataStore {
     private String baseDir;
 
     static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+        dateFormat.setTimeZone(TIME_ZONE);
     }
 
     public HDFSDataStoreImpl(Configuration config, String baseDir, String repositoryDir, String fileName,
@@ -66,7 +68,7 @@ public class HDFSDataStoreImpl implements FabricDataStore {
     }
 
     private String getFilePath() {
-        Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance(TIME_ZONE);
         c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         String dateStr = dateFormat.format(c.getTime());
         return baseDir + "/" + repositoryDir + "/Snapshot/" + dateStr + "/" + fileName;
