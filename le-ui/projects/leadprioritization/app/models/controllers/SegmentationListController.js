@@ -92,21 +92,14 @@ angular.module('lp.models.segments', [
     };
 
     vm.tileClick = function ($event) {
-        if ($event != null && $scope.nameStatus.editing) {
-            $event.preventDefault();
-        }
-        if (!$scope.nameStatus.editing && !data.Incomplete) {
-            $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
-        } else if (!$scope.nameStatus.editing && data.Incomplete && $scope.data.ModelFileType != "PmmlModel") {
-            StaleModelModal.show($scope.data.Id);
-        }
+        $event.preventDefault();
+        console.log("segment");
     };
 
-    vm.editSegmentClick = function(){
+    vm.editSegmentClick = function($event){
+        $event.stopPropagation();
+        console.log("edit");
         vm.editSegment = true;
-
-        // Show edit segment form
-
     };
 
     vm.cancelEditSegmentClicked = function() {
