@@ -36,11 +36,12 @@
                     <tbody>
                         <tr ng-repeat="attribute in vm.attributes | filter:{attribute:{Tags:'Internal'}}:true | orderBy:vm.sortBy:!vm.sortAsc as filteredAttributes">
                             <td>{{attribute.name}}</td>
-                            <td><i class="fa"
-                                ng-if="attribute.warning"
-                                ng-class="{'fa-exclamation-triangle':attribute.warning === 'optional', 'fa-exclamation-circle': attribute.warning === 'mandatory'}"
-                                ng-mouseenter="vm.showTooltip($event, attribute)"
-                                ng-mouseleave="vm.hideTooltip()"></i>
+                            <td>
+                                <div ng-if="attribute.warning"
+                                    ng-mouseenter="vm.showTooltip($event, attribute)"
+                                    ng-mouseleave="vm.hideTooltip()"><i class="fa"
+                                    ng-class="{'fa-exclamation-triangle':attribute.warning === 'optional', 'fa-exclamation-circle': attribute.warning === 'mandatory'}"></i>
+                                </div>
                             </td>
                             <td>
                                 <button class="attribute-toggle"

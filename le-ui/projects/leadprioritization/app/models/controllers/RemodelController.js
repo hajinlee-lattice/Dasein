@@ -7,7 +7,10 @@ angular.module('mainApp.models.remodel', [
     'lp.models.remodel',
     'lp.jobs'
 ])
-.controller('RemodelController', function($scope, $filter, $state, MetadataService, RemodelTooltipService, RemodelStore, Model, DataRules, Attributes, BasicConfirmationModal, RemodelingModal, ResourceUtility, StringUtility) {
+.controller('RemodelController', function($scope, $filter, $state, $timeout, MetadataService,
+        RemodelTooltipService, RemodelStore, Model, DataRules, Attributes, BasicConfirmationModal,
+        RemodelingModal, ResourceUtility, StringUtility
+) {
 
     if (Model.ModelType === 'PmmlModel' ||
         Model.ModelDetails.Uploaded === true) {
@@ -163,13 +166,28 @@ angular.module('mainApp.models.remodel', [
         vm.error = null;
     };
 
+    var timeout = null;
     var tooltipEl = angular.element('#remodel-tooltip');
+    tooltipEl.mouseenter(function() {
+        $timeout.cancel(timeout);
+    });
+    tooltipEl.mouseleave(function() {
+        vm.hideTooltip(true);
+    });
+
     vm.showTooltip = function($event, attribute) {
+        $timeout.cancel(timeout);
         RemodelTooltipService.show(tooltipEl, $event, attribute);
     };
 
-    vm.hideTooltip = function() {
-        RemodelTooltipService.hide(tooltipEl);
+    vm.hideTooltip = function(immediate) {
+        if (immediate === true) {
+            RemodelTooltipService.hide(tooltipEl);
+        } else {
+            timeout = $timeout(function() {
+                RemodelTooltipService.hide(tooltipEl);
+            }, 300, false);
+        }
     };
 })
 .service('RemodelTooltipService', function() {
