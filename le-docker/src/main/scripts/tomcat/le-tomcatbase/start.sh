@@ -13,6 +13,16 @@ if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
     cp /tmp/conf/env/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp
 fi
 
+# mail config
+if [ "${LE_ENVIRONMENT}" = "prodcluster" ]; then
+    echo "use production cf"
+    cp -f /root/postfix/main.cf.production /etc/postfix/main.cf
+else
+    echo "use dev cf"
+    cp -f /root/postfix/main.cf.dev /etc/postfix/main.cf
+fi
+/etc/init.d/postfix restart
+
 export LE_PROPDIR="/etc/ledp"
 
 if [ -f "/etc/internaladdr.txt" ]; then
