@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.am.AppmasterRmTemplate;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
-import org.springframework.yarn.am.container.AbstractLauncher;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
@@ -55,9 +54,6 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     protected void onInit() throws Exception {
         log.info("Initializing application.");
         super.onInit();
-        if (getLauncher() instanceof AbstractLauncher) {
-            ((AbstractLauncher) getLauncher()).addInterceptor(this);
-        }
         monitor = new ProgressMonitor(super.getAllocator());
     }
 
