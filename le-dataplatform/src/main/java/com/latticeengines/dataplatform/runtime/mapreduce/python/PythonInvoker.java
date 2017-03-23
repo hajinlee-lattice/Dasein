@@ -15,18 +15,20 @@ public class PythonInvoker {
 
     private static final Log log = LogFactory.getLog(PythonMRUtils.class);
     private Classifier classifier;
+    private String runtimeConfigFile;
 
-    public PythonInvoker(Classifier classifier) {
+    public PythonInvoker(Classifier classifier, String runtimeConfigFile) {
         this.classifier = classifier;
+        this.runtimeConfigFile = runtimeConfigFile;
     }
 
     public void callLauncher(Configuration config) {
         int exitValue = 0;
         try {
             PythonMRUtils.writeMetadataJsonToLocal(classifier);
-
-            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", "lattice", "launcher.py",
-                    "metadata.json", "None");
+            runtimeConfigFile = runtimeConfigFile != null ? runtimeConfigFile : "None";
+            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", "lattice",
+                    "launcher.py", "metadata.json", runtimeConfigFile);
             setupEnvironment(pb.environment(), config);
 
             Process p = pb.start();

@@ -1,23 +1,31 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.yarn.ProgressMonitor;
+import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.algorithm.AggregationAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 public class PythonMRUtils {
     public static final String METADATA_JSON_PATH = "./metadata.json";
-
+    
+    private static final Log log = LogFactory.getLog(PythonMRUtils.class);
+    
     public static String setupArchiveFilePath(Classifier classifier, String version) {
         List<String> paths = new ArrayList<String>();
         paths.add(classifier.getPythonPipelineLibHdfsPath());
@@ -94,6 +102,25 @@ public class PythonMRUtils {
 
     public static void copyMetadataJsonToHdfs(Configuration config, String hdfsPath) throws Exception {
         HdfsUtils.copyLocalToHdfs(config, METADATA_JSON_PATH, hdfsPath);
+    }
+
+    public static String getRuntimeConfig(Configuration config, ProgressMonitor monitor) {
+        String runtimeConfigFile = config.get(PythonContainerProperty.RUNTIME_CONFIG.name());
+        if (runtimeConfigFile == null) {
+            log.info("There's no run time config file specified.");
+            return null;
+        }
+        try (FileWriter writer = new FileWriter(runtimeConfigFile)) {
+            Properties runtimeConfig = new Properties();
+            runtimeConfig.put("host", monitor.getHost());
+            runtimeConfig.put("port", Integer.toString(monitor.getPort()));
+            runtimeConfig.store(writer, null);
+            log.info("Writing runtime host: " + monitor.getHost() + " port: " + monitor.getPort());
+            return runtimeConfigFile;
+        } catch (Exception ex) {
+            log.warn("Failed to write run time config!", ex);
+        }
+        return null;
     }
 
 }

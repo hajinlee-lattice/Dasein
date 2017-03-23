@@ -16,6 +16,7 @@ public enum PythonContainerProperty {
     DATAPROFILE, //
     CONFIGMETADATA, //
     VERSION, //
-    SWLIBARTIFACT
+    SWLIBARTIFACT, //
+    RUNTIME_CONFIG
 
 }

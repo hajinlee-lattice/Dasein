@@ -63,7 +63,7 @@ public class PythonReducer extends Reducer<Text, Text, NullWritable, NullWritabl
 
         log.info("Aggregating " + key.toString() + " from " + inputFiles.size() + " files");
         try {
-            aggregator.aggregate(inputFiles, config);
+            aggregator.aggregate(inputFiles, config, context);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_12011, e, new String[] { targetFile + " aggregation failed" });
         }

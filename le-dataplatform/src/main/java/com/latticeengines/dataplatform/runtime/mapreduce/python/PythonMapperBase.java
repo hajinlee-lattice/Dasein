@@ -13,6 +13,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.yarn.ProgressMonitor;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.domain.exposed.modeling.Classifier;
@@ -24,6 +25,7 @@ public abstract class PythonMapperBase extends Mapper<LongWritable, Text, Text, 
     private Classifier classifier;
     private String hdfsOutputDir;
     private PythonInvoker invoker;
+    private ProgressMonitor monitor;
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
@@ -33,7 +35,10 @@ public abstract class PythonMapperBase extends Mapper<LongWritable, Text, Text, 
         hdfsOutputDir = addUniqueOutputDir();
 
         setupClassifier(context, classifier);
-        invoker = new PythonInvoker(classifier);
+        monitor = new ProgressMonitor(context);
+        String runtimeConfigFile = PythonMRUtils.getRuntimeConfig(config, monitor);
+        invoker = new PythonInvoker(classifier, runtimeConfigFile);
+        monitor.start();
     }
 
     public abstract void setupClassifier(Context context, Classifier classifier) throws IOException,
@@ -43,11 +48,14 @@ public abstract class PythonMapperBase extends Mapper<LongWritable, Text, Text, 
     public void run(Context context) throws IOException, InterruptedException {
         log.info("Setting up environment to launch Python process");
         setup(context);
+        try {
+            invoker.callLauncher(config);
+            writeToContext(context);
+            log.info("Writing to context after Python process completed");
+        } finally {
+            monitor.stop();
+        }
 
-        invoker.callLauncher(config);
-
-        log.info("Writing to context after Python process completed");
-        writeToContext(context);
     }
 
     public abstract void writeToContext(Context context) throws IOException, InterruptedException;

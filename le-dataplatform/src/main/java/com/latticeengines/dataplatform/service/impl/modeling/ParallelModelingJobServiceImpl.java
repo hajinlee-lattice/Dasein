@@ -51,6 +51,9 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
+    @Value("${dataplatform.yarn.job.runtime.config}")
+    private String runtimeConfig;
+
     @Autowired
     private VersionManager versionManager;
 
@@ -107,6 +110,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
         properties.put(PythonMRProperty.DEBUG.name(), debug);
         properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
+        properties.put(PythonContainerProperty.RUNTIME_CONFIG.name(), runtimeConfig);
 
         return super.submitMRJob(PythonMRJob.PYTHON_MR_JOB, properties);
     }

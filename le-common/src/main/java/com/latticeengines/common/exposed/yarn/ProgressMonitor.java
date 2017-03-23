@@ -13,6 +13,8 @@ import java.util.concurrent.Executors;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.springframework.yarn.am.allocate.ContainerAllocator;
 
 public class ProgressMonitor {
@@ -29,8 +31,30 @@ public class ProgressMonitor {
 
     private ExecutorService executor;
 
+    @SuppressWarnings("rawtypes")
+    private Mapper.Context mapperContext;
+
+    @SuppressWarnings("rawtypes")
+    private Reducer.Context reducerContext;
+
     public ProgressMonitor(ContainerAllocator allocator) {
         this.allocator = allocator;
+        init();
+    }
+
+    @SuppressWarnings("rawtypes")
+    public ProgressMonitor(Mapper.Context mapperContext) {
+        this.mapperContext = mapperContext;
+        init();
+    }
+
+    @SuppressWarnings("rawtypes")
+    public ProgressMonitor(Reducer.Context reducerContext) {
+        this.reducerContext = reducerContext;
+        init();
+    }
+
+    private void init() {
         int attempt = 1;
         while (attempt <= MAX_ATTEMPTS) {
             try {
@@ -71,8 +95,8 @@ public class ProgressMonitor {
                             setProgress(progress);
                         }
 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Setting application progress to: " + progress);
+                        if (log.isInfoEnabled()) {
+                            log.info("Setting application progress to: " + progress);
                         }
                         connectionSocket.close();
                     } catch (Exception e) {
@@ -103,7 +127,13 @@ public class ProgressMonitor {
     private void setProgress(float progress) {
         this.progress = progress;
         // Allocator reports progress asynchronously to RM through heart beat
-        allocator.setProgress(progress);
+        if (allocator != null) {
+            allocator.setProgress(progress);
+        } else if (mapperContext != null) {
+            mapperContext.progress();
+        } else {
+            reducerContext.progress();
+        }
     }
 
     public float getProgress() {

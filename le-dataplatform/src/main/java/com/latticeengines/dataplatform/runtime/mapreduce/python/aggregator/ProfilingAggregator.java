@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Reducer.Context;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -10,8 +11,9 @@ import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 
 public abstract class ProfilingAggregator implements FileAggregator {
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public void aggregate(List<String> localPaths, Configuration config) throws Exception {
+    public void aggregate(List<String> localPaths, Configuration config, Context context) throws Exception {
         aggregateToLocal(localPaths);
         copyToHdfs(config);
     }

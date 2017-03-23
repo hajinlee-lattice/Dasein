@@ -83,6 +83,8 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
 
         String metadataKey = PythonContainerProperty.METADATA_CONTENTS.name();
         config.set(metadataKey, properties.getProperty(metadataKey));
+        String runtimeConfigKey = PythonContainerProperty.RUNTIME_CONFIG.name();
+        config.set(runtimeConfigKey, properties.getProperty(runtimeConfigKey));
 
         String jobTypeKey = MapReduceProperty.JOB_TYPE.name();
         config.set(jobTypeKey, properties.getProperty(jobTypeKey));
