@@ -42,11 +42,12 @@
                         ng-class="{
                             'has-highlight': attribute.HighlightHighlighted,
                             'no-highlight': !attribute.HighlightHighlighted,
-                            'no-highlights': highlightAttributes.length == 0
+                            'no-highlights': highlightAttributes.length == 0,
+                            'ignore-ngclick': vm.section !== 'segment.analysis'
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
                     <div class="column label" title="{{attribute.DisplayName}}">
-                        <input ng-model="vm.segmentAttributeInput[attribute.FieldName]" ng-checked="vm.segmentAttributeInput[attribute.FieldName]" name="{{attribute.FieldName}}" id="{{attribute.FieldName}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
+                        <input ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName]" ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName]" name="{{attribute.Attribute || attribute.FieldName}}" id="{{attribute.Attribute || attribute.FieldName}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
                         {{ attribute.DisplayName }}
                     </div>
                     <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>

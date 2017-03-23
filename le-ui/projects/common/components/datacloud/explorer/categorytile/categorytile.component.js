@@ -42,7 +42,7 @@ angular
             vm.categoryClick = function(category, $event) {
                 var target = angular.element($event.target),
                     currentTarget = angular.element($event.currentTarget);
-                if(target.closest("[ng-click]")[0] !== currentTarget[0]) {
+                if(target.closest("[ng-click]:not(.ignore-ngclick)")[0] !== currentTarget[0]) {
                     // do nothing, user is clicking something with it's own click event
                 } else {
                     var category = category || '';

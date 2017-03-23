@@ -639,7 +639,7 @@ angular.module('common.datacloud.explorer', [
 
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
             getHighlightMetadata();
-
+            vm.TileTableItems = {};
         });
     }
 
@@ -817,6 +817,8 @@ angular.module('common.datacloud.explorer', [
                 Object.keys(vm.topAttributes[category].SubCategories).forEach(function(key, index) {
                     items = items.concat(vm.topAttributes[category].SubCategories[key]);
                 });
+            } else if(!subcategory) {
+                items = vm.topAttributes[category].SubCategories['Other'];
             } else {
                 items = vm.topAttributes[category].SubCategories[subcategory];
             }
@@ -872,7 +874,7 @@ angular.module('common.datacloud.explorer', [
 
         var _items = {};
         
-        if (segment && items) { //ben
+        if (segment && items) { 
             var segmented = vm.filter(items, segment, true),
                 other = vm.filter(items, segment, false);
 
@@ -1194,8 +1196,9 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = vm.segmentAttributeInput || {};
     vm.selectSegmentAttribute = function(attribute) {
-        vm.segmentAttributeInput[attribute.FieldName] = !vm.segmentAttributeInput[attribute.FieldName];
-        console.log(vm.segmentAttributeInput);
+        var attributeKey = attribute.Attribute || attribute.FieldName;
+        vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
+        console.log(vm.segmentAttributeInput, attribute);
     }
 
     vm.init();
