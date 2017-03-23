@@ -32,7 +32,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
                 TransformationPipeline.getTransforms(TransformationGroup.STANDARD), SchemaInterpretation.SalesforceLead);
         Table table = executeDataFlow(parameters);
         System.out.println(JsonUtils.serialize(table));
-        Attribute attribute = table.getAttribute("Title_Level");
+        Attribute attribute = table.getAttribute("Industry_Group");
         assertNotEquals(attribute.getDisplayName(), attribute.getName());
         assertNotNull(attribute.getName());
         assertNotNull(attribute.getRTSArguments());
@@ -42,7 +42,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
         assertNotNull(attribute.getCategory());
         assertNotNull(attribute.getDisplayName());
 
-        attribute = table.getAttribute("Domain_Length");
+        attribute = table.getAttribute("ModelAction1");
         assertNotEquals(attribute.getDisplayName(), attribute.getName());
         assertNotNull(attribute.getName());
         assertNotNull(attribute.getRTSArguments());
@@ -55,8 +55,8 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
         Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> datacomposition = table
                 .getRealTimeTransformationMetadata();
         Set<String> fields = datacomposition.getKey().keySet();
-        assertTrue(fields.contains("Domain_Length"));
-        assertTrue(fields.contains("Title_Level"));
+        assertTrue(fields.contains("ModelAction1"));
+        assertTrue(fields.contains("Industry_Group"));
         assertFalse(fields.contains("TitleRole"));
     }
 
@@ -66,7 +66,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
                 TransformationPipeline.getTransforms(TransformationGroup.ALL), SchemaInterpretation.SalesforceLead);
         Table table = executeDataFlow(parameters);
         System.out.println(JsonUtils.serialize(table));
-        Attribute attribute = table.getAttribute("Title_Level");
+        Attribute attribute = table.getAttribute("Industry_Group");
         assertNotEquals(attribute.getDisplayName(), attribute.getName());
         assertNotNull(attribute.getName());
         assertNotNull(attribute.getRTSArguments());
@@ -90,7 +90,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
                 .getRealTimeTransformationMetadata();
         Set<String> fields = datacomposition.getKey().keySet();
         assertTrue(fields.contains("TitleRole"));
-        assertTrue(fields.contains("Title_Level"));
+        assertTrue(fields.contains("Industry_Group"));
     }
 
     @Override
