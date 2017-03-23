@@ -80,7 +80,7 @@ public class FileAggregatorUnitTestNG {
 
         ModelPickleAggregator aggregator = new ModelPickleAggregator();
         try {
-            aggregator.aggregate(new ArrayList<String>(), config);
+            aggregator.aggregate(new ArrayList<String>(), config, null);
         } catch (Exception e) {
             // ignore invoker exception
         }
