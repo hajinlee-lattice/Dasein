@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.service.impl.RegisterAccountMasterMetadataTableTestNG;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 
 public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
@@ -27,11 +28,15 @@ public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
+    @Autowired
+    private RegisterAccountMasterMetadataTableTestNG registerAccountMasterMetadataTableTestNG;
+
     @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
         TABLE_1.setName(TABLE1);
+        registerAccountMasterMetadataTableTestNG.registerMetadataTable();
     }
 
     @Test(groups = "functional")
