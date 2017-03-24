@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -34,6 +37,8 @@ import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableFutureTask;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.modeling.ModelExtractor;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -96,11 +101,17 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
+    @VisibleForTesting
     @Value("${scoringapi.scoreartifact.cache.maxsize}")
-    private int scoreArtifactCacheMaxSize;
+    int scoreArtifactCacheMaxSize;
 
+    @VisibleForTesting
     @Value("${scoringapi.scoreartifact.cache.expiration.time}")
-    private int scoreArtifactCacheExpirationTime;
+    int scoreArtifactCacheExpirationTime;
+
+    @VisibleForTesting
+    @Value("${scoringapi.scoreartifact.cache.refresh.time:120}")
+    int scoreArtifactCacheRefreshTime;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -169,6 +180,11 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public Fields getModelFields(CustomerSpace customerSpace, String modelId) {
         return getModelFields(customerSpace, modelId, null);
+    }
+
+    @VisibleForTesting
+    LoadingCache<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts> getScoreArtifactCache() {
+        return scoreArtifactCache;
     }
 
     @Override
@@ -263,7 +279,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         fieldList.add(field);
     }
 
-    private ModelSummary getModelSummary(CustomerSpace customerSpace, String modelId) {
+    @VisibleForTesting
+    ModelSummary getModelSummary(CustomerSpace customerSpace, String modelId) {
         ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
         if (modelSummary == null) {
             throw new ScoringApiException(LedpCode.LEDP_31102, new String[] { modelId });
@@ -273,7 +290,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return modelSummary;
     }
 
-    private List<BucketMetadata> getBucketMetadata(CustomerSpace customerSpace, String modelId) {
+    @VisibleForTesting
+    List<BucketMetadata> getBucketMetadata(CustomerSpace customerSpace, String modelId) {
         List<BucketMetadata> bucketMetadataList = internalResourceRestApiProxy.getUpToDateABCDBuckets(modelId,
                 customerSpace);
         if (bucketMetadataList == null) {
@@ -574,10 +592,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 .getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
     }
 
-    private void instantiateCache() {
+    void instantiateCache() {
         log.info("Instantiating score artifact cache with max size " + scoreArtifactCacheMaxSize);
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         scoreArtifactCache = CacheBuilder.newBuilder().maximumSize(scoreArtifactCacheMaxSize)
                 .expireAfterWrite(scoreArtifactCacheExpirationTime, TimeUnit.DAYS)
+                .refreshAfterWrite(scoreArtifactCacheRefreshTime, TimeUnit.SECONDS)
                 .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
                     @Override
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
@@ -590,7 +610,33 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         }
                         return artifact;
                     }
+
+                    @Override
+                    public ListenableFuture<ScoringArtifacts> reload(AbstractMap.SimpleEntry<CustomerSpace, String> key,
+                            ScoringArtifacts oldModelSummaryArtifacts) {
+                        if (log.isInfoEnabled()) {
+                            log.info("Reload model artifacts for: " + key.getKey());
+                        }
+                        ListenableFutureTask<ScoringArtifacts> task = ListenableFutureTask
+                                .create(new Callable<ScoringArtifacts>() {
+                                    @Override
+                                    public ScoringArtifacts call() {
+                                        ModelSummary modelSummary = getModelSummary(key.getKey(), key.getValue());
+                                        List<BucketMetadata> bucketMetadataList = getBucketMetadata(key.getKey(),
+                                                key.getValue());
+                                        oldModelSummaryArtifacts.setBucketMetadataList(bucketMetadataList);
+                                        oldModelSummaryArtifacts.setModelSummary(modelSummary);
+                                        return oldModelSummaryArtifacts;
+                                    }
+                                });
+                        if (log.isInfoEnabled()) {
+                            log.info("Reload model artifacts completed for: " + key.getKey());
+                        }
+                        executorService.execute(task);
+                        return task;
+                    }
                 });
+
     }
 
     @Override

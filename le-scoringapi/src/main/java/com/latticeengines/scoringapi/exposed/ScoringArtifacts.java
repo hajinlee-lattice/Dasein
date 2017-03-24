@@ -14,7 +14,7 @@ import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
 public class ScoringArtifacts {
 
-    private final ModelSummary modelSummary;
+    private ModelSummary modelSummary;
     private final ModelType modelType;
     private final DataComposition dataScienceDataComposition;
     private final DataComposition eventTableDataComposition;
@@ -23,7 +23,7 @@ public class ScoringArtifacts {
     private final File modelArtifactsDir;
     private final Map<String, FieldSchema> fieldSchemas;
     private final String modelJsonType;
-    private final List<BucketMetadata> bucketMetadataList;
+    private List<BucketMetadata> bucketMetadataList;
 
     public ScoringArtifacts(ModelSummary modelSummary, //
             ModelType modelType, DataComposition dataScienceDataComposition, //
@@ -82,6 +82,14 @@ public class ScoringArtifacts {
 
     public List<BucketMetadata> getBucketMetadataList() {
         return bucketMetadataList;
+    }
+
+    public void setModelSummary(ModelSummary modelSummary) {
+        this.modelSummary = modelSummary;
+    }
+
+    public void setBucketMetadataList(List<BucketMetadata> bucketMetadataList) {
+        this.bucketMetadataList = bucketMetadataList;
     }
 
 }
