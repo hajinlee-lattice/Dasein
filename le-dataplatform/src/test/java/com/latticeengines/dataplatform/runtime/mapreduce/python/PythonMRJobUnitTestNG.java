@@ -50,6 +50,7 @@ public class PythonMRJobUnitTestNG {
         property.put(PythonMRProperty.PYTHONIOENCODING.name(), "UTF-8");
         property.put(PythonMRProperty.SHDP_HD_FSWEB.name(), "${hadoop.fs.web.defaultFS}");
         property.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
+        property.put(PythonContainerProperty.RUNTIME_CONFIG.name(), "runtimeconfig.properties");
 
         job = Job.getInstance();
 
