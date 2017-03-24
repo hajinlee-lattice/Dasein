@@ -273,12 +273,23 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         if (success && !(source instanceof TableSource)) {
             try {
                 // register hive table
-                hiveTableService.createTable(source.getSourceName(), version);
+                createSourceHiveTable(source, version);
             } catch (Exception e) {
                 getLogger().error("Failed to create hive table.", e);
             }
         }
         return success;
+    }
+
+    protected void createSourceHiveTable(Source source, String version) {
+        // register hive table
+        if (source instanceof TableSource) {
+            TableSource tableSource = (TableSource) source;
+            hiveTableService.createTable(tableSource.getTable().getName(), tableSource.getCustomerSpace(),
+                    tableSource.getTable().getNamespace());
+        } else {
+            hiveTableService.createTable(source.getSourceName(), version);
+        }
     }
 
     protected boolean saveSourceVersionWithoutHive(TransformationProgress progress, Schema schema, Source source,
