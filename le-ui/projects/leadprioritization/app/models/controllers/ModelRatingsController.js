@@ -311,7 +311,6 @@ angular.module('lp.models.ratings', [
         vm.historicalBuckets = ordered;
 
         
-
         // Set value for total leads in set
         // This will need to get changed when we're saving configurations
         vm.historyTotalLeads = pluckDeepKey("num_leads", vm.historicalBuckets);

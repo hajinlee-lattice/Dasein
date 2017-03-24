@@ -39,7 +39,7 @@ angular.module('mainApp.models.modals.DeleteSegmentModal', [
         updateAsDeletedSegment(vm.segmentName);
     };
 
-    function updateAsDeletedModel(segmentName) {
+    function updateAsDeletedSegment(segmentName) {
         $("#deleteSegmentError").hide();
         SegmentService.DeleteSegment(segmentName).then(function(result) {
             if (result != null && result.success === true) {

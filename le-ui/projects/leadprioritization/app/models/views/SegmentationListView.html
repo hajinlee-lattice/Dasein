@@ -6,11 +6,12 @@
 
 
                 <li
-                    ng-click="tileClick($event)" 
+                    ng-repeat="segment in vm.segments"
+                    ng-click="vm.tileClick($event, segment.name)" 
                     ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
                 >
                     <div class="tile-header" ng-if="!vm.editSegment">
-                        <h2 title="{{vm.segments.name}}">{{vm.segments.name | limitTo: 36 }}{{vm.segments.name.length > 36 ? '&hellip;' : ''}}</h2>
+                        <h2 title="{{segment.name}}">{{segment.name | limitTo: 36 }}{{segment.name.length > 36 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
                             <button 
                                     type="button"
@@ -19,15 +20,15 @@
                                 <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
                             </button>
                             <ul class="model-menu" ng-if="showCustomMenu">
-                                <li data-ng-click="editSegmentClick($event)">
+                                <li data-ng-click="vm.editSegmentClick($event, segment.name)">
                                     <a href="javascript:void(0)">Edit</a>
                                     <i class="fa fa-trash"></i>
                                 </li>
-                                <li data-ng-click="duplicateSegmentClick($event)">
+                                <li data-ng-click="vm.duplicateSegmentClick($event, segment.name)">
                                     <a href="javascript:void(0)">Duplicate</a>
                                     <i class="fa fa-trash"></i>
                                 </li>
-                                <li data-ng-click="showDeleteSegmentModal($event)">
+                                <li data-ng-click="vm.showDeleteSegmentModal($event, segment.name)">
                                     <a href="javascript:void(0)">Delete</a>
                                     <i class="fa fa-trash"></i>
                                 </li>
@@ -35,11 +36,9 @@
                         </div>
                     </div>
                     <div class="tile-body" ng-if="!vm.editSegment">
-                        <p title="{{vm.segments.description}}" ng-if="vm.segments.description != null">{{vm.segments.description | limitTo: 36 }}{{vm.segments.description.length > 240 ? '&hellip;' : ''}}</p>
-                        <p ng-if="vm.segments.description === null"><button class="button link-button" data-ng-click="editSegmentClick($event)">Add description</button></p>
+                        <p title="{{segment.description}}" ng-if="segment.description != null">{{segment.description | limitTo: 36 }}{{segment.description.length > 240 ? '&hellip;' : ''}}</p>
+                        <p ng-if="segment.description === null"><button class="button link-button" data-ng-click="vm.editSegmentClick($event, segment)">Add description</button></p>
                     </div>
-
-
 
                     <div class="edit-form" ng-if="vm.editSegment">
                         <div class="form-group">
@@ -77,16 +76,13 @@
                         </div>
                     </div>
 
-
-
-                    <div class="meta-data">
+                    <div class="meta-data" ng-if="!vm.editSegment">
                         <dl class="stats">
                             <dt>Accounts</dt>
-                            <dd class="small">{{vm.segments.segment_properties[0].metadataSegmentProperty.value}}</dd>
+                            <dd class="small">{{segment.segment_properties[0].metadataSegmentProperty.value}}</dd>
                         </dl>
                     </div>
                 </li>
-
 
                 <li class="no-style">
                     <a

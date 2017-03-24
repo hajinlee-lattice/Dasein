@@ -3,45 +3,8 @@ angular.module('lp.models.segments', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.modals.DeleteSegmentModal'
 ])
-.controller('SegmentationListController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, ModelStore, SegmentsList, SegmentService) {
-
-    var DummySegment = {
-  "name": "Test",
-  "description": null,
-  "updated": 1490197173235,
-  "created": 1490197173235,
-  "restriction": null,
-  "display_name": "Test",
-  "simple_restriction": {
-    "any": [],
-    "all": [
-      {
-        "bucketRestriction": {
-          "lhs": {
-            "columnLookup": {
-              "column_name": "TechIndicator_AdRoll",
-              "object_type": "BucketedAccountMaster"
-            }
-          },
-          "range": {
-            "min": "Yes",
-            "max": "Yes",
-            "is_null_only": false
-          }
-        }
-      }
-    ]
-  },
-  "segment_properties": [
-    {
-      "metadataSegmentProperty": {
-        "option": "NumAccounts",
-        "value": "1435"
-      }
-    }
-  ]
-}
+.controller('SegmentationListController', function ($scope, $rootScope, $element, $state, $stateParams, $timeout, 
+    ResourceUtility, Model, ModelStore, SegmentsList, DeleteSegmentModal, SegmentService) {
 
     var vm = this;
     angular.extend(vm, {
@@ -49,7 +12,7 @@ angular.module('lp.models.segments', [
         tenantName: $stateParams.tenantName,
         model: Model,
         ResourceUtility: ResourceUtility,
-        segments: DummySegment,
+        segments: SegmentsList,
         editSegment: false,
         showCustomMenu: false
     });
@@ -57,9 +20,6 @@ angular.module('lp.models.segments', [
     vm.init = function() {
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
-        $scope.nameStatus = {
-            editing: false
-        };
 
         console.log(vm.segments);
     
@@ -67,38 +27,24 @@ angular.module('lp.models.segments', [
 
     vm.init();
 
-    vm.customMenuClick = function ($event) {
-        if ($event != null) {
-            $event.stopPropagation();
-        }
-        
-        $scope.showCustomMenu = !$scope.showCustomMenu;
+    vm.customMenuClick = function ($event) { 
 
-        if ($scope.showCustomMenu) {
-            $(document).bind('click', function(event){
-                var isClickedElementChildOfPopup = $element
-                    .find(event.target)
-                    .length > 0;
-
-                if (isClickedElementChildOfPopup)
-                    return;
-
-                $scope.$apply(function(){
-                    $scope.showCustomMenu = false;
-                    $(document).unbind(event);
-                });
-            });
-        }
-    };
-
-    vm.tileClick = function ($event) {
-        $event.preventDefault();
-        console.log("segment");
-    };
-
-    vm.editSegmentClick = function($event){
         $event.stopPropagation();
-        console.log("edit");
+
+    };
+
+    vm.tileClick = function ($event, segmentName) {
+
+        $event.preventDefault();
+        $state.go('home.model.analysis', segmentName, { reload: true } );
+
+    };
+
+    vm.editSegmentClick = function($event, segmentName){
+        $event.stopPropagation();
+        
+        console.log($event.currentTarget);
+
         vm.editSegment = true;
     };
 

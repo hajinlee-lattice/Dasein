@@ -133,7 +133,7 @@ Should be incorporated across PD and LP (models list, campaigns list).
         background-color: #fff;
         border-style: solid;
         border-color: #d0d0d0;
-        border-top-color: #2493eb;
+        border-top-color: #457eba;
         border-width: 8px 1px 1px;
         border-top-right-radius: 4px;
         border-top-left-radius: 4px;
@@ -141,8 +141,8 @@ Should be incorporated across PD and LP (models list, campaigns list).
         border-bottom-left-radius: 6px;
         &:hover {
             transition: all 0ms ease 0s;
-            border-color: #32a3fd;
-            border-top-color: #2493eb;
+            border-color: #457eba;
+            border-top-color: #457eba;
             cursor: pointer;
         }
         &.no-style {
