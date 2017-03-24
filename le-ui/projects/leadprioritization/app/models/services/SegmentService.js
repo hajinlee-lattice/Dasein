@@ -1,7 +1,28 @@
 angular
 .module('lp.models.segments')
+.service('SegmentStore', function() {
+    this.segments = [];
+
+    this.setSegments = function(segments) {
+        this.segments = segments;
+    };
+
+    this.getSegments = function() {
+        return this.segments;
+    };
+
+    this.getSegmentByName = function(segmentName) {
+        for (var i = 0; i < this.segments.length; i++) {
+            var segment = this.segments[i];
+            if (segment.name === segmentName) {
+                return segment;
+            }
+        }
+
+        return null;
+    };
+})
 .service('SegmentService', function($http, $q, $state) {
-    
 
     this.GetSegments = function() {
         var deferred = $q.defer(),

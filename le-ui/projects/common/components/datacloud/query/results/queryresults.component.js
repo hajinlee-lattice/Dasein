@@ -9,8 +9,8 @@ angular.module('common.datacloud.queryresults', [])
         list: [],
         columns: Columns,
         search: null,
-        sortBy: Columns[0].key,
-        context: $state.current.name.split('.').reverse()[0]
+        sortBy: null,
+        context: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1)
     });
 
     vm.clearSearch = function() {

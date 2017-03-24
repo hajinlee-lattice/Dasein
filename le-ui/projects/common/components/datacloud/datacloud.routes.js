@@ -218,7 +218,14 @@ angular
             params: {
                 segmentName: null
             },
-            resolve: DataCloudResolve,
+            resolve: angular.extend(DataCloudResolve, {
+                QueryRestriction: ['$stateParams', 'QueryStore', 'SegmentStore', function($stateParams, QueryStore, SegmentStore) {
+                    var segment = SegmentStore.getSegmentByName($stateParams.segmentName);
+                    QueryStore.setSegmentAndRestriction(segment);
+
+                    return QueryStore.getRestriction();
+                }]
+            }),
             redirectTo: 'home.model.analysis.explorer',
             views: {
                 "summary@": {
@@ -228,14 +235,8 @@ angular
                 }
             }
         })
-        .state('home.model.analysis.explorer', {
+        .state('home.model.analysis.explorer', { // no view, just puts attributes and query under same parent state
             url: '/explorer',
-            resolve: {
-                QueryRestriction: function(QueryStore, $stateParams) {
-                    QueryStore.loadRestrictions();
-                    return QueryStore.getRestrictions($stateParams.segmentName);
-                }
-            },
             redirectTo: 'home.model.analysis.explorer.attributes'
         })
         .state('home.model.analysis.explorer.attributes', {
@@ -298,12 +299,12 @@ angular
                     resolve: {
                         Columns: function ($q, QueryStore) {
                             var deferred = $q.defer();
-                            deferred.resolve(QueryStore.getAccountColumns());
+                            deferred.resolve([]);
                             return deferred.promise;
                         },
                         Count: function ($q, QueryStore) {
                            var deferred = $q.defer();
-                           deferred.resolve(QueryStore.getAccountCount());
+                           deferred.resolve(QueryStore.getCount('accounts'));
                            return deferred.promise;
                         }
                     },
@@ -324,12 +325,12 @@ angular
                     resolve: {
                         Columns: function ($q, QueryStore) {
                             var deferred = $q.defer();
-                            deferred.resolve(QueryStore.getContactColumns());
+                            deferred.resolve([]);
                             return deferred.promise;
                         },
                         Count: function ($q, QueryStore) {
                            var deferred = $q.defer();
-                           deferred.resolve(QueryStore.getContactCount());
+                           deferred.resolve(QueryStore.getCount('contacts'));
                            return deferred.promise;
                         }
                     },
