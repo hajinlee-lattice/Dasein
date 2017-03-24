@@ -84,15 +84,13 @@ public class ModelRetrieverUnitTestNG {
         Assert.assertTrue(sa.getModelSummary().getStatus() == ModelSummaryStatus.ACTIVE);
         AbstractMap.SimpleEntry<CustomerSpace, String> entry = new AbstractMap.SimpleEntry<CustomerSpace, String>(space,
                 "modelId");
-        ScoringArtifacts scoringArtifacts = cache.getUnchecked(entry);
+        ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
         Assert.assertNotNull(scoringArtifacts);
-        System.out.println(scoringArtifacts.getModelSummary().getStatus());
-        System.out.println(cache.asMap());
         Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 1);
 
         Thread.sleep(2000);
         Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 1);
-        scoringArtifacts = cache.getUnchecked(entry);
+        scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
         Assert.assertNotNull(scoringArtifacts);
         Assert.assertEquals(scoringArtifacts.getModelSummary().getStatus(), ModelSummaryStatus.INACTIVE);
         Assert.assertNotNull(scoringArtifacts.getBucketMetadataList());
