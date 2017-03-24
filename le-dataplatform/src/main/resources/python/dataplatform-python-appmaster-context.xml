@@ -6,6 +6,7 @@
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
+    <!-- Please do not change taskScheduler and taskExecutor here, otherwise it would case race condition -->
     <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
     <bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
     <bean id="yarnEventPublisher" class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
