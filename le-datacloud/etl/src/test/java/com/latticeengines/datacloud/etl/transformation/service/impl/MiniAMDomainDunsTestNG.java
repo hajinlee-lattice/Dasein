@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MiniAMDomainDunsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MiniAMDomainDunsInitConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
@@ -76,6 +77,8 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
             List<String> baseSourcesStep1 = new ArrayList<String>();
             baseSourcesStep1.add(baseSource.getSourceName());
             step1.setBaseSources(baseSourcesStep1);
+            step1.setTargetVersion("2017-01-01_21-50-34_UTC");
+            step1.setTargetSource(targetSourceName);
             step1.setTransformer("miniDnbAMDomainDunsTransformer");
             String confParamStr1 = getMiniAMDomainDunsInitConfig();
             step1.setConfiguration(confParamStr1);
@@ -85,11 +88,13 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
             List<String> baseSourcesStep2 = new ArrayList<String>();
             List<Integer> inputSteps = new ArrayList<Integer>();
             inputSteps.add(0);
-            step2.setInputSteps(inputSteps);
+            // step2.setInputSteps(inputSteps);
+            step2.setStepType(TransformationStepConfig.ITERATIVE);
             step2.setTargetSource(targetSourceName);
             step2.setTransformer("miniAMDomainDunsTransformer");
             String confParamStr2 = getMiniDnbAMDomainDunsConfig();
             step2.setConfiguration(confParamStr2);
+            baseSourcesStep2.add(targetSourceName);
             baseSourcesStep2.add(baseSourceDnbSeed.getSourceName());
             baseSourcesStep2.add(baseSourceAccountMasterSeed.getSourceName());
             step2.setBaseSources(baseSourcesStep2);
@@ -133,9 +138,11 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
-        Object[] expectedData = new Object[] { "dom1.com", "123456789", "dom2.com", "234567890", "dom3.com",
-                "3456789012", "dom4.com", "4567890123", "dom5.com", "6789012345", "111111111", "222222222",
-                "333333333" };
+        Object[] expectedData = new Object[] { "yahoo.com", "234567890", "adobe.com", "citrix.com", "google.com",
+                "107465839", "145789000", "345678911", "901234567", "snapchat.com", "microsoft.com", "oracle.com",
+                "4567890123", "890123456", "987624588", "intel.com", "paypal.com", "salesforce.com", "576878992",
+                "909090909", "kaggle.com", "krux.com", "123456789", "amazon.com", "facebook.com", "visa.com",
+                "333333333", "3456789012", "121459889", "192093993", "890898989" };
         Set<Object> expectedSet = new HashSet<Object>(Arrays.asList(expectedData));
         while (records.hasNext()) {
             GenericRecord record = records.next();
@@ -150,16 +157,27 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
             log.info("Type : " + type + "Value : " + value);
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 13);
+        Assert.assertEquals(rowCount, 31);
     }
 
     private void prepareGoldenDataSetSeed() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("Domain", String.class));
         columns.add(Pair.of("DUNS", String.class));
-        Object[][] data = new Object[][] { { "dom1.com", "123456789" }, { "dom2.com", "234567890" },
-                { "dom3.com", "3456789012" }, { "dom4.com", "4567890123" }, { "dom5.com", "234567890" },
-                { "dom3.com", "6789012345" } };
+        columns.add(Pair.of("Name", String.class));
+        columns.add(Pair.of("City", String.class));
+        columns.add(Pair.of("State", String.class));
+        columns.add(Pair.of("Country", String.class));
+        Object[][] data = new Object[][] { { "google.com", "123456789", "Google", "Mountain View", "California", "United States"}, 
+                { null, "234567890", "Apple", "Cupertino", "California", "United States" },
+                { "intel.com", "3456789012", "Intel", "Santa Clara", "California", "United States" },
+                { "facebook.com", "4567890123", "Facebook", "Menlo Park", "California", "United States" },
+                { "amazon.com", "234567890", "Amazon", "Seattle", "Washington", "United States" },
+                { "salesforce.com", null, "Salesforce", "San Francisco", "California", "United States" },
+                { null, null, "Visa", "Foster city", "California", "United States" },
+                { "citrix.com", null, "Citrix", "Santa Clara", "California", "United States" },
+                { null, "987624588", "Nvedia", "Santa Clara", "California", "United States" },
+                { "krux.com", "107465839", "Krux", "San Francisco", "California", "United States" } };
         uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data);
     }
 
@@ -169,11 +187,18 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
         columns.add(Pair.of("DUNS", String.class));
         columns.add(Pair.of("GU", String.class));
         columns.add(Pair.of("DU", String.class));
-        Object[][] data = new Object[][] { { "dom1.com", "123456789", null, "123456712" },
-                { "dom2.com", "234567890", "234567811", "234567812" },
-                { "dom3.com", "3456789012", "3456789011", "3456789022" },
-                { "dom21.com", "8901234567", "8901234533", "8901234522" },
-                { "dom22.com", "9012345678", null, "9012345611" } };
+        Object[][] data = new Object[][] { { "kaggle.com", "123456789", null, "123456712" },
+                { "visa.com", "234567890", "234567811", "234567812" },
+                { "snapchat.com", "345678911", "345678912", "345678902" },
+                { "yahoo.com", "890123456", "890123453", "890123452" },
+                { "google.com", "901234567", null, "901234561" },
+                { "adobe.com", "121459889", "345723848", "123456712" },
+                { "paypal.com", "192093993", "234567811", "234567812" },
+                { "oracle.com", "145789000", null, "121211212" }, { "datos.com", "910329039", null, null },
+                { "microsoft.com", "890898989", "234567811", "234567811" },
+                { "data.com", "787998900", "423500012", "234567811" }, { "yahoo.com", "121459889", null, null },
+                { "citrix.com", "576878992", "345678912", null }
+        };
 
         uploadBaseSourceData(baseSourceDnbSeed.getSourceName(), baseSourceVersion, columns, data);
     }
@@ -182,15 +207,23 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("DOMAIN", String.class));
         columns.add(Pair.of("Duns", String.class));
-        Object[][] data = new Object[][] { { "dom1.com", "111111111" }, { "dom2.com", "222222222" },
-                { "dom3.com", "333333333" }, { "dom44.com", "888888888" } };
+        Object[][] data = new Object[][] { { "tesla", "111111111" }, { "yelp.com", "222222222" },
+                { "intel.com", "333333333" }, { "netapp.com", "888888888" }, { "paypal.com", "145789000" },
+                { "adobe.com", "909090909" }, { null, "191090190" }, { "zendesk.com", "799090909" },
+                { "infotech.com", "901234561" }, { "kaggle.com", "576878992" }, { "snapchat.com", "121459889" } };
         uploadBaseSourceData(baseSourceAccountMasterSeed.getSourceName(), baseSourceVersion, columns, data);
     }
 
     private String getMiniAMDomainDunsInitConfig() throws JsonProcessingException {
         MiniAMDomainDunsInitConfig conf = new MiniAMDomainDunsInitConfig();
-        conf.setGoldenInputDataSetDomain("Domain");
-        conf.setGoldenInputDataSetDuns("DUNS");
+        // For storing DOMAINS of all golden data sets
+        Map<String, String> goldenDomain = new HashMap<String, String>();
+        goldenDomain.put("GoldenDataSet", "Domain");
+        // For storing DUNS of all golden data sets
+        Map<String, String> goldenDuns = new HashMap<String, String>();
+        goldenDuns.put("GoldenDataSet", "DUNS");
+        conf.setGoldenInputDataSetDomain(goldenDomain);
+        conf.setGoldenInputDataSetDuns(goldenDuns);
         conf.setOutputDataSetType("Type");
         conf.setOutputDataSetValue("Value");
         return om.writeValueAsString(conf);
@@ -198,6 +231,10 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
 
     private String getMiniDnbAMDomainDunsConfig() throws JsonProcessingException {
         MiniAMDomainDunsConfig conf = new MiniAMDomainDunsConfig();
+        IterativeStepConfig.ConvergeOnCount iterateStrategy = new IterativeStepConfig.ConvergeOnCount();
+        iterateStrategy.setIteratingSource(targetSourceName);
+        iterateStrategy.setCountDiff(0);
+        conf.setIterateStrategy(iterateStrategy);
         // For storing DOMAINS of all seeds as {seed, domain_name}
         Map<String, String> domain = new HashMap<String, String>();
         domain.put("DnbSeed", "Domain");
@@ -212,8 +249,8 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
         conf.setDnbInputDataSetDU("DU");
         conf.setSeedInputDataSetDomain(domain);
         conf.setSeedInputDataSetDuns(duns);
-        conf.setMiniInputDataSetDomain("Type");
-        conf.setMiniInputDataSetDuns("Value");
+        conf.setMiniInputDataSetType("Type");
+        conf.setMiniInputDataSetValue("Value");
         conf.setOutputDataSetType("Type");
         conf.setOutputDataSetValue("Value");
         return om.writeValueAsString(conf);
