@@ -7,9 +7,9 @@ angular
             vm:'='
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-        controller: function ($scope, $document, $timeout, $interval, DataCloudStore) {
+        controller: function ($scope, $document, $state, $timeout, $interval, DataCloudStore) {
             var vm = $scope.vm;
-            
+
             angular.extend(vm, {
                 orders: {
                     attributeLookupMode: [ '-Value', 'DisplayName'],
@@ -197,7 +197,7 @@ angular
                     }
                 }
             }
-            
+
             var handleFilterOrder = function(order, sortPrefix) {
                 var sortPrefix = sortPrefix || vm.sortPrefix.replace('+','');
                 if(typeof order === 'object') {
@@ -238,7 +238,7 @@ angular
 
                 return true;
             }
-            
+
             vm.enrichmentsFilter = function() {
                 var filter = {};
 
@@ -286,6 +286,10 @@ angular
                     count = vm.subcategoryCount(category, subcategory);
 
                 return (count ? true : false);
+            }
+
+            vm.refineQuery = function() {
+                $state.go('home.model.analysis.explorer.query');
             }
 
             vm.init_filters();
