@@ -270,16 +270,10 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     protected boolean saveSourceVersion(TransformationProgress progress, Schema schema, Source source, String version,
             String workflowDir) {
         boolean success = saveSourceVersionWithoutHive(progress, schema, source, version, workflowDir);
-        if (success) {
+        if (success && !(source instanceof TableSource)) {
             try {
                 // register hive table
-                if (source instanceof TableSource) {
-                    TableSource tableSource = (TableSource) source;
-                    hiveTableService.createTable(tableSource.getTable().getName(), tableSource.getCustomerSpace(),
-                            tableSource.getTable().getNamespace());
-                } else {
-                    hiveTableService.createTable(source.getSourceName(), version);
-                }
+                hiveTableService.createTable(source.getSourceName(), version);
             } catch (Exception e) {
                 getLogger().error("Failed to create hive table.", e);
             }
