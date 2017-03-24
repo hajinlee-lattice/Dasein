@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {

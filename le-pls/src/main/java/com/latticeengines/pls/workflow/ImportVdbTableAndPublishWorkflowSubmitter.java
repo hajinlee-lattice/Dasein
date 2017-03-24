@@ -1,5 +1,12 @@
 package com.latticeengines.pls.workflow;
 
+import java.util.Date;
+
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -9,12 +16,6 @@ import com.latticeengines.domain.exposed.pls.VdbCreateTableRule;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.leadprioritization.workflow.ImportVdbTableAndPublishWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 @Component
 public class ImportVdbTableAndPublishWorkflowSubmitter extends WorkflowSubmitter {

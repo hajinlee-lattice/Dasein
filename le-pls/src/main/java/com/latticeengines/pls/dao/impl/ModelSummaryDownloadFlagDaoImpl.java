@@ -1,8 +1,9 @@
 package com.latticeengines.pls.dao.impl;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.Table;
 
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
@@ -13,8 +14,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 import com.latticeengines.pls.dao.ModelSummaryDownloadFlagDao;
-
-import javax.persistence.Table;
 
 @Component("modelSummaryDownloadFlagDao")
 public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDownloadFlag> implements ModelSummaryDownloadFlagDao {

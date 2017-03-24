@@ -2,6 +2,8 @@ package com.latticeengines.pls.dao.impl;
 
 import java.util.List;
 
+import javax.persistence.Table;
+
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -13,8 +15,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.ModelSummaryDao;
-
-import javax.persistence.Table;
 
 @Component("modelSummaryDao")
 public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements ModelSummaryDao {

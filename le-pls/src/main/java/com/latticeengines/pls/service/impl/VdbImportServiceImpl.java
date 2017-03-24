@@ -1,5 +1,20 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -19,19 +34,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-
-import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.List;
 
 @Component("vdbImportService")
 public class VdbImportServiceImpl implements VdbImportService {

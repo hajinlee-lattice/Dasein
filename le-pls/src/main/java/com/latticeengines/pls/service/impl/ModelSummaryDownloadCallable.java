@@ -16,8 +16,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;

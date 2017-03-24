@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.wordnik.swagger.annotations.ApiOperation;
+
 import io.swagger.annotations.Api;
 
 @Api(value = "metadatasegments", description = "REST resource for metadata segments")

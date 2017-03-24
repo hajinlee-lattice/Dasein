@@ -271,7 +271,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", enabled = true)
+    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", enabled = false)
     public void retrieveReport() {
         log.info("Retrieving report for modeling ...");
         Job job = restTemplate.getForObject( //
@@ -298,7 +298,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                         .getString(ProvenancePropertyName.TransformationGroupName, null),
                 TransformationGroup.STANDARD.getName());
         assertJobExistsWithModelIdAndModelName(originalModelSummary.getId());
-        inspectOrignialModelSummaryPredictors(originalModelSummary);
+        inspectOriginalModelSummaryPredictors(originalModelSummary);
         assertABCDBucketsCreated(originalModelSummary.getId());
     }
 
@@ -416,7 +416,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                         .getString(ProvenancePropertyName.TransformationGroupName, null),
                 TransformationGroup.STANDARD.getName());
 
-        inspectOrignialModelSummaryPredictors(copiedModelSummary);
+        inspectOriginalModelSummaryPredictors(copiedModelSummary);
         compareRtsScoreWithModeling(copiedModelSummary, 687, secondTenant.getId());
         assertABCDBucketsCreated(copiedModelSummary.getId());
     }
@@ -551,7 +551,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
 
         // Inspect some predictors
-        inspectOrignialModelSummaryPredictors(replacedModelSummary);
+        inspectOriginalModelSummaryPredictors(replacedModelSummary);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummaryForClonedModel", timeOut = 600000)
@@ -753,7 +753,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
-    private void inspectOrignialModelSummaryPredictors(ModelSummary modelSummary) {
+    private void inspectOriginalModelSummaryPredictors(ModelSummary modelSummary) {
         // Inspect some predictors
         String rawModelSummary = modelSummary.getDetails().getPayload();
         JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
