@@ -1,5 +1,21 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_ADDRESS;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CACHE_HIT;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CITY;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CONFIDENCE_CODE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_COUNTRY_CODE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_DUNS;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_MATCH_GRADE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_NAME;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_PHONE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_STATE;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_ZIPCODE;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
@@ -41,22 +57,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_ADDRESS;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CACHE_HIT;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CITY;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CONFIDENCE_CODE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_COUNTRY_CODE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_DUNS;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_MATCH_GRADE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_NAME;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_PHONE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_STATE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_ZIPCODE;
 
 
 @Component("processorContext")

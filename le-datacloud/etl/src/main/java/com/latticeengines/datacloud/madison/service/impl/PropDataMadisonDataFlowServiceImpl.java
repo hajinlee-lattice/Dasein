@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.latticeengines.datacloud.madison.service.PropDataMadisonDataFlowService;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.madison.service.PropDataMadisonDataFlowService;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;

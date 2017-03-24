@@ -2,12 +2,12 @@ package com.latticeengines.datacloud.madison.mbean;
 
 import java.util.concurrent.Callable;
 
-import com.latticeengines.datacloud.madison.service.impl.MadisonLogicDownloadCallable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.madison.service.PropDataMadisonService;
+import com.latticeengines.datacloud.madison.service.impl.MadisonLogicDownloadCallable;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @Component("madisonLogicDownload")

@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.madison.jobs.impl;
 
-import com.latticeengines.datacloud.madison.service.PropDataContext;
-import com.latticeengines.datacloud.madison.service.PropDataMadisonService;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,6 +8,9 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.datacloud.madison.service.PropDataContext;
+import com.latticeengines.datacloud.madison.service.PropDataMadisonService;
 
 @DisallowConcurrentExecution
 @Component("madisonLogicDownloadService")

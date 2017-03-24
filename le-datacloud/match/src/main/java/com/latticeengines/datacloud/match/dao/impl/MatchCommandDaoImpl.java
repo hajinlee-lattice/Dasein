@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.match.dao.impl;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -7,10 +11,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.dao.MatchCommandDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 @Component("matchCommandDao")
 public class MatchCommandDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<MatchCommand>

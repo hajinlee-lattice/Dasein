@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.latticeengines.datacloud.madison.service.PropDataContext;
-import com.latticeengines.datacloud.madison.service.PropDataMadisonDataFlowService;
-import com.latticeengines.datacloud.madison.service.PropDataMadisonService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
@@ -23,6 +20,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.madison.service.PropDataContext;
+import com.latticeengines.datacloud.madison.service.PropDataMadisonDataFlowService;
+import com.latticeengines.datacloud.madison.service.PropDataMadisonService;
 import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;

@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.match.entitymgr;
 
-import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
-
 import java.util.List;
+
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 
 public interface MatchCommandEntityMgr {
 

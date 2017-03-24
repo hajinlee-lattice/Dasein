@@ -6,8 +6,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-import akka.util.Timeout;
-
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
@@ -17,6 +15,8 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+
+import akka.util.Timeout;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
     private final MatchKeyTuple matchKeyTuple;

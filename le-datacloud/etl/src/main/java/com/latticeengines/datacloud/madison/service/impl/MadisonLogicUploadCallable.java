@@ -3,12 +3,12 @@ package com.latticeengines.datacloud.madison.service.impl;
 import java.util.Date;
 import java.util.concurrent.Callable;
 
-import com.latticeengines.datacloud.madison.service.PropDataContext;
-import com.latticeengines.datacloud.madison.service.PropDataMadisonService;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.latticeengines.datacloud.madison.service.PropDataContext;
+import com.latticeengines.datacloud.madison.service.PropDataMadisonService;
 import com.newrelic.api.agent.Trace;
 
 public class MadisonLogicUploadCallable implements Callable<Boolean> {

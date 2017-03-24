@@ -1,9 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.match.entitymgr.MatchCommandEntityMgr;
-import com.latticeengines.datacloud.match.exposed.service.MatchCommandCleaner;
-import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -11,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.List;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.match.entitymgr.MatchCommandEntityMgr;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandCleaner;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 
 @Component("matchCommandCleaner")
 public class MatchCommandCleanerImpl implements MatchCommandCleaner {
