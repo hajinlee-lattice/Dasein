@@ -101,7 +101,7 @@ public class ProgressOrchestrator {
                         log.error("Failed to purge old versions of " + source.getSourceName(), e);
                     }
                 }
-            } else {
+            } else if (dryrun) {
                 try {
                     if (source instanceof DataImportedFromDB) {
                         ArchiveProgress progress = findArchiveProgressToProceed((DataImportedFromDB) source);

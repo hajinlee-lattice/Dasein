@@ -77,6 +77,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Value("${datacloud.match.actor.datasource.dnb.api.call.maxwait}")
     private Integer dnbApiCallMaxWait;
 
+    @Value("${datacloud.dnb.bulk.retry.times}")
+    private int bulkRetryTimes;
+
+    @Value("${datacloud.dnb.bulk.retry.wait.minute}")
+    private long bulkRetryWaitMinute;
+
+    private long bulkRetryWait;
+
     @Autowired
     private DnBRealTimeLookupService dnbRealTimeLookupService;
 
@@ -121,6 +129,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         initDnBDataSourceThreadPool();
         realtimeTimeout = realtimeTimeoutMinute * 60 * 1000;
         bulkTimeout = bulkTimeoutMinute * 60 * 1000;
+        bulkRetryWait = bulkRetryWaitMinute * 60 * 1000;
     }
 
     @PreDestroy
@@ -401,6 +410,17 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                         case IN_PROGRESS:
                         case RATE_LIMITING:
                         case EXCEED_LIMIT_OR_UNAUTHORIZED:
+                            if (submittedReq.getRetryTimes() < bulkRetryTimes && submittedReq.getTimestamp() != null
+                                    && (System.currentTimeMillis()
+                                            - submittedReq.getTimestamp().getTime() >= bulkRetryWait)) {
+                                long mins = (System.currentTimeMillis() - submittedReq.getTimestamp().getTime()) / 60
+                                        / 1000;
+                                log.info(String.format(
+                                        "Bulk match with serviceBatchId = %s was submitted %d minutes ago and hasn't got result back. Resubmit it!",
+                                        submittedReq.getServiceBatchId(), mins));
+                                submittedReq.setRetryTimes(submittedReq.getRetryTimes() + 1);
+                                retryBulkRequest(submittedReq);
+                            }
                             break;
                         default:
                             processBulkMatchResult(submittedReq, false);
@@ -448,9 +468,22 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         }
     }
 
+    private void retryBulkRequest(DnBBatchMatchContext batchContext) {
+        DnBBatchMatchContext retryContext = new DnBBatchMatchContext();
+        retryContext.copyForRetry(batchContext);
+        unsubmittedReqs.add(0, retryContext);
+    }
+
     private void processBulkMatchResult(DnBBatchMatchContext batchContext, boolean success) {
         List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
         for (String lookupRequestId : batchContext.getContexts().keySet()) {
+            String returnAddr = getReqReturnAddr(lookupRequestId);
+            if (returnAddr == null) {
+                log.info(String.format(
+                        "Fail to find return address for lookup request %s. Bulk match request might be retried and response of this request has been sent. Give up!",
+                        lookupRequestId));
+                return;
+            }
             DnBMatchContext context = batchContext.getContexts().get(lookupRequestId);
             if (!success) {
                 context.setDnbCode(batchContext.getDnbCode());
@@ -459,7 +492,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 dnbMatchResultValidator.validate(context);
                 dnbCacheService.addCache(context);
             }
-            String returnAddr = getReqReturnAddr(lookupRequestId);
             removeReq(lookupRequestId);
             sendResponse(lookupRequestId, context, returnAddr);
             dnBMatchHistories.add(new DnBMatchHistory(context));

@@ -57,6 +57,20 @@ public class DnBMatchContext implements Fact, Dimension {
         matchedNameLocation = new NameLocation();
     }
 
+    public void copyMatchInput(DnBMatchContext context) {
+        inputNameLocation = context.getInputNameLocation();
+        inputEmail = context.getInputEmail();
+        hitWhiteCache = context.getHitWhiteCache();
+        hitBlackCache = context.getHitBlackCache();
+        cacheId = context.getCacheId();
+        lookupRequestId = context.getLookupRequestId();
+        matchStrategy = context.getMatchStrategy();
+        logDnBBulkResult = context.getLogDnBBulkResult();
+        patched = context.getPatched();
+        timestamp = context.getTimestamp();     // Used to check timeout for each record in DnB bulk match
+        dataCloudVersion = context.getDataCloudVersion();
+    }
+
     // Used to copy bulk match result. Should not copy dataCloudVersion & dunsInAM
     public void copyMatchResult(DnBMatchContext result) {
         duns = result.getDuns();

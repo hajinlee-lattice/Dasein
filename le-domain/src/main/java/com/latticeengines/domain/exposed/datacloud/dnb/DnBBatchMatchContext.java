@@ -18,8 +18,20 @@ public class DnBBatchMatchContext {
 
     private boolean logDnBBulkResult;
 
+    private int retryTimes = 0;
+
     public DnBBatchMatchContext() {
         contexts = new HashMap<String, DnBMatchContext>();
+    }
+
+    public void copyForRetry(DnBBatchMatchContext batchContext) {
+        logDnBBulkResult = batchContext.getLogDnBBulkResult();
+        retryTimes = 1;
+        for (String lookupRequestId : batchContext.getContexts().keySet()) {
+            DnBMatchContext context = new DnBMatchContext();
+            context.copyMatchInput(batchContext.getContexts().get(lookupRequestId));
+            contexts.put(lookupRequestId, context);
+        }
     }
 
     public String getServiceBatchId() {
@@ -68,6 +80,14 @@ public class DnBBatchMatchContext {
 
     public void setLogDnBBulkResult(boolean logDnBBulkResult) {
         this.logDnBBulkResult = logDnBBulkResult;
+    }
+
+    public int getRetryTimes() {
+        return retryTimes;
+    }
+
+    public void setRetryTimes(int retryTimes) {
+        this.retryTimes = retryTimes;
     }
 
 }
