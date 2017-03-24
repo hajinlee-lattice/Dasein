@@ -15,6 +15,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.GzipUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,7 +151,11 @@ public class LatticeInsightsResource {
             Integer max) {
         List<LeadEnrichmentAttribute> result = getInsightsAttributes(request, attributeDisplayNameFilter, category,
                 subcategory, onlySelectedAttributes, offset, max);
-        writeToGzipStream(response, result);
+        try {
+            GzipUtils.writeToGzipStream(response, result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request,
@@ -287,7 +293,11 @@ public class LatticeInsightsResource {
                     null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
-        writeToGzipStream(response, cube);
+        try {
+            GzipUtils.writeToGzipStream(response, cube);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/cube", //
@@ -308,7 +318,11 @@ public class LatticeInsightsResource {
                     null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
-        writeToGzipStream(response, cube);
+        try {
+            GzipUtils.writeToGzipStream(response, cube);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/topn", //
@@ -384,21 +398,5 @@ public class LatticeInsightsResource {
         }
 
         return allTopNAttributes;
-    }
-
-    // ------------End for statistics---------------------//
-
-    private void writeToGzipStream(HttpServletResponse response, Object output) {
-        try {
-            OutputStream os = response.getOutputStream();
-            response.setHeader("Content-Encoding", "gzip");
-            response.setHeader("Content-Type", "application/json");
-            GzipCompressorOutputStream gzipOs = new GzipCompressorOutputStream(os);
-            OM.writeValue(gzipOs, output);
-            gzipOs.flush();
-            gzipOs.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

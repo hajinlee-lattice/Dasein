@@ -114,8 +114,7 @@ angular.module('lp.apiconsole.APIConsoleService', [
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + accessToken,
-                'ErrorDisplayMethod': 'none',
-                'Accept-Encoding': 'gzip'
+                'ErrorDisplayMethod': 'none'
             }
         })
         .success(function (data, status, headers, config) {

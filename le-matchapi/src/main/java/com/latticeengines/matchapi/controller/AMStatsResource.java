@@ -5,6 +5,7 @@ import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.common.exposed.util.GzipUtils;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +38,11 @@ public class AMStatsResource {
     @ApiOperation(value = "Get account master statistics cube", response = AccountMasterCube.class)
     private void getCube(@RequestBody AccountMasterFactQuery query, HttpServletResponse response) {
         AccountMasterCube cube = accountMasterStatisticsService.query(query);
-        writeToGzipStream(response, cube);
+        try {
+            GzipUtils.writeToGzipStream(response, cube);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @RequestMapping(value = "/topattrs", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -45,18 +50,8 @@ public class AMStatsResource {
     @ApiOperation(value = "Get categorical attribute tree", response = TopNAttributeTree.class)
     private void getTopAttrTree(HttpServletResponse response) {
         TopNAttributeTree tree = accountMasterStatisticsService.getTopAttrTree();
-        writeToGzipStream(response, tree);
-    }
-
-    private void writeToGzipStream(HttpServletResponse response, Object output) {
         try {
-            OutputStream os = response.getOutputStream();
-            response.setHeader("Content-Encoding", "gzip");
-            response.setHeader("Content-Type", "application/json");
-            GzipCompressorOutputStream gzipOs = new GzipCompressorOutputStream(os);
-            OM.writeValue(gzipOs, output);
-            gzipOs.flush();
-            gzipOs.close();
+            GzipUtils.writeToGzipStream(response, tree);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
