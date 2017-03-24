@@ -9,7 +9,8 @@ public enum ProvenancePropertyName {
     WorkflowJobId("Workflow_Job_Id", Long.class), //
     IsV2ProfilingEnabled("Is_V2_Profiling_Enabled", Boolean.class), //
     ConflictWithOptionalRules("Conflict_With_Optional_Rules", Boolean.class), //
-    FuzzyMatchingEnabled("Fuzzy_Matching_Enabled", Boolean.class);
+    FuzzyMatchingEnabled("Fuzzy_Matching_Enabled", Boolean.class), //
+    RefineAndCloneParentModelId("Refine_And_Clone_Parent_Model_Id", String.class);
 
     private String name;
     private Class<?> type;

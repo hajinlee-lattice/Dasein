@@ -104,6 +104,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .sourceSchemaInterpretation(sourceSchemaInterpretation) //
                 .inputProperties(inputProperties) //
                 .trainingTableName(cloneTableName) //
+                // .userId(parameters.getUserId()) //
                 .transformationGroup(transformationGroup) //
                 .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled() || modelSummary
                         .getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled, false)) //
@@ -118,6 +119,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .skipStandardTransform(!parameters.enableTransformation()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, plsFeatureFlagService.isFuzzyMatchEnabled()) //
+                .addProvenanceProperty(ProvenancePropertyName.RefineAndCloneParentModelId, modelSummary.getId()) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .dataCloudVersion(getDataCloudVersion(modelSummary.getDataCloudVersion()))//

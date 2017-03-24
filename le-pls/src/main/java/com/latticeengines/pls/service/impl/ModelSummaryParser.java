@@ -183,6 +183,10 @@ public class ModelSummaryParser {
             configuration.setBoolean(ProvenancePropertyName.ConflictWithOptionalRules,
                     JsonUtils.getOrDefault(eventTableProvenance.get("Conflict_With_Optional_Rules"),
                             Boolean.class, false));
+            configuration.setString(ProvenancePropertyName.RefineAndCloneParentModelId,
+                    JsonUtils.getOrDefault(
+                            eventTableProvenance.get("Refine_And_Clone_Parent_Model_Id"),
+                            String.class, ""));
 
             summary.setModelSummaryConfiguration(configuration);
         }
