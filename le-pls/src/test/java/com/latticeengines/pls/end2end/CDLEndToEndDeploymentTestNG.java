@@ -81,8 +81,6 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         DataPage page = restTemplate.postForObject(String.format("%s/pls/accounts/data/", getRestAPIHostPort()), query,
                 DataPage.class);
         assertEquals(page.getData().size(), 50);
-        assertTrue(page.getMetadata().size() > 0);
-        assertTrue(page.getMetadata().values().stream().anyMatch(c -> c.getColumnName().toUpperCase().contains("NAME")));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "viewAccountsForSegment")
@@ -93,8 +91,6 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         DataPage page = restTemplate.postForObject(String.format("%s/pls/accounts/data/", getRestAPIHostPort()), query,
                 DataPage.class);
         assertEquals(page.getData().size(), 50);
-        assertEquals(page.getMetadata().size(), 1);
-        assertTrue(page.getMetadata().values().stream().anyMatch(c -> c.getColumnName().toUpperCase().contains("NAME")));
 
         long count = restTemplate.postForObject(String.format("%s/pls/accounts/count", getRestAPIHostPort()), query,
                 Long.class);
