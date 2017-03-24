@@ -176,6 +176,7 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
         properties.put(PythonMRProperty.DEBUG.name(), debug);
         properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
+        properties.put(PythonContainerProperty.RUNTIME_CONFIG.name(), "runtimeconfig.properties");
 
         return properties;
     }
