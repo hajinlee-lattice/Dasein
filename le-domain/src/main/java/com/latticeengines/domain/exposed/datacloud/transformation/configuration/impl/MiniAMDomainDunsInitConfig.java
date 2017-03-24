@@ -1,13 +1,15 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MiniAMDomainDunsInitConfig extends TransformerConfig {
     @JsonProperty("GoldenInputDataSetDomain")
-    private String goldenInputDataSetDomain;
+    private Map<String, String> goldenInputDataSetDomain;
 
     @JsonProperty("GoldenInputDataSetDuns")
-    private String goldenInputDataSetDuns;
+    private Map<String, String> goldenInputDataSetDuns;
 
     @JsonProperty("OutputDataSetType")
     private String outputDataSetType;
@@ -15,19 +17,19 @@ public class MiniAMDomainDunsInitConfig extends TransformerConfig {
     @JsonProperty("OutputDataSetValue")
     private String outputDataSetValue;
 
-    public String getGoldenInputDataSetDomain() {
+    public Map<String, String> getGoldenInputDataSetDomain() {
         return goldenInputDataSetDomain;
     }
 
-    public void setGoldenInputDataSetDomain(String goldenInputDataSetDomain) {
+    public void setGoldenInputDataSetDomain(Map<String, String> goldenInputDataSetDomain) {
         this.goldenInputDataSetDomain = goldenInputDataSetDomain;
     }
 
-    public String getGoldenInputDataSetDuns() {
+    public Map<String, String> getGoldenInputDataSetDuns() {
         return goldenInputDataSetDuns;
     }
 
-    public void setGoldenInputDataSetDuns(String goldenInputDataSetDuns) {
+    public void setGoldenInputDataSetDuns(Map<String, String> goldenInputDataSetDuns) {
         this.goldenInputDataSetDuns = goldenInputDataSetDuns;
     }
 
