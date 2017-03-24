@@ -23,8 +23,7 @@ public class MiniAMDomainDunsInitFlow extends ConfigurableFlowBase<MiniAMDomainD
         for (int i = 0; i < parameters.getBaseTables().size(); i++) {
             Node goldenDataSet = addSource(parameters.getBaseTables().get(i));
             // Renaming source name to pipeName to ensure they are consistent
-            String sourceName = goldenDataSet.getIdentifier();
-            goldenDataSet.renamePipe(sourceName);
+            goldenDataSet.renamePipe(parameters.getBaseTables().get(i));
             storeList.add(goldenDataSet);
         }
         Node goldenSetResult = null;
