@@ -36,7 +36,9 @@ angular
             vm.categoryOrderBy = function(test) {
                 return vm.lookupMode 
                     ? [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ]
-                    : [ '-HighlightHighlighted', '-Value' ];
+                    : vm.section == 'analysis' 
+                        ? [ 'Checked', '-HighlightHighlighted', '-Value'  ]
+                        : [ '-HighlightHighlighted', '-Value' ];
             }
 
             vm.categoryClick = function(category, $event) {
