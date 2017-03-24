@@ -49,10 +49,20 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     @Autowired
     YarnConfiguration yarnConfiguration;
 
-    @Deprecated
     @Override
     public String getCurrentVersion(Source source) {
-        return getCurrentVersion(source.getSourceName());
+        String versionFile = hdfsPathBuilder.constructVersionFile(source).toString();
+        int retries = 0;
+        while (retries++ < 3) {
+            try {
+                String version = HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
+                version = version.replace("\n", "");
+                return StringUtils.trim(version);
+            } catch (Exception e) {
+                sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
+            }
+        }
+        throw new RuntimeException("Could not determine the current version of source " + source.getSourceName());
     }
 
     @Override
