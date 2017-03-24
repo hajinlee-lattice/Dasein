@@ -60,7 +60,8 @@ public class ScoreResource extends BaseScoring {
     @RequestMapping(value = "/modeldetails", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get paginated list of models for specified criteria")
-    public List<ModelDetail> getPaginatedModels(HttpServletRequest request,
+    public List<ModelDetail> getPaginatedModels(
+            HttpServletRequest request,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -73,7 +74,8 @@ public class ScoreResource extends BaseScoring {
     @RequestMapping(value = "/modeldetails/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get total count of models for specified criteria")
-    public int getModelCount(HttpServletRequest request,
+    public int getModelCount(
+            HttpServletRequest request,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
             @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus)
             throws ParseException {
@@ -100,14 +102,11 @@ public class ScoreResource extends BaseScoring {
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
     public void scorePercentileRecords(HttpServletRequest request, //
-            @RequestBody BulkRecordScoreRequest scoreRequest,
-            @RequestParam(value = "enrichInternalAttributes", required = false) String enrichInternalAttributes,
-            @RequestParam(value = "performFetchOnlyForMatching", required = false) String performFetchOnlyForMatching,
-            HttpServletResponse response) {
+            @RequestBody BulkRecordScoreRequest scoreRequest, HttpServletResponse response) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        List<RecordScoreResponse> recordScoreResponseList = scorePercentileRecords(request, scoreRequest, customerSpace,
-                "true".equals(enrichInternalAttributes), "true".equals(performFetchOnlyForMatching), requestId);
+        List<RecordScoreResponse> recordScoreResponseList = scorePercentileRecords(request, scoreRequest,
+                customerSpace, false, false, requestId);
         try {
             GzipUtils.writeToGzipStream(response, recordScoreResponseList);
         } catch (IOException e) {
@@ -120,14 +119,11 @@ public class ScoreResource extends BaseScoring {
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
     public void scoreRecordsDebug(HttpServletRequest request, //
-            @RequestBody BulkRecordScoreRequest scoreRequest,
-            @RequestParam(value = "enrichInternalAttributes", required = false) String enrichInternalAttributes,
-            @RequestParam(value = "performFetchOnlyForMatching", required = false) String performFetchOnlyForMatching,
-            HttpServletResponse response) {
+            @RequestBody BulkRecordScoreRequest scoreRequest, HttpServletResponse response) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         List<RecordScoreResponse> recordScoreResponseList = scoreRecordsDebug(request, scoreRequest, customerSpace,
-                "true".equals(enrichInternalAttributes), "true".equals(performFetchOnlyForMatching), requestId);
+                false, false, requestId);
         try {
             GzipUtils.writeToGzipStream(response, recordScoreResponseList);
         } catch (IOException e) {
