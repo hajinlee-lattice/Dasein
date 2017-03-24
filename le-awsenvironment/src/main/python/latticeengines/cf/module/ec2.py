@@ -98,20 +98,6 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "group":"root",
                         "authentication":"S3AccessCreds"
                     },
-                    "/etc/hadoop/conf/yarn-site.xml":{
-                        "source":"http://s3.amazonaws.com/" + bucket + "/hadoop/yarn-site.xml",
-                        "mode":"000777",
-                        "owner":"root",
-                        "group":"root",
-                        "authentication":"S3AccessCreds"
-                    },
-                    "/etc/hadoop/conf/mapred-site.xml":{
-                        "source":"http://s3.amazonaws.com/" + bucket + "/hadoop/mapred-site.xml",
-                        "mode":"000777",
-                        "owner":"root",
-                        "group":"root",
-                        "authentication":"S3AccessCreds"
-                    },
                     "/tmp/mount_efs.sh": {
                         "content": {
                             "Fn::Join": [
