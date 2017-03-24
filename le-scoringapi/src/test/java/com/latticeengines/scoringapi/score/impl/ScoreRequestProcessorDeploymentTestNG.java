@@ -41,6 +41,7 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     private List<RecordModelTuple> originalOrderParsedTupleList;
     private List<RecordModelTuple> partiallyOrderedParsedTupleList;
     private List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList;
+    private List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList;
     private List<RecordModelTuple> partiallyOrderedBadRecordList;
     private Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap;
     private Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords;
@@ -125,8 +126,12 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     public void testExtractParsedList() {
         partiallyOrderedParsedTupleList = new ArrayList<>();
         partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
-        scoreRequestProcessorImpl.extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap,
-                partiallyOrderedParsedTupleList, partiallyOrderedPmmlParsedRecordList, partiallyOrderedBadRecordList, false);
+        partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList = new ArrayList<>();
+        scoreRequestProcessorImpl.extractParsedList(originalOrderParsedTupleList, //
+                uniqueScoringArtifactsMap, partiallyOrderedParsedTupleList, //
+                partiallyOrderedPmmlParsedRecordList, //
+                partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, //
+                partiallyOrderedBadRecordList, false);
 
     }
 
@@ -142,7 +147,7 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     public void testBulkMatchAndJoin() {
         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
                 .getMatcher(true).matchAndJoin(customerSpace, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
-                        originalOrderModelSummaryList, false, false, false, UUID.randomUUID().toString(), true,
+                        originalOrderModelSummaryList, false, false, false, false, true, UUID.randomUUID().toString(),
                         matchLogMap, matchErrorLogMap);
 
         unorderedMatchedRecordMap = extractMap(unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
@@ -204,9 +209,31 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
         checkScoreResultList(recordScoreResponseList, false);
     }
 
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGenerateScoreResponse" })
+    public void testBulkMatchAndJoinEnrichOnly() {
+         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
+                .getMatcher(true).matchAndJoin(customerSpace, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
+                        originalOrderModelSummaryList, false, false, false, true, true, UUID.randomUUID().toString(),
+                        matchLogMap, matchErrorLogMap);
+
+        Map<RecordModelTuple, Map<String, Object>> matchedResult = extractMap(unorderedMatchedRecordEnrichmentMap,
+                Matcher.RESULT);
+        Assert.assertNotNull(matchedResult);
+        Assert.assertEquals(0, matchedResult.size());
+        Map<RecordModelTuple, Map<String, Object>> enrichmentMap = extractMap(unorderedMatchedRecordEnrichmentMap,
+                Matcher.ENRICHMENT);
+        Assert.assertNotNull(enrichmentMap);
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, enrichmentMap.size());
+    }
+
     @Override
     protected boolean shouldRunScoringTest() {
         return false;
+    }
+
+    @Override
+    protected boolean shouldSelectAttributeBeforeTest() {
+        return true;
     }
 
     private void checkScoreResultList(List<RecordScoreResponse> recordScoreResponseList, boolean isDebug) {

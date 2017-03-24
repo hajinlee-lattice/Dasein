@@ -145,7 +145,9 @@ public class SingleRecordMatcher extends AbstractMatcher {
             boolean isHomogeneous, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode, //
+            boolean shouldEnrichOnly, //
+            boolean isDebugMode, //
+            String requestId, //
             Map<RecordModelTuple, List<String>> matchLogMap, //
             Map<RecordModelTuple, List<String>> matchErrorLogMap) {
         throw new NotImplementedException();

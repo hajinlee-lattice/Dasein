@@ -39,6 +39,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
     private List<RecordModelTuple> originalOrderParsedTupleList;
     private List<RecordModelTuple> partiallyOrderedParsedTupleList;
     private List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList;
+    private List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList;
     private List<RecordModelTuple> partiallyOrderedBadRecordList;
     private Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap;
     private Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords;
@@ -124,8 +125,11 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
     public void testExtractParsedList() {
         partiallyOrderedParsedTupleList = new ArrayList<>();
         partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
+        partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList = new ArrayList<>();
+
         scoreRequestProcessorImpl.extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap,
-                partiallyOrderedParsedTupleList, partiallyOrderedPmmlParsedRecordList, partiallyOrderedBadRecordList, false);
+                partiallyOrderedParsedTupleList, partiallyOrderedPmmlParsedRecordList,
+                partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, partiallyOrderedBadRecordList, false);
 
     }
 

@@ -170,7 +170,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return true;
     }
 
-    private void saveAttributeSelectionBeforeTest(CustomerSpace customerSpace) {
+    protected void saveAttributeSelectionBeforeTest(CustomerSpace customerSpace) {
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
         Assert.assertNotNull(selectedAttributes);
