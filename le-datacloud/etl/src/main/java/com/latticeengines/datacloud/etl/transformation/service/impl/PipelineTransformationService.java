@@ -466,9 +466,9 @@ public class PipelineTransformationService extends AbstractTransformationService
                 }
             } while (!converged && ((Integer) iterationContext.get(CTX_ITERATION)) < MAX_ITERATION);
             if (converged && succeeded) {
-                log.error("Iterative step " + step.getName() + " converged, final count = "
+                log.info("Iterative step " + step.getName() + " converged, final count = "
                         + String.valueOf(step.getCount()));
-                saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
+                createSourceHiveTable(step.getTarget(), step.getTargetVersion());
                 return true;
             } else {
                 if (!converged) {
