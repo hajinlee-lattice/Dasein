@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
 
 public class MiniAMDomainDunsConfig extends TransformerConfig {
     @JsonProperty("DnbInputDataSetDomain")
@@ -17,15 +18,16 @@ public class MiniAMDomainDunsConfig extends TransformerConfig {
     private Map<String, String> seedInputDataSetDomain;
     @JsonProperty("SeedInputDataSetDuns")
     private Map<String, String> seedInputDataSetDuns;
-    @JsonProperty("MiniInputDataSetDomain")
-    private String miniInputDataSetDomain;
-    @JsonProperty("MiniInputDataSetDuns")
-    private String miniInputDataSetDuns;
+    @JsonProperty("MiniInputDataSetType")
+    private String miniInputDataSetType;
+    @JsonProperty("MiniInputDataSetValue")
+    private String miniInputDataSetValue;
     @JsonProperty("OutputDataSetType")
     private String outputDataSetType;
     @JsonProperty("OutputDataSetValue")
     private String outputDataSetValue;
-
+    @JsonProperty("IterateStrategy")
+    private IterativeStepConfig.ConvergeOnCount iterateStrategy;
 
     public String getDnbInputDataSetDomain() {
         return dnbInputDataSetDomain;
@@ -75,20 +77,20 @@ public class MiniAMDomainDunsConfig extends TransformerConfig {
         this.seedInputDataSetDuns = seedInputDataSetDuns;
     }
 
-    public String getMiniInputDataSetDomain() {
-        return miniInputDataSetDomain;
+    public String getMiniInputDataSetType() {
+        return miniInputDataSetType;
     }
 
-    public void setMiniInputDataSetDomain(String miniInputDataSetDomain) {
-        this.miniInputDataSetDomain = miniInputDataSetDomain;
+    public void setMiniInputDataSetType(String miniInputDataSetType) {
+        this.miniInputDataSetType = miniInputDataSetType;
     }
 
-    public String getMiniInputDataSetDuns() {
-        return miniInputDataSetDuns;
+    public String getMiniInputDataSetValue() {
+        return miniInputDataSetValue;
     }
 
-    public void setMiniInputDataSetDuns(String miniInputDataSetDuns) {
-        this.miniInputDataSetDuns = miniInputDataSetDuns;
+    public void setMiniInputDataSetValue(String miniInputDataSetValue) {
+        this.miniInputDataSetValue = miniInputDataSetValue;
     }
 
     public String getOutputDataSetType() {
@@ -105,5 +107,13 @@ public class MiniAMDomainDunsConfig extends TransformerConfig {
 
     public void setOutputDataSetValue(String outputDataSetValue) {
         this.outputDataSetValue = outputDataSetValue;
+    }
+
+    public IterativeStepConfig.ConvergeOnCount getIterateStrategy() {
+        return iterateStrategy;
+    }
+
+    public void setIterateStrategy(IterativeStepConfig.ConvergeOnCount iterateStrategy) {
+        this.iterateStrategy = iterateStrategy;
     }
 }
