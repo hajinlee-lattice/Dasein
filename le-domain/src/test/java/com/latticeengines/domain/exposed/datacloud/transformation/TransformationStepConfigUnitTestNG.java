@@ -1,12 +1,12 @@
 package com.latticeengines.domain.exposed.datacloud.transformation;
 
-import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class TransformationStepConfigUnitTestNG {

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.persistence.Id;
 
-import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -13,6 +12,7 @@ import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 public class LatticeAccount extends BaseFabricEntity<LatticeAccount> implements FabricEntity<LatticeAccount> {

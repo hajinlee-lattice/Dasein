@@ -1,9 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import org.hibernate.annotations.Index;
+import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -13,8 +11,11 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import java.io.Serializable;
-import java.util.Date;
+
+import org.hibernate.annotations.Index;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_VDB_EXTRACT")

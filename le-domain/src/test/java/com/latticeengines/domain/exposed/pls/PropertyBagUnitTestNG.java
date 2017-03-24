@@ -7,8 +7,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.db.PropertyBag;
 import com.latticeengines.domain.exposed.db.HasOptionAndValue;
+import com.latticeengines.domain.exposed.db.PropertyBag;
 
 public class PropertyBagUnitTestNG {
     public enum OptionName {

@@ -5,9 +5,6 @@ import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
-import com.latticeengines.domain.exposed.eai.ExportConfiguration;
-import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 

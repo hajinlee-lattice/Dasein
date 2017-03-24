@@ -3,9 +3,9 @@ package com.latticeengines.domain.exposed.pls;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class TargetMarketUnitTestNG {
 

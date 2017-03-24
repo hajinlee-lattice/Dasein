@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.InputSourceConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class PipelineTransformationConfiguration extends BasicTransformationConfiguration implements TransformationConfiguration {
 
