@@ -14,8 +14,9 @@ public enum LogicalDataType {
     Metric, //
     Timestamp;
 
-    private static EnumSet<LogicalDataType> typesExcludedFromRealTimeMetadata = EnumSet.of(LogicalDataType.InternalId,
-            LogicalDataType.Event, LogicalDataType.Opportunity, LogicalDataType.Timestamp);
+    private static EnumSet<LogicalDataType> typesExcludedFromRealTimeMetadata = EnumSet.of(
+            LogicalDataType.InternalId, LogicalDataType.Event, LogicalDataType.Opportunity,
+            LogicalDataType.Timestamp);
 
     public static boolean isExcludedFromRealTimeMetadata(LogicalDataType type) {
         return typesExcludedFromRealTimeMetadata.contains(type);
@@ -28,11 +29,18 @@ public enum LogicalDataType {
         return acausalDataTypes.contains(type);
     }
 
-    private static EnumSet<LogicalDataType> systemGeneratedDataTypes = EnumSet.of(LogicalDataType.InternalId,
-            LogicalDataType.RowId);
+    private static EnumSet<LogicalDataType> systemGeneratedDataTypes = EnumSet
+            .of(LogicalDataType.InternalId, LogicalDataType.RowId);
 
     public static boolean isSystemGeneratedEventType(LogicalDataType type) {
         return systemGeneratedDataTypes.contains(type);
+    }
+
+    private static EnumSet<LogicalDataType> typesExcludedFromFileScoringMapping = EnumSet
+            .of(LogicalDataType.Event, LogicalDataType.Opportunity);
+
+    public static boolean isExcludedFromScoringFileMapping(LogicalDataType type) {
+        return typesExcludedFromFileScoringMapping.contains(type);
     }
 
 }

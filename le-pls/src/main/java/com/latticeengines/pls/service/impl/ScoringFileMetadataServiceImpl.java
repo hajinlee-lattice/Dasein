@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -72,13 +73,14 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     private PlsFeatureFlagService plsFeatureFlagService;
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
-            String displayName) {
+    public InputStream validateHeaderFields(InputStream stream,
+            CloseableResourcePool closeableResourcePool, String displayName) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
         stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
-        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream,
+                closeableResourcePool);
         try {
             stream.reset();
         } catch (IOException e) {
@@ -86,14 +88,15 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
-        Collection<String> reservedWords = Arrays
-                .asList(new String[] { ScoreResultField.Percentile.displayName, ScoreResultField.Rating.displayName });
+        Collection<String> reservedWords = Arrays.asList(new String[] {
+                ScoreResultField.Percentile.displayName, ScoreResultField.Rating.displayName });
         ValidateFileHeaderUtils.checkForReservedHeaders(displayName, headerFields, reservedWords);
         return stream;
     }
 
     @Override
-    public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId) {
+    public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName,
+            String modelId) {
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (modelSummary == null) {
             throw new RuntimeException(String.format("No such model summary with id %s", modelId));
@@ -102,23 +105,27 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         if (schemaInterpretationStr == null) {
             throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
         }
-        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation
+                .valueOf(schemaInterpretationStr);
 
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
         fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
 
         fieldMappingDocument.getRequiredFields().add(InterfaceName.Id.name());
-        if (!modelSummary.getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.ExcludePropdataColumns)
+        if (!modelSummary.getModelSummaryConfiguration()
+                .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)
                 && !plsFeatureFlagService.isFuzzyMatchEnabled()) {
-            SchemaInterpretationFunctionalInterface function = (interfaceName) -> fieldMappingDocument
-                    .getRequiredFields().add(interfaceName.name());
+            SchemaInterpretationFunctionalInterface function = (
+                    interfaceName) -> fieldMappingDocument.getRequiredFields()
+                            .add(interfaceName.name());
             schemaInterpretation.apply(function);
         }
 
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
-        List<Attribute> schemaFields = SchemaRepository.instance().getSchema(schemaInterpretation).getAttributes();
+        List<Attribute> schemaFields = SchemaRepository.instance().getSchema(schemaInterpretation)
+                .getAttributes();
         Iterator<String> scoringHeaderFieldsIterator = scoringHeaderFields.iterator();
         while (scoringHeaderFieldsIterator.hasNext()) {
             String scoringHeaderField = scoringHeaderFieldsIterator.next();
@@ -128,7 +135,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             while (requiredAttributesIterator.hasNext()) {
                 Attribute requiredAttribute = requiredAttributesIterator.next();
 
-                if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField, requiredAttribute)) {
+                if (isScoringFieldMatchedWithModelAttribute(scoringHeaderField,
+                        requiredAttribute)) {
                     fieldMapping.setUserField(scoringHeaderField);
                     fieldMapping.setMappedField(requiredAttribute.getName());
                     fieldMapping.setMappedToLatticeField(true);
@@ -174,6 +182,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             fieldMappingDocument.getFieldMappings().add(fieldMapping);
         }
 
+        removeUnwantedFieldsFromFieldMappingDocuments(fieldMappingDocument, schemaInterpretation);
         return fieldMappingDocument;
     }
 
@@ -226,19 +235,44 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
     }
 
+    private void removeUnwantedFieldsFromFieldMappingDocuments(
+            FieldMappingDocument fieldMappingDocument, SchemaInterpretation schemaInterpretation) {
+        Iterator<FieldMapping> fieldMappingIterator = fieldMappingDocument.getFieldMappings()
+                .iterator();
+        Table schemaTable = SchemaRepository.instance().getSchema(schemaInterpretation);
+
+        while (fieldMappingIterator.hasNext()) {
+            FieldMapping fieldMapping = fieldMappingIterator.next();
+            if (schemaTable.getAttribute(fieldMapping.getMappedField()) != null
+                    && LogicalDataType.isExcludedFromScoringFileMapping(schemaTable
+                            .getAttribute(fieldMapping.getMappedField()).getLogicalDataType())) {
+                fieldMappingIterator.remove();
+            }
+        }
+    }
+
     private void resolveModelAttributeBasedOnFieldMapping(List<Attribute> modelAttributes,
             FieldMappingDocument fieldMappingDocument) {
-        Set<String> modelAttributeNames = modelAttributes.stream().map(modelAttribute -> modelAttribute.getName())
-                .collect(Collectors.toSet());
+        Set<String> modelAttributeNames = modelAttributes.stream()
+                .map(modelAttribute -> modelAttribute.getName()).collect(Collectors.toSet());
         Iterator<Attribute> attrIterator = modelAttributes.iterator();
         while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
-            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                if (fieldMapping.isMappedToLatticeField()) {
-                    if (fieldMapping.getMappedField().equals(attribute.getName())) {
-                        attribute.setDisplayName(fieldMapping.getUserField());
-                        break;
-                    }
+            Iterator<FieldMapping> fieldMappingIterator = fieldMappingDocument.getFieldMappings()
+                    .iterator();
+            while (fieldMappingIterator.hasNext()) {
+                FieldMapping fieldMapping = fieldMappingIterator.next();
+                if (fieldMapping.isMappedToLatticeField()
+                        && fieldMapping.getMappedField().equals(attribute.getName())) {
+                    attribute.setDisplayName(fieldMapping.getUserField());
+                    break;
+                } else if (!fieldMapping.isMappedToLatticeField()
+                        && isScoringFieldMatchedWithModelAttribute(fieldMapping.getUserField(),
+                                attribute)
+                        && LogicalDataType
+                                .isExcludedFromScoringFileMapping(attribute.getLogicalDataType())) {
+                    attribute.setDisplayName(fieldMapping.getUserField());
+                    fieldMappingIterator.remove();
                 }
             }
         }
@@ -251,8 +285,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 }
                 String unmappedScoringHeader = fieldMapping.getUserField();
                 for (Attribute modelAttribute : modelAttributes) {
-                    if (modelAttribute.getName().equals(unmappedScoringHeader)
-                            || modelAttribute.getDisplayName().equals(unmappedScoringHeader)) {
+                    if (isScoringFieldMatchedWithModelAttribute(unmappedScoringHeader,
+                            modelAttribute)) {
                         unmappedScoringHeader = unmappedScoringHeader.concat("_1");
                     }
                 }
@@ -293,7 +327,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         return table;
     }
 
-    private boolean isScoringFieldMatchedWithModelAttribute(String scoringField, Attribute modelAttribute) {
+    private boolean isScoringFieldMatchedWithModelAttribute(String scoringField,
+            Attribute modelAttribute) {
         List<String> allowedDisplayNames = modelAttribute.getAllowedDisplayNames();
         if (allowedDisplayNames != null) {
             for (int i = 0; i < modelAttribute.getAllowedDisplayNames().size(); i++) {
