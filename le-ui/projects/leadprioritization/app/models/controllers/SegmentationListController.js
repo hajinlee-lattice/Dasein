@@ -3,7 +3,7 @@ angular.module('lp.models.segments', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.modals.DeleteSegmentModal'
 ])
-.controller('SegmentationListController', function ($scope, $rootScope, $element, $state, $stateParams, $timeout, 
+.controller('SegmentationListController', function ($scope, $rootScope, $element, $state, $stateParams, $timeout,
     ResourceUtility, Model, ModelStore, SegmentsList, DeleteSegmentModal, SegmentService) {
 
     var vm = this;
@@ -22,12 +22,12 @@ angular.module('lp.models.segments', [
         vm.Math = window.Math;
 
         console.log(vm.segments);
-    
+
     };
 
     vm.init();
 
-    vm.customMenuClick = function ($event) { 
+    vm.customMenuClick = function ($event) {
 
         $event.stopPropagation();
 
@@ -36,13 +36,13 @@ angular.module('lp.models.segments', [
     vm.tileClick = function ($event, segmentName) {
 
         $event.preventDefault();
-        $state.go('home.model.analysis', segmentName, { reload: true } );
+        $state.go('home.model.analysis', {segmentName: segmentName}, { reload: true } );
 
     };
 
     vm.editSegmentClick = function($event, segmentName){
         $event.stopPropagation();
-        
+
         console.log($event.currentTarget);
 
         vm.editSegment = true;
@@ -62,7 +62,7 @@ angular.module('lp.models.segments', [
         };
 
         SegmentService.UpdateSegment(credential).then(function(result) {
-            
+
             var errorMsg = result.errorMsg;
 
             if (result.success) {

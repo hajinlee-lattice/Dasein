@@ -215,6 +215,9 @@ angular
         })
         .state('home.model.analysis', {
             url: '/analysis',
+            params: {
+                segmentName: null
+            },
             resolve: DataCloudResolve,
             redirectTo: 'home.model.analysis.explorer',
             views: {
@@ -227,6 +230,12 @@ angular
         })
         .state('home.model.analysis.explorer', {
             url: '/explorer',
+            resolve: {
+                QueryRestriction: function(QueryStore, $stateParams) {
+                    QueryStore.loadRestrictions();
+                    return QueryStore.getRestrictions($stateParams.segmentName);
+                }
+            },
             redirectTo: 'home.model.analysis.explorer.attributes'
         })
         .state('home.model.analysis.explorer.attributes', {
@@ -272,12 +281,6 @@ angular
             },
             views: {
                 "main@": {
-                    resolve: {
-                        QueryRestriction: function(QueryStore) {
-                            QueryStore.loadRestrictions();
-                            return QueryStore.getRestrictions();
-                        }
-                    },
                     controller: 'QueryBuilderCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/builder/querybuilder.component.html'
