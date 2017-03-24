@@ -85,17 +85,15 @@ def tomcat_task(profile_vars, env="qa"):
         .add_docker_label("app", PARAM_DOCKER_IMAGE.ref()) \
         .privileged()
 
-    if env == "prodcluster":
-        container = container
-    else:
-        container = container.set_logging({
-            "LogDriver": "splunk",
-            "Options": {
-                "splunk-url": PARAM_SPLUNK_URL.ref(),
-                "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
-                "splunk-index": "history",
-                "labels": "stack,app"
-            }})
+    container = container.set_logging({
+        "LogDriver": "splunk",
+        "Options": {
+            "splunk-url": PARAM_SPLUNK_URL.ref(),
+            "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
+            "splunk-index": "history",
+            "labels": "stack,app"
+        }})
+
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
