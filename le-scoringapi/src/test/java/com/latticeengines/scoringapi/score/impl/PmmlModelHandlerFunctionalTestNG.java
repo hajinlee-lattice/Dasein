@@ -1,6 +1,7 @@
 package com.latticeengines.scoringapi.score.impl;
 
 import static org.testng.Assert.assertEquals;
+
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
