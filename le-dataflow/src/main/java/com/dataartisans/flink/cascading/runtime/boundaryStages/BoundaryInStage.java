@@ -16,6 +16,8 @@
 
 package com.dataartisans.flink.cascading.runtime.boundaryStages;
 
+import java.util.Iterator;
+
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
@@ -27,8 +29,6 @@ import cascading.flow.stream.element.ElementStage;
 import cascading.flow.stream.element.InputSource;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-
-import java.util.Iterator;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class BoundaryInStage extends ElementStage<Void, TupleEntry> implements InputSource {

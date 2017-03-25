@@ -16,12 +16,13 @@
 
 package com.dataartisans.flink.cascading.types.tuple;
 
-import cascading.tuple.Tuple;
+import java.io.IOException;
+
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 
-import java.io.IOException;
+import cascading.tuple.Tuple;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class UnknownTupleSerializer extends TypeSerializer<Tuple> {

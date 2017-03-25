@@ -16,15 +16,16 @@
 
 package com.dataartisans.flink.cascading.types.tuple;
 
-import cascading.flow.FlowException;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 
-import java.io.IOException;
-import java.util.Arrays;
+import cascading.flow.FlowException;
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class DefinedTupleSerializer extends TypeSerializer<Tuple> {

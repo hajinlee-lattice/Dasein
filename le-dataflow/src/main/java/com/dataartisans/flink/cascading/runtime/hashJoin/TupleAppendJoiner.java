@@ -16,9 +16,10 @@
 
 package com.dataartisans.flink.cascading.runtime.hashJoin;
 
-import cascading.tuple.Tuple;
 import org.apache.flink.api.common.functions.JoinFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
+
+import cascading.tuple.Tuple;
 
 public class TupleAppendJoiner implements JoinFunction<Tuple2<Tuple, Tuple[]>, Tuple, Tuple2<Tuple, Tuple[]>> {
 

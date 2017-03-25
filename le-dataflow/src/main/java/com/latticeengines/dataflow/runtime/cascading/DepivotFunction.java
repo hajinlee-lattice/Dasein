@@ -1,7 +1,5 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
-import java.util.List;
-
 import com.latticeengines.dataflow.exposed.builder.strategy.DepivotStrategy;
 
 import cascading.flow.FlowProcess;

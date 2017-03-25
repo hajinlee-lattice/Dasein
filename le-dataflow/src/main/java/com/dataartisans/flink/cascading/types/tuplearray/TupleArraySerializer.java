@@ -16,14 +16,16 @@
 
 package com.dataartisans.flink.cascading.types.tuplearray;
 
-import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.types.tuple.NullMaskSerDeUtils;
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 
-import java.io.IOException;
-import java.util.Arrays;
+import com.dataartisans.flink.cascading.types.tuple.NullMaskSerDeUtils;
+
+import cascading.tuple.Tuple;
 
 @SuppressWarnings({"unchecked"})
 public class TupleArraySerializer extends TypeSerializer<Tuple[]> {

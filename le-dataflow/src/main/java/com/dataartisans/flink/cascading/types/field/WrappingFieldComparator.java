@@ -16,12 +16,12 @@
 
 package com.dataartisans.flink.cascading.types.field;
 
+import java.io.IOException;
+
 import org.apache.flink.api.common.typeutils.TypeComparator;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.core.memory.MemorySegment;
-
-import java.io.IOException;
 
 @SuppressWarnings({"rawtypes"})
 public class WrappingFieldComparator<T extends Comparable<T>> extends TypeComparator<T> {

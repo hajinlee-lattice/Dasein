@@ -16,16 +16,17 @@
 
 package com.dataartisans.flink.cascading.runtime.hashJoin;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
+import org.apache.flink.api.java.tuple.Tuple2;
+
 import cascading.flow.FlowProcess;
 import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
 import cascading.tuple.util.TupleViews;
-import org.apache.flink.api.java.tuple.Tuple2;
-
-import java.util.Arrays;
-import java.util.Iterator;
 
 @SuppressWarnings({"rawtypes"})
 public class JoinClosure extends JoinerClosure {

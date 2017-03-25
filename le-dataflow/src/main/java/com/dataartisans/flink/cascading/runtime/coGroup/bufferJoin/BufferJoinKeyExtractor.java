@@ -16,9 +16,10 @@
 
 package com.dataartisans.flink.cascading.runtime.coGroup.bufferJoin;
 
-import cascading.tuple.Tuple;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
+
+import cascading.tuple.Tuple;
 
 public class BufferJoinKeyExtractor implements MapFunction<Tuple, Tuple3<Tuple, Integer, Tuple>> {
 

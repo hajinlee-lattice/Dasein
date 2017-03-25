@@ -16,6 +16,10 @@
 
 package com.dataartisans.flink.cascading.planner.rules;
 
+import static cascading.flow.planner.iso.expression.NotElementExpression.not;
+import static cascading.flow.planner.iso.expression.OrElementExpression.or;
+import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
+
 import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementCapture;
@@ -32,10 +36,6 @@ import cascading.flow.stream.graph.IORole;
 import cascading.pipe.Boundary;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
-
-import static cascading.flow.planner.iso.expression.NotElementExpression.not;
-import static cascading.flow.planner.iso.expression.OrElementExpression.or;
-import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
 
 /**
  * Partition flow steps across Boundaries, GroupBys, CoGroups, Merges

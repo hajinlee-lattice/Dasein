@@ -16,11 +16,12 @@
 
 package com.dataartisans.flink.cascading.runtime.coGroup.regularJoin;
 
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import org.apache.flink.api.common.functions.RichJoinFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
+
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 public class TupleAppendOuterJoiner extends RichJoinFunction<Tuple2<Tuple, Tuple[]>, Tuple, Tuple2<Tuple, Tuple[]>> {
 

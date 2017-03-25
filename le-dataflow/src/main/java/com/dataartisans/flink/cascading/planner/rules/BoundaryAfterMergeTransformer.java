@@ -16,6 +16,8 @@
 
 package com.dataartisans.flink.cascading.planner.rules;
 
+import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
+
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
@@ -24,8 +26,6 @@ import cascading.flow.planner.iso.transformer.InsertionGraphTransformer;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
 import cascading.pipe.Merge;
-
-import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  * Injects a Boundary after a Merge in order to split of the Merge as a separate node.

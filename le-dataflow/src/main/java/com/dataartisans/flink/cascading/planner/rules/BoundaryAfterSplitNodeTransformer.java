@@ -16,6 +16,8 @@
 
 package com.dataartisans.flink.cascading.planner.rules;
 
+import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
+
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.OrElementExpression;
@@ -27,8 +29,6 @@ import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
-
-import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  * Injects a Boundary after a splitting node.

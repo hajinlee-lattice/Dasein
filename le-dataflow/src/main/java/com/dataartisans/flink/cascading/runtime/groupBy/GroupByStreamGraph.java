@@ -16,6 +16,12 @@
 
 package com.dataartisans.flink.cascading.runtime.groupBy;
 
+import org.apache.flink.util.Collector;
+
+import com.dataartisans.flink.cascading.runtime.boundaryStages.BoundaryOutStage;
+import com.dataartisans.flink.cascading.runtime.util.CollectorOutput;
+import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
+
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
 import cascading.flow.stream.duct.Duct;
@@ -26,10 +32,6 @@ import cascading.pipe.Boundary;
 import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.runtime.boundaryStages.BoundaryOutStage;
-import com.dataartisans.flink.cascading.runtime.util.CollectorOutput;
-import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
-import org.apache.flink.util.Collector;
 
 @SuppressWarnings({"rawtypes"})
 public class GroupByStreamGraph extends NodeStreamGraph {

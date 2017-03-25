@@ -16,7 +16,8 @@
 
 package com.dataartisans.flink.cascading.types.tuple;
 
-import cascading.tuple.Tuple;
+import java.io.IOException;
+import java.util.List;
 
 import org.apache.flink.api.common.typeutils.CompositeTypeComparator;
 import org.apache.flink.api.common.typeutils.TypeComparator;
@@ -25,8 +26,7 @@ import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.core.memory.MemorySegment;
 
-import java.io.IOException;
-import java.util.List;
+import cascading.tuple.Tuple;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class DefinedTupleComparator extends CompositeTypeComparator<Tuple> {
 

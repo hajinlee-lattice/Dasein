@@ -272,11 +272,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             allColumnsClone.toArray(extraCols);
 
             if (allColumnsClone.size() > 0) {
-                pipes[i] = new Each(new Pipe(source), new AddNullColumns(new Fields(extraCols)), //
-                        declaredFields);
+                pipes[i] = new Each(new Pipe(source), new AddNullColumns(new Fields(extraCols)), declaredFields);
             } else {
-                pipes[i] = new Each(new Pipe(source), new NoOp(), //
-                        declaredFields);
+                pipes[i] = new Each(new Pipe(source), new NoOp(), declaredFields);
             }
             i++;
             existing.add(sourceName);

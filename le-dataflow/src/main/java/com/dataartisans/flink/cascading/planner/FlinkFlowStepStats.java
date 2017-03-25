@@ -16,16 +16,17 @@
 
 package com.dataartisans.flink.cascading.planner;
 
-import cascading.flow.FlowStep;
-import cascading.management.state.ClientState;
-import cascading.stats.FlowStepStats;
-import com.dataartisans.flink.cascading.runtime.stats.EnumStringConverter;
-import com.dataartisans.flink.cascading.runtime.stats.AccumulatorCache;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.dataartisans.flink.cascading.runtime.stats.AccumulatorCache;
+import com.dataartisans.flink.cascading.runtime.stats.EnumStringConverter;
+
+import cascading.flow.FlowStep;
+import cascading.management.state.ClientState;
+import cascading.stats.FlowStepStats;
 
 @SuppressWarnings({"rawtypes"})
 public class FlinkFlowStepStats extends FlowStepStats {

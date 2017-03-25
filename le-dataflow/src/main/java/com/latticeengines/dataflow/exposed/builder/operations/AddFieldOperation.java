@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
+import java.util.ArrayList;
+
 import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
 import com.latticeengines.dataflow.runtime.cascading.AddFieldFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -7,8 +9,6 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
-
-import java.util.ArrayList;
 
 public class AddFieldOperation extends Operation {
 

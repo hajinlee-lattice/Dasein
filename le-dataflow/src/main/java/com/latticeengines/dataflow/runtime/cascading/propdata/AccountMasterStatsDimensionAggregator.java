@@ -2,20 +2,17 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.io.IOException;
 
-import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
-
-import cascading.operation.Aggregator;
-import cascading.tuple.Fields;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.AttributeStatsDetailsMergeUtil;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
 
+import cascading.operation.Aggregator;
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings("rawtypes")
 public class AccountMasterStatsDimensionAggregator
         extends BaseAggregator<AccountMasterStatsDimensionAggregator.Context>
         implements Aggregator<AccountMasterStatsDimensionAggregator.Context> {

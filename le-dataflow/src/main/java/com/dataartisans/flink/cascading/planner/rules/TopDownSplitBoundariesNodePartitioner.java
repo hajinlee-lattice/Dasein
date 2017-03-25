@@ -16,6 +16,8 @@
 
 package com.dataartisans.flink.cascading.planner.rules;
 
+import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
+
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
@@ -27,8 +29,6 @@ import cascading.flow.planner.rule.elementexpression.BoundariesElementExpression
 import cascading.flow.planner.rule.expressiongraph.NoGroupJoinMergeBoundaryTapExpressionGraph;
 import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.stream.graph.IORole;
-
-import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
 
 public class TopDownSplitBoundariesNodePartitioner extends ExpressionRulePartitioner {
 	public TopDownSplitBoundariesNodePartitioner() {

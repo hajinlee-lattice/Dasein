@@ -16,6 +16,8 @@
 
 package com.dataartisans.flink.cascading.runtime.hashJoin;
 
+import org.apache.flink.api.java.tuple.Tuple2;
+
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
 import cascading.flow.stream.duct.Duct;
@@ -26,7 +28,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryChainIterator;
-import org.apache.flink.api.java.tuple.Tuple2;
 
 @SuppressWarnings({"rawtypes"})
 public class HashJoinGate extends SpliceGate<Tuple2<Tuple, Tuple[]>, TupleEntry> {

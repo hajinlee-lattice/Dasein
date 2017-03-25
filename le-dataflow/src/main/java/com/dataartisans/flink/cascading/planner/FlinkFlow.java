@@ -16,22 +16,24 @@
 
 package com.dataartisans.flink.cascading.planner;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.flink.client.program.OptimizerPlanEnvironment;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.JobConf;
+
+import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
+
 import cascading.flow.BaseFlow;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.PlatformInfo;
-import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
-import org.apache.flink.client.program.OptimizerPlanEnvironment;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.JobConf;
 import riffle.process.ProcessComplete;
 import riffle.process.ProcessConfiguration;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FlinkFlow extends BaseFlow<Configuration> {
 

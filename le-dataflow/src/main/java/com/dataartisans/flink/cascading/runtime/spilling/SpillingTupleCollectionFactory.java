@@ -16,17 +16,18 @@
 
 package com.dataartisans.flink.cascading.runtime.spilling;
 
+import java.util.Collection;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.GzipCodec;
+
 import cascading.flow.FlowProcess;
 import cascading.tuple.Tuple;
 import cascading.tuple.collect.SpillableTupleList;
 import cascading.tuple.collect.TupleCollectionFactory;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.hadoop.collect.HadoopSpillableTupleList;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.io.compress.GzipCodec;
-
-import java.util.Collection;
 
 public class SpillingTupleCollectionFactory implements TupleCollectionFactory<Configuration> {
 

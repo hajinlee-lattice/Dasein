@@ -16,6 +16,21 @@
 
 package com.dataartisans.flink.cascading.runtime.coGroup.regularJoin;
 
+import static cascading.util.LogUtil.logCounters;
+import static cascading.util.LogUtil.logMemory;
+
+import java.util.Set;
+
+import org.apache.flink.api.common.functions.RichGroupReduceFunction;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.util.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
+import com.dataartisans.flink.cascading.util.FlinkConfigConverter;
+
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -25,19 +40,6 @@ import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.element.ElementDuct;
 import cascading.pipe.CoGroup;
 import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
-import com.dataartisans.flink.cascading.util.FlinkConfigConverter;
-import org.apache.flink.api.common.functions.RichGroupReduceFunction;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.util.Collector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Set;
-
-import static cascading.util.LogUtil.logCounters;
-import static cascading.util.LogUtil.logMemory;
 
 @SuppressWarnings({"rawtypes"})
 public class CoGroupReducer extends RichGroupReduceFunction<Tuple2<Tuple, Tuple[]>, Tuple> {

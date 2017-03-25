@@ -16,6 +16,20 @@
 
 package com.dataartisans.flink.cascading.runtime.sink;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Set;
+
+import org.apache.flink.api.common.io.FinalizeOnMaster;
+import org.apache.flink.api.common.io.RichOutputFormat;
+import org.apache.flink.configuration.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
+import com.dataartisans.flink.cascading.util.FlinkConfigConverter;
+
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -28,18 +42,6 @@ import cascading.pipe.Boundary;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
-import com.dataartisans.flink.cascading.util.FlinkConfigConverter;
-import org.apache.flink.api.common.io.FinalizeOnMaster;
-import org.apache.flink.api.common.io.RichOutputFormat;
-import org.apache.flink.configuration.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Set;
 
 @SuppressWarnings({"rawtypes"})
 public class TapOutputFormat extends RichOutputFormat<Tuple> implements FinalizeOnMaster {

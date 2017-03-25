@@ -16,16 +16,17 @@
 
 package com.dataartisans.flink.cascading.types.field;
 
-import cascading.tuple.Hasher;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Comparator;
+
 import org.apache.flink.api.common.typeutils.TypeComparator;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.core.memory.MemorySegment;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Comparator;
+import cascading.tuple.Hasher;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class CustomFieldComparator extends TypeComparator<Comparable> {

@@ -25,10 +25,11 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.tuple.Fields;
-import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cascading.tuple.Fields;
+import cascading.util.Util;
 
 /**
  * Adds in the Distribution Key and Sort Keys columns that are specific to

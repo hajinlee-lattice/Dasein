@@ -16,13 +16,13 @@
 
 package com.dataartisans.flink.cascading.types.field;
 
+import java.io.IOException;
+
 import org.apache.flink.api.common.typeutils.TypeComparator;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.core.memory.MemorySegment;
-
-import java.io.IOException;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class FieldComparator<T extends Comparable<T>> extends TypeComparator<T> {

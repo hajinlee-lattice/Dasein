@@ -16,10 +16,11 @@
 
 package com.dataartisans.flink.cascading.runtime.hashJoin;
 
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
+
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 public class JoinPrepareMapper implements MapFunction<Tuple, Tuple2<Tuple, Tuple[]>> {
 

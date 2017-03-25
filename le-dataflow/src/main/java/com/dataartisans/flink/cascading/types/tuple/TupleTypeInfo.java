@@ -16,9 +16,11 @@
 
 package com.dataartisans.flink.cascading.types.tuple;
 
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.types.field.FieldTypeInfo;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeinfo.AtomicType;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -26,10 +28,10 @@ import org.apache.flink.api.common.typeutils.CompositeType;
 import org.apache.flink.api.common.typeutils.TypeComparator;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import com.dataartisans.flink.cascading.types.field.FieldTypeInfo;
+
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class TupleTypeInfo extends CompositeType<Tuple> {

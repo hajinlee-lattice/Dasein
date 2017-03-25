@@ -16,6 +16,19 @@
 
 package com.dataartisans.flink.cascading.runtime.each;
 
+import java.io.IOException;
+import java.util.Set;
+
+import org.apache.flink.api.common.functions.RichMapPartitionFunction;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.util.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dataartisans.flink.cascading.runtime.boundaryStages.BoundaryInStage;
+import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
+import com.dataartisans.flink.cascading.util.FlinkConfigConverter;
+
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
@@ -25,17 +38,6 @@ import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.element.ElementDuct;
 import cascading.pipe.Boundary;
 import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.runtime.boundaryStages.BoundaryInStage;
-import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
-import com.dataartisans.flink.cascading.util.FlinkConfigConverter;
-import org.apache.flink.api.common.functions.RichMapPartitionFunction;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.util.Collector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Set;
 
 @SuppressWarnings({"rawtypes"})
 public class EachMapper extends RichMapPartitionFunction<Tuple, Tuple> {

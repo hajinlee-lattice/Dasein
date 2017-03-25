@@ -16,6 +16,12 @@
 
 package com.dataartisans.flink.cascading.runtime.hashJoin;
 
+import org.apache.flink.util.Collector;
+
+import com.dataartisans.flink.cascading.runtime.boundaryStages.BoundaryOutStage;
+import com.dataartisans.flink.cascading.runtime.util.CollectorOutput;
+import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
+
 import cascading.flow.FlowNode;
 import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.duct.Gate;
@@ -26,10 +32,6 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
-import com.dataartisans.flink.cascading.runtime.boundaryStages.BoundaryOutStage;
-import com.dataartisans.flink.cascading.runtime.util.CollectorOutput;
-import org.apache.flink.util.Collector;
 
 @SuppressWarnings({"rawtypes"})
 public class HashJoinStreamGraph extends NodeStreamGraph {

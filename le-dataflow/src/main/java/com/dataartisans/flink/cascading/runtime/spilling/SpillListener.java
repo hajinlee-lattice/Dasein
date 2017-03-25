@@ -16,12 +16,13 @@
 
 package com.dataartisans.flink.cascading.runtime.spilling;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.collect.Spillable;
 import cascading.tuple.collect.SpillableTupleList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class SpillListener implements Spillable.SpillListener {

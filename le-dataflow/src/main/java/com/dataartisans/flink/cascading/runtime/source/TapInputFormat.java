@@ -17,19 +17,13 @@
 
 package com.dataartisans.flink.cascading.runtime.source;
 
-import cascading.CascadingException;
-import cascading.flow.FlowElement;
-import cascading.flow.FlowException;
-import cascading.flow.FlowNode;
-import cascading.flow.FlowProcess;
-import cascading.flow.SliceCounters;
-import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.flow.stream.duct.Duct;
-import cascading.flow.stream.element.ElementDuct;
-import cascading.tap.Tap;
-import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
-import com.dataartisans.flink.cascading.util.FlinkConfigConverter;
+import static cascading.util.LogUtil.logCounters;
+import static cascading.util.LogUtil.logMemory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Set;
+
 import org.apache.flink.api.common.io.FileInputFormat.FileBaseStatistics;
 import org.apache.flink.api.common.io.LocatableInputSplitAssigner;
 import org.apache.flink.api.common.io.RichInputFormat;
@@ -51,12 +45,20 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Set;
+import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
+import com.dataartisans.flink.cascading.util.FlinkConfigConverter;
 
-import static cascading.util.LogUtil.logCounters;
-import static cascading.util.LogUtil.logMemory;
+import cascading.CascadingException;
+import cascading.flow.FlowElement;
+import cascading.flow.FlowException;
+import cascading.flow.FlowNode;
+import cascading.flow.FlowProcess;
+import cascading.flow.SliceCounters;
+import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.stream.duct.Duct;
+import cascading.flow.stream.element.ElementDuct;
+import cascading.tap.Tap;
+import cascading.tuple.Tuple;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class TapInputFormat extends RichInputFormat<Tuple, HadoopInputSplit> {

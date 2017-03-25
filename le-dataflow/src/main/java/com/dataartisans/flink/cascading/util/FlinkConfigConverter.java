@@ -16,9 +16,9 @@
 
 package com.dataartisans.flink.cascading.util;
 
-import org.apache.hadoop.conf.Configuration;
-
 import java.util.Map;
+
+import org.apache.hadoop.conf.Configuration;
 
 public class FlinkConfigConverter {
 

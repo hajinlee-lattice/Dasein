@@ -16,8 +16,9 @@
 
 package com.dataartisans.flink.cascading.runtime.util;
 
-import cascading.tuple.Tuple;
 import org.apache.flink.api.common.functions.MapFunction;
+
+import cascading.tuple.Tuple;
 
 public class IdMapper implements MapFunction<Tuple, Tuple> {
 

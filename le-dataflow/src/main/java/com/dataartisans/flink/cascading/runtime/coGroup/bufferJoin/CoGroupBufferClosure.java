@@ -16,6 +16,20 @@
 
 package com.dataartisans.flink.cascading.runtime.coGroup.bufferJoin;
 
+import static cascading.tuple.collect.TupleCollectionFactory.TUPLE_COLLECTION_FACTORY;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.hadoop.conf.Configuration;
+
+import com.dataartisans.flink.cascading.runtime.spilling.SpillListener;
+import com.dataartisans.flink.cascading.runtime.spilling.SpillingTupleCollectionFactory;
+
 import cascading.flow.FlowProcess;
 import cascading.pipe.joiner.JoinerClosure;
 import cascading.provider.FactoryLoader;
@@ -25,18 +39,6 @@ import cascading.tuple.Tuples;
 import cascading.tuple.collect.Spillable;
 import cascading.tuple.collect.TupleCollectionFactory;
 import cascading.tuple.util.TupleViews;
-import com.dataartisans.flink.cascading.runtime.spilling.SpillListener;
-import com.dataartisans.flink.cascading.runtime.spilling.SpillingTupleCollectionFactory;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.hadoop.conf.Configuration;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-import static cascading.tuple.collect.TupleCollectionFactory.TUPLE_COLLECTION_FACTORY;
 
 @SuppressWarnings({"unused", "unchecked", "rawtypes"})
 public class CoGroupBufferClosure extends JoinerClosure {

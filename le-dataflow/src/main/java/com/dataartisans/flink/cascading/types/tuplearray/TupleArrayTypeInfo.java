@@ -16,14 +16,16 @@
 
 package com.dataartisans.flink.cascading.types.tuplearray;
 
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import com.dataartisans.flink.cascading.types.tuple.TupleTypeInfo;
+import java.util.Arrays;
+
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 
-import java.util.Arrays;
+import com.dataartisans.flink.cascading.types.tuple.TupleTypeInfo;
+
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 
 @SuppressWarnings({"unchecked"})
 public class TupleArrayTypeInfo extends TypeInformation<Tuple[]> {

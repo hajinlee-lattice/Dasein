@@ -16,12 +16,12 @@
 
 package com.dataartisans.flink.cascading.runtime.groupBy;
 
+import java.util.Iterator;
+
 import cascading.flow.FlowProcess;
 import cascading.pipe.joiner.JoinerClosure;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-
-import java.util.Iterator;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class GroupByClosure extends JoinerClosure {

@@ -16,6 +16,8 @@
 
 package com.dataartisans.flink.cascading.runtime.sink;
 
+import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
+
 import cascading.flow.FlowNode;
 import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.duct.Gate;
@@ -25,7 +27,6 @@ import cascading.pipe.Boundary;
 import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
-import com.dataartisans.flink.cascading.runtime.util.FlinkFlowProcess;
 
 @SuppressWarnings({"rawtypes"})
 public class SinkStreamGraph extends NodeStreamGraph {

@@ -16,6 +16,22 @@
 
 package com.dataartisans.flink.cascading.runtime.util;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.flink.api.common.accumulators.LongCounter;
+import org.apache.flink.api.common.functions.RuntimeContext;
+import org.apache.flink.util.InstantiationUtil;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.JobConf;
+
+import com.dataartisans.flink.cascading.runtime.stats.EnumStringConverter;
+
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
@@ -24,20 +40,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import com.dataartisans.flink.cascading.runtime.stats.EnumStringConverter;
-import org.apache.flink.api.common.accumulators.LongCounter;
-import org.apache.flink.api.common.functions.RuntimeContext;
-import org.apache.flink.util.InstantiationUtil;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.JobConf;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class FlinkFlowProcess extends FlowProcess<Configuration> {

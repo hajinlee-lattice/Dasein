@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import cascading.pipe.GroupBy;
-import cascading.pipe.Pipe;
-import cascading.pipe.assembly.Retain;
-import cascading.tuple.Fields;
-
 import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
@@ -16,6 +11,11 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Sort;
+
+import cascading.pipe.GroupBy;
+import cascading.pipe.Pipe;
+import cascading.pipe.assembly.Retain;
+import cascading.tuple.Fields;
 
 public class SortOperation extends Operation {
     public SortOperation(Input prior, String field, boolean descending) {
