@@ -92,7 +92,7 @@ public class ClientRmTemplate extends YarnRpcAccessor<ApplicationClientProtocol>
     }
 
     @Override
-    public List<ApplicationReport> listApplications(GetApplicationsRequest request) {
+    public List<ApplicationReport> listApplications(final GetApplicationsRequest request) {
         return execute(new YarnRpcCallback<List<ApplicationReport>, ApplicationClientProtocol>() {
             @Override
             public List<ApplicationReport> doInYarn(ApplicationClientProtocol proxy) throws YarnException, IOException {
