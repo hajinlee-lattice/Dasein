@@ -35,7 +35,7 @@ public class MetadataFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
     @AfterClass(groups = "deployment")

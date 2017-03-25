@@ -21,7 +21,7 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
     @Test(groups = "deployment", enabled = false)
