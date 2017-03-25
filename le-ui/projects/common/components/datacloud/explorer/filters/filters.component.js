@@ -184,7 +184,6 @@ angular
 
             vm.sortOrder = function() {
                 var sortPrefix = vm.sortPrefix.replace('+','');
-
                 if (!vm.category) {
                     return handleFilterOrder(vm.orders.category);
                 } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {

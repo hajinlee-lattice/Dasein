@@ -24,6 +24,7 @@
                     | filter: vm.enrichmentsFilter(vm.lookupMode) 
                     | orderBy: [ '-Value' ]
                     | limitTo: 5))"
+                    ng-class="{'ignore-ngclick': vm.section !== 'segment.analysis'}"
                     ng-click="vm.selectSegmentAttribute(attribute)">
                 <div class="column label" title="{{attribute.DisplayName}}">
                     <input mg-model="vm.segmentAttributeInput[attribute.Attribute]" ng-checked="vm.segmentAttributeInput[attribute.Attribute]" name="{{attribute.Attribute}}" id="{{attribute.Attribute}}" type="checkbox" ng-if="vm.section == 'analysis'" />

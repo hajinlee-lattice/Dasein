@@ -95,7 +95,6 @@ angular.module('common.datacloud.explorer', [
         }
         if (vm.section == 'insights' || vm.section == 'team') {
             if (vm.show_lattice_insights) {
-                vm.console.show_lattice_insights = vm.show_lattice_insights;
                 return false;
             }
             return true;
@@ -206,9 +205,8 @@ angular.module('common.datacloud.explorer', [
         }
 
         if(vm.section === 'segment.analysis') {
-            getMetadataSegements().then(function(result){
+            getMetadataSegments().then(function(result){
                 vm.metadataSegments = result.data;
-                console.log('getMetadataSegements:\t ', vm.getMetadataSegements);
             });
         }
 
@@ -286,6 +284,7 @@ angular.module('common.datacloud.explorer', [
                 vm.enrichmentsMap[item.FieldName] = vm.enrichments.length;
                 vm.enrichmentsObj[item.Category].push(item);
                 vm.enrichments.push(item);
+
             }
 
             numbersNumber = 0;
@@ -326,6 +325,7 @@ angular.module('common.datacloud.explorer', [
 
         vm.generalSelectedTotal = DataCloudStore.getMetadata('generalSelectedTotal');
         vm.premiumSelectedTotal = DataCloudStore.getMetadata('premiumSelectedTotal');
+
         var timestamp5 = new Date().getTime();
         console.log('xhrResult();\t\t\t', '[' + (timestamp2 - timestamp) + ':' + (timestamp3 - timestamp2) + ':' + (timestamp5 - timestamp4) + ']\t ' + ((timestamp3 - timestamp) + (timestamp5 - timestamp4)) + 'ms\t concurrent:'+vm.concurrentIndex);
     }
@@ -369,6 +369,11 @@ angular.module('common.datacloud.explorer', [
 
             getTopAttributes();
             getHighlightMetadata();
+
+            if(vm.metadataSegments) {
+                getExplorerSegments(vm.enrichments);
+            }
+
             //console.log('vm.highlightMetadata:\t ', vm.highlightMetadata); //ben
         }
     }
@@ -426,23 +431,34 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    var breakOnFirstEncounter = function(items, property, value) {
+    var breakOnFirstEncounter = function(items, property, value, returnObj) {
         for (var i=0,item; i<items.length; i++) {
             if (value === null) {
                 if(typeof items[i][property] !== 'undefined') {
+                    if(returnObj) {
+                        return items[i];
+                    }
                     return true;
                 }
             }
             if (typeof value === 'object') {
                 if(typeof items[i][property] === 'object' && items[i][property] !== null) {
+                    if(returnObj) {
+                        return items[i];
+                    }
                     return true;
                 }
             }
             if (items[i][property] == value) {
+                    if(returnObj) {
+                        return items[i];
+                    }
                 return true;
             };
         }
-
+        if(returnObj) {
+            return null;
+        }
         return false;
     }
 
@@ -701,7 +717,14 @@ angular.module('common.datacloud.explorer', [
                     }
                 }
 
-                enrichment.AttributeFlagsMap.CompanyProfile.hidden = flags.hidden
+                if(!enrichment.AttributeFlagsMap) {
+                    enrichment.AttributeFlagsMap = {};
+                }
+                if(!enrichment.AttributeFlagsMap.CompanyProfile) {
+                    enrichment.AttributeFlagsMap.CompanyProfile = {};
+                }
+
+                enrichment.AttributeFlagsMap.CompanyProfile.hidden = flags.hidden;
                 enrichment.HighlightHidden = flags.hidden;
                 enrichment.HighlightState.type = _type;
                 enrichment.HighlightState.label = label;
@@ -828,20 +851,25 @@ angular.module('common.datacloud.explorer', [
 
             if (!vm.lookupMode && items) {
                 items.forEach(function(item) {
-                    var index = vm.enrichmentsMap[item.Attribute];
-                    var enrichment = vm.enrichments[index];
-                    
-                    item.Value = enrichment.Value;
-                    item.AttributeValue = enrichment.AttributeValue; 
-                    item.FundamentalType = enrichment.FundamentalType;
-                    item.DisplayName = enrichment.DisplayName;
-                    item.Subcategory = enrichment.Subcategory;
-                    item.IsSelected = enrichment.IsSelected; 
-                    item.IsPremium = enrichment.IsPremium;
-                    item.IsInternal = enrichment.IsInternal;
-                    item.ImportanceOrdering = enrichment.ImportanceOrdering;
-                    item.HighlightHidden = enrichment.HighlightHidden;
-                    item.HighlightHighlighted = enrichment.HighlightHighlighted;
+                    var index = vm.enrichmentsMap[item.Attribute],
+                        enrichment = vm.enrichments[index],
+                        map = [
+                        'Value',
+                        'AttributeValue',
+                        'FundamentalType',
+                        'DisplayName',
+                        'Subcategory',
+                        'IsSelected',
+                        'IsPremium',
+                        'IsInternal',
+                        'ImportanceOrdering',
+                        'HighlightHidden',
+                        'HighlightHighlighted',
+                        'SegmentChecked'
+                    ];
+                    map.forEach(function(key){
+                        item[key] = enrichment[key];
+                    });
                 });
             }
             var timestamp_c = new Date().getTime();
@@ -1095,14 +1123,31 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
-    var getMetadataSegements = function() {
+    var getMetadataSegments = function() {98
         var deferred = $q.defer();
 
-        DataCloudStore.getMetadataSegements().then(function(result) {
+        DataCloudStore.getMetadataSegments().then(function(result) {
             deferred.resolve(result);
         });
 
         return deferred.promise;
+    }
+
+    var getExplorerSegments = function(enrichments) {
+        vm.metadataSegments.forEach(function(segment, key){
+            if(segment.simple_restriction && segment.simple_restriction.all) {
+                segment.simple_restriction.all.forEach(function(restriction){
+                    var key = restriction.bucketRestriction.lhs.columnLookup.column_name;
+                        enrichment = breakOnFirstEncounter(vm.enrichments, 'FieldName', key, true),
+                        FieldName = enrichment.FieldName,
+                        category = enrichment.Category,
+                        index = vm.enrichmentsMap[FieldName];
+                        if(index) {
+                            vm.enrichments[index].SegmentChecked = true;
+                        }
+                });
+            }
+        });
     }
 
     var textSearch = function(haystack, needle, case_insensitive) {

@@ -34,11 +34,16 @@ angular
             }
 
             vm.categoryOrderBy = function(test) {
-                return vm.lookupMode 
+                ret = vm.lookupMode 
                     ? [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ]
-                    : vm.section == 'analysis' 
-                        ? [ 'Checked', '-HighlightHighlighted', '-Value'  ]
+                    : vm.section == 'segment.analysis' 
+                        ? [ 'SegmentChecked', '-Value'  ]
                         : [ '-HighlightHighlighted', '-Value' ];
+                return ret;
+            }
+
+            vm.log = function() {
+                console.log('$$$$$$$$$$$$$$$$$$$', arguments, arguments[1].filter(function(a){return a.SegmentChecked}));
             }
 
             vm.categoryClick = function(category, $event) {

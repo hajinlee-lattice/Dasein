@@ -237,20 +237,20 @@ angular.module('common.datacloud')
         this.cube = items;
     }
 
-    this.getMetadataSegements = function() {
+    this.getMetadataSegments = function() {
         var deferred = $q.defer();
         if (this.metadataSegments) {
             deferred.resolve(this.metadataSegments);
         } else {
-            DataCloudService.getMetadataSegements().then(function(response){
-                DataCloudStore.setMetadataSegements(response);
+            DataCloudService.getMetadataSegments().then(function(response){
+                DataCloudStore.setMetadataSegments(response);
                 deferred.resolve(response);
             });
         }
         return deferred.promise;
     }
 
-    this.setMetadataSegements = function(items) {
+    this.setMetadataSegments = function(items) {
         this.metadataSegments = items;
     }
 })
@@ -475,7 +475,7 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
-    this.getMetadataSegements = function(opts){
+    this.getMetadataSegments = function(opts){
         var deferred = $q.defer(),
             opts = opts || {};
         $http({

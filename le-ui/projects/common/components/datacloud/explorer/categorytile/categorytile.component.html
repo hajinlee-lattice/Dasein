@@ -47,7 +47,7 @@
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
                     <div class="column label" title="{{attribute.DisplayName}}">
-                        <input ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName]" ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName]" name="{{attribute.Attribute || attribute.FieldName}}" id="{{attribute.Attribute || attribute.FieldName}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
+                        <input ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName]" ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName] || attribute.SegmentChecked" name="{{attribute.Attribute || attribute.FieldName}}" id="{{attribute.Attribute || attribute.FieldName}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
                         {{ attribute.DisplayName }}
                     </div>
                     <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
