@@ -53,4 +53,8 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="sourceAttributeDao" class="com.latticeengines.datacloud.core.dao.impl.SourceAttributeDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>
