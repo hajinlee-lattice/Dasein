@@ -530,7 +530,7 @@ angular.module('common.datacloud.explorer', [
         if (metadata) {
             if(metadata.enabled && metadata.disabled) {
                 type = 'dirty';
-                label = 'Some enabled for sales team';
+                label = 'Some Enabled for Sales Team';
             } else if(!metadata.enabled) {
                 type = 'disabled';
                 label = vm.highlightTypesCategory[type];
