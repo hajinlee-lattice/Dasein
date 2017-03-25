@@ -2,7 +2,6 @@ package com.latticeengines.metadata.service.impl;
 
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
