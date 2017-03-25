@@ -9,14 +9,14 @@
 
     <properties>
         <component-name>domain</component-name>
-        <le.common.version>3.3.0-SNAPSHOT</le.common.version>
+        <le.common.version>3.4.0-SNAPSHOT</le.common.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.3.0-SNAPSHOT</version>
+        <version>3.4.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

@@ -8,21 +8,21 @@
     <name>le-serviceflows-${component-name}</name>
 
     <properties>
-        <le.dataflow.version>3.3.0-SNAPSHOT</le.dataflow.version>
-        <le.domain.version>3.3.0-SNAPSHOT</le.domain.version>
-        <le.serviceflows.core.version>3.3.0-SNAPSHOT</le.serviceflows.core.version>
-        <le.workflow.version>3.3.0-SNAPSHOT</le.workflow.version>
-        <le.proxy.version>3.3.0-SNAPSHOT</le.proxy.version>
-        <le.camille.version>3.3.0-SNAPSHOT</le.camille.version>
-        <le.remote.version>3.3.0-SNAPSHOT</le.remote.version>
-        <le.testframework.version>3.3.0-SNAPSHOT</le.testframework.version>
+        <le.dataflow.version>3.4.0-SNAPSHOT</le.dataflow.version>
+        <le.domain.version>3.4.0-SNAPSHOT</le.domain.version>
+        <le.serviceflows.core.version>3.4.0-SNAPSHOT</le.serviceflows.core.version>
+        <le.workflow.version>3.4.0-SNAPSHOT</le.workflow.version>
+        <le.proxy.version>3.4.0-SNAPSHOT</le.proxy.version>
+        <le.camille.version>3.4.0-SNAPSHOT</le.camille.version>
+        <le.remote.version>3.4.0-SNAPSHOT</le.remote.version>
+        <le.testframework.version>3.4.0-SNAPSHOT</le.testframework.version>
         <component-name>leadprioritization</component-name>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-serviceflows</artifactId>
-        <version>3.3.0-SNAPSHOT</version>
+        <version>3.4.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 

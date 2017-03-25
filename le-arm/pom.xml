@@ -10,14 +10,14 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.3.0-SNAPSHOT</version>
+        <version>3.4.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
 
     <properties>
         <component-name>arm</component-name>
-        <le.common.version>3.3.0-SNAPSHOT</le.common.version>
+        <le.common.version>3.4.0-SNAPSHOT</le.common.version>
     </properties>
 
     <dependencies>

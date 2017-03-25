@@ -9,15 +9,15 @@
 
     <properties>
         <component-name>admin</component-name>
-        <le.baton.version>3.3.0-SNAPSHOT</le.baton.version>
-        <le.common.version>3.3.0-SNAPSHOT</le.common.version>
-        <le.domain.version>3.3.0-SNAPSHOT</le.domain.version>
-        <le.monitor.version>3.3.0-SNAPSHOT</le.monitor.version>
-        <le.remote.version>3.3.0-SNAPSHOT</le.remote.version>
-        <le.camille.version>3.3.0-SNAPSHOT</le.camille.version>
-        <le.db.version>3.3.0-SNAPSHOT</le.db.version>
-        <le.security.version>3.3.0-SNAPSHOT</le.security.version>
-        <le.encryption.version>3.3.0-SNAPSHOT</le.encryption.version>
+        <le.baton.version>3.4.0-SNAPSHOT</le.baton.version>
+        <le.common.version>3.4.0-SNAPSHOT</le.common.version>
+        <le.domain.version>3.4.0-SNAPSHOT</le.domain.version>
+        <le.monitor.version>3.4.0-SNAPSHOT</le.monitor.version>
+        <le.remote.version>3.4.0-SNAPSHOT</le.remote.version>
+        <le.camille.version>3.4.0-SNAPSHOT</le.camille.version>
+        <le.db.version>3.4.0-SNAPSHOT</le.db.version>
+        <le.security.version>3.4.0-SNAPSHOT</le.security.version>
+        <le.encryption.version>3.4.0-SNAPSHOT</le.encryption.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
         <jetty.port>8085</jetty.port>
         <jett.stop.port>10985</jett.stop.port>
@@ -26,7 +26,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.3.0-SNAPSHOT</version>
+        <version>3.4.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
