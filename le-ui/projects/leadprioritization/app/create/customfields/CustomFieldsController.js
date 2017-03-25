@@ -45,7 +45,9 @@ angular
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
 
         vm.standardFieldsList[2] = (vm.schema === 'SalesforceLead') ? 'Email' : 'Website';
-        vm.requiredFieldsMissing[vm.standardFieldsList[2]] = true;
+        if (ImportStore.GetAdvancedSetting('useLatticeAttributes')) {
+            vm.requiredFieldsMissing[vm.standardFieldsList[2]] = true;
+        }
 
         if (vm.fuzzyMatchEnabled) {
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
