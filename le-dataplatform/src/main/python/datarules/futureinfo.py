@@ -1,6 +1,8 @@
-from rulefwk import ColumnRule, RuleResults
-from leframework.codestyle import overrides
 import logging
+
+from leframework.codestyle import overrides
+from rulefwk import ColumnRule, RuleResults
+
 
 logger = logging.getLogger(name='futureinfo')
 
@@ -46,15 +48,15 @@ class FutureInfo(ColumnRule):
                 
                 lift = record['lift']
                 isNull = (record['discreteNullBucket'] or record['continuousNullBucket'])
-                percentPopulation = float(record['count'])/float(totalRows)
+                percentPopulation = float(record['count']) / float(totalRows)
                 if isNull:
                     nullLift = lift
                     nullPopulation = percentPopulation
                 else:
-                    nonNullEvents += int(lift*record['count'])
+                    nonNullEvents += int(lift * record['count'])
                     nonNullRecords += record['count']
 
-            nonNullLift = float(nonNullEvents)/float(nonNullRecords)
+            nonNullLift = float(nonNullEvents) / float(nonNullRecords)
 
             if nullPopulation > self.maxNullPopulation and nullLift < self.minNullLift and nonNullLift > self.maxNonNullLift:
                 ruleResult = RuleResults(False,
@@ -69,7 +71,7 @@ class FutureInfo(ColumnRule):
 
     @overrides
     def getDescription(self):
-        return "This attribute looks like it was populated later in the business cycle, often called future information. This warning comes when available values show good lift (greater than {2}), but {0:.2%} or more records are unpopulated and have low lift (below {1}).".format(self.maxNullPopulation, self.minNullLift, sself.maxNonNullLift)
+        return "This attribute looks like it was populated later in the business cycle, often called future information. This warning comes when available values show good lift (greater than {2}), but {0:.2%} or more records are unpopulated and have low lift (below {1}).".format(self.maxNullPopulation, self.minNullLift, self.maxNonNullLift)
 
     @overrides(ColumnRule)
     def getConfParameters(self):

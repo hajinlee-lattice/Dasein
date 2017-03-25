@@ -101,6 +101,7 @@
       ],
       "NamedParameterListToInit": {
         "groupedFeatures": [],
+        "ldcFeatures": [ "HPAEmailSuffix", "LE_COUNTRY", "LE_INDUSTRY", "LDC_State", "LDC_PrimaryIndustry", "AlexaCategories", "AlexaLanguage" ],
         "dsCategVarGroupingInfo": "emptyDictionary",
         "maxNumberUniqueValues": 10,
         "targetCol": "targetColumn",

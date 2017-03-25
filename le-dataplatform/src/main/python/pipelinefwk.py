@@ -149,6 +149,39 @@ class PipelineStep(object):
     
     def setMediator(self, mediator):
         self.setProperty("MEDIATOR", mediator)
+
+    def getExternalColumnsSet(self, configMetadata):
+        externalCols = set()
+        if configMetadata is None:
+            return externalCols
+
+        try:
+            def isExternal(x):
+                try:
+                    return x['Tags'][0] == 'External'
+                except:
+                    return False
+            externalCols = set(map(lambda y: y['ColumnName'], filter(lambda y: isExternal(y), configMetadata)))
+        except e:
+            logger.error(str(e))
+        return externalCols
+    
+    def getApprovedUsageModelSet(self, configMetadata):
+        modelCols = set()
+        if configMetadata is None:
+            return modelCols
+
+        try:
+            def useForModel(x):
+                try:
+                    approvedUsage = x['ApprovedUsage'][0].strip()
+                    return approvedUsage in ['Model', 'ModelAndModelInsights', 'ModelAndAllInsights']
+                except:
+                    return True
+            modelCols = set(map(lambda y: y['ColumnName'], filter(lambda y: useForModel(y), configMetadata)))
+        except e:
+            logger.error(str(e))
+        return modelCols
     
 class ModelStep(PipelineStep):
     model = None

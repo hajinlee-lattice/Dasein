@@ -1,11 +1,10 @@
 from collections import Counter
-from json import encoder
 import json
 from math import sqrt
 import numbers
-import numpy as np
 import os
 
+import numpy as np
 import pandas as pd
 from pipelinefwk import PipelineStep
 from pipelinefwk import create_column
@@ -17,6 +16,7 @@ logger = get_logger("categoricalgroupingstep")
 class CategoricalGroupingStep(PipelineStep):
 
     def __init__(self, groupedFeatures, \
+                 ldcFeatures, \
                  dsCategVarGroupingInfo, \
                  maxNumberUniqueValues, \
                  targetCol, \
@@ -25,6 +25,7 @@ class CategoricalGroupingStep(PipelineStep):
                  thresholdError, \
                  thresholdSigSize, \
                  thresholdBinSize):
+        self.ldcFeatures = set(ldcFeatures)
         self.groupedFeatures = groupedFeatures
         self.dsCategVarGroupingInfo = dsCategVarGroupingInfo
         self.maxNumberUniqueValues = maxNumberUniqueValues
@@ -90,7 +91,7 @@ class CategoricalGroupingStep(PipelineStep):
             popCount = len(eventList)
             popRate = sum(eventList) * 1.0 / len(eventList)
 
-            featuresToGroup = self.__findFeatures(dataFrame)
+            featuresToGroup = self.__findFeatures(dataFrame, configMetadata)
 
             logger.info('features to group on = {}'.format(str(featuresToGroup)))
 
@@ -168,10 +169,14 @@ class CategoricalGroupingStep(PipelineStep):
     def __convertFloatToString(self, x):
         return '{0:.2f}'.format(x) if (x is not None and isinstance(x, numbers.Real) and not np.isnan(x)) else x
 
-    def __findFeatures(self, dataFrame):
+    def __findFeatures(self, dataFrame, configMetadata):
+        externalFeatures = super(CategoricalGroupingStep, self).getExternalColumnsSet(configMetadata)
+        externalFeatures = filter(lambda x: x not in self.ldcFeatures, externalFeatures)
         featureList = [featureName for featureName in self.categoricalColumns if featureName in dataFrame.columns \
                 and featureName not in self.keys and featureName not in self.samples and featureName not in self.readouts \
                 and featureName not in self.target and featureName not in self.featuresToExclude]
+        
+        featureList = filter(lambda x: x not in externalFeatures, featureList)
         return featureList
 
     def __conversionRateEncoding(self, columnList, eventList):
@@ -183,7 +188,7 @@ class CategoricalGroupingStep(PipelineStep):
         return {k:yy[k][1] / yy[k][0] for k in yy.keys()}
 
     def __writeRTSArtifacts(self):
-        with open("dsCategVarGroupingInfo.json", "wb") as fp:
+        with open("dscategvargroupinginfo.json", "wb") as fp:
             logger.info('Writing RTS artifacts: {}'.format(json.dumps(self.dsCategVarGroupingInfo)))
             json.dump(self.dsCategVarGroupingInfo, fp)
             self.dsCategVarGroupingInfoFilePath = os.path.abspath(fp.name)

@@ -1,29 +1,29 @@
-from avro import schema, datafile, io
 import codecs
 from collections import OrderedDict
 import json
 import logging
 import math
-from pandas.core.common import isnull
 import sys
 
+from avro import schema, datafile, io
+from pandas.core.common import isnull
 from scipy import stats
 
 from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
+from leframework.bucketers.categoricalbucketer import getCatGroupingAndStatsForModel, getCatGroupingAndStatsForDisplay
+from leframework.bucketers.numericalbucketer import getBucketsAndStats
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
 import numpy as np
 import pandas as pd
 
-from leframework.bucketers.numericalbucketer import getBucketsAndStats
-from leframework.bucketers.categoricalbucketer import getCatGroupingAndStatsForModel, getCatGroupingAndStatsForDisplay
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name='data_profile')
+logger = logging.getLogger(name='data_profile_v2')
 
 def getExecutor():
     return DataProfilingExecutor()
@@ -187,7 +187,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                                          recordWriter, writers_schema=avroSchema, codec='deflate')
     dataWriterUI = datafile.DataFileWriter(codecs.open(modelDir + '/profile.avro', 'wb'),
                                          recordWriter, writers_schema=avroSchema, codec='deflate')
-    dataWriterFull={'Model':dataWriterModel,'UI':dataWriterUI}
+    dataWriterFull = {'Model':dataWriterModel, 'UI':dataWriterUI}
     
     colNames = list(data.columns.values)
     categoricalCols = set(schema["stringColumns"])
@@ -377,12 +377,13 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         uniqueValues = len(columnData.unique())
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
+        if uniqueValues > 200:
+            if not filtered: attributeStats["GT200_DistinctValue"].append(colName)
+            logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
+            return (index, diagnostics)
         groupingDict = getCatGroupingAndStatsForModel(columnData.tolist(), eventVector.tolist())
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriterFull['Model'], groupingDict, mode, colName, otherMetadata, index)
         groupingDict = getCatGroupingAndStatsForDisplay(groupingDict['groupingResults'])
-        if uniqueValues > 200:
-            if not filtered: attributeStats["GT200_DistinctValue"].append(colName)
-            groupingDict['groupingResults']['LATTICE_GT200_DistinctValue'] = (0, 0.0, 0.0)
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriterFull['UI'], groupingDict, mode, colName, otherMetadata, index)
     else:
         # Band column
@@ -400,11 +401,11 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
             return (index, diagnostics)
         # use only unified bucketer and return different things
         # Apply bucketing with specified parameters for MI
-        bandsDictMI = getBucketsAndStats(columnData.tolist(), eventVector,  rawBinNumber = 200,
-                       minPtsToBucket = 50, minSpecialValRatio = 0.02, minRegBucketSize = 20,
-                       minRegBucketRatio = 0.005, sigThreshold = 8, minNumBuckets = 3, 
-                       maxNumBuckets = 10, forUI = False, kurtThreshold=3, numTailBuckets=3, 
-                       tailSize=0.03, sizeThreshold=0.05, liftThreshold=1.8, 
+        bandsDictMI = getBucketsAndStats(columnData.tolist(), eventVector, rawBinNumber=200,
+                       minPtsToBucket=50, minSpecialValRatio=0.02, minRegBucketSize=20,
+                       minRegBucketRatio=0.005, sigThreshold=8, minNumBuckets=3,
+                       maxNumBuckets=10, forUI=False, kurtThreshold=3, numTailBuckets=3,
+                       tailSize=0.03, sizeThreshold=0.05, liftThreshold=1.8,
                        fixBoundaries=False, eventDiffThreshold=10)
         # use different parameters for UI buckets
         # if colname is in revenue or employees, fix boundaries
@@ -415,11 +416,11 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
                         "Total_Amount_Raised"]
         fixBoundCols = [x.lower() for x in fixBoundCols]
         fixbound = colName.lower() in fixBoundCols
-        bandsDictUI = getBucketsAndStats(columnData.tolist(), eventVector,  rawBinNumber = 100,
-                       minPtsToBucket = 50, minSpecialValRatio = 0.02, minRegBucketSize = 100,
-                       minRegBucketRatio = 0.02, sigThreshold = 8, minNumBuckets = 3, 
-                       maxNumBuckets = 7, forUI = True, kurtThreshold=3, numTailBuckets=3, 
-                       tailSize=0.03, sizeThreshold=0.05, liftThreshold=1.8, 
+        bandsDictUI = getBucketsAndStats(columnData.tolist(), eventVector, rawBinNumber=100,
+                       minPtsToBucket=50, minSpecialValRatio=0.02, minRegBucketSize=100,
+                       minRegBucketRatio=0.02, sigThreshold=8, minNumBuckets=3,
+                       maxNumBuckets=7, forUI=True, kurtThreshold=3, numTailBuckets=3,
+                       tailSize=0.03, sizeThreshold=0.05, liftThreshold=1.8,
                        fixBoundaries=fixbound, eventDiffThreshold=10)
         diagnostics["BucketingStrategy"] = "UnifiedBucketer"
         index, diagnostics["UncertaintyCoefficient"] = writeBandsToAvro(dataWriterFull['Model'], bandsDictMI,
