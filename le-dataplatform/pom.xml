@@ -360,7 +360,7 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-yarn-core</artifactId>
             <version>${spring.data.version}</version>
-            <classifier>ledp</classifier>
+            <classifier>ledp3</classifier>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
