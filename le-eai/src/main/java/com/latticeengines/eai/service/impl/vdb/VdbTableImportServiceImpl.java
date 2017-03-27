@@ -68,11 +68,8 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Autowired
     private EaiMetadataService eaiMetadataService;
 
-//    @Value("${eai.vdb.rows.batch:2000}")
-//    private int rowsToGet;
-
-    @Value("${eai.vdb.cells.batch:1000000}")
-    private int cellsPerFile;
+    @Value("${eai.vdb.file.size:10000000}")
+    private int sizePerFile;
 
 
     @Override
@@ -160,10 +157,6 @@ public class VdbTableImportServiceImpl extends ImportService {
         String extractIdentifier = context.getProperty(ImportVdbProperty.EXTRACT_IDENTIFIER, String.class);
         String customSpace = context.getProperty(ImportVdbProperty.CUSTOMER, String.class);
         Configuration yarnConfiguration = context.getProperty(ImportVdbProperty.HADOOPCONFIG, Configuration.class);
-        String metaDataJson = context.getProperty(ImportVdbProperty.METADATA_LIST, String.class);
-        @SuppressWarnings("unchecked")
-        List<Object> rawList = JsonUtils.deserialize(metaDataJson, List.class);
-        List<VdbSpecMetadata> vdbSpecMetadataList = JsonUtils.convertList(rawList, VdbSpecMetadata.class);
         int totalRows;
         int rowsToGet;
         try {
@@ -184,20 +177,12 @@ public class VdbTableImportServiceImpl extends ImportService {
             reportStatus(statusUrl, vdbLoadTableStatus);
             throw new RuntimeException(vdbLoadTableStatus.getMessage());
         }
-        int proccessedLines = vdbImportExtract.getProcessedRecords();
-        int linesPerFile = vdbImportExtract.getLinesPerFile();
+        int processedLines = vdbImportExtract.getProcessedRecords();
         int fileIndex = 0;
-        if (proccessedLines > 0) {
-            fileIndex = proccessedLines / linesPerFile;
+        if (processedLines > 0) {
+            fileIndex = getFileIndex(targetPath, yarnConfiguration);
         }
-        if (linesPerFile == 0) {
-            linesPerFile = getLinesPerFile(vdbSpecMetadataList.size(), rowsToGet);
-            vdbImportExtract.setLinesPerFile(linesPerFile);
-            eaiMetadataService.updateVdbImportExtract(customSpace, vdbImportExtract);
-        }
-
-        int startRow = proccessedLines;
-        int fileRows = 0;
+        int startRow = processedLines;
 
         Schema schema = table.getSchema();
         log.info("schema is: " + schema.toString());
@@ -213,6 +198,7 @@ public class VdbTableImportServiceImpl extends ImportService {
         reportStatus(statusUrl, vdbLoadTableStatus);
         boolean error = false;
         boolean needNewFile = true;
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             HashMap<String, Attribute> attributeMap = new HashMap<>();
@@ -235,9 +221,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     if (rowsAppend != rowsToGet) {
                         log.warn(String.format("Row batch is %d, but only %d rows append to avro.", rowsToGet, rowsAppend));
                     }
-
                     startRow += rowsAppend;
-                    fileRows += rowsAppend;
 
                     vdbGetQueryData.setStartRow(startRow);
                     vdbLoadTableStatus.setJobStatus("Running");
@@ -246,12 +230,12 @@ public class VdbTableImportServiceImpl extends ImportService {
 
                     reportStatus(statusUrl, vdbLoadTableStatus);
 
-                    if (fileRows == linesPerFile) {
+                    dataFileWriter.flush();
+                    if (outputStream.size() >= sizePerFile) {
                         closeDataFileWriter(dataFileWriter);
                         String fileName = generateAvroFileName(avroFileName, fileIndex);
                         writeStreamToHdfs(outputStream, targetPath + "/" + fileName, yarnConfiguration);
                         fileIndex++;
-                        fileRows = 0;
                         needNewFile = true;
                         vdbImportExtract.setProcessedRecords(startRow);
                         eaiMetadataService.updateVdbImportExtract(customSpace, vdbImportExtract);
@@ -395,16 +379,6 @@ public class VdbTableImportServiceImpl extends ImportService {
         return numberFormatter.parse(inputStr, Locale.getDefault());
     }
 
-    private int getLinesPerFile(int columnCount, int rowsToGet) {
-        int linesPerFile = cellsPerFile / columnCount;
-        int batch = linesPerFile / rowsToGet;
-        if (batch == 0) {
-            batch = 1;
-        }
-        linesPerFile = batch * rowsToGet;
-        return linesPerFile;
-    }
-
     private String generateAvroFileName(String fileName, int fileIndex) {
         int extensionPos = fileName.lastIndexOf('.');
         String name = fileName.substring(0, extensionPos);
@@ -428,6 +402,16 @@ public class VdbTableImportServiceImpl extends ImportService {
             dataFileWriter.close();
         } catch (IOException e) {
             log.error("Error closing data file writer");
+        }
+    }
+
+    private int getFileIndex(String path, Configuration yarnConfiguration) {
+        try {
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
+            return files.size();
+        } catch (IOException e) {
+            log.error("Cannot get files from extract folder!");
+            return 0;
         }
     }
 }
