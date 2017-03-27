@@ -110,7 +110,11 @@ angular.module('lp.models.ratings', [
     
             vm.buckets[i].num_leads = vm.rightLeads - vm.leftLeads;
 
-            vm.buckets[i].lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
+            if (vm.totalLeads == 0 || vm.ratingsSummary.total_num_converted == 0 || vm.ratingsSummary.total_num_leads == 0) {
+                vm.buckets[i].lift = 0;
+            } else {
+                vm.buckets[i].lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
+            }
 
             vm.buckets[i].name = vm.bucketNames[i];
 
