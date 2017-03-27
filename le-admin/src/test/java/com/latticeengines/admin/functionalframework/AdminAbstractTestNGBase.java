@@ -124,8 +124,11 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         String url = String.format("%s/admin/tenants/%s?contractId=%s&deleteZookeeper=%b", getRestHostPort(), tenantId,
                 contractId, deleteZookeeper);
         restTemplate.delete(url, new HashMap<>());
-        waitUntilTenantDeleted(contractId, tenantId, 200);
-        log.info(String.format("Successfully deleted the tenant %s", tenantId));
+        if (waitUntilTenantDeleted(contractId, tenantId, 200)) {
+            log.info(String.format("Successfully deleted the tenant %s", tenantId));
+        } else {
+            log.warn(String.format("Tenant %s maybe not deleted.", tenantId));
+        }
     }
 
     protected void createTenant(String contractId, String tenantId) throws Exception {
@@ -240,21 +243,22 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         return state;
     }
 
-    protected void waitUntilTenantDeleted(String contractId, String tenantId, int numOfRetries) {
+    protected boolean waitUntilTenantDeleted(String contractId, String tenantId, int numOfRetries) {
         while(numOfRetries > 0) {
             numOfRetries--;
             try {
                 Thread.sleep(1000L);
                 TenantDocument doc = tenantService.getTenant(contractId, tenantId);
                 if (doc.getTenantInfo() == null) {
-                    break;
+                    return true;
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException("Waiting for tenant delete interrupted", e);
             } catch (Exception e) {
-                break;
+                return true;
             }
         }
+        return false;
     }
 
     public void clearDatastore(String dataStoreOption, String permStoreOption, String visiDBServerName, String tenant) {
