@@ -20,6 +20,7 @@ public class DataRuleLists {
         List<DataRule> ruleList = new ArrayList<>();
 
         DataRule distinctValueCount = new DataRule("DistinctValueCount");
+        distinctValueCount.setEnabled(false);
         distinctValueCount.setDisplayName("Too many category values");
         distinctValueCount.setDescription(
                 "This attribute has more than 200 category values. Attributes with more than 200 different category values cannot be used in modeling. Where possible, replace with a picklist attribute instead of a free field.");
