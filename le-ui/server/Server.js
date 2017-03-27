@@ -188,7 +188,7 @@ class Server {
         if (API_URL) {
             API_PATH = API_PATH || '/pls';
 
-            console.log(chalk.white('>') + ' API PROXY\t', API_LOCAL_PATH, '\n\t' + API_URL+API_PATH);
+            console.log(chalk.white('>') + ' API PROXY\t', API_LOCAL_PATH, '\n\t' + API_URL + API_PATH + '\n');
 
             try {
                 this.app.use(API_LOCAL_PATH, (req, res) => {
@@ -273,12 +273,12 @@ class Server {
                     );
                 });
             }
-
+/*
             console.log(
                 chalk.white('>') + ' ROUTE\t'+route.path.replace(this.options.SRC_PATH,''),
                 '\n\t[ '+displayString+' ]'
             );
-
+*/
             displayString = '';
             // users will see the desired render page when entering these routes
             if (route.pages) {
@@ -292,8 +292,6 @@ class Server {
                     );
                 });
             }
-
-            console.log('\n');
         });
     }
 

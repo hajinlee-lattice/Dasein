@@ -85,25 +85,30 @@ angular
 
                     // debounce timeout to speed things up
                     vm.queryTimeout = $timeout(function() {
-                        if(!vm.category && newvalue) {
+                        if (!vm.category && newvalue) {
                             vm.setCategory(vm.categories[0]);
                             vm.updateStateParams();
                         }
 
                         vm.query = vm.queryText;
-                        vm.queryInProgress = false;
 
                         if (vm.section != 'browse') {
                             vm.updateStateParams();
                         }
 
-                        var categories = Object.keys(vm.categoryCounts).filter(function(value, index) {
-                            return vm.categoryCounts[value] > 0;
-                        });
+                        // maybe this will fix the issues where they dont trill down??
+                        $timeout(function() {
+                            var categories = Object.keys(vm.categoryCounts).filter(function(value, index) {
+                                return vm.categoryCounts[value] > 0;
+                            });
 
-                        if (categories.length == 1 && !vm.lookupMode) {
-                            vm.setCategory(categories[0]);
-                        }
+                            if (categories.length == 1 && !vm.lookupMode) {
+                                vm.setCategory(categories[0]);
+                                vm.filterEmptySubcategories();
+                            }
+
+                            vm.queryInProgress = false;
+                        }, 1);
 
                         vm.filterEmptySubcategories();
                         vm.TileTableItems = {};

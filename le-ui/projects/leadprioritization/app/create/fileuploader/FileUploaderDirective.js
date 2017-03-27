@@ -173,29 +173,32 @@ angular
                 
                 var deferred = $q.defer(),
                     blob = new Blob([
-                        "onmessage = function(e) {"+
-                        "   importScripts(e.data.url + '/lib/js/pako_deflate.min.js');"+
-                        ""+ 
-                        "   var file = e.data.file,"+
-                        "       FR = new FileReaderSync(),"+
-                        "       totalSize = file.size, curSize = 0,"+
-                        "       maxChunk = 16384, chunks = 0, chunk,"+
-                        "       chunkSize = totalSize < maxChunk ? totalSize : maxChunk,"+
-                        "       deflator = new pako.Deflate({ gzip:true });"+
-                        ""+
-                        "   while (curSize < totalSize) { "+ 
-                        "       if (chunks++ % 100 == 0) {"+
-                        "           var percentage = ((curSize / totalSize) * 100).toFixed(2);"+
-                        "           postMessage({ file: null, progress: percentage });"+
-                        "       }"+
-                        ""+
-                        "       chunk = file.slice(curSize, curSize + chunkSize);"+
-                        "       curSize += chunkSize;"+
-                        "       lastChunk = (curSize >= totalSize);"+
-                        "       deflator.push(FR.readAsArrayBuffer(chunk), lastChunk);"+
-                        "   }"+
-                        ""+ 
-                        "   postMessage({ file: deflator.result, progress: 100 });"+
+                        "onmessage = function(e) {" +
+                        "   importScripts(e.data.url + '/lib/js/pako_deflate.min.js');" +
+                        "" + 
+                        "   var file = e.data.file," +
+                        "       FR = new FileReaderSync()," +
+                        "       deflator = new pako.Deflate({ gzip: true })," +
+                        "       totalSize = file.size," +
+                        "       maxChunk = 16384," +
+                        "       chunkSize = (totalSize < maxChunk ? totalSize : maxChunk)," +
+                        "       curSize = 0," +
+                        "       chunks = 0," +
+                        "       chunk;" +
+                        "" +
+                        "   while (curSize < totalSize) { " + 
+                        "       if (chunks++ % 100 == 0) {" +
+                        "           var percentage = ((curSize / totalSize) * 100).toFixed(2);" +
+                        "           postMessage({ file: null, progress: percentage });" +
+                        "       }" +
+                        "" +
+                        "       chunk = file.slice(curSize, curSize + chunkSize);" +
+                        "       curSize += chunkSize;" +
+                        "       lastChunk = (curSize >= totalSize);" +
+                        "       deflator.push(FR.readAsArrayBuffer(chunk), lastChunk);" +
+                        "   }" +
+                        "" + 
+                        "   postMessage({ file: deflator.result, progress: 100 });" +
                         "}"
                     ]),
                     blobURL = window.URL.createObjectURL(blob),

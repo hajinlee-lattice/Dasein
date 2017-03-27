@@ -102,18 +102,17 @@ angular.module('common.datacloud.explorer', [
         return false;
     }
 
-    var walkObject = function(obj, j) {
-        if (obj && j) {
-            return obj[j];
-        }
-    }
-
     vm.filter = function(items, property, value, debug) {
         if (property.indexOf('.') > -1) {
             var propsList = property.split('.');
+            var walkObject = function(obj, j) {
+                if (obj && j) {
+                    return obj[j];
+                }
+            };
 
-            for (var i=0,result=[]; i < items.length; i++) {
-                var item = propsList.reduce(walkObject, items[i]);
+            for (var i=0, result=[], item; i < items.length; i++) {
+                item = propsList.reduce(walkObject, items[i]);
 
                 if (typeof item != 'undefined' && item == value) {
                     result.push(items[i]);

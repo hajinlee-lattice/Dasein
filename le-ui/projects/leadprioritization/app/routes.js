@@ -1438,7 +1438,21 @@ angular
 
                                 json.request = LookupStore.get('request');
                                 json.request.record.CompanyName = 'Lattice Engines';
-
+                                /*json = {
+                                  "Authentication": "94e62273-2e09-4d65-8f8f-6cad2fd9de6f",
+                                  "request": {
+                                    "record": {
+                                      "CompanyName": "TestCompany",
+                                      "Email": "",
+                                      "Domain": "www.test.com",
+                                      "City": "SF",
+                                      "State": "CA",
+                                      "PostalCode": "94105",
+                                      "Country": "United States",
+                                      "PhoneNumber": "null"
+                                    }
+                                  }
+                                }*/
                                 childWindow.postMessage(json,'*');
                             }
                         }, false);

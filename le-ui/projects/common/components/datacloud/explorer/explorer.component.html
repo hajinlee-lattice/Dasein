@@ -56,12 +56,12 @@
                     vm="vm" subcategory="subcategory" count="count">
                 </li>
 
-                <li class="load-status" ng-show="!subcategoriesList.length" ng-if="loading_image" ng-init="loading_image">
-                    <div ng-show="!vm.enrichments_loaded">
+                <li class="load-status" ng-show="!subcategoriesList.length && loading_image" ng-init="loading_image">
+                    <div ng-if="!vm.enrichments_loaded">
                         <div class="loader"></div>
                     </div>
 
-                    <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
+                    <h2 ng-if="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
 
@@ -84,7 +84,7 @@
             <div class="subcategory-back" ng-if="filteredList.length && vm.category && (!vm.subcategory || (vm.subcategory == 'Other' && !vm.isYesNoCategory(vm.category, true)))">
                 <span ng-click="vm.setCategory(''); vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
             </div>
-            <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+            <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-if="vm.max > 1 && enrichment.length > 0">
                 <div class="twelve columns">
                     <pd-pagination-controls
                             current="vm.metadata.current"
@@ -108,14 +108,14 @@
                     vm="vm" enrichment="enrichment">
                 </li>
                 <li class="load-status" ng-show="!filteredList.length">
-                    <div ng-show="!vm.enrichments_loaded" ng-if="loading_image" ng-init="loading_image">
+                    <div ng-if="!vm.enrichments_loaded && loading_image" ng-init="loading_image">
                         <div class="loader"> </div>
                     </div>
-                    <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
+                    <h2 ng-if="vm.enrichments_loaded && !vm.queryInProgress">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
 
-            <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+            <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-if="vm.max > 1 && enrichment.length > 0">
                 <div class="twelve columns">
                     <pd-pagination-controls
                             current="vm.metadata.current"
@@ -128,6 +128,6 @@
     <div ng-if="vm.no_lookup_results_message" class="no-results-lookup">
         <h2>Account Not Found</h2>
         <p>We were unable to find a matching account for the information provided</p>
-        <a class="lookup-back" ui-sref="home.datacloud.lookup.form"><ico class="fa fa-arrow-left"></ico> Try again</a>
+        <a class="lookup-back" ui-sref="home.datacloud.lookup.form" ng-if="vm.section != 'insights'"><ico class="fa fa-arrow-left"></ico> Try again</a>
     </div>
 </div>

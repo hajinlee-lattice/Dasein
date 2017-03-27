@@ -226,7 +226,7 @@ module.exports = function (grunt) {
             proddev: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'production',
-                ULYSSES_URL: 'https://bodcdevsvipb13.lattice.local:8075',
+                ULYSSES_URL: 'https://api.lattice-engines.com',
                 API_URL: 'https://app.lattice-engines.com',
                 API_ADMIN_URL: 'https://admin.prod.lattice.local:8085/',
                 API_CON_URL: 'https://api.lattice-engines.com',
