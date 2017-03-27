@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -123,6 +124,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         String url = String.format("%s/admin/tenants/%s?contractId=%s&deleteZookeeper=%b", getRestHostPort(), tenantId,
                 contractId, deleteZookeeper);
         restTemplate.delete(url, new HashMap<>());
+        waitUntilTenantDeleted(contractId, tenantId, 200);
         log.info(String.format("Successfully deleted the tenant %s", tenantId));
     }
 
@@ -236,6 +238,23 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
             state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
         }
         return state;
+    }
+
+    protected void waitUntilTenantDeleted(String contractId, String tenantId, int numOfRetries) {
+        while(numOfRetries > 0) {
+            numOfRetries--;
+            try {
+                Thread.sleep(1000L);
+                TenantDocument doc = tenantService.getTenant(contractId, tenantId);
+                if (doc.getTenantInfo() == null) {
+                    break;
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Waiting for tenant delete interrupted", e);
+            } catch (Exception e) {
+                break;
+            }
+        }
     }
 
     public void clearDatastore(String dataStoreOption, String permStoreOption, String visiDBServerName, String tenant) {
