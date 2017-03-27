@@ -54,7 +54,21 @@
 						</tr>
 						<tr class="field-mapping-row-spacer field-mapping-row-spacer-odd"><td colspan=100></td></tr>
 						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
-						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:vm.standardFieldsList.length:1"
+						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:2:1"
+							ng-init="field = vm.standardFieldMappings[standardField]"
+							ng-if="field.mappedField !== null"
+							ng-include="'score-field-mapping-row-template.html'">
+						</tr>
+						<tr class="field-mapping-row-spacer field-mapping-row-spacer-odd"><td colspan=100></td></tr>
+						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:1:3"
+							ng-init="field = vm.standardFieldMappings[standardField]"
+							ng-if="field.mappedField !== null"
+							ng-include="'score-field-mapping-row-template.html'">
+						</tr>
+						<tr class="field-mapping-row-spacer field-mapping-row-spacer-odd"><td colspan=100></td></tr>
+						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr ng-repeat="standardField in vm.standardFieldsList | limitTo:vm.standardFieldsList.length:4"
 							ng-init="field = vm.standardFieldMappings[standardField]"
 							ng-if="field.mappedField !== null"
 							ng-include="'score-field-mapping-row-template.html'">
@@ -75,7 +89,7 @@
 						<div class="has-error">
 							<ul class="help-block">
 								<li ng-if="vm.requiredFieldsMissing['Id']">Please map Id</li>
-								<li ng-if="vm.requiredFieldsMissing['CompanyName'] || vm.requiredFieldsMissing['Email'] || vm.requiredFieldsMissing['Website']">Please map {{::vm.schema === 'SalesforceAccount' ? 'Website' : 'Email'}} {{::vm.useFuzzyMatch ? 'or Company Name' : ''}}</li>
+								<li ng-if="vm.requiredFieldsMissing['CompanyName'] || vm.requiredFieldsMissing['Email'] || vm.requiredFieldsMissing['Website'] || vm.requiredFieldsMissing['DUNS']">Please map {{::vm.schema === 'SalesforceAccount' ? 'Website' : 'Email'}} {{::vm.useFuzzyMatch ? 'or Company Name' : ''}} or DUNS</li>
 							</ul>
 						</div>
 					</div>

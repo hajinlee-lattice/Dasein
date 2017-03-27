@@ -23,14 +23,15 @@ angular
         fieldMappings: FieldDocument.fieldMappings,
         initialized: false,
         NextClicked: false,
-        standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
+        standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'DUNS', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
         standardFieldsListMap: {},
         requiredFieldsMissing: {
             'Event': true,
             'Id': true
         },
         requiredFieldsFuzzyMatching: {
-            'CompanyName': true
+            'CompanyName': true,
+            'DUNS': true
         },
         ignoredFieldLabel: '-- Unmapped Field --',
         UnmappedFieldsMap: {},
@@ -293,18 +294,17 @@ angular
         }
 
         if (vm.fuzzyMatchEnabled) {
-            if (vm.schema === 'SalesforceAccount') {
-                if (!vm.requiredFieldsMissing['Website']) {
-                    vm.requiredFieldsMissing['CompanyName'] = false;
-                } else if (!vm.requiredFieldsMissing['CompanyName']) {
-                    vm.requiredFieldsMissing['Website'] = false;
-                }
-            } else {
-                if (!vm.requiredFieldsMissing['Email']) {
-                    vm.requiredFieldsMissing['CompanyName'] = false;
-                } else if (!vm.requiredFieldsMissing['CompanyName']) {
-                    vm.requiredFieldsMissing['Email'] = false;
-                }
+            var domainLikeField = (vm.schema === 'SalesforceAccount') ? 'Website' : 'Email';
+
+            if (!vm.requiredFieldsMissing[domainLikeField]) {
+                vm.requiredFieldsMissing['CompanyName'] = false;
+                vm.requiredFieldsMissing['DUNS'] = false;
+            } else if (!vm.requiredFieldsMissing['CompanyName']) {
+                vm.requiredFieldsMissing[domainLikeField] = false;
+                vm.requiredFieldsMissing['DUNS'] = false;
+            } else if (!vm.requiredFieldsMissing['DUNS']) {
+                vm.requiredFieldsMissing['CompanyName'] = false;
+                vm.requiredFieldsMissing[domainLikeField] = false;
             }
         }
 
