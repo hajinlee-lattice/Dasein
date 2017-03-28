@@ -54,6 +54,10 @@ public class SessionServiceImpl implements SessionService {
         Long retryInterval = RETRY_INTERVAL_MSEC;
         Integer retries = 0;
         Session session = null;
+        if (ticket.getTenants() == null || ticket.getTenants().size() == 0) {
+            LOGGER.error("The ticket" + ticket.getData() + "'s tenant is null");
+            throw new RuntimeException("The ticket" + ticket.getData() + "'s tenant is null");
+        }
         while (++retries <= MAX_RETRY) {
             try {
                 session = globalSessionManagementService.attach(ticket);
