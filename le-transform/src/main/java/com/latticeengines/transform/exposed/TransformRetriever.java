@@ -67,8 +67,7 @@ public class TransformRetriever implements InitializingBean {
                             log.info("Loaded java transform: " + key.moduleName + ". constructor name:"
                                     + ctor.getName());
                         } catch (Exception e) {
-                            log.info(String.format("Failed to load java transform %s. Will try jython module %s.", // 
-                                    rtsClassName, key.moduleName));
+                            log.fatal("Failed to load java transform " + rtsClassName, e);
                         }
                         return ctor.newInstance(new Object[] { key.modelPath });
                     }

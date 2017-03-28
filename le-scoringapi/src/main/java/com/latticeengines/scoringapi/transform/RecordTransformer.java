@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.common.exposed.jython.JythonEngine;
 import com.latticeengines.common.exposed.util.PrecisionUtils;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.transform.exposed.RealTimeTransform;
@@ -24,14 +23,10 @@ public class RecordTransformer {
     @Autowired
     private TransformRetriever transformRetriever;
 
-    @Autowired
-    private JythonEngineRetriever jythonEngineRetriever;
-
     public Map<String, Object> transform(String modelPath, //
             List<TransformDefinition> definitions, //
             Map<String, Object> record) {
 
-        JythonEngine engine = jythonEngineRetriever.getEngine(modelPath);
         Map<String, Object> result = new HashMap<>(record.size() + definitions.size());
         result.putAll(record);
         
@@ -45,12 +40,7 @@ public class RecordTransformer {
             TransformId id = new TransformId(modelPath, entry.name, null);
             try {
                 RealTimeTransform transform = transformRetriever.getTransform(id);
-                Object value = null;
-                if (transform != null) {
-                    value = transform.transform(entry.arguments, result);
-                } else {
-                    value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
-                }
+                Object value = transform.transform(entry.arguments, result);
 
                 if (value == null) {
                     value = null;
@@ -76,29 +66,6 @@ public class RecordTransformer {
                 if (log.isWarnEnabled()) {
                     log.warn(String.format("Problem invoking %s", entry.name), e);
                 }
-            }
-        }
-
-        return result;
-    }
-
-    public Map<String, Object> transformJython(String modelPath, List<TransformDefinition> definitions,
-            Map<String, Object> record) {
-        JythonEngine engine = jythonEngineRetriever.getEngine(modelPath);
-        return transformJython(engine, definitions, record);
-    }
-
-    public Map<String, Object> transformJython(JythonEngine engine, List<TransformDefinition> definitions,
-            Map<String, Object> record) {
-        Map<String, Object> result = new HashMap<String, Object>(record.size() + definitions.size());
-        result.putAll(record);
-
-        for (TransformDefinition entry : definitions) {
-            try {
-                Object value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
-                result.put(entry.output, value);
-            } catch (Exception e) {
-                log.warn(String.format("Problem invoking %s with args %s", entry.name, entry.arguments));
             }
         }
 
