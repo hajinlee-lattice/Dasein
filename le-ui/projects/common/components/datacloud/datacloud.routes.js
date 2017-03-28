@@ -214,16 +214,47 @@ angular
             }
         })
         .state('home.model.analysis', {
-            url: '/analysis',
+            url: '/analysis?segment&create',
             params: {
-                segmentName: null
+                segment: null,
+                create: 'true'
             },
             resolve: angular.extend(DataCloudResolve, {
-                QueryRestriction: ['$stateParams', 'QueryStore', 'SegmentStore', function($stateParams, QueryStore, SegmentStore) {
-                    var segment = SegmentStore.getSegmentByName($stateParams.segmentName);
-                    QueryStore.setSegmentAndRestriction(segment);
+                QueryRestriction: ['$state', '$stateParams', '$q', 'QueryStore', 'SegmentStore', function($state, $stateParams, $q, QueryStore, SegmentStore) {
+                    var deferred = $q.defer();
+                    var segmentName = $stateParams.segment;
+                    if (segmentName) {
+                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                            QueryStore.setSegment(result);
+                            deferred.resolve(QueryStore.getRestriction());
+                        }).catch(function(error) {
+                            $state.go('home.model.analysis', {segment: null, create: true});
+                        });
+                    } else {
+                        QueryStore.setSegment(null);
+                        deferred.resolve(QueryStore.getRestriction());
+                    }
 
-                    return QueryStore.getRestriction();
+                    return deferred.promise;
+                }],
+                SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
+                    var CreateOrUpdateSegment = function() {
+                        var segment = QueryStore.getSegment();
+                        if (segment === null) {
+                            var ts = new Date().getTime();
+                            segment = {
+                                "name": "segment" + ts,
+                                "display_name": "segment" + ts,
+                            };
+                        }
+                        segment.simple_restriction = QueryStore.getRestriction();
+
+                        return SegmentService.CreateOrUpdateSegment(segment);
+                    };
+
+                    return {
+                        CreateOrUpdateSegment: CreateOrUpdateSegment
+                    };
                 }]
             }),
             redirectTo: 'home.model.analysis.explorer',
@@ -292,7 +323,7 @@ angular
             url: '/accounts',
             params: {
                 pageIcon: 'ico-segment',
-                pageTitle: 'Segment - Accounts'
+                pageTitle: 'Accounts'
             },
             views: {
                 "main@": {
@@ -318,7 +349,7 @@ angular
             url: '/contacts',
             params: {
                 pageIcon: 'ico-segment',
-                pageTitle: 'Segment - Accounts'
+                pageTitle: 'Contacts'
             },
             views: {
                 "main@": {

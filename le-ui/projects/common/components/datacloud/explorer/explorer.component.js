@@ -10,7 +10,7 @@ angular.module('common.datacloud.explorer', [
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount,
-    EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore
+    EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore
 ){
     var vm = this,
         enrichment_chunk_size = 5000,
@@ -1222,6 +1222,12 @@ angular.module('common.datacloud.explorer', [
         var attributeKey = attribute.Attribute || attribute.FieldName;
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         console.log(vm.segmentAttributeInput, attribute);
+
+        if (vm.segmentAttributeInput[attributeKey] === true) {
+            QueryStore.addRestriction({columnName: attributeKey});
+        } else {
+            QueryStore.removeRestriction({columnName: attributeKey});
+        }
     }
 
     vm.init();

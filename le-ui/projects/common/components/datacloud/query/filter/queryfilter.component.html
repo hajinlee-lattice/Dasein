@@ -6,8 +6,8 @@
     </div>
     <div class="query-filter-name">
         <div class="query-filter-table">
-            <p>{{attribute.category}}</p>
-            <p>{{attribute.column}}</p>
+            <p>### column_name category lookup</p>
+            <p>{{attribute.bucketRestriction.lhs.columnLookup.column_name}}</p>
         </div>
     </div>
     <div class="query-filter-type">
@@ -20,15 +20,15 @@
     <div class="query-filter-buckets">
         <div class="query-filter-table">
             <div class="query-filter-row query-filter-header">
-                <div class="query-filter-cell">Value</div>
-                <div class="query-filter-cell">Leads</div>
-                <div class="query-filter-cell">Lift</div>
+                <div class="query-filter-cell query-filter-value">Value</div>
+                <div class="query-filter-cell query-filter-lead">Leads</div>
+                <div class="query-filter-cell query-filter-lift">Lift</div>
                 <div class="query-filter-cell query-filter-delete">&nbsp;</div>
             </div>
             <div class="query-filter-row" ng-repeat="b in attribute.buckets">
-                <div class="query-filter-cell">{{b.value}}</div>
-                <div class="query-filter-cell">{{b.leads}}</div>
-                <div class="query-filter-cell"><div class="query-filter-lift">{{b.lift}}</div></div>
+                <div class="query-filter-cell query-filter-value">{{b.value}}</div>
+                <div class="query-filter-cell query-filter-lead">{{b.leads}}</div>
+                <div class="query-filter-cell query-filter-lift"><div class="query-lift-highlight">{{b.lift}}</div></div>
                 <div class="query-filter-cell query-filter-delete"><a href ng-click="vm.deleteBucket($index)">&times;</a></div>
             </div>
         </div>

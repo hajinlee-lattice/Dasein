@@ -1,5 +1,5 @@
 angular.module('common.datacloud.querybuilder', [])
-.controller('QueryBuilderCtrl', function($scope, $state, QueryRestriction, QueryStore) {
+.controller('QueryBuilderCtrl', function($scope, $state, QueryRestriction, QueryStore, SegmentServiceProxy) {
 
     var vm = this;
     angular.extend(this, {
@@ -36,4 +36,13 @@ angular.module('common.datacloud.querybuilder', [])
     vm.goAttributes = function() {
         $state.go('home.model.analysis.explorer.attributes');
     };
+
+    vm.saveSegment = function () {
+        SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
+            if (result.errorMsg) {
+            } else {
+                $state.go('home.model.segmentation', {}, {notify: true})
+            }
+        });
+    }
 });

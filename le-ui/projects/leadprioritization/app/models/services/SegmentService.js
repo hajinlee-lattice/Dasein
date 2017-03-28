@@ -1,6 +1,6 @@
 angular
 .module('lp.models.segments')
-.service('SegmentStore', function() {
+.service('SegmentStore', function($q, SegmentService) {
     this.segments = [];
 
     this.setSegments = function(segments) {
@@ -15,11 +15,13 @@ angular
         for (var i = 0; i < this.segments.length; i++) {
             var segment = this.segments[i];
             if (segment.name === segmentName) {
-                return segment;
+                var deferred = $q.defer();
+                deferred.resolve(segment);
+                return deferred.promise;
             }
         }
 
-        return null;
+        return SegmentService.GetSegmentByName(segmentName);
     };
 })
 .service('SegmentService', function($http, $q, $state) {
@@ -52,17 +54,41 @@ angular
         return deferred.promise;
     }
 
-    this.UpdateSegment = function(segment) {
+    this.GetSegmentByName = function(name) {
         var deferred = $q.defer(),
-            data = {
-                name: segment.segmentName,
-                description: segment.segmentDescription
-            };
+            result,
+            url = '/pls/metadatasegments/name/' + name;
+
+        $http({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.CreateOrUpdateSegment = function(segment) {
+        var deferred = $q.defer();
 
         $http({
             method: 'POST',
             url: '/pls/metadatasegments/',
-            data: data,
+            data: segment,
             headers: { 'Content-Type': 'application/json' }
         }).then(
             function onSuccess(response) {
@@ -90,7 +116,7 @@ angular
     this.DeleteSegment = function(segmentName) {
         var deferred = $q.defer(),
             result = {},
-            url = '/pls/marketo/credentials/' + segmentName;
+            url = '/pls/metadatasegments/' + segmentName;
 
         $http({
             method: 'DELETE',

@@ -33,7 +33,7 @@ angular
 
     $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
         console.log('-!- error changing state:', error, event, toState, toParams, fromState, fromParams);
-        
+
         if ($state.current.name != toState.name) {
             $state.reload();
         }
@@ -64,11 +64,11 @@ angular
                 },
                 FeatureFlags: function($q, FeatureFlagService) {
                     var deferred = $q.defer();
-                    
+
                     FeatureFlagService.GetAllFlags().then(function() {
                         deferred.resolve();
                     });
-                    
+
                     return deferred.promise;
                 },
                 ResourceStrings: function($q, ResourceStringsService, ClientSession) {
@@ -96,8 +96,8 @@ angular
                         if (tenantName != Tenant.DisplayName) {
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);
                             $rootScope.tenantId = window.escape(Tenant.Identifier);
-                            
-                            $state.go('home.models', { 
+
+                            $state.go('home.models', {
                                 tenantName: Tenant.DisplayName
                             });
                         }
@@ -152,7 +152,7 @@ angular
                 },
                 "main@": {
                     templateUrl: 'app/models/views/ModelCreationHistoryView.html'
-                }   
+                }
             }
         })
         .state('home.model', {
@@ -161,7 +161,7 @@ angular
                 Model: function($q, $stateParams, ModelStore) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
-                    
+
                     ModelStore.getModel(id).then(function(result) {
                         console.log('getModel', id, result);
                         deferred.resolve(result);
@@ -210,7 +210,7 @@ angular
                             $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
                             $scope.showSampleLeads = FeatureFlagService.FlagIsEnabled(flags.VIEW_SAMPLE_LEADS);
                         });
-                        
+
                         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
                     },
@@ -238,11 +238,11 @@ angular
                 },
                 "main@": {
                     resolve: {
-                        SegmentsList: function($q, SegmentService) {
-
+                        SegmentsList: function($q, SegmentService, SegmentStore) {
                             var deferred = $q.defer();
 
                             SegmentService.GetSegments().then(function(result) {
+                                SegmentStore.setSegments(result);
                                 deferred.resolve(result);
                             });
 
@@ -294,13 +294,13 @@ angular
             }
         })
         .state('home.model.ratings', {
-            url: '/ratings',           
+            url: '/ratings',
             resolve: {
                 CurrentConfiguration: function($q, $stateParams, ModelRatingsService) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
-                    
-                    ModelRatingsService.MostRecentConfiguration(id).then(function(result) { 
+
+                    ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
                         deferred.resolve(result);
                     });
 
@@ -309,13 +309,13 @@ angular
                 RatingsSummary: function($q, $stateParams, ModelRatingsService) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
-                    
-                    ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {  
+
+                    ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
                         deferred.resolve(result);
-                    }); 
+                    });
 
                     return deferred.promise;
-                },                
+                },
                 HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
@@ -424,7 +424,7 @@ angular
 
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
-                }   
+                }
             }
         })
         .state('home.model.alerts', {
@@ -466,7 +466,7 @@ angular
 
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
-                }   
+                }
             }
         })
         .state('home.model.refine', {
@@ -484,7 +484,7 @@ angular
                 "main@": {
                     controller: 'ManageFieldsController',
                     templateUrl: 'app/setup/views/ManageFieldsView.html'
-                }   
+                }
             }
         })
         .state('home.model.review', {
@@ -502,7 +502,7 @@ angular
                     ModelReviewStore.GetReviewData(modelId, eventTableName).then(function(result) {
                         deferred.resolve(result);
                     });
-                    
+
                     return deferred.promise;
                 }
             }
@@ -629,14 +629,14 @@ angular
         .state('home.marketosettings', {
             url: '/marketosettings',
             redirectto: 'home.marketosettings.apikey',
-            resolve: { 
-                urls: function($q, $http) { 
+            resolve: {
+                urls: function($q, $http) {
                     var deferred = $q.defer();
 
                     $http({
                         'method': "GET",
                         'url': "/pls/sureshot/urls",
-                        'params': { 
+                        'params': {
                             'crmType': "marketo"
                         }
                     }).then(
@@ -651,7 +651,7 @@ angular
                         }
                     );
 
-                    return deferred.promise; 
+                    return deferred.promise;
                 }
             }
         })
@@ -664,11 +664,11 @@ angular
             resolve: {
                 FeatureFlags: function($q, FeatureFlagService) {
                     var deferred = $q.defer();
-                    
+
                     FeatureFlagService.GetAllFlags().then(function() {
                         deferred.resolve();
                     });
-                    
+
                     return deferred.promise;
                 }
             },
@@ -688,7 +688,7 @@ angular
 
                         });
                     },
-                    templateUrl: 'app/navigation/sidebar/RootView.html'                    
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "main@": {
                     resolve: {
@@ -705,7 +705,7 @@ angular
                     controller: 'MarketoCredentialsController',
                     controllerAs: 'vm',
                     templateUrl: 'app/marketo/views/MarketoCredentialsView.html'
-                }   
+                }
             }
         })
         .state('home.marketosettings.create', {
@@ -716,7 +716,7 @@ angular
             },
             views: {
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
@@ -731,7 +731,7 @@ angular
                     controller: 'MarketoCredentialSetupController',
                     controllerAs: 'vm',
                     templateUrl: 'app/marketo/views/AddCredentialFormView.html'
-                }   
+                }
             }
         })
         .state('home.marketosettings.edit', {
@@ -781,7 +781,7 @@ angular
             },
             views: {
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
@@ -827,7 +827,7 @@ angular
                     controller: 'MarketoEnrichmentController',
                     controllerAs: 'vm',
                     templateUrl: 'app/marketo/views/MarketoEnrichmentView.html'
-                }   
+                }
             }
         })
         .state('home.marketosettings.models', {
@@ -836,9 +836,9 @@ angular
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles'
             },
-            views: { 
+            views: {
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SUMMARY_MARKETO_MODELS';
                         }
@@ -851,7 +851,7 @@ angular
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
-                    controller: function(urls, $scope, $stateParams) { 
+                    controller: function(urls, $scope, $stateParams) {
                         $scope.id = $stateParams.id;
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.scoring_settings_url + '&credentialId=' + $scope.id + '"></iframe>');
@@ -867,16 +867,16 @@ angular
                                 //if (origin != "{sureshot_iframe_origin}")
                                 //return false;
 
-                                if (!event.data.contentHeight) { 
+                                if (!event.data.contentHeight) {
                                     return;
                                 }
-                                
+
                                 var h = event.data.contentHeight;
 
                                 if ( !isNaN( h ) && h > 0 && h !== if_height ) {
                                     if_height = h;
-                                    
-                                    $("#sureshot_iframe_container iframe").height(h); 
+
+                                    $("#sureshot_iframe_container iframe").height(h);
                                 }
                                 return true;
                             }, false);
@@ -884,7 +884,7 @@ angular
 
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
-                }   
+                }
             }
         })
         .state('home.marketosettings.credentials', {
@@ -895,7 +895,7 @@ angular
             },
             views: {
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
@@ -921,23 +921,23 @@ angular
                                 //if (origin != "{sureshot_iframe_origin}")
                                 //return false;
 
-                                if (!event.data.contentHeight) { 
+                                if (!event.data.contentHeight) {
                                     return;
                                 }
-                                
+
                                 var h = event.data.contentHeight;
 
                                 if ( !isNaN( h ) && h > 0 && h !== if_height ) {
                                     if_height = h;
-                                    
-                                    $("#sureshot_iframe_container iframe").height(h); 
+
+                                    $("#sureshot_iframe_container iframe").height(h);
                                 }
                                 return true;
                             }, false);
                         }
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
-                }   
+                }
             }
         })
         .state('home.marketosettings.activemodels', {
@@ -946,9 +946,9 @@ angular
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles'
             },
-            views: { 
+            views: {
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SUMMARY_MARKETO_MODELS';
                         }
@@ -959,7 +959,7 @@ angular
                     templateUrl: 'app/navigation/summary/SureShotTabs.html'
                 },
                 "main@": {
-                    controller: function(urls) { 
+                    controller: function(urls) {
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
 
@@ -974,23 +974,23 @@ angular
                                 //if (origin != "{sureshot_iframe_origin}")
                                 //return false;
 
-                                if (!event.data.contentHeight) { 
+                                if (!event.data.contentHeight) {
                                     return;
                                 }
-                                
+
                                 var h = event.data.contentHeight;
 
                                 if ( !isNaN( h ) && h > 0 && h !== if_height ) {
                                     if_height = h;
-                                    
-                                    $("#sureshot_iframe_container iframe").height(h); 
+
+                                    $("#sureshot_iframe_container iframe").height(h);
                                 }
                                 return true;
                             }, false);
                         }
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
-                }   
+                }
             }
         })
         .state('home.eloquasettings', {
@@ -998,7 +998,7 @@ angular
             params: {
                 pageIcon: 'ico-eloqua',
                 pageTitle: 'Eloqua Settings'
-            }, 
+            },
             redirectto: 'eloquasettings.apikey',
             resolve: {
                 urls: function($q, $http) {
@@ -1043,7 +1043,7 @@ angular
             params: {
                 pageIcon: 'ico-eloqua',
                 pageTitle: 'Eloqua Settings'
-            }, 
+            },
             views: {
                 "summary@": {
                     resolve: {
@@ -1076,16 +1076,16 @@ angular
                                 //if (origin != "{sureshot_iframe_origin}")
                                 //return false;
 
-                                if (!event.data.contentHeight) { 
+                                if (!event.data.contentHeight) {
                                     return;
                                 }
-                                
+
                                 var h = event.data.contentHeight;
 
                                 if ( !isNaN( h ) && h > 0 && h !== if_height ) {
                                     if_height = h;
-                                    
-                                    $("#sureshot_iframe_container iframe").height(h); 
+
+                                    $("#sureshot_iframe_container iframe").height(h);
                                 }
                                 return true;
                             }, false);
@@ -1100,7 +1100,7 @@ angular
             params: {
                 pageIcon: 'ico-eloqua',
                 pageTitle: 'Eloqua Settings'
-            }, 
+            },
             views: {
                 "summary@": {
                     resolve: {
@@ -1120,7 +1120,7 @@ angular
                         if(urls && urls.scoring_settings_url) {
                             $('#sureshot_iframe_container')
                                 .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
-                            
+
                             changeIframeHeight();
                         }
 
@@ -1133,16 +1133,16 @@ angular
                                 //if (origin != "{sureshot_iframe_origin}")
                                 //return false;
 
-                                if (!event.data.contentHeight) { 
+                                if (!event.data.contentHeight) {
                                     return;
                                 }
-                                
+
                                 var h = event.data.contentHeight;
 
                                 if ( !isNaN( h ) && h > 0 && h !== if_height ) {
                                     if_height = h;
-                                    
-                                    $("#sureshot_iframe_container iframe").height(h); 
+
+                                    $("#sureshot_iframe_container iframe").height(h);
                                 }
                                 return true;
                             }, false);
@@ -1157,7 +1157,7 @@ angular
             params: {
                 pageIcon: 'ico-eloqua',
                 pageTitle: 'Eloqua Settings'
-            }, 
+            },
             views: {
                 "summary@": {
                     resolve: {
@@ -1189,16 +1189,16 @@ angular
                                 //if (origin != "{sureshot_iframe_origin}")
                                 //return false;
 
-                                if (!event.data.contentHeight) { 
+                                if (!event.data.contentHeight) {
                                     return;
                                 }
-                                
+
                                 var h = event.data.contentHeight;
 
                                 if ( !isNaN( h ) && h > 0 && h !== if_height ) {
                                     if_height = h;
-                                    
-                                    $("#sureshot_iframe_container iframe").height(h); 
+
+                                    $("#sureshot_iframe_container iframe").height(h);
                                 }
                                 return true;
                             }, false);
@@ -1214,7 +1214,7 @@ angular
             params: {
                 pageIcon: 'ico-salesforce',
                 pageTitle: 'Salesforce Settings'
-            }, 
+            },
             views: {
                 "summary@": {
                     resolve: {
@@ -1244,10 +1244,10 @@ angular
             }
         })
         .state('home.signout', {
-            url: '/signout', 
+            url: '/signout',
             views: {
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SUMMARY_SIGNOUT';
                         }
@@ -1296,7 +1296,7 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return '';
                         }
@@ -1317,7 +1317,7 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'ACTIVATE_MODEL_TITLE';
                         }
@@ -1341,7 +1341,7 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'USER_MANAGEMENT_TITLE';
                         }
@@ -1368,7 +1368,7 @@ angular
                     },
                     controller: 'UserManagementWidgetController',
                     templateUrl: 'app/AppCommon/widgets/userManagementWidget/UserManagementWidgetTemplate.html'
-                }   
+                }
             }
         })
         .state('home.setup', {
@@ -1378,7 +1378,7 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SYSTEM_SETUP_TITLE';
                         }
@@ -1388,7 +1388,7 @@ angular
                 },
                 "main@": {
                     templateUrl: 'app/config/views/ManageCredentialsView.html'
-                }   
+                }
             }
         })
         .state('home.fields', {
@@ -1398,7 +1398,7 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SETUP_NAV_NODE_MANAGE_FIELDS';
                         }
@@ -1409,7 +1409,7 @@ angular
                 "main@": {
                     controller: 'SetupController',
                     templateUrl: 'app/setup/views/SetupView.html'
-                }   
+                }
             }
         })
         .state('home.insights', {
@@ -1458,7 +1458,7 @@ angular
                         }, false);
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
-                }   
+                }
             }
         });
 });
@@ -1467,14 +1467,14 @@ function ShowSpinner(LoadingString, type) {
     var element = $('#mainContentView'),
         LoadingString = LoadingString || '',
         type = type || 'lattice';
-        
+
     // jump to top of page during state change
     angular.element(window).scrollTop(0,0);
 
     element
         .children()
             .addClass('inactive-disabled');
-    
+
     element
         .css({
             position:'relative'

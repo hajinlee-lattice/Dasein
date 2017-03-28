@@ -36,7 +36,7 @@ angular.module('lp.models.segments', [
     vm.tileClick = function ($event, segmentName) {
 
         $event.preventDefault();
-        $state.go('home.model.analysis', {segmentName: segmentName}, { reload: true } );
+        $state.go('home.model.analysis', {segment: segmentName, create: false}, { reload: true } );
 
     };
 

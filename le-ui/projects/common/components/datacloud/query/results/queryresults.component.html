@@ -1,4 +1,4 @@
-<section class="container segment-accounts-list">
+<section class="container query-results">
 
     <ul class="filters">
         <li class="query">
@@ -19,9 +19,8 @@
                 <button class="button icon-button blue-button">Save Segment</button>
             </div>
         </li>
-        <li class="paging">
+        <li class="paging" ng-show="vm.count > 0">
             <pd-pagination-controls
-                ng-show="vm.count > 0"
                 current="vm.current"
                 max="vm.count">
             </pd-pagination-controls>

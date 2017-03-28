@@ -2,6 +2,15 @@ angular.module('common.datacloud.queryservice',[
 ])
 .service('QueryStore', function($filter, $q, QueryService) {
 
+    function BucketRestriction(columnName, bucket) {
+        this.lhs = {
+            columnLookup: {
+                column_name: columnName
+            }
+        };
+        this.range = bucket;
+    }
+
     this.segment = null;
 
     this.restriction = {
@@ -14,28 +23,69 @@ angular.module('common.datacloud.queryservice',[
         contacts: null
     };
 
+    /* restriction related */
     this.getRestriction = function() {
         return this.restriction;
     };
+    peakRestriction = this.getRestriction.bind(this);
 
     this.setRestriction = function(restriction) {
         restriction = restriction || { all: [], any: [] };
-        this.restriction = restriction;
+        this.restriction = angular.copy(restriction);
     };
 
-    this.setSegmentAndRestriction = function(segment) {
+    this.setSegment = function(segment) {
         this.segment = segment;
         this.setRestriction(segment !== null ? segment.simple_restriction : null);
     };
 
+    this.getSegment = function() {
+        return this.segment;
+    };
+
     this.addRestriction = function(attribute) {
-        // append to all (default)
+        attribute.bucket = { max: 'No', min: 'No', is_null_only: false };
+
+        var attributes = this.findAttributes(attribute.columnName);
+        if (attributes.length === 0) {
+            this.restriction.all.push({ bucketRestriction: new BucketRestriction(attribute.columnName, attribute.bucket) });
+        }
     };
 
     this.removeRestriction = function(attribute) {
-        // search and remove from all or any
+        var attributes = this.findAttributes(attribute.columnName);
+        for (var i = 0; i < attributes.length; i++) {
+            var attributeMeta = attributes[i];
+            var columnName = attributeMeta.attribute.bucketRestriction.lhs.columnLookup.column_name;
+            if (attribute.columnName === columnName) {
+                this.restriction[attributeMeta.groupKey].splice(attributeMeta.index, 1);
+                break;
+            }
+        }
     };
 
+    this.findAttributes = function(columnName) {
+        var attributes = this.findAttributesInGroup('all', columnName);
+        if (attributes.length === 0) {
+            attributes = this.findAttributesInGroup('any', columnName);
+        }
+        return attributes;
+    };
+
+    this.findAttributesInGroup = function (groupKey, columnName) {
+        var group = this.restriction[groupKey];
+        var results = [];
+
+        for (var i = 0; i < group.length; i++) {
+            if (group[i].bucketRestriction.lhs.columnLookup.column_name === columnName) {
+                results.push({index: i, attribute: group[i], groupKey, groupKey});
+            }
+        }
+
+        return results;
+    };
+
+    /* query related */
     this.getPage = function(context, offset, maximum, query, sortBy, sortDesc) {
         return [];
     };
