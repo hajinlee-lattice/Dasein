@@ -1004,11 +1004,11 @@ angular.module('common.datacloud.explorer', [
 
         vm.selectDisabled = (selectedObj.length ? 0 : 1);
 
-        for (i in selectedObj) {
+        for (var i in selectedObj) {
             selected.push(selectedObj[i].FieldName);
         }
 
-        for (i in deselectedObj) {
+        for (var i in deselectedObj) {
             deselected.push(deselectedObj[i].FieldName);
         }
 
@@ -1029,7 +1029,7 @@ angular.module('common.datacloud.explorer', [
             if (selectedObj.length > 0 || deselectedObj.length > 0) {
                 var dirtyObj = vm.filter(vm.enrichments, 'IsDirty', true);
 
-                for (i in dirtyObj){
+                for (var i in dirtyObj){
                     dirtyObj[i].IsDirty = false;
                 }
             }
@@ -1102,7 +1102,7 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
-    var getMetadataSegments = function() {98
+    var getMetadataSegments = function() {
         var deferred = $q.defer();
 
         DataCloudStore.getMetadataSegments().then(function(result) {
