@@ -159,9 +159,11 @@ angular.module('common.datacloud.explorer', [
         for(var i in vm.openHighlighter) {
             if(vm.openHighlighter[i].open) {
                 vm.openHighlighter[i].open = false;
-                console.log('index:', index, (!index));
+                console.log('index:', index, '['+(!index)+']');
                 if(!index) {
-                    $scope.$digest(); // this works, but at what cost?!
+                    if(!$scope.$$phase) { // this is bad but short term hack
+                        $scope.$digest(); // this works, but at what cost?! -- this also breaks because of the $digest in filters.component.js document click.  this needs much better solution.
+                    }
                 }
             }
         }
@@ -654,8 +656,8 @@ angular.module('common.datacloud.explorer', [
 
     vm.setFlagsByCategory = function(type, category, subcategory){
         var opts = {
-            categoryName: encodeURIComponent(category),
-            subcategoryName: encodeURIComponent(subcategory)
+            categoryName: category,
+            subcategoryName: subcategory
         },
         flags = {
             hidden: (type === 'enabled' ? false : true),

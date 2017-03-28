@@ -461,7 +461,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer(),
             opts = opts || {},
             categoryName = opts.categoryName || '',
-            subcategoryName = opts.subcategoryName || '',
+            subcategoryName = (opts.subcategoryName ? encodeURIComponent(opts.subcategoryName).replace(/%2F/g, '%202F') : ''), // why?  because the apache double encodes slashes and needs to be updated but we don't have time now
             useCase = opts.useCase || 'CompanyProfile',
             flags = flags || {}; // json
         $http({

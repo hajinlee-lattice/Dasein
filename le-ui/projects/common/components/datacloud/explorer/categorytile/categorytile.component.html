@@ -21,7 +21,7 @@
                 <li ng-repeat="attribute in (highlightAttributes = ((TileTableItems = vm.getTileTableItems(category, false, 'HighlightHighlighted', 5)).HighlightHighlighted 
                         | filter: vm.enrichmentsFilter() 
                         | orderBy: vm.categoryOrderBy()
-                        | limitTo: (vm.section == 'segment.analysis' ? 0 : 5)))"
+                        | limitTo: (vm.section != 'team' ? 0 : 5)))"
                         class="attribute"
                         ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
