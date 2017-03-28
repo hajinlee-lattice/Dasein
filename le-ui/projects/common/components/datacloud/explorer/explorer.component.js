@@ -227,7 +227,7 @@ angular.module('common.datacloud.explorer', [
         var concurrent = 6, // most browsers allow a max of 6 concurrent connections per domain
             max = Math.ceil(EnrichmentCount.data / concurrent),
             offset = opts.offset || 0,
-            iterations = Math.ceil(vm.count / max),
+            iterations = Math.ceil(EnrichmentCount.data / max),
             _store;
 
         vm.concurrent = concurrent;
@@ -289,7 +289,7 @@ angular.module('common.datacloud.explorer', [
             numbersNumber = 0;
             _store = result; // just a copy of the correct data structure and properties for later
 
-            if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
+            if (cached || vm.enrichments.length >= EnrichmentCount.data || vm.concurrentIndex >= vm.concurrent) {
                 _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
                 DataCloudStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
                 vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;

@@ -39,6 +39,21 @@ var mainApp = angular.module('insightsApp', [
         this.Authorization = value;
     }
 })
+.service('SegmentStore', function(){
+    this.segments = [];
+
+    this.setSegments = function(segments) {
+        this.segments = segments;
+    };
+
+    this.getSegments = function() {
+        return this.segments;
+    };
+
+    this.getSegmentByName = function(segmentName) {
+        return null;
+    };
+})
 .factory('authInterceptor', function ($q, AuthStore) {
     return {
         request: function(config) {

@@ -1439,7 +1439,7 @@ angular
                                 json.request = LookupStore.get('request');
                                 json.request.record.CompanyName = 'Lattice Engines';
                                 /*json = {
-                                  "Authentication": "94e62273-2e09-4d65-8f8f-6cad2fd9de6f",
+                                  "Authentication": "0269dcb9-e793-4f63-b4dc-f9af598b6873",
                                   "request": {
                                     "record": {
                                       "CompanyName": "TestCompany",
