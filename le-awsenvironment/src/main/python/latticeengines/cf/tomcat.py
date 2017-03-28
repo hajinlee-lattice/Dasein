@@ -91,6 +91,7 @@ def tomcat_task(profile_vars, env="qa"):
             "splunk-url": PARAM_SPLUNK_URL.ref(),
             "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
             "splunk-index": "history",
+            "splunk-sourcetype": "log4j",
             "labels": "stack,app"
         }})
 
