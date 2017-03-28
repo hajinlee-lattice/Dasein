@@ -5,7 +5,6 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.I
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.LID_FIELD;
 
 import java.util.Arrays;
 import java.util.Collections;
