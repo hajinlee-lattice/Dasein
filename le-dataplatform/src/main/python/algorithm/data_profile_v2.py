@@ -379,8 +379,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
             if not filtered: attributeStats["GT200_DistinctValue"].append(colName)
-            logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
-            return (index, diagnostics)
+            columnData = columnData.apply(lambda x: 'LATTICE_GT200_DistinctValue' if not isnull(x) else None)
         groupingDict = getCatGroupingAndStatsForModel(columnData.tolist(), eventVector.tolist())
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriterFull['Model'], groupingDict, mode, colName, otherMetadata, index)
         groupingDict = getCatGroupingAndStatsForDisplay(groupingDict['groupingResults'])
