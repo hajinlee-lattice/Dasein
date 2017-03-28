@@ -27,7 +27,7 @@
                     ng-class="{'ignore-ngclick': vm.section !== 'segment.analysis'}"
                     ng-click="vm.selectSegmentAttribute(attribute)">
                 <div class="column label" title="{{attribute.DisplayName}}">
-                    <input mg-model="vm.segmentAttributeInput[attribute.Attribute]" ng-checked="vm.segmentAttributeInput[attribute.Attribute]" name="{{attribute.Attribute}}" id="{{attribute.Attribute}}" type="checkbox" ng-if="vm.section == 'analysis'" />
+                    <input ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName]" ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName] || attribute.SegmentChecked" name="{{attribute.Attribute || attribute.FieldName}}" id="{{attribute.Attribute || attribute.FieldName}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
                     {{ attribute.DisplayName }}
                 </div>
 
@@ -47,7 +47,7 @@
             <!-- this can't be a <button> element because IE and FF don't like it -->
             <div class="button"
                     ng-class="{'selected': vm.openHighlighter[vm.category + subcategory].open, 'enabled': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'enabled' || vm.highlightTypesCategoryLabel(vm.category, subcategory).type == 'dirty'}"
-                    ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
+                    ng-click="vm.closeHighlighterButtons(vm.category + subcategory); vm.openHighlighter[vm.category + subcategory].open = !vm.openHighlighter[vm.category + subcategory].open">
                 <span class="highlight-icon {{vm.highlightTypesCategoryLabel(vm.category, subcategory).type}}">
                     {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
                 </span>

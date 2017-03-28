@@ -42,10 +42,6 @@ angular
                 return ret;
             }
 
-            vm.log = function() {
-                console.log('$$$$$$$$$$$$$$$$$$$', arguments, arguments[1].filter(function(a){return a.SegmentChecked}));
-            }
-
             vm.categoryClick = function(category, $event) {
                 var target = angular.element($event.target),
                     currentTarget = angular.element($event.currentTarget);

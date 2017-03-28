@@ -21,12 +21,12 @@
         <div class="sales-employees">
             <div class="sales" ng-if="vm.company_info.LE_REVENUE_RANGE">
                 <h3>Annual Sales</h3>
-                {{vm.format('range', company_info.LE_REVENUE_RANGE)}}
+                {{vm.format('range', vm.company_info.LE_REVENUE_RANGE)}}
             </div>
 
             <div class="employees" ng-if="vm.company_info.LE_EMPLOYEE_RANGE">
                 <h3>Employees</h3>
-                {{vm.format('range', company_info.LE_EMPLOYEE_RANGE)}}
+                {{vm.format('range', vm.company_info.LE_EMPLOYEE_RANGE)}}
             </div>
         </div>
     </div>

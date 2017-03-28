@@ -57,7 +57,7 @@
         </div>
     </span>
     <ul class="controls noselect" ng-if="!vm.lookupMode && !vm.category">
-        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[category] = {}">
+        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'">
             <div class="button"
                     ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': vm.highlightTypesCategoryLabel(category).type == 'enabled' || vm.highlightTypesCategoryLabel(category).type == 'dirty'}"
                     ng-click="vm.closeHighlighterButtons(category); vm.openHighlighter[category].open = !vm.openHighlighter[category].open;">

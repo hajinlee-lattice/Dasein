@@ -79,6 +79,7 @@ angular.module('common.datacloud.explorer', [
         section: $stateParams.section,
         category: $stateParams.category,
         subcategory: $stateParams.subcategory,
+        openHighlighter: {},
         categoryCounts: {},
         TileTableItems: {},
         highlightMetadata: {
@@ -145,13 +146,23 @@ angular.module('common.datacloud.explorer', [
             //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
             vm.no_lookup_results_message = true;
         }
+
+        if(vm.section === 'segment.analysis') {
+            getMetadataSegments().then(function(result){
+                vm.metadataSegments = result.data;
+            });
+        }
     }
 
     vm.closeHighlighterButtons = function(index) {
         var index = index || '';
         for(var i in vm.openHighlighter) {
-            if(i !== index && vm.openHighlighter[i].open === true) {
+            if(vm.openHighlighter[i].open) {
                 vm.openHighlighter[i].open = false;
+                console.log('index:', index, (!index));
+                if(!index) {
+                    $scope.$digest(); // this works, but at what cost?!
+                }
             }
         }
     }
@@ -177,38 +188,6 @@ angular.module('common.datacloud.explorer', [
         }, {
             notify: false
         });
-    }
-
-    vm.init = function() {
-        vm.closeHighlighterButtons = function(index){
-            var index = index || '';
-            for(var i in vm.openHighlighter) {
-                if(i !== index && vm.openHighlighter[i].open === true) {
-                    vm.openHighlighter[i].open = false;
-                }
-            }
-        }
-
-        if (vm.lookupMode && vm.LookupResponse.errorCode) {
-            $state.go('home.datacloud.lookup.form');
-        }
-
-        getEnrichmentCategories();
-        getEnrichmentData();
-
-        vm.statusMessageBox = angular.element('.status-alert');
-
-        if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
-            //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
-            vm.no_lookup_results_message = true;
-        }
-
-        if(vm.section === 'segment.analysis') {
-            getMetadataSegments().then(function(result){
-                vm.metadataSegments = result.data;
-            });
-        }
-
     }
 
     var stopNumbersInterval = function(){
@@ -675,8 +654,8 @@ angular.module('common.datacloud.explorer', [
 
     vm.setFlagsByCategory = function(type, category, subcategory){
         var opts = {
-            categoryName: category,
-            subcategoryName: subcategory
+            categoryName: encodeURIComponent(category),
+            subcategoryName: encodeURIComponent(subcategory)
         },
         flags = {
             hidden: (type === 'enabled' ? false : true),
@@ -853,19 +832,19 @@ angular.module('common.datacloud.explorer', [
                     var index = vm.enrichmentsMap[item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
-                        'Value',
-                        'AttributeValue',
-                        'FundamentalType',
-                        'DisplayName',
-                        'Subcategory',
-                        'IsSelected',
-                        'IsPremium',
-                        'IsInternal',
-                        'ImportanceOrdering',
-                        'HighlightHidden',
-                        'HighlightHighlighted',
-                        'SegmentChecked'
-                    ];
+                            'Value',
+                            'AttributeValue',
+                            'FundamentalType',
+                            'DisplayName',
+                            'Subcategory',
+                            'IsSelected',
+                            'IsPremium',
+                            'IsInternal',
+                            'ImportanceOrdering',
+                            'HighlightHidden',
+                            'HighlightHighlighted',
+                            'SegmentChecked'
+                        ];
                     map.forEach(function(key){
                         item[key] = enrichment[key];
                     });
@@ -901,7 +880,6 @@ angular.module('common.datacloud.explorer', [
         var timestamp3 = new Date().getTime();
 
         var _items = {};
-
         if (segment && items) {
             var segmented = vm.filter(items, segment, true),
                 other = vm.filter(items, segment, false);
