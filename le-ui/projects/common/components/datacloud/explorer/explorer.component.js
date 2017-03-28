@@ -291,7 +291,7 @@ angular.module('common.datacloud.explorer', [
             }
         }
 
-        var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
+        var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true),
             EligibleEnrichments = vm.filter(vm.enrichments, 'IsInternal', false),
             DisabledForSalesTeamTotal = vm.filter(EligibleEnrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
             EnabledForSalesTeamTotal = EligibleEnrichments.length - DisabledForSalesTeamTotal.length;
