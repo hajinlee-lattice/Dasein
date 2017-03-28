@@ -8,6 +8,42 @@ angular
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .config(function($stateProvider) {
+    var DataCloudResolve = {
+        EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+            var deferred = $q.defer();
+
+            DataCloudStore.setHost(ApiHost);
+
+            DataCloudStore.getCount().then(function(result) {
+                deferred.resolve(result);
+            });
+
+            return deferred.promise;
+        }],
+        EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+            var deferred = $q.defer();
+
+            DataCloudStore.setHost(ApiHost);
+
+            DataCloudStore.getAllTopAttributes().then(function(result) {
+                deferred.resolve(result || {});
+            });
+
+            return deferred.promise;
+        }],
+        EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+            var deferred = $q.defer();
+
+            DataCloudStore.setHost(ApiHost);
+
+            DataCloudStore.getPremiumSelectMaximum().then(function(result) {
+                deferred.resolve(result);
+            });
+
+            return deferred.promise;
+        }]
+    };
+
     $stateProvider
         .state('home.datacloud', {
             url: '/datacloud',
@@ -372,39 +408,3 @@ angular
             }
         });
 });
-
-var DataCloudResolve = {
-    EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-        var deferred = $q.defer();
-
-        DataCloudStore.setHost(ApiHost);
-
-        DataCloudStore.getCount().then(function(result) {
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    }],
-    EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-        var deferred = $q.defer();
-
-        DataCloudStore.setHost(ApiHost);
-
-        DataCloudStore.getAllTopAttributes().then(function(result) {
-            deferred.resolve(result || {});
-        });
-
-        return deferred.promise;
-    }],
-    EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-        var deferred = $q.defer();
-
-        DataCloudStore.setHost(ApiHost);
-
-        DataCloudStore.getPremiumSelectMaximum().then(function(result) {
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    }]
-};
