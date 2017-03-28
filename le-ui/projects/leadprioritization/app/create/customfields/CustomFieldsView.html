@@ -97,7 +97,7 @@
 						<div class="has-error">
 							<ul class="help-block">
 								<li ng-if="vm.requiredFieldsMissing['Id'] || vm.requiredFieldsMissing['Event']">Please map Event and Id</li>
-								<li ng-if="vm.requiredFieldsMissing['CompanyName'] || vm.requiredFieldsMissing['Email'] || vm.requiredFieldsMissing['Website'] || vm.requiredFieldsMissing['DUNS']">Please map {{::vm.schema === 'SalesforceAccount' ? 'Website' : 'Email'}} {{::vm.fuzzyMatchEnabled ? 'or Company Name' : ''}} or DUNS</li>
+								<li ng-if="vm.requiredFieldsMissing['CompanyName'] || vm.requiredFieldsMissing['Email'] || vm.requiredFieldsMissing['Website'] || vm.requiredFieldsMissing['DUNS']">Please map {{::vm.schema === 'SalesforceAccount' ? 'Website' : 'Email'}} {{::vm.fuzzyMatchEnabled ? 'or Company Name or DUNS' : ''}}</li>
 							</ul>
 						</div>
 					</div>
