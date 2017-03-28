@@ -376,7 +376,7 @@ angular.module('common.datacloud.explorer', [
             //console.log('vm.highlightMetadata:\t ', vm.highlightMetadata); //ben
         }
     }
-            
+
     var getEnrichmentSubcategories = function(category, subcategories) {
         vm._subcategories[category] = subcategories;
         vm.subcategories[category] = subcategories;
@@ -816,7 +816,7 @@ angular.module('common.datacloud.explorer', [
             vm.enable_category_dropdown = true;
         }
     }
-    
+
     vm.getTileTableItems = function(category, subcategory, segment, limit, debug) {
         var items = [],
             limit = (limit === 0 ? 0 : null) || limit || null;
@@ -845,7 +845,7 @@ angular.module('common.datacloud.explorer', [
             } else {
                 items = vm.topAttributes[category].SubCategories[subcategory];
             }
-            
+
             var timestamp_b = new Date().getTime();
 
             if (!vm.lookupMode && items) {
@@ -901,8 +901,8 @@ angular.module('common.datacloud.explorer', [
         var timestamp3 = new Date().getTime();
 
         var _items = {};
-        
-        if (segment && items) { 
+
+        if (segment && items) {
             var segmented = vm.filter(items, segment, true),
                 other = vm.filter(items, segment, false);
 
@@ -949,7 +949,7 @@ angular.module('common.datacloud.explorer', [
                 enrichment.IsDirty = false;
                 vm.statusMessage(vm.label.premiumTotalSelectError);
                 return false;
-            }1 
+            }
         }
 
         vm.generalSelectedTotal = selectedTotal.length;
