@@ -61,7 +61,8 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
             internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                     internalResourceHostPort);
             List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy
-                    .createDefaultABCDBuckets(getStringValueFromContext(SCORING_MODEL_ID));
+                    .createDefaultABCDBuckets(getStringValueFromContext(SCORING_MODEL_ID),
+                            configuration.getUserId());
 
             log.info(String.format(
                     "Created A bucket (%s - %s) with %s leads and %s lift,"

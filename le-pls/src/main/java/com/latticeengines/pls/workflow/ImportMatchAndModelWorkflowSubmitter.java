@@ -162,6 +162,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .dedupDataFlowBeanName("dedupEventTable")
                 //
+                .userId(parameters.getUserId())
+                //
                 .dedupType(parameters.getDeduplicationType())
                 //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)

@@ -12,7 +12,7 @@
 
             	<li ng-repeat="configuration in vm.historicalBuckets">
 		            <div class="chart-header clearfix">
-		                <!-- <div class="list-data pull-left">Created by: bnguyen@lattice-engines.com</div> -->
+		                <div class="list-data pull-left">Created by: {{configuration[0].user_id}}</div>
 		                <div class="list-data pull-right">Published on: {{configuration[0].creation_timestamp | date : 'MMM d, y h:mm:ss a'}}</div>
 		            </div><!-- End .chart-header -->
 		            <ul class="bucket-tiles published">

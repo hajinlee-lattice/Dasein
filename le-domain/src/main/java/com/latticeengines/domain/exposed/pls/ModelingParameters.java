@@ -27,6 +27,9 @@ public class ModelingParameters {
     private String description;
 
     @JsonProperty
+    private String userId;
+
+    @JsonProperty
     private DedupType deduplicationType = DedupType.MULTIPLELEADSPERDOMAIN;
 
     @JsonProperty
@@ -86,6 +89,14 @@ public class ModelingParameters {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public DedupType getDeduplicationType() {

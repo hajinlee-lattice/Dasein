@@ -290,17 +290,21 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                         unmappedScoringHeader = unmappedScoringHeader.concat("_1");
                     }
                 }
-                modelAttributes.add(getAttributeFromFieldName(unmappedScoringHeader));
+
+                modelAttributes.add(getAttributeFromFieldName(unmappedScoringHeader,
+                        fieldMapping.getMappedField()));
             }
         }
     }
 
-    private Attribute getAttributeFromFieldName(String fieldName) {
+    private Attribute getAttributeFromFieldName(String scoringHeaderName, String fieldName) {
         Attribute attribute = new Attribute();
 
-        attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldName));
+        attribute.setName(fieldName == null
+                ? ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(scoringHeaderName)
+                : fieldName);
         attribute.setPhysicalDataType(FieldType.STRING.toString().toLowerCase());
-        attribute.setDisplayName(fieldName);
+        attribute.setDisplayName(scoringHeaderName);
         attribute.setApprovedUsage(ApprovedUsage.NONE.name());
         attribute.setCategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION);
         attribute.setFundamentalType(ModelingMetadata.FT_ALPHA);

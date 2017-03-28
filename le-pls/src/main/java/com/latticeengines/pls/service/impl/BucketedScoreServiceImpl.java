@@ -98,25 +98,27 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             GenericRecord pivotedRecord = pivotedRecords.get(currentRecord);
             log.info(String.format("current record index: %s, i is: %s, and generic record is: %s",
                     currentRecord, currentScore, pivotedRecord.toString()));
-            if (pivotedRecord != null && (int) pivotedRecord.get(SCORE) == currentScore) {
+            if (pivotedRecord != null && Double.valueOf(pivotedRecord.get(SCORE).toString())
+                    .intValue() == currentScore) {
                 bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
-                        (int) pivotedRecord.get(SCORE),
-                        new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue(),
-                        new Double((double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS)).intValue(),
+                        Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
+                        Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
+                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString())
+                                .intValue(),
                         cumulativeNumLeads, cumulativeNumConverted);
                 cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
                 cumulativeNumConverted += new Double(
                         (double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS)).intValue();
                 currentRecord--;
             } else {
-                bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(currentScore, 0, 0,
-                        cumulativeNumLeads, cumulativeNumConverted);
+                bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
+                        currentScore, 0, 0, cumulativeNumLeads, cumulativeNumConverted);
             }
             currentScore--;
         }
         for (; currentScore > 3; currentScore--) {
-            bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(currentScore, 0, 0,
-                    cumulativeNumLeads, cumulativeNumConverted);
+            bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(currentScore,
+                    0, 0, cumulativeNumLeads, cumulativeNumConverted);
         }
         bucketedScoreSummary.setTotalNumLeads(cumulativeNumLeads);
         bucketedScoreSummary.setTotalNumConverted(cumulativeNumConverted);

@@ -103,6 +103,7 @@ public class ModelResource {
             throw new RuntimeException(message);
         }
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
+        parameters.setUserId(MultiTenantContext.getEmailAddress());
         log.info(String.format("model called with parameters %s", parameters.toString()));
         return ResponseDocument.successResponse( //
                 importMatchAndModelWorkflowSubmitter.submit(parameters).toString());
@@ -142,6 +143,7 @@ public class ModelResource {
         List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(
                 parentModelEventTable.getAttributes(), parameters.getAttributes());
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
+        parameters.setUserId(MultiTenantContext.getEmailAddress());
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter
                         .submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)

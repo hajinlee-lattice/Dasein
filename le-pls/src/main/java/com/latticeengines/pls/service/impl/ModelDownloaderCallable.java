@@ -92,8 +92,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
             long recursiveGetFilesTime = System.currentTimeMillis() - startTime;
             if (recursiveGetFilesTime > 1000) {
-                log.info(String.format("Recursive get files from %s duration: %d milliseconds", startingHdfsPoint,
-                        recursiveGetFilesTime));
+                log.info(String.format("Recursive get files from %s duration: %d milliseconds",
+                        startingHdfsPoint, recursiveGetFilesTime));
             }
             log.debug(String.format("%d file(s) downloaded from modeling service for tenant %s.",
                     files.size(), tenant.getId()));
@@ -195,11 +195,12 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         for (BucketMetadata originalBucketMetadata : originalBucketMetadatas) {
             BucketMetadata bucketMetadata = new BucketMetadata();
 
-            bucketMetadata.setBucketName(originalBucketMetadata.getBucketName());
+            bucketMetadata.setBucket(originalBucketMetadata.getBucket());
             bucketMetadata.setLeftBoundScore(originalBucketMetadata.getLeftBoundScore());
             bucketMetadata.setRightBoundScore(originalBucketMetadata.getRightBoundScore());
             bucketMetadata.setNumLeads(originalBucketMetadata.getNumLeads());
             bucketMetadata.setLift(originalBucketMetadata.getLift());
+            bucketMetadata.setLastModifiedByUser(originalBucketMetadata.getLastModifiedByUser());
             bucketMetadata.setModelSummary(modelSummaryEntityMgr.getByModelId(copiedModelId));
 
             bucketMetadatas.add(bucketMetadata);

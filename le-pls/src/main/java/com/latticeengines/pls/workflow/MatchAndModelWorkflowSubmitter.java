@@ -104,7 +104,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .sourceSchemaInterpretation(sourceSchemaInterpretation) //
                 .inputProperties(inputProperties) //
                 .trainingTableName(cloneTableName) //
-                // .userId(parameters.getUserId()) //
+                .userId(parameters.getUserId()) //
                 .transformationGroup(transformationGroup) //
                 .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled() || modelSummary
                         .getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled, false)) //

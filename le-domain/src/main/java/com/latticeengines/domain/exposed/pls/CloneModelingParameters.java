@@ -21,6 +21,9 @@ public class CloneModelingParameters {
     private String description;
 
     @JsonProperty
+    private String userId;
+
+    @JsonProperty
     private List<VdbMetadataField> attributes;
 
     @JsonProperty
@@ -60,6 +63,14 @@ public class CloneModelingParameters {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public List<VdbMetadataField> getAttributes() {

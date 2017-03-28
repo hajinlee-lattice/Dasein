@@ -154,6 +154,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder userId(String userId) {
+            pivotScoreAndEvent.setUserId(userId);
+            return this;
+        }
+
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             setConfigForScoring.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.pls.service.BucketedScoreService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import io.swagger.annotations.Api;
@@ -52,6 +53,9 @@ public class BucketedScoreResource {
     @ApiOperation(value = "Create a group of ABCD buckets")
     public void createABCDBuckets(@PathVariable String modelId,
             @RequestBody List<BucketMetadata> bucketMetadatas) {
+        for (BucketMetadata bucketMetadata : bucketMetadatas) {
+            bucketMetadata.setLastModifiedByUser(MultiTenantContext.getEmailAddress());
+        }
         bucketedScoreService.createBucketMetadatas(modelId, bucketMetadatas);
     }
 

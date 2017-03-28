@@ -339,10 +339,10 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<BucketMetadata> createDefaultABCDBuckets(String modelId) {
+    public List<BucketMetadata> createDefaultABCDBuckets(String modelId, String userId) {
         try {
             String url = constructUrl("pls/internal/bucketmetadata", modelId);
-            List<?> abcdBuckets = restTemplate.getForObject(url, List.class);
+            List<?> abcdBuckets = restTemplate.postForObject(url, userId, List.class);
             return JsonUtils.convertList(abcdBuckets, BucketMetadata.class);
         } catch (Exception e) {
             throw new RuntimeException("create default abcd buckets: Remote call failure", e);

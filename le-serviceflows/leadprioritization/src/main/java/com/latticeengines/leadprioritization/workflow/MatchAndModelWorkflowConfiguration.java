@@ -129,6 +129,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder userId(String userId) {
+            pivotScoreAndEvent.setUserId(userId);
+            return this;
+        }
+
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
             setConfigForScoring.setInputProperties(inputProperties);

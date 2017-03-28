@@ -46,6 +46,9 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("namespace")
     private String namespace;
 
+    @JsonProperty("user_id")
+    private String userId;
+
     
     public Map<String, String> getExtraSources() {
         return extraSources;
@@ -130,4 +133,13 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
 }
