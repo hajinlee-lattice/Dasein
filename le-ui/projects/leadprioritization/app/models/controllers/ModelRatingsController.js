@@ -11,7 +11,6 @@ angular.module('lp.models.ratings', [
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
         model: Model,
-        chartNotUpdated: true,
         saveInProgress: false,
         showSaveBucketsError: false,
         ResourceUtility: ResourceUtility,
@@ -32,6 +31,9 @@ angular.module('lp.models.ratings', [
         } else {
             vm.modelType = "Accounts";
         };
+
+        
+        vm.chartNotUpdated = true;
 
         renderChart();
 
@@ -160,12 +162,15 @@ angular.module('lp.models.ratings', [
         vm.index = index;
         vm.canAddBucket = false;
         vm.showRemoveBucketText = false;
-        
+        vm.startingPosition = ev.clientX;
+
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);
+
     }
 
     function eleMouseMove(ev) {
+
         ev.preventDefault();
         ev.stopPropagation();
 
@@ -190,7 +195,7 @@ angular.module('lp.models.ratings', [
             vm.slider.style.right = right + '%';
         } else {
             vm.slider.style.right = (leftCheck ? vm.sliderBoundaryRight : vm.sliderBoundaryLeft) + '%';
-        }
+        } 
 
         if (vm.workingBuckets.length > 2 && (ev.clientY > vm.containerBox.bottom + 10)) {
             vm.showRemoveBucketText = true;
@@ -207,13 +212,18 @@ angular.module('lp.models.ratings', [
                 $scope.$apply();
             }
         }
+
     }
 
     function eleMouseUp(ev, index){
         ev.preventDefault();
         ev.stopPropagation();
 
-        vm.bucket.right_bound_score = this.right;
+        if(vm.startingPosition != ev.clientX) {
+            vm.bucket.right_bound_score = this.right;
+            vm.chartNotUpdated = false;
+        }
+
         vm.slider.style.opacity = 1;
         vm.canAddBucket = false;
 
@@ -243,14 +253,13 @@ angular.module('lp.models.ratings', [
 
         delete vm.slider;
 
-        vm.chartNotUpdated = false;
-
         document.removeEventListener('mousemove', eleMouseMove, false);
         document.removeEventListener('mouseup', eleMouseUp, false);
 
         $timeout(function() {
             refreshChartData();    
         }, 1);
+
     }
 
     vm.publishConfiguration = function() {
@@ -262,11 +271,15 @@ angular.module('lp.models.ratings', [
         ModelRatingsService.CreateABCDBuckets(modelId, vm.workingBuckets).then(function(result){
             
             if (result != null && result.success === true) {
-                // $state.go('home.model.ratings', {}, { reload: true });
-                $timeout( function(){
-                    vm.showSuccess = true;
-                    
-                }, 1);
+                
+                vm.showSuccess = true;
+                vm.chartNotUpdated = true;
+                vm.currentConfiguration.$apply;
+                
+                $timeout( function(){ vm.showSuccess = false; }, 3500);
+
+                // $state.go('home.model.ratings', {}, { reload: 'home.model.ratings' });
+
             } else {
                 vm.savingConfiguration = false;
                 vm.createBucketsErrorMessage = result;
@@ -309,8 +322,6 @@ angular.module('lp.models.ratings', [
         Object.keys(vm.historicalBuckets).sort().reverse().forEach(function(key) {
           ordered[key] = vm.historicalBuckets[key];
         });
-
-        console.log(JSON.stringify(ordered));
 
         vm.historicalBuckets = ordered;
 

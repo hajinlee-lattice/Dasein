@@ -3,8 +3,6 @@
     <div class="row">
         <div class="ten columns offset-one">
 
-            <div class="remove-text" ng-show="vm.showSuccess">Your new ratings configuration has been published.</div>
-
             <ul class="tabs_">
                 <li class="active">Rating Setup</li>
                 <li ui-sref="home.model.ratings.history({ modelId: '{{ vm.modelId | escape }}' })">History</li>
@@ -29,6 +27,7 @@
                 ng-attr-style="{{'height: '+ vm.chartContainerHeight +'px;'}}">
 
                 <div class="remove-text" ng-show="vm.showRemoveBucketText">Drop to remove bucket</div>
+                <div class="remove-text" ng-show="vm.showSuccess">Your new ratings configuration has been published.</div>
                 
                 <div 
                     id="sliders" 
