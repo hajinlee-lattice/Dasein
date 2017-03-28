@@ -9,11 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -23,11 +21,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -95,6 +93,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private ModelSummary summary;
 
+    @Override
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         TENANT_ID = this.getClass().getSimpleName() + String.valueOf(System.currentTimeMillis());
