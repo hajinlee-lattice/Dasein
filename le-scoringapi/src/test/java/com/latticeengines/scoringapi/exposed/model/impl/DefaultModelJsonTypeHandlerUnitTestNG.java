@@ -40,15 +40,15 @@ public class DefaultModelJsonTypeHandlerUnitTestNG {
     private List<BucketMetadata> generateDefaultBucketMetadataList() {
         List<BucketMetadata> bucketMetadataList = new ArrayList<BucketMetadata>();
         BucketMetadata bucket1 = new BucketMetadata();
-        bucket1.setBucketName(BucketName.A);
+        bucket1.setBucket(BucketName.A);
         bucket1.setLeftBoundScore(9);
         bucket1.setRightBoundScore(5);
         BucketMetadata bucket2 = new BucketMetadata();
-        bucket2.setBucketName(BucketName.B);
+        bucket2.setBucket(BucketName.B);
         bucket2.setLeftBoundScore(39);
         bucket2.setRightBoundScore(10);
         BucketMetadata bucket3 = new BucketMetadata();
-        bucket3.setBucketName(BucketName.C);
+        bucket3.setBucket(BucketName.C);
         bucket3.setLeftBoundScore(99);
         bucket3.setRightBoundScore(40);
         bucketMetadataList.add(bucket1);

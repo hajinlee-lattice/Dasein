@@ -54,7 +54,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
                 // the lower bound
                 int leftBoundScore = bucketMetadata.getLeftBoundScore();
                 int rightBoundScore = bucketMetadata.getRightBoundScore();
-                BucketName currentBucketName = bucketMetadata.getBucketName();
+                BucketName currentBucketName = bucketMetadata.getBucket();
                 if (rightBoundScore < min) {
                     min = rightBoundScore;
                     minBucket = currentBucketName;

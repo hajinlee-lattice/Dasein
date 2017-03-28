@@ -2,22 +2,39 @@ package com.latticeengines.domain.exposed.pls;
 
 public enum BucketName {
 
-    A(99, 95), //
-    B(94, 85), //
-    C(84, 50), //
-    D(49, 5), //
-    E, //
-    F;//
+    A("A", 99, 95), //
+    B("B", 94, 85), //
+    C("C", 84, 50), //
+    D("D", 49, 5), //
+    A_PLUS("A+"), //
+    F("F");//
 
+    private String value;
     private int defaultUpperBound;
     private int defaultLowerBound;
 
-    private BucketName() {
+    BucketName(String value) {
+        this.value = value;
     }
 
-    private BucketName(int defaultUpperBound, int defaultLowerBound) {
+    private BucketName(String value, int defaultUpperBound, int defaultLowerBound) {
+        this.value = value;
         this.defaultUpperBound = defaultUpperBound;
         this.defaultLowerBound = defaultLowerBound;
+    }
+
+    public static BucketName fromValue(String value) {
+        for (BucketName bucketName : values()) {
+            if (bucketName.toValue().equals(value)) {
+                return bucketName;
+            }
+        }
+
+        return null;
+    }
+
+    public String toValue() {
+        return this.value;
     }
 
     public int getDefaultUpperBound() {

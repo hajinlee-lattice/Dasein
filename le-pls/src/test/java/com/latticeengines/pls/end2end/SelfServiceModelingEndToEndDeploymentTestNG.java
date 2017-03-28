@@ -341,24 +341,24 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         List<BucketMetadata> bucketMetadatas = JsonUtils
                 .convertList(creationTimeToBucketMetadatas.get(timestamp), BucketMetadata.class);
         for (BucketMetadata bucketMetadata : bucketMetadatas) {
-            switch (bucketMetadata.getBucketName()) {
+            switch (bucketMetadata.getBucket()) {
             case A:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getLeftBoundScore(), 99);
                 assertEquals(bucketMetadata.getRightBoundScore(), 95);
                 break;
             case B:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getLeftBoundScore(), 94);
                 assertEquals(bucketMetadata.getRightBoundScore(), 85);
                 break;
             case C:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getLeftBoundScore(), 84);
                 assertEquals(bucketMetadata.getRightBoundScore(), 50);
                 break;
             case D:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getLeftBoundScore(), 49);
                 assertEquals(bucketMetadata.getRightBoundScore(), 5);
                 break;

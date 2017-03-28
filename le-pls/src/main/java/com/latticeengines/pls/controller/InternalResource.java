@@ -740,10 +740,10 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/bucketmetadata/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/bucketmetadata/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "create default abcd scored buckets")
-    public List<BucketMetadata> createDefaultABCDBuckets(@PathVariable String modelId,
+    public List<BucketMetadata> createDefaultABCDBuckets(@PathVariable String modelId, @RequestBody String userId,
             HttpServletRequest request) throws Exception {
         BucketMetadata bucketMetadata1 = new BucketMetadata();
         BucketMetadata bucketMetadata2 = new BucketMetadata();
@@ -760,9 +760,10 @@ public class InternalResource extends InternalResourceBase {
         BucketedScore[] bucketedScores = bucketedScoreSummary.getBucketedScores();
         Double overallLift = bucketedScoreSummary.getOverallLift();
 
-        bucketMetadata1.setBucketName(BucketName.A);
+        bucketMetadata1.setBucket(BucketName.A);
         bucketMetadata1.setLeftBoundScore(BUCKET_0);
         bucketMetadata1.setRightBoundScore(BUCKET_1);
+        bucketMetadata1.setLastModifiedByUser(userId);
         bucketMetadata1.setNumLeads(bucketedScores[BUCKET_1 - 1].getLeftNumLeads()
                 - bucketedScores[BUCKET_0].getLeftNumLeads());
         if (bucketMetadata1.getNumLeads() == 0 || overallLift == 0) {
@@ -773,9 +774,10 @@ public class InternalResource extends InternalResourceBase {
                     / (double) bucketMetadata1.getNumLeads()) / overallLift);
         }
 
-        bucketMetadata2.setBucketName(BucketName.B);
+        bucketMetadata2.setBucket(BucketName.B);
         bucketMetadata2.setLeftBoundScore(BUCKET_1 - 1);
         bucketMetadata2.setRightBoundScore(BUCKET_2);
+        bucketMetadata2.setLastModifiedByUser(userId);
         bucketMetadata2.setNumLeads(bucketedScores[BUCKET_2 - 1].getLeftNumLeads()
                 - bucketedScores[BUCKET_1 - 1].getLeftNumLeads());
         if (bucketMetadata2.getNumLeads() == 0 || overallLift == 0) {
@@ -786,9 +788,10 @@ public class InternalResource extends InternalResourceBase {
                     / (double) bucketMetadata2.getNumLeads()) / overallLift);
         }
 
-        bucketMetadata3.setBucketName(BucketName.C);
+        bucketMetadata3.setBucket(BucketName.C);
         bucketMetadata3.setLeftBoundScore(BUCKET_2 - 1);
         bucketMetadata3.setRightBoundScore(BUCKET_3);
+        bucketMetadata3.setLastModifiedByUser(userId);
         bucketMetadata3.setNumLeads(bucketedScores[BUCKET_3 - 1].getLeftNumLeads()
                 - bucketedScores[BUCKET_2 - 1].getLeftNumLeads());
         if (bucketMetadata3.getNumLeads() == 0 || overallLift == 0) {
@@ -799,9 +802,10 @@ public class InternalResource extends InternalResourceBase {
                     / (double) bucketMetadata3.getNumLeads()) / overallLift);
         }
 
-        bucketMetadata4.setBucketName(BucketName.D);
+        bucketMetadata4.setBucket(BucketName.D);
         bucketMetadata4.setLeftBoundScore(BUCKET_3 - 1);
         bucketMetadata4.setRightBoundScore(BUCKET_4);
+        bucketMetadata4.setLastModifiedByUser(userId);
         bucketMetadata4.setNumLeads(bucketedScores[BUCKET_4 - 1].getLeftNumLeads()
                 - bucketedScores[BUCKET_3 - 1].getLeftNumLeads());
         if (bucketMetadata4.getNumLeads() == 0 || overallLift == 0) {

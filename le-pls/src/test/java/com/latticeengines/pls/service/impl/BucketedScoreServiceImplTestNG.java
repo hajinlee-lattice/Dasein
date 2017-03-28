@@ -114,48 +114,48 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     {
-        BUCKET_METADATA_A.setBucketName(BucketName.A);
+        BUCKET_METADATA_A.setBucket(BucketName.A);
         BUCKET_METADATA_A.setNumLeads(NUM_LEADS_BUCKET_1);
         BUCKET_METADATA_A.setLeftBoundScore(95);
         BUCKET_METADATA_A.setRightBoundScore(99);
         BUCKET_METADATA_A.setLift(LIFT_1);
-        BUCKET_METADATA_B.setBucketName(BucketName.B);
+        BUCKET_METADATA_B.setBucket(BucketName.B);
         BUCKET_METADATA_B.setNumLeads(NUM_LEADS_BUCKET_2);
         BUCKET_METADATA_B.setLeftBoundScore(85);
         BUCKET_METADATA_B.setRightBoundScore(95);
         BUCKET_METADATA_B.setLift(LIFT_2);
-        BUCKET_METADATA_C.setBucketName(BucketName.C);
+        BUCKET_METADATA_C.setBucket(BucketName.C);
         BUCKET_METADATA_C.setNumLeads(NUM_LEADS_BUCKET_3);
         BUCKET_METADATA_C.setLeftBoundScore(50);
         BUCKET_METADATA_C.setRightBoundScore(85);
         BUCKET_METADATA_C.setLift(LIFT_3);
-        BUCKET_METADATA_D.setBucketName(BucketName.D);
+        BUCKET_METADATA_D.setBucket(BucketName.D);
         BUCKET_METADATA_D.setNumLeads(NUM_LEADS_BUCKET_4);
         BUCKET_METADATA_D.setLeftBoundScore(5);
         BUCKET_METADATA_D.setRightBoundScore(50);
         BUCKET_METADATA_D.setLift(LIFT_4);
 
-        BUCKET_METADATA_A_1.setBucketName(BucketName.A);
+        BUCKET_METADATA_A_1.setBucket(BucketName.A);
         BUCKET_METADATA_A_1.setNumLeads(NUM_LEADS_BUCKET_1);
         BUCKET_METADATA_A_1.setLeftBoundScore(95);
         BUCKET_METADATA_A_1.setRightBoundScore(99);
         BUCKET_METADATA_A_1.setLift(LIFT_1);
-        BUCKET_METADATA_B_1.setBucketName(BucketName.B);
+        BUCKET_METADATA_B_1.setBucket(BucketName.B);
         BUCKET_METADATA_B_1.setNumLeads(NUM_LEADS_BUCKET_2);
         BUCKET_METADATA_B_1.setLeftBoundScore(85);
         BUCKET_METADATA_B_1.setRightBoundScore(95);
         BUCKET_METADATA_B_1.setLift(LIFT_2);
-        BUCKET_METADATA_C_1.setBucketName(BucketName.C);
+        BUCKET_METADATA_C_1.setBucket(BucketName.C);
         BUCKET_METADATA_C_1.setNumLeads(NUM_LEADS_BUCKET_3);
         BUCKET_METADATA_C_1.setLeftBoundScore(50);
         BUCKET_METADATA_C_1.setRightBoundScore(85);
         BUCKET_METADATA_C_1.setLift(LIFT_3);
-        BUCKET_METADATA_D_1.setBucketName(BucketName.D);
+        BUCKET_METADATA_D_1.setBucket(BucketName.D);
         BUCKET_METADATA_D_1.setNumLeads(NUM_LEADS_BUCKET_4);
         BUCKET_METADATA_D_1.setLeftBoundScore(30);
         BUCKET_METADATA_D_1.setRightBoundScore(50);
         BUCKET_METADATA_D_1.setLift(LIFT_4);
-        BUCKET_METADATA_E_1.setBucketName(BucketName.E);
+        BUCKET_METADATA_E_1.setBucket(BucketName.A_PLUS);
         BUCKET_METADATA_E_1.setNumLeads(NUM_LEADS_BUCKET_5);
         BUCKET_METADATA_E_1.setLeftBoundScore(5);
         BUCKET_METADATA_E_1.setRightBoundScore(30);
@@ -205,30 +205,30 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
         Set<BucketName> bucketNames = new HashSet<>(
                 Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D));
         for (BucketMetadata bucketMetadata : bucketMetadataList) {
-            switch (bucketMetadata.getBucketName()) {
+            switch (bucketMetadata.getBucket()) {
             case A:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_1);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 95);
                 assertEquals(bucketMetadata.getRightBoundScore(), 99);
                 assertEquals(bucketMetadata.getLift(), LIFT_1);
                 break;
             case B:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_2);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 85);
                 assertEquals(bucketMetadata.getRightBoundScore(), 95);
                 assertEquals(bucketMetadata.getLift(), LIFT_2);
                 break;
             case C:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_3);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 50);
                 assertEquals(bucketMetadata.getRightBoundScore(), 85);
                 assertEquals(bucketMetadata.getLift(), LIFT_3);
                 break;
             case D:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_4);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 5);
                 assertEquals(bucketMetadata.getRightBoundScore(), 50);
@@ -245,39 +245,39 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
     private void testSecondGroupBucketMetadata(List<BucketMetadata> bucketMetadataList) {
         assertEquals(bucketMetadataList.size(), 5);
         Set<BucketName> bucketNames = new HashSet<>(
-                Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D, BucketName.E));
+                Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D, BucketName.A_PLUS));
         for (BucketMetadata bucketMetadata : bucketMetadataList) {
-            switch (bucketMetadata.getBucketName()) {
+            switch (bucketMetadata.getBucket()) {
             case A:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_1);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 95);
                 assertEquals(bucketMetadata.getRightBoundScore(), 99);
                 assertEquals(bucketMetadata.getLift(), LIFT_1);
                 break;
             case B:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_2);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 85);
                 assertEquals(bucketMetadata.getRightBoundScore(), 95);
                 assertEquals(bucketMetadata.getLift(), LIFT_2);
                 break;
             case C:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_3);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 50);
                 assertEquals(bucketMetadata.getRightBoundScore(), 85);
                 assertEquals(bucketMetadata.getLift(), LIFT_3);
                 break;
             case D:
-                bucketNames.remove(bucketMetadata.getBucketName());
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_4);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 30);
                 assertEquals(bucketMetadata.getRightBoundScore(), 50);
                 assertEquals(bucketMetadata.getLift(), LIFT_4);
                 break;
-            case E:
-                bucketNames.remove(bucketMetadata.getBucketName());
+            case A_PLUS:
+                bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_5);
                 assertEquals(bucketMetadata.getLeftBoundScore(), 5);
                 assertEquals(bucketMetadata.getRightBoundScore(), 30);

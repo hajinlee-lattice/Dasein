@@ -21,11 +21,12 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.IsUserModifiable;
 
 @Table(name = "BUCKET_METADATA")
 @Entity
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class BucketMetadata implements HasPid, Serializable {
+public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
 
     private static final long serialVersionUID = 5914215732568807732L;
 
@@ -67,6 +68,10 @@ public class BucketMetadata implements HasPid, Serializable {
     @Column(name = "CREATION_TIMESTAMP", nullable = false)
     private long creationTimestamp;
 
+    @JsonProperty("last_modified_by_user")
+    @Column(name = "LAST_MODIFIED_BY_USER")
+    private String lastModifiedByUser;
+
     @Override
     public Long getPid() {
         return pid;
@@ -85,12 +90,20 @@ public class BucketMetadata implements HasPid, Serializable {
         this.modelSummary = modelSummary;
     }
 
-    public BucketName getBucketName() {
+    public String getBucketName() {
+        return bucketName.toValue();
+    }
+
+    public BucketName getBucket() {
         return bucketName;
     }
 
-    public void setBucketName(BucketName bucketName) {
+    public void setBucket(BucketName bucketName) {
         this.bucketName = bucketName;
+    }
+
+    public void setBucketName(String bucketName) {
+        this.bucketName = BucketName.fromValue(bucketName);
     }
 
     public int getLeftBoundScore() {
@@ -131,6 +144,16 @@ public class BucketMetadata implements HasPid, Serializable {
 
     public void setCreationTimestamp(long creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
+    }
+
+    @Override
+    public String getLastModifiedByUser() {
+        return lastModifiedByUser;
+    }
+
+    @Override
+    public void setLastModifiedByUser(String lastModifiedByUser) {
+        this.lastModifiedByUser = lastModifiedByUser;
     }
 
 }
