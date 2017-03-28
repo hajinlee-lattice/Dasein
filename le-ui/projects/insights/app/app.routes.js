@@ -44,7 +44,9 @@ angular.module('insightsApp')
                     controller: function($state, AuthStore, LookupStore) {
                         parent.postMessage("init", '*');
 
+                        console.log('### insightsApp: initialized, waiting for postMessage()')
                         window.addEventListener("message", function (event){
+                            console.log('### insightsApp: received postMessage() event',event)
                             var data = ((typeof event.data).toLowerCase() == 'string')
                                 ? JSON.parse(event.data)
                                 : event.data;
@@ -54,6 +56,7 @@ angular.module('insightsApp')
                             LookupStore.add('timestamp', timestamp);
                             LookupStore.add('request', data.request);
                             AuthStore.set('Bearer ' + data.Authentication);
+                            console.log('### insightsApp: redirectTo home.datacloud.insights')
                             $state.go('home.datacloud.insights');
                         }, false);
                     }
