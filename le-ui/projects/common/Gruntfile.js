@@ -50,10 +50,7 @@ module.exports = function(grunt) {
         uglify: {
             vendor: {
                 options: {
-                    mangle: true,
-                    compress: {
-                        drop_console: true
-                    }
+                    mangle: true
                 },
                 files: {
                     '<%= dir.assets %>/vendor.min.js': [
@@ -63,10 +60,7 @@ module.exports = function(grunt) {
             },
             production: {
                 options: {
-                    mangle: true,
-                    compress: {
-                        drop_console: true
-                    }
+                    mangle: true
                 },
                 files: {
                     '<%= dir.assets %>/lattice.min.js': [
