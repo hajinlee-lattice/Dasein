@@ -57,6 +57,6 @@
       "Lead Prioritization 3.0"
     ],
     "Topology": "${TOPOLOGY}",
-    "DL_Address": "http://bodcdevvint187.dev.lattice.local:8081"
+    "DL_Address": "http://bodcdevvint187.dev.lattice.local:8089"
   }
 }
