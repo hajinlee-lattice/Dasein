@@ -95,7 +95,7 @@ public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseA
     @DataProvider(name = "getAccountMasterCsvFile")
     public Object[][] getAccountMasterCsvFile() {
         return new Object[][] { //
-                { "Mulesoft_NA_doman_AccountMaster", "Mulesoft_NA_domain.csv" }, //
+                { "Mulesoft_NA_doman_AccountMaster", "datasets/Mulesoft_NA_domain_enhanced21k.csv" }, //
                 // { "Mulesoft_Emea_doman_AccountMaster",
                 // "Mulesoft_Emea_domain.csv" }, //
                 // { "Mulesoft_Apac_doman_AccountMaster",
