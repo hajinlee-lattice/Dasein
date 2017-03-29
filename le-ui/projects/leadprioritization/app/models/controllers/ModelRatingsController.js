@@ -118,7 +118,7 @@ angular.module('lp.models.ratings', [
                 vm.buckets[i].lift = ( vm.totalConverted / vm.totalLeads ) / ( vm.ratingsSummary.total_num_converted / vm.ratingsSummary.total_num_leads );
             }
 
-            vm.buckets[i].name = vm.bucketNames[i];
+            vm.buckets[i].bucket_name = vm.bucketNames[i];
 
 
         }
@@ -134,7 +134,7 @@ angular.module('lp.models.ratings', [
                     creation_timestamp: 0,
                     left_bound_score: 0,
                     lift: 0,
-                    name: "",
+                    bucket_name: "",
                     num_leads: 0,
                     right_bound_score: 100 - Math.round(vm.relativeSliderChartPosition * 100)
                 };

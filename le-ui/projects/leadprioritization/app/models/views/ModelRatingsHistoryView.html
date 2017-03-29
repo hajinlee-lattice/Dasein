@@ -17,7 +17,7 @@
 		            </div><!-- End .chart-header -->
 		            <ul class="bucket-tiles published">
 		            	<li ng-repeat="bucket in configuration">
-		                    <div class="bucket-label">{{bucket.name}}</div>
+		                    <div class="bucket-label">{{bucket.bucket_name}}</div>
 		                    <dl>
 		                        <dt>Lift</dt>
 		                        <dd class="lift">{{vm.Math.max(bucket.lift).toFixed(1);}}x</dd>

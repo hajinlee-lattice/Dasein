@@ -43,7 +43,7 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private ModelSummary modelSummary;
 
-    @JsonProperty("name")
+    @JsonProperty("bucket_name")
     @Column(name = "NAME", nullable = false)
     @Enumerated(EnumType.STRING)
     private BucketName bucketName;
@@ -94,6 +94,7 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         return bucketName.toValue();
     }
 
+    @JsonIgnore
     public BucketName getBucket() {
         return bucketName;
     }
