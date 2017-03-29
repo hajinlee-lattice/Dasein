@@ -34,12 +34,12 @@ public class FabricDataServiceImpl implements FabricDataService {
 
         FabricDataStore dataStore = null;
 
-        if (serviceProviders == null)
-            initServiceProviders();
-        FabricDataServiceProvider dsp = serviceProviders.get(store);
+        FabricDataServiceProvider dsp = getServiceProvider(store);
         if (dsp != null) {
             log.info("Initialize data store " + store + " repo " + repository);
             dataStore = dsp.constructDataStore(repository, recordType, schema);
+        } else {
+            log.error("Cannot find service provider for store " + store);
         }
 
         return dataStore;
@@ -51,7 +51,15 @@ public class FabricDataServiceImpl implements FabricDataService {
         serviceProviders.put(dsp.getName(), dsp);
     }
 
-    synchronized private void initServiceProviders() {
+    synchronized private FabricDataServiceProvider getServiceProvider(String store) {
+        if (serviceProviders == null) {
+            initServiceProviders();
+        }
+        return serviceProviders.get(store);
+    }
+
+    private void initServiceProviders() {
+
         serviceProviders = new HashMap<String, FabricDataServiceProvider>();
 
         // Add preconfigured data services
