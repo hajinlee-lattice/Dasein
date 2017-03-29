@@ -86,9 +86,6 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
             // Initialize DnbSeed Data Set and AMSeed Data Set
             TransformationStepConfig step2 = new TransformationStepConfig();
             List<String> baseSourcesStep2 = new ArrayList<String>();
-            List<Integer> inputSteps = new ArrayList<Integer>();
-            inputSteps.add(0);
-            // step2.setInputSteps(inputSteps);
             step2.setStepType(TransformationStepConfig.ITERATIVE);
             step2.setTargetSource(targetSourceName);
             step2.setTransformer("miniAMDomainDunsTransformer");
