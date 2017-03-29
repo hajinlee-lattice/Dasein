@@ -18,7 +18,8 @@ angular.module('lp.models.ratings', [
         ratingsSummary: RatingsSummary,
         bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
         bucketTiles: document.getElementById("bucketTiles"),
-        slidersContainer: document.getElementById("sliders")
+        slidersContainer: document.getElementById("sliders"),
+        updateContent: false
     });
 
     vm.init = function() {
@@ -278,7 +279,7 @@ angular.module('lp.models.ratings', [
                 vm.chartNotUpdated = true;
 
                 $timeout( function(){ 
-                    
+
                     vm.updateContent = true;
                     vm.showSuccess = false;
                     
