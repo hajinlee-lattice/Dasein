@@ -78,7 +78,7 @@ angular.module('common.datacloud.queryservice',[
 
         for (var i = 0; i < group.length; i++) {
             if (group[i].bucketRestriction.lhs.columnLookup.column_name === columnName) {
-                results.push({index: i, attribute: group[i], groupKey, groupKey});
+                results.push({index: i, attribute: group[i], groupKey: groupKey});
             }
         }
 
