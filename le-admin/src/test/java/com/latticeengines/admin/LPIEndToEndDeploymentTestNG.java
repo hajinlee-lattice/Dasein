@@ -254,8 +254,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                     || serviceName.equals(DLTemplateComponent.componentName)
                     || serviceName.equals(BardJamsComponent.componentName)
                     || serviceName.equals(EaiComponent.componentName)
-                    || serviceName.equals(MetadataComponent.componentName)
-                    || serviceName.equals(ModelingComponent.componentName)) {
+                    || serviceName.equals(MetadataComponent.componentName)) {
                 continue;
             } else {
                 lp3ServiceNames.add(serviceName);
