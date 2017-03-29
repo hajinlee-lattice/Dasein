@@ -213,10 +213,7 @@ module.exports = function (grunt) {
         uglify: {
             dist: {
                 options: {
-                    mangle: true,
-                    compress: {
-                        drop_console: true
-                    }
+                    mangle: true
                 },
                 files: {
                     '<%= pls.app %>/app/production_<%= versionString %>.min.js': [
@@ -230,10 +227,7 @@ module.exports = function (grunt) {
             },
             production: {
                 options: {
-                    mangle: true,
-                    compress: {
-                        drop_console: true
-                    }
+                    mangle: true
                 },
                 files: {
                     '<%= pls.dist %>/app.js': [
