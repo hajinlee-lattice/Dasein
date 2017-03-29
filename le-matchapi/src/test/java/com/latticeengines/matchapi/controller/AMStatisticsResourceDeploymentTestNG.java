@@ -55,10 +55,12 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
             Assert.assertTrue(cube.getStatistics().get(attribute).getRowBasedStatistics() != null
                     || cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics() != null);
 
-            if (cube.getStatistics().get(attribute).getRowBasedStatistics() != null) {
+            if (cube.getStatistics().get(attribute).getRowBasedStatistics() != null
+                    && cube.getStatistics().get(attribute).getRowBasedStatistics().getBuckets() != null) {
                 checkBuckets(cube.getStatistics().get(attribute).getRowBasedStatistics().getBuckets().getBucketList());
             }
-            if (cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics() != null) {
+            if (cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics() != null
+                    && cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics().getBuckets() != null) {
                 checkBuckets(cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics().getBuckets()
                         .getBucketList());
             }

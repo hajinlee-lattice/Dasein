@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,16 +52,16 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("accountMasterStatisticsService")
 public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisticsService {
+    private static final String ENCODED_YES = "YES";
     private static final String ENCODED_NO = "NO";
+    private static final String DECODED_YES = "Yes";
+    private static final String DECODED_NO = "No";
 
     @Value("${datacloud.core.accountmasterstats.locationbased}")
     private boolean isLocationBased;
 
     @Value("${datacloud.core.accountmasterstats.numericbuckets.enabled:true}")
     private boolean isNumericbucketEnabled;
-
-    @Value("${datacloud.core.accountmasterstats.dummybuckets.enabled:true}")
-    private boolean isDummybucketEnabled;
 
     @Autowired
     private AccountMasterFactEntityMgr accountMasterFactEntityMgr;
@@ -129,10 +128,6 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
                     AccountMasterCube.class);
             expandEncodedAttributes(cube);
-
-            if (isDummybucketEnabled) {
-                populateDummyBuckets(cube);
-            }
 
             cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
                     query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
@@ -379,18 +374,31 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                 totalSum.setValue(0L);
             }
             for (Bucket bucket : encodedBuckets.getBucketList()) {
-                if (bucket.getEncodedCountList() != null && bucket.getEncodedCountList().length > idx) {
-                    decodedBuckets.getBucketList().get(loopId).setCount(bucket.getEncodedCountList()[idx]);
-                    total += bucket.getEncodedCountList()[idx];
-                    if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(ENCODED_NO)) {
-                        noBucketId = loopId;
-                        noBucketCount = bucket.getEncodedCountList()[idx];
+                if (bucket.getEncodedCountList() != null) {
+                    if (bucket.getEncodedCountList().length > idx) {
+                        decodedBuckets.getBucketList().get(loopId).setCount(bucket.getEncodedCountList()[idx]);
+                        total += bucket.getEncodedCountList()[idx];
+                        if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(ENCODED_NO)) {
+                            noBucketId = loopId;
+                            noBucketCount = bucket.getEncodedCountList()[idx];
+                        }
+                    } else {
+                        decodedBuckets.getBucketList().get(loopId).setCount(0L);
+                        if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(ENCODED_NO)) {
+                            noBucketId = loopId;
+                            noBucketCount = 0L;
+                        }
                     }
-                } else if (bucket.getEncodedCountList() != null) {
-                    decodedBuckets.getBucketList().get(loopId).setCount(0L);
-                    if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(ENCODED_NO)) {
-                        noBucketId = loopId;
-                        noBucketCount = 0L;
+
+                    // TODO - this is a temporary fix, actual fix needs to be
+                    // added in stats generation code to use "Yes", "No" for
+                    // encoded attribute labels
+                    if (decodedBuckets.getBucketList().get(loopId).getBucketLabel() //
+                            .equalsIgnoreCase(ENCODED_NO)) {
+                        decodedBuckets.getBucketList().get(loopId).setBucketLabel(DECODED_NO);
+                    } else if (decodedBuckets.getBucketList().get(loopId).getBucketLabel() //
+                            .equalsIgnoreCase(ENCODED_YES)) {
+                        decodedBuckets.getBucketList().get(loopId).setBucketLabel(DECODED_YES);
                     }
                 }
                 loopId++;
@@ -431,33 +439,6 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         }
     }
 
-    private void populateDummyBuckets(AccountMasterCube cube) {
-        for (String columnName : cube.getStatistics().keySet()) {
-            AttributeStatistics encodedValueCountInfo = cube.getStatistics().get(columnName);
-            if (encodedValueCountInfo.getRowBasedStatistics() != null
-                    && (encodedValueCountInfo.getRowBasedStatistics().getBuckets() == null //
-                            || CollectionUtils.isEmpty(
-                                    encodedValueCountInfo.getRowBasedStatistics().getBuckets().getBucketList()))) {
-
-                if (encodedValueCountInfo.getRowBasedStatistics().getNonNullCount() > 0) {
-                    Buckets buckets = new Buckets();
-                    List<Bucket> bucketList = new ArrayList<>();
-                    Bucket bucket = new Bucket();
-                    bucket.setBucketLabel(columnName + " label A");
-                    bucket.setCount(encodedValueCountInfo.getRowBasedStatistics().getNonNullCount() * 2 / 3);
-                    bucketList.add(bucket);
-                    bucket = new Bucket();
-                    bucket.setBucketLabel(columnName + " label B");
-                    bucket.setCount(encodedValueCountInfo.getRowBasedStatistics().getNonNullCount()
-                            - encodedValueCountInfo.getRowBasedStatistics().getNonNullCount() * 2 / 3);
-                    bucketList.add(bucket);
-                    buckets.setBucketList(bucketList);
-                    encodedValueCountInfo.getRowBasedStatistics().setBuckets(buckets);
-                }
-            }
-        }
-    }
-
     private void cleanupNumericBuckets(AccountMasterCube cube) {
         if (MapUtils.isEmpty(cube.getStatistics())) {
             return;
@@ -469,17 +450,19 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             AttributeStatistics attrStats = cube.getStatistics().get(attr);
             if (attrStats.getRowBasedStatistics() != null) {
                 AttributeStatsDetails st = attrStats.getRowBasedStatistics();
-                if (st.getBuckets().getType() == BucketType.Numerical) {
-                    st.getBuckets().setBucketList(emptyBucket);
-                }
+                setEmptyBucketList(emptyBucket, st);
             }
             if (attrStats.getUniqueLocationBasedStatistics() != null) {
                 AttributeStatsDetails st = attrStats.getUniqueLocationBasedStatistics();
-                if (st.getBuckets().getType() == BucketType.Numerical) {
-                    st.getBuckets().setBucketList(emptyBucket);
-                }
+                setEmptyBucketList(emptyBucket, st);
             }
         }
 
+    }
+
+    private void setEmptyBucketList(List<Bucket> emptyBucket, AttributeStatsDetails st) {
+        if (st.getBuckets() != null && st.getBuckets().getType() == BucketType.Numerical) {
+            st.getBuckets().setBucketList(emptyBucket);
+        }
     }
 }

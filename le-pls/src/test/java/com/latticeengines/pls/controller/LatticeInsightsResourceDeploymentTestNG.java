@@ -7,6 +7,7 @@ import static org.testng.AssertJUnit.assertFalse;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -46,6 +48,18 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testStatsCube() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+
+        String url = getRestAPIHostPort() + "/pls/latticeinsights/stats/cube?q=";
+
+        AccountMasterCube cube = restTemplate.postForObject(url, new HashMap<String, String>(),
+                AccountMasterCube.class);
+        assertTrue(cube != null);
+        assertTrue(cube.getNonNullCount() != null);
+        assertTrue(cube.getStatistics() != null);
     }
 
     @SuppressWarnings("unchecked")
@@ -359,8 +373,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertEquals(count.intValue(), 3);
     }
 
-//    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
-//            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
+    // @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+    // "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
     public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
