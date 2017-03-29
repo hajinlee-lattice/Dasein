@@ -685,6 +685,13 @@ angular.module('common.datacloud.explorer', [
                 wasHighlighted = enrichment.HighlightHighlighted,
                 _type = type;
 
+                if(!enrichment.AttributeFlagsMap) {
+                    enrichment.AttributeFlagsMap = {};
+                }
+                if(!enrichment.AttributeFlagsMap.CompanyProfile) {
+                    enrichment.AttributeFlagsMap.CompanyProfile = {};
+                }
+
                 if (type === 'disabled') {
                     label = vm.highlightTypes[type];
                     flags.highlighted = false;
@@ -700,13 +707,6 @@ angular.module('common.datacloud.explorer', [
                     if (wasHighlighted) {
                         _type = 'highlighted';
                     }
-                }
-
-                if(!enrichment.AttributeFlagsMap) {
-                    enrichment.AttributeFlagsMap = {};
-                }
-                if(!enrichment.AttributeFlagsMap.CompanyProfile) {
-                    enrichment.AttributeFlagsMap.CompanyProfile = {};
                 }
 
                 enrichment.AttributeFlagsMap.CompanyProfile.hidden = flags.hidden;
