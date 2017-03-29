@@ -165,7 +165,7 @@
                                 pointer-events: none;
                             }
                             &.has-highlight:not(.no-highlights) {
-                                position: relative; 
+                                position: relative;
                                 &:before {
                                     @include font-awesome-inline("\f005");
                                     display: block;
@@ -665,7 +665,7 @@
                         text-align: right;
                         text-overflow: ellipsis;
                         overflow: hidden;
-                        height: 1.2em;
+                        height: 1.3em;
                         min-width: 20%;
                         /*
                         &:not(.records) {
