@@ -88,7 +88,7 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         properties.put("highlighted", Boolean.FALSE.toString());
 
         String url = getRestAPIHostPort()
-                + String.format("/pls/attributes/categories/flags/%s/CompanyProfile", categoryName);
+                + String.format("/pls/attributes/categories/flags/CompanyProfile?category=%s", categoryName);
         testBed.getRestTemplate().postForObject(url, properties, Void.class);
     }
 
