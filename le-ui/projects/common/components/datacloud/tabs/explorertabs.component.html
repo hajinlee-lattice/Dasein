@@ -1,7 +1,7 @@
 <section id="ExplorerTabsView" class="containerx">
     <ul>
         <!--
-        <li class="tab-browse" 
+        <li class="tab-browse"
             ng-click="vm.setStateParams('browse')"
             ng-class="{ 'active': vm.section == 'browse' }">
             <div class="tab-container">
@@ -11,8 +11,8 @@
         </li>
         -->
         <li ng-click="vm.setStateParams('edit')"
-            ng-class="{ 'active': vm.section == 'edit' }" 
-            class="tab-edit info noselect-children" 
+            ng-class="{ 'active': vm.section == 'edit' }"
+            class="tab-edit info noselect-children"
             ng-if="!vm.DataCloudStore.metadata.lookupMode || 1">
             <div class="tab-container">
                 <h2>
@@ -33,7 +33,7 @@
                 </h2>
                 <div class="enrichmentCounts">
                     <span class="count">{{vm.DataCloudStore.metadata.generalSelectedTotal||0}} of {{vm.DataCloudStore.metadata.generalSelectLimit}}</span> enrichments
-                    <span class="count">{{vm.DataCloudStore.metadata.premiumSelectedTotal||0}} of {{vm.DataCloudStore.metadata.premiumSelectLimit}}</span> premium 
+                    <span class="count">{{vm.DataCloudStore.metadata.premiumSelectedTotal||0}} of {{vm.DataCloudStore.metadata.premiumSelectLimit}}</span> premium
                 </div>
             </div>
         </li>
@@ -66,7 +66,7 @@
         <li class="tab-lookup"
             ui-sref="home.datacloud.lookup" ui-sref-active="active">
             <div class="tab-container">
-                <h2>Account Insights</h2>
+                <h2>Company Profile</h2>
             </div>
         </li>
     </ul>
