@@ -5,7 +5,7 @@ from itertools import compress, product
 import math
 from sklearn.metrics.cluster.supervised import entropy
 
-from numpy import floor, log10, ceil, sign
+from numpy import floor, log10, ceil, sign, fabs
 from numpy.random import choice
 from scipy.stats import kurtosis
 
@@ -58,15 +58,6 @@ def uncertaintyCoeff(mi, entropy):
         return None
     return mi / entropy
 
-def roundTo(x, sigDigits=2):
-    """
-    round a value to certain significant digits
-    """
-    if x == 0:
-        return 0
-    else:
-        return round(x, sigDigits - 1 - int(floor(log10(abs(x)))))
-
 def getBound(y, boundaries):
     """
     returns the nearest lower boundary of a value, given a list of sorted 
@@ -104,6 +95,8 @@ def truncateToFixedBoundaries(x):
     maxVal = min([b for b in boundaries if b > getBound(maxInput, boundaries)])
     return maxVal, xTruncated
 
+C_LOG5 = log10(0.5)
+
 def roundTo5(x):
     """
     truncates a list of values to pre-defined boundary candidates
@@ -117,18 +110,26 @@ def roundTo5(x):
              all values in x, mapped to the corresponding approximation in the
              format of multiplier * (10 ^ n), e.g. if multipliers are [1, 2, 5],
              52 will be mapped to 50 and 3578 will be mapped to 2000
-    """    
-    if abs(x) <= 10:
-        return roundTo(x, 1)
-    x2str = str(int(roundTo(x, 2)))
-    secondDigit = 1 if x > 0 else 2
-    if x2str[secondDigit] in ['1', '2', '8', '9']:
-            return roundTo(x, 1)
-    elif x2str[secondDigit] in ['3', '4', '6', '7']:
-        x2strlist = list(x2str)
-        x2strlist[secondDigit] = '5'
-        x2str = ''.join(x2strlist)
-    return int(x2str)
+    """
+    if x == 0.0:
+        return 0
+
+    ax = fabs(x)
+    l = log10(fabs(x))
+    e = int(l)
+    m0 = float(x) / 10.0**e
+    if ax <= 10.0:
+        n = 1 if l < 0.0 else 0
+        m = round(m0, n)
+        return round(m*10.0**e, 8)
+
+    if m0 >= C_LOG5 and m0 < 0.0:
+        precision = 2
+    else: precision = 1
+
+    n = precision if l < 0.0 else precision - 1
+    m = round(float(2.0*x) / 10.0**e, n)
+    return int(m*10.0**e)/2
 
 def findWhereValueChanges(xList, xListLen, idx, direction):
     """
