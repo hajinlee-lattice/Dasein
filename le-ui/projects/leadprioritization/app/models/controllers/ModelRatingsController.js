@@ -18,8 +18,7 @@ angular.module('lp.models.ratings', [
         ratingsSummary: RatingsSummary,
         bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
         bucketTiles: document.getElementById("bucketTiles"),
-        slidersContainer: document.getElementById("sliders"),
-        updateContent: false
+        slidersContainer: document.getElementById("sliders")
     });
 
     vm.init = function() {
@@ -164,6 +163,7 @@ angular.module('lp.models.ratings', [
         vm.canAddBucket = false;
         vm.showRemoveBucketText = false;
         vm.startingPosition = ev.clientX;
+        vm.updateContent = false;
 
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);
