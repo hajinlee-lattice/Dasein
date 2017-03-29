@@ -449,7 +449,10 @@ angular.module('common.datacloud')
             flags = flags || {}; // json
         $http({
             method: 'POST',
-            url: '/pls/attributes/categories/flags/' + categoryName + '/' + useCase,
+            url: '/pls/attributes/categories/flags/' + useCase,
+            params: {
+                category: categoryName,
+            },
             data: flags
         }).then(function(response){
             deferred.resolve(response.data);
@@ -461,13 +464,16 @@ angular.module('common.datacloud')
         var deferred = $q.defer(),
             opts = opts || {},
             categoryName = opts.categoryName || '',
-            subcategoryName = (opts.subcategoryName ? encodeURIComponent(opts.subcategoryName).replace(/%2F/g, '%202F') : ''), // why?  because the apache double encodes slashes and needs to be updated but we don't have time now
+            subcategoryName = opts.subcategoryName || '',
             useCase = opts.useCase || 'CompanyProfile',
             flags = flags || {}; // json
         $http({
             method: 'POST',
-            url: '/pls/attributes/categories/subcategories/flags/' + categoryName + '/' + subcategoryName + '/' + useCase,
-
+            url: '/pls/attributes/categories/subcategories/flags/' + useCase, //+ categoryName + '/' + subcategoryName + '/' + useCase,
+            params: {
+                category: categoryName,
+                subcategory: subcategoryName
+            },
             data: flags
         }).then(function(response){
             deferred.resolve(response.data);

@@ -663,6 +663,10 @@ angular.module('common.datacloud.explorer', [
             hidden: (type === 'enabled' ? false : true),
         };
 
+        if(type === 'disabled') {
+            flags.highlighted = false;
+        }
+
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
         setFlagsByCategory(opts, flags).then(function(){
@@ -687,6 +691,7 @@ angular.module('common.datacloud.explorer', [
                     flags.hidden = true;
                     enrichment.HighlightHighlighted = false;
                     enrichment.HighlightState.highlighted = false;
+                    enrichment.AttributeFlagsMap.CompanyProfile.highlighted = false;
                 }
 
                 if (type === 'enabled') {
@@ -736,7 +741,7 @@ angular.module('common.datacloud.explorer', [
             case 'NUMERIC':
                 return $filter('number')(parseInt(item, 10));
             case 'CURRENCY':
-                return '$' + $filter('number')(parseInt(item, 10));
+                return '$' + $filter('number')(parseInt(item, 10)); //ben look at this later, use vm.fitler
             case 'DATE':
                 var date = new Date(parseInt(item, 10));
                 var year = date.getFullYear().toString();
