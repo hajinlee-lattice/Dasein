@@ -362,8 +362,11 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         for (var x = 0; x < totalPredictors.length; x++) {
             var predictor = totalPredictors[x];
-            var isNumericRange = predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Numeric ||
-                predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Currency;
+            var isNumericRange = false;
+            if (predictor.FundamentalType != null) {
+                isNumericRange = predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Numeric ||
+                    predictor.FundamentalType.toUpperCase() === AnalyticAttributeUtility.FundamentalType.Currency;
+            }
             var maxBucket = null;
 
             if(!StringUtility.IsEmptyString(predictor.Category) &&
