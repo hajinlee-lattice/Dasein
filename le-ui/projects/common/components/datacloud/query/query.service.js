@@ -27,7 +27,6 @@ angular.module('common.datacloud.queryservice',[
     this.getRestriction = function() {
         return this.restriction;
     };
-    peakRestriction = this.getRestriction.bind(this);
 
     this.setRestriction = function(restriction) {
         restriction = restriction || { all: [], any: [] };
