@@ -14,11 +14,9 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     if [[ "${UNAME}" == 'Darwin' ]]; then
         echo "You are on Mac"
         ANACONDA_SH=Anaconda2-4.3.0-MacOSX-x86_64.sh
-        NUMPY_VERSION="1.8.2"
     else
         echo "You are on ${UNAME}"
         ANACONDA_SH=Anaconda2-4.3.0-Linux-x86_64.sh
-        NUMPY_VERSION="1.8.2=py27_1"
     fi
 
     if [ -f $ARTIFACT_DIR/$ANACONDA_SH ]; then
@@ -74,7 +72,7 @@ $ANACONDA_HOME/bin/conda install -y \
     libxml2=2.9.4=0 \
     libxslt=1.1.28=3 \
     lxml=3.4.0=py27_0 \
-    numpy=${NUMPY_VERSION} \
+    numpy=1.8.2=py27_0 \
     openssl=1.0.2j=0 \
     py=1.4.31=py27_0 \
     pytest=2.9.2=py27_0 \
