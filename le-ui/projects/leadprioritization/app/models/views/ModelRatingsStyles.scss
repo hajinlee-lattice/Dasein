@@ -18,6 +18,11 @@
 		color: #222222;
 		background: url('/assets/images/ico-ratings-published.png') calc(50% - 175px) center no-repeat;
 	}
+    h4 {
+    	text-align: center;
+    	margin-top: 20px;
+    	font-size: 20px;
+    }
 }
 .chart-header {
 	&:after {
@@ -336,11 +341,6 @@
     	padding-top: 0;
     	margin-top: 0;
     	border-top: none;
-    }
-    h4 {
-    	text-align: center;
-    	margin-top: 20px;
-    	font-size: 20px;
     }
 }
 
