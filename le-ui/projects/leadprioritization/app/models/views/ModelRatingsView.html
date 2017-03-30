@@ -130,7 +130,7 @@
             <refresher condition="vm.updateContent">
             <ul class="bucket-tiles published">
                 <li ng-repeat="bucket in ::vm.currentConfiguration">
-                    <div class="bucket-label">{{bucket.bucket_name}}</div>
+                    <div class="bucket-label">{{::bucket.bucket_name}}</div>
                     <dl>
                         <dt>Lift</dt>
                         <dd class="lift">{{::vm.Math.max(bucket.lift).toFixed(1);}}x</dd>

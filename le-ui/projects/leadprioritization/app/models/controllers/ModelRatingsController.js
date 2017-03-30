@@ -3,6 +3,28 @@ angular.module('lp.models.ratings', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'
 ])
+.directive('refresher', function() {
+  return {
+    transclude: true,
+    controller: function($scope, $transclude,
+                         $attrs, $element) {
+      var childScope;
+
+      $scope.$watch($attrs.condition, function(value) {
+        $element.empty();
+        if (childScope) {
+          childScope.$destroy();
+          childScope = null;
+        }
+
+        $transclude(function(clone, newScope) {
+          childScope = newScope;
+          $element.append(clone);
+        });
+      });
+    }
+  };
+})
 .controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
     ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
 
@@ -13,8 +35,10 @@ angular.module('lp.models.ratings', [
         model: Model,
         saveInProgress: false,
         showSaveBucketsError: false,
+        updateContent: false,
         ResourceUtility: ResourceUtility,
         currentConfiguration: CurrentConfiguration,
+        workingBuckets: CurrentConfiguration,
         ratingsSummary: RatingsSummary,
         bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
         bucketTiles: document.getElementById("bucketTiles"),
@@ -24,8 +48,6 @@ angular.module('lp.models.ratings', [
     vm.init = function() {
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
-
-        vm.workingBuckets = angular.extend(vm.currentConfiguration);
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
@@ -75,6 +97,7 @@ angular.module('lp.models.ratings', [
 
     function refreshChartData(){
         vm.buckets = vm.workingBuckets;
+        vm.updateContent = false;
 
         if (vm.buckets.length === 6) {
             vm.bucketNames = ['A+', 'A', 'B', 'C', 'D', 'F'];
@@ -277,10 +300,11 @@ angular.module('lp.models.ratings', [
                 
                 vm.showSuccess = true;
                 vm.chartNotUpdated = true;
+                vm.updateContent = true;
 
                 $timeout( function(){ 
 
-                    vm.updateContent = true;
+                    vm.updateContent = false;
                     vm.showSuccess = false;
                     
                 }, 2500);
@@ -297,28 +321,6 @@ angular.module('lp.models.ratings', [
 
     vm.init();
 
-})
-.directive('refresher', function() {
-  return {
-    transclude: true,
-    controller: function($scope, $transclude,
-                         $attrs, $element) {
-      var childScope;
-
-      $scope.$watch($attrs.condition, function(value) {
-        $element.empty();
-        if (childScope) {
-          childScope.$destroy();
-          childScope = null;
-        }
-
-        $transclude(function(clone, newScope) {
-          childScope = newScope;
-          $element.append(clone);
-        });
-      });
-    }
-  };
 })
 .controller('ModelRatingsHistoryController', function ($scope, $rootScope, $stateParams,
     ResourceUtility, Model, ModelStore, ModelRatingsService, HistoricalABCDBuckets) {
