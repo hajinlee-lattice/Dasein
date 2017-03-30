@@ -341,7 +341,8 @@
   ],
   "targets": [
     "Event: Target",
-    "Revenue: __Revenue_0"
+    "Revenue: __Revenue_0",
+    "Offset:Offset"
   ],
   "training_data": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/data/Play_11_TrainingSample_WithRevenue_2/samples/s0Training-evpipeline.avro",
   "test_data": "/user/s-analytics/customers/INTERNAL_DellAPJDeploymentTestNG/data/Play_11_TrainingSample_WithRevenue_2/samples/s0Test-evpipeline.avro",
