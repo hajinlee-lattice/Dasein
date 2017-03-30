@@ -42,7 +42,7 @@ class ArgumentParser(object):
 
         self.fields = dataSchema["fields"]
         self.features = self.metadataSchema["features"]
-        (self.target, self.readouts, self.samples, self.revenueColumn, self.templateVersion) = self.extractTargets()
+        (self.target, self.readouts, self.samples, self.revenueColumn, self.periodOffsetColumn, self.templateVersion) = self.extractTargets()
         self.keys = self.metadataSchema["key_columns"]
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
@@ -67,7 +67,6 @@ class ArgumentParser(object):
 
         fields = set([e["name"] for e in self.fields])
         def columnExists(column): return column in fields
-
         eventKey = "Event".lower()
         readoutKey = "Readouts".lower()
         companyKey = "Company".lower()
@@ -78,10 +77,15 @@ class ArgumentParser(object):
         websiteKey = "Website".lower()
         spamIndicatorKey = "SpamIndicator".lower()
         revenueKey = "Revenue".lower()
+        periodOffsetKey = "Offset".lower()
         templateVersionKey = "Template_Version".lower()
 
-        templateVersion = None; revenueColumn = None
-        target = None; readouts = []; samples = dict()
+        templateVersion = None
+        revenueColumn = None
+        periodOffsetColumn = None
+        target = None
+        readouts = []
+        samples = dict()
         for sTarget in specifiedTargets:
             pair = sTarget.split(":")
             if len(pair) == 2:
@@ -118,6 +122,9 @@ class ArgumentParser(object):
                 elif key == revenueKey:
                     if columnExists(value): revenueColumn = value
                     else: logWarning(value, "revenueColumn")
+                elif key == periodOffsetKey:
+                    if columnExists(value): periodOffsetColumn = value
+                    else: logWarning(value, "periodOffsetColumn")
                 elif key == templateVersionKey:
                     templateVersion = value
                 else: logWarning(value, "unspecified")
@@ -127,7 +134,7 @@ class ArgumentParser(object):
                 if columnExists(value): target = value
                 else: logWarning(value, "target")
 
-        return target, readouts, samples, revenueColumn, templateVersion
+        return target, readouts, samples, revenueColumn, periodOffsetColumn, templateVersion
 
     def __parseProperties(self, name):
         element = {}
@@ -181,6 +188,7 @@ class ArgumentParser(object):
         scoringColumns = set(self.features) | set([self.target]) | set(self.keys)
         scoringColumns |= set([self.revenueColumn]) if self.revenueColumn != None else set()
         nonScoringColumns = set(self.readouts) | set(self.samples.values())
+        nonScoringColumns |= set([self.periodOffsetColumn]) if self.periodOffsetColumn != None else set()
         specifiedColumns = scoringColumns | nonScoringColumns
 
         if postProcessClf:

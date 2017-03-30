@@ -132,6 +132,7 @@ class AggregationExecutor(Executor):
             mediator.provenanceProperties = parser.getProvenanceProperties()
             mediator.metadata = params["metadata"]
             mediator.revenueColumn = parser.revenueColumn
+            mediator.periodOffsetColumn = parser.periodOffsetColumn
             mediator.templateVersion = parser.templateVersion
             mediator.algorithmProperties = parser.getAlgorithmProperties()
             mediator.messages = []

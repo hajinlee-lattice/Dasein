@@ -16,14 +16,14 @@ class RevenueModelQualityGeneratorTest(ScoreTargetBase):
         revenue = [100 + (100 * i) for i in range(0, numPointsToGenerate)]
         predictedRevenue = [200 + (100 * i) for i in range(0, numPointsToGenerate)]
         random.seed(2)
-        periodId = [random.randint(1,5) for i in range(0, numPointsToGenerate)]
+        periodOffset = [random.randint(1,5) for i in range(0, numPointsToGenerate)]
         self.loadMediator(generator, scoreTarget)
         mediator = generator.getMediator()
         mediator.schema["reserved"]["predictedrevenue"] = "PredictedRevenue"
         mediator.data['PredictedRevenue'] = predictedRevenue
         mediator.revenueColumn = "Revenue"
         mediator.data['Revenue'] = revenue
-        mediator.data['Offset'] = periodId
+        mediator.data['Offset'] = periodOffset
 
         generator.execute()
 
