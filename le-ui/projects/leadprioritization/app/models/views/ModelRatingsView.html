@@ -5,7 +5,7 @@
 
             <ul class="tabs_">
                 <li class="active">Rating Setup</li>
-                <li ui-sref="home.model.ratings.history({ modelId: '{{ vm.modelId | escape }}' })">History</li>
+                <li ui-sref="home.model.ratings.history({ modelId: '{{ vm.modelId | escape }}' })"  ui-sref-opts="{reload: true}">History</li>
             </ul>
 
             <div class="chart-header">
