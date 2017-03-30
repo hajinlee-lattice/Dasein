@@ -71,7 +71,6 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Value("${eai.vdb.file.size:10000000}")
     private int sizePerFile;
 
-
     @Override
     public List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context) {
         String queryHandle = context.getProperty(ImportVdbProperty.VDB_QUERY_HANDLE, String.class);
@@ -93,7 +92,7 @@ public class VdbTableImportServiceImpl extends ImportService {
             vdbSpecMetadataHashMap.put(metadata.getColumnName(), metadata);
         }
         try {
-            for(Table table : tables) {
+            for (Table table : tables) {
                 List<Attribute> attributes = table.getAttributes();
                 for (Attribute attribute : attributes) {
                     if (attribute == null) {
@@ -105,9 +104,10 @@ public class VdbTableImportServiceImpl extends ImportService {
                                 vdbSpecMetadataHashMap.get(attribute.getName()).getDataType()));
 
                         if (vdbSpecMetadataHashMap.get(attribute.getName()) != null) {
-                            attribute.setSourceLogicalDataType(vdbSpecMetadataHashMap.get(attribute.getName()).getDataType());
-                            attribute.setPhysicalDataType(vdbTableToAvroTypeConverter.convertTypeToAvro(
-                                    attribute.getSourceLogicalDataType().toLowerCase()).name());
+                            attribute.setSourceLogicalDataType(
+                                    vdbSpecMetadataHashMap.get(attribute.getName()).getDataType());
+                            attribute.setPhysicalDataType(vdbTableToAvroTypeConverter
+                                    .convertTypeToAvro(attribute.getSourceLogicalDataType().toLowerCase()).name());
 
                             if (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
                                 attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
@@ -123,7 +123,8 @@ public class VdbTableImportServiceImpl extends ImportService {
         } catch (Exception e) {
             log.error(String.format("Import table metadata failed with exception: %s", e.toString()));
             vdbLoadTableStatus.setJobStatus("Failed");
-            vdbLoadTableStatus.setMessage(String.format("Import table metadata failed with exception: %s", e.toString()));
+            vdbLoadTableStatus
+                    .setMessage(String.format("Import table metadata failed with exception: %s", e.toString()));
             reportStatus(statusUrl, vdbLoadTableStatus);
             throw new RuntimeException(vdbLoadTableStatus.getMessage());
         }
@@ -172,8 +173,8 @@ public class VdbTableImportServiceImpl extends ImportService {
         if (vdbImportExtract == null) {
             log.error(String.format("Cannot find Vdb import extract record for identifier %s", extractIdentifier));
             vdbLoadTableStatus.setJobStatus("Failed");
-            vdbLoadTableStatus.setMessage(String.format("Cannot find Vdb import extract record for identifier %s",
-                    extractIdentifier));
+            vdbLoadTableStatus.setMessage(
+                    String.format("Cannot find Vdb import extract record for identifier %s", extractIdentifier));
             reportStatus(statusUrl, vdbLoadTableStatus);
             throw new RuntimeException(vdbLoadTableStatus.getMessage());
         }
@@ -192,7 +193,6 @@ public class VdbTableImportServiceImpl extends ImportService {
         vdbGetQueryData.setStartRow(startRow);
         vdbGetQueryData.setRowsToGet(rowsToGet);
 
-
         vdbLoadTableStatus.setJobStatus("Running");
         vdbLoadTableStatus.setMessage("Start import data for Vdb table");
         reportStatus(statusUrl, vdbLoadTableStatus);
@@ -206,7 +206,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                 attributeMap.put(attr.getName(), attr);
             }
             DataFileWriter<GenericRecord> dataFileWriter = null;
-            while(!error) {
+            while (!error) {
                 try {
                     if (needNewFile) {
                         dataFileWriter = newDataFileWriter(schema, outputStream);
@@ -219,14 +219,15 @@ public class VdbTableImportServiceImpl extends ImportService {
                     }
                     int rowsAppend = appendGenericRecord(attributeMap, schema, vdbQueryDataResult, dataFileWriter);
                     if (rowsAppend != rowsToGet) {
-                        log.warn(String.format("Row batch is %d, but only %d rows append to avro.", rowsToGet, rowsAppend));
+                        log.warn(String.format("Row batch is %d, but only %d rows append to avro.", rowsToGet,
+                                rowsAppend));
                     }
                     startRow += rowsAppend;
 
                     vdbGetQueryData.setStartRow(startRow);
                     vdbLoadTableStatus.setJobStatus("Running");
-                    vdbLoadTableStatus.setMessage(
-                            String.format("%d of total %d records are processed.", startRow, totalRows));
+                    vdbLoadTableStatus
+                            .setMessage(String.format("%d of total %d records are processed.", startRow, totalRows));
 
                     reportStatus(statusUrl, vdbLoadTableStatus);
 
@@ -245,8 +246,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     error = true;
                     log.error(String.format("Load table failed with exception: %s", e));
                     vdbLoadTableStatus.setJobStatus("Failed");
-                    vdbLoadTableStatus.setMessage(
-                            String.format("Load table failed with exception: %s", e.toString()));
+                    vdbLoadTableStatus.setMessage(String.format("Load table failed with exception: %s", e.toString()));
                 }
                 if (startRow >= totalRows) {
                     closeDataFileWriter(dataFileWriter);
@@ -285,8 +285,7 @@ public class VdbTableImportServiceImpl extends ImportService {
     }
 
     private int appendGenericRecord(HashMap<String, Attribute> attributeMap, Schema schema,
-                                    VdbQueryDataResult vdbQueryDataResult,
-                                    DataFileWriter<GenericRecord> dataFileWriter) throws IOException {
+            VdbQueryDataResult vdbQueryDataResult, DataFileWriter<GenericRecord> dataFileWriter) throws IOException {
         int rowSize = vdbQueryDataResult.getColumns().get(0).getValues().size();
         int rowsAppend = 0;
         for (int i = 0; i < rowSize; i++) {
@@ -294,8 +293,8 @@ public class VdbTableImportServiceImpl extends ImportService {
             for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
                 if (attributeMap.containsKey(column.getColumnName())) {
                     Attribute attr = attributeMap.get(column.getColumnName());
-                    Type avroType = schema.getField(
-                            attributeMap.get(column.getColumnName()).getName()).schema().getTypes().get(0).getType();
+                    Type avroType = schema.getField(attributeMap.get(column.getColumnName()).getName()).schema()
+                            .getTypes().get(0).getType();
                     try {
                         String vdbFieldValue = column.getValues().get(i);
                         if (!StringUtils.isEmpty(vdbFieldValue)) {
@@ -320,36 +319,36 @@ public class VdbTableImportServiceImpl extends ImportService {
     private Object toAvro(String fieldValue, Type avroType, Attribute attr) {
         try {
             switch (avroType) {
-                case DOUBLE:
-                    return new Double(parseStringToNumber(fieldValue).doubleValue());
-                case FLOAT:
-                    return new Float(parseStringToNumber(fieldValue).floatValue());
-                case INT:
-                    return new Integer(parseStringToNumber(fieldValue).intValue());
-                case LONG:
-                    if (attr.getSourceLogicalDataType() != null &&
-                            (attr.getSourceLogicalDataType().toLowerCase().equals("date") ||
-                            attr.getSourceLogicalDataType().toLowerCase().equals("datetime") ||
-                            attr.getSourceLogicalDataType().toLowerCase().equals("datetimeoffset"))) {
-                        log.info("Date value from vdb: " + fieldValue);
-                        return new Long(TimeStampConvertUtils.convertToLong(fieldValue));
-                    } else {
-                        return new Long(parseStringToNumber(fieldValue).longValue());
-                    }
-                case STRING:
-                    return fieldValue;
-                case ENUM:
-                    return fieldValue;
-                case BOOLEAN:
-                    if (fieldValue.equals("1") || fieldValue.equalsIgnoreCase("true")) {
-                        return Boolean.TRUE;
-                    } else if (fieldValue.equals("0") || fieldValue.equalsIgnoreCase("false")) {
-                        return Boolean.FALSE;
-                    }
-                default:
-                    log.info("size is:" + fieldValue.length());
-                    throw new IllegalArgumentException(
-                            "Not supported Field, avroType: " + avroType + ", physicalDatalType:");
+            case DOUBLE:
+                return new Double(parseStringToNumber(fieldValue).doubleValue());
+            case FLOAT:
+                return new Float(parseStringToNumber(fieldValue).floatValue());
+            case INT:
+                return new Integer(parseStringToNumber(fieldValue).intValue());
+            case LONG:
+                if (attr.getSourceLogicalDataType() != null
+                        && (attr.getSourceLogicalDataType().toLowerCase().equals("date")
+                                || attr.getSourceLogicalDataType().toLowerCase().equals("datetime")
+                                || attr.getSourceLogicalDataType().toLowerCase().equals("datetimeoffset"))) {
+                    log.info("Date value from vdb: " + fieldValue);
+                    return new Long(TimeStampConvertUtils.convertToLong(fieldValue));
+                } else {
+                    return new Long(parseStringToNumber(fieldValue).longValue());
+                }
+            case STRING:
+                return fieldValue;
+            case ENUM:
+                return fieldValue;
+            case BOOLEAN:
+                if (fieldValue.equals("1") || fieldValue.equalsIgnoreCase("true")) {
+                    return Boolean.TRUE;
+                } else if (fieldValue.equals("0") || fieldValue.equalsIgnoreCase("false")) {
+                    return Boolean.FALSE;
+                }
+            default:
+                log.info("size is:" + fieldValue.length());
+                throw new IllegalArgumentException(
+                        "Not supported Field, avroType: " + avroType + ", physicalDatalType:");
             }
         } catch (IllegalArgumentException e) {
             log.warn(e.getMessage());
@@ -357,8 +356,8 @@ public class VdbTableImportServiceImpl extends ImportService {
                     String.format("Cannot convert %s to type %s for column %s.", fieldValue, avroType, ""));
         } catch (Exception e) {
             log.warn(e.getMessage());
-            throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.", fieldValue, avroType,
-                    attr.getName()));
+            throw new RuntimeException(
+                    String.format("Cannot parse %s as %s for column %s.", fieldValue, avroType, attr.getName()));
         }
     }
 

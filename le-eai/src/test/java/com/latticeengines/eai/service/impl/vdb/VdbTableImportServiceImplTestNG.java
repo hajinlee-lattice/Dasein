@@ -3,11 +3,13 @@ package com.latticeengines.eai.service.impl.vdb;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportVdbProperty;
@@ -19,7 +21,7 @@ import com.latticeengines.eai.functionalframework.VdbExtractAndImportUtil;
 import com.latticeengines.eai.service.ImportService;
 
 
-public class VdbTableImportServiceImplTestNg extends EaiFunctionalTestNGBase {
+public class VdbTableImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private ImportService vdbTableImportService;
     @Autowired
@@ -29,7 +31,7 @@ public class VdbTableImportServiceImplTestNg extends EaiFunctionalTestNGBase {
 
     private ImportContext importContext;
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
 
