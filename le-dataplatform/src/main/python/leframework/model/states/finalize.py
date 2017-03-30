@@ -46,7 +46,7 @@ class Finalize(State):
         with open(mediator.modelLocalDir + mediator.name + "_scored.txt", 'wb') as scoredFile:
             scoredWriter = csv.writer(scoredFile)
             for i in range(0,keyData.size):
-                scoredWriter.writerow([keyData[i][0], '{:.8f}'.format(scored[i])])
+                scoredWriter.writerow([keyData[i][0], '{:.6f}'.format(scored[i])])
         # write the target data to file
         numpy.savetxt(mediator.modelLocalDir + mediator.name + "_target.txt", eventData, delimiter=",", fmt="%s")
 

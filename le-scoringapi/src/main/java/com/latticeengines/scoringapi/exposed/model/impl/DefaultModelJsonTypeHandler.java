@@ -1,8 +1,6 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PrecisionUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -411,8 +410,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             Map<String, Object> transformedRecord) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation());
-        double probability = BigDecimal.valueOf((double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE))
-                .setScale(8, RoundingMode.HALF_UP).doubleValue();
+        double probability = PrecisionUtils.setPrecision((double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE), 6);
         Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
 
         int percentile = (int) percentileObject;

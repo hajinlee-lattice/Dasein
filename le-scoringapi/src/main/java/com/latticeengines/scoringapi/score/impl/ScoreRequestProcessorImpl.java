@@ -1,7 +1,5 @@
 package com.latticeengines.scoringapi.score.impl;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -941,13 +939,6 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     private Map<String, Object> transform(ScoringArtifacts scoringArtifacts, Map<String, Object> matchedRecord) {
         if (matchedRecord == null) {
             return null;
-        }
-
-        for (Map.Entry<String, Object> entry : matchedRecord.entrySet()) {
-            if (entry.getValue() instanceof Double) {
-                entry.setValue(
-                        BigDecimal.valueOf((Double) entry.getValue()).setScale(8, RoundingMode.HALF_UP).doubleValue());
-            }
         }
 
         Map<String, Object> standardTransformedRecord = recordTransformer.transform(

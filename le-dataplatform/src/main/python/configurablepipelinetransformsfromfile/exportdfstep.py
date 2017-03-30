@@ -22,7 +22,7 @@ class ExportDataFrameStep(PipelineStep):
         columns = [x for x in columns if not x.startswith("###")]
 
         logger.info('Exporting these columns to exportdfstep.csv: [ "' + '", "'.join(columns) + '" ]')
-        dataFrame.to_csv("exportdfstep.csv", sep=',', encoding='utf-8', cols=columns, index=False)
+        dataFrame.to_csv("exportdfstep.csv", sep=',', encoding='utf-8', cols=columns, index=False, float_format='%.10f')
         return dataFrame
     
     def includeInScoringPipeline(self):

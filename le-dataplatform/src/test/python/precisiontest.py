@@ -46,9 +46,9 @@ class PrecisionTest(TestCase):
         for i in range(0,len(valuesAtPrecision3)):
             self.assertEquals(vss['value'][i], valuesAtPrecision3[i])
 
-        ## Integer values should not be affected
+        ## Integer values should be converted
         intValue = 12345678910111213
-        self.assertEquals(PrecisionUtil.setPrecision(intValue, 3), intValue)
+        self.assertEquals(PrecisionUtil.setPrecision(intValue, 3), 12300000000000000)
 
         ## String values should not be affected
         strValue = 'Company Name'

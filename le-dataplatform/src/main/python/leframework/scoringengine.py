@@ -56,7 +56,7 @@ def generateScore(pipeline, inputFileName, outputFileName):
 
 
     for index in range(0, len(resultFrame)):
-        scoreList = map(lambda x: '{:.8f}'.format(resultFrame[x][index]), headers)
+        scoreList = map(lambda x: '{:.6f}'.format(resultFrame[x][index]), headers)
         writeToFile(w, rowIds[index], scoreList)
     w.close()
 

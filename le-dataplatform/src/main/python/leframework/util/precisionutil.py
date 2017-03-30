@@ -3,7 +3,7 @@ import numbers
 
 class PrecisionUtil(object):
 
-    __standardPrecision = 8
+    __standardPrecision = 10
 
     @classmethod
     def setPlatformStandardPrecision(cls, x):
@@ -11,7 +11,7 @@ class PrecisionUtil(object):
 
     @classmethod
     def setPrecisionOfValue(cls, x, precision):
-        if x is None or not isinstance(x, numbers.Real) or isinstance(x, numbers.Integral) or np.isnan(x) or x == 0.0:
+        if x is None or not isinstance(x, numbers.Real) or np.isnan(x) or x == 0.0:
             return x
         l = np.log10(np.fabs(x))
         e = np.int64(l)
@@ -23,8 +23,6 @@ class PrecisionUtil(object):
     def setPrecisionOfNPArray(cls, a, precision):
         if a is None:
             return None
-        if a.dtype == np.int64:
-            return np.array(a)
         return np.array([cls.setPrecisionOfValue(v, precision) for k,v in a.iteritems()])
 
     @classmethod
