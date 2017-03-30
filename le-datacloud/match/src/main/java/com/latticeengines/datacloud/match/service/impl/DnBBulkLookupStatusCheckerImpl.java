@@ -85,8 +85,10 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
                 sb.delete(0, sb.length());
                 for (Map.Entry<String, DnBBatchMatchContext> entry : batches.entrySet()) {
                     long mins = (System.currentTimeMillis() - entry.getValue().getTimestamp().getTime()) / 60 / 1000;
-                    sb.append(String.format("%s:%s(%d mins) ", entry.getValue().getServiceBatchId(),
-                            entry.getValue().getDnbCode().getMessage(), mins));
+                    sb.append(String.format("%s:%s(%d mins)%s ", entry.getValue().getServiceBatchId(),
+                            entry.getValue().getDnbCode().getMessage(), mins,
+                            StringUtils.isEmpty(entry.getValue().getRetryForServiceBatchId()) ? ""
+                                    : " (retry for " + entry.getValue().getRetryForServiceBatchId() + ")"));
                 }
                 if (batches.entrySet().iterator().next().getValue()
                         .getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {

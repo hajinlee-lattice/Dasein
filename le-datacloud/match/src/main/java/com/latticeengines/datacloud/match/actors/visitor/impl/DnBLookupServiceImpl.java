@@ -418,7 +418,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                 log.info(String.format(
                                         "Bulk match with serviceBatchId = %s was submitted %d minutes ago and hasn't got result back. Resubmit it!",
                                         submittedReq.getServiceBatchId(), mins));
-                                submittedReq.setRetryTimes(submittedReq.getRetryTimes() + 1);
                                 retryBulkRequest(submittedReq);
                             }
                             break;
@@ -469,6 +468,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     }
 
     private void retryBulkRequest(DnBBatchMatchContext batchContext) {
+        batchContext.setRetryTimes(batchContext.getRetryTimes() + 1);
         DnBBatchMatchContext retryContext = new DnBBatchMatchContext();
         retryContext.copyForRetry(batchContext);
         unsubmittedReqs.add(0, retryContext);

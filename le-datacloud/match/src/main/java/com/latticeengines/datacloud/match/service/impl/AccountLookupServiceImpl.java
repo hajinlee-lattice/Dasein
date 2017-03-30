@@ -96,7 +96,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         }
     }
 
-    private AccountLookupEntryMgr getLookupMgr(String version) {
+    public AccountLookupEntryMgr getLookupMgr(String version) {
         AccountLookupEntryMgr lookupMgr = lookupMgrs.get(version);
         if (lookupMgr == null) {
             lookupMgr = getLookupMgrSync(version);
@@ -126,7 +126,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         return lookupMgr;
     }
 
-    private LatticeAccountMgr getAccountMgr(String version) {
+    public LatticeAccountMgr getAccountMgr(String version) {
         LatticeAccountMgr accountMgr = accountMgrs.get(version);
 
         if (accountMgr == null)

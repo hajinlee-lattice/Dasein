@@ -43,12 +43,17 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
             @Override
             public void run() {
                 if (request instanceof DataSourceLookupRequest) {
-                    ((DataSourceLookupRequest) request).setTimestamp(System.currentTimeMillis());
-                    asyncLookupFromService(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
+                    try {
+                        ((DataSourceLookupRequest) request).setTimestamp(System.currentTimeMillis());
+                        asyncLookupFromService(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
+                    } catch (Exception ex) {
+                        sendFailureResponse(((DataSourceLookupRequest) request), ex);
+                    }
                 } else {
                     sendResponse(lookupRequestId, null, returnAddress);
                     log.error("Request type is not supported in DataSourceLookupService");
                 }
+
             }
         };
         return task;

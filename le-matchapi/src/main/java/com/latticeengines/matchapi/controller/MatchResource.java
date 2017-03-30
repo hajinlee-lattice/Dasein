@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.datacloud.match.exposed.service.MatchPrecheckService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -45,6 +47,9 @@ public class MatchResource {
     @Autowired
     private List<BulkMatchService> bulkMatchServiceList;
 
+    @Autowired
+    private MatchPrecheckService matchPrecheckService;
+
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
@@ -58,6 +63,7 @@ public class MatchResource {
     )
     public void matchRealTime(@RequestBody MatchInput input, HttpServletResponse response) {
         try {
+            matchPrecheckService.precheck(input.getDataCloudVersion());
             MatchOutput output = realTimeMatchService.match(input);
             if (output != null) {
                 GzipUtils.writeToGzipStream(response, output);
@@ -78,6 +84,11 @@ public class MatchResource {
     public void bulkMatchRealTime(@RequestBody BulkMatchInput input, HttpServletResponse response) {
         long time = System.currentTimeMillis();
         try {
+            if (CollectionUtils.isNotEmpty(input.getInputList())) {
+                for (MatchInput matchInput : input.getInputList()) {
+                    matchPrecheckService.precheck(matchInput.getDataCloudVersion());
+                }
+            }
             BulkMatchOutput output = realTimeMatchService.matchBulk(input);
             if (output != null) {
                 GzipUtils.writeToGzipStream(response, output);
@@ -101,6 +112,7 @@ public class MatchResource {
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             String matchVersion = input.getDataCloudVersion();
+            matchPrecheckService.precheck(matchVersion);
             BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
