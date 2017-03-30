@@ -23,7 +23,7 @@
             </li>
             <li explorer-category-tile
                 ng-repeat="category in vm.categories" class="category"
-                ng-if="count = vm.categoryCount(category)"
+                ng-if="count = vm.categoryCount(category) && (vm.lookupMode ? vm.highlightMetadata.categories[category].enabled : true)"
                 ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].enabled && vm.section == 'team'}"
                 ng-click="vm.categoryClick(category, $event);"
                 vm="vm" category="category" count="count">
@@ -111,7 +111,7 @@
                     <div ng-if="!vm.enrichments_loaded && loading_image" ng-init="loading_image">
                         <div class="loader"> </div>
                     </div>
-                    <h2 ng-if="vm.enrichments_loaded && !vm.queryInProgress">{{vm.label.no_results}}</h2>
+                    <h2 ng-if="vm.enrichments_loaded && !vm.queryInProgress && !vm.hasCategoryCount">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
 

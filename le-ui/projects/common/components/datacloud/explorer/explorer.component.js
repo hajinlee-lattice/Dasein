@@ -1163,6 +1163,8 @@ angular.module('common.datacloud.explorer', [
     vm.subcategoryCount = function(category, subcategory) {
         var filtered = vm.enrichmentsObj[category];
 
+        vm.hasCategoryCount = 0;
+
         if (!filtered || filtered.length <= 0) {
             return 0;
         }
@@ -1221,6 +1223,8 @@ angular.module('common.datacloud.explorer', [
         if(result.length <= 1) {
             //gotoNonemptyCategory();
         }
+
+        vm.hasCategoryCount = result.length;
         return result.length;
     }
 
