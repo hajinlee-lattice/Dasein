@@ -34,6 +34,8 @@ class ModelRun(EntityBase):
         modelrun.setDescription(config['description'])
         modelrun.setAnalyticPipelineName(config['analytic_pipeline_name'])
         modelrun.setDatasetName(config['dataset_name'])
+        modelrun.setAnalyticTestName(config['analytic_test_name'])
+        modelrun.setAnalyticTestTag(config['analytic_test_tag'])
         return modelrun
 
     def __init__(self, name):
@@ -42,6 +44,8 @@ class ModelRun(EntityBase):
         self._config['description'] = name
         self._config['analytic_pipeline_name'] = ''
         self._config['dataset_name'] = ''
+        self._config['analytic_test_name'] = ''
+        self._config['analytic_test_tag'] = ''
 
     def setName(self, name):
         self._config['name'] = name
@@ -67,8 +71,23 @@ class ModelRun(EntityBase):
     def getDatasetName(self):
         return self._config['dataset_name']
 
+    def setAnalyticTestName(self, name):
+        self._config['analytic_test_name'] = name
+
+    def getAnalyticTestName(self):
+        return self._config['analytic_test_name']
+
+    def setAnalyticTestTag(self, tag):
+        self._config['analytic_test_tag'] = tag
+
+    def getAnalyticTestTag(self):
+        return self._config['analytic_test_tag']
+
     def getStatus(self):
         return ModelRunResource().getStatus(self.getName())
+
+    def getHDFSDir(self):
+        return ModelRunResource().getHDFSDir(self.getName())
 
     def install(self):
         raise RuntimeError('Not implemented; run \"execute\" method with authentication arguments')

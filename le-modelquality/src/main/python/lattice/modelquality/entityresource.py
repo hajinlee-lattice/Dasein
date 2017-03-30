@@ -21,6 +21,7 @@ from .envconfig import EnvConfig
 class EntityResource(object):
 
     header_get = {"Accept": "application/json"}
+    header_put = {"Content-Type": "application/json", "Accept": "application/json"}
     header_post = {"Content-Type": "application/json", "Accept": "application/json"}
 
     def __init__(self, resource):
@@ -41,6 +42,8 @@ class EntityResource(object):
             self._resource = 'pipelines/'
         elif re.search('modelrun', resource.lower()):
             self._resource = 'modelruns/'
+        elif re.search('analytictest', resource.lower()):
+            self._resource = 'analytictests/'
         self._url = EnvConfig().getEndpoint() + '/' + self._resource
 
     def getAll(self):

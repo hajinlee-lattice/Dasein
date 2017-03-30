@@ -14,6 +14,7 @@ from propdata import PropData
 from sampling import Sampling
 from dataset import Dataset
 from analyticpipeline import AnalyticPipeline
+from analytictest import AnalyticTest
 from modelrun import ModelRun
 from envconfig import EnvConfig
 from entityresource import EntityResource
@@ -26,6 +27,7 @@ ENTITIES = { \
     'sampling' : Sampling, \
     'dataset' : Dataset, \
     'analyticpipeline' : AnalyticPipeline, \
+    'analytictest' : AnalyticTest, \
     'modelrun' : ModelRun \
 }
 
@@ -50,23 +52,23 @@ def main():
     parser_install_latest = subparsers.add_parser('install-latest', help='install the latest standard configurations to the model quality framework')
 
     parser_list = subparsers.add_parser('list', help='list all the configurations for a given entity')
-    parser_list.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_list.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset', 'analytictest'])
 
     parser_print = subparsers.add_parser('print', help='print to STDOUT a named configuration for a given entity')
-    parser_print.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_print.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset', 'analytictest'])
     parser_print.add_argument('name')
 
     parser_retrieve = subparsers.add_parser('retrieve', help='retrieve a named configuration for a given entity and write to the local workspace')
-    parser_retrieve.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_retrieve.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset', 'analytictest'])
     parser_retrieve.add_argument('name')
 
     parser_print = subparsers.add_parser('new', help='create a new named configuration for a given entity and write to the local workspace')
-    parser_print.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_print.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset', 'analytictest'])
     parser_print.add_argument('name')
 
     parser_install = subparsers.add_parser('install', help='install the named configuration for a given entity')
     parser_install.add_argument('-t', '--timestamp', help='add a timestamp to the end of the name', action='store_true')
-    parser_install.add_argument('module', choices=['analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_install.add_argument('module', choices=['analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset', 'analytictest'])
     parser_install.add_argument('name')
 
     parser_model = subparsers.add_parser('model', help="submit a job to create a model (modelRun)")
@@ -74,8 +76,14 @@ def main():
     parser_model.add_argument('name')
     parser_model.add_argument('description')
 
+    parser_at = subparsers.add_parser('exectest', help="execute an analytic test")
+    parser_at.add_argument('name')
+
     parser_modelstatus = subparsers.add_parser('model-status', help="get the status of a modelRun")
     parser_modelstatus.add_argument('name')
+
+    parser_modelhdfsdir = subparsers.add_parser('model-hdfs-dir', help="get the HDFS directory for the output artifcats of a modelRun")
+    parser_modelhdfsdir.add_argument('name')
 
     args = parser.parse_args()
 
@@ -103,6 +111,10 @@ def main():
         install(args.module, ENTITIES[args.module], args.name, args.timestamp)
     elif args.subcommand == 'model-status':
         model_status(args.name)
+    elif args.subcommand == 'model-hdfs-dir':
+        model_hdfsdir(args.name)
+    elif args.subcommand == 'exectest':
+        execute_analytic_test(args.name)
 
 
 def get_examples():
@@ -245,6 +257,18 @@ def model_status(name):
 
     modelRun = ModelRun.getByName(name)
     print 'Status of model \"{0}\": {1}'.format(name, modelRun.getStatus())
+
+def model_hdfsdir(name):
+
+    modelRun = ModelRun.getByName(name)
+    print 'HDFS directory for model \"{0}\": {1}'.format(name, modelRun.getHDFSDir())
+
+def execute_analytic_test(name):
+
+    analyticTest = AnalyticTest.getByName(name)
+    print 'Executing analytic test:'
+    analyticTest.printConfig()
+    analyticTest.execute()
 
 def _write_entity(entitytype, entity):
 

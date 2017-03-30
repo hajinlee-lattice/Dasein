@@ -34,6 +34,16 @@ class ModelRunResource(EntityResource):
         except:
             raise RuntimeError('Entity with name \"{}\" does not exist'.format(name))
 
+    def getHDFSDir(self, name):
+        url = self._url + 'modelhdfsdir/' + name
+        response = requests.get(url, headers=self.header_get, verify=EnvConfig().doVerify())
+        if response.status_code != 200:
+            raise RuntimeError('HTTP GET request failed for resource \"{0}\" with code {1}: {2}'.format(self._resource, response.status_code, response.json()['errorMsg']))
+        try:
+            return response.text
+        except:
+            raise RuntimeError('Entity with name \"{}\" does not exist'.format(name))
+
     def create(self, dfpars, tenant, username, password):
 
         apiHostPort = EnvConfig().getApiHostPort()
