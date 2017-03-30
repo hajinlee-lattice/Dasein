@@ -16,6 +16,9 @@ angular
             //performEnrichment: true,
             record: { }
         };
+
+        // for Ulysses API when in insights iframe testing mode
+        this.Authentication = '';
     }
 
     this.setParam = function(property, value) {

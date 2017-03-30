@@ -1413,13 +1413,33 @@ angular
             }
         })
         .state('home.insights', {
-            url: '/insights/:Authentication',
+            url: '/insights',
             params: {
                 pageIcon: 'ico-enrichment',
-                pageTitle: 'BIS Insights Test',
-                Authentication: 'ee440c75-a6a0-4abe-9d28-655d54c911d2'
+                pageTitle: 'BIS Insights iFrame Testing',
+                iframe: true
             },
             views: {
+                "summary@": {
+                    template: '<br><br>'
+                },
+                "main@": {
+                    controller: 'LookupController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/lookup/lookup.component.html'
+                }
+            }
+        })
+        .state('home.insights.iframe', {
+            url: '/iframe',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'BIS Insights Test'
+            },
+            views: {
+                "summary@": {
+                    template: '<br><div class="lookup-summary ten columns offset-one"><div class="lookup-back" ui-sref="home.insights"><ico class="fa fa-arrow-left"></ico>NEW LOOKUP</div></div></div>'
+                },
                 "main@": {
                     controller: function(LookupStore, $stateParams) {
                         var host = "/insights/";
@@ -1430,29 +1450,15 @@ angular
                         var childWindow = document.getElementById('insights_iframe').contentWindow;
 
                         window.addEventListener("message", function (event){
-                            console.log('message from Insights:', event.data);
+                            console.log('receiving from Insights:', event.data);
                             if (event.data == 'init') {
                                 var json = {};
 
-                                json.Authentication = $stateParams.Authentication;
-
+                                json.Authentication = LookupStore.get('Authentication');
                                 json.request = LookupStore.get('request');
-                                json.request.record.CompanyName = 'Lattice Engines';
-                                /*json = {
-                                  "Authentication": "0269dcb9-e793-4f63-b4dc-f9af598b6873",
-                                  "request": {
-                                    "record": {
-                                      "CompanyName": "TestCompany",
-                                      "Email": "",
-                                      "Domain": "www.test.com",
-                                      "City": "SF",
-                                      "State": "CA",
-                                      "PostalCode": "94105",
-                                      "Country": "United States",
-                                      "PhoneNumber": "null"
-                                    }
-                                  }
-                                }*/
+                                //json.request.record = $stateParams.record;
+                                
+                                console.log('posting to Insights:', json);
                                 childWindow.postMessage(json,'*');
                             }
                         }, false);

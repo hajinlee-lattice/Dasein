@@ -10,6 +10,29 @@
                 <hr />
 
                 <div class="section-body with-padding" ng-enter="vm.validate() && vm.next()">
+                    <div class="form-group" ng-if="vm.iframeMode">
+                        <label>Record JSON (optional)</label>
+                        <input
+                            type="text"
+                            class="form-control required"
+                            name="JSON"
+                            ng-model="vm.json"
+                            ng-change="vm.parse()"
+                            placeholder='{"Authentication":"<access code>","request":{"record":{"CompanyName":"Lattice Engines","Website":"www.lattice-engines.com"}}}' />
+                    </div>
+
+                    <hr size="1" ng-if="vm.iframeMode">
+
+                    <div class="form-group" ng-if="vm.iframeMode">
+                        <label>Access Token</label>
+                        <input
+                            type="text"
+                            class="form-control required"
+                            ng-class="{'lookup-required': vm.requiredMissingField.Authentication}"
+                            name="Authentication"
+                            ng-model="vm.Authentication"
+                            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+                    </div>
 
                     <div class="form-group">
                         <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_WEBSITE') }}</label>
