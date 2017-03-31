@@ -1,5 +1,7 @@
-angular.module('common.datacloud.queryresults', [])
-.controller('QueryResultsCtrl', function($scope, $state, QueryStore, Columns, Count) {
+angular.module('common.datacloud.queryresults', [
+    'mainApp.core.utilities.BrowserStorageUtility'
+])
+.controller('QueryResultsCtrl', function($scope, $state, BrowserStorageUtility, QueryStore, Columns, Count) {
 
     var vm = this;
     angular.extend(vm, {
@@ -10,7 +12,8 @@ angular.module('common.datacloud.queryresults', [])
         columns: Columns,
         search: null,
         sortBy: null,
-        context: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1)
+        context: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
+        authToken: BrowserStorageUtility.getTokenDocument()
     });
 
     vm.clearSearch = function() {
