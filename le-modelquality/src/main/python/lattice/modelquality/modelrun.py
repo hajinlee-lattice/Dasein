@@ -34,8 +34,10 @@ class ModelRun(EntityBase):
         modelrun.setDescription(config['description'])
         modelrun.setAnalyticPipelineName(config['analytic_pipeline_name'])
         modelrun.setDatasetName(config['dataset_name'])
-        modelrun.setAnalyticTestName(config['analytic_test_name'])
-        modelrun.setAnalyticTestTag(config['analytic_test_tag'])
+        if 'analytic_test_name' in config:
+            modelrun.setAnalyticTestName(config['analytic_test_name'])
+        if 'analytic_test_tag' in config:
+            modelrun.setAnalyticTestTag(config['analytic_test_tag'])
         return modelrun
 
     def __init__(self, name):
