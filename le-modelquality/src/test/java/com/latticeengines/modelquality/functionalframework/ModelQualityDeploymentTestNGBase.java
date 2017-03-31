@@ -76,7 +76,6 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     protected PropData propData;
     protected Sampling sampling;
     protected Pipeline pipeline1;
-    protected Pipeline pipeline2;
     protected DataSet dataset;
 
     protected final String analyticPipline2Name = "ModelQualityDeploymentTest-2";
@@ -209,8 +208,6 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         pipeline1 = pipelineService.createPipeline(pipeline1.getName(), pipeline1.getDescription(),
                 pipeline1StepsOrFiles);
 
-        pipeline2 = createNewDataPipeline(pipeline1);
-
         String datasetStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataset.json")
                         .getFile()));
@@ -226,7 +223,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                 .createAnalyticPipeline(analyticPipelineEntityNames);
 
         analyticPipelineEntityNames.setName(analyticPipline2Name);
-        analyticPipelineEntityNames.setPipeline(pipeline2.getName());
+        analyticPipelineEntityNames.setPipeline(pipeline1.getName());
         AnalyticPipeline analyticPipeline2 = analyticPipelineService
                 .createAnalyticPipeline(analyticPipelineEntityNames);
 
@@ -266,8 +263,6 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         dataSetEntityMgr.delete(dataset);
         System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline1.getName()));
         pipelineEntityMgr.delete(pipeline1);
-        System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline2.getName()));
-        pipelineEntityMgr.delete(pipeline2);
         PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
         if (pipelineStepAlreadyExists != null) {
             System.out.println("Attempting to delete PipelineStep \"assigncategorical\"");
@@ -318,7 +313,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         selectedConfig2.setAlgorithm(algorithm);
         selectedConfig2.setDataFlow(dataflow);
         selectedConfig2.setDataSet(dataset);
-        selectedConfig2.setPipeline(pipeline2);
+        selectedConfig2.setPipeline(pipeline1);
         selectedConfig2.setPropData(propData);
         selectedConfig2.setSampling(sampling);
 
