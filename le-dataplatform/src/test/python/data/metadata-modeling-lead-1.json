@@ -152,7 +152,6 @@
     "LastName",
     "Title",
     "PhoneNumber",
-    "Email",
     "ActiveRetirementParticipants",
     "AlexaAUPageViews",
     "AlexaAURank",
@@ -300,7 +299,6 @@
     "Company: CompanyName",
     "LastName: LastName",
     "FirstName: FirstName",
-    "Email: Email",
     "PhoneNumber: PhoneNumber",
     "Readouts: Id|Email|CreatedDate"
   ],
@@ -323,5 +321,5 @@
   "python_pipeline_script": "/app///dataplatform/scripts/pipeline.py",
   "python_mr_config": null,
   "pipeline_driver": "/app///dataplatform/scripts/pipeline.json",
-  "pipeline_properties": "remediatedatarulesstep.enabledRules={\"DerivedAttribute\":[\"CompanyName_Entropy\",\"CompanyName_Length\"],\"DistinctValueCount\":[\"CompanyName\",\"Email\"]} remediatedatarulesstep.customerPredictors=[] featureselectionstep.enabled=true"
+  "pipeline_properties":"featureselectionstep.enabled=true"
 }

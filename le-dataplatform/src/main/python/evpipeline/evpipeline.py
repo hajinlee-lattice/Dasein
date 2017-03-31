@@ -7,6 +7,7 @@ from evpipelinesteps import EVModelStep
 from evpipelinesteps import EnumeratedColumnTransformStep
 from evpipelinesteps import ImputationStep
 from evpipelinesteps import RevenueColumnTransformStep
+from highnumberuniquevaluesremovalstep import HighNumberUniqueValuesRemovalStep
 from pipelinefwk import ModelStep
 from pipelinefwk import Pipeline
 
@@ -45,7 +46,8 @@ def setupPipeline(pipelineDriver, pipelineLib, profile, columnMetadata, stringCo
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
 
-    steps = [EnumeratedColumnTransformStep(categoricalColumns), \
+    steps = [HighNumberUniqueValuesRemovalStep(200, categoricalColumns, params, profile), \
+             EnumeratedColumnTransformStep(categoricalColumns), \
              ColumnTypeConversionStep(columnsToTransform), \
              RevenueColumnTransformStep(OrderedDict(continuousColumnsMedian)), \
              ImputationStep(OrderedDict(continuousColumnsMedian), {}, [], [], OrderedDict(continuousColumnsMax), [], targetColumn)]

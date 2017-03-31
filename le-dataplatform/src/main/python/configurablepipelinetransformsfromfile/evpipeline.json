@@ -1,7 +1,21 @@
 {
   "columnTransformFiles": {
+    "HighNumberUniqueValuesRemovalStep": {
+      "KeyWhenSortingByAscending": 0,
+      "Name": "highnumberuniquevaluesremovalstep",
+      "MainClassName": "HighNumberUniqueValuesRemovalStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "maxNumberUniqueValues": 200,
+        "categoricalColumns": "categoricalColumns",
+        "params": "params",
+        "profile": "dataprofile"
+      },
+      "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
+    },
     "EnumeratedColumnTransformStep": {
-        "KeyWhenSortingByAscending": 0,
+        "KeyWhenSortingByAscending": 1,
         "Name": "enumeratedcolumntransformstep",
         "MainClassName": "EnumeratedColumnTransformStep",
         "UniqueColumnTransformName": "",
@@ -10,7 +24,7 @@
         "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
     },
     "ColumnTypeConversionStep": {
-        "KeyWhenSortingByAscending": 1,
+        "KeyWhenSortingByAscending": 2,
         "Name": "columntypeconversionstep",
         "MainClassName": "ColumnTypeConversionStep",
         "UniqueColumnTransformName": "",
@@ -19,7 +33,7 @@
         "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "RevenueColumnTransformStep": {
-        "KeyWhenSortingByAscending": 2,
+        "KeyWhenSortingByAscending": 3,
         "Name": "revenuecolumntransformstep",
         "MainClassName": "RevenueColumnTransformStep",
         "UniqueColumnTransformName": "",
@@ -28,7 +42,7 @@
         "ColumnTransformFilePath": "revenuecolumntransformstep.py"
     },
     "ImputationStepEVPipeline":{
-        "KeyWhenSortingByAscending": 3,
+        "KeyWhenSortingByAscending": 4,
         "Name": "imputationstepevpipeline",
         "MainClassName": "ImputationStep",
         "UniqueColumnTransformName": "",
@@ -37,7 +51,7 @@
         "ColumnTransformFilePath": "imputationstepevpipeline.py"
     },
     "CleanCategoricalColumn":{
-        "KeyWhenSortingByAscending": 4,
+        "KeyWhenSortingByAscending": 5,
         "Name": "cleancategoricalcolumn",
         "MainClassName": "CleanCategoricalColumn",
         "UniqueColumnTransformName": "",
@@ -46,7 +60,7 @@
         "ColumnTransformFilePath": "cleancategoricalcolumn.py"
     },
     "AssignConversionRateToAllCategoricalValues":{
-        "KeyWhenSortingByAscending": 5,
+        "KeyWhenSortingByAscending": 6,
         "Name": "assignconversionratetoallcategoricalvalues",
         "MainClassName": "AssignConversionRateToAllCategoricalValues",
         "UniqueColumnTransformName": "",
