@@ -101,6 +101,27 @@
 .query-filter-name {
     flex: 1 0 auto;
     max-width: 500px;
+    .category-firmographics {
+        color: $datacloud-color-firmographics;
+    }
+    .category-growth-trends {
+        color: $datacloud-color-growth-trends;
+    }
+    .category-intent {
+        color: $datacloud-color-intent;
+    }
+    .category-online-presence {
+        color: $datacloud-color-online-presence;
+    }
+    .category-technology-profile {
+        color: $datacloud-color-technology-profile;
+    }
+    .category-website-keywords {
+        color: $datacloud-color-website-keywords;
+    }
+    .category-website-profile {
+        color: $datacloud-color-website-profile;
+    }
 }
 .query-filter-type {
     width: 120px;

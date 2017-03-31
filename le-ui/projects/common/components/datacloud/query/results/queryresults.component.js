@@ -1,14 +1,16 @@
-angular.module('common.datacloud.queryresults', [
+angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('QueryResultsCtrl', function($scope, $state, BrowserStorageUtility, QueryStore, Columns, Count) {
+
+    var context = $state.current.name.substring($state.current.name.lastIndexOf('.') + 1);
 
     var vm = this;
     angular.extend(vm, {
         current: 1,
         pagesize: 20,
-        count: Count / 20,
-        list: [],
+        count: QueryStore.getCounts()[context].count / 20,
+        results: [],
         columns: Columns,
         search: null,
         sortBy: null,
@@ -59,11 +61,9 @@ angular.module('common.datacloud.queryresults', [
 
         setCount();
 
-        vm.list = QueryStore.getPage(vm.context, offset, vm.pagesize, vm.search, vm.sortBy, vm.sortDesc);
+        //vm.results = QueryStore.getPage(vm.context, offset, vm.pagesize, vm.search, vm.sortBy, vm.sortDesc);
     }
 
     function setCount() {
-        var count = QueryStore.getCount(vm.context, vm.search);
-        vm.count = (count === 0) ? 0 : count / vm.pagesize;
     }
 });

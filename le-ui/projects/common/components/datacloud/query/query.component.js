@@ -1,6 +1,7 @@
 angular.module('common.datacloud.query', [
-    'common.datacloud.queryservice',
-    'common.datacloud.queryfilter',
-    'common.datacloud.querybuilder',
-    'common.datacloud.queryresults'
+    'common.datacloud.query.service',
+    'common.datacloud.query.filter',
+    'common.datacloud.query.builder',
+    'common.datacloud.query.results',
+    'common.datacloud.query.factory.restriction'
 ]);

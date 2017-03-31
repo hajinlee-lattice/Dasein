@@ -134,8 +134,8 @@ angular.module('common.datacloud')
         } else {
             DataCloudService.getEnrichments(opts).then(function(response){
             //DataCloudStore.setEnrichments(response);
-            deferred.resolve(response);
-        });
+                deferred.resolve(response);
+            });
         }
         return deferred.promise;
     }
@@ -205,7 +205,7 @@ angular.module('common.datacloud')
             deferred.resolve(this.topAttributes);
         } else {
             var vm = this;
-            
+
             DataCloudService.getAllTopAttributes(opts).then(function(response) {
                 vm.topAttributes = data = response.data;
                 deferred.resolve(vm.topAttributes);

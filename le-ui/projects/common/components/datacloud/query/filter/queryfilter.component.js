@@ -1,4 +1,4 @@
-angular.module('common.datacloud.queryfilter', [])
+angular.module('common.datacloud.query.filter', [])
 .directive('queryFilter', function() {
     return {
         restrict: 'E',

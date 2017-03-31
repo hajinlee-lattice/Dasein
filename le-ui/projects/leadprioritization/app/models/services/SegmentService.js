@@ -12,16 +12,25 @@ angular
     };
 
     this.getSegmentByName = function(segmentName) {
+        var deferred = $q.defer();
+        if (!segmentName) {
+            deferred.resolve(null);
+            return deferred.promise;
+        }
+
         for (var i = 0; i < this.segments.length; i++) {
             var segment = this.segments[i];
             if (segment.name === segmentName) {
-                var deferred = $q.defer();
                 deferred.resolve(segment);
                 return deferred.promise;
             }
         }
 
-        return SegmentService.GetSegmentByName(segmentName);
+        SegmentService.GetSegmentByName(segmentName).then(function(result) {
+            deferred.resolve(result ? result : null);
+        });
+
+        return deferred.promise;
     };
 })
 .service('SegmentService', function($http, $q, $state) {

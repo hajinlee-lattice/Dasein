@@ -21,7 +21,7 @@ angular.module('common.datacloud.explorertabs', [
         }
         vm.section = section;
         var params = {
-            section: vm.section   
+            section: vm.section
         }
         if(goHome) {
             params.category = '';

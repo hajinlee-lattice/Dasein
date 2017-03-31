@@ -250,26 +250,24 @@ angular
             }
         })
         .state('home.model.analysis', {
-            url: '/analysis?segment&create',
+            url: '/analysis?segment',
             params: {
-                segment: null,
-                create: 'true'
+                segment: null
             },
             resolve: angular.extend(DataCloudResolve, {
-                QueryRestriction: ['$state', '$stateParams', '$q', 'QueryStore', 'SegmentStore', function($state, $stateParams, $q, QueryStore, SegmentStore) {
+                QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var deferred = $q.defer();
                     var segmentName = $stateParams.segment;
-                    if (segmentName) {
-                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                            QueryStore.setSegment(result);
-                            deferred.resolve(QueryStore.getRestriction());
-                        }).catch(function(error) {
-                            $state.go('home.model.analysis', {segment: null, create: true});
-                        });
-                    } else {
-                        QueryStore.setSegment(null);
+
+                    SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                        if (segmentName && !result) {
+                            $state.go('home.model.segmentation', {modelId: $stateParams.modelId});
+                        } else {
+                            return QueryStore.setupStore(result);
+                        }
+                    }).then(function() {
                         deferred.resolve(QueryStore.getRestriction());
-                    }
+                    });
 
                     return deferred.promise;
                 }],
@@ -322,16 +320,8 @@ angular
                         EnrichmentAccountLookup: function() {
                             return null;
                         },
-                        AnalysisLookup: function($q) {
-                            return false;
-                            // load default segment from API
-                            var deferred = $q.defer();
-
-                            //DataCloudStore.getCount().then(function(result) {
-                                deferred.resolve(null);
-                            //});
-
-                            return deferred.promise;
+                        AnalysisLookup: function() {
+                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -368,11 +358,6 @@ angular
                             var deferred = $q.defer();
                             deferred.resolve([]);
                             return deferred.promise;
-                        },
-                        Count: function ($q, QueryStore) {
-                           var deferred = $q.defer();
-                           deferred.resolve(QueryStore.getCount('accounts'));
-                           return deferred.promise;
                         }
                     },
                     controller: 'QueryResultsCtrl',
@@ -394,11 +379,6 @@ angular
                             var deferred = $q.defer();
                             deferred.resolve([]);
                             return deferred.promise;
-                        },
-                        Count: function ($q, QueryStore) {
-                           var deferred = $q.defer();
-                           deferred.resolve(QueryStore.getCount('contacts'));
-                           return deferred.promise;
                         }
                     },
                     controller: 'QueryResultsCtrl',

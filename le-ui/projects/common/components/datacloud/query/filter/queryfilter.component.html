@@ -6,8 +6,8 @@
     </div>
     <div class="query-filter-name">
         <div class="query-filter-table">
-            <p>### column_name category lookup</p>
-            <p>{{attribute.bucketRestriction.lhs.columnLookup.column_name}}</p>
+            <p class="category-{{attribute.categoryClassName}}">{{attribute.category}}</p>
+            <p>{{attribute.displayName}}</p>
         </div>
     </div>
     <div class="query-filter-type">
@@ -26,9 +26,9 @@
                 <div class="query-filter-cell query-filter-delete">&nbsp;</div>
             </div>
             <div class="query-filter-row" ng-repeat="b in attribute.buckets">
-                <div class="query-filter-cell query-filter-value">{{b.value}}</div>
-                <div class="query-filter-cell query-filter-lead">{{b.leads}}</div>
-                <div class="query-filter-cell query-filter-lift"><div class="query-lift-highlight">{{b.lift}}</div></div>
+                <div class="query-filter-cell query-filter-value">{{b.range.max}}</div>
+                <div class="query-filter-cell query-filter-lead"></div>
+                <div class="query-filter-cell query-filter-lift"><div class="query-lift-highlight"></div></div>
                 <div class="query-filter-cell query-filter-delete"><a href ng-click="vm.deleteBucket($index)">&times;</a></div>
             </div>
         </div>
