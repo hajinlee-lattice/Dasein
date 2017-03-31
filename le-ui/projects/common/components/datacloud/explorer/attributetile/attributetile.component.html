@@ -4,11 +4,11 @@
     <div class="header">
         <h2 title="{{enrichment.DisplayName}}">
             <div class="category-icon">
-                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted">
+                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.section != 'edit'"">
                     <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                 </div>
                 <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" />
-                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted">
+                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.section != 'edit'"">
                     <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                 </div>
             </div>

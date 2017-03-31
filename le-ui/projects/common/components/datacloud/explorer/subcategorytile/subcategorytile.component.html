@@ -52,7 +52,7 @@
                     {{vm.highlightTypesCategoryLabel(vm.category, subcategory).label}} 
                 </span>
                 <ul ng-class="{open: vm.openHighlighter[vm.category + subcategory].open}" class="highlightOptions button-dropdown">
-                    <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
+                    <li ng-repeat="(type, label) in vm.highlightTypesCategory" class="highlight-icon {{type}}" ng-class="{'disable-enable-all': vm.highlightTypesCategoryLabel(vm.category, subcategory).type == type}" ng-click="vm.setFlagsByCategory(type, vm.category, subcategory)">{{label}}</li>
                 </ul>
 
             </div>
