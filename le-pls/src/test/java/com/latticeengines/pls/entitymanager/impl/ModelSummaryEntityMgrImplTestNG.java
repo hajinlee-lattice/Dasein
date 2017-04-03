@@ -301,7 +301,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         setupSecurityContext(summary1);
         ModelSummary s = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         AttributeMap attrMap = new AttributeMap();
-        attrMap.put("DisplayName", "XYZ");
+        attrMap.put(ModelSummary.DISPLAY_NAME, "XYZ");
         modelSummaryEntityMgr.updateModelSummary(s, attrMap);
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         assertEquals(retrievedSummary.getDisplayName(), "XYZ");
@@ -315,7 +315,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         ModelSummary summaryToUpdate = new ModelSummary();
         summaryToUpdate.setId(summary2.getId());
         AttributeMap attrMap = new AttributeMap();
-        attrMap.put("DisplayName", "ABC");
+        attrMap.put(ModelSummary.DISPLAY_NAME, "ABC");
 
         setupSecurityContext(summary1);
         boolean exception = false;
@@ -404,8 +404,8 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         setupSecurityContext(summary1);
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, false, false);
 
-        List<Predictor> predictorsUsedForBi = modelSummaryEntityMgr.findPredictorsUsedByBuyerInsightsByModelId(summary1
-                .getId());
+        List<Predictor> predictorsUsedForBi = modelSummaryEntityMgr
+                .findPredictorsUsedByBuyerInsightsByModelId(summary1.getId());
         assertTrue(predictorsUsedForBi.size() == 2);
 
         List<Predictor> predictors = retrievedSummary.getPredictors();
@@ -442,6 +442,27 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
             assertTrue(e instanceof LedpException);
             assertTrue(((LedpException) e).getCode().equals(LedpCode.LEDP_18052));
         }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testGetModelSummariesModifiedWithinTimeFrame")
+    public void testUpdateLastModifiedTime() {
+        setupSecurityContext(summary1);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, false, false);
+        long oldLastUpdateTime = retrievedSummary.getLastUpdateTime();
+        modelSummaryEntityMgr.updateLastUpdateTime(retrievedSummary);
+        retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, false, false);
+        long newLastUpdateTime = retrievedSummary.getLastUpdateTime();
+        assertTrue(newLastUpdateTime > oldLastUpdateTime);
+    }
+
+    @Test(groups = "functional")
+    public void testGetModelSummariesModifiedWithinTimeFrame() {
+        List<ModelSummary> summaries = modelSummaryEntityMgr.getModelSummariesModifiedWithinTimeFrame(120000L);
+        assertNotNull(summaries);
+        Object[] result = summaries.stream()
+                .filter(summary -> summary.getId().equals(summary1.getId()) || summary.getId().equals(summary2.getId()))
+                .toArray();
+        assertEquals(result.length, 2);
     }
 
     private AttributeMap createValidMap() {

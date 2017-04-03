@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.VersionComparisonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
@@ -284,5 +286,28 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                 summary.setTrainingFileExist(true);
             }
         }
+    }
+
+    @Override
+    public List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame) {
+        return modelSummaryEntityMgr.getModelSummariesModifiedWithinTimeFrame(timeFrame);
+    }
+
+    @Override
+    public void updateModelSummary(String modelId, AttributeMap attrMap) {
+        ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        modelSummaryEntityMgr.updateModelSummary(modelSummary, attrMap);
+    }
+
+    @Override
+    public void updateLastUpdateTime(String modelId) {
+        ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        modelSummaryEntityMgr.updateLastUpdateTime(modelSummary);
     }
 }

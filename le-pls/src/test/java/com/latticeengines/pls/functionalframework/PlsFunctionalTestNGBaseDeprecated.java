@@ -161,6 +161,7 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
             summary1.setLookupId(String.format("%s|%s|%s", tokens[0], tokens[1], tokens[2]));
 
             String modelId = summary1.getId();
+            summary1.setLastUpdateTime(System.currentTimeMillis());
             ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
             if (summary != null) {
                 setupSecurityContext(summary);
@@ -235,6 +236,7 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
             s2el2.setVisible(true);
             s2p1.addPredictorElement(s2el2);
 
+            summary2.setLastUpdateTime(System.currentTimeMillis());
             String modelId = summary2.getId();
             ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
             if (summary != null) {
