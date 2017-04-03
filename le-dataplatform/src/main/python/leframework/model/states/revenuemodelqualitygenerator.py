@@ -46,11 +46,11 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
             self.logger.info("Calculating ValueScores in ModelQualityGenerator")
 
             # Check if EV model
-            if mediator.revenueColumn != None:
+            if mediator.revenueColumn is not None:
 
                 valueSpent = self.replaceNullsWithZero(list(mediator.data[mediator.revenueColumn]))
                 valueRanking = self.replaceNullsWithZero(
-                    list(mediator.data[mediator.schema["reserved"]["predictedrevenue"]]))
+                        list(mediator.data[mediator.schema["reserved"]["predictedrevenue"]]))
 
                 expectedValueRanking = [valueRanking[i] * eventRanking[i] for i in range(len(valueRanking))]
                 expectedValueScores = self.calculateValueScore(valueSpent, expectedValueRanking, eventRanking,
@@ -85,12 +85,14 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
                         expectedValueRanking_Period = [expectedValueRanking[i] for i in ind]
                         valueRanking_Period = [valueRanking[i] for i in ind]
                         eventRanking_Period = [eventRanking[i] for i in ind]
+
                         expectedValueScores = self.calculateValueScore(valueSpent_Period, expectedValueRanking_Period,
                                                                        eventRanking_Period, valueRanking_Period,
                                                                        expectedValueRanking_Period)
                         propensityValueScores = self.calculateValueScore(valueSpent_Period, eventRanking_Period,
                                                                          eventRanking_Period, valueRanking_Period,
                                                                          expectedValueRanking_Period)
+
                         predictedValueValueScores = self.calculateValueScore(valueSpent_Period, valueRanking_Period,
                                                                              eventRanking_Period, valueRanking_Period,
                                                                              expectedValueRanking_Period)
@@ -128,11 +130,15 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
 
     def calculateValueScore(self, valSpent, ranking, eventRanking=None, valueRanking=None, expectedValueRanking=None):
         length = len(valSpent)
+        bucketNumber = int(min(100.0,float(length)/10))
+        if bucketNumber<4: return {}
         if length != len(ranking): return None
         # sort by rank and by value spent to see how well it works
         indR = self.sortedInd(ranking)
         indV = self.sortedInd(valSpent)
         totalSpent = float(sum(valSpent))
+        if totalSpent == 0:
+            totalSpent = 1
         # cumulative sum of percentage of total value spent ordered by ranking
         valTotalSpent = np.cumsum([valSpent[i] / totalSpent for i in indR])
         valTotalRanked = np.cumsum([valSpent[i] / totalSpent for i in indV])
@@ -187,8 +193,9 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
                 returnTuple = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
             return returnTuple
 
+        bucketIncr = 1.0 / bucketNumber
         percMaxCount, popSize, meanRev, convRate, percTotalRev, meanRanking, meanPredictedEvent, meanPredictedRevenue, meanEV = zip(
-            *[evalRev(.01 * i) for i in range(1, 101)])
+                *[evalRev(bucketIncr * i) for i in range(1, bucketNumber+1)])
 
         results = {}
         results["percMaxCount"] = percMaxCount
@@ -202,12 +209,14 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
         results["meanEV"] = meanEV
         results["aucSpent"] = aucSpent
         results["aucRanked"] = aucRanked
-        results["aucQuality"] = aucRanked / aucSpent
+        results["aucQuality"] = (aucRanked / aucSpent) if aucSpent != 0 else 0
 
         return results
 
     def precisionRecallMatrix(self, ranking, valSpent):
         length = len(valSpent)
+        bucketNumber = int(min(100.0,float(length)/10))
+        if bucketNumber<4: return {}
         if length != len(ranking): return None
         indR = self.sortedInd(ranking, False)
         indV = self.sortedInd(valSpent, False)
@@ -219,23 +228,30 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
             valInd = [indV[i] for i in range(valueIndexLow, length)]
             rankInd = [indR[i] for i in range(rankingIndexLow, length)]
             cnt = len(set(valInd) & set(rankInd))
+            if len(rankInd) == 0:
+                return None
             return rank, value, cnt / 1.0 / length, cnt / 1.0 / len(valInd), cnt / 1.0 / len(rankInd)
 
-        ix = [int(i * .01 * length) for i in range(0, 100)]
+        bucketIncr = 1.0 / bucketNumber
+        ix = [int(i * bucketIncr * length) for i in range(0, bucketNumber)]
         indexList = [(i, j) for i in ix for j in ix]
         return [binDetails(x) for x in indexList]
 
-    def calculateEventScore(self, event, ranking, liftBuckets=0.01):
+    def calculateEventScore(self, event, ranking):
         length = len(event)
+        numBuckets = int(min(100.0,float(length)/10))
+        if numBuckets < 4: return {}
         if length != len(ranking):
             return None
         indR = self.sortedInd(ranking)
         totalEvents = float(sum(event))
+        if totalEvents == 0:
+            totalEvents = 1
         percentEvents = np.cumsum([event[i] / totalEvents for i in indR])
         auc = np.mean(percentEvents)
         liftCurve = [percentEvents[i] * len(percentEvents) / float(i + 1) for i in range(len(percentEvents))]
-        numBuckets = int(1.0 / liftBuckets)
-        liftBuckets = [int(i * liftBuckets * len(liftCurve)) for i in range(1, numBuckets + 1)]
+        bucketIncr = 1.0 / numBuckets
+        liftBuckets = [int(i * bucketIncr * len(liftCurve)) for i in range(1, numBuckets + 1)]
         liftBuckets[len(liftBuckets) - 1] = len(liftCurve) - 1
         outPutLiftCurve = [((b + 1.0) / float(len(liftCurve)), liftCurve[b]) for b in liftBuckets]
 
@@ -246,13 +262,14 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
         return results
 
     def simplifyPrecisionRecallResults(self, PRMatrix):
+        numBuckets = int(np.sqrt(len(PRMatrix)))
         # take out percentile thresholds
-        predictions = [x[0] for x in PRMatrix[0::100]]
-        revenues = [x[1] for x in PRMatrix[:100]]
+        predictions = [x[0] for x in PRMatrix[0::numBuckets]]
+        revenues = [x[1] for x in PRMatrix[:numBuckets]]
         # fold the percentage distribution into 100x100 matrix
-        percentages = np.reshape([x[2] for x in PRMatrix], (100, 100))
-        recalls = np.reshape([x[3] for x in PRMatrix], (100, 100))
-        precisions = np.reshape([x[4] for x in PRMatrix], (100, 100))
+        percentages = np.reshape([x[2] for x in PRMatrix], (numBuckets, numBuckets))
+        recalls = np.reshape([x[3] for x in PRMatrix], (numBuckets, numBuckets))
+        precisions = np.reshape([x[4] for x in PRMatrix], (numBuckets, numBuckets))
 
         def roundTo(x, sigDigits=1):
             """
@@ -265,7 +282,8 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
 
         # event needs to have at least 2% presence
         # then find eligible thresholds, which has 1 significant digit
-        eventThresholds = sorted(set([roundTo(x) for x in revenues[2:-2]]))
+        pctToExcl = int(0.02 * numBuckets)
+        eventThresholds = sorted(set([roundTo(x) for x in revenues[pctToExcl:numBuckets-pctToExcl]]))
 
         def thresholdDetails(threshold, recall):
             actualThreshold = min(revenues, key=lambda x: abs(x - threshold))
