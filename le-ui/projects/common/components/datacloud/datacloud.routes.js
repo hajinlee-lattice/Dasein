@@ -254,7 +254,7 @@ angular
             params: {
                 segment: null
             },
-            resolve: Object.assign({}, DataCloudResolve, {
+            resolve: angular.extend({}, DataCloudResolve, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var deferred = $q.defer();
                     var segmentName = $stateParams.segment;
