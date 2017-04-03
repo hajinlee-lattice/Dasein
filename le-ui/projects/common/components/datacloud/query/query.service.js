@@ -1,6 +1,6 @@
 angular.module('common.datacloud.query.service',[
 ])
-.service('QueryStore', function($filter, $q, QueryService, BucketRestriction) {
+.service('QueryStore', function($filter, $q, $timeout, QueryService, BucketRestriction) {
 
     this.segment = null;
 
@@ -13,10 +13,14 @@ angular.module('common.datacloud.query.service',[
         accounts: {
             count: null,
             state: 'done' // 'done' | 'loading'
-        } //, contacts: {}
+        },
+        contacts: {
+            count: null,
+            state: 'done'
+        }
     };
 
-    this.updateContextCount = function(context, count, state) {
+    this.setContextCount = function(context, state, count) {
         var contextCount = this.counts[context];
         if (contextCount) {
             contextCount.count = (count === undefined) ? contextCount.count : count;
@@ -55,17 +59,16 @@ angular.module('common.datacloud.query.service',[
         this.setSegment(segment);
         if (segment !== null) {
             this.setRestriction(segment.simple_restriction);
-            this.updateContextCount('accounts', parseInt(this.getSegmentProperty(segment.segment_properties, 'NumAccounts')), 'done');
+            this.setContextCount('accounts', 'done', parseInt(this.getSegmentProperty(segment.segment_properties, 'NumAccounts')));
 
             deferred.resolve();
         } else {
             this.setRestriction( { all: [], any: [] } );
 
-            this.GetCountByRestriction('accounts').then(function(result) {
-                self.updateContextCount('accounts', result, 'done');
+            this.updateContextCount('accounts').then(function() {
                 deferred.resolve();
             }).catch(function(error) {
-                deferred.reject();
+                deferred.resolve({error: error});
             });
         }
 
@@ -90,6 +93,8 @@ angular.module('common.datacloud.query.service',[
         if (attributes.length === 0) {
             this.restriction.all.push(new BucketRestriction(attribute.columnName, attribute.bucket));
         }
+
+        this.updateCountsDebounced();
     };
 
     this.removeRestriction = function(attribute) {
@@ -102,6 +107,8 @@ angular.module('common.datacloud.query.service',[
                 break;
             }
         }
+
+        this.updateCountsDebounced();
     };
 
     this.findAttributes = function(columnName) {
@@ -123,6 +130,35 @@ angular.module('common.datacloud.query.service',[
         }
 
         return results;
+    };
+
+    this.updateContextCount = function(context) {
+        var self = this;
+        self.setContextCount(context, 'loading')
+        return this.GetCountByRestriction(context).then(function(result) {
+            self.setContextCount(context, 'done', result);
+        });
+    };
+
+    var debounceTime = 5000;
+    var timeout = null;
+    var lastUpdated = 0;
+    this.updateCountsDebounced = function() {
+        var self = this;
+        var now = new Date().getTime();
+
+        if (now - lastUpdated > debounceTime && !timeout) {
+            this.updateContextCount('accounts').finally(function() {
+                lastUpdated = now;
+            });
+        } else {
+            $timeout.cancel(timeout);
+            timeout = $timeout(function() {
+                self.updateContextCount('accounts').finally(function() {
+                    lastUpdated = now;
+                });
+            }, debounceTime - (now - lastUpdated));
+        }
     };
 
     this.getPage = function(context, offset, maximum, query, sortBy, sortDesc) {

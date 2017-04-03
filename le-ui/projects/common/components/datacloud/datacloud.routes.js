@@ -277,8 +277,8 @@ angular
                         if (segment === null) {
                             var ts = new Date().getTime();
                             segment = {
-                                "name": "segment" + ts,
-                                "display_name": "segment" + ts,
+                                'name': 'segment' + ts,
+                                'display_name': 'segment' + ts,
                             };
                         }
                         segment.simple_restriction = QueryStore.getRestriction();

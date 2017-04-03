@@ -6,7 +6,7 @@ angular.module('common.datacloud.query.filter', [])
         scope: {
             attribute: '=',
             onMove: '&',
-            onDelete: '&',
+            onDelete: '=',
             group: "@"
         },
         templateUrl: '/components/datacloud/query/filter/queryfilter.component.html',
@@ -18,10 +18,7 @@ angular.module('common.datacloud.query.filter', [])
     var vm = this;
     angular.extend(this, {});
 
-    vm.deleteBucket = function (index) {
-        $scope.attribute.buckets.splice(index, 1);
-        if ($scope.attribute.buckets.length === 0) {
-            $scope.onDelete();
-        }
+    vm.deleteBucket = function(index) {
+        $scope.onDelete($scope.group, $scope.attribute.columnName, index);
     };
 });

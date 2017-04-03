@@ -17,8 +17,8 @@
             ng-repeat="(k, a) in vm.filters.all"
             attribute="a"
             group="all"
-            on-move="vm.moveToAny(k)"
-            on-delete="vm.delete(vm.filters.all, k)">
+            on-move="vm.move(vm.filters.all, vm.filters.any, k)"
+            on-delete="vm.delete">
         </query-filter>
         <p class="text-center" ng-if="vm.size(vm.filters.all) === 0">
             No attributes in All
@@ -31,8 +31,8 @@
             ng-repeat="(k, a) in vm.filters.any"
             attribute="a"
             group="any"
-            on-move="vm.moveToAll(k)"
-            on-delete="vm.delete(vm.filters.any, k)">
+            on-move="vm.move(vm.filters.any, vm.filters.all, k)"
+            on-delete="vm.delete">
         </query-filter>
         <p class="text-center" ng-if="vm.size(vm.filters.any) === 0">
             No attributes in Any
