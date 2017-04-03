@@ -16,7 +16,7 @@
         </h2>
         <!--// keep this below the h2 so that the z-indexes work with out setting z-index in the css -->
         <ul class="tags">
-            <li data-corner-ribbon="premium" ng-if="enrichment.IsPremium" class="premium noselect-children"><strong>premium</strong></li>
+            <li data-corner-ribbon="premium" ng-if="enrichment.IsPremium && vm.section != 'insights'" class="premium noselect-children"><strong>premium</strong></li>
             <li data-corner-ribbon="internal" ng-if="enrichment.IsInternal" class="internal noselect-children"><strong>internal</strong></li>
         </ul>
     </div>

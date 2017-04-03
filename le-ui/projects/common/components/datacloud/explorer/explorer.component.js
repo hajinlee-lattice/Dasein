@@ -95,7 +95,7 @@ angular.module('common.datacloud.explorer', [
             return true;
         }
         if (vm.section == 'insights' || vm.section == 'team') {
-            if (vm.show_lattice_insights) {
+            if (vm.show_lattice_insights || vm.section == 'insights') {
                 return false;
             }
             return true;
