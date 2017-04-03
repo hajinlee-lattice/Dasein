@@ -327,8 +327,15 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Override
     public void bulkLookup(BulkLookupStrategy bulkLookupStrategy) {
         try {
+            // Failed batch requests to process
+            List<DnBBatchMatchContext> failedBatchesToProcess = new ArrayList<>();
+            // Success batch requests to process
+            List<DnBBatchMatchContext> successBatchesToProcess = new ArrayList<>();
             switch (bulkLookupStrategy) {
             case DISPATCHER:
+                // Batch requests to submit
+                List<DnBBatchMatchContext> batchToSubmit = new ArrayList<>();
+                // Bucket single contexts in comingContexts to batched contexts in unsubmittedReqs
                 synchronized (unsubmittedReqs) {
                     synchronized (comingContexts) {
                         while (!comingContexts.isEmpty()) {
@@ -343,10 +350,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                     .put(context.getLookupRequestId(), context);
                         }
                     }
-                    List<DnBBatchMatchContext> batchContexts = new ArrayList<DnBBatchMatchContext>();
                     int unsubmittedNum = getUnsubmittedNum();
                     if (unsubmittedNum > 0) {
-                        log.info(String.format("There are %d requests unsubmitted before request dispatching",
+                        log.info(String.format("There are %d records unsubmitted before request dispatching",
                                 unsubmittedNum));
                     }
                     if (unsubmittedNum >= maximumBatchSize || unsubmittedNum == previousUnsubmittedNum.get()) {
@@ -355,47 +361,50 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                             DnBBatchMatchContext batchContext = iter.next();
                             if (batchContext.getContexts().size() == maximumBatchSize
                                     || unsubmittedNum == previousUnsubmittedNum.get()) {
-                                batchContexts.add(batchContext);
+                                batchToSubmit.add(batchContext);
                                 iter.remove();
                             }
                         }
                     }
-                    if (!batchContexts.isEmpty()) {
-                        int num = unsubmittedReqs.size();
-                        for (DnBBatchMatchContext batchContext : batchContexts) {
-                            try {
-                                batchContext = dnbBulkLookupDispatcher.sendRequest(batchContext);
-                            } catch (Exception ex) {
-                                log.error(String.format(
-                                        "Exception in dispatching match requests to DnB bulk match service: %s",
-                                        ex.getMessage()));
-                                batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
-                            }
-                            switch (batchContext.getDnbCode()) {
-                            case SUBMITTED:
-                                submittedReqs.add(batchContext);
-                                break;
-                            case RATE_LIMITING:
-                            case EXCEED_LIMIT_OR_UNAUTHORIZED:
-                                // Not allow to submit this request due to rate limiting
-                                // Put it back to unsubmittedReqs list. Maintain the same order in the unsubmittedReqs
-                                unsubmittedReqs.add(unsubmittedReqs.size() - num, batchContext);
-                                break;
-                            default:
-                                processBulkMatchResult(batchContext, false);
-                                break;
-                            }
-                        }
-                    }
-                    unsubmittedNum = getUnsubmittedNum();
-                    if (unsubmittedNum > 0) {
-                        log.info(String.format("There are %d requests unsubmitted after request dispatching",
-                                unsubmittedNum));
-                    }
-                    previousUnsubmittedNum.set(unsubmittedNum);
                 }
+                // Dispatch batch requests
+                for (DnBBatchMatchContext batchContext : batchToSubmit) {
+                    try {
+                        batchContext = dnbBulkLookupDispatcher.sendRequest(batchContext);
+                    } catch (Exception ex) {
+                        log.error(String.format("Exception in dispatching match requests to DnB bulk match service: %s",
+                                ex.getMessage()));
+                        batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
+                    }
+                    switch (batchContext.getDnbCode()) {
+                    case SUBMITTED:
+                        submittedReqs.add(batchContext);
+                        break;
+                    case RATE_LIMITING:
+                    case EXCEED_LIMIT_OR_UNAUTHORIZED:
+                        // Not allow to submit this request due to rate limiting
+                        // Put it back to unsubmittedReqs list.
+                        unsubmittedReqs.add(0, batchContext);
+                        break;
+                    default:
+                        failedBatchesToProcess.add(batchContext);
+                        break;
+                    }
+                }
+                // Process failed batch requests
+                for (DnBBatchMatchContext batchContext : failedBatchesToProcess) {
+                    processBulkMatchResult(batchContext, false);
+                }
+                int unsubmittedNum = getUnsubmittedNum();
+                if (unsubmittedNum > 0) {
+                    log.info(String.format("There are %d records unsubmitted after request dispatching",
+                            unsubmittedNum));
+                }
+                previousUnsubmittedNum.set(unsubmittedNum);
                 break;
             case STATUS:
+                // Batch requests to retry
+                List<DnBBatchMatchContext> retryReqs = new ArrayList<>();
                 synchronized (submittedReqs) {
                     dnbBulkLookupStatusChecker.checkStatus(submittedReqs);
                     Iterator<DnBBatchMatchContext> iter = submittedReqs.iterator();
@@ -413,20 +422,27 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                             if (submittedReq.getRetryTimes() < bulkRetryTimes && submittedReq.getTimestamp() != null
                                     && (System.currentTimeMillis()
                                             - submittedReq.getTimestamp().getTime() >= bulkRetryWait)) {
-                                long mins = (System.currentTimeMillis() - submittedReq.getTimestamp().getTime()) / 60
-                                        / 1000;
-                                log.info(String.format(
-                                        "Bulk match with serviceBatchId = %s was submitted %d minutes ago and hasn't got result back. Resubmit it!",
-                                        submittedReq.getServiceBatchId(), mins));
-                                retryBulkRequest(submittedReq);
+                                retryReqs.add(submittedReq);    // Do not retry here to avoid potential deadlock
                             }
                             break;
                         default:
-                            processBulkMatchResult(submittedReq, false);
+                            failedBatchesToProcess.add(submittedReq);
                             iter.remove();
                             break;
                         }
                     }
+                }
+                // Process failed batch requests
+                for (DnBBatchMatchContext batchContext : failedBatchesToProcess) {
+                    processBulkMatchResult(batchContext, false);
+                }
+                // Retry batch requests
+                for (DnBBatchMatchContext retryReq : retryReqs) {
+                    long mins = (System.currentTimeMillis() - retryReq.getTimestamp().getTime()) / 60 / 1000;
+                    log.info(String.format(
+                            "Bulk match with serviceBatchId = %s was submitted %d minutes ago and hasn't got result back. Resubmit it!",
+                            retryReq.getServiceBatchId(), mins));
+                    retryBulkRequest(retryReq);
                 }
                 break;
             case FETCHER:
@@ -444,14 +460,23 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                         }
                         switch (finishedReq.getDnbCode()) {
                         case OK:
-                            processBulkMatchResult(finishedReq, true);
+                            successBatchesToProcess.add(finishedReq);
                             iter.remove();
                             break;
                         default:
-                            processBulkMatchResult(finishedReq, false);
+                            failedBatchesToProcess.add(finishedReq);
                             iter.remove();
+                            break;
                         }
                     }
+                }
+                // Process failed batch requests
+                for (DnBBatchMatchContext batchContext : failedBatchesToProcess) {
+                    processBulkMatchResult(batchContext, false);
+                }
+                // Process success batch requests
+                for (DnBBatchMatchContext batchContext : successBatchesToProcess) {
+                    processBulkMatchResult(batchContext, true);
                 }
                 break;
             default:
