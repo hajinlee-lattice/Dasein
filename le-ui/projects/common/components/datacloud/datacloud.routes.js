@@ -354,9 +354,14 @@ angular
             views: {
                 "main@": {
                     resolve: {
-                        Columns: function ($q, QueryStore) {
+                        Columns: function($q, QueryStore) {
                             var deferred = $q.defer();
                             deferred.resolve([]);
+                            return deferred.promise;
+                        },
+                        CountMetadata: function($q, QueryStore) {
+                            var deferred = $q.defer();
+                            deferred.resolve(QueryStore.getCounts().accounts);
                             return deferred.promise;
                         }
                     },
@@ -375,9 +380,14 @@ angular
             views: {
                 "main@": {
                     resolve: {
-                        Columns: function ($q, QueryStore) {
+                        Columns: function($q, QueryStore) {
                             var deferred = $q.defer();
                             deferred.resolve([]);
+                            return deferred.promise;
+                        },
+                        CountMetadata: function($q, QueryStore) {
+                            var deferred = $q.defer();
+                            deferred.resolve(QueryStore.getCounts().contacts);
                             return deferred.promise;
                         }
                     },

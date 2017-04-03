@@ -1,6 +1,6 @@
 angular.module('common.datacloud.query.service',[
 ])
-.service('QueryStore', function($filter, $q, QueryService, $timeout, BucketRestriction) {
+.service('QueryStore', function($filter, $q, QueryService, BucketRestriction) {
 
     this.segment = null;
 
@@ -55,7 +55,7 @@ angular.module('common.datacloud.query.service',[
         this.setSegment(segment);
         if (segment !== null) {
             this.setRestriction(segment.simple_restriction);
-            this.updateContextCount('accounts', this.getSegmentProperty(segment.segment_properties, 'NumAccounts'), 'done');
+            this.updateContextCount('accounts', parseInt(this.getSegmentProperty(segment.segment_properties, 'NumAccounts')), 'done');
 
             deferred.resolve();
         } else {

@@ -1,7 +1,7 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, BrowserStorageUtility, QueryStore, Columns, Count) {
+.controller('QueryResultsCtrl', function($scope, $state, BrowserStorageUtility, QueryStore, Columns, CountMetadata) {
 
     var context = $state.current.name.substring($state.current.name.lastIndexOf('.') + 1);
 
@@ -9,9 +9,10 @@ angular.module('common.datacloud.query.results', [
     angular.extend(vm, {
         current: 1,
         pagesize: 20,
-        count: QueryStore.getCounts()[context].count / 20,
+        count: 0,
+        countMetadata: CountMetadata || {},
+        columns: Columns || [],
         results: [],
-        columns: Columns,
         search: null,
         sortBy: null,
         context: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
