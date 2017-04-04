@@ -58,8 +58,6 @@ angular.module('common.datacloud.query.builder', [])
     };
 
     vm.saveSegment = function() {
-        var restrictions = createRestrictionsFromFilters(vm.filters);
-        QueryStore.setRestriction(restrictions);
         SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
             if (!result.errorMsg) {
                 $state.go('home.model.segmentation', {}, {notify: true})

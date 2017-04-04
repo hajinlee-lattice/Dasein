@@ -161,10 +161,6 @@ angular.module('common.datacloud.query.service',[
         }
     };
 
-    this.getPage = function(context, offset, maximum, query, sortBy, sortDesc) {
-        return [];
-    };
-
     this.GetCountByRestriction = function(context) {
         if (!validContext(context)) {
             var deferred = $q.defer();
@@ -176,25 +172,25 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.GetCountByQuery = function(context, query) {
-        query = query || {};
-
         if (!validContext(context)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
-            return deferred;
+            return deferred.promise;
         }
 
-        return QueryService.GetCountByQuery(context);
+        return QueryService.GetCountByQuery(context, query);
     };
 
-    this.GetDataByQuery = function(context) {
+    this.GetDataByQuery = function(context, query) {
+        query.restriction = this.getRestriction();
+
         if (!validContext(context)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
-            return deferred;
+            return deferred.promise;
         }
 
-        return QueryService.GetDataByQuery(context);
+        return QueryService.GetDataByQuery(context, query);
     };
 
     function validContext(context) {
