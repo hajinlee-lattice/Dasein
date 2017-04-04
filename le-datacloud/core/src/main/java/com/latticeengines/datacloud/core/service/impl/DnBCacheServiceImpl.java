@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.DnBCacheEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.impl.DnBCacheEntityMgrImpl;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
@@ -21,7 +20,6 @@ import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 
 @Component("dnbCacheService")
 public class DnBCacheServiceImpl implements DnBCacheService {
@@ -43,9 +41,6 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     private double expireFactor;
 
     private Map<String, DnBCacheEntityMgr> cacheEntityMgrs = new HashMap<String, DnBCacheEntityMgr>();
-
-    @Autowired
-    private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Autowired
     private FabricMessageService messageService;
@@ -159,10 +154,6 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         DnBCacheEntityMgr cacheEntityMgr = cacheEntityMgrs.get(cacheVersion);
 
         if (cacheEntityMgr == null) {
-            DataCloudVersion dataCloudVersion = versionEntityMgr.findVersion(cacheVersion);
-            if (dataCloudVersion == null) {
-                throw new IllegalArgumentException("Cannot find the specified data cloud version " + cacheVersion);
-            }
             log.info("Use " + cacheVersion + " as full version of DnBCache for " + cacheVersion);
             cacheEntityMgr = new DnBCacheEntityMgrImpl(messageService, dataService, cacheVersion);
             cacheEntityMgr.init();
