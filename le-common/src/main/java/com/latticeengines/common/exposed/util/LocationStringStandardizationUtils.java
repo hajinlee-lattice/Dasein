@@ -15,7 +15,7 @@ public class LocationStringStandardizationUtils extends StringStandardizationUti
 
     private Character[] removed = { '~', '@', '#', '$', '%', '^', '*', '+', '=', '\'', '<', '>', '’' };
     private Character[] replacedBySpace = { '&', '-', '_', '|', '\\', '/', '\t', '?', ';', ':', ',', '(', ')', '{', '}',
-            '[', ']', '.', '"' };
+            '[', ']', '.', '"', '\r', '\n' };
     private String[][] replaced = {};
     private static LocationStringStandardizationUtils singletonUtil = new LocationStringStandardizationUtils();
 
