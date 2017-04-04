@@ -44,8 +44,10 @@ public class ExportProcessor extends SingleContainerYarnProcessor<ExportConfigur
     }
 
     private void invokeRedshiftExport(HdfsToRedshiftConfiguration configuration) {
-        hdfsToRedshiftService.createRedshiftTable(configuration);
+        hdfsToRedshiftService.cleanupS3(configuration);
         setProgress(0.1f);
+        hdfsToRedshiftService.createRedshiftTable(configuration);
+        setProgress(0.2f);
         hdfsToRedshiftService.uploadDataObjectToS3(configuration);
         setProgress(0.6f);
         hdfsToRedshiftService.copyToRedshift(configuration);

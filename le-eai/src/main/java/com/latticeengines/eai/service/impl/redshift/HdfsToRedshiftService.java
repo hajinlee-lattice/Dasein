@@ -43,11 +43,6 @@ public class HdfsToRedshiftService {
     private Configuration yarnConfiguration;
 
     public void uploadDataObjectToS3(HdfsToRedshiftConfiguration configuration) {
-
-        if (!configuration.isAppend()) {
-            cleanupS3(configuration);
-        }
-
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         HdfsToS3Configuration s3Configuration = new HdfsToS3Configuration();
         s3Configuration.setSplitSize(100L * 1024 * 1024);
@@ -65,7 +60,9 @@ public class HdfsToRedshiftService {
         redshiftService.dropTable(redshiftTableConfig.getTableName());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
-            RedshiftUtils.generateJsonPathsFile(schema, outputStream);
+            if (!configuration.isAppend()) {
+                RedshiftUtils.generateJsonPathsFile(schema, outputStream);
+            }
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
                 s3Service.uploadInputStream(s3Bucket, redshiftTableConfig.getJsonPathPrefix(), inputStream, true);
             }
@@ -89,6 +86,9 @@ public class HdfsToRedshiftService {
     }
 
     public void cleanupS3(HdfsToRedshiftConfiguration configuration) {
+        if (configuration.isAppend()) {
+            return;
+        }
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         String prefix = s3Prefix(redshiftTableConfig);
         s3Service.cleanupPrefix(s3Bucket, prefix);
