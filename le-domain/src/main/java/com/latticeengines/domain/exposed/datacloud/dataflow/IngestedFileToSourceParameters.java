@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig.CompressType;
 
 public class IngestedFileToSourceParameters extends TransformationFlowParameters {
-    @JsonProperty("IngetionName")
-    private String ingetionName;
+    @JsonProperty("IngestionName")
+    private String ingestionName;
 
     @JsonProperty("Qualifier")
     private String qualifier = "\"";
@@ -25,12 +25,12 @@ public class IngestedFileToSourceParameters extends TransformationFlowParameters
     @JsonProperty("CompressType")
     private CompressType compressType;
 
-    public String getIngetionName() {
-        return ingetionName;
+    public String getIngestionName() {
+        return ingestionName;
     }
 
-    public void setIngetionName(String ingetionName) {
-        this.ingetionName = ingetionName;
+    public void setIngestionName(String ingestionName) {
+        this.ingestionName = ingestionName;
     }
 
     public String getQualifier() {

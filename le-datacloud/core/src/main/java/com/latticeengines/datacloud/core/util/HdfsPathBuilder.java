@@ -157,7 +157,7 @@ public class HdfsPathBuilder {
     public Path constructVersionFile(Source source) {
         Path baseDir = null;
         if (source instanceof IngestionSource) {
-            baseDir = constructIngestionDir(((IngestionSource) source).getIngetionName());
+            baseDir = constructIngestionDir(((IngestionSource) source).getIngestionName());
         } else {
             baseDir = constructSourceDir(source.getSourceName());
         }

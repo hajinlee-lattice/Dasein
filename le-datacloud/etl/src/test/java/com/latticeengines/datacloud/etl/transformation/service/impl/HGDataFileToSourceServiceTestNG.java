@@ -51,7 +51,7 @@ public class HGDataFileToSourceServiceTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        baseSource.setIngetionName(IngestionNames.HGDATA);
+        baseSource.setIngestionName(IngestionNames.HGDATA);
         uploadBaseSourceFile(baseSource, "Lattice_Engines_2017-02-14.zip", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -108,7 +108,7 @@ public class HGDataFileToSourceServiceTestNG
 
     private String getIngestedFileToSourceTransformerConfig() throws JsonProcessingException {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
-        conf.setIngetionName(IngestionNames.HGDATA);
+        conf.setIngestionName(IngestionNames.HGDATA);
         conf.setFileNameOrExtension("7330 Lattice Engines.csv");
         conf.setCompressedFileNameOrExtension("Lattice_Engines_2017-02-14.zip");
         conf.setCompressType(CompressType.ZIP);

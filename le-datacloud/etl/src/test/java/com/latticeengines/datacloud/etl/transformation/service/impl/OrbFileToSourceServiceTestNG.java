@@ -56,7 +56,7 @@ public class OrbFileToSourceServiceTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        baseSource.setIngetionName(IngestionNames.ORB_INTELLIGENCE);
+        baseSource.setIngestionName(IngestionNames.ORB_INTELLIGENCE);
         uploadBaseSourceFile(baseSource, "orb-db2-export-sample.zip", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -113,7 +113,7 @@ public class OrbFileToSourceServiceTestNG
 
     private String getIngestedFileToSourceTransformerConfig() throws JsonProcessingException {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
-        conf.setIngetionName(IngestionNames.ORB_INTELLIGENCE);
+        conf.setIngestionName(IngestionNames.ORB_INTELLIGENCE);
         conf.setFileNameOrExtension("orb_companies.csv");
         conf.setCompressedFileNameOrExtension("orb-db2-export-sample.zip");
         conf.setCompressType(CompressType.ZIP);
