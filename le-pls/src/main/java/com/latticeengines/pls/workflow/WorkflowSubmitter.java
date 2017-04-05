@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -29,6 +30,9 @@ public abstract class WorkflowSubmitter {
 
     @Autowired
     protected ColumnMetadataProxy columnMetadataProxy;
+    
+    @Autowired
+    protected PlsFeatureFlagService plsFeatureFlagService;
 
     @Value("${common.test.pls.url}")
     protected String internalResourceHostPort;

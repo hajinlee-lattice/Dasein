@@ -27,7 +27,8 @@ public enum LatticeFeatureFlag {
     ENABLE_FUZZY_MATCH("EnableFuzzyMatch", "Enable Fuzzy Match"), //
     LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights"), //
     BYPASS_DNB_CACHE("BypassDnbCache", "Bypass DnB Cache"), //
-    ENABLE_CDL("EnableCdl", "Enable Customer Data Lake");
+    ENABLE_CDL("EnableCdl", "Enable Customer Data Lake"), //
+    ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug");
 
     private String name;
     private String documentation;

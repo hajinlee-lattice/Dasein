@@ -1,5 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("plsFeatureFlagService")
 public class PlsFeatureFlagServiceImpl implements PlsFeatureFlagService {
 
+    private static final Log log = LogFactory.getLog(PlsFeatureFlagServiceImpl.class);
+
     @Autowired
     protected TenantConfigServiceImpl tenantConfigService;
 
@@ -19,8 +23,8 @@ public class PlsFeatureFlagServiceImpl implements PlsFeatureFlagService {
     public TransformationGroup getTransformationGroupFromZK() {
         TransformationGroup transformationGroup = TransformationGroup.STANDARD;
 
-        FeatureFlagValueMap flags = tenantConfigService
-                .getFeatureFlags(MultiTenantContext.getCustomerSpace().toString());
+        FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()
+                .toString());
         if (flags.containsKey(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName())
                 && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName()))) {
             transformationGroup = TransformationGroup.ALL;
@@ -30,28 +34,42 @@ public class PlsFeatureFlagServiceImpl implements PlsFeatureFlagService {
 
     @Override
     public boolean isV2ProfilingEnabled() {
-        FeatureFlagValueMap flags = tenantConfigService
-                .getFeatureFlags(MultiTenantContext.getCustomerSpace().toString());
+        FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()
+                .toString());
         return flags.containsKey(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName())
                 && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName()));
     }
 
     @Override
     public boolean isFuzzyMatchEnabled() {
-        FeatureFlagValueMap flags = tenantConfigService
-                .getFeatureFlags(MultiTenantContext.getCustomerSpace().toString());
+        FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()
+                .toString());
         return flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())
                 && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName()));
     }
 
     @Override
     public boolean useDnBFlagFromZK() {
-        FeatureFlagValueMap flags = tenantConfigService
-                .getFeatureFlags(MultiTenantContext.getCustomerSpace().toString());
+        FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()
+                .toString());
         if (flags.containsKey(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName())
                 && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName()))) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean isMatchDebugEnabled() {
+        try {
+            FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()
+                    .toString());
+            return flags.containsKey(LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName()));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName() + " feature flag!", e);
+            return false;
+        }
+
     }
 }

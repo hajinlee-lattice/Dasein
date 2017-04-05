@@ -116,6 +116,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder matchDebugEnabled(boolean matchDebugEnabled) {
+            scoreWorkflowConfigurationBuilder.matchDebugEnabled(matchDebugEnabled);
+            return this;
+        }
+
         public Builder outputFilename(String outputFilename) {
             scoreWorkflowConfigurationBuilder.outputFilename(outputFilename);
             return this;

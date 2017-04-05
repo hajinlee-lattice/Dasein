@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
@@ -35,6 +36,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         private RTSScoreStepConfiguration score = new RTSScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
@@ -47,6 +49,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             matchResult.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
+            combineMatchDebugWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             return this;
         }
@@ -56,6 +59,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             match.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            combineMatchDebugWithScores.setInternalResourceHostPort(internalResourceHostPort);
             export.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -146,6 +150,11 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder matchDebugEnabled(boolean matchDebugEnabled) {
+            combineMatchDebugWithScores.setSkipStep(!matchDebugEnabled);
+            return this;
+        }
+
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);
@@ -164,6 +173,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
+            combineMatchDebugWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);
             match.setMatchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission());
 
@@ -171,6 +181,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             configuration.add(matchResult);
             configuration.add(score);
             configuration.add(combineInputWithScores);
+            configuration.add(combineMatchDebugWithScores);
             configuration.add(export);
 
             return configuration;

@@ -124,6 +124,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .dataCloudVersion(getDataCloudVersion(modelSummary.getDataCloudVersion()))//
                 .matchColumnSelection(Predefined.getDefaultSelection(), null).moduleName(modelSummary.getModuleName()) //
+                .matchDebugEnabled(plsFeatureFlagService.isMatchDebugEnabled()) //
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //

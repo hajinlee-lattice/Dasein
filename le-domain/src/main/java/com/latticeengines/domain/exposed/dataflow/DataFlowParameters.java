@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDa
 import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.CombineMatchDebugWithScoreParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.cdl.ResolveStagingAndRun
         @JsonSubTypes.Type(value = QuotaFlowParameters.class, name = "quotaFlowParameters"), //
         @JsonSubTypes.Type(value = CreateScoreTableParameters.class, name = "createScoreTableParameters"), //
         @JsonSubTypes.Type(value = CombineInputTableWithScoreParameters.class, name = "combineInputTableWithScoreParameters"), //
+        @JsonSubTypes.Type(value = CombineMatchDebugWithScoreParameters.class, name = "combineMatchDebugWithScoreParameters"), //
         @JsonSubTypes.Type(value = CreateAttributeLevelSummaryParameters.class, name = "createAttributeLevelSummaryParameters"), //
         @JsonSubTypes.Type(value = DedupEventTableParameters.class, name = "dedupEventTableParameters"), //
         @JsonSubTypes.Type(value = AddStandardAttributesParameters.class, name = "addStandardAttributesParameters"), //

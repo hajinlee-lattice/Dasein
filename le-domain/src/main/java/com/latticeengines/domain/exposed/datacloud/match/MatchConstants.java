@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public final class MatchConstants {
@@ -54,7 +57,9 @@ public final class MatchConstants {
     public static final String INT_MATCHED_ZIPCODE = "__Matched_Zipcode__";
     public static final String INT_MATCHED_PHONE = "__Matched_Phone__";
 
-
+    public static final List<String> matchDebugFields = Arrays.asList(INT_MATCHED_DUNS, INT_MATCHED_CONFIDENCE_CODE,
+            INT_MATCHED_MATCH_GRADE, INT_MATCHED_CACHE_HIT, INT_MATCHED_NAME, INT_MATCHED_ADDRESS, INT_MATCHED_CITY,
+            INT_MATCHED_STATE, INT_MATCHED_COUNTRY_CODE, INT_MATCHED_ZIPCODE, INT_MATCHED_PHONE);
 
     static final String MODEL = Predefined.Model.getName();
     static final String DERIVED_COLUMNS = Predefined.DerivedColumns.getName();

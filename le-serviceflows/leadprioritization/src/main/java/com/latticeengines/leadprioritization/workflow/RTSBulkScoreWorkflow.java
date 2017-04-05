@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
+import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.RTSScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -27,6 +28,9 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
     @Autowired
+    private CombineMatchDebugWithScoreDataFlow combineMatchDebugWithScore;
+
+    @Autowired
     private ExportWorkflow exportWorkflow;
 
     @Autowired
@@ -40,6 +44,7 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder().next(matchDataCloudWorkflow).next(score) //
+                .next(combineMatchDebugWithScore) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //
                 .listener(sendEmailAfterRTSBulkScoringCompletionListener) //

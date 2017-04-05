@@ -14,4 +14,6 @@ public interface ZkConfigurationService {
 
     boolean bypassDnBCache(CustomerSpace customerSpace);
 
+    boolean isMatchDebugEnabled(CustomerSpace customerSpace);
+
 }

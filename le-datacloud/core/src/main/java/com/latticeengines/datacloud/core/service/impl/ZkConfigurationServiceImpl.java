@@ -61,8 +61,8 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     }
 
     private void bootstrapCamille() throws Exception {
-        String json = IOUtils.toString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + sourceDbsJson));
+        String json = IOUtils.toString(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("datasource/" + sourceDbsJson));
         Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
         if (!camille.exists(poolPath)) {
             log.info("Uploading source db connection pool to ZK using " + sourceDbsJson + " ...");
@@ -89,11 +89,11 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     public boolean fuzzyMatchEnabled(CustomerSpace customerSpace) {
         try {
             FeatureFlagValueMap flags = FeatureFlagClient.getFlags(customerSpace);
-            return (flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())
-                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())));
+            return (flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName()) && Boolean.TRUE.equals(flags
+                    .get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())));
         } catch (Exception e) {
-            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName() + " feature flags for "
-                    + customerSpace, e);
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName()
+                    + " feature flags for " + customerSpace, e);
             return false;
         }
     }
@@ -119,6 +119,19 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
             propDataPath = propDataPath.append(STACKS).append(leStack);
         }
         return propDataPath.append(DATASOURCES).append(pool.name());
+    }
+
+    @Override
+    public boolean isMatchDebugEnabled(CustomerSpace customerSpace) {
+        try {
+            FeatureFlagValueMap flags = FeatureFlagClient.getFlags(customerSpace);
+            return (flags.containsKey(LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName()) && Boolean.TRUE.equals(flags
+                    .get(LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName())));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName()
+                    + " feature flags for " + customerSpace, e);
+            return false;
+        }
     }
 
 }

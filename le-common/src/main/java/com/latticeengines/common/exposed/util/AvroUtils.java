@@ -338,6 +338,36 @@ public class AvroUtils {
         return schema;
     }
 
+    public static Schema constructSchemaWithProperties(String tableName, Map<String, Class<?>> classMap,
+            Map<String, Map<String, String>> propertyMap) {
+        RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(tableName);
+        FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
+        FieldBuilder<Schema> fieldBuilder;
+        for (Map.Entry<String, Class<?>> classEntry : classMap.entrySet()) {
+            fieldBuilder = fieldAssembler.name(classEntry.getKey());
+            Type type = getAvroType(classEntry.getValue());
+            fieldBuilder = constructFieldWithProperties(propertyMap, fieldBuilder, classEntry.getKey());
+            fieldAssembler = constructFieldWithType(fieldAssembler, fieldBuilder, type);
+        }
+        Schema schema = fieldAssembler.endRecord();
+        return schema;
+    }
+
+    private static FieldBuilder<Schema> constructFieldWithProperties(Map<String, Map<String, String>> propertyMap,
+            FieldBuilder<Schema> fieldBuilder, String fieldName) {
+        if (propertyMap != null) {
+            Map<String, String> properties = propertyMap.get(fieldName);
+            if (properties != null) {
+                for (Map.Entry<String, String> entry : properties.entrySet()) {
+                    String k = entry.getKey();
+                    String v = entry.getValue();
+                    fieldBuilder = fieldBuilder.prop(k, v);
+                }
+            }
+        }
+        return fieldBuilder;
+    }
+
     public static FieldAssembler<Schema> constructFieldWithType(FieldAssembler<Schema> fieldAssembler,
             FieldBuilder<Schema> fieldBuilder, Type type) {
         switch (type) {

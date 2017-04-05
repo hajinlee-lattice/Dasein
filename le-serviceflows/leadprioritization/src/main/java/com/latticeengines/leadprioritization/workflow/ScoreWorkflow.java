@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
+import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -28,6 +29,9 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
     private ScoreEventTable score;
 
     @Autowired
+    private CombineMatchDebugWithScoreDataFlow combineMatchDebugWithScore;
+
+    @Autowired
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
     @Autowired
@@ -46,6 +50,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
         return new WorkflowBuilder().next(matchDataCloudWorkflow) //
                 .next(addStandardAttributes) //
                 .next(score) //
+                .next(combineMatchDebugWithScore) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //
                 .listener(sendEmailAfterScoringCompletionListener) //

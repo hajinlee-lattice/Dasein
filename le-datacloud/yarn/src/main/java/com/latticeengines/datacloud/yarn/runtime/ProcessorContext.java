@@ -4,20 +4,10 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.I
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_ADDRESS;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CACHE_HIT;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CITY;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_CONFIDENCE_CODE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_COUNTRY_CODE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_DUNS;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_MATCH_GRADE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_NAME;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_PHONE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_STATE;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_MATCHED_ZIPCODE;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,6 +39,7 @@ import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -57,7 +48,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-
 
 @Component("processorContext")
 public class ProcessorContext {
@@ -355,11 +345,13 @@ public class ProcessorContext {
         // sequence is very important in outputschema
         // am output attr -> dedupe -> debug
         // the same sequence will be used in writeDataToAvro
-        matchDebugEnabled = jobConfiguration.getMatchInput().isMatchDebugEnabled();
         log.info("Need to prepare for dedupe: " + originalInput.isPrepareForDedupe());
         if (originalInput.isPrepareForDedupe()) {
             outputSchema = appendDedupeHelpers(outputSchema);
         }
+
+        matchDebugEnabled = zkConfigurationService.isMatchDebugEnabled(space);
+        jobConfiguration.getMatchInput().setMatchDebugEnabled(matchDebugEnabled);
         log.info("Match Debug Enabled=" + matchDebugEnabled);
         if (matchDebugEnabled) {
             outputSchema = appendDebugSchema(outputSchema);
@@ -373,19 +365,22 @@ public class ProcessorContext {
 
     private Schema appendDebugSchema(Schema schema) {
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
-        fieldMap.put(INT_MATCHED_DUNS, String.class);
-        fieldMap.put(INT_MATCHED_CONFIDENCE_CODE, String.class);
-        fieldMap.put(INT_MATCHED_MATCH_GRADE, String.class);
-        fieldMap.put(INT_MATCHED_CACHE_HIT, String.class);
-        fieldMap.put(INT_MATCHED_NAME, String.class);
-        fieldMap.put(INT_MATCHED_ADDRESS, String.class);
-        fieldMap.put(INT_MATCHED_CITY, String.class);
-        fieldMap.put(INT_MATCHED_STATE, String.class);
-        fieldMap.put(INT_MATCHED_COUNTRY_CODE, String.class);
-        fieldMap.put(INT_MATCHED_ZIPCODE, String.class);
-        fieldMap.put(INT_MATCHED_PHONE, String.class);
-        Schema debugSchema = AvroUtils.constructSchema(schema.getName(), fieldMap);
+        for (String field : MatchConstants.matchDebugFields) {
+            fieldMap.put(field, String.class);
+        }
+        Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
+        Schema debugSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
         return (Schema) AvroUtils.combineSchemas(schema, debugSchema)[0];
+    }
+
+    private Map<String, Map<String, String>> getPropertiesMap(Set<String> keySet) {
+        Map<String, Map<String, String>> propertiesMap = new HashMap<String, Map<String, String>>();
+        Map<String, String> properties = new HashMap<>();
+        properties.put("ApprovedUsage", "[None]");
+        for (String key : keySet) {
+            propertiesMap.put(key, properties);
+        }
+        return propertiesMap;
     }
 
     private Schema appendDedupeHelpers(Schema schema) {

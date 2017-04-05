@@ -122,6 +122,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .columnSelection(selection, selectionVersion) //
                 .dataCloudVersion(dataCloudVersion) //
+                .matchDebugEnabled(plsFeatureFlagService.isMatchDebugEnabled()) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/"
                         + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")

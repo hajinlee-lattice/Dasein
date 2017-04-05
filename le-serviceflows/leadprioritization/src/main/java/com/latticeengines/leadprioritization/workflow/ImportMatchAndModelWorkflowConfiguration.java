@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.PivotScoreAndEventConfiguration;
@@ -49,6 +50,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
@@ -64,6 +66,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
+            combineMatchDebugWithScores.setMicroServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
@@ -83,6 +86,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             setConfigForScoring.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
+            combineMatchDebugWithScores.setCustomerSpace(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
             return this;
         }
@@ -135,6 +139,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            combineMatchDebugWithScores.setInternalResourceHostPort(internalResourceHostPort);
             pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -190,6 +195,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             matchResult.setSkipDedupe(skipDedupStep);
             dedupEventTable.setSkipStep(skipDedupStep);
             model.addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain, !skipDedupStep);
+            return this;
+        }
+
+        public Builder matchDebugEnabled(boolean matchDebugEnabled) {
+            combineMatchDebugWithScores.setSkipStep(!matchDebugEnabled);
             return this;
         }
 
@@ -338,6 +348,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             configuration.add(setConfigForScoring);
             configuration.add(score);
             configuration.add(combineInputWithScores);
+            configuration.add(combineMatchDebugWithScores);
             configuration.add(pivotScoreAndEvent);
 
             return configuration;

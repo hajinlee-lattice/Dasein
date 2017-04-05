@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
@@ -39,6 +40,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
@@ -49,6 +51,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             addStandardAttributes.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
+            combineMatchDebugWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
             return this;
@@ -65,6 +68,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            combineMatchDebugWithScores.setInternalResourceHostPort(internalResourceHostPort);
             export.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -76,7 +80,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
- 
+
         public Builder modelId(String modelId) {
             score.setModelId(modelId);
             return this;
@@ -175,6 +179,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder matchDebugEnabled(boolean matchDebugEnabled) {
+            combineMatchDebugWithScores.setSkipStep(!matchDebugEnabled);
+            return this;
+        }
+
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadataList) {
             combineInputWithScores.setBucketMetadata(bucketMetadataList);
             return this;
@@ -185,6 +194,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
+            combineMatchDebugWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);
             match.setMatchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission());
 
@@ -193,6 +203,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             configuration.add(addStandardAttributes);
             configuration.add(score);
             configuration.add(combineInputWithScores);
+            configuration.add(combineMatchDebugWithScores);
             configuration.add(export);
 
             return configuration;

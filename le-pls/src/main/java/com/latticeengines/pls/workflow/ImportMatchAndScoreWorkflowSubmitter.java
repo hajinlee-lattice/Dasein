@@ -144,6 +144,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(selection, selectionVersion) //
                 .dataCloudVersion(dataCloudVersion) //
+                .matchDebugEnabled(plsFeatureFlagService.isMatchDebugEnabled())
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
                         "/" + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),

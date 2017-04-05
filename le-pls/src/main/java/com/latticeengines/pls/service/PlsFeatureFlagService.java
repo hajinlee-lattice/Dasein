@@ -9,6 +9,8 @@ public interface PlsFeatureFlagService {
     boolean useDnBFlagFromZK();
 
     boolean isFuzzyMatchEnabled();
+    
+    boolean isMatchDebugEnabled();
 
     boolean isV2ProfilingEnabled();
 
