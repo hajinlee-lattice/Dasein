@@ -10,7 +10,8 @@ angular.module('common.datacloud.explorer', [
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount,
-    EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore
+    EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore, 
+    SegmentServiceProxy, QueryRestriction
 ){
     var vm = this,
         enrichment_chunk_size = 5000,
@@ -146,11 +147,8 @@ angular.module('common.datacloud.explorer', [
             //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
             vm.no_lookup_results_message = true;
         }
-
         if(vm.section === 'segment.analysis') {
-            getMetadataSegments().then(function(result){
-                vm.metadataSegments = result.data;
-            });
+            vm.metadataSegments = QueryRestriction;
         }
     }
 
@@ -351,6 +349,7 @@ angular.module('common.datacloud.explorer', [
 
             if(vm.metadataSegments) {
                 getExplorerSegments(vm.enrichments);
+                //console.log(vm.filter(vm.enrichments, 'FieldName', 'TechIndicator_AmazonSimpleDB'));
             }
 
             //console.log('vm.highlightMetadata:\t ', vm.highlightMetadata); //ben
@@ -1117,21 +1116,14 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
-    var getMetadataSegments = function() {
-        var deferred = $q.defer();
-
-        DataCloudStore.getMetadataSegments().then(function(result) {
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    }
-
     var getExplorerSegments = function(enrichments) {
-        vm.metadataSegments.forEach(function(segment, key){
-            if(segment.simple_restriction && segment.simple_restriction.all) {
-                segment.simple_restriction.all.forEach(function(restriction){
-                    var key = restriction.bucketRestriction.lhs.columnLookup.column_name;
+        for(var i in vm.metadataSegments) {
+            var restrictions = vm.metadataSegments[i];
+            for(var i in restrictions) {
+                var item = restrictions[i];
+                if(item.bucketRestriction) {
+                    var restriction = item.bucketRestriction,
+                        key = restriction.lhs.columnLookup.column_name;
                         enrichment = breakOnFirstEncounter(vm.enrichments, 'FieldName', key, true),
                         FieldName = enrichment.FieldName,
                         category = enrichment.Category,
@@ -1139,9 +1131,9 @@ angular.module('common.datacloud.explorer', [
                         if(index) {
                             vm.enrichments[index].SegmentChecked = true;
                         }
-                });
+                }
             }
-        });
+        }
     }
 
     var textSearch = function(haystack, needle, case_insensitive) {
@@ -1242,7 +1234,7 @@ angular.module('common.datacloud.explorer', [
     vm.selectSegmentAttribute = function(attribute) {
         var attributeKey = attribute.Attribute || attribute.FieldName;
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
-        console.log(vm.segmentAttributeInput, attribute);
+        vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {
             QueryStore.addRestriction({columnName: attributeKey});
@@ -1250,6 +1242,17 @@ angular.module('common.datacloud.explorer', [
             QueryStore.removeRestriction({columnName: attributeKey});
         }
     }
+
+    vm.saveSegment = function() {
+        if(Object.keys(vm.segmentAttributeInput).length) {
+            SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
+                if (!result.errorMsg) {
+                    $state.go('home.model.segmentation', {}, {notify: true})
+                }
+            });
+        }
+    }
+
 
     vm.init();
 })

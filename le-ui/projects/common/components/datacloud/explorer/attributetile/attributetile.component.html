@@ -36,6 +36,12 @@
             <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List">
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">
+                        <input  type="checkbox" 
+                                ng-model="vm.segmentAttributeInputRange[enrichment.FieldName+stat.Lbl]" 
+                                ng-checked="vm.segmentAttributeInputRange[enrichment.FieldName+stat.Lbl]" 
+                                name="{{enrichment.FieldName+stat.Lbl}}" 
+                                id="{{enrichment.FieldName+stat.Lbl}}"
+                                ng-if="vm.section == 'segment.analysis'" />
                         {{stat.Lbl}}
                     </li>
                     <li class="bar_">

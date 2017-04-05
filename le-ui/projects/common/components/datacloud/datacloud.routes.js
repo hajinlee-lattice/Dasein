@@ -199,6 +199,12 @@ angular
                         },
                         AnalysisLookup: function() {
                             return null;
+                        },
+                        SegmentServiceProxy: function() {
+                            return null;
+                        },
+                        QueryRestriction: function() {
+                            return null;                           
                         }
                     },
                     controller: 'DataCloudController',
