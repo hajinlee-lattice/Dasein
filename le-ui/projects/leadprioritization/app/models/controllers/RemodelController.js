@@ -104,7 +104,7 @@ angular.module('mainApp.models.remodel', [
         var copy_text = " (copy)",
             oneLeadPerDomain = Model.EventTableProvenance.Is_One_Lead_Per_Domain == null ? false :
                 Model.EventTableProvenance.Is_One_Lead_Per_Domain == "true",
-            dedupType = oneLeadPerDomain === 'true' ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
+            dedupType = oneLeadPerDomain ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
             includePersonalEmailDomains = Model.EventTableProvenance.Exclude_Public_Domains == null ? true :
                 Model.EventTableProvenance.Exclude_Public_Domains == "false",
             useLatticeAttributes = Model.EventTableProvenance.Exclude_Propdata_Columns == null ? true :

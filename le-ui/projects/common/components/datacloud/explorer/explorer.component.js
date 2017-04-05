@@ -778,27 +778,28 @@ angular.module('common.datacloud.explorer', [
         var opts = opts || {},
             category = opts.category;
 
-        Object.keys(EnrichmentTopAttributes).forEach(function(catKey) {
-            var category = data[catKey]['SubCategories'];
+        DataCloudStore.getAllTopAttributes().then(function(result){
+            Object.keys(EnrichmentTopAttributes).forEach(function(catKey) {
+                var category = result[catKey]['SubCategories']; // ben
 
-            Object.keys(category).forEach(function(subcategory) {
-                var items = category[subcategory];
+                Object.keys(category).forEach(function(subcategory) {
+                    var items = category[subcategory];
 
-                items.forEach(function(item) {
-                    var enrichment = vm.enrichments[vm.enrichmentsMap[item.Attribute]];
+                    items.forEach(function(item) {
+                        var enrichment = vm.enrichments[vm.enrichmentsMap[item.Attribute]];
 
-                    if (enrichment && enrichment.DisplayName) {
-                        var displayName = enrichment.DisplayName;
+                        if (enrichment && enrichment.DisplayName) {
+                            var displayName = enrichment.DisplayName;
 
-                        item.DisplayName = displayName;
-                    }
+                            item.DisplayName = displayName;
+                        }
+                    });
                 });
             });
+            vm.topAttributes = EnrichmentTopAttributes;
+            var timestamp2 = new Date().getTime();
+            console.log('getTopAttributes();\t\t', timestamp2 - timestamp + 'ms');
         });
-
-        vm.topAttributes = EnrichmentTopAttributes;
-        var timestamp2 = new Date().getTime();
-        console.log('getTopAttributes();\t\t', timestamp2 - timestamp + 'ms');
     }
 
     var getEnrichmentCategories = function() {
@@ -870,15 +871,15 @@ angular.module('common.datacloud.explorer', [
         }
         var timestamp2 = new Date().getTime();
 
-        if (vm.lookupMode || (!items || items.length == 0)) {
+        if (vm.lookupMode || !items || items.length == 0) {
             items = vm.enrichmentsObj[category];
 
             if (subcategory || vm.isYesNoCategory(category, true)) {
                 //var subcategory = subcategory || 'Other';
 
                 items = items.filter(function(item) {
-                    var isSubcategory = subcategory ? item.Subcategory == subcategory : true;
-                    var attrValue = vm.lookupFiltered[item.FieldName];
+                    var isSubcategory = subcategory ? item.Subcategory == subcategory : true,
+                        attrValue = (vm.lookupFiltered ? vm.lookupFiltered[item.FieldName] : item.AttributeValue);
 
                     if (vm.lookupMode && attrValue && isSubcategory) {
                         item.Value = attrValue;

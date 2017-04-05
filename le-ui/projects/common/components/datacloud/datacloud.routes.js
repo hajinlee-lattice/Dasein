@@ -277,8 +277,8 @@ angular
                         if (segment === null) {
                             var ts = new Date().getTime();
                             segment = {
-                                "name": "segment" + ts,
-                                "display_name": "segment" + ts,
+                                'name': 'segment' + ts,
+                                'display_name': 'segment' + ts,
                             };
                         }
                         segment.simple_restriction = QueryStore.getRestriction();
@@ -354,11 +354,6 @@ angular
             views: {
                 "main@": {
                     resolve: {
-                        Columns: function($q, QueryStore) {
-                            var deferred = $q.defer();
-                            deferred.resolve([]);
-                            return deferred.promise;
-                        },
                         CountMetadata: function($q, QueryStore) {
                             var deferred = $q.defer();
                             deferred.resolve(QueryStore.getCounts().accounts);
@@ -380,11 +375,6 @@ angular
             views: {
                 "main@": {
                     resolve: {
-                        Columns: function($q, QueryStore) {
-                            var deferred = $q.defer();
-                            deferred.resolve([]);
-                            return deferred.promise;
-                        },
                         CountMetadata: function($q, QueryStore) {
                             var deferred = $q.defer();
                             deferred.resolve(QueryStore.getCounts().contacts);
