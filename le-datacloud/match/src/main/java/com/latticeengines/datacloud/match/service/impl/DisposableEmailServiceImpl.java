@@ -36,7 +36,7 @@ public class DisposableEmailServiceImpl implements DisposableEmailService {
         InputStream is = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("com/latticeengines/datacloud/match/DisposableEmailDomains.txt");
         if (is == null) {
-            throw new RuntimeException("Cannot find resource PublicDomains.txt");
+            throw new RuntimeException("Cannot find resource DisposableEmailDomains.txt");
         }
         Scanner scanner = new Scanner(is);
 
