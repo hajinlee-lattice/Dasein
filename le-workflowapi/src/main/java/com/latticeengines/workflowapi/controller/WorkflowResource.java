@@ -91,6 +91,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ResponseBody
     @ApiOperation(value = "Get status about a submitted workflow")
     @Override
+    @Deprecated
     public WorkflowStatus getWorkflowStatus(@PathVariable String workflowId) {
         return workflowService.getStatus(new WorkflowExecutionId(Long.valueOf(workflowId)));
     }

@@ -39,6 +39,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowI
     }
 
     @Override
+    @Deprecated
     public WorkflowStatus getWorkflowStatus(String workflowId) {
         String url = constructUrl("/status/{workflowId}", workflowId);
         return get("getWorkflowStatus", url, WorkflowStatus.class);

@@ -29,7 +29,7 @@ public class SqoopProxy extends BaseRestApiProxy {
 
     public AppSubmission exportData(SqoopExporter exporter) {
         String url = constructUrl("/export");
-        return post("import-table", url, exporter, AppSubmission.class);
+        return post("export-table", url, exporter, AppSubmission.class);
     }
 
 }
