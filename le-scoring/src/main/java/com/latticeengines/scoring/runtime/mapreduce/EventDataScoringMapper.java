@@ -2,6 +2,7 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
+
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
@@ -41,14 +42,14 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
         Configuration config = context.getConfiguration();
         Schema schema = AvroJob.getInputKeySchema(config);
-        @SuppressWarnings("deprecation")
-        Path[] paths = context.getLocalCacheFiles();
+
+        URI[] uris = context.getCacheFiles();
         long recordFileThreshold = context.getConfiguration().getLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(),
                 DEFAULT_LEAD_FILE_THRESHOLD);
 
         try {
             // Store localized files
-            Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(paths);
+            Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(uris);
             long transformStartTime = System.currentTimeMillis();
             JsonNode dataType = ScoringJobUtil.generateDataTypeSchema(schema);
             log.info("DataType :" + dataType.asText());
@@ -71,7 +72,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
                     .booleanValue()) {
                 log.info("Using score derivation to generate percentile score.");
                 Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
-                        .deserializeLocalScoreDerivationFiles(paths);
+                        .deserializeLocalScoreDerivationFiles(uris);
                 resultList = ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(modelAndRecordInfo,
                         scoreDerivationMap, recordFileThreshold);
             } else {

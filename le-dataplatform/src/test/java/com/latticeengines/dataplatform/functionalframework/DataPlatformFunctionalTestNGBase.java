@@ -7,6 +7,7 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -45,6 +46,8 @@ import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -54,6 +57,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
@@ -447,6 +451,21 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     protected String generateUnique(String base) {
         String id = UUID.randomUUID().toString();
         return base.equals("") ? id : (base + "_" + id);
+    }
+
+    protected Properties createAppMasterPropertiesForYarnJob() {
+        Properties appMasterProperties = new Properties();
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
+        return appMasterProperties;
+    }
+
+    protected Properties createContainerPropertiesForYarnJob() {
+        Properties containerProperties = new Properties();
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "64");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+        return containerProperties;
     }
 
 }

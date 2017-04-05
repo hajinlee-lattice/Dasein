@@ -32,12 +32,13 @@ import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomizati
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.dataplatform.exposed.runtime.mapreduce.MRJobCustomizationBase;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
-public class EventDataSamplingJob extends Configured implements Tool, MRJobCustomization {
+public class EventDataSamplingJob extends MRJobCustomizationBase {
 
     public static final String LEDP_SAMPLE_CONFIG = "ledp.sample.config";
     private static final String SAMPLE_JOB_TYPE = "samplingJob";
@@ -66,6 +67,9 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
         properties.setProperty(MapReduceProperty.OUTPUT.name(), args[1]);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), args[2]);
         properties.setProperty(MapReduceProperty.QUEUE.name(), args[3]);
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
+                MRJobUtil.getPlatformShadedJarPath(getConf(), "/"));
 
         customize(job, properties);
         if (job.waitForCompletion(true)) {
@@ -113,8 +117,8 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             AvroKeyOutputFormat.setCompressOutput(mrJob,
                     Boolean.valueOf(properties.getProperty(EventDataSamplingProperty.COMPRESS_SAMPLE.name(), "true")));
 
-            SamplingConfiguration samplingConfig = JsonUtils
-                    .deserialize(samplingConfigStr, SamplingConfiguration.class);
+            SamplingConfiguration samplingConfig = JsonUtils.deserialize(samplingConfigStr,
+                    SamplingConfiguration.class);
 
             for (SamplingElement samplingElement : samplingConfig.getSamplingElements()) {
                 AvroMultipleOutputs.addNamedOutput(mrJob, samplingElement.getName() + "Training",
@@ -130,7 +134,6 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             mrJob.setReducerClass(EventDataSamplingReducer.class);
             mrJob.setOutputKeyClass(AvroKey.class);
             mrJob.setOutputValueClass(NullWritable.class);
-            
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
         } catch (Exception e) {

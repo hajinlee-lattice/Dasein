@@ -27,8 +27,6 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
 
-    protected Configuration yarnConfiguration;
-
     protected VersionManager versionManager;
 
     protected String stackName;
@@ -181,6 +179,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE
                 // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+                getJacocoOpt(containerProperties), 
                 getXmxSetting(containerProperties),
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
@@ -188,6 +187,16 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 parameter, //
                 "1><LOG_DIR>/Appmaster.stdout", //
                 "2><LOG_DIR>/Appmaster.stderr" });
+    }
+
+    private String getJacocoOpt(Properties properties) {
+        if (properties.getProperty(ContainerProperty.JACOCO_AGENT_FILE.name()) != null
+                && properties.getProperty(ContainerProperty.JACOCO_DEST_FILE.name()) != null) {
+            return String.format(" -javaagent:%s=destfile=%s,append=true,includes=com.*",
+                    properties.getProperty(ContainerProperty.JACOCO_AGENT_FILE.name()),
+                    properties.getProperty(ContainerProperty.JACOCO_DEST_FILE.name()));
+        }
+        return "";
     }
 
     @Override

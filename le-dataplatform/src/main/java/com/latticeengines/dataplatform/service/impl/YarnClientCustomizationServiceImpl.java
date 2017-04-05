@@ -118,7 +118,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         if (environment != null) {
             client.setEnvironment(environment);
         }
-        
+
         if (maxAppAttempts != 0) {
             client.setMaxAppAttempts(maxAppAttempts);
         }
@@ -146,8 +146,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             return appMasterProperties.getProperty(AppMasterProperty.APP_NAME.name());
         } else if (appMasterProperties.containsKey(AppMasterProperty.APP_NAME_SUFFIX.name())) {
             return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
-                    clientName)
-                    + JobNameServiceImpl.JOBNAME_DELIMITER
+                    clientName) + JobNameServiceImpl.JOBNAME_DELIMITER
                     + appMasterProperties.getProperty(AppMasterProperty.APP_NAME_SUFFIX.name());
         } else {
             return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
@@ -201,6 +200,10 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         }
         YarnClientCustomization customization = YarnClientCustomization.getCustomization(clientName);
         customization.finalize(appMasterProperties, containerProperties);
+    }
+
+    public void setConfiguration(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
     }
 
 }

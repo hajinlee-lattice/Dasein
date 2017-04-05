@@ -3,19 +3,23 @@ package com.latticeengines.scoring.util;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.fs.Path;
+import org.codehaus.plexus.util.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -65,20 +69,20 @@ public class ScoringMapperValidateUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testValidateDatatype() throws IOException {
+    public void testValidateDatatype() throws Exception {
         Map<String, JsonNode> models = new HashMap<>();
-        URL modelUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/models/60fd2fa4-9868-464e-a534-3205f52c41f0");
+        String uuid = "60fd2fa4-9868-464e-a534-3205f52c41f0";
+        URL modelUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/models/" + uuid);
         String modelFileName = modelUrl.getFile();
         Path modelPath = new Path(modelFileName);
-        JsonNode modelJsonObj = ScoringMapperTransformUtil.parseFileContentToJsonNode(modelPath);
+        FileUtils.copyURLToFile(modelUrl, new File(uuid));
+        JsonNode modelJsonObj = ScoringMapperTransformUtil
+                .parseFileContentToJsonNode(new URI(modelUrl.getFile() + "#" + uuid));
         String modelGuid = modelPath.getName();
         models.put(modelGuid, modelJsonObj);
 
-        URL datatypeUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/data/" + "datatype.avsc");
-        String datatypeFileName = datatypeUrl.getFile();
-        Path datatypePath = new Path(datatypeFileName);
-        JsonNode datatype = ScoringMapperTransformUtil.parseFileContentToJsonNode(datatypePath);
+        InputStream is = ClassLoader.getSystemResourceAsStream("com/latticeengines/scoring/data/datatype.avsc");
+        JsonNode datatype = JsonUtils.getObjectMapper().readTree(is);
         try {
             ScoringMapperValidateUtil.validateDatatype(datatype, models.get(modelGuid), modelGuid);
         } catch (LedpException e1) {

@@ -6,7 +6,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.LineNumberReader;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +18,6 @@ import java.util.Map;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.fs.Path;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
@@ -46,47 +48,40 @@ public class ScoringMapperTransformUtilUnitTestNG {
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
             + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
 
-    private Path modelPath;
-    private Path pythonPath;
-    private List<Path> localFilePaths;
+    private URI modelPath;
+    private URI pythonPath;
+    private List<URI> localFilePaths;
     private JsonNode dataType;
 
     @BeforeClass(groups = "unit")
-    public void setup() throws IOException {
-        modelPath = new Path(ClassLoader.getSystemResource(MODEL_PATH + UUID).getFile());
-        pythonPath = new Path(ClassLoader.getSystemResource(PYTHON_PATH).getFile());
-        localFilePaths = new ArrayList<Path>();
+    public void setup() throws Exception {
+        URL modelPathUrl = ClassLoader.getSystemResource(MODEL_PATH + UUID);
+        URL pythonPathUrl = ClassLoader.getSystemResource(PYTHON_PATH);
+        FileUtils.copyURLToFile(modelPathUrl, new File(UUID));
+        FileUtils.copyURLToFile(pythonPathUrl, new File("scoring.py"));
+        modelPath = new URI(modelPathUrl.getFile() + "#" + UUID);
+        pythonPath = new URI(pythonPathUrl.getFile());
+        localFilePaths = new ArrayList<URI>();
         localFilePaths.add(modelPath);
         localFilePaths.add(pythonPath);
-        Path datatypePath = new Path(ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc").getFile());
-        dataType = ScoringMapperTransformUtil.parseFileContentToJsonNode(datatypePath);
+        InputStream is = ClassLoader.getSystemResourceAsStream(DATA_PATH + "datatype.avsc");
+        dataType = JsonUtils.getObjectMapper().readTree(is);
     }
 
     @Test(groups = "unit")
     public void testProcessLocalizedFiles() throws IOException {
 
         Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
-                .toArray(new Path[localFilePaths.size()]));
+                .toArray(new URI[localFilePaths.size()]));
         Assert.assertNotNull(models);
         Assert.assertEquals(models.size(), 1);
         Assert.assertNotNull(models.get(UUID));
     }
 
     @Test(groups = "unit")
-    public void testParseDatatypeFile() throws IOException {
-        URL url = ClassLoader.getSystemResource(DATA_PATH + "mock_datatype.avsc");
-        String fileName = url.getFile();
-        Path path = new Path(fileName);
-        JsonNode datatypeObj = ScoringMapperTransformUtil.parseFileContentToJsonNode(path);
-        assertTrue(datatypeObj.size() == 7, "datatypeObj should have 7 objects");
-        assertTrue(datatypeObj.get("ModelingID").asDouble() == 1L, "parseDatatypeFile should be successful");
-    }
-
-    @Test(groups = "unit")
     public void testParseModelFiles() throws IOException {
         String[] targetFiles = { "encoder.py", "pipeline.py", "pipelinefwk.py", "pipelinesteps.py", "scoringengine.py",
                 "STPipelineBinary.p" };
-
         JsonNode modelJson = ScoringMapperTransformUtil.parseFileContentToJsonNode(modelPath);
         ScoringMapperTransformUtil.decodeSupportedFilesToFile(UUID, modelJson.get(ScoringDaemonService.MODEL));
         ScoringMapperTransformUtil.writeScoringScript(UUID, modelJson.get(ScoringDaemonService.MODEL));
@@ -152,7 +147,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
         Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
-                .toArray(new Path[localFilePaths.size()]));
+                .toArray(new URI[localFilePaths.size()]));
         JsonNode jsonNode = new ObjectMapper().readTree(PROPER_TEST_RECORD);
         ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, dataType, modelInfoMap, leadFileBufferMap, models,
                 10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI", ScoringDaemonService.UNIQUE_KEY_COLUMN);
@@ -240,7 +235,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
         Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
-                .toArray(new Path[localFilePaths.size()]));
+                .toArray(new URI[localFilePaths.size()]));
 
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID);

@@ -1,5 +1,7 @@
 package com.latticeengines.scoring.service.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -25,7 +28,7 @@ import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 import com.mysql.jdbc.StringUtils;
 
-@Component("scoringJobServiceImpl")
+@Component("scoringJobService")
 public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Autowired
@@ -33,6 +36,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private VersionManager versionManager;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -48,6 +54,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Value("${scoring.mapper.logdir}")
     private String scoringMapperLogDir;
+
+    @Value("${dataplatform.hdfs.stack:}")
+    protected String stackName;
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
 
@@ -92,7 +101,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         }
     }
 
-    private Properties generateCustomizedProperties(ScoringConfiguration scoringConfig) {
+    @Override
+    public Properties generateCustomizedProperties(ScoringConfiguration scoringConfig) {
         String tenant = CustomerSpace.parse(scoringConfig.getCustomer()).toString();
 
         Properties properties = new Properties();
@@ -108,10 +118,23 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
         properties.setProperty(ScoringProperty.MODEL_GUID.name(), commaJoiner.join(scoringConfig.getModelGuids()));
         properties.setProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(), String.valueOf(Long.MIN_VALUE));
-        List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
-                scoringConfig.getModelGuids(), Boolean.TRUE.booleanValue());
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));
+
+        List<String> cacheFiles = new ArrayList<>();
+        try {
+            cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration,
+                    versionManager.getCurrentVersionInStack(stackName));
+            cacheFiles.addAll(ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
+                    scoringConfig.getModelGuids(), Boolean.TRUE.booleanValue()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(cacheFiles));
         properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.TRUE.toString());
         return properties;
+    }
+
+    @Override
+    public void setConfiguration(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
     }
 }

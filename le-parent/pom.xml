@@ -350,7 +350,6 @@
                                     </excludes>
                                     <groups>${functional.groups}</groups>
                                     <additionalClasspathElements>
-                                        <additionalClasspathElement>${env.HADOOP_CONF_DIR}</additionalClasspathElement>
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                 </configuration>

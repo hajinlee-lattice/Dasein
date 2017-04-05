@@ -8,16 +8,19 @@ import java.util.Properties;
 
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 public abstract class YarnClientCustomization {
-    
+
+    protected Configuration yarnConfiguration;
+
     private static Map<String, YarnClientCustomization> registry = new HashMap<>();
-    
+
     public YarnClientCustomization() {
         registry.put(getClientId(), this);
     }
-    
+
     public static YarnClientCustomization getCustomization(String clientId) {
         return registry.get(clientId);
     }
@@ -53,4 +56,8 @@ public abstract class YarnClientCustomization {
     public abstract void afterCreateLocalLauncherContextFile(Properties containerProperties);
 
     public abstract int getMaxAppAttempts(Properties appMasterProperties);
+
+    public void setConfiguration(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
+    }
 }

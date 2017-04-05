@@ -36,10 +36,9 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     private final static Log log = LogFactory.getLog(CommandLineAppMaster.class);
 
     @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
     private YarnService yarnService;
+
+    private Configuration yarnConfiguration;
 
     private ProgressMonitor monitor;
 
@@ -55,6 +54,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
         log.info("Initializing application.");
         super.onInit();
         monitor = new ProgressMonitor(super.getAllocator());
+        yarnConfiguration = super.getConfiguration();
     }
 
     @Override

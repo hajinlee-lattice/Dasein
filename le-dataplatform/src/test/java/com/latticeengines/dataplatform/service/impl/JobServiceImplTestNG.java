@@ -150,21 +150,6 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         fs.delete(new Path("/functionalTests"), true);
     }
 
-    private Properties createAppMasterPropertiesForYarnJob() {
-        Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
-        return appMasterProperties;
-    }
-
-    private Properties createContainerPropertiesForYarnJob() {
-        Properties containerProperties = new Properties();
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "64");
-        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
-        return containerProperties;
-    }
-
     @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void testGetJobReportsAll() throws Exception {
         List<ApplicationReport> applications = jobService.getJobReportsAll();

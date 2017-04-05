@@ -1,7 +1,6 @@
 package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Properties;
 
@@ -17,47 +16,30 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
-import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.dataplatform.exposed.runtime.mapreduce.MRJobCustomizationBase;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class EventDataScoringJob extends Configured implements Tool, MRJobCustomization {
+public class EventDataScoringJob extends MRJobCustomizationBase {
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
-
-    private VersionManager versionManager;
-
-    private String stackName;
-
-    private static final String dependencyPath = "/app/";
-
-    private static final String jarDependencyPath = "/scoring/lib";
-
-    private static final String scoringPythonPath = "/scoring/scripts/scoring.py";
-    
-    private static final String pythonLauncherPath = "/dataplatform/scripts/pythonlauncher.sh";
 
     public EventDataScoringJob(Configuration config) {
         setConf(config);
     }
 
-    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry,
-            VersionManager versionManager, String stackName) {
+    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
-        this.versionManager = versionManager;
-        this.stackName = stackName;
     }
 
     @Override
@@ -74,7 +56,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             config.set(ScoringProperty.USE_SCOREDERIVATION.name(),
                     properties.getProperty(ScoringProperty.USE_SCOREDERIVATION.name()));
             if (properties.containsKey(ScoringProperty.MODEL_GUID.name())) {
-                config.set(ScoringProperty.MODEL_GUID.name(), properties.getProperty(ScoringProperty.MODEL_GUID.name()));
+                config.set(ScoringProperty.MODEL_GUID.name(),
+                        properties.getProperty(ScoringProperty.MODEL_GUID.name()));
             }
             config.set(ScoringProperty.LEAD_INPUT_QUEUE_ID.name(),
                     properties.getProperty(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()));
@@ -110,15 +93,6 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             mrJob.setNumReduceTasks(0);
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
-            mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersionInStack(stackName)
-                    + scoringPythonPath));
-            mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersionInStack(stackName)
-                    + pythonLauncherPath));
-            List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), dependencyPath
-                    + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
-            for (String jarFilePath : jarFilePaths) {
-                mrJob.addFileToClassPath(new Path(jarFilePath));
-            }
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);

@@ -73,8 +73,8 @@ public class ScoringJobUtil {
     }
 
     @VisibleForTesting
-    static List<String> findModelUrlsToLocalize(Configuration yarnConfiguration, String tenant,
-            List<String> modelGuids, List<String> modelFilePaths, boolean useScoreDerivation) {
+    static List<String> findModelUrlsToLocalize(Configuration yarnConfiguration, String tenant, List<String> modelGuids,
+            List<String> modelFilePaths, boolean useScoreDerivation) {
         List<String> modelUrlsToLocalize = new ArrayList<>();
         label: for (String modelGuid : modelGuids) {
             String uuid = UuidUtils.extractUuid(modelGuid);
@@ -150,6 +150,22 @@ public class ScoringJobUtil {
             builder.set(ScoreResultField.RawScore.name(), scoreOutput.getRawScore());
             dataFileWriter.append(builder.build());
         }
+    }
+
+    public static List<String> getCacheFiles(Configuration yarnConfiguration, String currentVersionInStack)
+            throws IOException {
+        List<String> files = new ArrayList<>();
+        String dependencyPath = "/app/";
+        String jarDependencyPath = "/scoring/lib";
+        String scoringPythonPath = "/scoring/scripts/scoring.py";
+        String pythonLauncherPath = "/dataplatform/scripts/pythonlauncher.sh";
+
+        files.add(dependencyPath + currentVersionInStack + scoringPythonPath);
+        files.add(dependencyPath + currentVersionInStack + pythonLauncherPath);
+        files.addAll(HdfsUtils.getFilesForDir(yarnConfiguration,
+                dependencyPath + currentVersionInStack + jarDependencyPath, ".*.jar$"));
+        return files;
+
     }
 
 }

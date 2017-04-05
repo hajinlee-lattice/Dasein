@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.hadoop.mapreduce.JobRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
@@ -127,10 +126,15 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         overwriteAMQueueAssignment(appMasterProperties);
         overwriteContainerQueueAssignment(containerProperties);
         CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
+        return submitYarnJob(client, yarnClientName, appMasterProperties, containerProperties);
+    }
+
+    @Override
+    public ApplicationId submitYarnJob(CommandYarnClient client, String yarnClientName, Properties appMasterProperties,
+            Properties containerProperties) {
         yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
         yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties,
                 containerProperties);
-
         try {
             ApplicationId applicationId = client.submitApplication();
             return applicationId;
@@ -144,13 +148,14 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         defaultYarnClient.killApplication(appId);
     }
 
-    private YarnClient getYarnClient(String yarnClientName) {
+    @Override
+    public YarnClient getYarnClient(String yarnClientName) {
         ConfigurableApplicationContext context = null;
         try {
             if (StringUtils.isEmpty(yarnClientName)) {
                 throw new IllegalStateException("Yarn client name cannot be empty.");
             }
-            YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
+            CommandYarnClient client = (CommandYarnClient) applicationContext.getBean(yarnClientName);
             return client;
         } catch (Throwable e) {
             log.error("Error while getting yarnClient for application " + yarnClientName, e);
@@ -181,23 +186,19 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         }
 
         Configuration config = job.getConfiguration();
-        Iterator<Map.Entry<String,String>> iter = config.iterator();
+        Iterator<Map.Entry<String, String>> iter = config.iterator();
         log.info(String.format("Job %s Properties:", mrJobName));
         while (iter.hasNext()) {
-            Map.Entry<String,String> next = iter.next();
+            Map.Entry<String, String> next = iter.next();
             log.info(String.format("%s: %s", next.getKey(), next.getValue()));
         }
-
-        JobRunner runner = new JobRunner();
-        runner.setJob(job);
         try {
-            runner.setWaitForCompletion(false);
-            runner.call();
+            JobID jobId = JobService.runMRJob(job, mrJobName, false);
+            return TypeConverter.toYarn(jobId).getAppId();
         } catch (Exception e) {
             log.error("Failed to submit MapReduce job " + mrJobName, e);
             throw new LedpException(LedpCode.LEDP_12009, e, new String[] { mrJobName });
         }
-        return TypeConverter.toYarn(job.getJobID()).getAppId();
     }
 
     private Job getJob(String mrJobName) {

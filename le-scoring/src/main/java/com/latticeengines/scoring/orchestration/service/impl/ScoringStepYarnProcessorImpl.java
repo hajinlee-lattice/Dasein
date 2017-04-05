@@ -1,6 +1,8 @@
 package com.latticeengines.scoring.orchestration.service.impl;
 
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -78,6 +81,12 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     @Value("${scoring.mapper.min.input.split.size}")
     private String minInputSplitSize;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    protected String stackName;
+
+    @Autowired
+    private VersionManager versionManager;
+
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
 
@@ -132,11 +141,6 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new LedpException(LedpCode.LEDP_00004, new String[] { targetDir });
         }
-//         ApplicationId appId = sqoopSyncJobService.importData(table,
-//         targetDir, scoringCreds,
-//         LedpQueueAssigner.getScoringQueueNameForSubmission(), tenant,
-//         Arrays.asList(PID), "");
-//         return appId;
 
         SqoopImporter importer = new SqoopImporter.Builder() //
                 .setTable(table) //
@@ -162,8 +166,6 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String targetTable = createNewTable(scoringCommand);
         String tenant = getTenant(scoringCommand);
         String sourceDir = customerBaseDir + "/" + tenant + "/scoring/" + scoringCommand.getTableName() + "/scores";
-//         ApplicationId appId = sqoopSyncJobService.exportData(targetTable,
-//         sourceDir, scoringCreds, queue, tenant);
 
         SqoopExporter exporter = new SqoopExporter.Builder() //
                 .setQueue(queue)//
@@ -209,10 +211,10 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), tenant);
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getScoringQueueNameForSubmission());
-        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
-                + "/data");
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + tenant + "/scoring/" + table
-                + "/scores");
+        properties.setProperty(MapReduceProperty.INPUT.name(),
+                customerBaseDir + "/" + tenant + "/scoring/" + table + "/data");
+        properties.setProperty(MapReduceProperty.OUTPUT.name(),
+                customerBaseDir + "/" + tenant + "/scoring/" + table + "/scores");
         properties.setProperty(MapReduceProperty.MAX_INPUT_SPLIT_SIZE.name(), maxInputSplitSize);
         properties.setProperty(MapReduceProperty.MIN_INPUT_SPLIT_SIZE.name(), minInputSplitSize);
         properties.setProperty(ScoringProperty.RECORD_FILE_THRESHOLD.name(), recordFileThreshold);
@@ -224,9 +226,16 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String tableName = scoringCommand.getTableName();
         List<String> modelGuids = dbMetadataService.getDistinctColumnValues(scoringJdbcTemplate, tableName,
                 ScoringDaemonService.MODEL_GUID);
-        List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
-                modelGuids, Boolean.FALSE.booleanValue());
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelUrls));
+        List<String> cacheFiles = new ArrayList<>();
+        try {
+            cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration,
+                    versionManager.getCurrentVersionInStack(stackName));
+            cacheFiles.addAll(ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
+                    modelGuids, Boolean.TRUE.booleanValue()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(cacheFiles));
         properties.setProperty(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.FALSE.toString());
         return properties;
     }

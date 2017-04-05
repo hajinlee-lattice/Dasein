@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +15,6 @@ import java.util.Map;
 
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.specific.SpecificDatumReader;
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -35,7 +35,7 @@ public class ScoringMapperPredictUtilTestNG {
     private static final String MODEL_ID = ScoringTestUtils.generateRandomModelId();
 
     @Test(groups = "unit")
-    public void testProcessScoreFiles() throws IOException, DecoderException {
+    public void testProcessScoreFiles() throws Exception {
         // copy over the score.txt file to the current directory
         URL scoreUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/scoring/results/60fd2fa4-9868-464e-a534-3205f52c41f0scoringoutputfile-0.txt");
@@ -49,18 +49,19 @@ public class ScoringMapperPredictUtilTestNG {
         }
 
         // parseModelFile
+        String uuid = "60fd2fa4-9868-464e-a534-3205f52c41f0";
         URL url = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/60fd2fa4-9868-464e-a534-3205f52c41f0");
-        String fileName = url.getFile();
-        Path path = new Path(fileName);
         HashMap<String, JsonNode> models = new HashMap<>();
-        JsonNode modelJsonObj = ScoringMapperTransformUtil.parseFileContentToJsonNode(path);
-        models.put(path.getName(), modelJsonObj);
+        FileUtils.copyURLToFile(url, new File(uuid));
+        JsonNode modelJsonObj = ScoringMapperTransformUtil
+                .parseFileContentToJsonNode(new URI(url.getFile() + "#" + uuid));
+        models.put(uuid, modelJsonObj);
 
         // make up modelInfoMap
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         ModelAndRecordInfo.ModelInfo modelInfo = new ModelAndRecordInfo.ModelInfo(MODEL_ID, 10);
-        modelInfoMap.put(MODEL_ID, modelInfo);
+        modelInfoMap.put(uuid, modelInfo);
         // make up modelAndLeadInfo
         ModelAndRecordInfo modelAndLeadInfo = new ModelAndRecordInfo();
         modelAndLeadInfo.setModelInfoMap(modelInfoMap);
@@ -265,8 +266,8 @@ public class ScoringMapperPredictUtilTestNG {
     @Test(groups = "unit")
     public void testEvaluate() throws IOException, InterruptedException {
         // copy over the test scoring.py file to the current directory
-        URL scoreUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/python/scoring.py");
-        File dest = new File(System.getProperty("user.dir") + "/scoring.py");
+        URL scoreUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/python/testscoring.py");
+        File dest = new File(System.getProperty("user.dir") + "/testscoring.py");
         try {
             FileUtils.copyURLToFile(scoreUrl, dest);
         } catch (IOException e) {

@@ -10,5 +10,7 @@ public enum ContainerProperty {
     METADATA_CONTENTS, //
     JOBDIR, //
     RUNTIME_CONFIG, //
+    JACOCO_AGENT_FILE, //
+    JACOCO_DEST_FILE, //
     JOB_TYPE;
 }

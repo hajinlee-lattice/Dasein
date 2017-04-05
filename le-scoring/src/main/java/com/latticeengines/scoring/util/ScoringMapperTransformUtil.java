@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.StringUtils;
@@ -45,22 +45,23 @@ public class ScoringMapperTransformUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
 
-    public static Map<String, JsonNode> processLocalizedFiles(Path[] paths) throws IOException {
+    public static Map<String, JsonNode> processLocalizedFiles(URI[] uris) throws IOException {
         // key: uuid, value: model contents
         // Note that not every model in the map might be used.
         Map<String, JsonNode> models = new HashMap<String, JsonNode>();
         boolean scoringScriptProvided = false;
 
-        for (Path p : paths) {
-            log.info("files" + p);
-            log.info(p.getName());
+        for (URI uri : uris) {
+            String fragment = uri.getFragment();
+            log.info("file: " + uri);
+            log.info(fragment);
 
-            if (p.getName().equals("scoring.py")) {
+            if (uri.getPath().endsWith("scoring.py")) {
                 scoringScriptProvided = true;
-            } else if (p.getName().equals("pythonlauncher.sh")) {
-            } else if (!p.getName().endsWith(".jar") && !p.getName().endsWith("_scorederivation")) {
-                String uuid = p.getName();
-                JsonNode modelJsonObj = parseFileContentToJsonNode(p);
+            } else if (uri.getPath().endsWith("pythonlauncher.sh")) {
+            } else if (!uri.getPath().endsWith(".jar") && fragment != null && !fragment.endsWith("_scorederivation")) {
+                String uuid = fragment;
+                JsonNode modelJsonObj = parseFileContentToJsonNode(uri);
                 // use the uuid to identify a model. It is a contact that when
                 // mapper localizes the model, it changes its name to be the
                 // uuid
@@ -78,8 +79,8 @@ public class ScoringMapperTransformUtil {
     }
 
     @VisibleForTesting
-    static JsonNode parseFileContentToJsonNode(Path path) throws IOException {
-        String content = FileUtils.readFileToString(new File(path.toString()));
+    static JsonNode parseFileContentToJsonNode(URI uri) throws IOException {
+        String content = FileUtils.readFileToString(new File(uri.getFragment()));
         JsonNode jsonNode = new ObjectMapper().readTree(content);
         return jsonNode;
     }
@@ -197,8 +198,8 @@ public class ScoringMapperTransformUtil {
             recordFileName = leadFileBuilder.toString();
             if (!recordFilebufferMap.containsKey(recordFileName)) {
                 // create new stream
-                bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true),
-                        "UTF8"));
+                bw = new BufferedWriter(
+                        new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), "UTF8"));
                 recordFilebufferMap.put(recordFileName, bw);
                 // close the previous stream
                 StringBuilder formerLeadFileBuilder = new StringBuilder();
@@ -284,12 +285,13 @@ public class ScoringMapperTransformUtil {
 
     }
 
-    public static Map<String, ScoreDerivation> deserializeLocalScoreDerivationFiles(Path[] paths) throws IOException {
+    public static Map<String, ScoreDerivation> deserializeLocalScoreDerivationFiles(URI[] uris) throws IOException {
         Map<String, ScoreDerivation> scoreDerivations = new HashMap<>();
-        for (Path p : paths) {
-            if (p.getName().endsWith("_scorederivation")) {
-                String content = FileUtils.readFileToString(new File(p.toString()));
-                String uuid = org.apache.commons.lang3.StringUtils.substringBeforeLast(p.getName(), "_scorederivation");
+        for (URI uri : uris) {
+            if (uri.getFragment() != null && uri.getFragment().endsWith("_scorederivation")) {
+                String content = FileUtils.readFileToString(new File(uri.getFragment()));
+                String uuid = org.apache.commons.lang3.StringUtils.substringBeforeLast(uri.getFragment(),
+                        "_scorederivation");
                 scoreDerivations.put(uuid, JsonUtils.deserialize(content, ScoreDerivation.class));
             }
         }
