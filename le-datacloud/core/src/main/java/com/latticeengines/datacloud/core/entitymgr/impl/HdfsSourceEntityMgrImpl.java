@@ -343,7 +343,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         boolean sourceExists = false;
         String versionDir = null;
         if (source instanceof IngestionSource) {
-            versionDir = hdfsPathBuilder.constructIngestionDir(((IngestionSource) source).getIngestionName(), version)
+            versionDir = hdfsPathBuilder.constructIngestionDir(((IngestionSource) source).getIngetionName(), version)
                     .toString();
         } else {
             versionDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
@@ -355,7 +355,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } catch (Exception e) {
             log.info(
                     String.format("Failed to check %s %s @version %s in HDFS", source.getSourceName(),
-                    (source instanceof IngestionSource ? ((IngestionSource) source).getIngestionName() : ""), version));
+                    (source instanceof IngestionSource ? ((IngestionSource) source).getIngetionName() : ""), version));
         }
         return sourceExists;
     }

@@ -110,7 +110,6 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
         }
         setDetails(modelSummary);
         modelSummary.setModelType(ModelType.PYTHONMODEL.getModelType());
-        modelSummary.setLastUpdateTime(modelSummary.getConstructionTime());
         modelSummaryService.createModelSummary(modelSummary, tenant.getId());
     }
 
@@ -165,32 +164,19 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void createGroupOfBucketMetadataForModel_assertCreated() throws Exception {
-        ModelSummary modelSummary = modelSummaryService.getModelSummary(MODEL_ID);
-        long oldLastUpdateTime = modelSummary.getLastUpdateTime();
-        System.out.println("oldLastUpdateTime is " + oldLastUpdateTime);
-        System.out.println("current time  is " + System.currentTimeMillis());
         bucketedScoreService.createBucketMetadatas(MODEL_ID,
                 Arrays.asList(BUCKET_METADATA_A, BUCKET_METADATA_B, BUCKET_METADATA_C, BUCKET_METADATA_D));
 
         Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
                 .getModelBucketMetadataGroupedByCreationTimes(MODEL_ID);
         Long timestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0];
-        modelSummary = modelSummaryService.getModelSummary(MODEL_ID);
-        long newLastUpdateTime = modelSummary.getLastUpdateTime();
-        System.out.println("newLastUpdateTime is " + newLastUpdateTime);
-        assertTrue(newLastUpdateTime > oldLastUpdateTime);
         testFirstGroupBucketMetadata(creationTimeToBucketMetadatas.get(timestamp));
     }
 
     @Test(groups = { "functional" }, dependsOnMethods = "createGroupOfBucketMetadataForModel_assertCreated")
     public void createAnotherGroupsOfBucketMetadata_assertCreated() throws Exception {
-        ModelSummary modelSummary = modelSummaryService.getModelSummary(MODEL_ID);
-        long oldLastUpdateTime = modelSummary.getLastUpdateTime();
         bucketedScoreService.createBucketMetadatas(MODEL_ID, Arrays.asList(BUCKET_METADATA_A_1, BUCKET_METADATA_B_1,
                 BUCKET_METADATA_C_1, BUCKET_METADATA_D_1, BUCKET_METADATA_E_1));
-        modelSummary = modelSummaryService.getModelSummary(MODEL_ID);
-        long newLastUpdateTime = modelSummary.getLastUpdateTime();
-        assertTrue(newLastUpdateTime > oldLastUpdateTime);
 
         Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
                 .getModelBucketMetadataGroupedByCreationTimes(MODEL_ID);

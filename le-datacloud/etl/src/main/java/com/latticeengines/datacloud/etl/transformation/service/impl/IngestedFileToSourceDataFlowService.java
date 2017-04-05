@@ -40,7 +40,7 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
     public void executeDataFlow(Source source, String workflowDir, String baseVersion,
             IngestedFileToSourceParameters parameters) {
         CsvToAvroFieldMappingImpl fieldTypeMapping = new CsvToAvroFieldMappingImpl(parameters.getColumns());
-        String ingestionDir = hdfsPathBuilder.constructIngestionDir(parameters.getIngestionName(), baseVersion)
+        String ingestionDir = hdfsPathBuilder.constructIngestionDir(parameters.getIngetionName(), baseVersion)
                 .toString();
         log.info("Ingestion Directory: " + ingestionDir);
         

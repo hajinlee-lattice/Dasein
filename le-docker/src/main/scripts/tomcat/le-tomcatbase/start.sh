@@ -32,6 +32,19 @@ if [ -f "/etc/internaladdr.txt" ]; then
     echo "METRIC_ADVERTISE_NAME=${METRIC_ADVERTISE_NAME}"
 fi
 
+if [ -f "/etc/efsip.txt" ]; then
+    EFS_IP=`cat /etc/efsip.txt`
+    echo "EFS_IP=${EFS_IP}"
+    echo "${EFS_IP}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0" >> /etc/fstab
+    mkdir -p /mnt/efs
+    mount -a
+    mkdir -p /mnt/efs/scoringapi
+    chmod 777 /mnt/efs/scoringapi
+    rm -rf /var/cache/scoringapi || true
+    ln -s /mnt/efs/scoringapi /var/cache/scoringapi
+    chmod 777 /var/cache/scoringapi
+fi
+
 export JAVA_OPTS="-Duser.timezone=US/Eastern -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099"

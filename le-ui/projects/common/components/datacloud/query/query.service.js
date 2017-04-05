@@ -1,6 +1,6 @@
 angular.module('common.datacloud.query.service',[
 ])
-.service('QueryStore', function($filter, $q, $timeout, QueryService, BucketRestriction) {
+.service('QueryStore', function($filter, $q, QueryService, BucketRestriction) {
 
     this.segment = null;
 
@@ -13,14 +13,10 @@ angular.module('common.datacloud.query.service',[
         accounts: {
             count: null,
             state: 'done' // 'done' | 'loading'
-        },
-        contacts: {
-            count: null,
-            state: 'done'
-        }
+        } //, contacts: {}
     };
 
-    this.setContextCount = function(context, state, count) {
+    this.updateContextCount = function(context, count, state) {
         var contextCount = this.counts[context];
         if (contextCount) {
             contextCount.count = (count === undefined) ? contextCount.count : count;
@@ -59,16 +55,17 @@ angular.module('common.datacloud.query.service',[
         this.setSegment(segment);
         if (segment !== null) {
             this.setRestriction(segment.simple_restriction);
-            this.setContextCount('accounts', 'done', parseInt(this.getSegmentProperty(segment.segment_properties, 'NumAccounts')));
+            this.updateContextCount('accounts', parseInt(this.getSegmentProperty(segment.segment_properties, 'NumAccounts')), 'done');
 
             deferred.resolve();
         } else {
             this.setRestriction( { all: [], any: [] } );
 
-            this.updateContextCount('accounts').then(function() {
+            this.GetCountByRestriction('accounts').then(function(result) {
+                self.updateContextCount('accounts', result, 'done');
                 deferred.resolve();
             }).catch(function(error) {
-                deferred.resolve({error: error});
+                deferred.reject();
             });
         }
 
@@ -93,8 +90,6 @@ angular.module('common.datacloud.query.service',[
         if (attributes.length === 0) {
             this.restriction.all.push(new BucketRestriction(attribute.columnName, attribute.bucket));
         }
-
-        this.updateCountsDebounced();
     };
 
     this.removeRestriction = function(attribute) {
@@ -107,8 +102,6 @@ angular.module('common.datacloud.query.service',[
                 break;
             }
         }
-
-        this.updateCountsDebounced();
     };
 
     this.findAttributes = function(columnName) {
@@ -132,33 +125,8 @@ angular.module('common.datacloud.query.service',[
         return results;
     };
 
-    this.updateContextCount = function(context) {
-        var self = this;
-        self.setContextCount(context, 'loading')
-        return this.GetCountByRestriction(context).then(function(result) {
-            self.setContextCount(context, 'done', result);
-        });
-    };
-
-    var debounceTime = 5000;
-    var timeout = null;
-    var lastUpdated = 0;
-    this.updateCountsDebounced = function() {
-        var self = this;
-        var now = new Date().getTime();
-
-        if (now - lastUpdated > debounceTime && !timeout) {
-            this.updateContextCount('accounts').finally(function() {
-                lastUpdated = now;
-            });
-        } else {
-            $timeout.cancel(timeout);
-            timeout = $timeout(function() {
-                self.updateContextCount('accounts').finally(function() {
-                    lastUpdated = now;
-                });
-            }, debounceTime - (now - lastUpdated));
-        }
+    this.getPage = function(context, offset, maximum, query, sortBy, sortDesc) {
+        return [];
     };
 
     this.GetCountByRestriction = function(context) {
@@ -172,25 +140,25 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.GetCountByQuery = function(context, query) {
+        query = query || {};
+
         if (!validContext(context)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
-            return deferred.promise;
+            return deferred;
         }
 
-        return QueryService.GetCountByQuery(context, query);
+        return QueryService.GetCountByQuery(context);
     };
 
-    this.GetDataByQuery = function(context, query) {
-        query.restriction = this.getRestriction();
-
+    this.GetDataByQuery = function(context) {
         if (!validContext(context)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
-            return deferred.promise;
+            return deferred;
         }
 
-        return QueryService.GetDataByQuery(context, query);
+        return QueryService.GetDataByQuery(context);
     };
 
     function validContext(context) {

@@ -10,15 +10,7 @@ public class IngestionSource implements Source {
 
     private static final long serialVersionUID = 2237469282940403218L;
 
-    private String ingestionName;
-
-    public IngestionSource() {
-
-    }
-
-    public IngestionSource(String ingestionName) {
-        this.ingestionName = ingestionName;
-    }
+    private String ingetionName;
 
     @Override
     public String getSourceName() {
@@ -40,12 +32,12 @@ public class IngestionSource implements Source {
         return null;
     }
 
-    public String getIngestionName() {
-        return ingestionName;
+    public String getIngetionName() {
+        return ingetionName;
     }
 
-    public void setIngestionName(String ingestionName) {
-        this.ingestionName = ingestionName;
+    public void setIngetionName(String ingetionName) {
+        this.ingetionName = ingetionName;
     }
 
 }

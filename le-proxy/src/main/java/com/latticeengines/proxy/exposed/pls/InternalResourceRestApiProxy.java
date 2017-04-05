@@ -77,18 +77,6 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         return modelSummary;
     }
 
-    public List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame) {
-        try {
-            String url = constructUrl("pls/internal/modelsummaries/updated", String.valueOf(timeFrame));
-            log.debug("Get from " + url);
-            List<?> modelSummaryObjList = restTemplate.getForObject(url, List.class);
-            List<ModelSummary> modelSummaryList = JsonUtils.convertList(modelSummaryObjList, ModelSummary.class);
-            return modelSummaryList;
-        } catch (Exception e) {
-            throw new RuntimeException("getModelSummariesNeedToRefreshInCache: Remote call failure", e);
-        }
-    }
-
     public List<String> getRequiredColumnNames(String modelId, CustomerSpace customerSpace) {
         String url = constructUrl("pls/internal/metadata/required/modelId/", modelId, customerSpace.toString());
         List<?> requiredColumnObjList = restTemplate.getForObject(url, List.class);
@@ -422,7 +410,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             String url = constructUrl("pls/internal/modelsummaries", modelId);
             log.info(String.format("Putting to %s", url));
             AttributeMap attrMap = new AttributeMap();
-            attrMap.put(ModelSummary.STATUS, ModelSummaryStatus.ACTIVE.getStatusCode());
+            attrMap.put("Status", ModelSummaryStatus.ACTIVE.getStatusCode());
             HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
             restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Object.class);
         } catch (Exception e) {

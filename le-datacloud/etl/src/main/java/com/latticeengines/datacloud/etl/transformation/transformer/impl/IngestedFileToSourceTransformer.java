@@ -39,7 +39,7 @@ public class IngestedFileToSourceTransformer
 
     @Override
     protected boolean validateConfig(IngestedFileToSourceTransformerConfig config, List<String> baseSources) {
-        if (config.getIngestionName() == null) {
+        if (config.getIngetionName() == null) {
             log.error("Please provide ingestion name");
             return false;
         }
@@ -67,7 +67,7 @@ public class IngestedFileToSourceTransformer
     @Override
     protected void updateParameters(IngestedFileToSourceParameters parameters, Source[] baseTemplates,
             Source targetTemplate, IngestedFileToSourceTransformerConfig config) {
-        parameters.setIngestionName(config.getIngestionName());
+        parameters.setIngetionName(config.getIngetionName());
         parameters.setQualifier(config.getQualifier());
         parameters.setDelimiter(config.getDelimiter());
         parameters.setCharset(config.getCharset());

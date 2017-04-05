@@ -104,10 +104,10 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         if (baseSource instanceof IngestionSource) {
             baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile);
             targetPath = hdfsPathBuilder
-                    .constructIngestionDir(((IngestionSource) baseSource).getIngestionName(), baseSourceVersion)
+                    .constructIngestionDir(((IngestionSource) baseSource).getIngetionName(), baseSourceVersion)
                     .append("/" + baseSourceFile).toString();
             successPath = hdfsPathBuilder
-                    .constructIngestionDir(((IngestionSource) baseSource).getIngestionName(), baseSourceVersion)
+                    .constructIngestionDir(((IngestionSource) baseSource).getIngetionName(), baseSourceVersion)
                     .append("_SUCCESS").toString();
         } else {
             baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile + ".avro");

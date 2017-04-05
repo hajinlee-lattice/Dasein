@@ -109,8 +109,7 @@
         "params": "params",
         "thresholdError": 3,
         "thresholdSigSize": 0.01,
-        "thresholdBinSize": 0.05,
-        "enabled": "false"
+        "thresholdBinSize": 0.05
       },
       "ColumnTransformFilePath": "categoricalgroupingstep.py"
     },

@@ -42,7 +42,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -211,7 +210,8 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create default target market")
-    public void createDefaultTargetMarket(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+    public void createDefaultTargetMarket(@PathVariable("tenantId") String tenantId,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -222,7 +222,8 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Find target market by name")
-    public TargetMarket findTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
+    public TargetMarket findTargetMarketByName(
+            @PathVariable("targetMarketName") String targetMarketName,
             @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
@@ -259,7 +260,8 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a target market")
-    public void deleteAllTargetMarkets(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+    public void deleteAllTargetMarkets(@PathVariable("tenantId") String tenantId,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -271,7 +273,8 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Register a target market report")
     public void registerReport(@PathVariable("targetMarketName") String targetMarketName,
-            @PathVariable("tenantId") String tenantId, @RequestBody Report report, HttpServletRequest request) {
+            @PathVariable("tenantId") String tenantId, @RequestBody Report report,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -282,8 +285,8 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a report")
-    public void registerReport(@PathVariable("tenantId") String tenantId, @RequestBody Report report,
-            HttpServletRequest request) {
+    public void registerReport(@PathVariable("tenantId") String tenantId,
+            @RequestBody Report report, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -319,7 +322,8 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Update a SourceFile")
     public void updateSourceFile(@PathVariable("sourceFileName") String sourceFileName,
-            @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile, HttpServletRequest request) {
+            @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -331,7 +335,8 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Create a SourceFile")
     public void createSourceFile(@PathVariable("sourceFileName") String sourceFileName,
-            @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile, HttpServletRequest request) {
+            @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -342,28 +347,20 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a ModelSummary")
-    public void createModelSummary(@PathVariable("tenantId") String tenantId, @RequestBody ModelSummary modelSummary,
-            HttpServletRequest request) {
+    public void createModelSummary(@PathVariable("tenantId") String tenantId,
+            @RequestBody ModelSummary modelSummary, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
         modelSummaryService.createModelSummary(modelSummary, tenantId);
     }
 
-    @RequestMapping(value = "/modelsummaries/updated/{timeframe}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get a list of model summary updated within the timeframe as specified")
-    public List<ModelSummary> getModelSummariesUpdatedWithinTimeFrame(@PathVariable long timeframe,
-            HttpServletRequest request) {
-        checkHeader(request);
-        return modelSummaryService.getModelSummariesModifiedWithinTimeFrame(timeframe);
-    }
-
     @RequestMapping(value = "/modelsummarydownloadflag/"
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get list of model summary need for refresh in Scoringapi cachce")
-    public void setModelSummaryDownloadFlag(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+    @ApiOperation(value = "Insert a model summary download flag")
+    public void setModelSummaryDownloadFlag(@PathVariable("tenantId") String tenantId,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -374,8 +371,8 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a model summary")
-    public Boolean deleteModelSummary(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
-            HttpServletRequest request) {
+    public Boolean deleteModelSummary(@PathVariable String modelId,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -398,7 +395,8 @@ public class InternalResource extends InternalResourceBase {
         return postProcessModelSummaryList(summaries, true);
     }
 
-    private List<ModelSummary> postProcessModelSummaryList(List<ModelSummary> summaries, boolean dropPredictors) {
+    private List<ModelSummary> postProcessModelSummaryList(List<ModelSummary> summaries,
+            boolean dropPredictors) {
         for (ModelSummary summary : summaries) {
             if (dropPredictors) {
                 summary.setPredictors(new ArrayList<Predictor>());
@@ -416,7 +414,8 @@ public class InternalResource extends InternalResourceBase {
     public int getModelSummariesCount(
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
             @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) throws ParseException {
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request)
+            throws ParseException {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
@@ -436,15 +435,16 @@ public class InternalResource extends InternalResourceBase {
             @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus,
             @ApiParam(value = "Offset", required = false) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum entries in page", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @PathVariable("tenantId") String tenantId, HttpServletRequest request) throws ParseException {
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request)
+            throws ParseException {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
         if (!StringStandardizationUtils.objectIsNullOrEmptyString(start)) {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
-        return postProcessModelSummaryList(
-                modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum), false);
+        return postProcessModelSummaryList(modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime,
+                considerAllStatus, offset, maximum), false);
 
     }
 
@@ -463,11 +463,13 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a model summary by applicationId")
-    public List<ModelSummary> getModelSummariesCrossTenantByAppId(@PathVariable("applicationId") String applicationId,
+    public List<ModelSummary> getModelSummariesCrossTenantByAppId(
+            @PathVariable("applicationId") String applicationId,
             @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
-        List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getModelSummariesByApplicationId(applicationId);
+        List<ModelSummary> modelSummaries = modelSummaryEntityMgr
+                .getModelSummariesByApplicationId(applicationId);
         return modelSummaries;
     }
 
@@ -486,8 +488,8 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get required column names for the event table used for the specified model")
-    public List<String> getRequiredColumns(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
-            HttpServletRequest request) {
+    public List<String> getRequiredColumns(@PathVariable String modelId,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         List<String> columnNames = new ArrayList<>();
@@ -516,28 +518,29 @@ public class InternalResource extends InternalResourceBase {
 
         manufactureSecurityContextForInternalAccess(summary.getTenant());
 
+        // Reuse the logic in the ModelSummaryResource to do the updates
+        ModelSummaryResource msr = new ModelSummaryResource();
+        msr.setModelSummaryEntityMgr(modelSummaryEntityMgr);
         ModelActivationResult result = new ModelActivationResult();
         result.setExists(true);
         ResponseDocument<ModelActivationResult> response = new ResponseDocument<>();
         response.setResult(result);
-        if (!NameValidationUtils.validateModelName(modelId)) {
-            log.error(String.format("Not qualified modelId %s contains unsupported characters.", modelId));
-            response.setSuccess(false);
-        } else {
-            modelSummaryService.updateModelSummary(modelId, attrMap);
+        if (msr.update(modelId, attrMap)) {
             response.setSuccess(true);
+        } else {
+            response.setSuccess(false);
         }
         return response;
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories"
+            + "/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request, //
             @PathVariable("tenantId") String tenantId) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, null, null,
-                false, null, null, Boolean.FALSE);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId,
+                null, null, null, false, null, null, Boolean.FALSE);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -548,8 +551,8 @@ public class InternalResource extends InternalResourceBase {
         return categoryStrList;
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/subcategories" + "/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/subcategories"
+            + "/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
@@ -557,8 +560,8 @@ public class InternalResource extends InternalResourceBase {
             @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, category,
-                null, false, null, null, Boolean.FALSE);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId,
+                null, category, null, false, null, null, Boolean.FALSE);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
             subcategories.add(attr.getSubcategory());
@@ -599,14 +602,14 @@ public class InternalResource extends InternalResourceBase {
             Boolean considerInternalAttributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
-        return attributeService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, offset, max, considerInternalAttributes);
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category)
+                ? null : Category.fromName(category));
+        return attributeService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
+                subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + "count" + "/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + "count"
+            + "/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get lead enrichment")
     public int getLeadEnrichmentAttributesCount(HttpServletRequest request, //
@@ -630,10 +633,10 @@ public class InternalResource extends InternalResourceBase {
     ) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
-        return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, Boolean.FALSE);
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category)
+                ? null : Category.fromName(category));
+        return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum,
+                subcategory, onlySelectedAttributes, Boolean.FALSE);
     }
 
     @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/"
@@ -646,25 +649,27 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Map<String, Integer> limitationMap = attributeService.getPremiumAttributesLimitation(tenant);
+        Map<String, Integer> limitationMap = attributeService
+                .getPremiumAttributesLimitation(tenant);
         attributeService.save(attributes, tenant, limitationMap, Boolean.FALSE);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/premiumattributeslimitation" + "/"
-            + TENANT_ID_PATH, //
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH
+            + "/premiumattributeslimitation" + "/" + TENANT_ID_PATH, //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
-    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request, //
+    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(
+            HttpServletRequest request, //
             @PathVariable("tenantId") String tenantId) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         return attributeService.getPremiumAttributesLimitation(tenant);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedattributes/count" + "/"
-            + TENANT_ID_PATH, //
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH
+            + "/selectedattributes/count" + "/" + TENANT_ID_PATH, //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
@@ -676,8 +681,8 @@ public class InternalResource extends InternalResourceBase {
         return attributeService.getSelectedAttributeCount(tenant, Boolean.FALSE);
     }
 
-    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count"
-            + "/" + TENANT_ID_PATH, //
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH
+            + "/selectedpremiumattributes/count" + "/" + TENANT_ID_PATH, //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
@@ -693,7 +698,8 @@ public class InternalResource extends InternalResourceBase {
             + LatticeInsightsResource.INSIGHTS_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all lead enrichment")
-    public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes(HttpServletRequest request) {
+    public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes(
+            HttpServletRequest request) {
         return attributeService.getAllAttributes();
     }
 
@@ -713,18 +719,20 @@ public class InternalResource extends InternalResourceBase {
                     if (result.equals("COMPLETED")) {
                         if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
                                 || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                    true);
+                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl,
+                                    tenantName, modelName, true);
                         } else {
-                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                    false);
+                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl,
+                                    tenantName, modelName, false);
                         }
                     } else {
                         if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
                                 || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, true);
+                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl,
+                                    tenantName, modelName, true);
                         } else {
-                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, false);
+                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl,
+                                    tenantName, modelName, false);
                         }
                     }
                 }
@@ -745,7 +753,8 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         manufactureSecurityContextForInternalAccess(modelSummary.getTenant());
-        BucketedScoreSummary bucketedScoreSummary = bucketedScoreService.getBucketedScoreSummaryForModelId(modelId);
+        BucketedScoreSummary bucketedScoreSummary = bucketedScoreService
+                .getBucketedScoreSummaryForModelId(modelId);
         log.info(String.format("Creating abcd buckets for model: %s bucketed score summary: %s", modelId,
                 JsonUtils.serialize(bucketedScoreSummary)));
         BucketedScore[] bucketedScores = bucketedScoreSummary.getBucketedScores();
@@ -755,56 +764,56 @@ public class InternalResource extends InternalResourceBase {
         bucketMetadata1.setLeftBoundScore(BUCKET_0);
         bucketMetadata1.setRightBoundScore(BUCKET_1);
         bucketMetadata1.setLastModifiedByUser(userId);
-        bucketMetadata1.setNumLeads(
-                bucketedScores[BUCKET_1 - 1].getLeftNumLeads() - bucketedScores[BUCKET_0].getLeftNumLeads());
+        bucketMetadata1.setNumLeads(bucketedScores[BUCKET_1 - 1].getLeftNumLeads()
+                - bucketedScores[BUCKET_0].getLeftNumLeads());
         if (bucketMetadata1.getNumLeads() == 0 || overallLift == 0) {
             bucketMetadata1.setLift(0);
         } else {
             bucketMetadata1.setLift(((bucketedScores[BUCKET_1 - 1].getLeftNumConverted()
-                    - bucketedScores[BUCKET_0].getLeftNumConverted()) / (double) bucketMetadata1.getNumLeads())
-                    / overallLift);
+                    - bucketedScores[BUCKET_0].getLeftNumConverted())
+                    / (double) bucketMetadata1.getNumLeads()) / overallLift);
         }
 
         bucketMetadata2.setBucket(BucketName.B);
         bucketMetadata2.setLeftBoundScore(BUCKET_1 - 1);
         bucketMetadata2.setRightBoundScore(BUCKET_2);
         bucketMetadata2.setLastModifiedByUser(userId);
-        bucketMetadata2.setNumLeads(
-                bucketedScores[BUCKET_2 - 1].getLeftNumLeads() - bucketedScores[BUCKET_1 - 1].getLeftNumLeads());
+        bucketMetadata2.setNumLeads(bucketedScores[BUCKET_2 - 1].getLeftNumLeads()
+                - bucketedScores[BUCKET_1 - 1].getLeftNumLeads());
         if (bucketMetadata2.getNumLeads() == 0 || overallLift == 0) {
             bucketMetadata2.setLift(0);
         } else {
             bucketMetadata2.setLift(((bucketedScores[BUCKET_2 - 1].getLeftNumConverted()
-                    - bucketedScores[BUCKET_1 - 1].getLeftNumConverted()) / (double) bucketMetadata2.getNumLeads())
-                    / overallLift);
+                    - bucketedScores[BUCKET_1 - 1].getLeftNumConverted())
+                    / (double) bucketMetadata2.getNumLeads()) / overallLift);
         }
 
         bucketMetadata3.setBucket(BucketName.C);
         bucketMetadata3.setLeftBoundScore(BUCKET_2 - 1);
         bucketMetadata3.setRightBoundScore(BUCKET_3);
         bucketMetadata3.setLastModifiedByUser(userId);
-        bucketMetadata3.setNumLeads(
-                bucketedScores[BUCKET_3 - 1].getLeftNumLeads() - bucketedScores[BUCKET_2 - 1].getLeftNumLeads());
+        bucketMetadata3.setNumLeads(bucketedScores[BUCKET_3 - 1].getLeftNumLeads()
+                - bucketedScores[BUCKET_2 - 1].getLeftNumLeads());
         if (bucketMetadata3.getNumLeads() == 0 || overallLift == 0) {
             bucketMetadata3.setLift(0);
         } else {
             bucketMetadata3.setLift(((bucketedScores[BUCKET_3 - 1].getLeftNumConverted()
-                    - bucketedScores[BUCKET_2 - 1].getLeftNumConverted()) / (double) bucketMetadata3.getNumLeads())
-                    / overallLift);
+                    - bucketedScores[BUCKET_2 - 1].getLeftNumConverted())
+                    / (double) bucketMetadata3.getNumLeads()) / overallLift);
         }
 
         bucketMetadata4.setBucket(BucketName.D);
         bucketMetadata4.setLeftBoundScore(BUCKET_3 - 1);
         bucketMetadata4.setRightBoundScore(BUCKET_4);
         bucketMetadata4.setLastModifiedByUser(userId);
-        bucketMetadata4.setNumLeads(
-                bucketedScores[BUCKET_4 - 1].getLeftNumLeads() - bucketedScores[BUCKET_3 - 1].getLeftNumLeads());
+        bucketMetadata4.setNumLeads(bucketedScores[BUCKET_4 - 1].getLeftNumLeads()
+                - bucketedScores[BUCKET_3 - 1].getLeftNumLeads());
         if (bucketMetadata4.getNumLeads() == 0 || overallLift == 0) {
             bucketMetadata4.setLift(0);
         } else {
             bucketMetadata4.setLift(((bucketedScores[BUCKET_4 - 1].getLeftNumConverted()
-                    - bucketedScores[BUCKET_3 - 1].getLeftNumConverted()) / (double) bucketMetadata4.getNumLeads())
-                    / overallLift);
+                    - bucketedScores[BUCKET_3 - 1].getLeftNumConverted())
+                    / (double) bucketMetadata4.getNumLeads()) / overallLift);
         }
 
         bucketedScoreService.createBucketMetadatas(modelId,
@@ -816,8 +825,9 @@ public class InternalResource extends InternalResourceBase {
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after scoring")
-    public void sendPlsScoreEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            @RequestBody AdditionalEmailInfo emailInfo, HttpServletRequest request) {
+    public void sendPlsScoreEmail(@PathVariable("result") String result,
+            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo,
+            HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String modelId = emailInfo.getModelId();
         if (modelId != null && !modelId.isEmpty()) {
@@ -829,19 +839,23 @@ public class InternalResource extends InternalResourceBase {
                         String modelName = modelSummary.getDisplayName();
                         if (result.equals("COMPLETED")) {
                             if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                        true);
+                                    || user.getAccessLevel()
+                                            .equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl,
+                                        tenantName, modelName, true);
                             } else {
-                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                        false);
+                                emailService.sendPlsScoreCompletionEmail(user, appPublicUrl,
+                                        tenantName, modelName, false);
                             }
                         } else {
                             if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                                emailService.sendPlsScoreErrorEmail(user, appPublicUrl, tenantName, modelName, true);
+                                    || user.getAccessLevel()
+                                            .equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsScoreErrorEmail(user, appPublicUrl, tenantName,
+                                        modelName, true);
                             } else {
-                                emailService.sendPlsScoreErrorEmail(user, appPublicUrl, tenantName, modelName, false);
+                                emailService.sendPlsScoreErrorEmail(user, appPublicUrl, tenantName,
+                                        modelName, false);
                             }
                         }
                     }
@@ -867,11 +881,13 @@ public class InternalResource extends InternalResourceBase {
                     if (modelSummary != null) {
                         String modelName = modelSummary.getDisplayName();
                         if (result.equals("COMPLETED")) {
-                            emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl, tenantName,
-                                    modelName, true, emailInfo.getExtraInfoList());
+                            emailService.sendPlsEnrichInternalAttributeCompletionEmail(user,
+                                    appPublicUrl, tenantName, modelName, true,
+                                    emailInfo.getExtraInfoList());
                         } else {
-                            emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
-                                    modelName, false, emailInfo.getExtraInfoList());
+                            emailService.sendPlsEnrichInternalAttributeErrorEmail(user,
+                                    appPublicUrl, tenantName, modelName, false,
+                                    emailInfo.getExtraInfoList());
                         }
                     }
                 }
@@ -894,7 +910,8 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Get up-to-date ABCD Buckets info for the model")
     public List<BucketMetadata> getUpToDateABCDBuckets(@PathVariable String modelId,
-            @RequestParam(value = "tenantId", required = false) String tenantId, HttpServletRequest request) {
+            @RequestParam(value = "tenantId", required = false) String tenantId,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         return bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
@@ -903,14 +920,13 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/abcdbuckets/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Create a group of ABCD buckets")
     public void createABCDBuckets(@PathVariable String modelId,
-            @RequestParam(value = "tenantId", required = false) String tenantId, HttpServletRequest request,
-            @RequestBody List<BucketMetadata> bucketMetadatas) {
+            @RequestParam(value = "tenantId", required = false) String tenantId,
+            HttpServletRequest request, @RequestBody List<BucketMetadata> bucketMetadatas) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         bucketedScoreService.createBucketMetadatas(modelId, bucketMetadatas);
     }
 
-    @SuppressWarnings("deprecation")
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset the testing environment for protractor tests.")
@@ -945,21 +961,25 @@ public class InternalResource extends InternalResourceBase {
             if (StringStandardizationUtils.objectIsNullOrEmptyString(productPrefix)) {
                 Camille camille = CamilleEnvironment.getCamille();
                 Path productsPath = PathBuilder
-                        .buildCustomerSpacePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1Id))
+                        .buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                                CustomerSpace.parse(tenant1Id))
                         .append("SpaceConfiguration").append("Products");
                 try {
                     camille.upsert(productsPath,
-                            new Document(JsonUtils.serialize(Collections.singleton(LatticeProduct.LPA.getName()))),
+                            new Document(JsonUtils.serialize(
+                                    Collections.singleton(LatticeProduct.LPA.getName()))),
                             ZooDefs.Ids.OPEN_ACL_UNSAFE);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 productsPath = PathBuilder
-                        .buildCustomerSpacePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2Id))
+                        .buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                                CustomerSpace.parse(tenant2Id))
                         .append("SpaceConfiguration").append("Products");
                 try {
                     camille.upsert(productsPath,
-                            new Document(JsonUtils.serialize(Collections.singleton(LatticeProduct.LPA.getName()))),
+                            new Document(JsonUtils.serialize(
+                                    Collections.singleton(LatticeProduct.LPA.getName()))),
                             ZooDefs.Ids.OPEN_ACL_UNSAFE);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -973,7 +993,8 @@ public class InternalResource extends InternalResourceBase {
                     provisionThroughTenantConsole(tenant1Id, "Marketo", jsonFileName);
                 } catch (Exception ex) {
                     // do not interrupt, functional test could fail on this
-                    log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
+                    log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: "
+                            + e.getMessage());
                 }
             }
 
@@ -984,7 +1005,8 @@ public class InternalResource extends InternalResourceBase {
                     provisionThroughTenantConsole(tenant2Id, "Eloqua", jsonFileName);
                 } catch (Exception ex) {
                     // do not interrupt, functional test could fail on this
-                    log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
+                    log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: "
+                            + e.getMessage());
                 }
             }
         }
@@ -1001,8 +1023,8 @@ public class InternalResource extends InternalResourceBase {
         headers.add(new BasicNameValuePair("Accept", "application/json"));
 
         String payload = JsonUtils.serialize(creds);
-        String loginDocAsString = HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/login", true,
-                headers, payload);
+        String loginDocAsString = HttpClientWithOptionalRetryUtils
+                .sendPostRequest(getHostPort() + "/pls/login", true, headers, payload);
         LoginDocument loginDoc = JsonUtils.deserialize(loginDocAsString, LoginDocument.class);
 
         headers.add(new BasicNameValuePair(Constants.AUTHORIZATION, loginDoc.getData()));
@@ -1011,10 +1033,10 @@ public class InternalResource extends InternalResourceBase {
                 if (tenant.getId().equals(tenant2Id)) {
                     log.info("Checking models for tenant " + tenant.getId());
                     payload = JsonUtils.serialize(tenant);
-                    HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers,
-                            payload);
-                    String response = HttpClientWithOptionalRetryUtils
-                            .sendGetRequest(getHostPort() + "/pls/modelsummaries?selection=all", true, headers);
+                    HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach",
+                            true, headers, payload);
+                    String response = HttpClientWithOptionalRetryUtils.sendGetRequest(
+                            getHostPort() + "/pls/modelsummaries?selection=all", true, headers);
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode jNode = mapper.readTree(response);
                     log.info("Found " + jNode.size() + " models for " + tenant.getId());
@@ -1028,13 +1050,14 @@ public class InternalResource extends InternalResourceBase {
                         fakeTenant.setPid(-1L);
                         data.setTenant(fakeTenant);
                         data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                        HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true",
-                                true, headers, JsonUtils.serialize(data));
-                        response = HttpClientWithOptionalRetryUtils
-                                .sendGetRequest(getHostPort() + "/pls/modelsummaries", true, headers);
+                        HttpClientWithOptionalRetryUtils.sendPostRequest(
+                                getHostPort() + "/pls/modelsummaries?raw=true", true, headers,
+                                JsonUtils.serialize(data));
+                        response = HttpClientWithOptionalRetryUtils.sendGetRequest(
+                                getHostPort() + "/pls/modelsummaries", true, headers);
                         jNode = mapper.readTree(response);
-                        log.info("Uploaded a model to " + tenant.getId() + ". Now there are " + jNode.size()
-                                + " models");
+                        log.info("Uploaded a model to " + tenant.getId() + ". Now there are "
+                                + jNode.size() + " models");
                     }
                     for (JsonNode modelNode : jNode) {
                         ModelSummary data = mapper.treeToValue(modelNode, ModelSummary.class);
@@ -1044,7 +1067,8 @@ public class InternalResource extends InternalResourceBase {
                             String modelApi = getHostPort() + "/pls/modelsummaries/" + data.getId();
                             payload = String.format("{ \"Status\": \"%s\" }",
                                     ModelSummaryStatus.INACTIVE.getStatusCode());
-                            HttpClientWithOptionalRetryUtils.sendPutRequest(modelApi, false, headers, payload);
+                            HttpClientWithOptionalRetryUtils.sendPutRequest(modelApi, false,
+                                    headers, payload);
                             log.info("Update model " + data.getId() + " to inactive.");
                         }
                     }
@@ -1075,7 +1099,8 @@ public class InternalResource extends InternalResourceBase {
         }
 
         Map<AccessLevel, User> accessLevelToUsers = internalTestUserService
-                .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(testTenants);
+                .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(
+                        testTenants);
 
         // ==================================================
         // Reset password of password tester
@@ -1105,21 +1130,21 @@ public class InternalResource extends InternalResourceBase {
         return Arrays.asList(tenant1Id, tenant2Id);
     }
 
-    @SuppressWarnings("deprecation")
-    private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson)
-            throws IOException {
+    private void provisionThroughTenantConsole(String tupleId, String topology,
+            String tenantRegJson) throws IOException {
         if (resetByAdminApi) {
             List<BasicNameValuePair> adHeaders = loginAd();
 
             String tenantToken = "${TENANT}";
             String topologyToken = "${TOPOLOGY}";
             String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
-            InputStream ins = getClass().getClassLoader()
-                    .getResourceAsStream("com/latticeengines/pls/controller/internal/" + tenantRegJson);
+            InputStream ins = getClass().getClassLoader().getResourceAsStream(
+                    "com/latticeengines/pls/controller/internal/" + tenantRegJson);
             String payload = IOUtils.toString(ins);
             payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
             HttpClientWithOptionalRetryUtils.sendPostRequest(
-                    adminApi + "/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders, payload);
+                    adminApi + "/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false,
+                    adHeaders, payload);
         } else {
             throw new RuntimeException(
                     "We need to add the request tenant into ZK, but we do not have AD credentials in the environment. "
@@ -1127,20 +1152,21 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
         long timeout = 1800000L; // bardjams has a long long timeout
         long totTime = 0L;
         String url = adminApi + "/tenants/" + customerSpace.getTenantId() + "?contractId="
                 + customerSpace.getContractId();
         BootstrapState state = BootstrapState.createInitialState();
-        while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
-                && totTime <= timeout) {
+        while (!BootstrapState.State.OK.equals(state.state)
+                && !BootstrapState.State.ERROR.equals(state.state) && totTime <= timeout) {
             try {
                 List<BasicNameValuePair> adHeaders = loginAd();
-                String jsonResponse = HttpClientWithOptionalRetryUtils.sendGetRequest(url, false, adHeaders);
+                String jsonResponse = HttpClientWithOptionalRetryUtils.sendGetRequest(url, false,
+                        adHeaders);
                 log.info("JSON response from tenant console: " + jsonResponse);
-                TenantDocument tenantDocument = JsonUtils.deserialize(jsonResponse, TenantDocument.class);
+                TenantDocument tenantDocument = JsonUtils.deserialize(jsonResponse,
+                        TenantDocument.class);
                 BootstrapState newState = tenantDocument.getBootstrapState();
                 state = newState == null ? state : newState;
             } catch (IOException e) {
@@ -1156,11 +1182,11 @@ public class InternalResource extends InternalResourceBase {
         }
 
         if (!BootstrapState.State.OK.equals(state.state)) {
-            throw new IllegalArgumentException("The tenant state is not OK after " + timeout + " msec.");
+            throw new IllegalArgumentException(
+                    "The tenant state is not OK after " + timeout + " msec.");
         }
     }
 
-    @SuppressWarnings("deprecation")
     private List<BasicNameValuePair> loginAd() throws IOException {
         List<BasicNameValuePair> headers = new ArrayList<>();
         headers.add(new BasicNameValuePair("Content-Type", "application/json"));
@@ -1169,8 +1195,8 @@ public class InternalResource extends InternalResourceBase {
         Credentials credentials = new Credentials();
         credentials.setUsername(adUsername);
         credentials.setPassword(adPassword);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/adlogin", false, headers,
-                JsonUtils.serialize(credentials));
+        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/adlogin",
+                false, headers, JsonUtils.serialize(credentials));
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode json = mapper.readTree(response);
@@ -1188,13 +1214,15 @@ public class InternalResource extends InternalResourceBase {
             }
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenantId, passwordTester);
         }
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, getTestTenantIds().get(0), EXTERNAL_USER_USERNAME_1);
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, getTestTenantIds().get(0),
+                EXTERNAL_USER_USERNAME_1);
         userService.deleteUser(getTestTenantIds().get(1), EXTERNAL_USER_USERNAME_1);
     }
 
     private void resetPasswordTester() {
         String tempPwd = globalUserManagementService.resetLatticeCredentials(passwordTester);
-        Ticket ticket = globalAuthenticationService.authenticateUser(passwordTester, DigestUtils.sha256Hex(tempPwd));
+        Ticket ticket = globalAuthenticationService.authenticateUser(passwordTester,
+                DigestUtils.sha256Hex(tempPwd));
 
         Credentials oldCreds = new Credentials();
         oldCreds.setUsername(passwordTester);
@@ -1227,8 +1255,8 @@ public class InternalResource extends InternalResourceBase {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
-            Category category) {
+    private boolean containsAtleastOneAttributeForCategory(
+            List<LeadEnrichmentAttribute> allAttributes, Category category) {
         if (!CollectionUtils.isEmpty(allAttributes)) {
             for (LeadEnrichmentAttribute attr : allAttributes) {
                 if (category.toString().equals(attr.getCategory())) {

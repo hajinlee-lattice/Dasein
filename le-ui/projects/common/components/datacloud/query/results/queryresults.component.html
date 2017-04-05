@@ -16,13 +16,13 @@
             <div class="pull-right">
                 <a href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}"><button class="button icon-button white-button"><i class="fa fa-download"></i></button></a>
                 <button class="button icon-button white-button" ui-sref="home.model.analysis.explorer.query">Refine Query</button>
-                <button class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
+                <button class="button icon-button blue-button">Save Segment</button>
             </div>
         </li>
         <li class="paging" ng-show="vm.count > 0">
             <pd-pagination-controls
                 current="vm.current"
-                max="vm.count / vm.pagesize">
+                max="vm.count">
             </pd-pagination-controls>
         </li>
     </ul>
@@ -44,7 +44,7 @@
         </tbody>
     </table>
 
-    <p ng-if="!vm.count">
+    <p ng-if="vm.count === 0">
         No Records Found
     <p>
 

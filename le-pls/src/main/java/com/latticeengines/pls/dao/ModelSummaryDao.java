@@ -32,6 +32,4 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     List<ModelSummary> getModelSummariesByApplicationId(String applicationId);
 
-    List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
-
 }

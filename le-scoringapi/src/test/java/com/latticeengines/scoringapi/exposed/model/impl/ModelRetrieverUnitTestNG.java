@@ -2,6 +2,7 @@ package com.latticeengines.scoringapi.exposed.model.impl;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,11 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -30,14 +29,11 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 
 public class ModelRetrieverUnitTestNG {
 
     private CustomerSpace space;
-
-    private String modelId;
 
     @Mock
     private ModelSummary oldModelSummary;
@@ -58,31 +54,20 @@ public class ModelRetrieverUnitTestNG {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         space = CustomerSpace.parse("space");
-        modelId = "modelId";
-        doReturn(ModelSummaryStatus.INACTIVE).when(newModelSummary).getStatus();
-        doReturn(System.currentTimeMillis()).when(newModelSummary).getLastUpdateTime();
-        doReturn(modelId).when(newModelSummary).getId();
-        doReturn(new Tenant(space.getTenantId())).when(newModelSummary).getTenant();
+        when(newModelSummary.getStatus()).thenReturn(ModelSummaryStatus.INACTIVE);
+        when(newModelSummary.getLastUpdateTime()).thenReturn(System.currentTimeMillis());
         doReturn(newModelSummary).when(modelRetriever).getModelSummary(any(CustomerSpace.class), any(String.class));
-        doReturn(ModelSummaryStatus.ACTIVE).when(oldModelSummary).getStatus();
+        when(oldModelSummary.getStatus()).thenReturn(ModelSummaryStatus.ACTIVE);
         scoringArtifact = new ScoringArtifacts(oldModelSummary, null, null, null, null, null, null, null, null, null);
         doReturn(scoringArtifact).when(modelRetriever).retrieveModelArtifactsFromHdfs(any(CustomerSpace.class),
                 any(String.class));
         bucketMetadataList = Collections.emptyList();
-        doReturn(Collections.singletonList(newModelSummary)).when(modelRetriever)
-                .getModelSummariesModifiedWithinTimeFrame(Matchers.anyLong());
         doReturn(bucketMetadataList).when(modelRetriever).getBucketMetadata(any(CustomerSpace.class),
                 any(String.class));
-        modelRetriever.setScoreArtifactCacheMaxSize(50);
-        modelRetriever.setScoreArtifactCacheExpirationTime(1);
-        modelRetriever.setScoreArtifactCacheRefreshTime(1);
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        modelRetriever.setTaskScheduler(taskScheduler);
-        taskScheduler.setThreadNamePrefix("poolScheduler");
-        taskScheduler.setPoolSize(1);
-        taskScheduler.initialize();
+        modelRetriever.scoreArtifactCacheMaxSize = 50;
+        modelRetriever.scoreArtifactCacheExpirationTime = 1;
+        modelRetriever.scoreArtifactCacheRefreshTime = 1;
         modelRetriever.instantiateCache();
-        modelRetriever.scheduleRefreshJob();
     }
 
     @Test(groups = "unit")
@@ -91,22 +76,19 @@ public class ModelRetrieverUnitTestNG {
                 .getScoreArtifactCache();
         Assert.assertNotNull(cache);
         Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 0);
-        Thread.sleep(1200);
-        // The first time when scoring cache tries to refresh, no change is
-        // since there is no entry in the cache.
-        cache = modelRetriever.getScoreArtifactCache();
-        Assert.assertNotNull(cache);
-        Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 0);
+        Assert.assertNotNull(modelRetriever.getBucketMetadata(space, ""));
+        Assert.assertNotNull(modelRetriever.retrieveModelArtifactsFromHdfs(space, ""));
 
+        ScoringArtifacts sa = modelRetriever.retrieveModelArtifactsFromHdfs(space, "");
+        Assert.assertNotNull(sa.getModelSummary());
+        Assert.assertTrue(sa.getModelSummary().getStatus() == ModelSummaryStatus.ACTIVE);
         AbstractMap.SimpleEntry<CustomerSpace, String> entry = new AbstractMap.SimpleEntry<CustomerSpace, String>(space,
-                modelId);
+                "modelId");
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
         Assert.assertNotNull(scoringArtifacts);
         Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 1);
-        Assert.assertEquals(scoringArtifacts.getModelSummary().getStatus(), ModelSummaryStatus.ACTIVE);
-        Thread.sleep(1200);
-        // The second time when scoring cache tries to refresh, an entry already
-        // exists
+
+        Thread.sleep(2000);
         Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 1);
         scoringArtifacts = modelRetriever.getModelArtifacts(entry.getKey(), entry.getValue());
         Assert.assertNotNull(scoringArtifacts);

@@ -27,10 +27,4 @@ public interface ModelSummaryService {
     ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly);
 
     List<ModelSummary> getModelSummaries(String selection);
-
-    void updateModelSummary(String modelId, AttributeMap attrMap);
-
-    List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
-
-    public void updateLastUpdateTime(String modelId);
 }

@@ -1,11 +1,12 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -36,16 +36,10 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @Autowired
     private TenantService tenantService;
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
     private Tenant tenant;
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         setupMarketoEloquaTestEnvironment();
 
         tenant = new Tenant();
@@ -60,13 +54,30 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         tenantService.discardTenant(tenant);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "functional")
     public void updateModelSummary() {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+
         List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getAll();
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("Status", "UpdateAsActive");
+
+        String restAPIHostPort = getRestAPIHostPort();
         for (ModelSummary modelSummary : modelSummaries) {
-            internalResourceRestApiProxy.activateModelSummary(modelSummary.getId());
+            String url = String.format("%s/pls/internal/modelsummaries/%s", restAPIHostPort, modelSummary.getId());
+            HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
+            ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
+                    ResponseDocument.class);
+            ResponseDocument responseDoc = response.getBody();
+            assertTrue(responseDoc.isSuccess());
+            Map<String, Object> result = (Map) response.getBody().getResult();
+            assertTrue((boolean) result.get("Exists"));
         }
+
         modelSummaries = modelSummaryEntityMgr.getAll();
+
         for (ModelSummary modelSummary : modelSummaries) {
             Assert.assertEquals(modelSummary.getStatus(), ModelSummaryStatus.ACTIVE);
         }
@@ -92,12 +103,4 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Assert.assertFalse((boolean) result.get("Exists"));
     }
 
-    @Test(groups = "functional")
-    public void testGetModelSummariesModifiedWithinTimeFrame() {
-        List<ModelSummary> modelSummaries = internalResourceRestApiProxy
-                .getModelSummariesModifiedWithinTimeFrame(120000L);
-        Assert.assertNotNull(modelSummaries);
-        int size = modelSummaries.size();
-        Assert.assertTrue(size >= 2);
-    }
 }

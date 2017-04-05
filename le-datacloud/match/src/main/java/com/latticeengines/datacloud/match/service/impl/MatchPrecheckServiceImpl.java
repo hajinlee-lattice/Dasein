@@ -34,7 +34,7 @@ public class MatchPrecheckServiceImpl implements MatchPrecheckService {
             return;
         }
         DnBCacheEntityMgr entityMgr = dnbCacheService.getCacheMgr();
-        if (entityMgr == null || entityMgr.isDisabled()) {
+        if (entityMgr.isDisabled()) {
             throw new RuntimeException("DnBCacheEntityMgr is disabled.");
         }
     }
@@ -44,11 +44,11 @@ public class MatchPrecheckServiceImpl implements MatchPrecheckService {
             return;
         }
         AccountLookupEntryMgr lookupEntityMgr = accountLookupService.getLookupMgr(matchVersion);
-        if (lookupEntityMgr == null || lookupEntityMgr.isDisabled()) {
+        if (lookupEntityMgr.isDisabled()) {
             throw new RuntimeException("AccountLookupEntryMgr is disabled.");
         }
         LatticeAccountMgr latticeAccountMgr = accountLookupService.getAccountMgr(matchVersion);
-        if (latticeAccountMgr == null || latticeAccountMgr.isDisabled()) {
+        if (latticeAccountMgr.isDisabled()) {
             throw new RuntimeException("LatticeAccountMgr is disabled.");
         }
     }

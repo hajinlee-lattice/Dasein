@@ -102,13 +102,11 @@ def tomcat_task(profile_vars, env="qa"):
 
     ledp = Volume("ledp", "/etc/ledp")
     efsip = Volume("efsip", "/etc/efsip.txt")
-    scoringcache = Volume("scoringcache", "/var/cache/scoringapi")
     internal_addr = Volume("intAddr", "/etc/internaladdr.txt")
     hadoop_conf = Volume("hadoopConf", "/etc/hadoop/conf")
 
     container = container.mount("/etc/ledp", ledp) \
         .mount("/etc/efsip.txt", efsip) \
-        .mount("/var/cache/scoringapi", scoringcache) \
         .mount("/etc/internaladdr.txt", internal_addr) \
         .mount("/etc/hadoop/conf", hadoop_conf)
 
@@ -116,7 +114,6 @@ def tomcat_task(profile_vars, env="qa"):
     task.add_container(container)
     task.add_volume(ledp)
     task.add_volume(efsip)
-    task.add_volume(scoringcache)
     task.add_volume(internal_addr)
     task.add_volume(hadoop_conf)
     return task
