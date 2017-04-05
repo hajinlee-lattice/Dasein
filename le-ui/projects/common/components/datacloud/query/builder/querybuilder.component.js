@@ -29,8 +29,7 @@ angular.module('common.datacloud.query.builder', [])
 
     vm.update = function() {
         var restrictions = createRestrictionsFromFilters(vm.filters);
-        QueryStore.setRestriction(restrictions);
-        QueryStore.updateCountsDebounced();
+        QueryStore.updateRestriction(restrictions);
     };
 
     vm.move = function(src, dest, key) {

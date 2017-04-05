@@ -40,6 +40,12 @@ angular.module('common.datacloud.query.service',[
         return this.restriction;
     };
 
+    this.updateRestriction = function(restriction) {
+        this.restriction.all = restriction.all;
+        this.restriction.any = restriction.any;
+        this.updateCountsDebounced();
+    };
+
     this.setSegment = function(segment) {
         this.segment = segment;
     };
