@@ -7,7 +7,7 @@
 
                 <li
                     ng-repeat="segment in vm.segments"
-                    ng-click="vm.tileClick($event, segment.name)" 
+                    ng-click="vm.tileClick($event, segment.name)"
                     ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
                 >
                     <div class="tile-header" ng-if="!vm.editSegment">
@@ -15,20 +15,20 @@
                         <div class="edit">
                             <button 
                                     type="button"
-                                    ng-click="customMenuClick($event)" 
+                                    ng-click="customMenuClick($event)"
                                     ng-class="{ 'open': showCustomMenu }">
                                 <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
                             </button>
-                            <ul class="model-menu" ng-if="showCustomMenu">
-                                <li data-ng-click="vm.editSegmentClick($event, segment.name)">
+                            <ul class="model-menu" ng-show="showCustomMenu">
+                                <li data-ng-click="vm.editSegmentClick($event, segment)">
                                     <a href="javascript:void(0)">Edit</a>
-                                    <i class="fa fa-trash"></i>
+                                    <i class="fa fa-edit"></i>
                                 </li>
-                                <li data-ng-click="vm.duplicateSegmentClick($event, segment.name)">
+                                <li data-ng-click="vm.duplicateSegmentClick($event, segment)">
                                     <a href="javascript:void(0)">Duplicate</a>
-                                    <i class="fa fa-trash"></i>
+                                    <i class="fa fa-copy"></i>
                                 </li>
-                                <li data-ng-click="vm.showDeleteSegmentModal($event, segment.name)">
+                                <li data-ng-click="vm.showDeleteSegmentModal($event, segment)">
                                     <a href="javascript:void(0)">Delete</a>
                                     <i class="fa fa-trash"></i>
                                 </li>
@@ -65,13 +65,13 @@
                             <button 
                                 type="button" 
                                 class="button white-button pull-left" 
-                                ng-click="vm.cancelEditSegmentClicked($event)">
+                                ng-click="vm.cancelEditSegmentClicked($event, segment)">
                                 Cancel</button>
                             <button 
                                 type="button" 
                                 class="button orange-button pull-right" 
                                 ng-disabled="vm.canSave"
-                                ng-click="vm.saveSegmentClicked($event)">
+                                ng-click="vm.saveSegmentClicked($event, segment)">
                                 Save</button>
                         </div>
                     </div>
@@ -87,7 +87,7 @@
                 <li class="no-style">
                     <a
                         class="button new-tile-button"
-                        ui-sref="home.model.analysis">
+                        ng-click="createNewSegmentClick($event)">
                         <span>&#43;</span>
                         Add Segment
                     </a>

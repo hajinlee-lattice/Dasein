@@ -345,6 +345,18 @@ angular
         })
         .state('home.model.ratings.history', {
             url: '/history',
+            resolve: {
+                HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
+                    var deferred = $q.defer(),
+                        id = $stateParams.modelId;
+
+                    ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             params: {
                 pageIcon: 'ico-ratings',
                 pageTitle: 'History'
@@ -355,18 +367,6 @@ angular
                     template: ''
                 },
                 "main@": {
-                    resolve: {
-                        HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
-                            var deferred = $q.defer(),
-                                id = $stateParams.modelId;
-
-                            ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
                     controller: 'ModelRatingsHistoryController',
                     controllerAs: 'vm',
                     templateUrl: 'app/models/views/ModelRatingsHistoryView.html'

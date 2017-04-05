@@ -12,24 +12,43 @@ angular.module('lp.models.segments', [
         tenantName: $stateParams.tenantName,
         model: Model,
         ResourceUtility: ResourceUtility,
-        segments: SegmentsList,
-        editSegment: false,
-        showCustomMenu: false
+        segments: SegmentsList
     });
 
     vm.init = function() {
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
 
-        console.log(vm.segments);
+        $scope.showCustomMenu = false;
 
     };
 
     vm.init();
 
-    vm.customMenuClick = function ($event) {
+    $scope.customMenuClick = function ($event) {
 
-        $event.stopPropagation();
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+
+        $scope.showCustomMenu = !$scope.showCustomMenu;
+
+        if ($scope.showCustomMenu) {
+            $(document).bind('click', function(event){
+                var isClickedElementChildOfPopup = $element
+                    .find(event.target)
+                    .length > 0;
+
+                if (isClickedElementChildOfPopup)
+                    return;
+
+                $scope.$apply(function(){
+                    $scope.showCustomMenu = false;
+                    $(document).unbind(event);
+                });
+            });
+        }
+
 
     };
 
@@ -40,19 +59,19 @@ angular.module('lp.models.segments', [
 
     };
 
-    vm.editSegmentClick = function($event, segmentName){
+    vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
 
-        console.log($event.currentTarget);
+        console.log(segment);
 
-        vm.editSegment = true;
+        $event.currentTarget = vm.editSegment;
     };
 
     vm.cancelEditSegmentClicked = function() {
         vm.editSegment = false;
     };
 
-    vm.saveSegmentClicked = function() {
+    vm.saveSegmentClicked = function($event, segment) {
 
         vm.saveInProgress = true;
 
@@ -61,7 +80,7 @@ angular.module('lp.models.segments', [
             segmentDescription: vm.segmentDescription
         };
 
-        SegmentService.UpdateSegment(credential).then(function(result) {
+        SegmentService.UpdateSegment(segment).then(function(result) {
 
             var errorMsg = result.errorMsg;
 
@@ -79,9 +98,15 @@ angular.module('lp.models.segments', [
         // Need help from Jamey on this one
     };
 
-    vm.showDeleteSegmentModalClick = function($event){
+    vm.showDeleteSegmentModalClick = function($event, segment){
         $event.preventDefault();
-        DeleteSegmentModal.show();
+        $event.stopPropagation();
+        DeleteSegmentModal.show(segment);
+    };
+
+    vm.createNewSegmentClick = function($event){
+        $event.preventDefault();
+        SegmentService.CreateSegment();
     };
 
 });

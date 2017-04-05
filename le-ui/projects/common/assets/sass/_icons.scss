@@ -88,6 +88,16 @@ Icons
 			background-image: url("/assets/images/ico-campaign-dark.png");
 		}
 	}
+	&.ico-segments {
+		background-color: transparent !important;
+		background-image: url("/assets/images/ico-segments-white.png");
+		background-size: 18px;
+	}
+	&.ico-analysis {
+		background-color: transparent !important;
+		background-image: url("/assets/images/ico-analysis-white.png");
+		background-size: 18px;
+	}
 	&.ico-marketo-apikey {
 		-webkit-mask-image: url("/assets/images/ico-marketo-apikey.svg");
 		mask: url("/assets/images/ico-marketo-apikey.svg");

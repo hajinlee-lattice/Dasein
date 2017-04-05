@@ -5,11 +5,12 @@ angular.module('mainApp.models.modals.DeleteSegmentModal', [
 ])
 .service('DeleteSegmentModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, SegmentService) {
     var self = this;
-    this.show = function (modelId) {
+    this.show = function (segment) {
         $http.get('app/models/views/DeleteSegmentConfirmView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
-            scope.modelId = modelId;
+            
+            scope.segmentName = segment.name;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -36,7 +37,7 @@ angular.module('mainApp.models.modals.DeleteSegmentModal', [
             $event.preventDefault();
         }
 
-        updateAsDeletedSegment(vm.segmentName);
+        updateAsDeletedSegment(segment.name);
     };
 
     function updateAsDeletedSegment(segmentName) {
