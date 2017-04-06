@@ -1123,7 +1123,7 @@ angular.module('common.datacloud.explorer', [
                 var item = restrictions[i];
                 if(item.bucketRestriction) {
                     var restriction = item.bucketRestriction,
-                        key = restriction.lhs.columnLookup.column_name;
+                        key = restriction.lhs.columnLookup.column_name,
                         enrichment = breakOnFirstEncounter(vm.enrichments, 'FieldName', key, true),
                         FieldName = enrichment.FieldName,
                         category = enrichment.Category,
