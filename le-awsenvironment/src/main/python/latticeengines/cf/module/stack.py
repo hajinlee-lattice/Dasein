@@ -227,7 +227,7 @@ class ECSStack(Stack):
         if sns_topic is not None:
             asgroup.hook_notifications_to_sns_topic(sns_topic)
 
-        scale_up_policy = PercentScalingPolicy("ScaleUp", asgroup, 100).cooldown(600)
+        scale_up_policy = PercentScalingPolicy("ScaleUp", asgroup, 100).cooldown(300)
         scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup, PARAM_CAPACITY).cooldown(600)
 
         self.add_resources([asgroup, launchconfig, scale_up_policy, scale_back_policy])
