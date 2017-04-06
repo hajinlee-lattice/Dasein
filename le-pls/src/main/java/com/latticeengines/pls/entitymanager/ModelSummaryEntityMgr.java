@@ -51,4 +51,8 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     List<Predictor> findPredictorsUsedByBuyerInsightsByModelId(String modelId);
 
+    List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
+
+    void updateLastUpdateTime(ModelSummary summary);
+
 }

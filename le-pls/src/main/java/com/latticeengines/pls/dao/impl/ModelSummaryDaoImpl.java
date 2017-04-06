@@ -29,8 +29,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public ModelSummary findByApplicationId(String applicationId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where applicationId = :applicationId",
-                entityClz.getSimpleName());
+        String queryStr = String.format("from %s where applicationId = :applicationId", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("applicationId", applicationId);
         List list = query.list();
@@ -45,8 +44,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public List<ModelSummary> getModelSummariesByApplicationId(String applicationId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where applicationId = :applicationId",
-                entityClz.getSimpleName());
+        String queryStr = String.format("from %s where applicationId = :applicationId", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("applicationId", applicationId);
         return query.list();
@@ -72,8 +70,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public ModelSummary findByModelName(String modelName) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where name = :modelName",
-                entityClz.getSimpleName());
+        String queryStr = String.format("from %s where name = :modelName", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("modelName", modelName);
         List list = query.list();
@@ -88,8 +85,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public List<ModelSummary> getAllByTenant(Tenant tenant) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "from %s where tenantId = :tenantId and status != :statusId",
+        String queryStr = String.format("from %s where tenantId = :tenantId and status != :statusId",
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("tenantId", tenant.getPid());
@@ -103,8 +99,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
         String modelSummaryTable = entityClz.getAnnotation(Table.class).name();
-        String sqlStr = String.format("SELECT ModelSummary.ID FROM %s as ModelSummary",
-                modelSummaryTable);
+        String sqlStr = String.format("SELECT ModelSummary.ID FROM %s as ModelSummary", modelSummaryTable);
         SQLQuery sqlQuery = session.createSQLQuery(sqlStr).addScalar("ID", new StringType());
         return sqlQuery.list();
     }
@@ -114,8 +109,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public List<ModelSummary> findAllValid() {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where status != :statusId",
-                entityClz.getSimpleName());
+        String queryStr = String.format("from %s where status != :statusId", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());
         return query.list();
@@ -126,8 +120,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public List<ModelSummary> findAllActive() {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where status = :statusId",
-                entityClz.getSimpleName());
+        String queryStr = String.format("from %s where status = :statusId", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setInteger("statusId", ModelSummaryStatus.ACTIVE.getStatusId());
         return query.list();
@@ -152,8 +145,8 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus,
-            int offset, int maximum) {
+    public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
+            int maximum) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
         String basicQueryStr = "from %s where lastUpdateTime >= :lastUpdateTime ";
@@ -204,5 +197,19 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
             return null;
         }
         return (ModelSummary) list.get(0);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where :currentTime - lastUpdateTime <= :timeFrame",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setLong("currentTime", System.currentTimeMillis());
+        query.setLong("timeFrame", timeFrame);
+        List list = query.list();
+        return list;
     }
 }

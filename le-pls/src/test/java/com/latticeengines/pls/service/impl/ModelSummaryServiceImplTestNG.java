@@ -161,6 +161,10 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
         ModelSummary retrievedSummary = modelSummaryService.getModelSummary(summary1.getId());
         assertEquals(retrievedSummary.getId(), summary1.getId());
         assertEquals(retrievedSummary.getName(), summary1.getName());
+        long oldLastUpdateTime = retrievedSummary.getLastUpdateTime();
+        modelSummaryService.updateLastUpdateTime(summary1.getId());
+        long newLastUpdateTime = modelSummaryService.getModelSummary(summary1.getId()).getLastUpdateTime();
+        assertTrue(newLastUpdateTime > oldLastUpdateTime);
 
         KeyValue keyValue = retrievedSummary.getDetails();
         String uncompressedStr = new String(CompressionUtils.decompressByteArray(keyValue.getData()));

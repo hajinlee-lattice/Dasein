@@ -54,6 +54,9 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 public class ModelSummary
         implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId, HasApplicationId, Fact, Dimension {
 
+    public static final String STATUS = "Status";
+    public static final String DISPLAY_NAME = "DisplayName";
+    public static final String LAST_UPDATE_TIME = "LastUpdateTime";
     private String id;
     private String name;
     private String displayName;
@@ -183,6 +186,7 @@ public class ModelSummary
         }
     }
 
+    @JsonIgnore
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "modelSummary")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<Predictor> getPredictors() {

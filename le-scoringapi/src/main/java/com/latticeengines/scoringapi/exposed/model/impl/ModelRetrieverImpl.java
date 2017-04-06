@@ -10,9 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +24,9 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,8 +36,6 @@ import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.modeling.ModelExtractor;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -101,17 +98,18 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    @VisibleForTesting
     @Value("${scoringapi.scoreartifact.cache.maxsize}")
-    int scoreArtifactCacheMaxSize;
+    private int scoreArtifactCacheMaxSize;
 
-    @VisibleForTesting
     @Value("${scoringapi.scoreartifact.cache.expiration.time}")
-    int scoreArtifactCacheExpirationTime;
+    private int scoreArtifactCacheExpirationTime;
 
-    @VisibleForTesting
     @Value("${scoringapi.scoreartifact.cache.refresh.time:120}")
-    int scoreArtifactCacheRefreshTime;
+    private int scoreArtifactCacheRefreshTime;
+
+    @Autowired
+    @Qualifier("taskScheduler")
+    private ThreadPoolTaskScheduler taskScheduler;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -133,11 +131,32 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     private String localModelJsonCacheDirIdentifier;
 
+    @VisibleForTesting
+    void setScoreArtifactCacheMaxSize(int scoreArtifactCacheMaxSize) {
+        this.scoreArtifactCacheMaxSize = scoreArtifactCacheMaxSize;
+    }
+
+    @VisibleForTesting
+    void setScoreArtifactCacheExpirationTime(int scoreArtifactCacheExpirationTime) {
+        this.scoreArtifactCacheExpirationTime = scoreArtifactCacheExpirationTime;
+    }
+
+    @VisibleForTesting
+    void setScoreArtifactCacheRefreshTime(int scoreArtifactCacheRefreshTime) {
+        this.scoreArtifactCacheRefreshTime = scoreArtifactCacheRefreshTime;
+    }
+
+    @VisibleForTesting
+    void setTaskScheduler(ThreadPoolTaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
+    }
+
     @PostConstruct
     public void initialize() throws Exception {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-        instantiateCache();
         localModelJsonCacheDirIdentifier = StringUtils.defaultIfBlank(NetworkUtils.getHostName(), UUID_IDENTIFIER);
+        instantiateCache();
+        scheduleRefreshJob();
     }
 
     @Override
@@ -298,6 +317,13 @@ public class ModelRetrieverImpl implements ModelRetriever {
             throw new LedpException(LedpCode.LEDP_31200, new String[] { modelId });
         }
         return bucketMetadataList;
+    }
+
+    @VisibleForTesting
+    List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame) {
+        List<ModelSummary> modelSummaryList = internalResourceRestApiProxy
+                .getModelSummariesModifiedWithinTimeFrame(timeFrame);
+        return modelSummaryList;
     }
 
     private Triple<String, String, String> determineScoreArtifactBaseEventTableAndSamplePath(
@@ -592,12 +618,24 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 .getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
     }
 
+    @Override
+    public ScoringArtifacts getModelArtifactsIfPresent(CustomerSpace customerSpace, String modelId) {
+        return scoreArtifactCache
+                .getIfPresent(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
+    }
+
+    @Override
+    public void updateModelArtifacts(CustomerSpace customerSpace, //
+            String modelId, ScoringArtifacts scoringArtifacts) {
+        scoreArtifactCache.put(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId),
+                scoringArtifacts);
+    }
+
     void instantiateCache() {
         log.info("Instantiating score artifact cache with max size " + scoreArtifactCacheMaxSize);
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        scoreArtifactCache = CacheBuilder.newBuilder().maximumSize(scoreArtifactCacheMaxSize)
-                .expireAfterWrite(scoreArtifactCacheExpirationTime, TimeUnit.DAYS)
-                .refreshAfterWrite(scoreArtifactCacheRefreshTime, TimeUnit.SECONDS)
+        scoreArtifactCache = CacheBuilder.newBuilder().maximumSize(scoreArtifactCacheMaxSize) //
+                .expireAfterAccess(scoreArtifactCacheExpirationTime, TimeUnit.DAYS) //
+                .refreshAfterWrite(scoreArtifactCacheRefreshTime, TimeUnit.SECONDS) //
                 .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
                     @Override
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
@@ -609,34 +647,41 @@ public class ModelRetrieverImpl implements ModelRetriever {
                             log.info("Load completed model artifacts for: " + key.getKey());
                         }
                         return artifact;
-                    }
-
-                    @Override
-                    public ListenableFuture<ScoringArtifacts> reload(AbstractMap.SimpleEntry<CustomerSpace, String> key,
-                            ScoringArtifacts oldModelSummaryArtifacts) {
-                        if (log.isInfoEnabled()) {
-                            log.info("Reload model artifacts for: " + key.getKey());
-                        }
-                        ListenableFutureTask<ScoringArtifacts> task = ListenableFutureTask
-                                .create(new Callable<ScoringArtifacts>() {
-                                    @Override
-                                    public ScoringArtifacts call() {
-                                        ModelSummary modelSummary = getModelSummary(key.getKey(), key.getValue());
-                                        List<BucketMetadata> bucketMetadataList = getBucketMetadata(key.getKey(),
-                                                key.getValue());
-                                        oldModelSummaryArtifacts.setBucketMetadataList(bucketMetadataList);
-                                        oldModelSummaryArtifacts.setModelSummary(modelSummary);
-                                        return oldModelSummaryArtifacts;
-                                    }
-                                });
-                        if (log.isInfoEnabled()) {
-                            log.info("Reload model artifacts completed for: " + key.getKey());
-                        }
-                        executorService.execute(task);
-                        return task;
-                    }
+                    };
                 });
 
+    }
+
+    void scheduleRefreshJob() {
+        taskScheduler.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                refreshCache();
+            }
+        }, TimeUnit.SECONDS.toMillis(scoreArtifactCacheRefreshTime));
+    }
+
+    private void refreshCache() {
+        log.info("Begin to refresh cache");
+        List<ModelSummary> modelSummaryListNeedsToRefresh = getModelSummariesModifiedWithinTimeFrame(
+                TimeUnit.SECONDS.toMillis(scoreArtifactCacheRefreshTime));
+        if (CollectionUtils.isNotEmpty(modelSummaryListNeedsToRefresh)) {
+            // get the modelsummary and its associated bucket metadata
+            modelSummaryListNeedsToRefresh.forEach(modelsummay -> {
+                CustomerSpace cs = CustomerSpace.parse(modelsummay.getTenant().getId());
+                String modelId = modelsummay.getId();
+                List<BucketMetadata> bucketMetadataList = getBucketMetadata(cs, modelId);
+                ScoringArtifacts scoringArtifacts = getModelArtifactsIfPresent(cs, modelId);
+                // lazy refresh by only updating the cache entry if present
+                if (scoringArtifacts != null) {
+                    scoringArtifacts.setBucketMetadataList(bucketMetadataList);
+                    scoringArtifacts.setModelSummary(modelsummay);
+                    updateModelArtifacts(cs, modelId, scoringArtifacts);
+                    log.info(String.format("Refresh cache for model %s finishes.", modelId));
+                }
+            });
+        }
+        log.info("Refresh cache ends");
     }
 
     @Override

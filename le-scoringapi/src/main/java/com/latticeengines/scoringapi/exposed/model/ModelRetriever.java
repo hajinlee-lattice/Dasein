@@ -19,6 +19,8 @@ public interface ModelRetriever {
 
     ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, String modelId);
 
+    void updateModelArtifacts(CustomerSpace customerSpace, String modelId, ScoringArtifacts scoringArtifacts);
+
     ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId);
 
     void setLocalPathToPersist(String localPathToPersist);
@@ -31,4 +33,6 @@ public interface ModelRetriever {
             boolean considerAllStatus);
 
     Fields getModelFields(CustomerSpace customerSpace, String modelId, List<Predictor> predictors);
+
+    ScoringArtifacts getModelArtifactsIfPresent(CustomerSpace customerSpace, String modelId);
 }
