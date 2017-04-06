@@ -69,7 +69,7 @@ public class ExportConfiguration extends EaiJobConfiguration {
         return table;
     }
 
-    @JsonProperty("tables")
+    @JsonProperty("table")
     public void setTable(Table table) {
         this.table = table;
     }
