@@ -95,7 +95,6 @@ angular.module('lp.models.segments', [
     };
 
     vm.duplicateSegmentClick = function(){
-        // Need help from Jamey on this one
     };
 
     vm.showDeleteSegmentModalClick = function($event, segment){
