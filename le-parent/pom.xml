@@ -41,7 +41,7 @@
         <spring.version>4.0.0.RELEASE</spring.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <h2.version>1.4.191</h2.version>
-        <c3p0.version>0.9.5.2</c3p0.version>
+        <c3p0.version>0.9.1.1</c3p0.version>
         <newrelic.version>2.14.1</newrelic.version>
         <aspectj.version>1.8.7</aspectj.version>
         <reflections.version>0.9.9</reflections.version>
