@@ -104,9 +104,4 @@ angular.module('lp.models.segments', [
         DeleteSegmentModal.show(segment);
     };
 
-    vm.createNewSegmentClick = function($event){
-        $event.preventDefault();
-        SegmentService.CreateSegment();
-    };
-
 });
