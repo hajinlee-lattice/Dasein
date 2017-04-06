@@ -91,7 +91,7 @@ angular
                         vm.uploadFile(vm.selectedFile);
                     }
 
-                    if (vm.isCompressed()) {
+                    if (vm.isCompressed(vm.selectedFile)) {
                         try {
                             vm.processFile(vm.selectedFile)
                                 .then(vm.uploadFile);
@@ -358,9 +358,14 @@ angular
                 ImportService.Upload(options).then(vm.uploadResponse);
             }
 
-            vm.isCompressed = function() {
+            vm.isCompressed = function(file) {
+                console.log('file',file)
                 if (!vm.params) {
                     vm.params = {};
+                }
+
+                if (file && file.size < 16384) {
+                    vm.params.compressed = false;
                 }
 
                 return (vm.params.compressed || vm.params.compressed === false ? vm.params.compressed : vm.compressed);

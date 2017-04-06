@@ -77,7 +77,7 @@
 
         <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
-                <div ng-if="vm.subcategories[vm.category].length > 1">
+                <div ng-if="vm.subcategories[vm.category].length > 1 || (vm.isYesNoCategory(vm.category, true) && vm.subcategories[vm.category].length >= 1)">
                     <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
                 </div>
             </div>
