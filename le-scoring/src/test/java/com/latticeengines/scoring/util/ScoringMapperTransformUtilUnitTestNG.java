@@ -37,7 +37,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private final static String DATA_PATH = "com/latticeengines/scoring/data/";
     private final static String MODEL_PATH = "com/latticeengines/scoring/models/";
-    private final static String PYTHON_PATH = "com/latticeengines/scoring/python/scoring.py";
+    private final static String PYTHON_PATH = "com/latticeengines/scoring/python/testscoring.py";
     private final static String MODEL_SUPPORTED_FILE_PATH = "com/latticeengines/scoring/models/supportedFiles/";
     private final static String UUID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
     private final static String MODEL_NAME = "2Checkout_relaunch_PLSModel_2015-03-19_15-37";
@@ -58,7 +58,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         URL modelPathUrl = ClassLoader.getSystemResource(MODEL_PATH + UUID);
         URL pythonPathUrl = ClassLoader.getSystemResource(PYTHON_PATH);
         FileUtils.copyURLToFile(modelPathUrl, new File(UUID));
-        FileUtils.copyURLToFile(pythonPathUrl, new File("scoring.py"));
+        FileUtils.copyURLToFile(pythonPathUrl, new File("testscoring.py"));
         modelPath = new URI(modelPathUrl.getFile() + "#" + UUID);
         pythonPath = new URI(pythonPathUrl.getFile());
         localFilePaths = new ArrayList<URI>();
