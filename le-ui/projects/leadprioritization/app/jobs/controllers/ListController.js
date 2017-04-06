@@ -18,7 +18,7 @@ angular.module('lp.jobs', [
 
     var clientSession = BrowserStorageUtility.getClientSession();
     $scope.TenantId = clientSession.Tenant.Identifier;
-    
+
     $scope.init = function() {
         if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
             && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
@@ -44,7 +44,7 @@ angular.module('lp.jobs', [
         }
 
         $scope.header = {
-            filter: { 
+            filter: {
                 label: 'Filter By',
                 unfiltered: $scope.jobs,
                 filtered: $scope.jobs,
@@ -92,14 +92,14 @@ angular.module('lp.jobs', [
                 iconclass: 'orange-button select-more',
                 iconrotate: true,
                 items: [
-                    { 
+                    {
                         click: $scope.handleRescoreClick,
                         label: 'Score Training Set',
-                        icon: 'fa fa fa-th-list' 
+                        icon: 'fa fa fa-th-list'
                     },{
                         sref: 'home.model.scoring',
                         label: 'Score List',
-                        icon: 'fa fa-file-excel-o' 
+                        icon: 'fa fa-file-excel-o'
                     }
                 ]
             }
@@ -112,20 +112,20 @@ angular.module('lp.jobs', [
                 $scope.loadingJobs = false;
             });
         }
-        
+
         var BULK_SCORING_INTERVAL = 30 * 1000,
             BULK_SCORING_ID;
 
         // this stuff happens only on Model Bulk Scoring page
         getAllJobs();
-        
+
         if (modelId) {
             BULK_SCORING_ID = $interval(getAllJobs, BULK_SCORING_INTERVAL);
         }
 
         $scope.$on("JobCompleted", function(evt, data) {
             $scope.succeeded = true;
-            if ($scope.state == 'model' || data.jobType.toUpperCase().indexOf('SCORE')) {
+            if ($scope.state == 'model' || data.jobType.toUpperCase().indexOf('SCORE') > -1) {
                 $scope.successMsg = 'Success! Scoring job has completed.';
             } else {
                 $scope.successMsg = 'Success! Modeling job has completed.';
@@ -174,7 +174,7 @@ angular.module('lp.jobs', [
         }
         ScoreLeadEnrichmentModal.showRescoreModal();
     };
-    
+
     $scope.closeJobSuccessMessage = function() {
         $scope.succeeded = false;
     };
