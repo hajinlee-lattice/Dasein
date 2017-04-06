@@ -22,7 +22,7 @@ angular.module('common.datacloud.query.builder', [])
     vm.init = function () {
         DataCloudStore.getEnrichments().then(function(result) {
             vm.filters = createFiltersFromRestrictions(QueryRestriction, result.data);
-            loading = false;
+            vm.loading = false;
         });
     };
     vm.init();

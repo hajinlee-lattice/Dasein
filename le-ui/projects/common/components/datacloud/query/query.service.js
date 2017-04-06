@@ -92,15 +92,24 @@ angular.module('common.datacloud.query.service',[
         return null;
     };
 
+    var tickTock = true;
     this.addRestriction = function(attribute) {
-        attribute.bucket = { max: 'No', min: 'No', is_null_only: false };
+        attribute.bucket = (tickTock = !tickTock) ? { max: 'No', min: 'No', is_null_only: false } : { max: 'Yes', min: 'Yes', is_null_only: false };
 
         var attributes = this.findAttributes(attribute.columnName);
-        if (attributes.length === 0) {
-            this.restriction.all.push(new BucketRestriction(attribute.columnName, attribute.bucket));
+        var found = false;
+        for (var i = 0; i < attributes.length; i++) {
+            var attributeMeta = attributes[i];
+            if (BucketRestriction.isEqualBucket(attribute, attributeMeta.attribute)) {
+                found = true;
+                break;
+            }
         }
 
-        this.updateCountsDebounced();
+        if (!found) {
+            this.restriction.all.push(new BucketRestriction(attribute.columnName, attribute.bucket));
+            this.updateCountsDebounced();
+        }
     };
 
     this.removeRestriction = function(attribute) {
@@ -110,11 +119,10 @@ angular.module('common.datacloud.query.service',[
             var columnName = attributeMeta.attribute.bucketRestriction.lhs.columnLookup.column_name;
             if (attribute.columnName === columnName) {
                 this.restriction[attributeMeta.groupKey].splice(attributeMeta.index, 1);
+                this.updateCountsDebounced();
                 break;
             }
         }
-
-        this.updateCountsDebounced();
     };
 
     this.findAttributes = function(columnName) {
