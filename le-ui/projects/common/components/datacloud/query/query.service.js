@@ -186,6 +186,8 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.GetCountByQuery = function(context, query) {
+        query.restriction = this.getRestriction();
+
         if (!validContext(context)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
