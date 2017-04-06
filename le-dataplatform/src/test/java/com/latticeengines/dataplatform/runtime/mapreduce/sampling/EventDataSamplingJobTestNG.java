@@ -16,7 +16,7 @@ public class EventDataSamplingJobTestNG extends DataplatformMiniClusterFunctiona
     private String input = ClassLoader
             .getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE").getPath();
 
-    @Test(groups = "functional.minicluster")
+    @Test(groups = "functional")
     public void test() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);

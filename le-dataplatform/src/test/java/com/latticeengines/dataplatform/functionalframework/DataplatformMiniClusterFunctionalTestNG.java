@@ -7,6 +7,8 @@ import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
@@ -30,11 +32,15 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.runtime.mapreduce.MRJobCustomizationBase;
 import com.latticeengines.dataplatform.exposed.service.JobService;
+import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctionalTestNGBase {
+
+    protected static final Log log = LogFactory.getLog(DataplatformMiniClusterFunctionalTestNG.class);
 
     @Autowired
     private JobService jobService;
@@ -64,13 +70,13 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
 
     public static final String JACOCO_DEST_FILE = System.getenv("JACOCO_DEST_FILE");
 
-    @BeforeClass(groups = "functional.minicluster")
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupMiniCluster();
         uploadArtifactsToHdfs();
     }
 
-    @AfterClass(groups = "functional.minicluster")
+    @AfterClass(groups = "functional")
     public void clear() throws IOException {
         miniCluster.close();
         hdfsCluster.shutdown();
@@ -148,6 +154,9 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
         yarnClientCustomizationService.setConfiguration(miniclusterConfiguration);
         YarnClientCustomization customization = YarnClientCustomization.getCustomization(yarnClientName);
         customization.setConfiguration(miniclusterConfiguration);
+
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.overwriteQueueAssignment(
+                appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()), queueScheme));
 
         containerProperties.put(ContainerProperty.JACOCO_AGENT_FILE.name(), JACOCO_AGENT_FILE);
         containerProperties.put(ContainerProperty.JACOCO_DEST_FILE.name(), JACOCO_DEST_FILE);

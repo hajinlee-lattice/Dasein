@@ -38,7 +38,7 @@ public class EventDataScoringJobTestNG extends DataplatformMiniClusterFunctional
     private String uuid;
 
     @Override
-    @BeforeClass(groups = "functional.minicluster")
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         super.setup();
         tenant = CustomerSpace.parse(this.getClass().getSimpleName()).toString();
@@ -74,7 +74,7 @@ public class EventDataScoringJobTestNG extends DataplatformMiniClusterFunctional
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "scoring", scoringHdfsPath);
     }
 
-    @Test(groups = "functional.minicluster")
+    @Test(groups = "functional")
     public void test() throws Exception {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(tenant);

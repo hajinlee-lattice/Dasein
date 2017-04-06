@@ -18,17 +18,15 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
 import com.latticeengines.domain.exposed.modeling.Classifier;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class YarnJobServiceImplTestNG extends DataplatformMiniClusterFunctionalTestNG {
 
     private String baseDir = "/functionalTests/" + suffix;
 
-    @BeforeClass(groups = { "functional.minicluster" })
+    @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         super.setup();
         FileSystem fs = FileSystem.get(miniclusterConfiguration);
@@ -53,7 +51,7 @@ public class YarnJobServiceImplTestNG extends DataplatformMiniClusterFunctionalT
         doCopy(fs, copyEntries);
     }
 
-    @Test(groups = "functional.minicluster")
+    @Test(groups = "functional")
     public void test() throws Exception {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
@@ -76,9 +74,6 @@ public class YarnJobServiceImplTestNG extends DataplatformMiniClusterFunctionalT
                 "/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/pipeline.json");
 
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.overwriteQueueAssignment(
-                appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()), queueScheme));
-
         Properties containerProperties = createContainerPropertiesForYarnJob();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
         ApplicationId appId = testYarnJob("pythonClient", appMasterProperties, containerProperties);
