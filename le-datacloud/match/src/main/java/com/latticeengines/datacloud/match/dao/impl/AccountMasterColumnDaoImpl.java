@@ -37,7 +37,7 @@ public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactor
     public List<AccountMasterColumn> findByTag(String tag, String dataCloudVersion) {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format(
-                "from %s where groups like :tag and dataCloudVersion = :dataCloudVersion order by category asc, subcategory asc",
+                "from %s where groups like :tag and dataCloudVersion = :dataCloudVersion order by category asc, subcategory asc, PID asc",
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("tag", "%" + tag + "%");
