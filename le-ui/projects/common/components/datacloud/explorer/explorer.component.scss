@@ -879,6 +879,12 @@
             }
         }
     }
+    .box-inner ul.attributes > li,
+    .box-inner .stats ul > li {
+        input {
+            pointer-events: none;
+        }
+    }
 
     *[ng-click]:not(.ignore-ngclick) {
         cursor: pointer;

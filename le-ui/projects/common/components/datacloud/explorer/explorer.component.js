@@ -347,8 +347,8 @@ angular.module('common.datacloud.explorer', [
             getTopAttributes();
             getHighlightMetadata();
 
-            if(vm.metadataSegments) {
-                getExplorerSegments(vm.enrichments);
+            if(vm.metadataSegments || QueryRestriction) {
+                getExplorerSegments(vm.enrichments || QueryRestriction);
                 //console.log(vm.filter(vm.enrichments, 'FieldName', 'TechIndicator_AmazonSimpleDB'));
             }
 
@@ -1117,8 +1117,10 @@ angular.module('common.datacloud.explorer', [
     }
 
     var getExplorerSegments = function(enrichments) {
-        for(var i in vm.metadataSegments) {
-            var restrictions = vm.metadataSegments[i];
+        vm.clearExplorerSegments();
+        var metadataSegments = vm.metadataSegments || QueryRestriction;
+        for(var i in metadataSegments) {
+            var restrictions = metadataSegments[i];
             for(var i in restrictions) {
                 var item = restrictions[i];
                 if(item.bucketRestriction) {
@@ -1135,6 +1137,18 @@ angular.module('common.datacloud.explorer', [
             }
         }
     }
+
+    vm.clearExplorerSegments = function() {
+        var _enrichments = vm.filter(vm.enrichments, 'SegmentChecked', true);
+        _enrichments.forEach(function(enrichment){
+            index = vm.enrichmentsMap[enrichment.FieldName];
+            if(index) {
+                delete vm.enrichments[index].SegmentChecked;
+            }
+        });
+        var __enrichments = vm.filter(vm.enrichments, 'SegmentChecked', true);
+    }
+
 
     var textSearch = function(haystack, needle, case_insensitive) {
         var case_insensitive = (case_insensitive === false ? false : true);
@@ -1243,8 +1257,22 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
+    vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
+    vm.selectSegmentAttributeRange = function(enrichment, stat) {
+        var attributeKey = enrichment.FieldName + stat.Lbl,
+            fieldName = enrichment.FieldName;
+
+        vm.segmentAttributeInputRange[attributeKey] = !vm.segmentAttributeInputRange[attributeKey];
+        vm.saveSegmentEnabled = true;
+        if (vm.segmentAttributeInputRange[attributeKey] === true) {
+            QueryStore.addRestriction({columnName: fieldName, bucket: stat.Range});
+        } else {
+            QueryStore.removeRestriction({columnName: fieldName, bucket: stat.Range});
+        }
+    }
+
     vm.saveSegment = function() {
-        if(Object.keys(vm.segmentAttributeInput).length) {
+        if(Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
             SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
                 if (!result.errorMsg) {
                     $state.go('home.model.segmentation', {}, {notify: true})
@@ -1252,7 +1280,6 @@ angular.module('common.datacloud.explorer', [
             });
         }
     }
-
 
     vm.init();
 })
