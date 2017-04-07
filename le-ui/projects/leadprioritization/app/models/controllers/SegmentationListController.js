@@ -25,15 +25,17 @@ angular.module('lp.models.segments', [
 
     vm.init();
 
-    $scope.customMenuClick = function ($event) {
+    vm.customMenuClick = function ($event, segment) {
 
         if ($event != null) {
             $event.stopPropagation();
         }
 
-        $scope.showCustomMenu = !$scope.showCustomMenu;
+        console.log(segment);
 
-        if ($scope.showCustomMenu) {
+        segment.showCustomMenu = !segment.showCustomMenu;
+
+        if (segment.showCustomMenu) {
             $(document).bind('click', function(event){
                 var isClickedElementChildOfPopup = $element
                     .find(event.target)
@@ -100,6 +102,9 @@ angular.module('lp.models.segments', [
     vm.showDeleteSegmentModalClick = function($event, segment){
         $event.preventDefault();
         $event.stopPropagation();
+
+        console.log(segment);
+
         DeleteSegmentModal.show(segment);
     };
 

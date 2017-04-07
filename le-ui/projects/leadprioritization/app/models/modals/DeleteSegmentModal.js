@@ -9,8 +9,9 @@ angular.module('mainApp.models.modals.DeleteSegmentModal', [
         $http.get('app/models/views/DeleteSegmentConfirmView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
-
             scope.segmentName = segment.name;
+
+            console.log(scope.segmentName);
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -42,6 +43,9 @@ angular.module('mainApp.models.modals.DeleteSegmentModal', [
 
     function deleteSegment(segmentName) {
         $("#deleteSegmentError").hide();
+
+        console.log(segmentName);
+
         SegmentService.DeleteSegment(segmentName).then(function(result) {
             if (result != null && result.success === true) {
                 $("#modalContainer").modal('hide');
