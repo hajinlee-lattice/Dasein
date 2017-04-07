@@ -84,6 +84,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
                                     modelSummary.getDataCloudVersion())//
                             .getVersion();
         }
+        log.info(String.format("Found current DataCloudVersion %s. (DataCloudVersion got from ModelSummary: %s)",
+                currentDataCloudVersion, modelSummary == null ? null : modelSummary.getDataCloudVersion()));
 
         if (shouldCallEnrichmentExplicitly) {
             Map<String, Map<String, Object>> result = new HashMap<>();
