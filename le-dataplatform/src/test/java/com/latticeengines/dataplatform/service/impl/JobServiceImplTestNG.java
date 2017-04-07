@@ -355,7 +355,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      *
      * @throws Exception
      */
-    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = false)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
