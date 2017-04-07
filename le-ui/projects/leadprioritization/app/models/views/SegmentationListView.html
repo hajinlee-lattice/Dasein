@@ -8,18 +8,18 @@
                 <li
                     ng-repeat="segment in vm.segments"
                     ng-click="vm.tileClick($event, segment.name)"
-                    ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
+                    ng-mouseleave="segment.showCustomMenu ? vm.customMenuClick($event, segment) : null"
                 >
                     <div class="tile-header" ng-if="!vm.editSegment">
                         <h2 title="{{segment.name}}">{{segment.name | limitTo: 36 }}{{segment.name.length > 36 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
                             <button
                                     type="button"
-                                    ng-click="customMenuClick($event)"
-                                    ng-class="{ 'open': showCustomMenu }">
-                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
+                                    ng-click="vm.customMenuClick($event, segment)"
+                                    ng-class="{ 'open': segment.showCustomMenu }">
+                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': segment.showCustomMenu }"></span>
                             </button>
-                            <ul class="model-menu" ng-show="showCustomMenu">
+                            <ul class="model-menu" ng-show="segment.showCustomMenu">
                                 <li data-ng-click="vm.editSegmentClick($event, segment)">
                                     <a href="javascript:void(0)">Edit</a>
                                     <i class="fa fa-edit"></i>
