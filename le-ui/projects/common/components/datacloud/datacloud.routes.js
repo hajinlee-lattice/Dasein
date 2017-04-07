@@ -165,6 +165,12 @@ angular
                             deferred.resolve(LookupResponse.attributes || {});
 
                             return deferred.promise;
+                        },
+                        SegmentServiceProxy: function() {
+                            return null;
+                        },
+                        QueryRestriction: function() {
+                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -197,14 +203,11 @@ angular
                         EnrichmentAccountLookup: function() {
                             return null;
                         },
-                        AnalysisLookup: function() {
-                            return null;
-                        },
                         SegmentServiceProxy: function() {
                             return null;
                         },
                         QueryRestriction: function() {
-                            return null;                           
+                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -245,7 +248,10 @@ angular
 
                             return deferred.promise;
                         },
-                        AnalysisLookup: function() {
+                        SegmentServiceProxy: function() {
+                            return null;
+                        },
+                        QueryRestriction: function() {
                             return null;
                         }
                     },
@@ -324,9 +330,6 @@ angular
                     resolve: {
                         // Note: this is needed for Account Lookup, dont remove!
                         EnrichmentAccountLookup: function() {
-                            return null;
-                        },
-                        AnalysisLookup: function() {
                             return null;
                         }
                     },
