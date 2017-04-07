@@ -33,6 +33,8 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
@@ -463,6 +465,13 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
                 .filter(summary -> summary.getId().equals(summary1.getId()) || summary.getId().equals(summary2.getId()))
                 .toArray();
         assertEquals(result.length, 2);
+        for (Object obj : result) {
+        	ModelSummary ms = (ModelSummary) obj;
+        	KeyValue details = ms.getDetails();
+        	assertNotNull(details);
+        	assertEquals(details.getTenantId(), ms.getTenantId());
+        	assertEquals(ms.getDataCloudVersion(), "2.0.3");
+        }
     }
 
     private AttributeMap createValidMap() {
