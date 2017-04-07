@@ -77,7 +77,9 @@ public class SingleRecordMatcher extends AbstractMatcher {
         if (modelSummary == null) {
             // this means only enrichment is needed
             currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+            log.info("model is null");
         } else if (modelSummary != null && StringUtils.isNotBlank(modelSummary.getDataCloudVersion())) {
+        	log.info(String.format("modelSummary.getDataCloudVersion() is %s", modelSummary.getDataCloudVersion()));
             currentDataCloudVersion = modelSummary.getDataCloudVersion() == null ? null
                     : columnMetadataProxy
                             .latestVersion(//
