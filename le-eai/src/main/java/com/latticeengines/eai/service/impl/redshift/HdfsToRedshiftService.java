@@ -10,7 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
@@ -36,22 +35,15 @@ public class HdfsToRedshiftService {
     @Autowired
     private S3Service s3Service;
 
-    @Value("${aws.s3.bucket}")
-    private String s3Bucket;
-
     @Autowired
     private Configuration yarnConfiguration;
 
     public void uploadDataObjectToS3(HdfsToRedshiftConfiguration configuration) {
 
-        if (!configuration.isAppend()) {
-            cleanupS3(configuration);
-        }
-
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         HdfsToS3Configuration s3Configuration = new HdfsToS3Configuration();
         s3Configuration.setSplitSize(100L * 1024 * 1024);
-        s3Configuration.setS3Bucket(s3Bucket);
+        s3Configuration.setS3Bucket(redshiftTableConfig.getS3Bucket());
         s3Configuration.setS3Prefix(s3Prefix(redshiftTableConfig));
         s3Configuration.setExportInputPath(configuration.getExportInputPath());
         s3Configuration.setTargetFilename(s3FileName(redshiftTableConfig));
@@ -61,13 +53,17 @@ public class HdfsToRedshiftService {
     }
 
     public void createRedshiftTable(HdfsToRedshiftConfiguration configuration) {
+        if (configuration.isAppend()) {
+            return;
+        }
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         redshiftService.dropTable(redshiftTableConfig.getTableName());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
             RedshiftUtils.generateJsonPathsFile(schema, outputStream);
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
-                s3Service.uploadInputStream(s3Bucket, redshiftTableConfig.getJsonPathPrefix(), inputStream, true);
+                s3Service.uploadInputStream(redshiftTableConfig.getS3Bucket(), redshiftTableConfig.getJsonPathPrefix(),
+                        inputStream, true);
             }
             redshiftService.createTable(redshiftTableConfig, schema);
         } catch (IOException e) {
@@ -79,20 +75,18 @@ public class HdfsToRedshiftService {
 
     public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
-        redshiftService.loadTableFromAvroInS3(redshiftTableConfig.getTableName(), s3Bucket,
+        redshiftService.loadTableFromAvroInS3(redshiftTableConfig.getTableName(), redshiftTableConfig.getS3Bucket(),
                 s3Prefix(redshiftTableConfig), redshiftTableConfig.getJsonPathPrefix());
     }
 
-    // should only be used for testing purpose
-    public void setS3Bucket(String bucket) {
-        s3Bucket = bucket;
-    }
-
     public void cleanupS3(HdfsToRedshiftConfiguration configuration) {
+        if (configuration.isAppend()) {
+            return;
+        }
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         String prefix = s3Prefix(redshiftTableConfig);
-        s3Service.cleanupPrefix(s3Bucket, prefix);
-        s3Service.cleanupPrefix(s3Bucket, redshiftTableConfig.getJsonPathPrefix());
+        s3Service.cleanupPrefix(redshiftTableConfig.getS3Bucket(), prefix);
+        s3Service.cleanupPrefix(redshiftTableConfig.getS3Bucket(), redshiftTableConfig.getJsonPathPrefix());
     }
 
     private String s3FileName(RedshiftTableConfiguration configuration) {

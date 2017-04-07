@@ -133,6 +133,8 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
                 miniclusterConfiguration.get(YarnConfiguration.RM_SCHEDULER_ADDRESS));
         properties.setProperty("hadoop." + FileSystem.FS_DEFAULT_NAME_KEY,
                 "hdfs://localhost:" + hdfsCluster.getNameNodePort());
+        properties.setProperty("swlib." + FileSystem.FS_DEFAULT_NAME_KEY,
+                "hdfs://localhost:" + hdfsCluster.getNameNodePort());
         return properties;
     }
 

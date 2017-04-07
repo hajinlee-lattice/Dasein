@@ -30,6 +30,11 @@ public class RedshiftTableConfiguration {
     @NotEmptyString
     private String jsonPathPrefix;
 
+    @JsonProperty("s3_bucket")
+    @NotNull
+    @NotEmptyString
+    private String s3Bucket;
+
     public String getTableName() {
         return tableName;
     }
@@ -76,6 +81,14 @@ public class RedshiftTableConfiguration {
 
     public void setJsonPathPrefix(String jsonPathPrefix) {
         this.jsonPathPrefix = jsonPathPrefix;
+    }
+
+    public String getS3Bucket() {
+        return s3Bucket;
+    }
+
+    public void setS3Bucket(String s3Bucket) {
+        this.s3Bucket = s3Bucket;
     }
 
     public enum SortKeyType {
