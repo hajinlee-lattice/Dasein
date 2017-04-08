@@ -247,8 +247,8 @@ Model List
 }
 .meta-data {
     position: absolute;
-    bottom: 13px;
-    left: 13px;
+    bottom: 0;
+    left: 0;
     width: 94%;
     .stats, .status {
         display: inline-block;
@@ -268,7 +268,7 @@ Model List
     position: absolute;
     display: inline;
     right: 16px;
-    bottom: 32px;
+    bottom: 18px;
     .fa-exclamation-triangle {
         font-size: 16px;
         color: #fdbc54;

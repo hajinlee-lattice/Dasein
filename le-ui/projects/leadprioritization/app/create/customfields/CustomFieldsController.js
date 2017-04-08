@@ -218,7 +218,7 @@ angular
 
     vm.clickNextModel = function() {
 
-        ShowSpinner('Saving Field Mappings...');
+        ShowSpinner('Saving Field Mappings and Executing Modeling Job...');
 
         // build ignoredFields list from temp 'ignored' fieldMapping property
         vm.fieldMappings.forEach(function(fieldMapping) {
@@ -230,7 +230,6 @@ angular
         });
 
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument).then(function(result) {
-            ShowSpinner('Executing Modeling Job...');
 
             ImportService.StartModeling(vm.csvMetadata).then(function(result) {
                 if (result.Result && result.Result != "") {

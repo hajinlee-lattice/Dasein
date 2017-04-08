@@ -148,7 +148,7 @@ angular
     vm.clickNextScore = function() {
         $anchorScroll();
 
-        ShowSpinner('Saving Field Mappings...');
+        ShowSpinner('Saving Field Mappings and Preparing Scoring Job...');
 
         FieldDocument.fieldMappings = _.chain(angular.extend({}, vm.standardFieldMappings, vm.additionalFieldMappings))
             .pick(function (item) {
@@ -163,7 +163,6 @@ angular
         })
 
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
-            ShowSpinner('Preparing Scoring Job...');
             ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName, 'home.model.jobs');
         });
     };

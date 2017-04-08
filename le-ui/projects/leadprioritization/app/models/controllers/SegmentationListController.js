@@ -16,6 +16,7 @@ angular.module('lp.models.segments', [
     });
 
     vm.init = function() {
+
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
 
@@ -30,8 +31,6 @@ angular.module('lp.models.segments', [
         if ($event != null) {
             $event.stopPropagation();
         }
-
-        console.log(segment);
 
         segment.showCustomMenu = !segment.showCustomMenu;
 
@@ -63,49 +62,54 @@ angular.module('lp.models.segments', [
 
     vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
-
-        console.log(segment);
-
-        $event.currentTarget = vm.editSegment;
+        segment.showCustomMenu = !segment.showCustomMenu;
+        segment.editSegment = !segment.editSegment;
     };
 
-    vm.cancelEditSegmentClicked = function() {
-        vm.editSegment = false;
+    vm.cancelEditSegmentClicked = function($event, segment) {
+        $event.stopPropagation();
+        segment.editSegment = !segment.editSegment;
     };
 
     vm.saveSegmentClicked = function($event, segment) {
 
+        $event.stopPropagation();
+
         vm.saveInProgress = true;
 
         var segment = {
-            segmentName: vm.segmentName,
-            segmentDescription: vm.segmentDescription
+            name: segment.name,
+            display_name: segment.display_name,
+            description: segment.description
         };
 
-        SegmentService.UpdateSegment(segment).then(function(result) {
+        SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
 
             var errorMsg = result.errorMsg;
 
             if (result.success) {
-                $state.go('home.model.segmentation');
+                console.log("success");
+                $state.go('home.model.segmentation', {}, { reload: true });
             } else {
+                console.log("error");
                 vm.saveInProgress = false;
                 vm.addSegmentErrorMessage = errorMsg;
                 vm.showAddSegmentError = true;
             }
         });
+
     };
 
     vm.duplicateSegmentClick = function(){
     };
 
     vm.showDeleteSegmentModalClick = function($event, segment){
+
         $event.preventDefault();
         $event.stopPropagation();
 
-        console.log(segment);
-
         DeleteSegmentModal.show(segment);
+
     };
 
 });

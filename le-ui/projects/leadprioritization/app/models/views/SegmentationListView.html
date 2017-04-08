@@ -7,11 +7,11 @@
 
                 <li
                     ng-repeat="segment in vm.segments"
-                    ng-click="vm.tileClick($event, segment.name)"
+                    ng-click="vm.tileClick($event, segment.display_name)"
                     ng-mouseleave="segment.showCustomMenu ? vm.customMenuClick($event, segment) : null"
                 >
-                    <div class="tile-header" ng-if="!vm.editSegment">
-                        <h2 title="{{segment.name}}">{{segment.name | limitTo: 36 }}{{segment.name.length > 36 ? '&hellip;' : ''}}</h2>
+                    <div class="tile-header" ng-if="!segment.editSegment">
+                        <h2 title="{{segment.display_name}}">{{segment.display_name | limitTo: 44 }}{{segment.display_name.length > 44 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
                             <button
                                     type="button"
@@ -24,10 +24,10 @@
                                     <a href="javascript:void(0)">Edit</a>
                                     <i class="fa fa-edit"></i>
                                 </li>
-                                <li data-ng-click="vm.duplicateSegmentClick($event, segment)">
+                                <!-- <li data-ng-click="vm.duplicateSegmentClick($event, segment)">
                                     <a href="javascript:void(0)">Duplicate</a>
                                     <i class="fa fa-copy"></i>
-                                </li>
+                                </li> -->
                                 <li data-ng-click="vm.showDeleteSegmentModalClick($event, segment)">
                                     <a href="javascript:void(0)">Delete</a>
                                     <i class="fa fa-trash"></i>
@@ -35,20 +35,24 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="tile-body" ng-if="!vm.editSegment">
-                        <p title="{{segment.description}}" ng-if="segment.description != null">{{segment.description | limitTo: 36 }}{{segment.description.length > 240 ? '&hellip;' : ''}}</p>
-                        <p ng-if="segment.description === null"><button class="button link-button" data-ng-click="vm.editSegmentClick($event, segment)">Add description</button></p>
+                    <div class="tile-body" ng-if="!segment.editSegment">
+                        <p title="{{segment.description}}" ng-if="segment.description != null">{{segment.description | limitTo: 250 }}{{segment.description.length > 250 ? '&hellip;' : ''}}</p>
+                        <p ng-if="segment.description === null || segment.description === ''"><button class="button link-button" data-ng-click="vm.editSegmentClick($event, segment)">Add description</button></p>
                     </div>
 
-                    <div class="edit-form" ng-if="vm.editSegment">
+                    <form 
+                        class="edit-form" 
+                        name="editSegmentForm"
+                        ng-if="segment.editSegment"
+                        ng-click="$event.stopPropagation()">
                         <div class="form-group">
-                            <label for="segmentName">Name
+                            <label for="segmentDisplayName">Name
                             <input
                                 autofocus
                                 type="text"
-                                id="segmentName"
-                                name="segmentName"
-                                data-ng-model="vm.segmentName"
+                                id="display_name"
+                                name="display_name"
+                                data-ng-model="segment.display_name"
                                 class="form-control" />
                                 </label>
                         </div>
@@ -56,9 +60,9 @@
                             <label for="segmentDescription">Description</label>
                             <textarea
                                 class="form-control"
-                                id="segmentDescription"
-                                name="segmentDescription"
-                                data-ng-model="vm.segmentDescription"
+                                id="description"
+                                name="description"
+                                data-ng-model="segment.description"
                             ></textarea>
                         </div>
                         <div class="actions">
@@ -70,16 +74,16 @@
                             <button
                                 type="button"
                                 class="button orange-button pull-right"
-                                ng-disabled="vm.canSave"
+                                ng-disabled="editSegmentForm.$pristine"
                                 ng-click="vm.saveSegmentClicked($event, segment)">
                                 Save</button>
                         </div>
-                    </div>
+                    </form>
 
-                    <div class="meta-data" ng-if="!vm.editSegment">
+                    <div class="meta-data" ng-if="!segment.editSegment">
                         <dl class="stats">
                             <dt>Accounts</dt>
-                            <dd class="small">{{segment.segment_properties[0].metadataSegmentProperty.value}}</dd>
+                            <dd class="small">{{segment.segment_properties[0].metadataSegmentProperty.value | number}}</dd>
                         </dl>
                     </div>
                 </li>

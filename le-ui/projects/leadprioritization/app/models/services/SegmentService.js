@@ -94,6 +94,8 @@ angular
     this.CreateOrUpdateSegment = function(segment) {
         var deferred = $q.defer();
 
+        console.log(segment);
+
         $http({
             method: 'POST',
             url: '/pls/metadatasegments/',
