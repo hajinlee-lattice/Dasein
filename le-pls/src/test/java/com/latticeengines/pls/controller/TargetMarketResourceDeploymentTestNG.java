@@ -41,7 +41,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
+    private static final String PLS_TARGETMARKET_URL = "/pls/targetmarkets/";
 
     @Autowired
     private Configuration yarnConfiguration;

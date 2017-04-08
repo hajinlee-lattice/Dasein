@@ -28,7 +28,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     private static final Log log = LogFactory.getLog(ProspectDiscoveryEndToEndDeploymentTestNG.class);
 
-    private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
+    private static final String PLS_TARGETMARKET_URL = "/pls/targetmarkets/";
 
     @Value("${pls.test.sfdc.user.name}")
     private String salesforceUserName;
