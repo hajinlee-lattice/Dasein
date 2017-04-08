@@ -292,10 +292,6 @@ angular
                 return (count ? true : false);
             }
 
-            vm.refineQuery = function() {
-                $state.go('home.model.analysis.explorer.query');
-            }
-
             vm.init_filters();
         }
     };

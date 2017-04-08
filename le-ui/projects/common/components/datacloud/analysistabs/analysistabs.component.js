@@ -1,9 +1,10 @@
 angular.module('common.datacloud.analysistabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
     ])
-.controller('AnalysisTabsController', function ($state, $stateParams, $scope,
-    FeatureFlagService, BrowserStorageUtility, ResourceUtility, DataCloudStore, QueryStore) {
-
+.controller('AnalysisTabsController', function (
+    $state, $stateParams, $scope, FeatureFlagService, BrowserStorageUtility, 
+    ResourceUtility, DataCloudStore, QueryStore
+) {
     var vm = this,
         flags = FeatureFlagService.Flags();
 
@@ -15,24 +16,48 @@ angular.module('common.datacloud.analysistabs', [
         counts: QueryStore.getCounts()
     });
 
+    vm.init = function() {
+        vm.attributes = vm.inModel() 
+            ? 'home.model.analysis.explorer' 
+            : 'home.segment.explorer';
+
+        vm.accounts = vm.inModel() 
+            ? 'home.model.analysis.accounts' 
+            : 'home.segment.accounts';
+
+        vm.contacts = vm.inModel() 
+            ? 'home.model.analysis.contacts' 
+            : 'home.segment.contacts';
+    }
+
+    vm.inModel = function() {
+        var name = $state.current.name.split('.');
+        return name[1] == 'model';
+    }
+
     vm.setStateParams = function(section) {
         var goHome = false;
-        if(section && section == vm.section && section) {
+        
+        if (section && section == vm.section && section) {
             goHome = true;
         }
+        
         vm.section = section;
+        
         var params = {
             section: vm.section
         }
-        if(goHome) {
+        
+        if (goHome) {
             params.category = '';
             params.subcategory = '';
         }
-        $state.go('home.model.analysis', params, { notify: true });
-    }
 
-    vm.init = function() {
-
+        if (vm.inModel()) {
+            $state.go('home.model.analysis', params, { notify: true });
+        } else {
+            $state.go('home.segment', params, { notify: true });
+        }
     }
 
     vm.init();

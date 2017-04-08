@@ -1271,11 +1271,28 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
+    vm.inModel = function() {
+        var name = $state.current.name.split('.');
+        return name[1] == 'model';
+    }
+
+    vm.refineQuery = function() {
+        if (vm.inModel()) {
+            $state.go('home.model.analysis.explorer.query');
+        } else{
+            $state.go('home.segment.explorer.query');
+        }
+    }
+
     vm.saveSegment = function() {
         if(Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
             SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
                 if (!result.errorMsg) {
-                    $state.go('home.model.segmentation', {}, {notify: true})
+                    if (vm.inModel()) {
+                        $state.go('home.model.segmentation', {}, {notify: true})
+                    } else {
+                        $state.go('home.segments', {}, {notify: true})
+                    }
                 }
             });
         }

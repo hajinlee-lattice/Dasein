@@ -34,6 +34,17 @@ angular.module('common.datacloud.query.results', [
         updatePage();
     };
 
+    vm.inModel = function() {
+        var name = $state.current.name.split('.');
+        return name[1] == 'model';
+    }
+
+    vm.refineQuery = function() {
+        return vm.inModel()
+            ? 'home.model.analysis.explorer.query'
+            : 'home.segment.explorer.query'
+    }
+
     vm.clearSearch = function() {
         vm.search = '';
         vm.current = 1;

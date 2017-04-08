@@ -260,11 +260,21 @@ angular
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
                 }
             }
-        })
-        .state('home.model.analysis', {
-            url: '/analysis?segment',
+        });
+
+    var getState = function(type, overwrite) {
+        var result = angular.extend({}, analysis[type]);
+
+        angular.extend(result, overwrite)
+
+        return result;
+    };
+
+    var analysis = {
+        main: {
+            url: '/analysis/:segment',
             params: {
-                segment: null
+                segment: 'Test'
             },
             resolve: angular.extend({}, DataCloudResolve, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
@@ -311,15 +321,15 @@ angular
                     templateUrl: '/components/datacloud/analysistabs/analysistabs.component.html'
                 }
             }
-        })
-        .state('home.model.analysis.explorer', { // no view, just puts attributes and query under same parent state
+        },
+        explorer: { // no view, just puts attributes and query under same parent state
             url: '/explorer',
             redirectTo: 'home.model.analysis.explorer.attributes'
-        })
-        .state('home.model.analysis.explorer.attributes', {
+        },
+        attributes: {
             url: '/attributes/:category/:subcategory',
             params: {
-                pageIcon: 'ico-performance',
+                pageIcon: 'ico-analysis',
                 pageTitle: 'Analysis',
                 section: 'segment.analysis',
                 category: {value: null, squash: true},
@@ -338,11 +348,11 @@ angular
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
                 }
             }
-        })
-        .state('home.model.analysis.explorer.query', {
+        },
+        query: {
             url: '/query',
             params: {
-                pageIcon: 'ico-performance',
+                pageIcon: 'ico-analysis',
                 pageTitle: 'Analysis',
                 section: 'query',
             },
@@ -353,11 +363,11 @@ angular
                     templateUrl: '/components/datacloud/query/builder/querybuilder.component.html'
                 }
             }
-        })
-        .state('home.model.analysis.accounts', {
+        },
+        accounts: {
             url: '/accounts',
             params: {
-                pageIcon: 'ico-segment',
+                pageIcon: 'ico-analysis',
                 pageTitle: 'Accounts'
             },
             views: {
@@ -374,11 +384,11 @@ angular
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
                 }
             }
-        })
-        .state('home.model.analysis.contacts', {
+        },
+        contacts: {
             url: '/contacts',
             params: {
-                pageIcon: 'ico-segment',
+                pageIcon: 'ico-analysis',
                 pageTitle: 'Contacts'
             },
             views: {
@@ -395,5 +405,34 @@ angular
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
                 }
             }
-        });
+        }
+    };
+
+    $stateProvider
+        .state('home.model.analysis', getState('main'))
+        .state('home.model.analysis.explorer', getState('explorer'))
+        .state('home.model.analysis.explorer.attributes', getState('attributes'))
+        .state('home.model.analysis.explorer.query', getState('query'))
+        .state('home.model.analysis.accounts', getState('accounts'))
+        .state('home.model.analysis.contacts', getState('contacts'))
+
+        .state('home.segment', getState('main', { 
+            url: '/segment/:segment', 
+            redirectTo: 'home.segment.explorer'
+        }))
+        .state('home.segment.explorer', getState('explorer', { 
+            redirectTo: 'home.segment.explorer.attributes' 
+        }))
+        .state('home.segment.explorer.attributes', getState('attributes', { 
+            params: { 
+                pageTitle: 'My Data',
+                pageIcon: 'ico-analysis',
+                section: 'segment.analysis',
+                category: {value: null, squash: true},
+                subcategory: {value: null, squash: true}
+            }
+        }))
+        .state('home.segment.explorer.query', getState('query'))
+        .state('home.segment.accounts', getState('accounts'))
+        .state('home.segment.contacts', getState('contacts'));
 });

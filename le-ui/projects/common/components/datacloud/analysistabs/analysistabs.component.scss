@@ -41,6 +41,11 @@
             }
             &.active {
                 background: #fafafa;
+                pointer-events: none;
+                .more-info {
+                    pointer-events: all;
+                    z-index: 999;
+                }
                 .tab-container {
                     border-top-color: orange;
                     border-bottom-color: transparent;

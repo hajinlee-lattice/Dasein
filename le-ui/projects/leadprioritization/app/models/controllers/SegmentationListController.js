@@ -3,25 +3,21 @@ angular.module('lp.models.segments', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.modals.DeleteSegmentModal'
 ])
-.controller('SegmentationListController', function ($scope, $rootScope, $element, $state, $stateParams, $timeout,
-    ResourceUtility, Model, ModelStore, SegmentsList, DeleteSegmentModal, SegmentService) {
+.controller('SegmentationListController', function ($scope, $element, $state, $stateParams, $timeout,
+    ResourceUtility, SegmentsList, DeleteSegmentModal, SegmentService) {
 
     var vm = this;
     angular.extend(vm, {
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
-        model: Model,
         ResourceUtility: ResourceUtility,
         segments: SegmentsList
     });
 
     vm.init = function() {
-
-        $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
 
         $scope.showCustomMenu = false;
-
     };
 
     vm.init();
@@ -54,9 +50,13 @@ angular.module('lp.models.segments', [
     };
 
     vm.tileClick = function ($event, segmentName) {
-
         $event.preventDefault();
-        $state.go('home.model.analysis', {segment: segmentName, create: false}, { reload: true } );
+
+        if ($state.current.name == 'home.segments') {
+            $state.go('home.segment', {segment: segmentName, create: false}, { reload: true } );
+        } else {
+            $state.go('home.model.analysis', {segment: segmentName, create: false}, { reload: true } );
+        }
 
     };
 

@@ -163,7 +163,6 @@ angular
                         id = $stateParams.modelId;
 
                     ModelStore.getModel(id).then(function(result) {
-                        console.log('getModel', id, result);
                         deferred.resolve(result);
                     });
 
@@ -233,7 +232,40 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: '',
+                    controller: function($rootScope, Model) {
+                        $rootScope.$broadcast('model-details', { 
+                            displayName: Model.ModelDetails.DisplayName 
+                        });
+                    },
+                    template: ''
+                },
+                "main@": {
+                    resolve: {
+                        SegmentsList: function($q, SegmentService, SegmentStore) {
+                            var deferred = $q.defer();
+
+                            SegmentService.GetSegments().then(function(result) {
+                                SegmentStore.setSegments(result);
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'SegmentationListController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/models/views/SegmentationListView.html'
+                }
+            }
+        })
+        .state('home.segments', {
+            url: '/segments',
+            params: {
+                pageTitle: 'Segments',
+                pageIcon: 'ico-segments'
+            },
+            views: {
+                "summary@": {
                     template: ''
                 },
                 "main@": {

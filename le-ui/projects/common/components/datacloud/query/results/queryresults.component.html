@@ -15,7 +15,7 @@
         <li class="buttons">
             <div class="pull-right">
                 <a href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}"><button class="button icon-button white-button"><i class="fa fa-download"></i></button></a>
-                <button class="button icon-button white-button" ui-sref="home.model.analysis.explorer.query">Refine Query</button>
+                <button class="button icon-button white-button" ui-sref="{{ vm.refineQuery() }}">Refine Query</button>
                 <button class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
             </div>
         </li>

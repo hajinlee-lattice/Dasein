@@ -52,14 +52,27 @@ angular.module('common.datacloud.query.builder', [])
         vm.update();
     };
 
+    vm.inModel = function() {
+        var name = $state.current.name.split('.');
+        return name[1] == 'model';
+    }
+
     vm.goAttributes = function() {
-        $state.go('home.model.analysis.explorer.attributes');
+        if (vm.inModel()) {
+            $state.go('home.model.analysis.explorer.attributes');
+        } else{
+            $state.go('home.segment.explorer.attributes');
+        }
     };
 
     vm.saveSegment = function() {
         SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
             if (!result.errorMsg) {
-                $state.go('home.model.segmentation', {}, {notify: true})
+                if (vm.inModel()) {
+                    $state.go('home.model.segmentation', {}, {notify: true});
+                } else {
+                    $state.go('home.segments', {}, {notify: true});
+                }
             }
         });
     }

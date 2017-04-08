@@ -364,6 +364,7 @@ angular
                     vm.params = {};
                 }
 
+                // don't bother compressing if file size is small
                 if (file && file.size < 16384) {
                     vm.params.compressed = false;
                 }
