@@ -149,12 +149,12 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         Assert.assertNotNull(scoreContents);
         List<GenericRecord> list = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
         for (GenericRecord record : list) {
+            System.out.println(record);
             Assert.assertNotNull(record.get(InterfaceName.Id.toString()));
             Assert.assertNotNull(record.get(ScoringDaemonService.MODEL_ID));
             Assert.assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             Assert.assertNotNull(record.get(ScoreResultField.Rating.displayName));
             Assert.assertNull(record.get(ScoreResultField.RawScore.displayName));
-            System.out.println(record);
         }
         Assert.assertEquals(list.size(), 20);
 
