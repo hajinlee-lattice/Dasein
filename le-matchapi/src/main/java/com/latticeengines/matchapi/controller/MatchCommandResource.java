@@ -1,6 +1,5 @@
 package com.latticeengines.matchapi.controller;
 
-import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.CreateCommandRequest;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandStatus;
 import com.latticeengines.domain.exposed.datacloud.MatchStatusResponse;
+import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

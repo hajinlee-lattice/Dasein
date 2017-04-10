@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.proxy.exposed.matchapi.AMStatsProxy;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -25,6 +24,7 @@ import org.testng.Assert;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.proxy.exposed.matchapi.AMStatsProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {

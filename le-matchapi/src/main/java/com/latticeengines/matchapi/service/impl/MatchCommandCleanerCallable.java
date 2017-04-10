@@ -1,11 +1,12 @@
 package com.latticeengines.matchapi.service.impl;
 
 
-import com.latticeengines.datacloud.match.exposed.service.MatchCommandCleaner;
+import java.util.concurrent.Callable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.concurrent.Callable;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandCleaner;
 
 public class MatchCommandCleanerCallable implements Callable<Boolean> {
 
