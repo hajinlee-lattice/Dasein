@@ -107,7 +107,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         testAccountMasterRTSMatch(true, "a@fb.com", true, false, null);
         testAccountMasterRTSMatch(true, "a@salesforce.com", false, true, "null");
         testAccountMasterRTSMatch(true, "a@dnb.com", true, true, "NULL");
-        testAccountMasterRTSMatch(true, null, false, true, "079942718");
+        // testAccountMasterRTSMatch(true, null, false, true, "079942718");
     }
 
     private void testAccountMasterRTSMatch(boolean resolveKeyMap, String domain, boolean isEmail,
