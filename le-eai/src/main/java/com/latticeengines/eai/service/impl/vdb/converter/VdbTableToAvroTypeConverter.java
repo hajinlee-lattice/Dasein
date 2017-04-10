@@ -1,11 +1,12 @@
 package com.latticeengines.eai.service.impl.vdb.converter;
 
-import com.latticeengines.eai.service.impl.AvroTypeConverter;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.avro.Schema.Type;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.latticeengines.eai.service.impl.AvroTypeConverter;
 
 @Component("vdbTableToAvroTypeConverter")
 public class VdbTableToAvroTypeConverter extends AvroTypeConverter {

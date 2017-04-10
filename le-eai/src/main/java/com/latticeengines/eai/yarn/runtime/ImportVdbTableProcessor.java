@@ -1,17 +1,22 @@
 package com.latticeengines.eai.yarn.runtime;
 
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
-import com.latticeengines.domain.exposed.eai.*;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.eai.service.EaiMetadataService;
-import com.latticeengines.eai.service.ImportService;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
+import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
+import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.eai.ImportVdbProperty;
+import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.eai.service.EaiMetadataService;
+import com.latticeengines.eai.service.ImportService;
 
 @Component("importVdbTableProcessor")
 public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
