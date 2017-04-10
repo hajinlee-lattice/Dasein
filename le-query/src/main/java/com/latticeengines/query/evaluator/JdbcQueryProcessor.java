@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +174,7 @@ public class JdbcQueryProcessor extends QueryProcessor {
     }
 
     private Predicate processFreeFormSearch(DataCollection dataCollection, Query query, BusinessObject businessObject) {
-        if (query.getFreeFormTextSearch() != null) {
+        if (!StringUtils.isEmpty(query.getFreeFormTextSearch())) {
             return businessObject.processFreeFormSearch(dataCollection, query.getFreeFormTextSearch());
         } else {
             return Expressions.TRUE;
