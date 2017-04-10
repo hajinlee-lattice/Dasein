@@ -6,7 +6,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,7 +27,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -68,7 +66,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "createSegment")
     public void getNumAccountsForSegment() {
-        FrontEndRestriction restriction = getArbitraryRestriction();
+        FrontEndRestriction restriction = new FrontEndRestriction();
 
         long count = restTemplate.postForObject(
                 String.format("%s/pls/accounts/count/restriction", getRestAPIHostPort()), restriction, Long.class);
@@ -118,9 +116,6 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         arbitraryRestriction = new FrontEndRestriction();
         BucketRange range = buckets.get(0).getRange();
-        // TODO Temporary hack fix
-        range.setMin(StringUtils.capitalize(range.getMin().toString().toLowerCase()));
-        range.setMax(StringUtils.capitalize(range.getMax().toString().toLowerCase()));
         BucketRestriction bucketRestriction = new BucketRestriction(new ColumnLookup(
                 SchemaInterpretation.BucketedAccountMaster, "TechIndicator_AdRoll"), range);
         arbitraryRestriction.setAll(Collections.singletonList(bucketRestriction));
