@@ -1,7 +1,6 @@
 package com.latticeengines.ulysses.controller;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,9 +14,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.latticeengines.common.exposed.util.GzipUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
