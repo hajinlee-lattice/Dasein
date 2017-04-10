@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -37,6 +39,12 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Override
     public MetadataSegment findByName(String name) {
         return segmentDao.findByNameWithSegmentationDataCollection(name);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public List<MetadataSegment> findAll() {
+        return super.findAll();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
