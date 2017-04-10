@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 public abstract class YarnClientCustomization {

@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.runtime.mapreduce.sampling;
 
 import java.util.Properties;
+
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;

@@ -23,8 +23,8 @@ import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.ClientRmTemplate;
+import org.springframework.yarn.client.CommandYarnClient;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
