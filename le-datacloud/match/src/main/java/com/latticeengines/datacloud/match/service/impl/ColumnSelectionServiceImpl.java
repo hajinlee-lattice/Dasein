@@ -39,6 +39,9 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     private Log log = LogFactory.getLog(ColumnSelectionServiceImpl.class);
 
+    @Value("${datacloud.match.columnselection.rts.refresh.minute:11}")
+    private long refreshInterval;
+
     @Resource(name = "externalColumnService")
     private MetadataColumnService<ExternalColumn> externalColumnService;
 
@@ -59,7 +62,8 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
             public void run() {
                 loadCaches();
             }
-        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(11)), TimeUnit.MINUTES.toMillis(11));
+        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(refreshInterval)),
+                TimeUnit.MINUTES.toMillis(refreshInterval));
     }
 
     @Override

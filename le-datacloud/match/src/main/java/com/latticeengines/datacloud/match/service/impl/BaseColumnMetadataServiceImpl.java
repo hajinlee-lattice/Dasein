@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -34,6 +35,9 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         implements ColumnMetadataService {
 
     private static final Log log = LogFactory.getLog(BaseColumnMetadataServiceImpl.class);
+
+    @Value("${datacloud.match.columnmetadata.refresh.minute:17}")
+    private long refreshInterval;
 
     private ConcurrentMap<Predefined, List<ColumnMetadata>> predefinedMetaDataCache = new ConcurrentHashMap<>();
 
@@ -58,8 +62,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
             public void run() {
                 loadCache();
             }
-        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(11)),
-                TimeUnit.MINUTES.toMillis(11));
+        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(refreshInterval)),
+                TimeUnit.MINUTES.toMillis(refreshInterval));
     }
 
     @Override

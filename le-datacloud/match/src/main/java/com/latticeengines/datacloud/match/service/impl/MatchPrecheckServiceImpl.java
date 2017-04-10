@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +9,7 @@ import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
 import com.latticeengines.datacloud.match.entitymgr.LatticeAccountMgr;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.MatchPrecheckService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 
 @Component("matchPrecheckService")
 public class MatchPrecheckServiceImpl implements MatchPrecheckService {
@@ -30,26 +30,24 @@ public class MatchPrecheckServiceImpl implements MatchPrecheckService {
     }
 
     private void checkDnBCacheEntityMgr(String matchVersion) {
-        if (StringUtils.isEmpty(matchVersion) || matchVersion.startsWith("1")) {
-            return;
-        }
-        DnBCacheEntityMgr entityMgr = dnbCacheService.getCacheMgr();
-        if (entityMgr == null || entityMgr.isDisabled()) {
-            throw new RuntimeException("DnBCacheEntityMgr is disabled.");
+        if (MatchUtils.isValidForAccountMasterBasedMatch(matchVersion)) {
+            DnBCacheEntityMgr entityMgr = dnbCacheService.getCacheMgr();
+            if (entityMgr == null || entityMgr.isDisabled()) {
+                throw new RuntimeException("DnBCacheEntityMgr is disabled.");
+            }
         }
     }
 
     private void checkAccountLookupEntityMgr(String matchVersion) {
-        if (StringUtils.isEmpty(matchVersion) || matchVersion.startsWith("1")) {
-            return;
-        }
-        AccountLookupEntryMgr lookupEntityMgr = accountLookupService.getLookupMgr(matchVersion);
-        if (lookupEntityMgr == null || lookupEntityMgr.isDisabled()) {
-            throw new RuntimeException("AccountLookupEntryMgr is disabled.");
-        }
-        LatticeAccountMgr latticeAccountMgr = accountLookupService.getAccountMgr(matchVersion);
-        if (latticeAccountMgr == null || latticeAccountMgr.isDisabled()) {
-            throw new RuntimeException("LatticeAccountMgr is disabled.");
+        if (MatchUtils.isValidForAccountMasterBasedMatch(matchVersion)) {
+            AccountLookupEntryMgr lookupEntityMgr = accountLookupService.getLookupMgr(matchVersion);
+            if (lookupEntityMgr == null || lookupEntityMgr.isDisabled()) {
+                throw new RuntimeException("AccountLookupEntryMgr is disabled.");
+            }
+            LatticeAccountMgr latticeAccountMgr = accountLookupService.getAccountMgr(matchVersion);
+            if (latticeAccountMgr == null || latticeAccountMgr.isDisabled()) {
+                throw new RuntimeException("LatticeAccountMgr is disabled.");
+            }
         }
     }
 }
