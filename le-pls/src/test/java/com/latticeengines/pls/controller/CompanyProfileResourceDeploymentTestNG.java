@@ -12,11 +12,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.plexus.util.ExceptionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
@@ -79,8 +81,9 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
         CompanyProfileRequest request = new CompanyProfileRequest();
         request.getRecord().put("Email", "someuser@google.com");
         try {
-            new RestTemplate().postForObject(url, request, CompanyProfile.class);
+            HttpClientUtils.newRestTemplate().postForObject(url, request, CompanyProfile.class);
         } catch (Exception e) {
+        	log.error(ExceptionUtils.getFullStackTrace(e));
             assertTrue(e.getMessage().contains("401"));
             thrown = true;
         }
