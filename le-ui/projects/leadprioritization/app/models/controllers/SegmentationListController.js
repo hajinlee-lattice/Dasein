@@ -53,9 +53,9 @@ angular.module('lp.models.segments', [
         $event.preventDefault();
 
         if ($state.current.name == 'home.segments') {
-            $state.go('home.segment', {segment: segmentName, create: false}, { reload: true } );
+            $state.go('home.segment', {segment: segmentName}, { reload: true } );
         } else {
-            $state.go('home.model.analysis', {segment: segmentName, create: false}, { reload: true } );
+            $state.go('home.model.analysis', {segment: segmentName}, { reload: true } );
         }
 
     };

@@ -166,14 +166,11 @@ angular
 
                             return deferred.promise;
                         },
-                        AnalysisLookup: function() {
-                            return null;
-                        },
                         SegmentServiceProxy: function() {
                             return null;
                         },
                         QueryRestriction: function() {
-                            return null;                           
+                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -255,7 +252,7 @@ angular
                             return null;
                         },
                         QueryRestriction: function() {
-                            return null;                           
+                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -349,7 +346,7 @@ angular
                             return null;
                         },
                         QueryRestriction: function() {
-                            return null;                           
+                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -425,15 +422,15 @@ angular
         .state('home.model.analysis.accounts', getState('accounts'))
         .state('home.model.analysis.contacts', getState('contacts'))
 
-        .state('home.segment', getState('main', { 
-            url: '/segment/:segment', 
+        .state('home.segment', getState('main', {
+            url: '/segment/:segment',
             redirectTo: 'home.segment.explorer'
         }))
-        .state('home.segment.explorer', getState('explorer', { 
-            redirectTo: 'home.segment.explorer.attributes' 
+        .state('home.segment.explorer', getState('explorer', {
+            redirectTo: 'home.segment.explorer.attributes'
         }))
-        .state('home.segment.explorer.attributes', getState('attributes', { 
-            params: { 
+        .state('home.segment.explorer.attributes', getState('attributes', {
+            params: {
                 pageTitle: 'My Data',
                 pageIcon: 'ico-analysis',
                 section: 'segment.analysis',
