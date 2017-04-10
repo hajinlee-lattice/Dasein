@@ -166,11 +166,14 @@ angular
 
                             return deferred.promise;
                         },
+                        AnalysisLookup: function() {
+                            return null;
+                        },
                         SegmentServiceProxy: function() {
                             return null;
                         },
                         QueryRestriction: function() {
-                            return null;
+                            return null;                           
                         }
                     },
                     controller: 'DataCloudController',
@@ -252,7 +255,7 @@ angular
                             return null;
                         },
                         QueryRestriction: function() {
-                            return null;
+                            return null;                           
                         }
                     },
                     controller: 'DataCloudController',
@@ -341,6 +344,12 @@ angular
                         // Note: this is needed for Account Lookup, dont remove!
                         EnrichmentAccountLookup: function() {
                             return null;
+                        },
+                        SegmentServiceProxy: function() {
+                            return null;
+                        },
+                        QueryRestriction: function() {
+                            return null;                           
                         }
                     },
                     controller: 'DataCloudController',

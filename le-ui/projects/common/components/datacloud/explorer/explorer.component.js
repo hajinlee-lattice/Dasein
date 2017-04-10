@@ -348,7 +348,7 @@ angular.module('common.datacloud.explorer', [
             getHighlightMetadata();
 
             if(vm.metadataSegments || QueryRestriction) {
-                getExplorerSegments(vm.enrichments || QueryRestriction);
+                getExplorerSegments(vm.enrichments);
                 //console.log(vm.filter(vm.enrichments, 'FieldName', 'TechIndicator_AmazonSimpleDB'));
             }
 
@@ -1116,6 +1116,11 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
+    vm.makeSegmentsRangeKey = function(enrichment, range){
+        key = enrichment.FieldName + Object.values(range).join('');
+        return key;
+    }
+
     var getExplorerSegments = function(enrichments) {
         vm.clearExplorerSegments();
         var metadataSegments = vm.metadataSegments || QueryRestriction;
@@ -1126,12 +1131,15 @@ angular.module('common.datacloud.explorer', [
                 if(item.bucketRestriction) {
                     var restriction = item.bucketRestriction,
                         key = restriction.lhs.columnLookup.column_name,
+                        range = restriction.range,
                         enrichment = breakOnFirstEncounter(vm.enrichments, 'FieldName', key, true),
-                        FieldName = enrichment.FieldName,
+                        fieldName = enrichment.FieldName,
                         category = enrichment.Category,
-                        index = vm.enrichmentsMap[FieldName];
+                        index = vm.enrichmentsMap[fieldName];
                         if(index) {
                             vm.enrichments[index].SegmentChecked = true;
+                            vm.enrichments[index].SegmentRangesChecked = {};
+                            vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range)] = true;
                         }
                 }
             }
@@ -1259,8 +1267,9 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat) {
-        var attributeKey = enrichment.FieldName + stat.Lbl,
+        var attributeKey = vm.makeSegmentsRangeKey(enrichment, stat.Range),
             fieldName = enrichment.FieldName;
+
 
         vm.segmentAttributeInputRange[attributeKey] = !vm.segmentAttributeInputRange[attributeKey];
         vm.saveSegmentEnabled = true;
