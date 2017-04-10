@@ -41,7 +41,18 @@ angular
             });
 
             return deferred.promise;
-        }]
+        }],
+        // below resolves are needed. Do not removed
+        // override at child state when needed
+        EnrichmentAccountLookup: function() {
+            return null;
+        },
+        SegmentServiceProxy: function() {
+            return null;
+        },
+        QueryRestriction: function() {
+            return null;
+        }
     };
 
     $stateProvider
@@ -165,12 +176,6 @@ angular
                             deferred.resolve(LookupResponse.attributes || {});
 
                             return deferred.promise;
-                        },
-                        SegmentServiceProxy: function() {
-                            return null;
-                        },
-                        QueryRestriction: function() {
-                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -198,18 +203,6 @@ angular
                     templateUrl: '/components/datacloud/tabs/explorertabs.component.html'
                 },
                 "main@": {
-                    resolve: {
-                        // Note: this is needed for Account Lookup, dont remove!
-                        EnrichmentAccountLookup: function() {
-                            return null;
-                        },
-                        SegmentServiceProxy: function() {
-                            return null;
-                        },
-                        QueryRestriction: function() {
-                            return null;
-                        }
-                    },
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
@@ -247,12 +240,6 @@ angular
                             deferred.resolve(LookupResponse.attributes || {});
 
                             return deferred.promise;
-                        },
-                        SegmentServiceProxy: function() {
-                            return null;
-                        },
-                        QueryRestriction: function() {
-                            return null;
                         }
                     },
                     controller: 'DataCloudController',
@@ -337,18 +324,6 @@ angular
             },
             views: {
                 "main@": {
-                    resolve: {
-                        // Note: this is needed for Account Lookup, dont remove!
-                        EnrichmentAccountLookup: function() {
-                            return null;
-                        },
-                        SegmentServiceProxy: function() {
-                            return null;
-                        },
-                        QueryRestriction: function() {
-                            return null;
-                        }
-                    },
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
