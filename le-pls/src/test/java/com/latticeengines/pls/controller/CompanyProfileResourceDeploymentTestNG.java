@@ -5,7 +5,9 @@ import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -18,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
@@ -29,7 +32,10 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        String featureFlag = LatticeFeatureFlag.LATTICE_INSIGHTS.getName();
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(featureFlag, true);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, flags);
     }
 
     @Test(groups = "deployment")
@@ -54,9 +60,9 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
             assertFalse("Attr: " + attr, value.equals("null"));
         }
 
-        String[] requiredAttrs = { "LDC_Name", "LDC_Street", "LDC_City", "LDC_State", "LDC_ZipCode",
-                "LDC_Domain", "LDC_DUNS", "LE_NUMBER_OF_LOCATIONS", "LE_IS_PRIMARY_LOCATION", "LE_INDUSTRY",
-                "LE_REVENUE_RANGE", "LE_EMPLOYEE_RANGE" };
+        String[] requiredAttrs = { "LDC_Name", "LDC_Street", "LDC_City", "LDC_State", "LDC_ZipCode", "LDC_Domain",
+                "LDC_DUNS", "LE_NUMBER_OF_LOCATIONS", "LE_IS_PRIMARY_LOCATION", "LE_INDUSTRY", "LE_REVENUE_RANGE",
+                "LE_EMPLOYEE_RANGE" };
         Set<String> requiredAttrSet = new HashSet<String>(Arrays.asList(requiredAttrs));
         Set<String> actualAttrSet = new HashSet<>();
 
@@ -82,7 +88,7 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
         try {
             HttpClientUtils.newRestTemplate().postForObject(url, request, CompanyProfile.class);
         } catch (Exception e) {
-        	log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getFullStackTrace(e));
             assertTrue(e.getMessage().contains("401"));
             thrown = true;
         }
