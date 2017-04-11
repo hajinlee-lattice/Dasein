@@ -71,6 +71,10 @@ public class DataCloudVersion implements HasPid, Serializable {
     @Column(name = "Status", nullable = false)
     private Status status;
 
+    @JsonProperty("MetadataRefreshDate")
+    @Column(name = "MetadataRefreshDate")
+    private Date metadataRefreshDate;
+
     @Override
     public Long getPid() {
         return pid;
@@ -143,6 +147,14 @@ public class DataCloudVersion implements HasPid, Serializable {
 
     public void setDynamoTableSignatureLookup(String dynamoTableSignatureLookup) {
         this.dynamoTableSignatureLookup = dynamoTableSignatureLookup;
+    }
+
+    public Date getMetadataRefreshDate() {
+        return metadataRefreshDate;
+    }
+
+    public void setMetadataRefreshDate(Date metadataRefreshDate) {
+        this.metadataRefreshDate = metadataRefreshDate;
     }
 
     public enum Status {
