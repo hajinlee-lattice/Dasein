@@ -86,7 +86,7 @@ angular.module('common.datacloud.query.results', [
             page_filter: {
                 num_rows: vm.pagesize,
                 row_offset: offset
-            },
+            }
         };
 
         if (vm.sortBy) {

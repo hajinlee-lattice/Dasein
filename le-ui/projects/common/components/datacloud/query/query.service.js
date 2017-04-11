@@ -2,6 +2,12 @@ angular.module('common.datacloud.query.service',[
 ])
 .service('QueryStore', function($filter, $q, $timeout, QueryService, BucketRestriction) {
 
+    var validContexts = ['accounts', 'contacts'];
+
+    function isValidContext(context) {
+        return validContexts.indexOf(context) > -1;
+    }
+
     this.segment = null;
 
     this.restriction = {
@@ -64,7 +70,7 @@ angular.module('common.datacloud.query.service',[
 
         this.setSegment(segment);
         if (segment !== null) {
-            this.setRestriction(segment.simple_restriction);
+            this.setRestriction(segment.simple_restriction || { all: [], any: [] });
             this.setContextCount('accounts', 'done', parseInt(this.getSegmentProperty(segment.segment_properties, 'NumAccounts')));
 
             deferred.resolve();
@@ -176,7 +182,7 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.GetCountByRestriction = function(context) {
-        if (!validContext(context)) {
+        if (!isValidContext(context)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
             return deferred;
@@ -188,7 +194,7 @@ angular.module('common.datacloud.query.service',[
     this.GetCountByQuery = function(context, query) {
         query.restriction = this.getRestriction();
 
-        if (!validContext(context)) {
+        if (!isValidContext(context)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
             return deferred.promise;
@@ -200,7 +206,7 @@ angular.module('common.datacloud.query.service',[
     this.GetDataByQuery = function(context, query) {
         query.restriction = this.getRestriction();
 
-        if (!validContext(context)) {
+        if (!isValidContext(context)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
             return deferred.promise;
@@ -208,10 +214,6 @@ angular.module('common.datacloud.query.service',[
 
         return QueryService.GetDataByQuery(context, query);
     };
-
-    function validContext(context) {
-        return ['accounts'].indexOf(context) > -1;
-    }
 })
 .service('QueryService', function($http, $q) {
 
