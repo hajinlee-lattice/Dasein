@@ -1,11 +1,12 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, BrowserStorageUtility, QueryStore, SegmentServiceProxy, CountMetadata) {
-
+.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, SegmentServiceProxy, CountMetadata) {
+    console.log($stateParams);
     var vm = this;
     angular.extend(vm, {
         context: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
+        modelId: $stateParams.modelId,
         count: CountMetadata ? CountMetadata.count : 0,
         countMetadata: CountMetadata || {},
         columns: [{displayName: 'Company Name', key: 'business_name'}],
@@ -65,7 +66,11 @@ angular.module('common.datacloud.query.results', [
     vm.saveSegment = function () {
         SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
             if (!result.errorMsg) {
-                $state.go('home.model.segmentation', {}, {notify: true})
+                if (vm.modelId) {
+                    $state.go('home.model.segmentation', {}, {notify: true})
+                } else {
+                    $state.go('home.segments', {}, {notify: true});
+                }
             }
         });
     };

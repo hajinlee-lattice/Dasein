@@ -233,8 +233,8 @@ angular
             views: {
                 "summary@": {
                     controller: function($rootScope, Model) {
-                        $rootScope.$broadcast('model-details', { 
-                            displayName: Model.ModelDetails.DisplayName 
+                        $rootScope.$broadcast('model-details', {
+                            displayName: Model.ModelDetails.DisplayName
                         });
                     },
                     template: ''
@@ -1489,7 +1489,7 @@ angular
                                 json.Authentication = LookupStore.get('Authentication');
                                 json.request = LookupStore.get('request');
                                 //json.request.record = $stateParams.record;
-                                
+
                                 console.log('posting to Insights:', json);
                                 childWindow.postMessage(json,'*');
                             }

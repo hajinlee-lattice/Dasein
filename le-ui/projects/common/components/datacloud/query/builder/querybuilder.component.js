@@ -4,8 +4,8 @@ angular.module('common.datacloud.query.builder', [])
     var vm = this;
     angular.extend(this, {
         filters: {
-            any: {},
-            all: {}
+            any: [],
+            all: []
         },
         loading: true,
         saving: false

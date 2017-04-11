@@ -96,7 +96,11 @@ angular.module('lp.models.segments', [
             var errorMsg = result.errorMsg;
 
             if (result.success) {
-                $state.go('home.model.segmentation', {}, { reload: true });
+                if ($state.current.name == 'home.segments') {
+                    $state.go('home.segments', {}, { reload: true});
+                } else {
+                    $state.go('home.model.segmentation', {}, { reload: true });
+                }
             } else {
                 vm.saveInProgress = false;
                 vm.addSegmentErrorMessage = errorMsg;
@@ -122,7 +126,7 @@ angular.module('lp.models.segments', [
         $event.preventDefault();
         $event.stopPropagation();
 
-        DeleteSegmentModal.show(segment);
+        DeleteSegmentModal.show(segment, !vm.modelId);
 
     };
 

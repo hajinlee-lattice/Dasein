@@ -5,13 +5,12 @@ angular.module('mainApp.models.modals.DeleteSegmentModal', [
 ])
 .service('DeleteSegmentModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, SegmentService) {
     var self = this;
-    this.show = function (segment) {
+    this.show = function (segment, inModel) {
         $http.get('app/models/views/DeleteSegmentConfirmView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
             scope.segmentName = segment.name;
-
-            console.log(scope.segmentName);
+            scope.inModel = inModel;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -44,12 +43,14 @@ angular.module('mainApp.models.modals.DeleteSegmentModal', [
     function deleteSegment(segmentName) {
         $("#deleteSegmentError").hide();
 
-        console.log(segmentName);
-
         SegmentService.DeleteSegment(segmentName).then(function(result) {
             if (result != null && result.success === true) {
                 $("#modalContainer").modal('hide');
-                $state.go('home.model.segmentation', {}, { reload: true } );
+                if ($scope.inModel) {
+                    $state.go('home.model.segmentation', {}, { reload: true } );
+                } else {
+                    $state.go('home.segments', {}, { reload: true } );
+                }
             } else {
                 $scope.deleteSegmentErrorMessage = result.ResultErrors;
                 $("#deleteSegmentError").fadeIn();

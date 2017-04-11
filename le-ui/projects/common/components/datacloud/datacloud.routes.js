@@ -279,9 +279,9 @@ angular
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
                             if (segmentName && !result) {
                                 if (modelId) {
-                                    $state.go('home.model.segmentation', {modelId: modelId});
+                                    $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
                                 } else {
-                                    $state.go('home.segments', {tenantName: tenantName});
+                                    $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
                                 }
                             } else {
                                 return QueryStore.setupStore(result);
