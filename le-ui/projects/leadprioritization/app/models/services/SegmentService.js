@@ -13,22 +13,22 @@ angular
 
     this.getSegmentByName = function(segmentName) {
         var deferred = $q.defer();
-        if (!segmentName) {
-            deferred.resolve(null);
-            return deferred.promise;
-        }
 
+        var found = false;
         for (var i = 0; i < this.segments.length; i++) {
             var segment = this.segments[i];
             if (segment.name === segmentName) {
                 deferred.resolve(segment);
-                return deferred.promise;
+                found = true;
+                break;
             }
         }
 
-        SegmentService.GetSegmentByName(segmentName).then(function(result) {
-            deferred.resolve(result ? result : null);
-        });
+        if (!found) {
+            SegmentService.GetSegmentByName(segmentName).then(function(result) {
+                deferred.resolve(result ? result : null);
+            });
+        }
 
         return deferred.promise;
     };

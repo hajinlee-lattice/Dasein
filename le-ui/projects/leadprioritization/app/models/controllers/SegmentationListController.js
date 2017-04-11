@@ -1,26 +1,23 @@
 angular.module('lp.models.segments', [
-    'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.modals.DeleteSegmentModal'
 ])
-.controller('SegmentationListController', function ($scope, $element, $state, $stateParams, $timeout,
-    ResourceUtility, SegmentsList, DeleteSegmentModal, SegmentService) {
+.controller('SegmentationListController', function ($scope, $element, $state, $stateParams,
+    SegmentsList, DeleteSegmentModal, SegmentService) {
 
     var vm = this;
     angular.extend(vm, {
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
-        ResourceUtility: ResourceUtility,
-        segments: SegmentsList
+        segments: SegmentsList,
+        tileStates: {}
     });
 
-    vm.init = function() {
-        vm.Math = window.Math;
-
-        $scope.showCustomMenu = false;
-    };
-
-    vm.init();
+    SegmentsList.forEach(function(segment) {
+        vm.tileStates[segment.name] = {
+            showCustomMenu: false,
+            editSegment: false
+        };
+    });
 
     vm.customMenuClick = function ($event, segment) {
 
@@ -28,9 +25,10 @@ angular.module('lp.models.segments', [
             $event.stopPropagation();
         }
 
-        segment.showCustomMenu = !segment.showCustomMenu;
+        var tileState = vm.tileStates[segment.name];
+        tileState.showCustomMenu = !tileState.showCustomMenu
 
-        if (segment.showCustomMenu) {
+        if (tileState.showCustomMenu) {
             $(document).bind('click', function(event){
                 var isClickedElementChildOfPopup = $element
                     .find(event.target)
@@ -40,7 +38,7 @@ angular.module('lp.models.segments', [
                     return;
 
                 $scope.$apply(function(){
-                    $scope.showCustomMenu = false;
+                    tileState.showCustomMenu = false;
                     $(document).unbind(event);
                 });
             });
@@ -60,15 +58,29 @@ angular.module('lp.models.segments', [
 
     };
 
+    var oldSegmentDisplayName = '';
+    var oldSegmentDescription = '';
     vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
-        segment.showCustomMenu = !segment.showCustomMenu;
-        segment.editSegment = !segment.editSegment;
+
+        oldSegmentDescription = segment.description;
+        oldSegmentDisplayName = segment.display_name;
+
+        var tileState = vm.tileStates[segment.name];
+        tileState.showCustomMenu = !tileState.showCustomMenu;
+        tileState.editSegment = !tileState.editSegment;
     };
 
     vm.cancelEditSegmentClicked = function($event, segment) {
         $event.stopPropagation();
-        segment.editSegment = !segment.editSegment;
+
+        segment.display_name = oldSegmentDisplayName;
+        segment.description = oldSegmentDescription;
+        oldSegmentDisplayName = '';
+        oldSegmentDescription = '';
+
+        var tileState = vm.tileStates[segment.name];
+        tileState.editSegment = !tileState.editSegment;
     };
 
     vm.saveSegmentClicked = function($event, segment) {
@@ -76,22 +88,16 @@ angular.module('lp.models.segments', [
         $event.stopPropagation();
 
         vm.saveInProgress = true;
-
-        var segment = {
-            name: segment.name,
-            display_name: segment.display_name,
-            description: segment.description
-        };
+        oldSegmentDisplayName = '';
+        oldSegmentDescription = '';
 
         SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
 
             var errorMsg = result.errorMsg;
 
             if (result.success) {
-                console.log("success");
                 $state.go('home.model.segmentation', {}, { reload: true });
             } else {
-                console.log("error");
                 vm.saveInProgress = false;
                 vm.addSegmentErrorMessage = errorMsg;
                 vm.showAddSegmentError = true;
@@ -100,7 +106,15 @@ angular.module('lp.models.segments', [
 
     };
 
-    vm.duplicateSegmentClick = function(){
+    vm.addSegment = function() {
+        if (vm.modelId) {
+            $state.go('home.model.analysis');
+        } else {
+            $state.go('home.segment');
+        }
+    };
+
+    vm.duplicateSegmentClick = function($event, segment) {
     };
 
     vm.showDeleteSegmentModalClick = function($event, segment){

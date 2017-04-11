@@ -261,22 +261,35 @@ angular
         main: {
             url: '/analysis/:segment',
             params: {
-                segment: 'Test'
+                segment: 'Create'
             },
             resolve: angular.extend({}, DataCloudResolve, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var deferred = $q.defer();
-                    var segmentName = $stateParams.segment;
 
-                    SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                        if (segmentName && !result) {
-                            $state.go('home.model.segmentation', {modelId: $stateParams.modelId});
-                        } else {
-                            return QueryStore.setupStore(result);
-                        }
-                    }).then(function() {
+                    var segmentName = $stateParams.segment;
+                    var isCreateNew = segmentName === 'Create';
+                    var modelId = $stateParams.modelId;
+                    var tenantName = $stateParams.tenantName;
+
+                    if (isCreateNew) {
+                        QueryStore.setupStore(null);
                         deferred.resolve(QueryStore.getRestriction());
-                    });
+                    } else {
+                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                            if (segmentName && !result) {
+                                if (modelId) {
+                                    $state.go('home.model.segmentation', {modelId: modelId});
+                                } else {
+                                    $state.go('home.segments', {tenantName: tenantName});
+                                }
+                            } else {
+                                return QueryStore.setupStore(result);
+                            }
+                        }).then(function() {
+                            deferred.resolve(QueryStore.getRestriction());
+                        });
+                    }
 
                     return deferred.promise;
                 }],
