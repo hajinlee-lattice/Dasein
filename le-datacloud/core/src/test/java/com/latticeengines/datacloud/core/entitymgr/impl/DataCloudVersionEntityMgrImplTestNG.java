@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -15,6 +17,7 @@ import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTe
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 
 public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctionalTestNGBase {
+    private static final Log log = LogFactory.getLog(DataCloudVersionEntityMgrImplTestNG.class);
 
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
@@ -68,5 +71,31 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         version2.setStatus(DataCloudVersion.Status.APPROVED);
 
         return Arrays.asList(version1, version2);
+    }
+
+    @Test(groups = "functional")
+    public void testMetadataRefreshDate() {
+        /*
+         * Testing all versions and latest approved version if they have MetadataRefreshDate column
+         * populated
+         */
+        // for latest approved version
+        DataCloudVersion latestApprovedVersion = dataCloudVersionEntityMgr.latestApprovedForMajorVersion("2.0");
+        log.info("latestApprovedVersion : " + latestApprovedVersion.getVersion());
+        Assert.assertNotNull(latestApprovedVersion.getVersion());
+        Date refreshDate = latestApprovedVersion.getMetadataRefreshDate();
+        log.info("refresh date : " + refreshDate);
+        Assert.assertNotNull(refreshDate);
+        // for all versions
+        List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
+        for (DataCloudVersion version : versions) {
+            log.info("version : " + version.getVersion());
+            Assert.assertNotNull(version);
+            if (version.getMajorVersion().equals("2.0")) {
+                Date metadataRefreshDate = version.getMetadataRefreshDate();
+                log.info("date : " + metadataRefreshDate);
+                Assert.assertNotNull(metadataRefreshDate);
+            }
+        }
     }
 }
