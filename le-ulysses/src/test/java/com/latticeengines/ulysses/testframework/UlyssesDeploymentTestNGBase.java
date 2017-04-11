@@ -2,6 +2,8 @@ package com.latticeengines.ulysses.testframework;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -18,6 +20,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
@@ -53,7 +56,10 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
-        Tenant tenant = setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        String featureFlag = LatticeFeatureFlag.LATTICE_INSIGHTS.getName();
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(featureFlag, true);
+        Tenant tenant = setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, flags);
         String oneTimeKey = oauth2RestApiProxy.createAPIToken(tenant.getId());
 
         oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, tenant.getId(), oneTimeKey, CLIENT_ID_LP);
@@ -63,6 +69,14 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
 
     protected RestTemplate getGlobalAuthRestTemplate() {
         return deploymentTestBed.getRestTemplate();
+    }
+
+    protected Tenant setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product, Map<String, Boolean> flags)
+            throws IOException {
+        turnOffSslChecking();
+        deploymentTestBed.bootstrapForProduct(product, flags);
+        deploymentTestBed.switchToSuperAdmin();
+        return deploymentTestBed.getMainTestTenant();
     }
 
     protected Tenant setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product) throws IOException {

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +35,7 @@ import com.mysql.jdbc.StringUtils;
 
 @Component("companyProfileService")
 public class CompanyProfileServiceImpl implements CompanyProfileService {
+    private static final Log log = LogFactory.getLog(CompanyProfileServiceImpl.class);
 
     @Autowired
     private MatchProxy matchProxy;
@@ -46,6 +49,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     @Override
     public CompanyProfile getProfile(CustomerSpace customerSpace, CompanyProfileRequest request,
             boolean enforceFuzzyMatch) {
+        if (!FeatureFlagClient.isEnabled(customerSpace, LatticeFeatureFlag.LATTICE_INSIGHTS.getName())) {
+            throw new RuntimeException(String.format("LATTICE_INSIGHTS feature flag is not enabled for customer %s",
+                    customerSpace));
+        }
+
         MatchInput matchInput = new MatchInput();
 
         List<List<Object>> data = new ArrayList<>();
@@ -61,7 +69,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
 
         considerInternalAttributes = considerInternalAttributes == null //
-                ? Boolean.FALSE //
+        ? Boolean.FALSE //
                 : considerInternalAttributes;
 
         Tenant tenant = new Tenant(customerSpace.toString());
