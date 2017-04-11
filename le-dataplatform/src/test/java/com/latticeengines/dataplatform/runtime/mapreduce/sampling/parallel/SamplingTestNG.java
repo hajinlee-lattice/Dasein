@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
@@ -18,11 +19,9 @@ import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.FsInput;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.mapreduce.JobID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
@@ -32,14 +31,16 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
+import com.latticeengines.common.exposed.util.ProxyUtils;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceImpl;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingProperty;
 import com.latticeengines.domain.exposed.modeling.SamplingType;
 
 @Test(singleThreaded = true)
-public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
+public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
     private static final String TARGET_COLUMN_NAME = "Event_Latitude_Customer";
     private static final Double DEFAULT_ERROR_RANGE = 0.05;
     private static final Double STRIGENT_ERROR_RANGE = 0.01;
@@ -66,6 +67,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional.platform" })
     public void setup() throws Exception {
+        super.setup();
         setupDirPath();
         setupFileSystem();
         setupInputData();
@@ -79,7 +81,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     private void setupFileSystem() throws Exception {
-        fs = FileSystem.get(yarnConfiguration);
+        fs = FileSystem.get(miniclusterConfiguration);
         fs.delete(new Path(baseDir), true);
         fs.mkdirs(new Path(dataDir));
     }
@@ -123,7 +125,8 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
     public void testDefaultSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         checkFinalApplicationStatusSucceeded(samplingConfig);
-        List<String> samplingFiles = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDir, HdfsFileFormat.AVRO_FILE);
+        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
+                HdfsFileFormat.AVRO_FILE);
         assertEquals(samplingFiles.size(), trainingSet + 2);
         List<SampleStat> sampleStats = getSampleStats(samplingFiles);
         checkSampleClassDistribution(sampleStats, DEFAULT_ERROR_RANGE);
@@ -139,7 +142,8 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         samplingConfig.setProperty(SamplingProperty.TRAINING_SET_SIZE.name(), "1600");
 
         checkFinalApplicationStatusSucceeded(samplingConfig);
-        List<String> samplingFiles = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDir, HdfsFileFormat.AVRO_FILE);
+        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
+                HdfsFileFormat.AVRO_FILE);
         assertEquals(samplingFiles.size(), trainingSet + 2);
         List<SampleStat> sampleStats = getSampleStats(samplingFiles);
         checkSampleClassDistribution(sampleStats, DEFAULT_ERROR_RANGE);
@@ -155,7 +159,8 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         samplingConfig.setProperty(SamplingProperty.TARGET_COLUMN_NAME.name(), TARGET_COLUMN_NAME);
 
         checkFinalApplicationStatusSucceeded(samplingConfig);
-        List<String> samplingFiles = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDir, HdfsFileFormat.AVRO_FILE);
+        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
+                HdfsFileFormat.AVRO_FILE);
         assertEquals(samplingFiles.size(), trainingSet + 2);
         List<SampleStat> sampleStats = getSampleStats(samplingFiles);
         checkSampleClassDistribution(sampleStats, STRIGENT_ERROR_RANGE);
@@ -173,7 +178,8 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         samplingConfig.setProperty(SamplingProperty.UP_TO_PERCENTAGE.name(), "122");
 
         checkFinalApplicationStatusSucceeded(samplingConfig);
-        List<String> samplingFiles = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDir, HdfsFileFormat.AVRO_FILE);
+        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
+                HdfsFileFormat.AVRO_FILE);
         assertEquals(samplingFiles.size(), trainingSet + 2);
         List<SampleStat> sampleStats = getSampleStats(samplingFiles);
         checkEvenClassDistribution(sampleStats, DEFAULT_ERROR_RANGE);
@@ -190,7 +196,8 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         samplingConfig.setProperty(SamplingProperty.DOWN_TO_PERCENTAGE.name(), "82");
 
         checkFinalApplicationStatusSucceeded(samplingConfig);
-        List<String> samplingFiles = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDir, HdfsFileFormat.AVRO_FILE);
+        List<String> samplingFiles = HdfsUtils.getFilesForDir(miniclusterConfiguration, sampleDir,
+                HdfsFileFormat.AVRO_FILE);
         assertEquals(samplingFiles.size(), trainingSet + 2);
         List<SampleStat> sampleStats = getSampleStats(samplingFiles);
         checkEvenClassDistribution(sampleStats, DEFAULT_ERROR_RANGE);
@@ -199,9 +206,10 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     private void checkFinalApplicationStatusSucceeded(SamplingConfiguration samplingConfig) throws Exception {
-        ApplicationId appId = modelingService.createSamples(samplingConfig);
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        Properties properties = ((ModelingServiceImpl) ProxyUtils.getTargetObject(modelingService))
+                .customSamplingConfig(samplingConfig);
+        JobID jobId = testMRJob(ParallelEventDataSamplingJob.class, properties);
+        assertTrue(jobId != null);
     }
 
     private void checkSampleClassDistribution(List<SampleStat> sampleStats, Double errorRange) {
@@ -278,7 +286,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
 
     private FileReader<GenericRecord> getAvroReader(String filename) throws Exception {
         Path path = new Path(filename);
-        SeekableInput input = new FsInput(path, new Configuration());
+        SeekableInput input = new FsInput(path, miniclusterConfiguration);
         GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<GenericRecord>();
         return DataFileReader.openReader(input, fileReader);
     }

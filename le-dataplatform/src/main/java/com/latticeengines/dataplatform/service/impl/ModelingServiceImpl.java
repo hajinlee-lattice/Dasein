@@ -181,6 +181,11 @@ public class ModelingServiceImpl implements ModelingService {
     @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId createSamples(SamplingConfiguration config) {
 
+        Properties properties = customSamplingConfig(config);
+        return modelingJobService.submitMRJob(dispatchService.getSampleJobName(config.isParallelEnabled()), properties);
+    }
+
+    public Properties customSamplingConfig(SamplingConfiguration config) {
         dispatchService.customizeSampleConfig(config, config.isParallelEnabled());
 
         Model model = new Model();
@@ -202,8 +207,7 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil
                 .getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
-
-        return modelingJobService.submitMRJob(dispatchService.getSampleJobName(config.isParallelEnabled()), properties);
+        return properties;
     }
 
     @Override
