@@ -86,12 +86,12 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES;
 
-INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsVersion, AccountLookupHdfsVersion, DynamoTableSignature, DynamoTableSignature_Lookup, Status)
+INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsVersion, AccountLookupHdfsVersion, DynamoTableSignature, DynamoTableSignature_Lookup, Status, MetadataRefreshDate)
 VALUES
-  ('2.0.0', '2016-08-28', '2.0', '2016-10-15_14-37-09_UTC', '2016-10-10_17-40-35_UTC', '20161015', '20161015', 'APPROVED'),
-  ('2.0.1', '2016-11-19', '2.0', '2016-11-19_20-32-21_UTC', '2016-11-19_05-33-46_UTC', '', '', 'APPROVED'),
-  ('2.0.2', '2016-12-15', '2.0', '2017-01-24_23-14-40_UTC', '2017-01-04_04-49-12_UTC', '20170126', '', 'APPROVED'),
-  ('2.0.3', '2017-02-14', '2.0', '2017-02-14_07-28-18_UTC', '2017-02-14_17-20-41_UTC', '20170301', '20170301', 'APPROVED');
+  ('2.0.0', '2016-08-28', '2.0', '2016-10-15_14-37-09_UTC', '2016-10-10_17-40-35_UTC', '20161015', '20161015', 'APPROVED', NOW()),
+  ('2.0.1', '2016-11-19', '2.0', '2016-11-19_20-32-21_UTC', '2016-11-19_05-33-46_UTC', '', '', 'APPROVED', NOW()),
+  ('2.0.2', '2016-12-15', '2.0', '2017-01-24_23-14-40_UTC', '2017-01-04_04-49-12_UTC', '20170126', '', 'APPROVED', NOW()),
+  ('2.0.3', '2017-02-14', '2.0', '2017-02-14_07-28-18_UTC', '2017-02-14_17-20-41_UTC', '20170301', '20170301', 'APPROVED', NOW());
 
 INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges)
 VALUES
