@@ -231,7 +231,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
             cacheFiles = ScoringJobUtil.getCacheFiles(yarnConfiguration,
                     versionManager.getCurrentVersionInStack(stackName));
             cacheFiles.addAll(ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
-                    modelGuids, Boolean.TRUE.booleanValue()));
+                    modelGuids, Boolean.FALSE.booleanValue()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
