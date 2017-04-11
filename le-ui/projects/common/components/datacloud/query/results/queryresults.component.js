@@ -2,7 +2,7 @@ angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, SegmentServiceProxy, CountMetadata) {
-    console.log($stateParams);
+
     var vm = this;
     angular.extend(vm, {
         context: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
