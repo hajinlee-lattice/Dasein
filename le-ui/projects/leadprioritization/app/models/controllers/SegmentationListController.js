@@ -126,7 +126,7 @@ angular.module('lp.models.segments', [
         $event.preventDefault();
         $event.stopPropagation();
 
-        DeleteSegmentModal.show(segment, !vm.modelId);
+        DeleteSegmentModal.show(segment, !!vm.modelId);
 
     };
 
