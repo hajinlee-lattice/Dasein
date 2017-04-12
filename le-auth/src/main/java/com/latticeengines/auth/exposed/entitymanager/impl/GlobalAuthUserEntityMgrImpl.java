@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.auth.exposed.dao.GlobalAuthUserDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 
@@ -71,4 +72,11 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     public GlobalAuthUser findByUserIdWithTenantRightsAndAuthentications(Long userId) {
         return gaUserDao.findByUserIdWithTenantRightsAndAuthentications(userId);
     }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public GlobalAuthUser findByEmail(String email) {
+        return gaUserDao.findByField("Email", email);
+    }
+
 }

@@ -14,4 +14,6 @@ public interface GlobalAuthAuthenticationEntityMgr extends BaseEntityMgr<GlobalA
     GlobalAuthAuthentication findByUserId(Long userId);
 
     HashMap<Long, String> findUserInfoByTenantId(Long tenantId);
+
+    Boolean deleteByUserId(Long userId);
 }

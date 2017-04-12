@@ -80,4 +80,10 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
         return gaUserTenantRightDao.findAllByField("Tenant_ID", tenantId);
     }
 
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
+    public Boolean deleteByUserId(Long userId) {
+        return gaUserTenantRightDao.deleteByUserId(userId);
+    }
+
 }

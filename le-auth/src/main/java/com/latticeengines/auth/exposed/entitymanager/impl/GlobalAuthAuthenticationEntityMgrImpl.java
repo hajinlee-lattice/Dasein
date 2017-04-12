@@ -69,4 +69,10 @@ public class GlobalAuthAuthenticationEntityMgrImpl extends
         gaAuthentication.setLastModificationDate(new Date(System.currentTimeMillis()));
         super.update(gaAuthentication);
     }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
+    public Boolean deleteByUserId(Long userId) {
+        return gaAuthenticationDao.deleteByUserId(userId);
+    }
 }

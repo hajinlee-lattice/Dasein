@@ -15,4 +15,6 @@ public interface GlobalAuthUserEntityMgr extends BaseEntityMgr<GlobalAuthUser> {
 
     List<GlobalAuthUser> findByEmailJoinUserTenantRight(String email);
 
+    GlobalAuthUser findByEmail(String email);
+
 }

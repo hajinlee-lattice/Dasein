@@ -20,4 +20,6 @@ public interface GlobalAuthUserTenantRightEntityMgr extends
 
     List<GlobalAuthUserTenantRight> findByTenantId(Long tenantId);
 
+    Boolean deleteByUserId(Long userId);
+
 }

@@ -14,4 +14,6 @@ public interface GlobalAuthUserTenantRightDao extends BaseDao<GlobalAuthUserTena
 
     GlobalAuthUserTenantRight findByUserIdAndTenantIdAndOperationName(Long userId, Long tenantId,
             String operationName);
+
+    Boolean deleteByUserId(Long userId);
 }

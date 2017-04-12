@@ -11,4 +11,6 @@ public interface GlobalAuthAuthenticationDao extends BaseDao<GlobalAuthAuthentic
 
     HashMap<Long, String> findUserInfoByTenantId(Long tenantId);
 
+    Boolean deleteByUserId(Long userId) ;
+
 }

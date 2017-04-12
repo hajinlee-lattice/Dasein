@@ -597,4 +597,49 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
         return userRightsList;
     }
+
+    @Override
+    public Boolean deactiveUserStatus(String userName, String emails) {
+        String[] emailStr = emails.trim().split(",");
+        for (String email : emailStr) {
+            GlobalAuthUser gaUser = gaUserEntityMgr.findByEmail(email.trim());
+            if (gaUser != null) {
+                gaUser.setIsActive(false);
+                gaUserEntityMgr.update(gaUser);
+                log.info(String.format("%s set user %s isActive to false", userName, gaUser.getFirstName()));
+                gaAuthenticationEntityMgr.deleteByUserId(gaUser.getPid());
+                log.info(String.format("%s delete the %s's GlobalAuthentication", userName, gaUser.getFirstName()));
+                gaUserTenantRightEntityMgr.deleteByUserId(gaUser.getPid());
+                log.info(String.format("%s delete the %s's GlobalUserTenantRight", userName, gaUser.getFirstName()));
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public GlobalAuthUser findByEmailNoJoin(String email) {
+        return gaUserEntityMgr.findByEmail(email);
+    }
+
+    @Override
+    public boolean deleteUserByEmail(String email){
+        GlobalAuthUser gaUser = gaUserEntityMgr.findByEmail(email);
+        if(gaUser == null)
+            return true;
+
+        GlobalAuthAuthentication gaAuthentication = gaAuthenticationEntityMgr.findByUserId(gaUser.getPid());
+        if(gaAuthentication != null)
+        {
+            gaAuthenticationEntityMgr.delete(gaAuthentication);
+            log.info(String.format("current user's auth id %s is deleted", gaAuthentication.getPid()));
+        }
+
+        try {
+            gaUserEntityMgr.delete(gaUser);
+            log.info(String.format("current user %s is deleted", gaUser.getFirstName()));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to delete the user requested.");
+        }
+        return true;
+    }
 }

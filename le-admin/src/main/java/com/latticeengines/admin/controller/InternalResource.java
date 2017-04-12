@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
+import com.latticeengines.security.exposed.service.UserService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -53,6 +54,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private PermStoreProvider permStoreProvider;
+
+    @Autowired
+    private UserService userService;
 
     @RequestMapping(value = "services/options", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -121,6 +125,22 @@ public class InternalResource extends InternalResourceBase {
             HttpServletRequest request) {
         checkHeader(request);
         dataStoreProvider.deleteTenantFolder(server, tenantId);
+        return true;
+    }
+
+    @RequestMapping(value = "services/deactiveUserStatus", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "set user status to inactive")
+    public Boolean deactiveUserStatusBasedOnEmails(@RequestBody String emails, HttpServletRequest request) {
+        checkHeader(request);
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
+        String userName = "_defaultUser";
+        if (!StringUtils.isEmpty(ticket)) {
+            String decrypted = CipherUtils.decrypt(ticket);
+            String[] tokens = decrypted.split("\\|");
+            userName = tokens[0];
+        }
+        userService.deactiveUserStatus(userName, emails);
         return true;
     }
 

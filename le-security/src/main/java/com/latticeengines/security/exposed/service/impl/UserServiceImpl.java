@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
@@ -322,5 +323,20 @@ public class UserServiceImpl implements UserService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean deactiveUserStatus(String userName, String emails) {
+        return globalUserManagementService.deactiveUserStatus(userName, emails);
+    }
+
+    @Override
+    public GlobalAuthUser findByEmailNoJoin(String email) {
+        return globalUserManagementService.findByEmailNoJoin(email);
+    }
+
+    @Override
+    public boolean deleteUserByEmail(String email) {
+        return globalUserManagementService.deleteUserByEmail(email);
     }
 }

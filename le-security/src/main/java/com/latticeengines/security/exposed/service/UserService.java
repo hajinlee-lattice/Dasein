@@ -2,6 +2,7 @@ package com.latticeengines.security.exposed.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.User;
@@ -40,4 +41,10 @@ public interface UserService {
     boolean updateCredentials(User user, UserUpdateData data);
 
     String getURLSafeUsername(String username);
+
+    boolean deactiveUserStatus(String userName, String emails);
+
+    GlobalAuthUser findByEmailNoJoin(String username);
+
+    boolean deleteUserByEmail(String emial);
 }
