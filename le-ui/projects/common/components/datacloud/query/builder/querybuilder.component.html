@@ -7,11 +7,12 @@
             <div class="pull-right">
                 <button class="button icon-button white-button"><i class="fa fa-download"></i></button>
                 <button class="button icon-button white-button" ng-click="vm.goAttributes()">Select Attributes</button>
-                <button class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
+                <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
+                <button ng-if="vm.saving" disabled class="button icon-button blue-button""><i class="fa fa-spinner fa-pulse fw"></i></button>
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row filter-group" ng-class="{disabled: vm.saving}">
         <p><strong>All</strong> of the selected attribute value combinations:</p>
         <query-filter
             ng-repeat="(k, a) in vm.filters.all"
@@ -25,7 +26,7 @@
         </p>
     </div>
     <hr>
-    <div class="row">
+    <div class="row filter-group" ng-class="{disabled: vm.saving}">
         <p>And <strong>Any</strong> of the selected attribute value combinations:</p>
         <query-filter
             ng-repeat="(k, a) in vm.filters.any"

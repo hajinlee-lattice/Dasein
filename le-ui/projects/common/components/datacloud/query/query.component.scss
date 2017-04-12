@@ -73,6 +73,10 @@
     .row {
         padding: 0 1em;
     }
+
+    .row.filter-group.disabled {
+        pointer-events: none;
+    }
 }
 
 .query-filter {

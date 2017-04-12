@@ -66,6 +66,7 @@ angular.module('common.datacloud.query.builder', [])
     };
 
     vm.saveSegment = function() {
+        vm.saving = true;
         SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
             if (!result.errorMsg) {
                 if (vm.inModel()) {
@@ -74,6 +75,8 @@ angular.module('common.datacloud.query.builder', [])
                     $state.go('home.segments', {}, {notify: true});
                 }
             }
+        }).finally(function() {
+            vm.saving = false;
         });
     }
 
