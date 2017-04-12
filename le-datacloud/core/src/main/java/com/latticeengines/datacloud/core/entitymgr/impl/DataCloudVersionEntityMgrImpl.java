@@ -84,6 +84,12 @@ public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr 
         return dataCloudVersionDao.findAll();
     }
 
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
+    public List<String> allApprovedMajorVersions() {
+        return dataCloudVersionDao.allApprovedMajorVersions();
+    }
+
     private String parseMajorVersion(String version) {
         String[] tokens = version.split("\\.");
         if (tokens.length < 2) {

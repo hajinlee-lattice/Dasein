@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -33,7 +33,7 @@ public class ColumnMetadataResource {
     private BeanDispatcher beanDispatcher;
 
     @Autowired
-    private DataCloudVersionEntityMgr versionEntityMgr;
+    private DataCloudVersionService dataCloudVersionService;
 
     @RequestMapping(value = "/predefined/{selectName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -53,7 +53,7 @@ public class ColumnMetadataResource {
     @ResponseBody
     @ApiOperation(value = "Get all known data cloud versions")
     public List<DataCloudVersion> getVersions() {
-        return versionEntityMgr.allVerions();
+        return dataCloudVersionService.allVerions();
     }
 
     @RequestMapping(value = "/versions/latest", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -63,9 +63,9 @@ public class ColumnMetadataResource {
     public DataCloudVersion latestVersion(
             @RequestParam(value = "compatibleto", required = false) String compatibleToVersion) {
         if (StringUtils.isEmpty(compatibleToVersion)) {
-            compatibleToVersion = versionEntityMgr.currentApprovedVersion().getVersion();
+            compatibleToVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
         }
-        return versionEntityMgr.latestApprovedForMajorVersion(compatibleToVersion);
+        return dataCloudVersionService.latestApprovedForMajorVersion(compatibleToVersion);
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET, headers = "Accept=application/json")

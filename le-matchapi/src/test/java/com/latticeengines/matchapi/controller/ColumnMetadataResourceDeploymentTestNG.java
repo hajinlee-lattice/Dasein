@@ -2,6 +2,8 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -16,10 +18,12 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 @Component
 public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
+    private static final Log log = LogFactory.getLog(ColumnMetadataResourceDeploymentTestNG.class);
+
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testPredefined() {
         for (Predefined predefined: Predefined.values()) {
             List<ColumnMetadata> columnMetadataList = columnMetadataProxy.columnSelection(predefined, null);
@@ -32,7 +36,7 @@ public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTe
         }
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testLeadEnrichment() {
         List<ColumnMetadata> columnMetadataList =
                 columnMetadataProxy.columnSelection(Predefined.LeadEnrichment, null);
@@ -42,5 +46,12 @@ public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTe
             Assert.assertNotNull(columnMetadata.getDescription());
             Assert.assertNotNull(columnMetadata.getMatchDestination());
         }
+    }
+
+    @Test(groups = "deployment")
+    public void testLatestVersion() {
+        String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        Assert.assertNotNull(dataCloudVersion);
+        log.info(String.format("Latest version: %s", dataCloudVersion));
     }
 }

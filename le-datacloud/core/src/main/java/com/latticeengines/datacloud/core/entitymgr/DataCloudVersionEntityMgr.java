@@ -20,4 +20,6 @@ public interface DataCloudVersionEntityMgr {
     void deleteVersion(String version);
 
     List<DataCloudVersion> allVerions();
+
+    List<String> allApprovedMajorVersions();
 }

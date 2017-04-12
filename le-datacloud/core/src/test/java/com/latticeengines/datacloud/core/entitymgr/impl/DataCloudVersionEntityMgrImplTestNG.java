@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,17 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
                 log.info("date : " + metadataRefreshDate);
                 Assert.assertNotNull(metadataRefreshDate);
             }
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testAllApprovedMajorVersions() {
+        List<String> allApprovedMajorVersions = dataCloudVersionEntityMgr.allApprovedMajorVersions();
+        Assert.assertNotNull(allApprovedMajorVersions);
+        Assert.assertNotEquals(allApprovedMajorVersions.size(), 0);
+        for (String majorVersion : allApprovedMajorVersions) {
+            log.info("Found major version: " + majorVersion);
+            Assert.assertTrue(StringUtils.isNotEmpty(majorVersion));
         }
     }
 }
