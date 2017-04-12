@@ -57,7 +57,4 @@ public abstract class YarnClientCustomization {
 
     public abstract int getMaxAppAttempts(Properties appMasterProperties);
 
-    public void setConfiguration(Configuration yarnConfiguration) {
-        this.yarnConfiguration = yarnConfiguration;
-    }
 }

@@ -65,7 +65,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
 
     private SampleStat inputStat;
 
-    @BeforeClass(groups = { "functional.platform" })
+    @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         super.setup();
         setupDirPath();
@@ -121,7 +121,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         return samplingConfig;
     }
 
-    @Test(groups = { "functional.platform" })
+    @Test(groups = { "functional" })
     public void testDefaultSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         checkFinalApplicationStatusSucceeded(samplingConfig);
@@ -134,7 +134,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         deleteSamples();
     }
 
-    @Test(groups = { "functional.platform" })
+    @Test(groups = { "functional" })
     public void testBootstrapSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.BOOTSTRAP_SAMPLING);
@@ -151,7 +151,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         deleteSamples();
     }
 
-    @Test(groups = { "functional.platform" })
+    @Test(groups = { "functional" })
     public void testStratifiedSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.STRATIFIED_SAMPLING);
@@ -168,7 +168,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         deleteSamples();
     }
 
-    @Test(groups = { "functional.platform" })
+    @Test(groups = { "functional" })
     public void testUpSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.UP_SAMPLING);
@@ -187,7 +187,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         deleteSamples();
     }
 
-    @Test(groups = { "functional.platform" })
+    @Test(groups = { "functional" })
     public void testDownSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.DOWN_SAMPLING);
@@ -320,9 +320,10 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
         fs.delete(new Path(sampleDir), true);
     }
 
-    @AfterClass(groups = { "functional.platform" })
+    @AfterClass(groups = { "functional" })
     public void cleanup() throws Exception {
         fs.delete(new Path(baseDir), true);
+        super.clear();
     }
 
     private class SampleStat {

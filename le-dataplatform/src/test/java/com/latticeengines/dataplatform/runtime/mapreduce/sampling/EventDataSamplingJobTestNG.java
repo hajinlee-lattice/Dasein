@@ -2,25 +2,35 @@ package com.latticeengines.dataplatform.runtime.mapreduce.sampling;
 
 import java.util.Properties;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.common.exposed.util.ProxyUtils;
+import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceImpl;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class EventDataSamplingJobTestNG extends DataplatformMiniClusterFunctionalTestNG {
+
+    @Autowired
+    private ModelingService modelingService;
 
     private String input = ClassLoader
             .getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE").getPath();
 
+    private final static String CUSTOMER = EventDataSamplingJobTestNG.class.getSimpleName();
+
+    private final static String EVENT_TABLE_NAME = "DELL_EVENT_TABLE";
+
     @Test(groups = "functional")
     public void test() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
+        samplingConfig.setCustomer(CUSTOMER);
         samplingConfig.setTrainingPercentage(80);
+        samplingConfig.setTable(EVENT_TABLE_NAME);
         SamplingElement s0 = new SamplingElement();
         s0.setName("s0");
         s0.setPercentage(30);
@@ -29,16 +39,11 @@ public class EventDataSamplingJobTestNG extends DataplatformMiniClusterFunctiona
         s1.setPercentage(60);
         samplingConfig.addSamplingElement(s0);
         samplingConfig.addSamplingElement(s1);
-        HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, input, "/DELL_EVENT_TABLE");
+        HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, input,
+                customerBaseDir + "/" + CUSTOMER + "/data/" + EVENT_TABLE_NAME);
 
-        Properties properties = new Properties();
-        properties.setProperty(MapReduceProperty.INPUT.name(), "/DELL_EVENT_TABLE");
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), "/samples");
-        properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
-        properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
-        properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil.getPlatformShadedJarPath(
-                miniclusterConfiguration, versionManager.getCurrentVersionInStack(stackName)));
+        Properties properties = ((ModelingServiceImpl) ProxyUtils.getTargetObject(modelingService))
+                .customSamplingConfig(samplingConfig);
 
         testMRJob(EventDataSamplingJob.class, properties);
 

@@ -29,13 +29,16 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.ProxyUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.runtime.mapreduce.MRJobCustomizationBase;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
 import com.latticeengines.dataplatform.exposed.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
+import com.latticeengines.dataplatform.service.impl.YarnClientCustomizationServiceImpl;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctionalTestNGBase {
@@ -43,10 +46,13 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
     protected static final Log log = LogFactory.getLog(DataplatformMiniClusterFunctionalTestNG.class);
 
     @Autowired
-    private JobService jobService;
+    protected JobService jobService;
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected Configuration hadoopConfiguration;
 
     @Autowired
     protected VersionManager versionManager;
@@ -153,9 +159,11 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
 
     public ApplicationId testYarnJob(String yarnClientName, Properties appMasterProperties,
             Properties containerProperties) throws Exception {
-        yarnClientCustomizationService.setConfiguration(miniclusterConfiguration);
+        ((YarnClientCustomizationServiceImpl) ProxyUtils.getTargetObject(yarnClientCustomizationService))
+                .setConfiguration(miniclusterConfiguration);
         YarnClientCustomization customization = YarnClientCustomization.getCustomization(yarnClientName);
-        customization.setConfiguration(miniclusterConfiguration);
+        ((DefaultYarnClientCustomization) ProxyUtils.getTargetObject(customization))
+                .setConfiguration(miniclusterConfiguration);
 
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.overwriteQueueAssignment(
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()), queueScheme));

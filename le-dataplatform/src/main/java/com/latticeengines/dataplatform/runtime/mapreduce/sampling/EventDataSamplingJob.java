@@ -94,7 +94,7 @@ public class EventDataSamplingJob extends MRJobCustomizationBase {
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
             AvroKeyOutputFormat.setOutputPath(mrJob, new Path(properties.getProperty(MapReduceProperty.OUTPUT.name())));
 
-            List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, new HdfsFilenameFilter() {
+            List<String> files = HdfsUtils.getFilesForDir(config, inputDir, new HdfsFilenameFilter() {
 
                 @Override
                 public boolean accept(String filename) {

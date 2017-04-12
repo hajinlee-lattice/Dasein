@@ -101,7 +101,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         }
     }
 
-    @Override
     public Properties generateCustomizedProperties(ScoringConfiguration scoringConfig) {
         String tenant = CustomerSpace.parse(scoringConfig.getCustomer()).toString();
 
@@ -133,7 +132,6 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         return properties;
     }
 
-    @Override
     public void setConfiguration(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
     }
