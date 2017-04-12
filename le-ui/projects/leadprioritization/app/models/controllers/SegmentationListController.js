@@ -43,8 +43,6 @@ angular.module('lp.models.segments', [
                 });
             });
         }
-
-
     };
 
     vm.tileClick = function ($event, segmentName) {
@@ -91,6 +89,37 @@ angular.module('lp.models.segments', [
         oldSegmentDisplayName = '';
         oldSegmentDescription = '';
 
+        createOrUpdateSegment(segment);
+    };
+
+    vm.addSegment = function() {
+        if (vm.modelId) {
+            $state.go('home.model.analysis');
+        } else {
+            $state.go('home.segment');
+        }
+    };
+
+    vm.duplicateSegmentClick = function($event, segment) {
+        $event.preventDefault();
+        $event.stopPropagation();
+
+        vm.saveInProgress = true;
+        segment.name = 'segment' + new Date().getTime();
+
+        createOrUpdateSegment(segment);
+    };
+
+    vm.showDeleteSegmentModalClick = function($event, segment){
+
+        $event.preventDefault();
+        $event.stopPropagation();
+
+        DeleteSegmentModal.show(segment, !!vm.modelId);
+
+    };
+
+    function createOrUpdateSegment(segment) {
         SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
 
             var errorMsg = result.errorMsg;
@@ -108,26 +137,5 @@ angular.module('lp.models.segments', [
             }
         });
 
-    };
-
-    vm.addSegment = function() {
-        if (vm.modelId) {
-            $state.go('home.model.analysis');
-        } else {
-            $state.go('home.segment');
-        }
-    };
-
-    vm.duplicateSegmentClick = function($event, segment) {
-    };
-
-    vm.showDeleteSegmentModalClick = function($event, segment){
-
-        $event.preventDefault();
-        $event.stopPropagation();
-
-        DeleteSegmentModal.show(segment, !!vm.modelId);
-
-    };
-
+    }
 });
