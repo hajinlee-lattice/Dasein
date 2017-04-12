@@ -53,7 +53,7 @@ public class AttributeServiceImpl implements AttributeService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    private AppTenantConfigServiceImpl appTenantConfigService;
+    private CommonTenantConfigServiceImpl appTenantConfigService;
 
     @Autowired
     private AttributeCustomizationService attributeCustomizationService;

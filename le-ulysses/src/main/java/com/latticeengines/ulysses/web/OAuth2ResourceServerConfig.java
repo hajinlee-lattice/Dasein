@@ -57,7 +57,8 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                     .permitAll() //
                 .antMatchers("/ulysses/latticeinsights/**", //
                              "/ulysses/companyprofiles/**", //
-                             "/ulysses/attributes/**") //
+                             "/ulysses/attributes/**",
+                             "/ulysses/tenant/**") //
                     .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))")
                 .antMatchers("/ulysses/**")
                     .denyAll();

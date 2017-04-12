@@ -52,6 +52,9 @@ public class TenantConfigResource {
     private class TopologyJson {
         @JsonProperty("Topology")
         public CRMTopology topology;
-        public TopologyJson(CRMTopology topology) { this.topology = topology; }
+
+        public TopologyJson(CRMTopology topology) {
+            this.topology = topology;
+        }
     }
 }
