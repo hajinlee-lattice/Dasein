@@ -5,4 +5,4 @@ RUN rm -r -f ${CATALINA_HOME}/webapps/ROOT*
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY webapps/{{WAR}}.war ${CATALINA_HOME}/webapps/{{WAR}}.war
 
-
+RUN yum update -y glibc-common && yum clean all
