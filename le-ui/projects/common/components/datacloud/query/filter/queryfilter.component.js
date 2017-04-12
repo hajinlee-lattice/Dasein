@@ -21,4 +21,15 @@ angular.module('common.datacloud.query.filter', [])
     vm.deleteBucket = function(index) {
         $scope.onDelete($scope.group, $scope.attribute.columnName, index);
     };
+})
+.filter('QueryRange', function() {
+    return function(range) {
+        if (!range) {
+            return null;
+        }
+        if (range.is_null_only) {
+            return 'null';
+        }
+        return range.max === range.min ? range.max : range.min + ' - ' + range.max;
+    };
 });

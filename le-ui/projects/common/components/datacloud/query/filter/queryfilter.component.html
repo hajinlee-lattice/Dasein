@@ -26,7 +26,7 @@
                 <div class="query-filter-cell query-filter-delete">&nbsp;</div>
             </div>
             <div class="query-filter-row" ng-repeat="b in attribute.buckets">
-                <div class="query-filter-cell query-filter-value">{{b.range.max}}</div>
+                <div class="query-filter-cell query-filter-value">{{b.range | QueryRange}}</div>
                 <div class="query-filter-cell query-filter-lead"></div>
                 <div class="query-filter-cell query-filter-lift"><div class="query-lift-highlight"></div></div>
                 <div class="query-filter-cell query-filter-delete"><a href ng-click="vm.deleteBucket($index)">&times;</a></div>
