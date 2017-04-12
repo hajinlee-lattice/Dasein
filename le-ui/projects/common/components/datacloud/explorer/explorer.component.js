@@ -491,6 +491,10 @@ angular.module('common.datacloud.explorer', [
         disabled: vm.highlightTypes.disabled
     }
 
+    vm.showHighlighting = function() {
+        return (vm.section == 'team' || vm.section == 'insights' || vm.section == 'lookup');
+    }
+
     vm.highlightTypesCategoryLabel = function(category, subcategory) {
         var category = category || '',
             subcategory = subcategory || '',

@@ -4,11 +4,11 @@
     <div class="header">
         <h2 title="{{enrichment.DisplayName}}">
             <div class="category-icon">
-                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.section != 'edit'"">
+                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.showHighlighting()">
                     <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                 </div>
                 <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" />
-                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.section != 'edit'"">
+                <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.showHighlighting()">
                     <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                 </div>
             </div>
@@ -30,6 +30,9 @@
     <span class="lesser-description" ng-if="vm.lookupMode">
         {{ enrichment.Description }}
     </span>
+    <div ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && !vm.lookupMode">
+        <div ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean'">[has numerical]</div>
+    </div>
     <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' && !vm.lookupMode">
         <h5><label>Attribute range</label><label>Records</label></h5>
         <ul>
@@ -38,7 +41,7 @@
                 ng-click="vm.selectSegmentAttributeRange(enrichment, stat)">
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">
-                        <input  type="checkbox" 
+                        <input  type="checkbox"
                                 ng-model="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)]" 
                                 ng-checked="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)]" 
                                 name="{{vm.makeSegmentsRangeKey(enrichment,stat.Range)}}" 

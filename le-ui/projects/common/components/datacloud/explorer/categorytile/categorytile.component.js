@@ -70,6 +70,37 @@ angular
                     vm.updateStateParams();
                 }
             }
+            
+            vm.displayAttributeValue = function(attribute, property) {
+                var property = property || 'Lbl',
+                    enrichmentKey = attribute.Attribute || attribute.FieldName,
+                    index = vm.enrichmentsMap[enrichmentKey],
+                    enrichment = vm.enrichments[index],
+                    stats = vm.cube.Stats[enrichmentKey].RowStats.Bkts.List,
+                    stat = stats[0],
+                    segmentRangeKey = null;
+                if(stat && stat.Range) {
+                    segmentRangeKey = vm.makeSegmentsRangeKey(enrichment,stat.Range);
+                }
+                //console.log(vm.cube.Stats[enrichmentKey].RowStats.Bkts.List);
+                if(stats && stats.length > 1) {
+                    for(var i in stats) {
+                        if(stats[i] && stats[i].Range) {
+                            if(vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stats[i].Range)]) {
+                                stat = stats[i];
+                                break;
+                            }
+                        }
+
+                    }
+                }
+                if(stat && stat[property]) {
+                    if(property === 'Lift') {
+                        return stat[property].toFixed(1) + 'x';
+                    }
+                    return stat[property];
+                }
+            }
         }
     };
 });
