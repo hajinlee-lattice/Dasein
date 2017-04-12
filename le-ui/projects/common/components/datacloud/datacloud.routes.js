@@ -15,6 +15,7 @@ angular
             DataCloudStore.setHost(ApiHost);
 
             DataCloudStore.getCount().then(function(result) {
+                DataCloudStore.setMetadata('enrichmentsTotal', result.data);
                 deferred.resolve(result);
             });
 

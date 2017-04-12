@@ -10,7 +10,7 @@ angular.module('common.datacloud.explorer', [
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount,
-    EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore, 
+    EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore,
     SegmentServiceProxy, QueryRestriction
 ){
     var vm = this,
@@ -296,7 +296,6 @@ angular.module('common.datacloud.explorer', [
         if(!vm.lookupMode) {
             DataCloudStore.setMetadata('generalSelectedTotal', selectedTotal.length);
             DataCloudStore.setMetadata('premiumSelectedTotal', vm.filter(selectedTotal, 'IsPremium', true).length);
-            DataCloudStore.setMetadata('enrichmentsTotal', vm.enrichments.length);
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
         }
 
