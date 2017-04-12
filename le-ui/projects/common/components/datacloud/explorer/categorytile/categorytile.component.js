@@ -77,7 +77,7 @@ angular
                     index = vm.enrichmentsMap[enrichmentKey],
                     enrichment = vm.enrichments[index],
                     stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].RowStats && vm.cube.Stats[enrichmentKey].RowStats.Bkts && vm.cube.Stats[enrichmentKey].RowStats.Bkts.List ? vm.cube.Stats[enrichmentKey].RowStats.Bkts.List : null),
-                    stat = (stats.length ? stats[0] : null),
+                    stat = (stats && stats.length ? stats[0] : null),
                     segmentRangeKey = null;
                 if(stat && stat.Range) {
                     segmentRangeKey = vm.makeSegmentsRangeKey(enrichment,stat.Range);
