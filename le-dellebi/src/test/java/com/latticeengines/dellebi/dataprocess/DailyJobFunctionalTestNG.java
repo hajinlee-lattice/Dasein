@@ -11,7 +11,6 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -63,9 +62,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
 
     @BeforeMethod(groups = "functional")
     public void setUpBeforeMethod() throws Exception {
-
-        Configuration configuration = new Configuration();
-        HdfsUtils.rmdir(configuration, dataHadoopWorkingPath);
+        HdfsUtils.rmdir(yarnConfiguration, dataHadoopWorkingPath);
     }
 
     @Test(groups = "functional", dataProvider = "fileDataProvider", enabled=true)
@@ -93,9 +90,8 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
             Assert.assertEquals(result, true);
             result = exportAndReportService.export(context);
             Assert.assertEquals(result, true);
-            Configuration conf = new Configuration();
-            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(context)), true);
-            List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(context) + "/*.txt");
+            Assert.assertEquals(HdfsUtils.fileExists(yarnConfiguration, dellEbiFlowService.getOutputDir(context)), true);
+            List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, dellEbiFlowService.getTxtDir(context) + "/*.txt");
             Assert.assertEquals(files.size(), 1);
             if (sourceType.equals("SMB")) {
                 SmbFile smbFile = smbRetrieve(smbInboxPath, file);
@@ -141,9 +137,8 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
             Assert.assertEquals(result, true);
             exportAndReportService.export(context);
 
-            Configuration conf = new Configuration();
-            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(context)), true);
-            List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(context) + "/*.txt");
+            Assert.assertEquals(HdfsUtils.fileExists(yarnConfiguration, dellEbiFlowService.getOutputDir(context)), true);
+            List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, dellEbiFlowService.getTxtDir(context) + "/*.txt");
             Assert.assertEquals(files.size(), 1);
             if (sourceType.equals("SMB")) {
                 SmbFile smbFile = smbRetrieve(smbInboxPath, file);

@@ -2,7 +2,6 @@ package com.latticeengines.dellebi.dataprocess;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -35,9 +34,7 @@ public class LocalFileTestNG extends DellEbiTestNGBase {
 
     @BeforeMethod(groups = "manual")
     public void setUpBeforeMethod() throws Exception {
-
-        Configuration configuration = new Configuration();
-        HdfsUtils.rmdir(configuration, dataHadoopWorkingPath);
+        HdfsUtils.rmdir(yarnConfiguration, dataHadoopWorkingPath);
     }
 
     @Test(groups = "manual")

@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import cascading.flow.FlowDef;
@@ -28,13 +29,15 @@ public class HadoopFileSystemOperations {
     @Value("${dellebi.quotetrans}")
     private String quoteTrans;
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
     private static final Log log = LogFactory.getLog(HadoopFileSystemOperations.class);
 
     public void cleanFolder(String folderName) {
         try {
-            Configuration conf = new Configuration();
-            if (HdfsUtils.fileExists(conf, folderName))
-                HdfsUtils.rmdir(conf, folderName);
+            if (HdfsUtils.fileExists(yarnConfiguration, folderName))
+                HdfsUtils.rmdir(yarnConfiguration, folderName);
 
         } catch (Exception e) {
             log.warn("Failed to delete dir!");
@@ -45,8 +48,7 @@ public class HadoopFileSystemOperations {
     public int listFileNumber(String folderName) {
         int fileNumber = 0;
         try {
-            Configuration conf = new Configuration();
-            FileSystem fs = FileSystem.get(URI.create(dataHadoopRootPath), conf);
+            FileSystem fs = FileSystem.get(URI.create(dataHadoopRootPath), yarnConfiguration);
             Path path = new Path(folderName);
             FileStatus[] status = fs.listStatus(path);
             for (FileStatus s : status) {
@@ -66,8 +68,7 @@ public class HadoopFileSystemOperations {
     public boolean isExistWithTXTFile(String folderName) {
 
         try {
-            Configuration conf = new Configuration();
-            FileSystem fs = FileSystem.get(URI.create(dataHadoopRootPath), conf);
+            FileSystem fs = FileSystem.get(URI.create(dataHadoopRootPath), yarnConfiguration);
             Path path = new Path(folderName);
             if (fs.exists(path)) {
                 FileStatus[] fileStatus = fs.listStatus(path);
@@ -85,13 +86,12 @@ public class HadoopFileSystemOperations {
         return false;
     }
 
-    public static void addClasspath(FlowDef flow, String artifactVersion) {
+    public static void addClasspath(Configuration yarnConfiguration, FlowDef flow, String artifactVersion) {
 
         try {
-            Configuration config = new Configuration();
             String libPath = StringUtils.isEmpty(artifactVersion) ? "/app/dellebi/lib"
                     : String.format("/app/%s/dellebi/lib/", artifactVersion);
-            List<String> files = HdfsUtils.getFilesForDir(config, libPath);
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, libPath);
             for (String file : files) {
                 flow.addToClassPath(file);
             }

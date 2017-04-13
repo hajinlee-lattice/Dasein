@@ -41,6 +41,9 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
     @Autowired
     protected DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
+    
+    @Autowired
+    protected Configuration yarnConfiguration;
 
     public BaseFileFlowService() {
         super();
@@ -78,10 +81,9 @@ public abstract class BaseFileFlowService implements FileFlowService {
         String txtDir = getTxtDir(getFileType(fileName));
 
         try {
-            Configuration conf = new Configuration();
-            FileSystem fs = FileSystem.get(conf);
-            if (!HdfsUtils.fileExists(conf, zipDir)) {
-                HdfsUtils.mkdir(conf, zipDir);
+            FileSystem fs = FileSystem.get(yarnConfiguration);
+            if (!HdfsUtils.fileExists(yarnConfiguration, zipDir)) {
+                HdfsUtils.mkdir(yarnConfiguration, zipDir);
             }
             String zipFilePath = zipDir + "/" + fileName;
             OutputStream os = fs.create(new Path(zipFilePath), true);
@@ -89,8 +91,8 @@ public abstract class BaseFileFlowService implements FileFlowService {
             FileCopyUtils.copy(is, os);
             log.info("Finished downloading file to HDFS, fileName=" + fileName);
 
-            if (HdfsUtils.fileExists(conf, txtDir)) {
-                HdfsUtils.rmdir(conf, txtDir);
+            if (HdfsUtils.fileExists(yarnConfiguration, txtDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, txtDir);
             }
             return unzip(fs, zipDir, txtDir, fileName);
 

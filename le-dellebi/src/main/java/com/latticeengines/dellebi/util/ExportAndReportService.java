@@ -96,9 +96,8 @@ public class ExportAndReportService {
                 DellEbiExecutionLog.class);
         Long startTime = System.currentTimeMillis();
 
-        Configuration conf = new Configuration();
         try {
-            if (!HdfsUtils.fileExists(conf, successFile)) {
+            if (!HdfsUtils.fileExists(yarnConfiguration, successFile)) {
                 log.info("The successFile: " + successFile + " does not exist in output, skip the data export");
                 return false;
             }
@@ -167,7 +166,7 @@ public class ExportAndReportService {
 
         if (errorMsg == null) {
             try {
-                List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(context) + "/*.txt");
+                List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, dellEbiFlowService.getTxtDir(context) + "/*.txt");
                 if (files != null && files.size() > 0) {
                     boolean result = dellEbiFlowService.deleteFile(context);
                     if (result) {

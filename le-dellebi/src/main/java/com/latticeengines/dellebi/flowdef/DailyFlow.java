@@ -2,11 +2,13 @@ package com.latticeengines.dellebi.flowdef;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import com.latticeengines.dellebi.util.LoggingUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -84,6 +86,9 @@ public class DailyFlow {
     @Autowired
     private FlowDefinition flowDefinition;
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
     public DataFlowContext doDailyFlow(String[] typesList) {
 
         DataFlowContext context = new DataFlowContext();
@@ -112,10 +117,14 @@ public class DailyFlow {
         long startTime = System.currentTimeMillis();
 
         Properties properties = new Properties();
+        for (Map.Entry<String,String> entry : yarnConfiguration) {
+            properties.put(entry.getKey(), entry.getValue());
+        }
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(queue, yarnQueueScheme);
         properties.put("mapred.job.queue.name", translatedQueue);
+
         FlowConnector flowConnector = new Hadoop2MR1FlowConnector(properties);
 
         try {
@@ -162,7 +171,8 @@ public class DailyFlow {
             if (config.getType().equalsIgnoreCase(dellEbiFlowService.getFileType(context))) {
 
                 FlowDef flow = flowDefinition.populateFlowDefByType(config.getType());
-                HadoopFileSystemOperations.addClasspath(flow, versionManager.getCurrentVersionInStack(stackName));
+                HadoopFileSystemOperations.addClasspath(yarnConfiguration, flow,
+                        versionManager.getCurrentVersionInStack(stackName));
                 return flow;
             }
         }

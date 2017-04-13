@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -38,19 +39,19 @@ public class BatchDownloadTestNG extends AbstractTestNGSpringContextTests {
     @Value("${dellebi.smbarchivepath}")
     private String smbArchivePath;
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
     @Test(groups = "manual")
     public void batchDownload() throws Exception {
 
-        Configuration conf = null;
-        conf = new Configuration();
-
         String batchInputDir = dataHadoopWorkingPath + "/ZipDir/";
         String batchOutputDir = dataHadoopWorkingPath + "/TextDir/";
-        if (HdfsUtils.fileExists(conf, batchInputDir)) {
-            HdfsUtils.rmdir(conf, batchInputDir);
+        if (HdfsUtils.fileExists(yarnConfiguration, batchInputDir)) {
+            HdfsUtils.rmdir(yarnConfiguration, batchInputDir);
         }
-        if (HdfsUtils.fileExists(conf, batchOutputDir)) {
-            HdfsUtils.rmdir(conf, batchOutputDir);
+        if (HdfsUtils.fileExists(yarnConfiguration, batchOutputDir)) {
+            HdfsUtils.rmdir(yarnConfiguration, batchOutputDir);
         }
 
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
@@ -63,7 +64,7 @@ public class BatchDownloadTestNG extends AbstractTestNGSpringContextTests {
             long startTime = System.currentTimeMillis();
             System.out.println("Downloading zip file name=" + file.getName());
 
-            FileSystem fs = FileSystem.get(conf);
+            FileSystem fs = FileSystem.get(yarnConfiguration);
             String filePath = batchInputDir + file.getName();
             OutputStream os = fs.create(new Path(filePath));
             FileCopyUtils.copy(file.getInputStream(), os);
