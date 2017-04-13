@@ -5,29 +5,22 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.avro.file.FileReader;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.camel.testng.AbstractCamelTestNGSpringContextTests;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +33,6 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.csv.LECSVFormat;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -53,13 +44,10 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
@@ -67,7 +55,8 @@ import com.latticeengines.security.exposed.service.TenantService;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
-public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTests {
+public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTests
+        implements EaiFunctionalTestNGInterface {
 
     protected static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
     protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = TimeUnit.MINUTES.toMillis(90);
@@ -140,52 +129,6 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         Path importTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")
                 .append("ImportTimeout");
         camille.create(importTimeoutDocPath, new Document("3600000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-    }
-
-    protected Table createFile(File destDir, String fileName) {
-        Configuration conf = new Configuration();
-        conf.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
-        Table table = MetadataConverter.getTable(conf, destDir.getPath());
-        table.setName(fileName);
-        return table;
-    }
-
-    protected void verifyAllDataNotNullWithNumRows(Configuration config, Table table, int expectedNumRows)
-            throws Exception {
-        List<Extract> extracts = table.getExtracts();
-        long numRows = 0;
-        for (Extract extract : extracts) {
-            List<String> avroFiles = HdfsUtils.getFilesByGlob(config, extract.getPath());
-
-            for (String avroFile : avroFiles) {
-                try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config,
-                        new org.apache.hadoop.fs.Path(avroFile))) {
-                    long prev = 0;
-                    for (; reader.hasNext(); numRows++) {
-                        GenericRecord record = reader.next();
-                        long current = Long.valueOf(record.get(InterfaceName.InternalId.name()).toString());
-                        assertTrue(current > prev);
-                        prev = current;
-                    }
-                }
-                validateErrorFile(avroFile);
-            }
-        }
-        assertEquals(numRows, expectedNumRows);
-    }
-
-    private void validateErrorFile(String avroFile) throws IOException {
-        String errorPath = StringUtils.substringBeforeLast(avroFile, "/") + "/error.csv";
-        try (CSVParser parser = new CSVParser(
-                new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration, errorPath)), LECSVFormat.format)) {
-            Set<String> headers = parser.getHeaderMap().keySet();
-            assertTrue(headers.contains("Id"));
-            assertTrue(headers.contains("LineNumber"));
-            assertTrue(headers.contains("ErrorMessage"));
-
-            List<CSVRecord> records = parser.getRecords();
-            assertEquals(records.size(), 10);
-        }
     }
 
     protected List<String> getFilesFromHdfs(String targetPath, String table) throws Exception {

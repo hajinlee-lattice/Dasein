@@ -1,6 +1,5 @@
 package com.latticeengines.eai.runtime.mapreduce;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -10,27 +9,21 @@ import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
-import org.apache.hadoop.util.Tool;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.dataplatform.exposed.runtime.mapreduce.MRJobCustomizationBase;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public abstract class AvroExportJob extends Configured implements Tool, MRJobCustomization {
+public abstract class AvroExportJob extends MRJobCustomizationBase {
 
     private static final Log log = LogFactory.getLog(AvroExportJob.class);
 
@@ -38,28 +31,17 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
 
     public static final String MAPRED_MAP_TASKS_PROPERTY = "mapreduce.job.maps";
 
-    private static final String dependencyPath = "/app/";
-
-    private static final String jarDependencyPath = "/eai/lib";
-
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
-    private VersionManager versionManager;
-
-    private String stackName;
-
     public AvroExportJob(Configuration config) {
-        setConf(config);
+        super(config);
     }
 
     public AvroExportJob(Configuration config, //
-            MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
-            VersionManager versionManager, String stackName) {
+            MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
         this(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
-        this.versionManager = versionManager;
-        this.stackName = stackName;
     }
 
     @SuppressWarnings("rawtypes")
@@ -114,12 +96,6 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
             log.info("Set num mappers to " + getNumMappers());
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
-            List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(),
-                    dependencyPath + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
-            for (String jarFilePath : jarFilePaths) {
-                mrJob.addFileToClassPath(new Path(jarFilePath));
-            }
-
             // config.set(MRJobConfig.MAP_JAVA_OPTS,
             // "-Xdebug -Xnoagent -Djava.compiler=NONE
             // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
@@ -132,47 +108,6 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
     @Override
     public int run(String[] args) throws Exception {
         return 0;
-    }
-
-    static class IgnoreDirectoriesAndSupportOnlyAvroFilesFilter extends Configured implements PathFilter {
-        private FileSystem fs;
-
-        public IgnoreDirectoriesAndSupportOnlyAvroFilesFilter() {
-            super();
-        }
-
-        public IgnoreDirectoriesAndSupportOnlyAvroFilesFilter(Configuration config) {
-            super(config);
-        }
-
-        @Override
-        public boolean accept(Path path) {
-            try {
-
-                if (this.getConf().get(FileInputFormat.INPUT_DIR).contains(path.toString())) {
-                    return true;
-                }
-                if (!fs.isDirectory(path) && path.toString().endsWith(".avro")) {
-                    return true;
-                }
-            } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_00002, e);
-            }
-            return false;
-        }
-
-        @Override
-        public void setConf(Configuration config) {
-            try {
-                if (config != null) {
-                    fs = FileSystem.get(config);
-                    super.setConf(config);
-                }
-
-            } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_00002, e);
-            }
-        }
     }
 
 }

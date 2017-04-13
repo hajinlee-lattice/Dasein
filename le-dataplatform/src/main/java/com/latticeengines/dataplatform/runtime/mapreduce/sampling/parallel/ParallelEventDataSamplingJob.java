@@ -49,13 +49,13 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
     private SamplingJobCustomizerFactory samplingJobCustomizerFactory;
 
     public ParallelEventDataSamplingJob(Configuration config) {
-        setConf(config);
+        super(config);
         samplingJobCustomizerFactory = new SamplingJobCustomizerFactory();
     }
 
     public ParallelEventDataSamplingJob(Configuration config,
             MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
-        setConf(config);
+        this(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
     }

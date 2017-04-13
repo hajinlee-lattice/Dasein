@@ -1,8 +1,6 @@
 package com.latticeengines.eai.service.impl.redshift;
 
-
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -16,25 +14,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
+import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
-@DirtiesContext
-@ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
-public class HdfsToRedshiftServiceImplTestNG extends DataplatformMiniClusterFunctionalTestNG {
+public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(HdfsToRedshiftServiceImplTestNG.class);
 
@@ -81,20 +75,10 @@ public class HdfsToRedshiftServiceImplTestNG extends DataplatformMiniClusterFunc
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, url.getPath(), HDFS_DIR + "/" + FILENAME);
     }
 
-    @Override
-    protected void uploadArtifactsToHdfs() throws IOException {
-        super.uploadArtifactsToHdfs();
-        String eaiHdfsPath = String.format("/app/%s/eai", versionManager.getCurrentVersionInStack(stackName))
-                .toString();
-        FileUtils.deleteDirectory(new File("eai"));
-        HdfsUtils.copyHdfsToLocal(yarnConfiguration, eaiHdfsPath, ".");
-        HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "eai", eaiHdfsPath);
-
-    }
-
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
         cleanup();
+        super.clear();
     }
 
     @Test(groups = "functional")

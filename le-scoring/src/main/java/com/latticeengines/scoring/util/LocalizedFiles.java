@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.util;
 
 import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class LocalizedFiles {

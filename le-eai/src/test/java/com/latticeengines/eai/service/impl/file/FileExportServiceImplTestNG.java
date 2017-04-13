@@ -16,11 +16,9 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.mapreduce.JobID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -38,10 +36,12 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.file.runtime.mapreduce.CSVExportJob;
+import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
+import com.latticeengines.eai.service.impl.file.strategy.CSVFileExportStrategyBase;
 
-public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
+public class FileExportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     public static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("TestCustomer");
 
@@ -49,7 +49,7 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private ExportService fileExportService;
 
     @Autowired
-    private Configuration yarnConfiguration;
+    private CSVFileExportStrategyBase csvFileExportStrategyBase;
 
     private URL dataUrl;
 
@@ -61,34 +61,36 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        super.setup();
         dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file.avro");
         sourceFilePath = "/tmp/sourceFiles/file.avro";
         targetCSVPath = "output";
-        HdfsUtils.rmdir(yarnConfiguration, sourceFilePath);
-        HdfsUtils.mkdir(yarnConfiguration, sourceFilePath);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), sourceFilePath);
+        HdfsUtils.rmdir(miniclusterConfiguration, sourceFilePath);
+        HdfsUtils.mkdir(miniclusterConfiguration, sourceFilePath);
+        HdfsUtils.copyLocalToHdfs(miniclusterConfiguration, dataUrl.getPath(), sourceFilePath);
 
         csvUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file2.csv");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, csvUrl.getPath(), sourceFilePath);
+        HdfsUtils.copyLocalToHdfs(miniclusterConfiguration, csvUrl.getPath(), sourceFilePath);
     }
 
     @AfterClass(groups = "functional")
     public void cleanup() throws IOException {
-        HdfsUtils.rmdir(yarnConfiguration, sourceFilePath);
-        HdfsUtils.rmdir(yarnConfiguration,
+        HdfsUtils.rmdir(miniclusterConfiguration, sourceFilePath);
+        HdfsUtils.rmdir(miniclusterConfiguration,
                 PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), TEST_CUSTOMER).toString());
     }
 
     @Test(groups = "functional")
     public void exportMetadataAndDataAndWriteToHdfs() throws Exception {
-        ExportContext ctx = new ExportContext(yarnConfiguration);
+        ExportContext ctx = new ExportContext(miniclusterConfiguration);
 
         ExportConfiguration fileExportConfig = new ExportConfiguration();
         fileExportConfig.setExportFormat(ExportFormat.CSV);
         fileExportConfig.setExportDestination(ExportDestination.FILE);
         fileExportConfig.setCustomerSpace(TEST_CUSTOMER);
-        fileExportConfig.setExportTargetPath(PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), TEST_CUSTOMER)
-                .append(targetCSVPath).toString());
+        fileExportConfig
+                .setExportTargetPath(PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), TEST_CUSTOMER)
+                        .append(targetCSVPath).toString());
         // fileExportConfig.setUsingDisplayName(Boolean.FALSE);
         Table table = createFile(new File(csvUrl.getPath()).getParentFile(), "file2");
         Extract extract = new Extract();
@@ -99,19 +101,18 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         Map<String, String> props = new HashMap<>();
         props.put(ExportProperty.TARGET_FILE_NAME, targetCSVPath);
         fileExportConfig.setProperties(props);
-        fileExportService.exportDataFromHdfs(fileExportConfig, ctx);
 
-        ApplicationId appId = ctx.getProperty(ExportProperty.APPID, ApplicationId.class);
-        assertNotNull(appId);
-        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        ((FileExportServiceImpl) fileExportService).configureExportContext(fileExportConfig, ctx);
+        JobID jobId = testMRJob(CSVExportJob.class, csvFileExportStrategyBase.getProperties(ctx, table));
+        assertNotNull(jobId);
+
         String actualTargetPath = PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), TEST_CUSTOMER)
                 .append(targetCSVPath + "_file.csv").toString();
-        verifyAllDataNotNullWithNumRows(yarnConfiguration, actualTargetPath, 10);
+        verifyAllDataNotNullWithNumRows(actualTargetPath, 10);
     }
 
-    void verifyAllDataNotNullWithNumRows(Configuration yarnConfiguration, String csvPath, int num) throws IOException {
-        try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
+    void verifyAllDataNotNullWithNumRows(String csvPath, int num) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(miniclusterConfiguration)) {
             try (InputStream is = fs.open(new Path(csvPath))) {
 
                 try (InputStreamReader reader = new InputStreamReader(is)) {

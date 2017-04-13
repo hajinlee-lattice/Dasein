@@ -6,7 +6,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportJob;
 
@@ -19,9 +18,8 @@ public class CSVExportJob extends AvroExportJob {
     }
 
     public CSVExportJob(Configuration config, //
-            MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
-            VersionManager versionManager, String version) {
-        super(config, mapReduceCustomizationRegistry, versionManager, version);
+            MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
+        super(config, mapReduceCustomizationRegistry);
     }
 
     @Override

@@ -58,7 +58,6 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     @Autowired(required = false)
     private final Collection<PartitionHandler> partitionHandlers = Collections.emptySet();
 
-    @Autowired
     private Configuration yarnConfiguration;
 
     private List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
@@ -85,7 +84,8 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         if (getLauncher() instanceof AbstractLauncher) {
             ((AbstractLauncher) getLauncher()).addInterceptor(this);
         }
-        RackResolver.init(getConfiguration());
+        yarnConfiguration = getConfiguration();
+        RackResolver.init(yarnConfiguration);
     }
 
     @Override
@@ -124,8 +124,8 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         } catch (Exception e) {
             if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
                 log.info("Retry submit application.");
-                //performFailover();
-                //registerAppmaster();
+                // performFailover();
+                // registerAppmaster();
             } else {
                 throw e;
             }
@@ -261,8 +261,8 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         } catch (Exception e) {
             if (getConfiguration().getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
                 log.info("Retry doStop.");
-                //performFailover();
-                //super.doStop();
+                // performFailover();
+                // super.doStop();
             } else {
                 throw e;
             }
@@ -280,37 +280,42 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
     }
 
-//    private void performFailover() {
-//        Configuration conf = getConfiguration();
-//        log.info(String.format("RM address before fail over: %s", conf.get(YarnConfiguration.RM_ADDRESS)));
-//        Collection<String> rmIds = HAUtil.getRMHAIds(conf);
-//        String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
-//        int currentIndex = 0;
-//        String currentHAId = conf.get(YarnConfiguration.RM_HA_ID);
-//        for (int i = 0; i < rmServiceIds.length; i++) {
-//            if (currentHAId.equals(rmServiceIds[i])) {
-//                currentIndex = i;
-//                break;
-//            }
-//        }
-//        currentIndex = (currentIndex + 1) % rmServiceIds.length;
-//        conf.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
-//        String address = conf.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
-//        String webappAddress = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
-//                + rmServiceIds[currentIndex]);
-//        String schedulerAddress = conf.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "."
-//                + rmServiceIds[currentIndex]);
-//        conf.set(YarnConfiguration.RM_ADDRESS, address);
-//        conf.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
-//        conf.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);
-//        setConfiguration(conf);
-//        log.info(String.format("Fail over from %s to %s.", currentHAId, rmServiceIds[currentIndex]));
-//        log.info(String.format("RM address after fail over: %s", conf.get(YarnConfiguration.RM_ADDRESS)));
-//        AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
-//        try {
-//            rmTemplate.afterPropertiesSet();
-//        } catch (Exception e) {
-//            log.error("AppmasterRmTemplate refresh properties failed.");
-//        }
-//    }
+    // private void performFailover() {
+    // Configuration conf = getConfiguration();
+    // log.info(String.format("RM address before fail over: %s",
+    // conf.get(YarnConfiguration.RM_ADDRESS)));
+    // Collection<String> rmIds = HAUtil.getRMHAIds(conf);
+    // String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
+    // int currentIndex = 0;
+    // String currentHAId = conf.get(YarnConfiguration.RM_HA_ID);
+    // for (int i = 0; i < rmServiceIds.length; i++) {
+    // if (currentHAId.equals(rmServiceIds[i])) {
+    // currentIndex = i;
+    // break;
+    // }
+    // }
+    // currentIndex = (currentIndex + 1) % rmServiceIds.length;
+    // conf.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
+    // String address = conf.get(YarnConfiguration.RM_ADDRESS + "." +
+    // rmServiceIds[currentIndex]);
+    // String webappAddress = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
+    // + rmServiceIds[currentIndex]);
+    // String schedulerAddress = conf.get(YarnConfiguration.RM_SCHEDULER_ADDRESS
+    // + "."
+    // + rmServiceIds[currentIndex]);
+    // conf.set(YarnConfiguration.RM_ADDRESS, address);
+    // conf.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
+    // conf.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);
+    // setConfiguration(conf);
+    // log.info(String.format("Fail over from %s to %s.", currentHAId,
+    // rmServiceIds[currentIndex]));
+    // log.info(String.format("RM address after fail over: %s",
+    // conf.get(YarnConfiguration.RM_ADDRESS)));
+    // AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
+    // try {
+    // rmTemplate.afterPropertiesSet();
+    // } catch (Exception e) {
+    // log.error("AppmasterRmTemplate refresh properties failed.");
+    // }
+    // }
 }

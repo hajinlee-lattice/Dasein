@@ -67,7 +67,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         log.info(String.format("Importing data for table %s with filter %s", table, filter));
-        Properties props = getProperties(ctx, table, "");
+        Properties props = getProperties(ctx, table);
 
         ApplicationId appId = eaiYarnService.submitMRJob(CSVImportJob.CSV_IMPORT_JOB_TYPE, props);
        // ApplicationId appId = sparkImport.launch(props);
@@ -85,7 +85,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         lastModifiedTimes.put(table.getName(), DateTime.now().getMillis());
     }
 
-    private Properties getProperties(ImportContext ctx, Table table, String localFileName) {
+    public Properties getProperties(ImportContext ctx, Table table) {
         Properties props = new Properties();
         props.put("errorLineNumber", errorLineNumber + "");
         props.put("yarn.mr.hdfs.class.path",

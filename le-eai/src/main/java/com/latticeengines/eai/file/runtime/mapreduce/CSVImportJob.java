@@ -6,27 +6,25 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
-import org.apache.hadoop.util.Tool;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.dataplatform.exposed.runtime.mapreduce.MRJobCustomizationBase;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
-public class CSVImportJob extends Configured implements Tool, MRJobCustomization {
+public class CSVImportJob extends MRJobCustomizationBase {
 
     public static final String CSV_IMPORT_JOB_TYPE = "eaiCSVImportJob";
 
@@ -43,7 +41,7 @@ public class CSVImportJob extends Configured implements Tool, MRJobCustomization
     private String stackName;
 
     public CSVImportJob(Configuration config) {
-        setConf(config);
+        super(config);
     }
 
     public CSVImportJob(Configuration config, //

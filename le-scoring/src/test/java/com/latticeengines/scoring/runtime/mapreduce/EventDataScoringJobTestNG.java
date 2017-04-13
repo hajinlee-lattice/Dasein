@@ -16,7 +16,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.ProxyUtils;
 import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -85,11 +84,8 @@ public class EventDataScoringJobTestNG extends DataplatformMiniClusterFunctional
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
         scoringConfig.setUniqueKeyColumn(InterfaceName.Id.name());
 
-        ((ScoringJobServiceImpl) ProxyUtils.getTargetObject(scoringJobService))
-        .setConfiguration(miniclusterConfiguration);
-        Properties properties = ((ScoringJobServiceImpl) ProxyUtils.getTargetObject(scoringJobService))
-                .generateCustomizedProperties(scoringConfig);
-
+        ((ScoringJobServiceImpl) scoringJobService).setConfiguration(miniclusterConfiguration);
+        Properties properties = ((ScoringJobServiceImpl) scoringJobService).generateCustomizedProperties(scoringConfig);
         testMRJob(EventDataScoringJob.class, properties);
 
     }

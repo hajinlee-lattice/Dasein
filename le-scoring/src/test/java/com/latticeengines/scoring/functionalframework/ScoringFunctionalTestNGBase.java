@@ -2,7 +2,6 @@ package com.latticeengines.scoring.functionalframework;
 
 import static org.testng.Assert.assertEquals;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,6 +13,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.AfterClass;
 
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.db.exposed.service.DbMetadataService;

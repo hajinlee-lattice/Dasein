@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
@@ -29,7 +30,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.ProxyUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.runtime.mapreduce.MRJobCustomizationBase;
 import com.latticeengines.dataplatform.exposed.service.JobService;
@@ -50,9 +50,6 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
 
     @Autowired
     protected Configuration yarnConfiguration;
-
-    @Autowired
-    protected Configuration hadoopConfiguration;
 
     @Autowired
     protected VersionManager versionManager;
@@ -139,8 +136,8 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
                 miniclusterConfiguration.get(YarnConfiguration.RM_SCHEDULER_ADDRESS));
         properties.setProperty("hadoop." + FileSystem.FS_DEFAULT_NAME_KEY,
                 "hdfs://localhost:" + hdfsCluster.getNameNodePort());
-        properties.setProperty("swlib." + FileSystem.FS_DEFAULT_NAME_KEY,
-                "hdfs://localhost:" + hdfsCluster.getNameNodePort());
+        // properties.setProperty("swlib." + FileSystem.FS_DEFAULT_NAME_KEY,
+        // "hdfs://localhost:" + hdfsCluster.getNameNodePort());
         return properties;
     }
 
@@ -159,11 +156,11 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
 
     public ApplicationId testYarnJob(String yarnClientName, Properties appMasterProperties,
             Properties containerProperties) throws Exception {
-        ((YarnClientCustomizationServiceImpl) ProxyUtils.getTargetObject(yarnClientCustomizationService))
+        ((YarnClientCustomizationServiceImpl) yarnClientCustomizationService)
                 .setConfiguration(miniclusterConfiguration);
+
         YarnClientCustomization customization = YarnClientCustomization.getCustomization(yarnClientName);
-        ((DefaultYarnClientCustomization) ProxyUtils.getTargetObject(customization))
-                .setConfiguration(miniclusterConfiguration);
+        ((DefaultYarnClientCustomization) customization).setConfiguration(miniclusterConfiguration);
 
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.overwriteQueueAssignment(
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()), queueScheme));
@@ -176,8 +173,10 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
         yarnClient = new CommandYarnClient(clientTemplate);
         ((CommandYarnClient) yarnClient).setConfiguration(miniclusterConfiguration);
 
-        ((CommandYarnClient) yarnClient)
-                .setEnvironment(((CommandYarnClient) (applicationContext.getBean(yarnClientName))).getEnvironment());
+        ((CommandYarnClient) yarnClient).setEnvironment(new HashMap<String, String>());
+        ((CommandYarnClient) yarnClient).getEnvironment().put("CLASSPATH",
+                ((CommandYarnClient) (applicationContext.getBean(yarnClientName))).getEnvironment().get("CLASSPATH"));
+
         return jobService.submitYarnJob(((CommandYarnClient) yarnClient), yarnClientName, appMasterProperties,
                 containerProperties);
     }

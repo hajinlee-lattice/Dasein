@@ -251,6 +251,10 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         return yarnConfiguration;
     }
 
+    public void setConfiguration(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
+    }
+
     @Override
     public int getMaxAppAttempts(Properties appMasterProperties) {
         String maxAppAttempts = appMasterProperties.getProperty(AppMasterProperty.MAX_APP_ATTEMPTS.name(), "-1");
@@ -260,7 +264,4 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         return Integer.valueOf(maxAppAttempts);
     }
 
-    public void setConfiguration(Configuration yarnConfiguration) {
-        this.yarnConfiguration = yarnConfiguration;
-    }
 }

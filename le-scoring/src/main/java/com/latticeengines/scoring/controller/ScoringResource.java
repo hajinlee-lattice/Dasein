@@ -1,8 +1,5 @@
 package com.latticeengines.scoring.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.Arrays;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -21,6 +18,9 @@ import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scoring.exposed.service.ScoringService;
 import com.latticeengines.scoring.service.ScoringJobService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "scoring", description = "REST resource for scoring service by Lattice")
 @RestController

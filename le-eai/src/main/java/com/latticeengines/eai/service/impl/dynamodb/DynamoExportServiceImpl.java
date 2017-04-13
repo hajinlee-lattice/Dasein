@@ -1,5 +1,8 @@
 package com.latticeengines.eai.service.impl.dynamodb;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
@@ -8,9 +11,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
@@ -22,6 +27,7 @@ import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ExportService;
+import com.latticeengines.eai.util.EaiJobUtil;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("dynamoExportService")
@@ -30,10 +36,13 @@ public class DynamoExportServiceImpl extends ExportService {
     private static final Log log = LogFactory.getLog(DynamoExportServiceImpl.class);
 
     @Autowired
-    private Configuration yarnConfiguration;
+    private EaiYarnService eaiYarnService;
 
     @Autowired
-    private EaiYarnService eaiYarnService;
+    private VersionManager versionManager;
+
+    @Value("${dataplatform.hdfs.stack:}")
+    protected String stackName;
 
     protected DynamoExportServiceImpl() {
         super(ExportDestination.DYNAMO);
@@ -55,8 +64,8 @@ public class DynamoExportServiceImpl extends ExportService {
         if (StringUtils.isNotEmpty(inputPath)) {
             context.setProperty(ExportProperty.INPUT_FILE_PATH, inputPath);
         } else {
-            context.setProperty(ExportProperty.INPUT_FILE_PATH,
-                    ExtractUtils.getSingleExtractPath(yarnConfiguration, table));
+            context.setProperty(ExportProperty.INPUT_FILE_PATH, ExtractUtils.getSingleExtractPath(
+                    context.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class), table));
         }
         boolean exportUsingDisplayName = exportConfig.getUsingDisplayName();
         context.setProperty(ExportProperty.EXPORT_USING_DISPLAYNAME, String.valueOf(exportUsingDisplayName));
@@ -128,6 +137,14 @@ public class DynamoExportServiceImpl extends ExportService {
         } else {
             props.setProperty(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED, "");
         }
+        List<String> cacheFiles = new ArrayList<>();
+        try {
+            cacheFiles = EaiJobUtil.getCacheFiles(ctx.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class),
+                    versionManager.getCurrentVersionInStack(stackName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        props.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), String.join(",", cacheFiles));
 
         return props;
     }
