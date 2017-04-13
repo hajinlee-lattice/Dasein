@@ -26,6 +26,7 @@ public class LocationUtils {
 
     public static final String USA = "USA";
     public static final String CANADA = "CANADA";
+    public static final String US = "US";
 
     static {
         Object[][] countrySynonData = new Object[][] { //
