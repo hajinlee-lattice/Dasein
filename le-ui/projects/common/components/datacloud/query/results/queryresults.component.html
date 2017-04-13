@@ -13,14 +13,16 @@
             </div>
         </li>
         <li class="buttons">
-            <div class="pull-right">
+            <div>
                 <a href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}"><button class="button icon-button white-button"><i class="fa fa-download"></i></button></a>
                 <button class="button icon-button white-button" ui-sref="{{ vm.refineQuery() }}" ng-disabled="vm.saving">Refine Query</button>
                 <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
                 <button ng-if="vm.saving" disabled class="button icon-button blue-button">Saving <i class="fa fa-spinner fa-pulse fw"></i></button>
             </div>
         </li>
-        <li class="paging" ng-show="vm.count > 0">
+    </ul>
+    <ul class="filters" ng-show="vm.count > 0">
+        <li>
             <pd-pagination-controls
                 current="vm.current"
                 max="vm.count / vm.pagesize">
@@ -28,7 +30,7 @@
         </li>
     </ul>
 
-    <table class="list-table" ng-show="vm.count > 0">
+    <table class="list-table" ng-if="vm.count > 0">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
                 <th ng-repeat="col in ::vm.columns" ng-click="vm.sort(col.key);">

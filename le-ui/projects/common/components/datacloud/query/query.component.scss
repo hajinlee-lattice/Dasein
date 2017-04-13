@@ -9,10 +9,9 @@
 
     .filters {
         @include flex-container;
-        padding-bottom: 10px;
+        justify-content: center;
 
-        .query,
-        .paging {
+        .query {
             @include flex-item(0 1 auto);
         }
 
