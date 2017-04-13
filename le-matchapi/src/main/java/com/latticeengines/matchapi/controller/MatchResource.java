@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.exposed.service.MatchPrecheckService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -65,6 +66,7 @@ public class MatchResource {
         try {
             matchPrecheckService.precheck(input.getDataCloudVersion());
             MatchOutput output = realTimeMatchService.match(input);
+            log.info("match output record: " + JsonUtils.serialize(output));
             if (output != null) {
                 GzipUtils.writeToGzipStream(response, output);
             }

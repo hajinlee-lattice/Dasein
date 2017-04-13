@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
@@ -204,6 +205,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setMatchLogs(internalRecord.getMatchLogs());
             outputRecord.setDebugValues(internalRecord.getDebugValues());
             outputRecords.add(outputRecord);
+            log.info("output record: " + JsonUtils.serialize(outputRecord));
         }
 
         matchContext.getOutput().setResult(outputRecords);
