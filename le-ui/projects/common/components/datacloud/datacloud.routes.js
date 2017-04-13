@@ -94,10 +94,8 @@ angular
             resolve: {
                 LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
                     var deferred = $q.defer();
-                    //var data = LookupStore.get('response');
 
                     LookupService.submit(ApiHost).then(function(data) {
-                        //console.log('response', data);
                         var current = new Date().getTime();
                         var old = LookupStore.get('timestamp');
 
@@ -168,17 +166,17 @@ angular
                 category: {value: null, squash: true},
                 subcategory: {value: null, squash: true}
             },
+            resolve: {
+                EnrichmentAccountLookup: function($q, DataCloudStore, LookupResponse) {
+                    var deferred = $q.defer();
+                    
+                    deferred.resolve(LookupResponse.attributes || {});
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "main@": {
-                    resolve: {
-                        EnrichmentAccountLookup: function($q, DataCloudStore, LookupResponse) {
-                            var deferred = $q.defer();
-
-                            deferred.resolve(LookupResponse.attributes || {});
-
-                            return deferred.promise;
-                        }
-                    },
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
@@ -423,8 +421,8 @@ angular
                 pageTitle: 'My Data',
                 pageIcon: 'ico-analysis',
                 section: 'segment.analysis',
-                category: {value: null, squash: true},
-                subcategory: {value: null, squash: true}
+                category: { value: null, squash: true },
+                subcategory: { value: null, squash: true }
             }
         }))
         .state('home.segment.explorer.query', getState('query'))

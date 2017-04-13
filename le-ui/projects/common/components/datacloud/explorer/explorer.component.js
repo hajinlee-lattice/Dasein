@@ -303,7 +303,7 @@ angular.module('common.datacloud.explorer', [
         vm.premiumSelectedTotal = DataCloudStore.getMetadata('premiumSelectedTotal');
 
         var timestamp5 = new Date().getTime();
-        console.log('xhrResult();\t\t\t', '[' + (timestamp2 - timestamp) + ':' + (timestamp3 - timestamp2) + ':' + (timestamp5 - timestamp4) + ']\t ' + ((timestamp3 - timestamp) + (timestamp5 - timestamp4)) + 'ms\t concurrent:'+vm.concurrentIndex);
+        console.info('xhrResult();\t\t\t', '[' + (timestamp2 - timestamp) + ':' + (timestamp3 - timestamp2) + ':' + (timestamp5 - timestamp4) + ']\t ' + ((timestamp3 - timestamp) + (timestamp5 - timestamp4)) + 'ms\t concurrent:'+vm.concurrentIndex);
     }
 
     vm.generateTree = function(isComplete) {
@@ -334,7 +334,7 @@ angular.module('common.datacloud.explorer', [
         });
 
         var timestamp2 = new Date().getTime();
-        console.log('generateTree();\t\t\t', (timestamp2 - timestamp) + 'ms');
+        console.info('generateTree();\t\t\t', (timestamp2 - timestamp) + 'ms');
 
         if (isComplete) {
             vm.categories.forEach(function(category, item) {
@@ -476,7 +476,7 @@ angular.module('common.datacloud.explorer', [
         });
 
         var timestamp2 = new Date().getTime();
-        console.log('getHighlightMetadata():\t ' + (timestamp2 - timestamp) + 'ms');
+        console.info('getHighlightMetadata():\t ' + (timestamp2 - timestamp) + 'ms');
     }
 
     vm.highlightTypes = {
@@ -776,11 +776,12 @@ angular.module('common.datacloud.explorer', [
     }
 
     var getTopAttributes = function(opts) {
-        var timestamp = new Date().getTime();
         var opts = opts || {},
             category = opts.category;
 
         DataCloudStore.getAllTopAttributes().then(function(result){
+            var timestamp = new Date().getTime();
+            
             Object.keys(EnrichmentTopAttributes).forEach(function(catKey) {
                 var category = result[catKey]['SubCategories']; // ben
 
@@ -798,9 +799,11 @@ angular.module('common.datacloud.explorer', [
                     });
                 });
             });
+            
             vm.topAttributes = EnrichmentTopAttributes;
+            
             var timestamp2 = new Date().getTime();
-            console.log('getTopAttributes();\t\t', timestamp2 - timestamp + 'ms');
+            console.info('getTopAttributes();\t\t', timestamp2 - timestamp + 'ms');
         });
     }
 
@@ -851,8 +854,8 @@ angular.module('common.datacloud.explorer', [
                     var index = vm.enrichmentsMap[item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
-                            'Value',
-                            'AttributeValue',
+                            //'Value',
+                            //'AttributeValue',
                             'FundamentalType',
                             'DisplayName',
                             'Subcategory',
@@ -864,21 +867,23 @@ angular.module('common.datacloud.explorer', [
                             'HighlightHighlighted',
                             'SegmentChecked'
                         ];
+                    
                     map.forEach(function(key){
                         item[key] = enrichment[key];
                     });
+
+                    enrichment.NonNullCount = item.NonNullCount;
                 });
             }
             var timestamp_c = new Date().getTime();
         }
+
         var timestamp2 = new Date().getTime();
 
         if (vm.lookupMode || !items || items.length == 0) {
             items = vm.enrichmentsObj[category];
 
             if (subcategory || vm.isYesNoCategory(category, true)) {
-                //var subcategory = subcategory || 'Other';
-
                 items = items.filter(function(item) {
                     var isSubcategory = subcategory ? item.Subcategory == subcategory : true,
                         attrValue = (vm.lookupFiltered ? vm.lookupFiltered[item.FieldName] : item.AttributeValue);
@@ -896,9 +901,10 @@ angular.module('common.datacloud.explorer', [
                 });
             }
         }
-        var timestamp3 = new Date().getTime();
 
+        var timestamp3 = new Date().getTime();
         var _items = {};
+
         if (segment && items) {
             var segmented = vm.filter(items, segment, true),
                 other = vm.filter(items, segment, false);
@@ -907,13 +913,25 @@ angular.module('common.datacloud.explorer', [
         }
 
         _items['other'] = other || items;
-
         items = _items;
-
+        
         vm.TileTableItems[category][(subcategory || 'all')] = items;
 
-        var timestamp4 = new Date().getTime();
-        console.log('getTileTableItems();\t', '[' + (timestamp_b - timestamp_a) + ':' + (timestamp_c - timestamp_b) + ':' + (timestamp3 - timestamp2) + ':' + (timestamp4 - timestamp3) + ']\t '+ (timestamp4 - timestamp) + 'ms\t', category, '\t', subcategory, '\t', (items[segment]||[]).length + ':' + items.other.length, items);
+        var timestamp4 = new Date().getTime(),
+            a = (timestamp_b - timestamp_a),
+            b = (timestamp_c - timestamp_b),
+            c = (timestamp3 - timestamp2),
+            d = (timestamp4 - timestamp3);
+
+        console.info(
+            'getTileTableItems();\t', 
+            '[' + (isNaN(a) ? '' : a + ':') + (isNaN(b) ? '' : b + ':') + c + ':' + d + ']\t '+ 
+            (timestamp4 - timestamp) + 'ms\t', 
+            category, '\t', 
+            subcategory, '\t', 
+            items
+        );
+        
         return items;
     }
 
