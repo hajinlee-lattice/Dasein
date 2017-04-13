@@ -6,9 +6,9 @@
         <div class="columns six">
             <div class="pull-right">
                 <button class="button icon-button white-button"><i class="fa fa-download"></i></button>
-                <button class="button icon-button white-button" ng-click="vm.goAttributes()">Select Attributes</button>
+                <button class="button icon-button white-button" ng-click="vm.goAttributes()" ng-disabled="vm.saving">Select Attributes</button>
                 <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
-                <button ng-if="vm.saving" disabled class="button icon-button blue-button""><i class="fa fa-spinner fa-pulse fw"></i></button>
+                <button ng-if="vm.saving" disabled class="button icon-button blue-button">Saving <i class="fa fa-spinner fa-pulse fw"></i></button>
             </div>
         </div>
     </div>
