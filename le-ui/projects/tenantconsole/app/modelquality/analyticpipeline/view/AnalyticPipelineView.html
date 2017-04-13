@@ -75,7 +75,7 @@
       </div>
       <div class="row">
         <form class="form-group">
-          <label>{{::vm_analyticPipeline.labels.PROP_DATA_CONFIG}}: <label>
+          <label>{{::vm_analyticPipeline.labels.PROP_DATA_CONFIG}}: </label>
           <select class="form-control"
             ng-model="vm_analyticPipeline.analyticPipeline.prop_data_name"
             ng-options="config.name as config.name for config in vm_analyticPipeline.propDataConfigs">
@@ -85,11 +85,11 @@
       <div class="row pipeline-description">
         <form class="form-group">
           <label>{{::vm_analyticPipeline.labels.PIPELINE_DESCRIPTION}}:</label>
-          <textarea class="form-control" placeholder="{{::vm_analyticPipeline.labels.PIPELINE_DESCRIPTION}}" ng-model="vm_analyticPipeline.pipelineDescription"/>
+          <textarea class="form-control" placeholder="{{::vm_analyticPipeline.labels.PIPELINE_DESCRIPTION}}" ng-model="vm_analyticPipeline.pipelineDescription"></textarea>
         </form>
       </div>
       <div class="row">
-        <hr>
+        <hr/>
       </div>
       <div class="row" ng-if="!vm_analyticPipeline.loading">
         <div class="pull-right">
