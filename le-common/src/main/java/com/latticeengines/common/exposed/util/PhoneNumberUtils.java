@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -9,10 +10,12 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 public class PhoneNumberUtils {
     private static final Log log = LogFactory.getLog(PhoneNumberUtils.class);
-
     public static String getStandardPhoneNumber(String phoneNumber, String countryCode) {
         phoneNumber = LocationStringStandardizationUtils.getStandardString(phoneNumber);
-        if (org.apache.commons.lang.StringUtils.isEmpty(phoneNumber)) {
+        if (StringUtils.isEmpty(countryCode)) {
+            countryCode = LocationUtils.US;
+        }
+        if (StringUtils.isEmpty(phoneNumber)) {
             return null;
         }
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
