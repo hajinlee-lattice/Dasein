@@ -34,12 +34,28 @@ angular
             }
 
             vm.categoryOrderBy = function(test) {
+                if(vm.lookupMode) {
+                    order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
+                } else if(vm.section == 'segment.analysis') {
+                    order = [ 'SegmentChecked', '-Value' ];
+                } else {
+                    order = [ '-HighlightHighlighted', '-Value' ];
+                }
+                // remove highlighting
+                if(!vm.showHighlighting()) {
+                    order = order.filter(function(item){
+                        return item != '-HighlightHighlighted' && item != 'HighlightHighlighted'
+                    });
+                }
+                return order;
+                /*
                 ret = vm.lookupMode 
-                    ? [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ]
+                ? [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ]
                     : vm.section == 'segment.analysis' 
                         ? [ 'SegmentChecked', '-Value'  ]
                         : [ '-HighlightHighlighted', '-Value' ];
                 return ret;
+                */
             }
 
             vm.categoryClick = function(category, $event) {

@@ -29,6 +29,13 @@ angular
                 queryText: ''
             });
 
+            // remove highlighting
+            if (!vm.showHighlighting()) {
+                vm.orders.attribute = vm.orders.attribute.filter(function(item){
+                    return item != '-HighlightHighlighted' && item != 'HighlightHighlighted'
+                });
+            }
+
             var clearFilters = function() {
                 for(var i in vm.metadata.toggle) {
                     for(var j in vm.metadata.toggle[i]) {
