@@ -150,6 +150,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     public void setRestriction(Restriction restriction) {
         this.restrictionString = JsonUtils.serialize(restriction);
         List<ColumnLookup> lookups = GraphUtils.getAllOfType(restriction, ColumnLookup.class);
+        setDependencies(new ArrayList<>());
         for (ColumnLookup lookup : lookups) {
             if (lookup != null) {
                 addDependency(DependableObject.fromDependable(lookup));
