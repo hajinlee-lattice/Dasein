@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import org.hibernate.annotations.Index;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_DEPENDENCY_LINK")
@@ -30,10 +31,12 @@ public class DependencyLink implements HasPid {
 
     @Column(name = "CHILD_NAME", nullable = false)
     @JsonProperty("child_name")
+    @Index(name = "NAME_TYPE_IDX")
     private String childName;
 
     @Column(name = "CHILD_TYPE", nullable = false)
     @JsonProperty("child_type")
+    @Index(name = "NAME_TYPE_IDX")
     private String childType;
 
     @JsonProperty("parent")
