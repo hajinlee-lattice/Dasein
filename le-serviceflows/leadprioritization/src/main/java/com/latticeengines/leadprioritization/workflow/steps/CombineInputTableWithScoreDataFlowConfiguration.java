@@ -9,6 +9,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfigurati
 public class CombineInputTableWithScoreDataFlowConfiguration extends DataFlowStepConfiguration {
 
     private List<BucketMetadata> bucketMetadata;
+    private String modelType;
 
     public CombineInputTableWithScoreDataFlowConfiguration() {
         setBeanName("combineInputTableWithScore");
@@ -21,5 +22,13 @@ public class CombineInputTableWithScoreDataFlowConfiguration extends DataFlowSte
 
     public void setBucketMetadata(List<BucketMetadata> bucketMetadataList) {
         this.bucketMetadata = bucketMetadataList;
+    }
+
+    public String getModelType() {
+        return this.modelType;
+    }
+
+    public void setModelType(String modelType) {
+        this.modelType = modelType;
     }
 }

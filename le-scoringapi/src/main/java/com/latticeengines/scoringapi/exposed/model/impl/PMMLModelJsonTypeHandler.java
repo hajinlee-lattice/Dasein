@@ -96,10 +96,10 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
         ScoreEvaluation scoreEvaluation = null;
         if (p != null) {
             double probability = BigDecimal.valueOf(p).setScale(8, RoundingMode.HALF_UP).doubleValue();
-            scoreEvaluation = new ScoreEvaluation(probability, -1, null);
+            scoreEvaluation = new ScoreEvaluation(probability, -1);
             scoreEvaluation.setScoreType(ScoreType.PROBABILITY_OR_VALUE);
         } else if (i != null) {
-            scoreEvaluation = new ScoreEvaluation(-1.0, i, null);
+            scoreEvaluation = new ScoreEvaluation(-1.0, i);
             scoreEvaluation.setScoreType(ScoreType.PERCENTILE);
         }
         Object c = evaluation.get(ScoreType.CLASSIFICATION);

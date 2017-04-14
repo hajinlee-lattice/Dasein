@@ -20,7 +20,7 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
 
     @Autowired
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
-    
+
     @Autowired
     private RTSScoreEventTable score;
 
@@ -43,7 +43,8 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
 
     @Override
     public Workflow defineWorkflow() {
-        return new WorkflowBuilder().next(matchDataCloudWorkflow).next(score) //
+        return new WorkflowBuilder().next(matchDataCloudWorkflow)//
+                .next(score) //
                 .next(combineMatchDebugWithScore) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //

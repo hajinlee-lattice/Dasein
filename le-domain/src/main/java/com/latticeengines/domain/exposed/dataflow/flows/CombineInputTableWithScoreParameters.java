@@ -20,16 +20,24 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     @JsonProperty("bucket_metadata")
     private List<BucketMetadata> bucketMetadata;
 
+    @JsonProperty("model_type")
+    private String modelType;
+
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
-        setScoreResultsTableName(scoreResultsTable);
-        setInputTableName(trainingTable);
+        this(scoreResultsTable, trainingTable, null);
     }
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable,
             List<BucketMetadata> bucketMetadata) {
+        this(scoreResultsTable, trainingTable, bucketMetadata, null);
+    }
+
+    public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable,
+            List<BucketMetadata> bucketMetadata, String modelType) {
         setScoreResultsTableName(scoreResultsTable);
         setInputTableName(trainingTable);
         setBucketMetadata(bucketMetadata);
+        setModelType(modelType);
     }
 
     /**
@@ -61,6 +69,14 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public void setBucketMetadata(List<BucketMetadata> bucketMetadata) {
         this.bucketMetadata = bucketMetadata;
+    }
+
+    public String getModelType() {
+        return this.modelType;
+    }
+
+    public void setModelType(String modelType) {
+        this.modelType = modelType;
     }
 
     @Override

@@ -102,7 +102,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private boolean isEnableDebug = false;
 
-    private boolean enableScoreValidation = false;
+    private boolean modelIsPythonType = false;
 
     private Map<String, Long> idToInternalIdMap = new HashMap<>();
 
@@ -129,7 +129,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = null;
         Map<String, Boolean> leadEnrichmentInternalAttributeFlagMap = null;
         isEnableDebug = rtsBulkScoringConfig.isEnableDebug();
-        enableScoreValidation = rtsBulkScoringConfig.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
+        modelIsPythonType = ModelType.isPythonTypeModel(rtsBulkScoringConfig.getModelType());
         boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient.isEnabled(
                 rtsBulkScoringConfig.getCustomerSpace(),
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
@@ -382,15 +382,18 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         scoreAttr.setDisplayName(ScoreResultField.Percentile.displayName);
         scoreAttr.setSourceLogicalDataType("");
         scoreAttr.setPhysicalDataType(Type.DOUBLE.name());
-        Attribute bucketAttr = new Attribute();
-        bucketAttr.setName(ScoreResultField.Rating.displayName);
-        bucketAttr.setDisplayName(ScoreResultField.Rating.displayName);
-        bucketAttr.setSourceLogicalDataType("");
-        bucketAttr.setPhysicalDataType(Type.STRING.name());
         outputTable.addAttribute(idAttr);
         outputTable.addAttribute(modelIdAttr);
         outputTable.addAttribute(scoreAttr);
-        outputTable.addAttribute(bucketAttr);
+        if (modelIsPythonType) {
+            Attribute bucketAttr = new Attribute();
+            bucketAttr.setName(ScoreResultField.Rating.displayName);
+            bucketAttr.setDisplayName(ScoreResultField.Rating.displayName);
+            bucketAttr.setSourceLogicalDataType("");
+            bucketAttr.setPhysicalDataType(Type.STRING.name());
+            outputTable.addAttribute(bucketAttr);
+        }
+
         if (isEnableDebug) {
             Attribute rawScoreAttr = new Attribute();
             rawScoreAttr.setName(ScoreResultField.RawScore.displayName);
@@ -449,14 +452,11 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     throw new LedpException(LedpCode.LEDP_20036);
                 }
                 Double score = tuple.getScore();
-                if (enableScoreValidation) {
+                if (modelIsPythonType) {
                     validateScore(score);
+                    String bucketName = tuple.getBucket() == null ? "" : tuple.getBucket().name();
+                    builder.set(ScoreResultField.Rating.displayName, bucketName);
                 }
-                String bucketName = tuple.getBucket() == null ? "" : tuple.getBucket().name();
-
-                builder.set(ScoringDaemonService.MODEL_ID, modelId);
-                builder.set(ScoreResultField.Percentile.displayName, score);
-                builder.set(ScoreResultField.Rating.displayName, bucketName);
                 if (isEnableDebug) {
                     Double rawScore = tuple.getProbability();
                     if (rawScore != null && (rawScore > 1 || rawScore < 0)) {
@@ -464,6 +464,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     }
                     builder.set(ScoreResultField.RawScore.displayName, rawScore);
                 }
+                builder.set(ScoringDaemonService.MODEL_ID, modelId);
+                builder.set(ScoreResultField.Percentile.displayName, score);
 
                 writeToErrorFile(csvFilePrinter, id, tuple.getErrorDescription());
 

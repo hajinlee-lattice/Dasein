@@ -2,12 +2,15 @@ package com.latticeengines.leadprioritization.dataflow;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -15,6 +18,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithSco
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
@@ -34,6 +38,12 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
     private CombineInputTableWithScoreParameters getStandardParameters() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters("ScoreResult",
                 "InputTable", generateDefaultBucketMetadata());
+        return params;
+    }
+
+    private CombineInputTableWithScoreParameters getParametersWithPMMLModelType() {
+        CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters("ScoreResult",
+                "InputTable", generateDefaultBucketMetadata(), ModelType.PMML.getModelType());
         return params;
     }
 
@@ -81,7 +91,7 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
     }
 
     @Test(groups = "functional")
-    public void execute() throws Exception {
+    public void testScoresAreCombined() throws Exception {
         List<GenericRecord> inputRecords = AvroUtils.readFromLocalFile(ClassLoader
                 .getSystemResource(String.format("%s/%s/%s/part-m-00000.avro", //
                         getFlowBeanName(), getScenarioName(), getStandardParameters().getInputTableName())) //
@@ -96,6 +106,29 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
             assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             assertNotNull(record.get(ScoreResultField.Rating.displayName));
         }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testScoresAreCombined")
+    public void testRatingsAreNotGeneratedForPMMLModel() throws IOException {
+        List<GenericRecord> inputRecords = AvroUtils.readFromLocalFile(ClassLoader
+                .getSystemResource(String.format("%s/%s/%s/part-m-00000.avro", //
+                        getFlowBeanName(), getScenarioName(), getParametersWithPMMLModelType().getInputTableName())) //
+                .getPath());
+
+        executeDataFlow(getParametersWithPMMLModelType());
+
+        List<GenericRecord> outputRecords = readOutput();
+        assertEquals(outputRecords.size(), inputRecords.size());
+        for (GenericRecord record : outputRecords) {
+            assertNotNull(record.get(InterfaceName.Id.name()));
+            assertNotNull(record.get(ScoreResultField.Percentile.displayName));
+            assertNull(record.get(ScoreResultField.Rating.displayName));
+        }
+    }
+
+    @AfterMethod(groups = "functional")
+    public void cleanUp() throws Exception {
+        super.setup();
     }
 
     @Override

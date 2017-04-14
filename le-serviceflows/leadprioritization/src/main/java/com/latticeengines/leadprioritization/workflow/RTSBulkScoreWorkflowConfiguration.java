@@ -194,6 +194,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder modelType(String modelType) {
             score.setModelType(modelType);
+            combineInputWithScores.setModelType(modelType);
             return this;
         }
 

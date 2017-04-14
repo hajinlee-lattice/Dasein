@@ -1,6 +1,7 @@
 package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -334,6 +335,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
             assertTrue(csvHeaders.contains("SourceColumn"));
             assertTrue(csvHeaders.contains("Score"));
             assertTrue(csvHeaders.contains("Event"));
+            assertFalse(csvHeaders.contains("Rating"));
 
             int line = 1;
             for (CSVRecord record : parser.getRecords()) {

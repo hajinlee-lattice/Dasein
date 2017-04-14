@@ -201,10 +201,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     public ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, //
             Map<String, Object> transformedRecord) {
         ScoreResponse scoreResponse = new ScoreResponse();
-        int percentile = score(scoringArtifacts, transformedRecord).getPercentile();
-        BucketName bucket = score(scoringArtifacts, transformedRecord).getBucketName();
-        scoreResponse.setScore(percentile);
-        scoreResponse.setBucket(bucket);
+        ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
+        scoreResponse.setScore(scoreEvaluation.getPercentile());
+        scoreResponse.setBucket(scoreEvaluation.getBucketName());
         return scoreResponse;
     }
 

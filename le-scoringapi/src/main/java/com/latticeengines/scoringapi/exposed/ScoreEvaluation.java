@@ -11,9 +11,7 @@ public class ScoreEvaluation {
     private BucketName bucketName;
 
     public ScoreEvaluation(double probabilityOrValue, int percentile) {
-        super();
-        this.probabilityOrValue = probabilityOrValue;
-        this.percentile = percentile;
+        this(probabilityOrValue, percentile, null);
     }
 
     public ScoreEvaluation(double probabilityOrValue, int percentile, BucketName bucketName) {
