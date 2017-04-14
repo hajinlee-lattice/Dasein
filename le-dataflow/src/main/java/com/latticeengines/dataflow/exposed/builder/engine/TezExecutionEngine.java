@@ -1,12 +1,17 @@
 package com.latticeengines.dataflow.exposed.builder.engine;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 import cascading.flow.FlowConnector;
@@ -25,14 +30,18 @@ public class TezExecutionEngine extends ExecutionEngine {
 
     @Override
     public FlowConnector createFlowConnector(DataFlowContext dataFlowCtx, Properties properties) {
+        Configuration config = dataFlowCtx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
         properties.put("tez.queue.name", getQueue(dataFlowCtx));
+        for (Map.Entry<String, String> entry : config) {
+            properties.put(entry.getKey(), entry.getValue());
+        }
         properties = FlowRuntimeProps.flowRuntimeProps().setGatherPartitions(getPartitions(dataFlowCtx))
                 .buildProperties(properties);
-        properties = updateTezRuntime(properties);
+        properties = updateTezRuntime(config, properties);
         return new Hadoop2TezFlowConnector(properties);
     }
 
-    private Properties updateTezRuntime(Properties properties) {
+    private Properties updateTezRuntime(Configuration config, Properties properties) {
         if (StringUtils.isNotBlank(properties.getProperty("tez.task.resource.memory.mb"))
                 && StringUtils.isBlank(properties.getProperty("tez.runtime.io.sort.mb"))) {
             long taskmb = Long.valueOf(properties.getProperty("tez.task.resource.memory.mb"));
@@ -40,6 +49,8 @@ public class TezExecutionEngine extends ExecutionEngine {
             properties.put("tez.runtime.io.sort.mb", String.valueOf(sortmb));
             log.info("Automatically set tez.runtime.io.sort.mb = " + properties.get("tez.runtime.io.sort.mb"));
         }
+        properties.put("tez.lib.uris",
+                config.get(FileSystem.FS_DEFAULT_NAME_KEY) + PropertyUtils.getProperty("tez.lib.uris"));
         return properties;
     }
 
