@@ -3,18 +3,21 @@ package com.latticeengines.domain.exposed.metadata;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.Index;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import org.hibernate.annotations.Index;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_DEPENDENCY_LINK")
@@ -35,9 +38,10 @@ public class DependencyLink implements HasPid {
     private String childName;
 
     @Column(name = "CHILD_TYPE", nullable = false)
+    @Enumerated(value = EnumType.ORDINAL)
     @JsonProperty("child_type")
     @Index(name = "NAME_TYPE_IDX")
-    private String childType;
+    private DependableType childType;
 
     @JsonProperty("parent")
     @ManyToOne
@@ -62,11 +66,11 @@ public class DependencyLink implements HasPid {
         this.childName = childName;
     }
 
-    public String getChildType() {
+    public DependableType getChildType() {
         return childType;
     }
 
-    public void setChildType(String childType) {
+    public void setChildType(DependableType childType) {
         this.childType = childType;
     }
 

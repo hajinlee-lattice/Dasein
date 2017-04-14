@@ -238,8 +238,8 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     }
 
     @Override
-    public String getType() {
-        return getClass().getTypeName();
+    public DependableType getType() {
+        return DependableType.Segment;
     }
 
     @Override

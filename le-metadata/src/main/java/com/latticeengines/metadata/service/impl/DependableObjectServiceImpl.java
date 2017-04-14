@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DependableObject;
+import com.latticeengines.domain.exposed.metadata.DependableType;
 import com.latticeengines.metadata.entitymgr.DependableObjectEntityMgr;
 import com.latticeengines.metadata.service.DependableObjectService;
 
@@ -13,7 +14,7 @@ public class DependableObjectServiceImpl implements DependableObjectService {
     private DependableObjectEntityMgr dependableObjectEntityMgr;
 
     @Override
-    public DependableObject find(String customerSpace, String type, String name) {
+    public DependableObject find(String customerSpace, DependableType type, String name) {
         return dependableObjectEntityMgr.find(type, name);
     }
 
@@ -27,7 +28,7 @@ public class DependableObjectServiceImpl implements DependableObjectService {
     }
 
     @Override
-    public void delete(String customerSpace, String type, String name) {
+    public void delete(String customerSpace, DependableType type, String name) {
         dependableObjectEntityMgr.delete(type, name);
     }
 }

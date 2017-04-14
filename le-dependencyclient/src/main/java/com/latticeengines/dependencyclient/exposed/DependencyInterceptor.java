@@ -51,7 +51,7 @@ public class DependencyInterceptor implements PostLoadEventListener, PersistEven
                 log.info(String.format("Retrieving dependencies for [name %s, type %s]", dependable.getName(),
                         dependable.getType()));
                 DependableObject object = dependableObjectProxy.find(MultiTenantContext.getCustomerSpace().toString(),
-                        dependable.getType(), dependable.getName());
+                        dependable.getType().toString(), dependable.getName());
                 if (object != null) {
                     dependable.setDependencies(object.getDependencies());
                 }

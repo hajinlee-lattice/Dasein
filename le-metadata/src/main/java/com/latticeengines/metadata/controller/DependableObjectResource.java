@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.DependableObject;
+import com.latticeengines.domain.exposed.metadata.DependableType;
 import com.latticeengines.metadata.service.DependableObjectService;
 
 import io.swagger.annotations.Api;
@@ -28,7 +29,7 @@ public class DependableObjectResource {
     @ApiOperation(value = "Get by type and name")
     public DependableObject find(@PathVariable String customerSpace, @RequestParam String type,
             @RequestParam String name) {
-        return dependableObjectService.find(customerSpace, type, name);
+        return dependableObjectService.find(customerSpace, DependableType.valueOf(type), name);
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -43,7 +44,7 @@ public class DependableObjectResource {
     @ResponseBody
     @ApiOperation(value = "Delete")
     public boolean delete(@PathVariable String customerSpace, @RequestParam String type, @RequestParam String name) {
-        dependableObjectService.delete(customerSpace, type, name);
+        dependableObjectService.delete(customerSpace, DependableType.valueOf(type), name);
         return true;
     }
 

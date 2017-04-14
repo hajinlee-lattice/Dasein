@@ -14,6 +14,7 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dependency.Dependable;
 import com.latticeengines.domain.exposed.metadata.DependableObject;
+import com.latticeengines.domain.exposed.metadata.DependableType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -76,8 +77,8 @@ public class ColumnLookup extends Lookup implements Dependable {
     }
 
     @Override
-    public String getType() {
-        return getClass().getTypeName();
+    public DependableType getType() {
+        return DependableType.Column;
     }
 
     @Override

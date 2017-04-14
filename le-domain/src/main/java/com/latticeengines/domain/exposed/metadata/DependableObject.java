@@ -7,6 +7,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -63,7 +65,8 @@ public class DependableObject extends AbstractDependableObject implements HasPid
 
     @Column(name = "TYPE", nullable = false)
     @JsonProperty("type")
-    private String type;
+    @Enumerated(value = EnumType.ORDINAL)
+    private DependableType type;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -85,11 +88,11 @@ public class DependableObject extends AbstractDependableObject implements HasPid
     }
 
     @Override
-    public String getType() {
+    public DependableType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(DependableType type) {
         this.type = type;
     }
 

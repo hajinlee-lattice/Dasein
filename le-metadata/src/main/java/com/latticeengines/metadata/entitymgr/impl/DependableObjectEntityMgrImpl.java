@@ -13,6 +13,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.dependency.Dependable;
 import com.latticeengines.domain.exposed.metadata.DependableObject;
+import com.latticeengines.domain.exposed.metadata.DependableType;
 import com.latticeengines.domain.exposed.metadata.DependencyLink;
 import com.latticeengines.metadata.dao.DependableObjectDao;
 import com.latticeengines.metadata.dao.DependencyLinkDao;
@@ -36,8 +37,9 @@ public class DependableObjectEntityMgrImpl extends BaseEntityMgrImpl<DependableO
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @SuppressWarnings("unchecked")
-    public DependableObject find(String type, String name) {
-        DependableObject retrieved = dependableObjectDao.findByFields("type", type, "name", name);
+    public DependableObject find(DependableType type, String name) {
+        DependableObject retrieved = dependableObjectDao.findByFields("type", Integer.toString(type.ordinal()), "name",
+                name);
         if (retrieved != null) {
             List<DependableObject> children = getChildren(retrieved);
             if (children != null) {
@@ -73,7 +75,7 @@ public class DependableObjectEntityMgrImpl extends BaseEntityMgrImpl<DependableO
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(String type, String name) {
+    public void delete(DependableType type, String name) {
         DependableObject existing = find(type, name);
         if (existing != null) {
             delete(existing);

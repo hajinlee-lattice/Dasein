@@ -18,11 +18,6 @@ public abstract class AbstractDependableObject implements Dependable, GraphNode 
     private List<DependableObject> dependencies = new ArrayList<>();
 
     @Override
-    public String getType() {
-        return getClass().getTypeName();
-    }
-
-    @Override
     public List<DependableObject> getDependencies() {
         return dependencies;
     }

@@ -794,8 +794,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode, Dependabl
     }
 
     @Override
-    public String getType() {
-        return Table.class.getTypeName();
+    public DependableType getType() {
+        return DependableType.Table;
     }
 
     @Override
