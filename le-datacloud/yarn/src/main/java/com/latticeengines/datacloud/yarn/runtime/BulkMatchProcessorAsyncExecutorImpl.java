@@ -9,6 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import scala.concurrent.Future;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.RateLimitingService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
@@ -17,12 +19,11 @@ import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
-import scala.concurrent.Future;
-
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
     private static final int NUM_10K = 10_000;
+    private static final int NUM_1K = 1_000;
     private static final Log log = LogFactory.getLog(BulkMatchProcessorAsyncExecutorImpl.class);
 
     @Autowired
@@ -90,7 +91,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
         do {
             processRecords(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
-                    completedFutures, combinedContext, 2_000, NUM_10K * 2);
+                    completedFutures, combinedContext, 100, NUM_10K * 2);
         } while (futures.size() > NUM_10K * 4);
     }
 
@@ -100,7 +101,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             int completedThreshold, int waitThreshold) {
 
         getCompletedRecords(processorContext, internalRecords, internalCompletedRecords, futures, completedFutures);
-        if (completedFutures.size() > completedThreshold) {
+        if (completedFutures.size() >= completedThreshold) {
             consumeFutures(processorContext, internalCompletedRecords, completedFutures, combinedContext);
         }
         if (futures.size() > waitThreshold) {
@@ -136,6 +137,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             log.error(msg);
             throw new RuntimeException(msg);
         }
+        
         combinedContext.setInternalResults(internalCompletedRecords);
         combinedContext.setFuturesResult(completedFutures);
         log.info("Sending " + completedFutures.size() + " of futures to get results.");
@@ -172,9 +174,12 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         for (int i = 0; i < futures.size(); i++) {
             Future<Object> future = futures.get(i);
             InternalOutputRecord internRecord = internalRecords.get(i);
-            if (future.isCompleted()) {
+            if (future.isCompleted() && currentCompletedfutures.size() < NUM_1K) {
                 currentCompletedfutures.add(future);
                 currentCompletedRecords.add(internRecord);
+                if (currentCompletedfutures.size() >= NUM_1K) {
+                    break;
+                }
             }
         }
         if (currentCompletedfutures.size() > 0) {
