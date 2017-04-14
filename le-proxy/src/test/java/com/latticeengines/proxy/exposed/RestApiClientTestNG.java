@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class RestApiClientTestNG extends AbstractTestNGSpringContextTests {
 
     private static final String PUBLIC_URL = "https://app.lattice-engines.com";
-    private static final String PRIVATE_URL = "https://10.51.51.109:3000";
+    private static final String PRIVATE_URL = "https://lpi-app-1206577515.us-east-1.elb.amazonaws.com";
 
     @Autowired
     private ApplicationContext applicationContext;
