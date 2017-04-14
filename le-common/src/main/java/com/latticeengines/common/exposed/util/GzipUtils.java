@@ -106,7 +106,7 @@ public class GzipUtils {
     public static void writeToGzipStream(HttpServletResponse response, Object output) throws IOException {
         OutputStream os = response.getOutputStream();
         response.setHeader("Content-Encoding", "gzip");
-        response.setHeader("Content-Type", "application/json");
+        response.setHeader("Content-Type", "application/json; charset=utf-8");
         GzipCompressorOutputStream gzipOs = new GzipCompressorOutputStream(os);
         OM.writeValue(gzipOs, output);
         gzipOs.flush();
