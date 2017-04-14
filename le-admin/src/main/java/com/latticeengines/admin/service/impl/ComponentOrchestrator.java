@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
@@ -130,7 +130,7 @@ public class ComponentOrchestrator {
     }
 
     public void orchestrateForInstall(String contractId, String tenantId, String spaceId,
-                                      Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo) {
+            Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo) {
         OrchestratorVisitor visitor = new OrchestratorVisitor(contractId, tenantId, spaceId, properties);
         TopologicalTraverse traverser = new TopologicalTraverse();
         traverser.traverse(components, visitor);
@@ -139,9 +139,10 @@ public class ComponentOrchestrator {
     }
 
     public void orchestrateForUninstall(String contractId, String tenantId, String spaceId,
-                                        Map<String, Map<String, String>> properties,
-                                        ProductAndExternalAdminInfo prodAndExternalAminInfo, boolean deleteZookeeper) {
-        OrchestratorVisitorForUninstall visitor = new OrchestratorVisitorForUninstall(contractId, tenantId, spaceId, properties);
+            Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo,
+            boolean deleteZookeeper) {
+        OrchestratorVisitorForUninstall visitor = new OrchestratorVisitorForUninstall(contractId, tenantId, spaceId,
+                properties);
         LatticeComponent modelingComponent = null;
         for (LatticeComponent component : components) {
             if (component.getName() == ModelingComponent.componentName) {
@@ -164,7 +165,8 @@ public class ComponentOrchestrator {
         }
     }
 
-    void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo, String tenantId) {
+    void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo,
+            String tenantId) {
         boolean installSuccess = checkComponentsBootStrapStatus(visitor);
         emailService(installSuccess, prodAndExternalAminInfo, tenantId);
     }
@@ -182,7 +184,8 @@ public class ComponentOrchestrator {
         List<String> existingEmailList = new ArrayList<String>();
         List<LatticeProduct> products = prodAndExternalAminInfo.products;
         if (allComponentsSuccessful) {
-            if (products.contains(LatticeProduct.PD) || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
+            if (products.contains(LatticeProduct.PD)
+                    || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
                 Map<String, Boolean> externalEmailMap = prodAndExternalAminInfo.getExternalEmailMap();
                 Set<String> externalEmails = externalEmailMap.keySet();
                 for (String externalEmail : externalEmails) {
@@ -276,7 +279,8 @@ public class ComponentOrchestrator {
 
                 if (properties.containsKey(component.getName())) {
 
-                    log.info("Attempt to install component " + component.getName());
+                    log.info(String.format("Attempt to install component %s for tenant %s", component.getName(),
+                            tenantId));
 
                     List<? extends LatticeComponent> dependencies = component.getChildren();
                     for (LatticeComponent dependency : dependencies) {
@@ -320,7 +324,7 @@ public class ComponentOrchestrator {
         }
     }
 
-    private static class OrchestratorVisitorForUninstall extends  OrchestratorVisitor {
+    private static class OrchestratorVisitorForUninstall extends OrchestratorVisitor {
 
         public OrchestratorVisitorForUninstall(String contractId, String tenantId, String spaceId,
                 Map<String, Map<String, String>> properties) {
@@ -334,7 +338,8 @@ public class ComponentOrchestrator {
 
                 if (properties.containsKey(component.getName())) {
 
-                    log.info("Attempt to uninstall component " + component.getName());
+                    log.info(String.format("Attempt to uninstall component %s for tenant %s", component.getName(),
+                            tenantId));
 
                     Map<String, String> bootstrapProperties = properties.get(component.getName());
                     batonService.bootstrap(contractId, tenantId, spaceId, component.getName(), bootstrapProperties);
