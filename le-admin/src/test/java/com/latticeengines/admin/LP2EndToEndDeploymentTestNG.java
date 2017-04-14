@@ -130,7 +130,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     /**
      * In setup, orchestrate a full tenant.
      **/
-    @BeforeClass(groups = "lp2")
+    @BeforeClass(groups = "lp2", enabled = false)
     public void setup() throws Exception {
         tenantId = testContract + tenantId + System.currentTimeMillis();
         contractId = tenantId;
@@ -146,7 +146,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         provisionEndToEndTestTenants();
     }
 
-    @AfterClass(groups = "lp2")
+    @AfterClass(groups = "lp2", enabled = false)
     public void tearDown() throws Exception {
         cleanup();
     }
@@ -160,7 +160,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify ZK states
     // ==================================================
 
-    @Test(groups = "lp2")
+    @Test(groups = "lp2", enabled = false)
     public void verifyZKStatesInMainTestTenant() {
         verifyZKState();
     }
@@ -169,17 +169,17 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify tenant truly exists
     // ==================================================
 
-    @Test(groups = "lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant", enabled = false)
     public void verifyJAMSMainTestTenantExists() throws Exception {
         verifyJAMSTenantExists();
     }
 
-    @Test(groups = "lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant", enabled = false)
     public void verifyPLSMainTestTenantExists() throws Exception {
         verifyPLSTenantExists();
     }
 
-    @Test(groups = "lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant", enabled = false)
     public void verifyVisiDBDLMainTestTenantExists() throws Exception {
         verifyVisiDBDLTenantExists();
     }
@@ -188,7 +188,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify cross component workflows
     // ==================================================
 
-    @Test(groups = "lp2", dependsOnMethods = "verifyPLSMainTestTenantExists")
+    @Test(groups = "lp2", dependsOnMethods = "verifyPLSMainTestTenantExists", enabled = false)
     public void verifyPLSTenantKnowsTopologyInMainTestTenant() throws Exception {
         verifyPLSTenantKnowsTopology();
     }
@@ -345,8 +345,8 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                 msg.append(String.format("Could not successfully get the bootstrap state of %s \n", serviceName));
             }
             boolean thisIsOK = (state != null && state.state.equals(BootstrapState.State.OK))
-                    || (BootstrapState.State.INITIAL.equals(state.state) && DanteComponent.componentName
-                            .equals(serviceName));
+                    || (BootstrapState.State.INITIAL.equals(state.state)
+                            && DanteComponent.componentName.equals(serviceName));
             if (!thisIsOK && state != null) {
                 msg.append(String.format("The bootstrap state of %s is not OK, but rather %s : %s.\n", serviceName,
                         state.state, state.errorMessage));
