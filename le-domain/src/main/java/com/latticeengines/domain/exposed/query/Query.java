@@ -168,5 +168,4 @@ public class Query implements GraphNode {
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
     }
-
 }

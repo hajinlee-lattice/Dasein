@@ -25,4 +25,8 @@ public interface BaseDao<T> {
     <F> T findByField(String fieldName, F value);
 
     <F> List<T> findAllByField(String fieldName, F value);
+
+    T findByFields(String... fieldsAndValues);
+
+    List<T> findAllByFields(String... fieldsAndValues);
 }

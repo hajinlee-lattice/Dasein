@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentProperty;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
+import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -57,7 +58,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         METADATA_SEGMENT.addSegmentProperty(METADATA_SEGMENT_PROPERTY_1);
         METADATA_SEGMENT.addSegmentProperty(METADATA_SEGMENT_PROPERTY_2);
         METADATA_SEGMENT
-                .setRestriction(new ConcreteRestriction(false, null, ComparisonType.EQUAL, null));
+                .setRestriction(new ConcreteRestriction(false, new ColumnLookup("Test"), ComparisonType.EQUAL, null));
         METADATA_SEGMENT.setDataCollection(DATA_COLLECTION);
     }
 
@@ -83,6 +84,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
                 NUM_CONTACTS);
         assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(),
                 ComparisonType.EQUAL);
+        assertEquals(retrieved.getDependencies().size(), 1);
     }
 
     @SuppressWarnings("unchecked")

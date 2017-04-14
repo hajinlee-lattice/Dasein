@@ -57,4 +57,9 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     public void allDataCollectionMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
+
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.DependableObjectEntityMgrImpl.*(..))")
+    public void allDependableObjectMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
 }

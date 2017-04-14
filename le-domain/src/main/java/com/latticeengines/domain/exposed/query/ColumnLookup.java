@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -9,13 +12,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
+import com.latticeengines.domain.exposed.dependency.Dependable;
+import com.latticeengines.domain.exposed.metadata.DependableObject;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ColumnLookup extends Lookup {
+public class ColumnLookup extends Lookup implements Dependable {
     @JsonProperty("column_name")
     private String columnName;
     @JsonProperty("object_type")
@@ -69,5 +73,29 @@ public class ColumnLookup extends Lookup {
     @Override
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
+    }
+
+    @Override
+    public String getType() {
+        return getClass().getTypeName();
+    }
+
+    @Override
+    public List<DependableObject> getDependencies() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void setDependencies(List<DependableObject> dependencies) {
+    }
+
+    @Override
+    public String getName() {
+        return getColumnName();
+    }
+
+    @Override
+    public void setName(String name) {
+        setColumnName(name);
     }
 }

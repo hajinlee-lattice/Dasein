@@ -29,6 +29,7 @@
         <module>le-datafabric</module>
         <module>le-domain</module>
         <module>le-proxy</module>
+        <module>le-dependencyclient</module>
         <module>le-remote</module>
         <module>le-scheduler</module>
         <module>le-parent</module>

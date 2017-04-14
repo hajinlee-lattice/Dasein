@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
@@ -24,11 +25,7 @@ public class QueryUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetJoins() {
-        Query query = new Query();
-        query.setObjectType(SchemaInterpretation.Account);
-        query.addLookup(new ColumnLookup(SchemaInterpretation.Account, "foo"));
-        query.addLookup(new ColumnLookup(SchemaInterpretation.BucketedAccountMaster, "bar"));
-        query.setRestriction(new ExistsRestriction(SchemaInterpretation.Contact, false, null));
+        Query query = getQuery();
         List<JoinSpecification> joins = query.getNecessaryJoins();
         assertEquals(joins.size(), 2);
         JoinSpecification amJoin = joins.stream()
@@ -38,5 +35,21 @@ public class QueryUnitTestNG {
         JoinSpecification contactJoin = joins.stream()
                 .filter(j -> j.getDestinationType().equals(SchemaInterpretation.Contact)).findFirst().orElse(null);
         assertEquals(contactJoin.getDestinationObjectUsage(), ObjectUsage.EXISTS);
+    }
+
+    @Test(groups = "unit")
+    public void testGetAllOfType() {
+        Query query = getQuery();
+        List<ColumnLookup> lookups = GraphUtils.getAllOfType(query, ColumnLookup.class);
+        assertEquals(lookups.size(), 2);
+    }
+
+    private Query getQuery() {
+        Query query = new Query();
+        query.setObjectType(SchemaInterpretation.Account);
+        query.addLookup(new ColumnLookup(SchemaInterpretation.Account, "foo"));
+        query.addLookup(new ColumnLookup(SchemaInterpretation.BucketedAccountMaster, "bar"));
+        query.setRestriction(new ExistsRestriction(SchemaInterpretation.Contact, false, null));
+        return query;
     }
 }

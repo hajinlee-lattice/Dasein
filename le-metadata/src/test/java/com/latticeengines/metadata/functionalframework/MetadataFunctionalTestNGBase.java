@@ -26,6 +26,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.dependencyclient.exposed.DependencyInterceptor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -47,8 +48,7 @@ import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGB
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-metadata-context.xml",
-        "classpath:metadata-aspects-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:metadata-aspects-context.xml" })
 public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private static final Logger log = Logger.getLogger(MetadataFunctionalTestNGBase.class);
 
@@ -85,20 +85,22 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Autowired
     protected TableTypeHolder tableTypeHolder;
 
+    @Autowired
+    private DependencyInterceptor dependencyInterceptor;
+
     protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
 
-    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase
-            .getAuthHeaderInterceptor();
+    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase
             .getMagicAuthHeaderInterceptor();
-    protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase
-            .getStatusErrorHandler();
+    protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase.getStatusErrorHandler();
 
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 
     public void setup() {
+        dependencyInterceptor.setEnabled(false);
         tableLocation1 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(CUSTOMERSPACE1), "x.y.z");
         tableLocation2 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
@@ -114,17 +116,17 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     private void copyExtractsToHdfs() {
         log.info("copyExtractsToHdfs");
         try {
-            Assert.assertNotEquals(yarnConfiguration.get("fs.defaultFS"), "file:///",
+            Assert.assertNotEquals(
+                    yarnConfiguration.get("fs.defaultFS"),
+                    "file:///",
                     "$HADOOP_HOME/etc/hadoop must be on the classpath, and configured to use a hadoop cluster in order for this test to run");
 
             HdfsUtils.rmdir(yarnConfiguration, tableLocation1.toString());
             HdfsUtils.mkdir(yarnConfiguration, tableLocation1.toString());
             HdfsUtils.rmdir(yarnConfiguration, tableLocation2.toString());
             HdfsUtils.mkdir(yarnConfiguration, tableLocation2.toString());
-            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE1,
-                    tableLocation1.toString());
-            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE2,
-                    tableLocation2.toString());
+            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE1, tableLocation1.toString());
+            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE2, tableLocation2.toString());
         } catch (Exception e) {
             throw new RuntimeException("Failed to setup hdfs for metadata test", e);
         }
@@ -199,10 +201,9 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         }
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(
-                Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        String url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(),
-                table.getTenant().getId(), urlType, table.getName());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        String url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), table.getTenant()
+                .getId(), urlType, table.getName());
         restTemplate.postForLocation(url, table);
     }
 

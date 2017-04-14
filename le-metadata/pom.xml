@@ -18,6 +18,7 @@
         <le.network.version>3.4.0-SNAPSHOT</le.network.version>
         <le.dataplatform.version>3.4.0-SNAPSHOT</le.dataplatform.version>
         <le.proxy.version>3.4.0-SNAPSHOT</le.proxy.version>
+        <le.dependencyclient.version>3.4.0-SNAPSHOT</le.dependencyclient.version>
     </properties>
 
     <parent>
@@ -74,7 +75,7 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
-            <classifier>intf</classifier>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -195,6 +196,18 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dependencyclient</artifactId>
+            <version>${le.dependencyclient.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dependencyclient</artifactId>
+            <version>${le.dependencyclient.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

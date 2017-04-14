@@ -54,6 +54,7 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.dependency.Dependable;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
@@ -68,14 +69,14 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_TABLE", //
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
+uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
 @Filters({ //
-        @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
         @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
 @EntityListeners(TableListener.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Table implements HasPid, HasName, HasTenantId, GraphNode {
+public class Table implements HasPid, HasName, HasTenantId, GraphNode, Dependable {
 
     private static final Log log = LogFactory.getLog(Table.class);
 
@@ -173,6 +174,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "sourceTable")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<TableRelationship> relationships = new ArrayList<>();
+
+    @JsonProperty("dependencies")
+    @Transient
+    private List<DependableObject> dependencies = new ArrayList<>();
 
     public Table() {
     }
@@ -494,7 +499,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             attrMetadatum.setFundamentalType(attr.getFundamentalType());
             attrMetadatum.setExtensions(Arrays.<KV> asList(new KV[] { //
                     new KV("Category", attr.getCategory()), //
-                    new KV("DataType", attr.getDataType()) }));
+                            new KV("DataType", attr.getDataType()) }));
             attrMetadatum.setDataQuality(attr.getDataQuality());
             attrMetadatum.setDataSource(attr.getDataSource());
 
@@ -545,8 +550,9 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         for (Attribute attr : getAttributes()) {
             boolean isRequest = requestTargets.contains(attr.getName());
             if (isRequest) {
-                if (attr.getInterfaceName() == null && (attr.getApprovedUsage() == null
-                        || attr.getApprovedUsage().size() == 0 || attr.getApprovedUsage().get(0).equals("None"))) {
+                if (attr.getInterfaceName() == null
+                        && (attr.getApprovedUsage() == null || attr.getApprovedUsage().size() == 0 || attr
+                                .getApprovedUsage().get(0).equals("None"))) {
                     // Custom field with no approved usage
                     continue;
                 } else if (LogicalDataType.isExcludedFromRealTimeMetadata(attr.getLogicalDataType())) {
@@ -785,5 +791,24 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
     public void addRelationship(TableRelationship relationship) {
         this.relationships.add(relationship);
+    }
+
+    @Override
+    public String getType() {
+        return Table.class.getTypeName();
+    }
+
+    @Override
+    public List<DependableObject> getDependencies() {
+        return dependencies;
+    }
+
+    @Override
+    public void setDependencies(List<DependableObject> dependencies) {
+        this.dependencies = dependencies;
+    }
+
+    public void addDependency(DependableObject dependableObject) {
+        this.dependencies.add(dependableObject);
     }
 }

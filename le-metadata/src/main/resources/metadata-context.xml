@@ -21,4 +21,5 @@
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
+    <import resource="classpath:dependencyclient-context.xml"/>
 </beans>

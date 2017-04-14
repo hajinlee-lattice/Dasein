@@ -110,6 +110,37 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         return results;
     }
 
+    public final T findByFields(String... fieldsAndValues) {
+        List<T> results = findAllByFields(fieldsAndValues);
+        if (results.size() == 0) {
+            return null;
+        }
+        if (results.size() > 1) {
+            throw new RuntimeException("Multiple rows found");
+        }
+        return results.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    public final List<T> findAllByFields(String... fieldsAndValues) {
+        if (fieldsAndValues.length % 2 != 0) {
+            throw new RuntimeException("Must specify a value for each field name");
+        }
+
+        Session session = getSessionFactory().getCurrentSession();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fieldsAndValues.length; i += 2) {
+            if (i > 0) {
+                sb.append(" and ");
+            }
+            sb.append(String.format("%s = '%s'", fieldsAndValues[i], fieldsAndValues[i + 1]));
+        }
+        String queryStr = String.format("from %s where %s", getEntityClass().getSimpleName(), sb.toString());
+        Query query = session.createQuery(queryStr);
+
+        return query.list();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll() {

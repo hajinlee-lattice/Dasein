@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
+import com.latticeengines.domain.exposed.metadata.DependableObject;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.flink.FlinkConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -96,8 +97,8 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
                 continue;
             }
             if (sourceTable.getExtracts().size() > 0) {
-                log.info(String.format("The first extract of table %s is located at %s", name,
-                        sourceTable.getExtracts().get(0).getPath()));
+                log.info(String.format("The first extract of table %s is located at %s", name, sourceTable
+                        .getExtracts().get(0).getPath()));
             }
             sourceTables.put(name, sourceTable);
         }
@@ -114,6 +115,9 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
         log.info(String.format("Setting metadata for table %s", table.getName()));
         if (!dataFlowConfig.shouldSkipRegisteringTable()) {
+            for (Table sourceTable : sourceTables.values()) {
+                table.addDependency(DependableObject.fromDependable(sourceTable));
+            }
             metadataProxy.updateTable(dataFlowConfig.getCustomerSpace().toString(), table.getName(), table);
         }
         return null;
