@@ -25,7 +25,7 @@ public class MRJobUtil {
 
     public static List<String> getPlatformShadedJarPathList(Configuration yarnConfiguration, String version) {
         try {
-            return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/dataplatform/lib", version), ".*.jar$");
+            return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/dataplatform/lib", version), ".*\\.jar$");
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }

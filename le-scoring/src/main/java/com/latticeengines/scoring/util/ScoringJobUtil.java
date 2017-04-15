@@ -163,7 +163,7 @@ public class ScoringJobUtil {
         files.add(dependencyPath + currentVersionInStack + scoringPythonPath);
         files.add(dependencyPath + currentVersionInStack + pythonLauncherPath);
         files.addAll(HdfsUtils.getFilesForDir(yarnConfiguration,
-                dependencyPath + currentVersionInStack + jarDependencyPath, ".*.jar$"));
+                dependencyPath + currentVersionInStack + jarDependencyPath, ".*\\.jar$"));
         return files;
 
     }

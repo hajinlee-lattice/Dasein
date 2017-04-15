@@ -14,7 +14,7 @@ public class EaiJobUtil {
         String dependencyPath = "/app/";
         String jarDependencyPath = "/eai/lib";
         List<String> jarFilePaths = HdfsUtils.getFilesForDir(yarnConfiguration,
-                dependencyPath + currentVersionInStack + jarDependencyPath, ".*.jar$");
+                dependencyPath + currentVersionInStack + jarDependencyPath, ".*\\.jar$");
         return jarFilePaths;
     }
 }
