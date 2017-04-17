@@ -117,7 +117,6 @@ public class DailyFlow {
         long startTime = System.currentTimeMillis();
 
         Properties properties = new Properties();
-        yarnConfiguration.setBoolean("mapreduce.job.user.classpath.first", true);
         for (Map.Entry<String, String> entry : yarnConfiguration) {
             properties.put(entry.getKey(), entry.getValue());
         }
