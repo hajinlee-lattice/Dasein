@@ -69,19 +69,6 @@
       },
       "ColumnTransformFilePath": "imputationstep.py"
     },
-    "FeatureSelectionStep": {
-      "KeyWhenSortingByAscending": 6,
-      "Name": "featureselectionstep",
-      "MainClassName": "FeatureSelectionStep",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "params": "params",
-        "numFeatures": 50,
-        "enabled": "false"
-      },
-      "ColumnTransformFilePath": "featureselectionstep.py"
-    },
     "ExportDataFrameStep": {
       "KeyWhenSortingByAscending": 7,
       "Name": "exportdfstep",
