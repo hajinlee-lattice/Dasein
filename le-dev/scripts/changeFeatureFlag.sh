@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 ###############################################
-# Usage: python changeFeatureFlag.sh -f tenants.txt -env Default -featureFlags UseMarketoSettings:true,UseSalesforceSettings:true,UseEloquaSettings:true,AllowPivotFile:true -all 
+# Usage: python changeFeatureFlag.sh -f tenants.txt -env Default -featureFlags UseMarketoSettings:true,UseSalesforceSettings:true,UseEloquaSettings:true,AllowPivotFile:true -all
 ###############################################
 
 import os
@@ -10,8 +10,8 @@ import argparse
 from kazoo.client import KazooClient
 
 LOCAL_ZKHOST='localhost:2181'
-QA_ZKHOST='10.41.1.18:2181,10.41.1.19:2181,10.41.1.20:2181'
-PROD_ZKHOST='bodcprodvzk217.prod.lattice.local:2181,bodcprodvzk218.prod.lattice.local:2181,bodcprodvzk219.prod.lattice.local:2181'
+QA_ZKHOST='internal-zookeeper-1213348105.us-east-1.elb.amazonaws.com:2181'
+PROD_ZKHOST='internal-Zookeeper-227174924.us-east-1.elb.amazonaws.com:2181'
 LOCAL_ENV = 'Default'
 QA_ENV = 'QA'
 PROD_ENV = 'Production'
