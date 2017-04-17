@@ -138,6 +138,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE, lpi);
         marketoCredentialFf.setConfigurable(false);
         marketoCredentialFf.setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MATCH_DEBUG, lpi);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,

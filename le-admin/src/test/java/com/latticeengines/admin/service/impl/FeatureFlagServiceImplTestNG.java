@@ -60,7 +60,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING,
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, LatticeFeatureFlag.ENABLE_FUZZY_MATCH,
                 LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION, LatticeFeatureFlag.LATTICE_INSIGHTS,
-                LatticeFeatureFlag.ENABLE_CDL, LatticeFeatureFlag.BYPASS_DNB_CACHE);
+                LatticeFeatureFlag.ENABLE_CDL, LatticeFeatureFlag.BYPASS_DNB_CACHE,
+                LatticeFeatureFlag.ENABLE_MATCH_DEBUG);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);

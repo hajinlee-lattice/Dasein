@@ -63,7 +63,7 @@
       "displayName": "PD_${TENANT}",
       "description": "A PD solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePocTransform\":false,\"UseSalesforceSettings\":true,\"UseMarketoSettings\":true,\"UseEloquaSettings\":true,\"AllowPivotFile\":false,\"UseDnbRtsAndModeling\":false,\"EnableLatticeMarketoCredentialPage\":false,\"EnableDataEncryption\":true,\"EnableInternalEnrichmentAttributes\":false,\"EnableDataProfilingV2\":true,\"LatticeInsights\":false,\"EnableFuzzyMatch\":false,\"BypassDnbCache\":false,\"EnableCdl\":false}"
+    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePocTransform\":false,\"UseSalesforceSettings\":true,\"UseMarketoSettings\":true,\"UseEloquaSettings\":true,\"AllowPivotFile\":false,\"UseDnbRtsAndModeling\":false,\"EnableLatticeMarketoCredentialPage\":false,\"EnableDataEncryption\":true,\"EnableInternalEnrichmentAttributes\":false,\"EnableDataProfilingV2\":true,\"LatticeInsights\":false,\"EnableFuzzyMatch\":false,\"BypassDnbCache\":false,\"EnableCdl\":false,\"EnableMatchDebug\":false}"
   },
   "TenantInfo": {
     "properties": {
