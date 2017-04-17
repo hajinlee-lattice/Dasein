@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.latticeengines.dellebi.util.LoggingUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -17,6 +16,7 @@ import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
+import com.latticeengines.dellebi.util.LoggingUtils;
 import com.latticeengines.dellebi.util.MailSender;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
@@ -117,7 +117,8 @@ public class DailyFlow {
         long startTime = System.currentTimeMillis();
 
         Properties properties = new Properties();
-        for (Map.Entry<String,String> entry : yarnConfiguration) {
+        yarnConfiguration.setBoolean("mapreduce.job.user.classpath.first", true);
+        for (Map.Entry<String, String> entry : yarnConfiguration) {
             properties.put(entry.getKey(), entry.getValue());
         }
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
