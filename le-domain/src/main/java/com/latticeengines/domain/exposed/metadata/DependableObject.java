@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
@@ -46,11 +47,18 @@ public class DependableObject extends AbstractDependableObject implements HasPid
 
     public static DependableObject fromDependable(Dependable dependable) {
         DependableObject object = new DependableObject();
-        object.setName(dependable.getName());
-        object.setType(dependable.getType());
-        object.setDependencies(dependable.getDependencies());
+        object.setName(dependable.getDependableName());
+        object.setType(dependable.getDependableType());
+
+        for (Dependable dependency : dependable.getDependencies()) {
+            object.addDependency(dependency);
+        }
         return object;
     }
+
+    @JsonProperty("dependencies")
+    @Transient
+    private List<DependableObject> dependencies = new ArrayList<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,17 +85,14 @@ public class DependableObject extends AbstractDependableObject implements HasPid
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
     }
 
-    @Override
     public DependableType getType() {
         return type;
     }
@@ -142,7 +147,34 @@ public class DependableObject extends AbstractDependableObject implements HasPid
     }
 
     @Override
+    public DependableType getDependableType() {
+        return getType();
+    }
+
+    @Override
+    public List<? extends Dependable> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(ArrayList<DependableObject> dependencies) {
+        this.dependencies = dependencies;
+    }
+
+    public void addDependency(Dependable dependency) {
+        DependableObject object = new DependableObject();
+        object.setName(dependency.getDependableName());
+        object.setType(dependency.getDependableType());
+        dependencies.add(object);
+    }
+
+    @Override
+    public String getDependableName() {
+        return getName();
+    }
+
+    @Override
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
     }
+
 }

@@ -43,7 +43,7 @@ public class DependencyLink implements HasPid {
     @Index(name = "NAME_TYPE_IDX")
     private DependableType childType;
 
-    @JsonProperty("parent")
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "FK_PARENT_ID", nullable = false)
     private DependableObject parent;

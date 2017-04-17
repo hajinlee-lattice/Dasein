@@ -1,8 +1,5 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,21 +38,15 @@ public class DependableObjectEntityMgrImpl extends BaseEntityMgrImpl<DependableO
         DependableObject retrieved = dependableObjectDao.findByFields("type", Integer.toString(type.ordinal()), "name",
                 name);
         if (retrieved != null) {
-            List<DependableObject> children = getChildren(retrieved);
-            if (children != null) {
-                retrieved.setDependencies(children);
+            HibernateUtils.inflateDetails(retrieved.getDependencyLinks());
+            for (DependencyLink link : retrieved.getDependencyLinks()) {
+                DependableObject object = new DependableObject();
+                object.setName(link.getChildName());
+                object.setType(link.getChildType());
+                retrieved.addDependency(object);
             }
         }
         return retrieved;
-    }
-
-    private List<DependableObject> getChildren(DependableObject parent) {
-        HibernateUtils.inflateDetails(parent.getDependencyLinks());
-        List<DependableObject> children = new ArrayList<>();
-        for (DependencyLink link : parent.getDependencyLinks()) {
-            children.add(find(link.getChildType(), link.getChildName()));
-        }
-        return children;
     }
 
     @Override
@@ -64,11 +55,11 @@ public class DependableObjectEntityMgrImpl extends BaseEntityMgrImpl<DependableO
         dependableObject.setTenant(MultiTenantContext.getTenant());
         super.create(dependableObject);
 
-        for (Dependable dependable : dependableObject.getDependencies()) {
+        for (Dependable child : dependableObject.getDependencies()) {
             DependencyLink link = new DependencyLink();
+            link.setChildType(child.getDependableType());
+            link.setChildName(child.getDependableName());
             link.setParent(dependableObject);
-            link.setChildName(dependable.getName());
-            link.setChildType(dependable.getType());
             dependencyLinkDao.create(link);
         }
     }

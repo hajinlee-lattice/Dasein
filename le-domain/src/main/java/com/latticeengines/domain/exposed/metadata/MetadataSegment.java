@@ -28,13 +28,10 @@ import springfox.documentation.annotations.ApiIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.dependency.Dependable;
-import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -45,7 +42,7 @@ import io.swagger.annotations.ApiModelProperty;
 @javax.persistence.Table(name = "METADATA_SEGMENT")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
-public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Dependable {
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,10 +96,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @JsonIgnore
     private Long tenantId;
 
-    @Transient
-    @JsonProperty("dependencies")
-    private List<DependableObject> dependencies = new ArrayList<>();
-
     @Override
     public Long getPid() {
         return pid;
@@ -149,13 +142,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @ApiIgnore
     public void setRestriction(Restriction restriction) {
         this.restrictionString = JsonUtils.serialize(restriction);
-        List<ColumnLookup> lookups = GraphUtils.getAllOfType(restriction, ColumnLookup.class);
-        setDependencies(new ArrayList<>());
-        for (ColumnLookup lookup : lookups) {
-            if (lookup != null) {
-                addDependency(DependableObject.fromDependable(lookup));
-            }
-        }
     }
 
     public FrontEndRestriction getSimpleRestriction() {
@@ -237,22 +223,4 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         }
     }
 
-    @Override
-    public DependableType getType() {
-        return DependableType.Segment;
-    }
-
-    @Override
-    public List<DependableObject> getDependencies() {
-        return dependencies;
-    }
-
-    @Override
-    public void setDependencies(List<DependableObject> dependencies) {
-        this.dependencies = dependencies;
-    }
-
-    public void addDependency(DependableObject dependency) {
-        this.dependencies.add(dependency);
-    }
 }

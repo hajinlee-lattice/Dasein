@@ -54,7 +54,6 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.dependency.Dependable;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
@@ -76,7 +75,7 @@ uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TY
 @EntityListeners(TableListener.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Table implements HasPid, HasName, HasTenantId, GraphNode, Dependable {
+public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
     private static final Log log = LogFactory.getLog(Table.class);
 
@@ -174,10 +173,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode, Dependabl
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "sourceTable")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<TableRelationship> relationships = new ArrayList<>();
-
-    @JsonProperty("dependencies")
-    @Transient
-    private List<DependableObject> dependencies = new ArrayList<>();
 
     public Table() {
     }
@@ -791,24 +786,5 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode, Dependabl
 
     public void addRelationship(TableRelationship relationship) {
         this.relationships.add(relationship);
-    }
-
-    @Override
-    public DependableType getType() {
-        return DependableType.Table;
-    }
-
-    @Override
-    public List<DependableObject> getDependencies() {
-        return dependencies;
-    }
-
-    @Override
-    public void setDependencies(List<DependableObject> dependencies) {
-        this.dependencies = dependencies;
-    }
-
-    public void addDependency(DependableObject dependableObject) {
-        this.dependencies.add(dependableObject);
     }
 }

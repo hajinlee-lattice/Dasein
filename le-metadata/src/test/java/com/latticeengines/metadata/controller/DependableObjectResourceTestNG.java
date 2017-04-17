@@ -48,11 +48,11 @@ public class DependableObjectResourceTestNG extends MetadataFunctionalTestNGBase
         DependableObject example = createExampleDependableObject("Parent");
         DependableObject retrieved = dependableObjectProxy.find(CUSTOMERSPACE1, example.getType().toString(),
                 example.getName());
-        retrieved.setType(DependableType.Column);
+        retrieved.setType(DependableType.Attribute);
         retrieved.setDependencies(new ArrayList<>());
         dependableObjectProxy.createOrUpdate(CUSTOMERSPACE1, retrieved);
 
-        retrieved = dependableObjectProxy.find(CUSTOMERSPACE1, DependableType.Column.toString(), "Parent");
+        retrieved = dependableObjectProxy.find(CUSTOMERSPACE1, DependableType.Attribute.toString(), "Parent");
         assertEquals(retrieved.getDependencies().size(), 0);
     }
 

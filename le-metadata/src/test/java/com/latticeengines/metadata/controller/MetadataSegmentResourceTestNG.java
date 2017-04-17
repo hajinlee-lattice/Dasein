@@ -84,7 +84,6 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
                 NUM_CONTACTS);
         assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(),
                 ComparisonType.EQUAL);
-        assertEquals(retrieved.getDependencies().size(), 1);
     }
 
     @SuppressWarnings("unchecked")

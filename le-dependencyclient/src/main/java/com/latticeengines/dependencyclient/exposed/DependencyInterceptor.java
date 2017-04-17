@@ -12,8 +12,6 @@ import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.event.spi.PersistEvent;
 import org.hibernate.event.spi.PersistEventListener;
-import org.hibernate.event.spi.PostLoadEvent;
-import org.hibernate.event.spi.PostLoadEventListener;
 import org.hibernate.internal.SessionFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +22,7 @@ import com.latticeengines.proxy.exposed.metadata.DependableObjectProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
-public class DependencyInterceptor implements PostLoadEventListener, PersistEventListener {
+public class DependencyInterceptor implements PersistEventListener {
     private static final Log log = LogFactory.getLog(DependencyInterceptor.class);
 
     @Autowired
@@ -39,24 +37,7 @@ public class DependencyInterceptor implements PostLoadEventListener, PersistEven
     private void init() {
         EventListenerRegistry registry = ((SessionFactoryImpl) sessionFactory).getServiceRegistry().getService(
                 EventListenerRegistry.class);
-        registry.appendListeners(EventType.POST_LOAD, this);
         registry.appendListeners(EventType.PERSIST, this);
-    }
-
-    @Override
-    public void onPostLoad(PostLoadEvent event) {
-        if (enabled) {
-            if (event.getEntity() instanceof Dependable && !(event.getEntity() instanceof DependableObject)) {
-                Dependable dependable = (Dependable) event.getEntity();
-                log.info(String.format("Retrieving dependencies for [name %s, type %s]", dependable.getName(),
-                        dependable.getType()));
-                DependableObject object = dependableObjectProxy.find(MultiTenantContext.getCustomerSpace().toString(),
-                        dependable.getType().toString(), dependable.getName());
-                if (object != null) {
-                    dependable.setDependencies(object.getDependencies());
-                }
-            }
-        }
     }
 
     @Override
@@ -64,12 +45,9 @@ public class DependencyInterceptor implements PostLoadEventListener, PersistEven
         if (enabled) {
             if (event.getObject() instanceof Dependable && !(event.getObject() instanceof DependableObject)) {
                 Dependable dependable = (Dependable) event.getObject();
-                log.info(String.format("Updating dependencies for [name %s, type %s, #dependencies %d]",
-                        dependable.getName(), dependable.getType(), dependable.getDependencies().size()));
-                DependableObject object = new DependableObject();
-                object.setName(dependable.getName());
-                object.setType(dependable.getType());
-                object.setDependencies(dependable.getDependencies());
+                log.info(String.format("Updating dependencies for [name %s, type %s, #dependencies %d]", dependable
+                        .getDependableName(), dependable.getDependableType(), dependable.getDependencies().size()));
+                DependableObject object = DependableObject.fromDependable(dependable);
                 dependableObjectProxy.createOrUpdate(MultiTenantContext.getCustomerSpace().toString(), object);
             }
         }

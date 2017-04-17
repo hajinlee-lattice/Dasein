@@ -291,9 +291,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertJobExistsWithModelIdAndModelName(originalModelSummary.getId());
         inspectOriginalModelSummaryPredictors(originalModelSummary);
         assertABCDBucketsCreated(originalModelSummary.getId());
-
-        assertTrue(metadataProxy.getTable(firstTenant.getId(), originalModelSummary.getEventTableName())
-                .getDependencies().size() > 0);
     }
 
     void activateModelSummary(String modelId) {
