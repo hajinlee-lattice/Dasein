@@ -37,7 +37,7 @@ public class ScoringContainerTestNG extends ScoringFunctionalTestNGBase {
 
     private String modelId = ScoringTestUtils.generateRandomModelId();
 
-    @BeforeClass(groups = "functional", enabled = false)
+    @BeforeClass(groups = "functional", enabled = true)
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(customer).toString();
         path = customerBaseDir + "/" + tenant;
@@ -46,7 +46,7 @@ public class ScoringContainerTestNG extends ScoringFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, scorePath);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     protected void scoring() throws Exception {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(tenant);

@@ -36,6 +36,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
@@ -58,14 +59,18 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private String modelGuidString;
 
+    private RTSBulkScoringConfiguration rtsBulkScoringConfig;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        bulkScoringProcessor = new ScoringProcessor();
-        bulkScoringProcessor.setConfiguration(yarnConfiguration);
-        bulkScoringProcessor.setModelIsPythonType(true);
         dir = customerBaseDir + "/test_customer/scoring/data/some_random_directory";
         modelGuidString = "modelGuid";
         HdfsUtils.rmdir(yarnConfiguration, dir);
+        rtsBulkScoringConfig = new RTSBulkScoringConfiguration();
+        rtsBulkScoringConfig.setModelGuids(Arrays.asList(new String[] { modelGuidString }));
+        rtsBulkScoringConfig.setModelType(ModelType.PYTHONMODEL.getModelType());
+        bulkScoringProcessor = new ScoringProcessor(rtsBulkScoringConfig);
+        bulkScoringProcessor.setConfiguration(yarnConfiguration);
     }
 
     @BeforeMethod(groups = "functional")
@@ -84,9 +89,6 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testConvertAvroToBulkScoreRequest() throws IllegalArgumentException, Exception {
-        RTSBulkScoringConfiguration rtsBulkScoringConfig = new RTSBulkScoringConfiguration();
-        rtsBulkScoringConfig.setModelGuids(Arrays.asList(new String[] { modelGuidString }));
-
         List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
         FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
         BulkRecordScoreRequest scoreRequest = null;

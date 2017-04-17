@@ -102,9 +102,17 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private boolean isEnableDebug = false;
 
-    private boolean modelIsPythonType = false;
-
     private Map<String, Long> idToInternalIdMap = new HashMap<>();
+
+    private RTSBulkScoringConfiguration rtsBulkScoringConfig;
+
+    public ScoringProcessor() {
+        super();
+    }
+
+    public ScoringProcessor(RTSBulkScoringConfiguration rtsBulkScoringConfig) {
+        this.rtsBulkScoringConfig = rtsBulkScoringConfig;
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -117,6 +125,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     @Override
     public String process(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
+        this.rtsBulkScoringConfig = rtsBulkScoringConfig;
         log.info("Inside the rts bulk scoring processor.");
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
@@ -129,7 +138,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = null;
         Map<String, Boolean> leadEnrichmentInternalAttributeFlagMap = null;
         isEnableDebug = rtsBulkScoringConfig.isEnableDebug();
-        modelIsPythonType = ModelType.isPythonTypeModel(rtsBulkScoringConfig.getModelType());
         boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient.isEnabled(
                 rtsBulkScoringConfig.getCustomerSpace(),
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
@@ -385,7 +393,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         outputTable.addAttribute(idAttr);
         outputTable.addAttribute(modelIdAttr);
         outputTable.addAttribute(scoreAttr);
-        if (modelIsPythonType) {
+        if (modelIsPythonType()) {
             Attribute bucketAttr = new Attribute();
             bucketAttr.setName(ScoreResultField.Rating.displayName);
             bucketAttr.setDisplayName(ScoreResultField.Rating.displayName);
@@ -420,6 +428,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         return TableUtils.createSchema(outputTable.getName(), outputTable);
     }
 
+    private boolean modelIsPythonType() {
+        return ModelType.isPythonTypeModel(rtsBulkScoringConfig.getModelType());
+    }
+
     @VisibleForTesting
     void appendScoreResponseToAvro(List<RecordScoreResponse> recordScoreResponseList,
             DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
@@ -452,7 +464,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     throw new LedpException(LedpCode.LEDP_20036);
                 }
                 Double score = tuple.getScore();
-                if (modelIsPythonType) {
+                if (modelIsPythonType()) {
                     validateScore(score);
                     String bucketName = tuple.getBucket() == null ? "" : tuple.getBucket().name();
                     builder.set(ScoreResultField.Rating.displayName, bucketName);
@@ -609,11 +621,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             }
             return 0;
         }
-    }
-
-    @VisibleForTesting
-    void setModelIsPythonType(boolean modelIsPythonType) {
-        this.modelIsPythonType = modelIsPythonType;
     }
 
 }
