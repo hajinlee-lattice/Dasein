@@ -6,11 +6,16 @@
 
 
     <bean id="dataSourceOauth2" primary="true"
-          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${oauth2.datasource.driver}"/>
-        <property name="url" value="${oauth2.datasource.url}"/>
-        <property name="username" value="${oauth2.datasource.user}"/>
+          class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${oauth2.datasource.driver}"/>
+        <property name="jdbcUrl" value="${oauth2.datasource.url}"/>
+        <property name="user" value="${oauth2.datasource.user}"/>
         <property name="password"
                   value="${oauth2.datasource.password.encrypted}"/>
+        <property name="acquireIncrement" value="4"/>
+        <property name="maxPoolSize" value="32"/>
+        <property name="checkoutTimeout" value="10000"/>
+        <property name="idleConnectionTestPeriod" value="10"/>
+        <property name="maxIdleTime" value="30"/>
     </bean>
 </beans>
