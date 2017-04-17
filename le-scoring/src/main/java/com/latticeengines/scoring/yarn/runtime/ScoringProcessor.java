@@ -611,4 +611,9 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
     }
 
+    @VisibleForTesting
+    void setModelIsPythonType(boolean modelIsPythonType) {
+        this.modelIsPythonType = modelIsPythonType;
+    }
+
 }

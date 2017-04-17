@@ -62,6 +62,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     public void setup() throws Exception {
         bulkScoringProcessor = new ScoringProcessor();
         bulkScoringProcessor.setConfiguration(yarnConfiguration);
+        bulkScoringProcessor.setModelIsPythonType(true);
         dir = customerBaseDir + "/test_customer/scoring/data/some_random_directory";
         modelGuidString = "modelGuid";
         HdfsUtils.rmdir(yarnConfiguration, dir);
