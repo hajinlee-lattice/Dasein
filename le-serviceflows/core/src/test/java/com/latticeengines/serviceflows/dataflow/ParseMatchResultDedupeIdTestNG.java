@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
@@ -65,11 +64,11 @@ public class ParseMatchResultDedupeIdTestNG extends ServiceFlowsDataFlowFunction
                 // domain same as a matched row
                 { 7, null, "dom1.com", "b", 0, "1" }, //
                 { 8, null, "dom2.com", "n", 0, "2" }, //
-                { 9, null, "dom3.com", "n", 0, "34" }, // two rows with dom3.com, pick one randomly
+                { 9, null, "dom3.com", "n", 0, "3" }, //
 
                 // location only
                 { 10, null, null, "a", 0, "1" }, //  we have only one row matched for 'a'
-                { 11, null, null, "b", 0, "26" }, // two rows with 'b', pick one randomly
+                { 11, null, null, "b", 0, "2" }, // two rows with 'b', pick the one with high pop
                 { 12, null, null, "z", 0, "z" }, // unmatched location
 
                 // both valid, but domain not matched
@@ -83,8 +82,7 @@ public class ParseMatchResultDedupeIdTestNG extends ServiceFlowsDataFlowFunction
         List<GenericRecord> records = readOutput();
         for (GenericRecord record : records) {
             System.out.println(record);
-            Assert.assertTrue(StringUtils.contains(record.get("ExpectedDedupeId").toString(),
-                    record.get(INT_LDC_DEDUPE_ID).toString()));
+            Assert.assertEquals(record.get(INT_LDC_DEDUPE_ID), record.get("ExpectedDedupeId"));
             numRows++;
         }
         Assert.assertEquals(numRows, getData().length);
