@@ -56,11 +56,13 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .singleton(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
-        Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList(LatticeFeatureFlag.ALLOW_PIVOT_FILE,
-                LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING,
-                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, LatticeFeatureFlag.ENABLE_FUZZY_MATCH,
-                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION, LatticeFeatureFlag.LATTICE_INSIGHTS,
-                LatticeFeatureFlag.ENABLE_CDL, LatticeFeatureFlag.BYPASS_DNB_CACHE,
+        Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList(LatticeFeatureFlag.ALLOW_PIVOT_FILE, //
+                LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, //
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, //
+                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION, //
+                LatticeFeatureFlag.LATTICE_INSIGHTS, //
+                LatticeFeatureFlag.ENABLE_CDL, //
+                LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);

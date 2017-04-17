@@ -19,12 +19,10 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -47,7 +45,6 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -101,12 +98,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Autowired
     private ScoreCorrectnessService scoreCompareService;
 
-    @Value("${pls.ff.enableDnBFeatureFlag}")
-    private boolean enableDnBFeatureFlag;
-
-    @Value("${pls.test.e2e.use.fuzzy.match}")
-    private boolean useFuzzyMatch;
-
     private Tenant firstTenant;
     private Tenant secondTenant;
     private SourceFile sourceFile;
@@ -125,15 +116,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @BeforeClass(groups = { "deployment.lp", "precheckin" })
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
-        Map<String, Boolean> featureFlagMap = new HashMap<String, Boolean>();
-
-        if (enableDnBFeatureFlag && !BooleanUtils.toBoolean(System.getenv("DNB_RTS_AND_MODELING_DISABLED"))) {
-            featureFlagMap.put(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(), true);
-        }
-        featureFlagMap.put(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName(), useFuzzyMatch);
-
-        log.info("Overwrite the featureFlagMap to be " + featureFlagMap);
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, featureFlagMap);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         firstTenant = testBed.getMainTestTenant();
 
         if (EncryptionGlobalState.isEnabled()) {
@@ -207,7 +190,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         sourceFile.setSchemaInterpretation(schemaInterpretation);
         ResponseDocument response = restTemplate.postForObject(
                 String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
-                        sourceFile.getName(), schemaInterpretation.name()), parameters, ResponseDocument.class);
+                        sourceFile.getName(), schemaInterpretation.name()),
+                parameters, ResponseDocument.class);
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);
 
@@ -227,9 +211,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info("the fieldmappings are: " + mappings.getFieldMappings());
         log.info("the ignored fields are: " + mappings.getIgnoredFields());
-        restTemplate.postForObject(
-                String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s", getRestAPIHostPort(),
-                        sourceFile.getName()), mappings, Void.class);
+        restTemplate.postForObject(String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s",
+                getRestAPIHostPort(), sourceFile.getName()), mappings, Void.class);
     }
 
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "resolveMetadata")
@@ -276,7 +259,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(reports.size(), 2);
     }
 
-    @Test(groups = { "deployment.lp", "precheckin" }, dependsOnMethods = "createModel", timeOut = 120000, enabled = true)
+    @Test(groups = { "deployment.lp",
+            "precheckin" }, dependsOnMethods = "createModel", timeOut = 120000, enabled = true)
     public void retrieveModelSummary() throws InterruptedException {
         log.info("Retrieving model summary for modeling ...");
         originalModelSummary = waitToDownloadModelSummary(modelName);
@@ -285,9 +269,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 SchemaInterpretation.SalesforceLead.toString());
         assertNotNull(originalModelSummary.getTrainingTableName());
         assertFalse(originalModelSummary.getTrainingTableName().isEmpty());
-        assertEquals(
-                originalModelSummary.getModelSummaryConfiguration().getString(
-                        ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
+        assertEquals(originalModelSummary.getModelSummaryConfiguration().getString(
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
         assertJobExistsWithModelIdAndModelName(originalModelSummary.getId());
         inspectOriginalModelSummaryPredictors(originalModelSummary);
         assertABCDBucketsCreated(originalModelSummary.getId());
@@ -319,8 +302,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info(String.format("The timestamps are: %s", JsonUtils.serialize(bucketMetadataRaw.keySet())));
         Map<Long, List> creationTimeToBucketMetadatas = JsonUtils.convertMap(bucketMetadataRaw, Long.class, List.class);
 
-        Set<BucketName> bucketNames = new HashSet<>(Arrays.asList(BucketName.A, BucketName.B, BucketName.C,
-                BucketName.D));
+        Set<BucketName> bucketNames = new HashSet<>(
+                Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D));
         assertEquals(creationTimeToBucketMetadatas.keySet().size(), 1);
         Long timestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0];
         List<BucketMetadata> bucketMetadatas = JsonUtils.convertList(creationTimeToBucketMetadatas.get(timestamp),
@@ -396,9 +379,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 originalModelSummary.getSourceSchemaInterpretation());
         assertNotNull(copiedModelSummary.getTrainingTableName());
         assertFalse(copiedModelSummary.getTrainingTableName().isEmpty());
-        assertEquals(
-                originalModelSummary.getModelSummaryConfiguration().getString(
-                        ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
+        assertEquals(originalModelSummary.getModelSummaryConfiguration().getString(
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
 
         inspectOriginalModelSummaryPredictors(copiedModelSummary);
         compareRtsScoreWithModeling(copiedModelSummary, 687, secondTenant.getId());
@@ -468,10 +450,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
 
         }));
-        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
-        assertEquals(
-                clonedModelSummary.getModelSummaryConfiguration().getString(
-                        ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
+        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(),
+                SchemaInterpretation.SalesforceLead.toString());
+        assertEquals(clonedModelSummary.getModelSummaryConfiguration().getString(
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
         String foundFileTableName = clonedModelSummary.getTrainingTableName();
         assertNotNull(foundFileTableName);
 
@@ -505,10 +487,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void replaceModel() {
         log.info("Replacing the cloned model with original model ...");
         testBed.switchToSuperAdmin(firstTenant);
-        ResponseDocument response = restTemplate.postForObject(String.format(
-                "%s/pls/models/replacemodel/%s?targetTenantId=%s&targetModelId=%s", getRestAPIHostPort(),
-                originalModelSummary.getId(), secondTenant.getId(), clonedModelSummary.getId()), parameters,
-                ResponseDocument.class);
+        ResponseDocument response = restTemplate.postForObject(
+                String.format("%s/pls/models/replacemodel/%s?targetTenantId=%s&targetModelId=%s", getRestAPIHostPort(),
+                        originalModelSummary.getId(), secondTenant.getId(), clonedModelSummary.getId()),
+                parameters, ResponseDocument.class);
         Boolean res = new ObjectMapper().convertValue(response.getResult(), Boolean.class);
         Assert.assertTrue(res);
     }
@@ -523,9 +505,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 SchemaInterpretation.SalesforceLead.toString());
         assertNotNull(replacedModelSummary.getTrainingTableName());
         assertEquals(replacedModelSummary.getTrainingTableName(), clonedModelSummary.getTrainingTableName());
-        assertEquals(
-                replacedModelSummary.getModelSummaryConfiguration().getString(
-                        ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
+        assertEquals(replacedModelSummary.getModelSummaryConfiguration().getString(
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
 
         // Inspect some predictors
         inspectOriginalModelSummaryPredictors(replacedModelSummary);
@@ -550,8 +531,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
-            List<Object> raw = getRestTemplate().getForObject(
-                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
+            List<Object> raw = getRestTemplate()
+                    .getForObject(String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
@@ -702,8 +683,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             throws IOException {
         activateModelSummary(modelSummary.getId());
 
-        Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenantId, RESOURCE_BASE + "/"
-                + fileName, modelSummary.getId(), countsForScoring);
+        Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenantId,
+                RESOURCE_BASE + "/" + fileName, modelSummary.getId(), countsForScoring);
         checkExpectedDifferentCount(diffRecords);
     }
 
@@ -746,13 +727,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void assertJobExistsWithModelIdAndModelName(final String jobModelId) {
         log.info(String.format("The model_id is: %s", jobModelId));
         @SuppressWarnings("unchecked")
-        List<Object> rawJobs = restTemplate
-                .getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()), List.class);
+        List<Object> rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()),
+                List.class);
         List<Job> jobs = JsonUtils.convertList(rawJobs, Job.class);
         String jobsInString = "There are " + rawJobs.size() + " jobs:\n";
         try {
-            jobsInString += new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(
-                    JsonUtils.serialize(rawJobs));
+            jobsInString += new ObjectMapper().writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(JsonUtils.serialize(rawJobs));
         } catch (IOException e) {
             log.warn(e.getMessage());
         }
@@ -762,11 +743,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 assertNotNull(job.getId());
                 job = restTemplate.getForObject(
                         String.format("%s/pls/jobs/%s", getRestAPIHostPort(), Long.toString(job.getId())), Job.class);
-                return job != null
-                        && job.getOutputs() != null
+                return job != null && job.getOutputs() != null
                         && jobModelId.equals(job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID))
-                        && MODEL_DISPLAY_NAME.equals(job.getInputs().get(
-                                WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME));
+                        && MODEL_DISPLAY_NAME
+                                .equals(job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME));
             }
         }), jobsInString);
     }
