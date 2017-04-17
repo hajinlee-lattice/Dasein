@@ -253,7 +253,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
         String appIdFilePath = getBinaryInputDir(uuid) + "/" + appIdFileName;
         config.set("sqoop.sync", Boolean.toString(sync));
         config.set("sqoop.app.id.file.name", appIdFilePath);
-        config.set("mapreduce.job.user.classpath.first", "true");
+        config.setBoolean("mapreduce.job.user.classpath.first", true);
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(config));
         return getApplicationId(appIdFilePath);
     }
@@ -281,8 +281,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
 
     private static List<String> getPlatformShadedJarPathList(Configuration yarnConfiguration, String version) {
         try {
-            return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/sqoop/lib", version),
-                    ".*.jar$");
+            return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/sqoop/lib", version), ".*.jar$");
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
