@@ -1,5 +1,6 @@
 .query-results {
     min-width: 680px;
+    margin-top: 1.5em;
 
     .pd-pagination {
         float: right;
@@ -69,10 +70,6 @@
         font-weight: bold;
     }
 
-    .row {
-        padding: 0 1em;
-    }
-
     .row.filter-group.disabled {
         pointer-events: none;
     }
@@ -85,10 +82,9 @@
     background: white;
     border: 1px solid #ccc;
     border-radius: 2px;
-    font-size: 14px;
     font-weight: bold;
     margin: 1em 0;
-    padding: 0.3em 0;
+    padding: 0.3em 1em;
 }
 
 .query-filter-action {
