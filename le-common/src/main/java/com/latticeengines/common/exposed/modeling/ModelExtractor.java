@@ -3,6 +3,7 @@ package com.latticeengines.common.exposed.modeling;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -23,6 +24,10 @@ public class ModelExtractor {
     private static final Log log = LogFactory.getLog(ModelExtractor.class);
 
     public void extractModelArtifacts(String modelFilePath, String targetDir) {
+        extractModelArtifacts(modelFilePath, targetDir, null);
+    }
+
+    public void extractModelArtifacts(String modelFilePath, String targetDir, FilenameFilter filter) {
         log.info(String.format("Extracting %s into %s", modelFilePath, targetDir));
         JsonFactory f = new JsonFactory();
         JsonParser parser = null;
@@ -66,7 +71,11 @@ public class ModelExtractor {
 
         for (Map.Entry<String, String> entry : entries) {
             try {
-                FileUtils.write(new File(targetDir + "/" + entry.getKey()), entry.getValue());
+                if (filter != null && !filter.accept(null, entry.getKey())) {
+                    continue;
+                } else {
+                    FileUtils.write(new File(targetDir + "/" + entry.getKey()), entry.getValue());
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -76,7 +85,8 @@ public class ModelExtractor {
     private String decodeValue(String value) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             byte[] data = Base64.decodeBase64(value);
-            try (GzipCompressorInputStream gzipInputStream = new GzipCompressorInputStream(new ByteArrayInputStream(data))) {
+            try (GzipCompressorInputStream gzipInputStream = new GzipCompressorInputStream(
+                    new ByteArrayInputStream(data))) {
                 IOUtils.copy(gzipInputStream, baos);
                 return new String((baos.toByteArray()));
             }

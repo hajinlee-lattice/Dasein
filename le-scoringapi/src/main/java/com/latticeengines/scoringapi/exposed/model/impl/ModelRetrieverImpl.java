@@ -91,6 +91,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
     public static final String SCORED_TXT = "_scored.txt";
     public static final String RTS_DATA_CLOUD_VERSION = "1.0";
+    private static final String STPIPELINE_BINARY = "STPipelineBinary.p";
 
     @VisibleForTesting
     static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
@@ -605,10 +606,14 @@ public class ModelRetrieverImpl implements ModelRetriever {
         List<String> modelJsonHdfsPathSplits = Splitter.on("/").splitToList(modelJsonHdfsPath.get(0));
         String modelJsonFileName = modelJsonHdfsPathSplits.get(modelJsonHdfsPathSplits.size() - 1);
 
-        new ModelExtractor().extractModelArtifacts(localModelJsonCacheDir + modelJsonFileName,
-                modelArtifactsDir.getAbsolutePath());
+        extractFromModelJson(localModelJsonCacheDir + modelJsonFileName, modelArtifactsDir.getAbsolutePath());
 
         return modelArtifactsDir;
+    }
+
+    @VisibleForTesting
+    void extractFromModelJson(String filePath, String targetDir) {
+        new ModelExtractor().extractModelArtifacts(filePath, targetDir, (dir, name) -> !name.equals(STPIPELINE_BINARY));
     }
 
     @Override

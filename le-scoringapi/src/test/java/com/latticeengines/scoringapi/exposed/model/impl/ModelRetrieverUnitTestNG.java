@@ -3,6 +3,7 @@ package com.latticeengines.scoringapi.exposed.model.impl;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -35,6 +37,8 @@ import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 
 public class ModelRetrieverUnitTestNG {
 
+    private static final String TARGETDIR = "/tmp/modelretrieverunittest/modelfiles";
+
     private CustomerSpace space;
 
     private String modelId;
@@ -56,6 +60,9 @@ public class ModelRetrieverUnitTestNG {
 
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
+        FileUtils.deleteDirectory(new File(TARGETDIR));
+        new File(TARGETDIR).mkdir();
+
         MockitoAnnotations.initMocks(this);
         space = CustomerSpace.parse("space");
         modelId = "modelId";
@@ -136,5 +143,17 @@ public class ModelRetrieverUnitTestNG {
                 dataScienceDataComposition);
 
         Assert.assertEquals(mergedFields.size(), 349);
+    }
+
+    @Test(groups = "unit")
+    public void testExtractFromModelJson() throws Exception {
+        String path = ClassLoader
+                .getSystemResource("com/latticeengines/scoringapi/model/3MulesoftAllRows20160314_112802/model.json")
+                .getPath();
+
+        ModelRetrieverImpl modelRetriever = new ModelRetrieverImpl();
+        modelRetriever.extractFromModelJson(path, TARGETDIR);
+        Assert.assertFalse(new File(TARGETDIR + "/STPipelineBinary.p").exists());
+
     }
 }
