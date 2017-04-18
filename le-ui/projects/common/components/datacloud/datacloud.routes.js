@@ -169,7 +169,7 @@ angular
             resolve: {
                 EnrichmentAccountLookup: function($q, DataCloudStore, LookupResponse) {
                     var deferred = $q.defer();
-                    
+
                     deferred.resolve(LookupResponse.attributes || {});
 
                     return deferred.promise;
@@ -366,11 +366,11 @@ angular
             views: {
                 "main@": {
                     resolve: {
-                        CountMetadata: function($q, QueryStore) {
+                        CountMetadata: ['$q', 'QueryStore', function($q, QueryStore) {
                             var deferred = $q.defer();
                             deferred.resolve(QueryStore.getCounts().accounts);
                             return deferred.promise;
-                        }
+                        }]
                     },
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
@@ -387,11 +387,11 @@ angular
             views: {
                 "main@": {
                     resolve: {
-                        CountMetadata: function($q, QueryStore) {
+                        CountMetadata: ['$q', 'QueryStore', function($q, QueryStore) {
                             var deferred = $q.defer();
                             deferred.resolve(QueryStore.getCounts().contacts);
                             return deferred.promise;
-                        }
+                        }]
                     },
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
