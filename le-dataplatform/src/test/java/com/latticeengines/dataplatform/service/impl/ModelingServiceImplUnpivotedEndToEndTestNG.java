@@ -76,7 +76,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     private StandaloneHttpServer httpServer;
 
     public String getCustomer() {
-        return "Nutanix";
+        return ModelingServiceImplUnpivotedEndToEndTestNG.class.getSimpleName();
     }
 
     protected boolean doClearDbTables() {
@@ -123,8 +123,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         m.setCustomer(getCustomer());
         m.setDataFormat("avro");
-        m.setProvenanceProperties(StringUtils.join(new String[] {
-                "swlib.module=dataflowapi", //
+        m.setProvenanceProperties(StringUtils.join(new String[] { "swlib.module=dataflowapi", //
                 "swlib.group_id=com.latticeengines", //
                 "swlib.version=2.0.22-SNAPSHOT", //
                 "swlib.artifact_id=le-serviceflows-leadprioritization" }, " "));

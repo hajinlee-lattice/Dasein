@@ -30,6 +30,8 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
 
     private static final int NUM_ALGORITHMS = 1; // No LR; only RF for now.
 
+    private static final String CUSTOMER = ModelStepYarnProcessorImplTestNG.class.getSimpleName();
+
     @Autowired
     private ModelStepYarnProcessorImpl modelStepYarnProcessor;
 
@@ -39,56 +41,56 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
 
     @Test(groups = "sqoop", enabled = false)
     public void testExecuteYarnSteps() throws Exception {
-        cleanUpHdfs("Nutanix");
-        cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
+        cleanUpHdfs(CUSTOMER);
+        cleanUpHdfs(CustomerSpace.parse(CUSTOMER).toString());
         setupDBConfig();
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
-        List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
+        List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep(CUSTOMER, ModelCommandStep.LOAD_DATA,
                 command, commandParameters);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.LOAD_DATA);
 
-        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.GENERATE_SAMPLES, command,
+        appIds = modelStepYarnProcessor.executeYarnStep(CUSTOMER, ModelCommandStep.GENERATE_SAMPLES, command,
                 commandParameters);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.GENERATE_SAMPLES);
 
-        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.PROFILE_DATA, command,
+        appIds = modelStepYarnProcessor.executeYarnStep(CUSTOMER, ModelCommandStep.PROFILE_DATA, command,
                 commandParameters);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.PROFILE_DATA);
 
-        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.SUBMIT_MODELS, command,
+        appIds = modelStepYarnProcessor.executeYarnStep(CUSTOMER, ModelCommandStep.SUBMIT_MODELS, command,
                 commandParameters);
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
     @Test(groups = "sqoop")
     public void testExecuteYarnStepsFeatureThreshold() throws Exception {
-        cleanUpHdfs("Nutanix");
-        cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
+        cleanUpHdfs(CUSTOMER);
+        cleanUpHdfs(CustomerSpace.parse(CUSTOMER).toString());
         setupDBConfig();
         int featureThreshold = 30;
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, featureThreshold);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
-        List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
+        List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep(CUSTOMER, ModelCommandStep.LOAD_DATA,
                 command, commandParameters);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.LOAD_DATA);
 
-        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.GENERATE_SAMPLES, command,
+        appIds = modelStepYarnProcessor.executeYarnStep(CUSTOMER, ModelCommandStep.GENERATE_SAMPLES, command,
                 commandParameters);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.GENERATE_SAMPLES);
 
-        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.PROFILE_DATA, command,
+        appIds = modelStepYarnProcessor.executeYarnStep(CUSTOMER, ModelCommandStep.PROFILE_DATA, command,
                 commandParameters);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.PROFILE_DATA);
 
-        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.SUBMIT_MODELS, command,
+        appIds = modelStepYarnProcessor.executeYarnStep(CUSTOMER, ModelCommandStep.SUBMIT_MODELS, command,
                 commandParameters);
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "sqoop")
     public void testModelSelectionUsingCamille() throws Exception {
         int featureThreshold = -1;
         String modelingServiceName = "Modeling";
