@@ -39,6 +39,8 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     private static final String PROPDATA_SERVICE = "PropData";
     private static final String DATASOURCES = "DataSources";
     private static final String STACKS = "Stacks";
+    private static final String MATCH_SERVICE = "Match";
+    private static final String USE_REMOTE_DNB_GLOBAL = "UseRemoteDnB";
 
     @Value("${datacloud.source.db.json}")
     private String sourceDbsJson;
@@ -48,6 +50,9 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
 
     @Value("${common.le.stack}")
     private String leStack;
+
+    @Value("${datacloud.dnb.use.remote.global}")
+    private String useRemoteDnBGlobal;
 
     @PostConstruct
     private void postConstruct() {
@@ -67,6 +72,11 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         if (!camille.exists(poolPath)) {
             log.info("Uploading source db connection pool to ZK using " + sourceDbsJson + " ...");
             camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        }
+        // Flag of UseRemoteDnBGlobal
+        Path useRemoteDnBPath = useRemoteDnBGlobalPath();
+        if (!camille.exists(useRemoteDnBPath) || StringUtils.isBlank(camille.get(useRemoteDnBPath).getData())) {
+            camille.upsert(useRemoteDnBPath, new Document(useRemoteDnBGlobal), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         }
     }
 
@@ -132,6 +142,28 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
                     + " feature flags for " + customerSpace, e);
             return false;
         }
+    }
+
+    @Override
+    public boolean useRemoteDnBGlobal() {
+        Path useRemoteDnBPath = useRemoteDnBGlobalPath();
+        try {
+            if (!camille.exists(useRemoteDnBPath) || StringUtils.isBlank(camille.get(useRemoteDnBPath).getData())) {
+                camille.upsert(useRemoteDnBPath, new Document(useRemoteDnBGlobal), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
+            return Boolean.valueOf(camille.get(useRemoteDnBPath).getData()).booleanValue();
+        } catch (Exception e) {
+            log.error("Failed to get UseRemoteDnBGlobal flag", e);
+            return Boolean.valueOf(useRemoteDnBGlobal);
+        }
+    }
+
+    private Path matchServicePath() {
+        return PathBuilder.buildServicePath(podId, PROPDATA_SERVICE).append(MATCH_SERVICE);
+    }
+
+    private Path useRemoteDnBGlobalPath() {
+        return matchServicePath().append(USE_REMOTE_DNB_GLOBAL);
     }
 
 }

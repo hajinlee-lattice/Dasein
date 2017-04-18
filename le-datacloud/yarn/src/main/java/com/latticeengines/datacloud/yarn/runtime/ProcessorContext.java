@@ -292,6 +292,7 @@ public class ProcessorContext {
             useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(space);
         }
         useRemoteDnB = useRemoteDnB && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
+        useRemoteDnB = useRemoteDnB && zkConfigurationService.useRemoteDnBGlobal();
         log.info("Use remote DnB ? " + useRemoteDnB);
         if (StringUtils.isEmpty(decisionGraph)) {
             decisionGraph = defaultGraph;

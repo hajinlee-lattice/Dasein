@@ -16,4 +16,6 @@ public interface ZkConfigurationService {
 
     boolean isMatchDebugEnabled(CustomerSpace customerSpace);
 
+    boolean useRemoteDnBGlobal();
+
 }
