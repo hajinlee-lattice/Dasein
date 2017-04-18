@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
@@ -17,6 +16,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.MRJobConfig;
+import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
@@ -143,6 +143,12 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
 
     public <T extends MRJobCustomizationBase> JobID testMRJob(Class<T> mrJobCustomizationClass, Properties properties)
             throws Exception {
+        Job mrJob = createMRJob(mrJobCustomizationClass, properties);
+        return JobService.runMRJob(mrJob, "jobName", true);
+    }
+
+    public <T extends MRJobCustomizationBase> Job createMRJob(Class<T> mrJobCustomizationClass, Properties properties)
+            throws Exception {
         Constructor<T> constructor = mrJobCustomizationClass.getConstructor(Configuration.class);
         MRJobCustomizationBase mrJobCustomization = constructor.newInstance(miniclusterConfiguration);
 
@@ -151,7 +157,14 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
         Job mrJob = new Job(jobConf);
 
         mrJobCustomization.customize(mrJob, properties);
-        return JobService.runMRJob(mrJob, "jobName", true);
+        if (properties != null) {
+            Configuration config = mrJob.getConfiguration();
+            config.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
+            for (Object key : properties.keySet()) {
+                config.set(key.toString(), properties.getProperty((String) key));
+            }
+        }
+        return mrJob;
     }
 
     public ApplicationId testYarnJob(String yarnClientName, Properties appMasterProperties,
@@ -173,10 +186,8 @@ public class DataplatformMiniClusterFunctionalTestNG extends DataPlatformFunctio
         yarnClient = new CommandYarnClient(clientTemplate);
         ((CommandYarnClient) yarnClient).setConfiguration(miniclusterConfiguration);
 
-        ((CommandYarnClient) yarnClient).setEnvironment(new HashMap<String, String>());
-        ((CommandYarnClient) yarnClient).getEnvironment().put("CLASSPATH",
-                ((CommandYarnClient) (applicationContext.getBean(yarnClientName))).getEnvironment().get("CLASSPATH"));
-
+        ((CommandYarnClient) yarnClient)
+                .setEnvironment(((CommandYarnClient) (applicationContext.getBean(yarnClientName))).getEnvironment());
         return jobService.submitYarnJob(((CommandYarnClient) yarnClient), yarnClientName, appMasterProperties,
                 containerProperties);
     }

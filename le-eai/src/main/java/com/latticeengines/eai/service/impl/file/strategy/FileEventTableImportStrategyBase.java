@@ -2,7 +2,9 @@ package com.latticeengines.eai.service.impl.file.strategy;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -11,6 +13,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -33,6 +37,7 @@ import com.latticeengines.eai.file.runtime.mapreduce.CSVImportJob;
 import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
+import com.latticeengines.eai.util.EaiJobUtil;
 import com.latticeengines.eai.util.HdfsUriGenerator;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -52,9 +57,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
-    
-//    @Autowired
-//    private SparkImport sparkImport;
+
+    // @Autowired
+    // private SparkImport sparkImport;
 
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
@@ -70,12 +75,12 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         Properties props = getProperties(ctx, table);
 
         ApplicationId appId = eaiYarnService.submitMRJob(CSVImportJob.CSV_IMPORT_JOB_TYPE, props);
-       // ApplicationId appId = sparkImport.launch(props);
+        // ApplicationId appId = sparkImport.launch(props);
         ctx.setProperty(ImportProperty.APPID, appId);
         updateContextProperties(ctx, table);
     }
 
-    private void updateContextProperties(ImportContext ctx, Table table) {
+    public void updateContextProperties(ImportContext ctx, Table table) {
         @SuppressWarnings("unchecked")
         Map<String, Long> processedRecordsMap = ctx.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
 
@@ -97,6 +102,15 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
         props.put(MapReduceProperty.INPUT.name(), hdfsFileToImport);
         props.put("eai.table.schema", JsonUtils.serialize(table));
+        List<String> cacheFiles = new ArrayList<>();
+        try {
+            cacheFiles = EaiJobUtil.getCacheFiles(ctx.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class),
+                    versionManager.getCurrentVersionInStack(stackName));
+            cacheFiles.add(hdfsFileToImport);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        props.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), String.join(",", cacheFiles));
         return props;
     }
 

@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,8 +111,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private void process(Context context) throws IOException {
-        @SuppressWarnings("deprecation")
-        String csvFileName = getCSVFilePath(context.getLocalCacheFiles());
+        String csvFileName = getCSVFilePath(context.getCacheFiles());
         if (csvFileName == null) {
             throw new RuntimeException("Not able to find csv file from localized files");
         }
@@ -177,10 +177,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         errorMap.clear();
     }
 
-    public String getCSVFilePath(Path[] paths) {
-        for (Path path : paths) {
-            if (path.getName().endsWith(".csv")) {
-                return path.getName();
+    public String getCSVFilePath(URI[] uris) {
+        for (URI uri : uris) {
+            if (uri.getPath().endsWith(".csv")) {
+                return new Path(uri.getPath()).getName();
             }
         }
         return null;

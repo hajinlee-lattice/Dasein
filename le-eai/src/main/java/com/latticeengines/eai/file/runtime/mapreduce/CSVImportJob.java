@@ -1,6 +1,5 @@
 package com.latticeengines.eai.file.runtime.mapreduce;
 
-import java.util.List;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
@@ -12,9 +11,7 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
@@ -30,28 +27,17 @@ public class CSVImportJob extends MRJobCustomizationBase {
 
     public static final String MAPRED_MAP_TASKS_PROPERTY = "mapreduce.job.maps";
 
-    private static final String dependencyPath = "/app/";
-
-    private static final String jarDependencyPath = "/eai/lib";
-
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
-
-    private VersionManager versionManager;
-
-    private String stackName;
 
     public CSVImportJob(Configuration config) {
         super(config);
     }
 
     public CSVImportJob(Configuration config, //
-            MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
-            VersionManager versionManager, String stackName) {
+            MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
         this(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
-        this.versionManager = versionManager;
-        this.stackName = stackName;
     }
 
     @Override
@@ -76,7 +62,6 @@ public class CSVImportJob extends MRJobCustomizationBase {
             // get schema
             Table table = JsonUtils.deserialize(tableSchema, Table.class);
             Schema schema = TableUtils.createSchema(table.getName(), table);
-            System.out.println(schema.toString());
             AvroJob.setOutputKeySchema(mrJob, schema);
 
             String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
@@ -90,14 +75,7 @@ public class CSVImportJob extends MRJobCustomizationBase {
 
             TextInputFormat.setMinInputSplitSize(mrJob, 100000000000L);
 
-            mrJob.addFileToClassPath(new Path(inputDir));
             MRJobUtil.setLocalizedResources(mrJob, properties);
-            List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(),
-                    dependencyPath + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
-            for (String jarFilePath : jarFilePaths) {
-                mrJob.addFileToClassPath(new Path(jarFilePath));
-            }
-
             // config.set(MRJobConfig.MAP_JAVA_OPTS,
             // "-Xdebug -Xnoagent -Djava.compiler=NONE
             // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");

@@ -1,7 +1,7 @@
 package com.latticeengines.eai.service.impl.file;
 
+import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.net.URL;
@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -25,23 +25,24 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.file.runtime.mapreduce.CSVImportJob;
+import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
+import com.latticeengines.eai.service.impl.file.strategy.FileEventTableImportStrategyBase;
 
-public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
+public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     @Autowired
     private ImportService fileImportService;
 
     @Autowired
-    private Configuration yarnConfiguration;
+    private EaiMetadataService eaiMetadataService;
 
     @Autowired
-    private EaiMetadataService eaiMetadataService;
+    private FileEventTableImportStrategyBase fileEventTableImportStrategyBase;
 
     private URL metadataUrl;
 
@@ -49,20 +50,18 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private URL avroDataUrl;
 
-    @Autowired
-    private JobService jobService;
-
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        super.setup();
         cleanup();
     }
 
     public void cleanup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/sourceFiles");
-        HdfsUtils.mkdir(yarnConfiguration, "/tmp/sourceFiles");
+        HdfsUtils.rmdir(miniclusterConfiguration, "/tmp/dataFromFile");
+        HdfsUtils.rmdir(miniclusterConfiguration, "/tmp/sourceFiles");
+        HdfsUtils.mkdir(miniclusterConfiguration, "/tmp/sourceFiles");
         dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file2.csv");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
+        HdfsUtils.copyLocalToHdfs(miniclusterConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
         metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/testdataMetadata.json");
         avroDataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file3.avro");
     }
@@ -70,7 +69,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Test(groups = "functional", dataProvider = "getPropertiesProvider")
     public void importMetadataAndDataAndWriteToHdfs(Map<String, String> properties) throws Exception {
         cleanup();
-        ImportContext ctx = new ImportContext(yarnConfiguration);
+        ImportContext ctx = new ImportContext(miniclusterConfiguration);
         ctx.setProperty(ImportProperty.TARGETPATH, "/tmp/dataFromFile/file2");
         ctx.setProperty(ImportProperty.CUSTOMER, "testcustomer");
         ctx.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
@@ -85,33 +84,34 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
 
-        fileImportConfig.setTables(Arrays.<Table> asList(tables.get(0)));
+        ctx.setProperty(ImportProperty.HDFSFILE, //
+                properties.get(ImportProperty.HDFSFILE));
+        ctx.setProperty(ImportProperty.FILEURLPROPERTIES, //
+                properties.get(ImportProperty.FILEURLPROPERTIES));
 
-        fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx);
-
+        Job mrJob = createMRJob(CSVImportJob.class, fileEventTableImportStrategyBase.getProperties(ctx, tables.get(0)));
+        JobID jobID = JobService.runMRJob(mrJob, "jobName", true);
+        assertNotNull(jobID);
+        fileEventTableImportStrategyBase.updateContextProperties(ctx, tables.get(0));
         eaiMetadataService.updateTableSchema(tables, ctx);
 
-        ApplicationId appId = ctx.getProperty(ImportProperty.APPID, ApplicationId.class);
-        assertNotNull(appId);
-        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        verifyAllDataNotNullWithNumRows(yarnConfiguration, //
+        verifyAllDataNotNullWithNumRows(miniclusterConfiguration, //
                 tables.get(0), //
                 9);
-        Counters counters = jobService.getMRJobCounters(appId.toString());
-        assertEquals(counters.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue(), 9);
-        assertEquals(counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 10);
-        assertEquals(counters.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
-        assertEquals(counters.getCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 5);
-        assertEquals(counters.getCounter(RecordImportCounter.ROW_ERROR).getValue(), 0);
+        Counters counters = mrJob.getCounters();
+        assertEquals(counters.findCounter(RecordImportCounter.IMPORTED_RECORDS).getValue(), 9);
+        assertEquals(counters.findCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 10);
+        assertEquals(counters.findCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
+        assertEquals(counters.findCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 5);
+        assertEquals(counters.findCounter(RecordImportCounter.ROW_ERROR).getValue(), 0);
     }
 
     @DataProvider
     public Object[][] getPropertiesProvider() {
         Map<String, String> metadataFileProperties = getProperties(true);
-        //Map<String, String> inlineMetadataProperties = getProperties(false);
+        // Map<String, String> inlineMetadataProperties = getProperties(false);
 
-        return new Object[][] { { metadataFileProperties }};
+        return new Object[][] { { metadataFileProperties } };
     }
 
     private Map<String, String> getProperties(boolean useMetadataFile) {
