@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -38,6 +40,8 @@ import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 public class SqoopJobServiceImpl implements SqoopJobService {
 
     private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
+
+    private static final int MAX_SQOOP_RETRY = 3;
 
     @Value("${dataplatform.queue.scheme}")
     private String queueScheme;
@@ -249,13 +253,30 @@ public class SqoopJobServiceImpl implements SqoopJobService {
     }
 
     private ApplicationId runTool(List<String> cmds, Configuration config, boolean sync, String uuid) {
+
         String appIdFileName = String.format("appid-%s.txt", UUID.randomUUID().toString());
         String appIdFilePath = getBinaryInputDir(uuid) + "/" + appIdFileName;
         config.set("sqoop.sync", Boolean.toString(sync));
         config.set("sqoop.app.id.file.name", appIdFilePath);
         config.setBoolean("mapreduce.job.user.classpath.first", true);
-        LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(config));
-        return getApplicationId(appIdFilePath);
+        int retryCount = 0;
+        while (retryCount < MAX_SQOOP_RETRY) {
+            try {
+                LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(config));
+                return getApplicationId(appIdFilePath);
+            } catch (Exception e) {
+                log.error("Sqoop Job Failed! Retry " + retryCount + "\n", e);
+                if (retryCount == MAX_SQOOP_RETRY) {
+                    throw new LedpException(LedpCode.LEDP_12010, e, new String[] { "finish" });
+                }
+                try {
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
+                } catch (InterruptedException e1) {
+                    log.error("Sqoop Import Retry Failed! " + ExceptionUtils.getStackTrace(e1));
+                }
+            }
+        }
+        return null;
     }
 
     private String getBinaryInputDir(String uuid) {
