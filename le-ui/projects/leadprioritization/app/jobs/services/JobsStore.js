@@ -108,21 +108,10 @@ angular
     };
 
     this.getDataImportJobs = function() {
-        var self = this;
         var defer = $q.defer();
-
-        if (self.data.dataImportJobs.length > 0) {
-            defer.resolve(self.data.dataImportJobs)
-        } else {
-            JobsService.getDataImportJobs().then(function(response) {
-                var data = Array.isArray(response.data) ? response.data : [];
-                for (var i = 0; i < data.length; i++) {
-                    self.data.dataImportJobs.push(data[i]);
-                }
-                defer.resolve(self.data.dataImportJobs);
-            });
-        }
-
+        defer.resolve(this.data.dataImportJobs)
         return defer.promise;
     };
+
+    this.data.dataImportJobs = [{"timestamp":1490971665695,"fileName":"Lattice_Full_location_20170331.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1491075500934,"fileName":"Lattice_Full_location_20170401.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1491257578363,"fileName":"Lattice_Full_location_20170403.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1491512702355,"fileName":"Lattice_Full_location_20170406.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1491667049385,"fileName":"Lattice_Full_location_20170408.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1491938267633,"fileName":"Lattice_Full_location_20170411.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1492016087146,"fileName":"Lattice_Full_location_20170412.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1492369432966,"fileName":"Lattice_Full_location_20170416.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1493132895501,"fileName":"Lattice_Full_location_20170425.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1493403375791,"fileName":"Lattice_Full_location_20170428.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1493649030170,"fileName":"Lattice_Full_location_20170501.csv","jobType":"Data Import","status":"Completed"},{"timestamp":1493840430170,"fileName":"Lattice_Full_location_20170503.csv","jobType":"Data Import","status":"Completed"}];
 });

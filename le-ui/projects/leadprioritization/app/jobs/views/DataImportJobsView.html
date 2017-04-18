@@ -42,10 +42,10 @@
                     <thead>
                         <tr class="row">
                             <th class="columns two">Timestamp</th>
-                            <th class="columns three">File Name</th>
+                            <th class="columns four">File Name</th>
                             <th class="columns two">Job Type</th>
                             <th class="columns two">Status</th>
-                            <th class="columns three">&nbsp;</th>
+                            <th class="columns two">&nbsp;</th>
                         </tr>
                     </thead>
                 </table>
@@ -59,8 +59,8 @@
                         limitTo: pagesize">
                         <div class="clearfix">
                             <span class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-                            <span class="columns three">
-                                <span data-stooltip="{{job.fileName}}">{{job.fileName | limitTo: 16 }}{{job.fileName.length > 16 ? '&hellip;' : ''}}</span>
+                            <span class="columns four">
+                                <span data-stooltip="{{job.fileName}}">{{job.fileName | limitTo: 36 }}{{job.fileName.length > 36 ? '&hellip;' : ''}}</span>
                             </span>
                             <span class="columns two">{{job.jobType}}</span>
                             <span class="columns two {{job.status}}">{{job.status}}</span>

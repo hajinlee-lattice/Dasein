@@ -479,11 +479,4 @@ angular
         numStepsInGroup.create_global_target_market = 0;
         numStepsInGroup.score_training_set = 0;
     }
-
-    this.getDataImportJobs = function() {
-        return $http({
-            method: 'GET',
-            url: 'assets/resources/stub/dataimportjobs.json'
-        });
-    };
 });
