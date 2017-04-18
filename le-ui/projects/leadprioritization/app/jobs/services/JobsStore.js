@@ -9,10 +9,10 @@ angular
 
     $interval(function() {
         var modelId = $stateParams.modelId || '';
-        
+
         if (!pending) {
             pending = true;
-            
+
             JobsStore.getJobs(null, modelId).then(function(response) {
                 pending = false;
             });
@@ -26,6 +26,7 @@ angular
         jobs: [],
         models: {},
         jobsMap: {},
+        dataImportJobs: [],
         isModelState: false
     };
 
@@ -42,8 +43,8 @@ angular
     this.getJobs = function(use_cache, modelId) {
         var deferred = $q.defer(),
             isModelState = modelId ? true : false,
-            jobs = modelId 
-                ? this.data.models[modelId] 
+            jobs = modelId
+                ? this.data.models[modelId]
                 : this.data.jobs;
 
         if (use_cache) {
@@ -61,7 +62,7 @@ angular
                     if (!JobsStore.data.models[modelId]) {
                         JobsStore.data.models[modelId] = [];
                     }
-                    
+
                     JobsStore.data.models[modelId].length = 0;
 
                     for (var i=0; i<response.length; i++) {
@@ -82,7 +83,7 @@ angular
                         }
                     }
                 }
-                
+
                 deferred.resolve(JobsStore.data.jobs);
             });
         }
@@ -104,5 +105,16 @@ angular
 
     this.removeJob = function(jobId) {
         delete this.data.jobsMap[jobId];
+    };
+
+    this.getDataImportJobs = function() {
+        var self = this;
+        return JobsService.getDataImportJobs().then(function(response) {
+            var data = Array.isArray(response.data) ? response.data : [];
+            for (var i = 0; i < data.length; i++) {
+                self.data.dataImportJobs.push(data[i]);
+            }
+            return self.data.dataImportJobs;
+        });
     };
 });

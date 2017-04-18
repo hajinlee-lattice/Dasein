@@ -1,0 +1,24 @@
+<section id="JobsTabsView" class="containerx" ng-if="vm.cdlEnabled">
+    <ul>
+        <li
+            ui-sref="home.jobs.status"
+            ui-sref-active="active">
+            <div class="tab-container">
+                <h2>Model Jobs</h2>
+                <div>
+                    <span class="count">{{vm.JobsStore.data.jobs.length}}</span>
+                </div>
+            </div>
+        </li>
+        <li
+            ui-sref="home.jobs.data"
+            ui-sref-active="active">
+            <div class="tab-container">
+                <h2>Data Import Jobs</h2>
+                <div>
+                    <span class="count">{{vm.JobsStore.data.dataImportJobs.length}}</span>
+                </div>
+            </div>
+        </li>
+    </ul>
+</section>

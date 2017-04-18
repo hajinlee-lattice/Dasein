@@ -8,6 +8,11 @@ angular
                 "navigation@": {
                     controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "summary@": {
+                    controller: 'JobsTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/jobs/tabs/jobstabs.component.html'
                 }
             },
             redirectTo: 'jobs.status'
@@ -23,7 +28,7 @@ angular
                 "summary@": {
                     resolve: {
                         ResourceString: function(Model) {
-                            var sourceSchemaInterpretation = Model.ModelDetails.SourceSchemaInterpretation;   
+                            var sourceSchemaInterpretation = Model.ModelDetails.SourceSchemaInterpretation;
 
                             if (sourceSchemaInterpretation == 'SalesforceAccount') {
                                 var modelType = 'MODEL_SCORING_ACCOUNTS_SUMMARY_HEADER';
@@ -56,8 +61,8 @@ angular
                 jobCreationSuccess: null
             },
             views: {
-                "summary@": {
-                    resolve: { 
+                "subsummary@": {
+                    resolve: {
                         ResourceString: function() {
                             return 'SUMMARY_JOBS_STATUS';
                         }
@@ -67,6 +72,15 @@ angular
                 },
                 "main@": {
                     templateUrl: 'app/jobs/views/ListView.html'
+                }
+            }
+        })
+        .state('home.jobs.data', {
+            url: '/status',
+            views: {
+                "main@": {
+                    controller: 'DataImportJobsCtrl',
+                    templateUrl: 'app/jobs/views/DataImportJobsView.html'
                 }
             }
         })
@@ -103,11 +117,11 @@ angular
                     });
 
                     return deferred.promise;
-                } 
+                }
             },
             views: {
                 "summary@": {
-                    resolve: { 
+                    resolve: {
                         ResourceString: function() {
                             return 'SUMMARY_JOBS_IMPORT_CSV';
                         }
@@ -118,7 +132,7 @@ angular
                 "main@": {
                     controller: 'CSVReportController',
                     templateUrl: 'app/create/jobreport/JobReportView.html'
-                }   
+                }
             }
         });
 });

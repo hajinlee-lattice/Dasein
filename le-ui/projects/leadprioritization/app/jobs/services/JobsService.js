@@ -1,26 +1,26 @@
 angular
 .module('lp.jobs')
 .service('JobsService', function($http, $q, _, $stateParams) {
-    var stepsNameDictionary = { 
-        "markReportOutOfDate":                  "load_data", 
-        "importData":                           "load_data", 
+    var stepsNameDictionary = {
+        "markReportOutOfDate":                  "load_data",
+        "importData":                           "load_data",
         "createPreMatchEventTable":             "match_data",
-        "loadHdfsTableToPDServer":              "match_data", 
-        "match":                                "match_data", 
-        "createEventTableFromMatchResult":      "generate_insights", 
+        "loadHdfsTableToPDServer":              "match_data",
+        "match":                                "match_data",
+        "createEventTableFromMatchResult":      "generate_insights",
         "runImportSummaryDataFlow":             "generate_insights",
-        "registerImportSummaryReport":          "generate_insights", 
-        "sample":                               "generate_insights", 
+        "registerImportSummaryReport":          "generate_insights",
+        "sample":                               "generate_insights",
         "profileAndModel":                      "create_global_model",
         "chooseModel":                          "create_global_model",
         "activateModel":                        "create_global_model",
-        "runScoreTableDataFlow":                "create_global_target_market", 
+        "runScoreTableDataFlow":                "create_global_target_market",
         "runAttributeLevelSummaryDataFlows":    "create_global_target_market",
         "scoreEventTable":                      "score_training_set",
         "combineInputTableWithScore":           "score_training_set",
         "pivotScoreAndEvent":                   "score_training_set"
-    }; 
-    
+    };
+
     var dictionary = {
         'fitModelWorkflow': stepsNameDictionary,/*
         'importMatchAndScoreWorkflow': {
@@ -68,11 +68,11 @@ angular
             'reviewModel':                              'create_global_target_market',
             'remediateDataRules':                       'create_global_target_market',
             'createModel':                              'create_global_target_market',
-            'downloadAndProcessModelSummaries':         'create_global_target_market', 
+            'downloadAndProcessModelSummaries':         'create_global_target_market',
             'persistDataRules':                         'create_global_target_market',
             'setConfigurationForScoring':               'score_training_set',
             // 'matchDataCloud':                        'score_training_set',
-            // 'processMatchResult':                    'score_training_set', 
+            // 'processMatchResult':                    'score_training_set',
             // 'addStandardAttributes':                 'score_training_set',
             'score':                                    'score_training_set',
             'scoreEventTable':                          'score_training_set',
@@ -80,17 +80,17 @@ angular
             // 'exportData':                            'score_training_set',
             'pivotScoreAndEvent':                       'score_training_set',
             // 'exportData':                            'score_training_set',
-        }, 
+        },
         'pmmlModelWorkflow': {
             'createPMMLModel': 'create_global_target_market'
         }
     };
 
-    var numStepsInGroup = { 
-        "load_data": 0, 
-        "match_data": 0, 
+    var numStepsInGroup = {
+        "load_data": 0,
+        "match_data": 0,
         "generate_insights": 0,
-        "create_global_model": 0, 
+        "create_global_model": 0,
         "create_global_target_market": 0,
         "score_training_set": 0
     };
@@ -98,11 +98,11 @@ angular
     this.getErrorLog = function(JobReport) {
         var deferred = $q.defer();
         //jobType = jobType == 'importMatchAndModelWorkflow' ? 'models' : 'scores';
-        
+
         $http({
             method: 'GET',
             url: '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors',
-            headers: { 
+            headers: {
                 'Accept': 'application/csv;charset=utf-8',
                 'ErrorDisplayMethod': 'modal'
             }
@@ -128,11 +128,11 @@ angular
 
     this.getScoringResults = function(job) {
         var deferred = $q.defer();
-        
+
         $http({
             method: 'GET',
             url: '/pls/scores/jobs/' + job.id + '/results/score',
-            headers: { 
+            headers: {
                 'Accept': 'application/csv;charset=utf-8',
                 'ErrorDisplayMethod': 'banner'
             }
@@ -160,8 +160,8 @@ angular
         var deferred = $q.defer();
         var result;
         var modelId = $stateParams.modelId;
-        var url = modelId 
-            ? '/pls/scores/jobs/' + modelId 
+        var url = modelId
+            ? '/pls/scores/jobs/' + modelId
             : '/pls/jobs';
 
         $http({
@@ -180,7 +180,7 @@ angular
                     success: true,
                     resultObj: null
                 };
-                
+
                 jobs = _.sortBy(jobs, 'startTimestamp');
                 result.resultObj = _.map(jobs, function(job) {
                     clearNumSteps();
@@ -220,7 +220,7 @@ angular
         );
         return deferred.promise;
     };
-    
+
     this.getJobStatus = function(jobId) {
 
         var deferred = $q.defer();
@@ -229,7 +229,7 @@ angular
         $http({
             method: 'GET',
             url: '/pls/jobs/' + jobId,
-            headers: { 
+            headers: {
                 'ErrorDisplayMethod': 'none',
                 'If-Modified-Since': 0
             }
@@ -348,7 +348,7 @@ angular
                 'performEnrichment': performEnrichment,
                 'useRtsApi': performEnrichment
             },
-            headers: { 
+            headers: {
                 'ErrorDisplayMethod': 'modal'
             }
         }).then(
@@ -404,7 +404,7 @@ angular
             method: 'POST',
             url: '/pls/jobs/' + jobId +'/cancel'
         });
-    }
+    };
 
     function getStepFailed(job) {
         if (job.steps) {
@@ -467,10 +467,10 @@ angular
                 }
             }
         }
-        
+
         return stepsCompleted;
     }
-    
+
     function clearNumSteps() {
         numStepsInGroup.load_data = 0;
         numStepsInGroup.match_data = 0;
@@ -479,4 +479,11 @@ angular
         numStepsInGroup.create_global_target_market = 0;
         numStepsInGroup.score_training_set = 0;
     }
+
+    this.getDataImportJobs = function() {
+        return $http({
+            method: 'GET',
+            url: 'assets/resources/stub/dataimportjobs.json'
+        });
+    };
 });

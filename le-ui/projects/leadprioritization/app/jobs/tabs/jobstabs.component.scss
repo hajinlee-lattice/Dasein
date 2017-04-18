@@ -1,0 +1,86 @@
+#JobsTabsView {
+    @include flex-container;
+    position: relative;
+    z-index: 3;
+    border-top: 1px solid #d0d1d0;
+    border-bottom: 1px solid #d0d1d0;
+    background: #efefef;
+    margin-top: 0;
+    margin-bottom: 2em;
+    & > ul {
+        @include flex-container;
+        @include flex-item(1 1 auto);
+        border-left: 1px solid #d0d1d0;
+        max-width: 1200px;
+        margin: 0 auto;
+        & > li {
+            @include flex-item(1 1 auto);
+            border-right: 1px solid #d0d1d0;
+            font-size: 9px;
+            position: relative;
+            height: 73px;
+            min-width: 237px;
+            max-width: 320px;
+            cursor: pointer;
+            .tab-container {
+                margin: 0;
+                padding: 14px 20px;
+                border-top: 5px solid transparent;
+                border-bottom: 1px solid transparent;
+                height: calc(100% + 1px);
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2;
+                cursor: pointer;
+            }
+            &:last-child {
+                border-right: 1px solid #d0d1d0;
+            }
+            &.active {
+                background: #fafafa;
+                pointer-events: none;
+                .more-info {
+                    pointer-events: all;
+                    z-index: 999;
+                }
+                .tab-container {
+                    border-top-color: orange;
+                    border-bottom-color: transparent;
+                    background: #fafafa;
+                    z-index: 1;
+                }
+            }
+            .count {
+                font-size: 18px;
+            }
+            & > .tab-container > h2 {
+                position: relative;
+                &:after {
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    top: 50%;
+                    left: 0;
+                    transform: translateY(-50%);
+                    margin-top: -1px;
+                    height: 20px;
+                    width: 20px;
+                    background-size: contain;
+                }
+            }
+            h2, h3 {
+                font-weight: normal;
+            }
+            h2 {
+                font-size: 14px;
+            }
+            h3 {
+                font-size: 18px;
+                color: white;
+            }
+        }
+    }
+}
