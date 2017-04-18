@@ -109,12 +109,20 @@ angular
 
     this.getDataImportJobs = function() {
         var self = this;
-        return JobsService.getDataImportJobs().then(function(response) {
-            var data = Array.isArray(response.data) ? response.data : [];
-            for (var i = 0; i < data.length; i++) {
-                self.data.dataImportJobs.push(data[i]);
-            }
-            return self.data.dataImportJobs;
-        });
+        var defer = $q.defer();
+
+        if (self.data.dataImportJobs.length > 0) {
+            defer.resolve(self.data.dataImportJobs)
+        } else {
+            JobsService.getDataImportJobs().then(function(response) {
+                var data = Array.isArray(response.data) ? response.data : [];
+                for (var i = 0; i < data.length; i++) {
+                    self.data.dataImportJobs.push(data[i]);
+                }
+                defer.resolve(self.data.dataImportJobs);
+            });
+        }
+
+        return defer.promise;
     };
 });
