@@ -272,7 +272,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
                 try {
                     Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
                 } catch (InterruptedException e1) {
-                    log.error("Sqoop Import Retry Failed! " + ExceptionUtils.getStackTrace(e1));
+                    log.error("Sqoop Job Retry Failed! " + ExceptionUtils.getStackTrace(e1));
                 }
             }
         }
