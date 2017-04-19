@@ -40,6 +40,7 @@ public class ModelExtractorUnitTestNG {
 
         extractor.extractModelArtifacts(path, TARGETDIR, (dir, name) -> !name.equals("STPipelineBinary.p"));
         Assert.assertFalse(new File(TARGETDIR + ST_PIPELINE_BINARY_P).exists());
+        Assert.assertTrue(new File(TARGETDIR + "/pipeline.py").exists());
     }
 
 }

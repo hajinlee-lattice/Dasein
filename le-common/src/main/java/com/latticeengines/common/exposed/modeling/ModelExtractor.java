@@ -24,7 +24,7 @@ public class ModelExtractor {
     private static final Log log = LogFactory.getLog(ModelExtractor.class);
 
     public void extractModelArtifacts(String modelFilePath, String targetDir) {
-        extractModelArtifacts(modelFilePath, targetDir, null);
+        extractModelArtifacts(modelFilePath, targetDir, (dir, name) -> true);
     }
 
     public void extractModelArtifacts(String modelFilePath, String targetDir, FilenameFilter filter) {

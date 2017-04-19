@@ -154,6 +154,5 @@ public class ModelRetrieverUnitTestNG {
         ModelRetrieverImpl modelRetriever = new ModelRetrieverImpl();
         modelRetriever.extractFromModelJson(path, TARGETDIR);
         Assert.assertFalse(new File(TARGETDIR + "/STPipelineBinary.p").exists());
-
     }
 }
