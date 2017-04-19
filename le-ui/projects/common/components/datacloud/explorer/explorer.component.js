@@ -1161,6 +1161,7 @@ angular.module('common.datacloud.explorer', [
                         if(index) {
                             vm.enrichments[index].SegmentChecked = true;
                             vm.enrichments[index].SegmentRangesChecked = {};
+                            vm.segmentAttributeInput[vm.enrichments[index].FieldName] = true;
                             vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range)] = true;
                         }
                 }

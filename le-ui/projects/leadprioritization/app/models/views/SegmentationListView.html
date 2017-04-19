@@ -6,7 +6,7 @@
 
 
                 <li
-                    ng-repeat="segment in vm.segments"
+                    ng-repeat="segment in vm.segments | orderBy: '-updated'"
                     ng-click="vm.tileClick($event, segment.name)"
                     ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null"
                 >

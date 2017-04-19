@@ -358,18 +358,12 @@
             }
         }
         .lattice-rating {
-            & > h2 {
-                .ratings-logo {
-                    display: block;
-                    height: 40px;
-                    width: 40px;
-                    border: 1px solid #d0d1d0;
-                    border-radius: 50%;
-                    margin: 0 auto;
-                    padding: 10px;
-                    & > img {
-                        width: 100%;
-                        height: 100%;
+            &.box-inner {
+                & > h2 {
+                    .category-icon.ratings-logo {
+                        img {
+                            margin-left: -2px;
+                        }
                     }
                 }
             }
@@ -391,7 +385,8 @@
                                 padding-right: 5px;
                             }
                             &.rating-label {
-                                width: 50px; 
+                                width: 50px;
+                                margin-right: 0;
                                 text-align: left;
                             }
                             &.rating-lift,
@@ -437,7 +432,7 @@
                     position: absolute;
                     top: 20px;
                     right: 90px;
-                    left: 45px;
+                    left: 50px;
                     bottom: 0;
                     font-size: 10px;
                     @include flex-container;
