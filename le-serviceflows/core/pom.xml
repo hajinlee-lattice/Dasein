@@ -265,6 +265,12 @@
             <version>4.0.0.RELEASE</version>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+             <groupId>com.mchange</groupId>
+             <artifactId>c3p0</artifactId>
+             <version>${c3p0.version}</version> 
+        </dependency>
 
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -276,8 +282,14 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <version>2.2.1</version>
+            <version>${quartz.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>c3p0</groupId>
+                    <artifactId>c3p0</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

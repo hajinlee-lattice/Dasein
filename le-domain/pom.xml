@@ -10,7 +10,6 @@
     <properties>
         <component-name>domain</component-name>
         <le.common.version>3.4.0-SNAPSHOT</le.common.version>
-        <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
 
     <parent>
@@ -50,6 +49,11 @@
             <version>1.0.1.Final</version>
         </dependency>
         <!-- for the use of hibernate annotation -->
+        <dependency>
+             <groupId>com.mchange</groupId>
+             <artifactId>c3p0</artifactId>
+             <version>${c3p0.version}</version> 
+        </dependency> 
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>

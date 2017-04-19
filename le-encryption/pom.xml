@@ -18,7 +18,6 @@
         <le.security.version>3.4.0-SNAPSHOT</le.security.version>
         <le.testfwk.version>3.4.0-SNAPSHOT</le.testfwk.version>
         <le.remote.version>3.4.0-SNAPSHOT</le.remote.version>
-        <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
 
     <parent>

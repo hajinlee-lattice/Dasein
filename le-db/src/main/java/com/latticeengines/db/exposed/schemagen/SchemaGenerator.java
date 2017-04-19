@@ -122,8 +122,8 @@ public class SchemaGenerator {
         default:
             break;
         }
-        Iterable<File> iterable = Files.fileTreeTraverser().children(
-                new File("src/main/resources/staticsql/" + leafFolder));
+        Iterable<File> iterable = Files.fileTreeTraverser()
+                .children(new File("src/main/resources/staticsql/" + leafFolder));
         for (File f : iterable) {
             if (f.getName().equals(".svn") || f.isDirectory()) {
                 continue;
@@ -233,19 +233,19 @@ public class SchemaGenerator {
                         Enumeration<JarEntry> jarEntries = jarFile.entries();
                         while (jarEntries.hasMoreElements()) {
                             JarEntry jarEntry = jarEntries.nextElement();
-                            
+
                             if (!jarEntry.getName().endsWith(".class")) {
                                 continue;
                             }
                             // strip off file entry name
                             String jarPackage = jarEntry.getName().substring(0, jarEntry.getName().lastIndexOf('/'));
-                            
+
                             // only process specific package, not sub-package
                             if (!jarEntry.isDirectory() && jarPackage.equalsIgnoreCase(packageName.replace('.', '/'))) {
                                 // remove .class extension
-                                String fullyClassname = jarEntry.getName()
-                                        .substring(0, jarEntry.getName().length() - 6);
-                                
+                                String fullyClassname = jarEntry.getName().substring(0,
+                                        jarEntry.getName().length() - 6);
+
                                 classes.add(Class.forName(fullyClassname.replace('/', '.')));
                                 if (log.isDebugEnabled()) {
                                     log.debug("adding class: " + fullyClassname);
@@ -259,7 +259,8 @@ public class SchemaGenerator {
                 }
             }
         } catch (NullPointerException x) {
-            throw new ClassNotFoundException(packageName + " (" + directory + ") does not appear to be a valid package");
+            throw new ClassNotFoundException(
+                    packageName + " (" + directory + ") does not appear to be a valid package");
         }
 
         return classes;
