@@ -33,7 +33,7 @@ angular
                 return path + icon;
             }
 
-            vm.categoryOrderBy = function(test) {
+            vm.categoryOrderBy = function() {
                 if(vm.lookupMode) {
                     order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
                 } else if(vm.section == 'segment.analysis') {

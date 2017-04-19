@@ -848,7 +848,6 @@ angular.module('common.datacloud.explorer', [
             } else {
                 items = vm.topAttributes[category].SubCategories[subcategory];
             }
-
             var timestamp_b = new Date().getTime();
 
             if (!vm.lookupMode && items) {
@@ -907,6 +906,13 @@ angular.module('common.datacloud.explorer', [
         var timestamp3 = new Date().getTime();
         var _items = {};
 
+        /**
+         * if we aren't showing highlighted items don't segment them even if the UI asks
+         */
+        if(segment === 'HighlightHighlighted' && !vm.showHighlighting()) {
+            segment = '';
+        }
+
         if (segment && items) {
             var segmented = vm.filter(items, segment, true),
                 other = vm.filter(items, segment, false);
@@ -933,7 +939,7 @@ angular.module('common.datacloud.explorer', [
             subcategory, '\t', 
             items
         );
-        
+
         return items;
     }
 

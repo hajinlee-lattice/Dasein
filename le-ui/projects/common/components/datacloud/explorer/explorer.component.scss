@@ -636,31 +636,41 @@
                             }
                         }
                     }
-                    ul {
-                        li {
+                    ul.attribute-stats {
+                        li.attribute-stat {
+                            &:nth-child(odd) {
+                               background-color: rgba(0,0,0,0.05);
+                            }
                             ul.graph {
                                 @include flex-container;
                                 color: #000;
                                 li {
+                                    margin: 0 5px;
                                     &.label {
                                         @include flex-item(0 1 auto);
+                                        position: relative;
                                         width: 100px;
                                         max-height: 31px;
                                         overflow: hidden;
                                         word-wrap: break-word;
                                         text-align: right;
-                                        margin: 5px 0;
                                         line-height: 12px;
+                                        padding: 3px 0;
+                                        padding-left: 20px;
+                                        & > input {
+                                            position: absolue;
+                                            top: -1px;
+                                            left: -4px;
+                                        }
                                     }
                                     &.bar_ {
                                         @include flex-item(1 1 auto);
                                         border-left: 1px solid #d0d1d0;
-                                        margin: 0 5px;
                                         div {
                                             height: 100%;
                                             span {
                                                 display: block;
-                                                height: 50%; //10px
+                                                height: 10px;
                                                 position: relative;
                                                 top: 50%;
                                                 transform: translateY(-50%);

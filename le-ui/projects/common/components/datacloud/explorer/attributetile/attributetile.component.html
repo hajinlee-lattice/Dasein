@@ -32,8 +32,9 @@
     </span>
     <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' && !vm.lookupMode">
         <h5><label>Attribute range</label><label>Records</label></h5>
-        <ul>
-            <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List"
+        <ul class="attribute-stats">
+            <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List | limitTo: 5"
+                class="attribute-stat"
                 ng-class="{'select-range': vm.section == 'segment.analysis', 'disabled-grayout': !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)]}"
                 ng-click="vm.selectSegmentAttributeRange(enrichment, stat)">
                 <ul class="graph">

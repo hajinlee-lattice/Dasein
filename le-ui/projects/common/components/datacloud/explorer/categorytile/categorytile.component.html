@@ -41,9 +41,9 @@
                         | limitTo: 5 - (highlightAttributes.length || 0)))"
                         class="attribute"
                         ng-class="{
-                            'has-highlight': attribute.HighlightHighlighted,
-                            'no-highlight': !attribute.HighlightHighlighted,
-                            'no-highlights': highlightAttributes.length == 0,
+                            'has-highlight': attribute.HighlightHighlighted && vm.showHighlighting(),
+                            'no-highlight': !attribute.HighlightHighlighted || !vm.showHighlighting(),
+                            'no-highlights': highlightAttributes.length == 0 || !vm.showHighlighting(),
                             'ignore-ngclick': vm.section !== 'segment.analysis'
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
