@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,13 +14,12 @@ import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
-
-import  com.latticeengines.datafabric.entitymanager.CompositeFabricEntityMgr;
-import  com.latticeengines.datafabric.entitymanager.CompositeGraphEntityMgr;
+import com.latticeengines.datafabric.entitymanager.CompositeFabricEntityMgr;
+import com.latticeengines.datafabric.entitymanager.CompositeGraphEntityMgr;
 import com.latticeengines.domain.exposed.datafabric.CompositeFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.CompositeGraphEntity;
 
-public class CompositeGraphEntityMgrImpl implements GraphNode, CompositeGraphEntityMgr {
+public class CompositeGraphEntityMgrImpl implements CompositeGraphEntityMgr {
 
     private static final Log log = LogFactory.getLog(CompositeGraphEntityMgrImpl.class);
 
@@ -69,12 +69,12 @@ public class CompositeGraphEntityMgrImpl implements GraphNode, CompositeGraphEnt
     }
 
     public CompositeFabricEntityMgr<? extends CompositeFabricEntity> getEntityMgr(List<String> path) {
-         CompositeGraphEntityMgr graphMgr = getGraphMgr(path);
-         if (graphMgr == null) {
-             return null;
-         } else {
-             return graphMgr.getManager();
-         }
+        CompositeGraphEntityMgr graphMgr = getGraphMgr(path);
+        if (graphMgr == null) {
+            return null;
+        } else {
+            return graphMgr.getManager();
+        }
 
     }
 
@@ -96,67 +96,67 @@ public class CompositeGraphEntityMgrImpl implements GraphNode, CompositeGraphEnt
     }
 
     public List<CompositeGraphEntity> findChildren(List<String> path, String id) {
-         CompositeGraphEntityMgr mgr = getGraphMgr(path);
-         return mgr.findChildren(id);
+        CompositeGraphEntityMgr mgr = getGraphMgr(path);
+        return mgr.findChildren(id);
     }
 
     public List<CompositeGraphEntity> findChildren(String id) {
-         GraphCollector collector = new GraphCollector();
-         collector.addParentId(this, id);
-         collectEntities(collector);
-         List<CompositeGraphEntity> entities = collector.getEntities(this);
-         return entities;
+        GraphCollector collector = new GraphCollector();
+        collector.addParentId(this, id);
+        collectEntities(collector);
+        List<CompositeGraphEntity> entities = collector.getEntities(this);
+        return entities;
     }
 
     public CompositeGraphEntity find(List<String> path, String id) {
-         CompositeGraphEntityMgr mgr = getGraphMgr(path);
-         return mgr.find(id);
+        CompositeGraphEntityMgr mgr = getGraphMgr(path);
+        return mgr.find(id);
     }
 
     public CompositeGraphEntity find(String id) {
-         GraphCollector collector = new GraphCollector();
-         collector.setId(this, id);
-         collectEntities(collector);
-         List<CompositeGraphEntity> entities = collector.getEntities(this);
-         if ((entities == null) || (entities.size() == 0)) {
-             return null;
-         } else {
-             return entities.get(0);
-         }
+        GraphCollector collector = new GraphCollector();
+        collector.setId(this, id);
+        collectEntities(collector);
+        List<CompositeGraphEntity> entities = collector.getEntities(this);
+        if ((entities == null) || (entities.size() == 0)) {
+            return null;
+        } else {
+            return entities.get(0);
+        }
     }
 
     private void collectEntities(GraphCollector collector) {
-         collector.setMode(FIND);
-         BreadthFirstSearch searchAlg = new BreadthFirstSearch();
-         searchAlg.run(this, collector);
+        collector.setMode(FIND);
+        BreadthFirstSearch searchAlg = new BreadthFirstSearch();
+        searchAlg.run(this, collector);
     }
 
     public void delete(List<String> path, String id) {
-         CompositeGraphEntityMgr mgr = getGraphMgr(path);
-         mgr.delete(id);
+        CompositeGraphEntityMgr mgr = getGraphMgr(path);
+        mgr.delete(id);
     }
 
     public void deleteChildren(List<String> path, String id) {
-         CompositeGraphEntityMgr mgr = getGraphMgr(path);
-         mgr.deleteChildren(id);
+        CompositeGraphEntityMgr mgr = getGraphMgr(path);
+        mgr.deleteChildren(id);
     }
 
     public void delete(String id) {
-         GraphCollector collector = new GraphCollector();
-         collector.setId(this, id);
-         collectEntities(collector);
-         collector.setMode(DELETE);
-         DepthFirstSearch searchAlg = new DepthFirstSearch();
-         searchAlg.run(this, collector, true);
+        GraphCollector collector = new GraphCollector();
+        collector.setId(this, id);
+        collectEntities(collector);
+        collector.setMode(DELETE);
+        DepthFirstSearch searchAlg = new DepthFirstSearch();
+        searchAlg.run(this, collector, true);
     }
 
     public void deleteChildren(String id) {
-         GraphCollector collector = new GraphCollector();
-         collector.addParentId(this, id);
-         collectEntities(collector);
-         collector.setMode(DELETE);
-         DepthFirstSearch searchAlg = new DepthFirstSearch();
-         searchAlg.run(this, collector, true);
+        GraphCollector collector = new GraphCollector();
+        collector.addParentId(this, id);
+        collectEntities(collector);
+        collector.setMode(DELETE);
+        DepthFirstSearch searchAlg = new DepthFirstSearch();
+        searchAlg.run(this, collector, true);
     }
 
     private void addToCollector(GraphCollector collector, CompositeFabricEntity entity) {
@@ -172,38 +172,38 @@ public class CompositeGraphEntityMgrImpl implements GraphNode, CompositeGraphEnt
         GraphCollector collector = (GraphCollector) visitor;
         List<String> parentIds = collector.getParentIds(this);
         switch (collector.getMode()) {
-            case FIND:
-               if (parentIds == null) {
-                   String id = collector.getId(this);
-                   if (id != null) {
-                       CompositeFabricEntity entity = manager.findByKey(id);
-                       if (entity != null) {
-                           addToCollector(collector, entity);
-                       }
-                   }
-               } else {
-                   for (String parentId : parentIds) {
-                       List<? extends CompositeFabricEntity> entities = manager.findChildren(parentId, name);
-                       if (entities != null) {
-                           for (CompositeFabricEntity entity : entities) {
-                               addToCollector(collector, entity);
-                           }
-                       }
-                   }
-               }
-               break;
-            case DELETE:
-               if (parentIds != null) {
-                   for (String parentId : parentIds) {
-                       manager.deleteChildren(name, parentId);
-                   }
-               } else {
-                   String id = collector.getId(this);
-                   if (id != null) {
-                       manager.deleteByKey(id);
-                   }
-               }
-               break;
+        case FIND:
+            if (parentIds == null) {
+                String id = collector.getId(this);
+                if (id != null) {
+                    CompositeFabricEntity entity = manager.findByKey(id);
+                    if (entity != null) {
+                        addToCollector(collector, entity);
+                    }
+                }
+            } else {
+                for (String parentId : parentIds) {
+                    List<? extends CompositeFabricEntity> entities = manager.findChildren(parentId, name);
+                    if (entities != null) {
+                        for (CompositeFabricEntity entity : entities) {
+                            addToCollector(collector, entity);
+                        }
+                    }
+                }
+            }
+            break;
+        case DELETE:
+            if (parentIds != null) {
+                for (String parentId : parentIds) {
+                    manager.deleteChildren(name, parentId);
+                }
+            } else {
+                String id = collector.getId(this);
+                if (id != null) {
+                    manager.deleteByKey(id);
+                }
+            }
+            break;
         }
     }
 
