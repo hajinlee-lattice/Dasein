@@ -27,7 +27,8 @@
                 attribute="a"
                 group="all"
                 on-move="vm.move(vm.filters.all, vm.filters.any, k)"
-                on-delete="vm.delete">
+                on-delete="vm.delete"
+                show-lift="vm.inModel()">
             </query-filter>
             <p class="text-center" ng-if="vm.size(vm.filters.all) === 0">
                 No attributes in All
@@ -41,7 +42,8 @@
                 attribute="a"
                 group="any"
                 on-move="vm.move(vm.filters.any, vm.filters.all, k)"
-                on-delete="vm.delete">
+                on-delete="vm.delete"
+                show-lift="vm.inModel()">
             </query-filter>
             <p class="text-center" ng-if="vm.size(vm.filters.any) === 0">
                 No attributes in Any
