@@ -25,9 +25,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
+import com.latticeengines.common.exposed.graph.traversal.impl.ReverseTopologicalTraverse;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
@@ -143,17 +143,8 @@ public class ComponentOrchestrator {
             boolean deleteZookeeper) {
         OrchestratorVisitorForUninstall visitor = new OrchestratorVisitorForUninstall(contractId, tenantId, spaceId,
                 properties);
-        LatticeComponent modelingComponent = null;
-        for (LatticeComponent component : components) {
-            if (component.getName() == ModelingComponent.componentName) {
-                modelingComponent = component;
-            } else {
-                visitor.visit(component, null);
-            }
-        }
-        if (modelingComponent != null) {
-            visitor.visit(modelingComponent, null);
-        }
+        TopologicalTraverse traverser = new ReverseTopologicalTraverse();
+        traverser.traverse(components, visitor);
         postUninstall(contractId, tenantId, deleteZookeeper);
     }
 
@@ -165,8 +156,7 @@ public class ComponentOrchestrator {
         }
     }
 
-    void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo,
-            String tenantId) {
+    void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo, String tenantId) {
         boolean installSuccess = checkComponentsBootStrapStatus(visitor);
         emailService(installSuccess, prodAndExternalAminInfo, tenantId);
     }
@@ -184,8 +174,7 @@ public class ComponentOrchestrator {
         List<String> existingEmailList = new ArrayList<String>();
         List<LatticeProduct> products = prodAndExternalAminInfo.products;
         if (allComponentsSuccessful) {
-            if (products.contains(LatticeProduct.PD)
-                    || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
+            if (products.contains(LatticeProduct.PD) || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
                 Map<String, Boolean> externalEmailMap = prodAndExternalAminInfo.getExternalEmailMap();
                 Set<String> externalEmails = externalEmailMap.keySet();
                 for (String externalEmail : externalEmails) {

@@ -44,6 +44,14 @@ public class QueryUnitTestNG {
         assertEquals(lookups.size(), 2);
     }
 
+    @Test(groups = "unit")
+    public void testGetAllOfTypeComplexRestriction() {
+        String json = "{\"logicalRestriction\":{\"operator\":\"AND\",\"restrictions\":[{\"logicalRestriction\":{\"operator\":\"OR\",\"restrictions\":[]}},{\"logicalRestriction\":{\"operator\":\"AND\",\"restrictions\":[{\"bucketRestriction\":{\"lhs\":{\"columnLookup\":{\"column_name\":\"TechIndicator_AdRoll\",\"object_type\":\"BucketedAccountMaster\"}},\"range\":{\"min\":\"Yes\",\"max\":\"Yes\",\"is_null_only\":false}}}]}}]}}";
+        Restriction restriction = JsonUtils.deserialize(json, Restriction.class);
+        List<ColumnLookup> lookups = GraphUtils.getAllOfType(restriction, ColumnLookup.class);
+        assertEquals(lookups.size(), 1);
+    }
+
     private Query getQuery() {
         Query query = new Query();
         query.setObjectType(SchemaInterpretation.Account);

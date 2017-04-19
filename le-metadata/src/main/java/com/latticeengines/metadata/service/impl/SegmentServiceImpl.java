@@ -27,10 +27,11 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public Boolean deleteSegmentByName(String customerSpace, String segmentName) {
-        if (segmentEntityMgr.findByName(segmentName) == null) {
+        MetadataSegment segment = segmentEntityMgr.findByName(segmentName);
+        if (segment == null) {
             return false;
         }
-        segmentEntityMgr.delete(segmentEntityMgr.findByName(segmentName));
+        segmentEntityMgr.delete(segment);
         return true;
     }
 
@@ -42,6 +43,14 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment findByName(String customerSpace, String name) {
         return segmentEntityMgr.findByName(name);
+    }
+
+    @Override
+    public void deleteAllSegments(String customerSpace) {
+        List<MetadataSegment> segments = getSegments(customerSpace);
+        for (MetadataSegment segment : segments) {
+            deleteSegmentByName(customerSpace, segment.getName());
+        }
     }
 
 }

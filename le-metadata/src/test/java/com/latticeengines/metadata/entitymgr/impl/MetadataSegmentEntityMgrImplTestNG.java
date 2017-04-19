@@ -9,17 +9,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentProperty;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
@@ -30,7 +34,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
     private TableEntityMgr tableEntityMgr;
 
     @Autowired
-    private DataCollectionEntityMgr dataCollectionEntityMgr;
+    private DataCollectionService dataCollectionService;
 
     private static final String SEGMENT_NAME = "SEGMENT_NAME";
 
@@ -41,6 +45,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
     private static final MetadataSegment METADATA_SEGMENT = new MetadataSegment();
     private static final MetadataSegmentProperty METADATA_SEGMENT_PROPERTY_1 = new MetadataSegmentProperty();
     private static final MetadataSegmentProperty METADATA_SEGMENT_PROPERTY_2 = new MetadataSegmentProperty();
+    private Attribute arbitraryAttribute;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -57,6 +62,9 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
         METADATA_SEGMENT_PROPERTY_2.setOption(MetadataSegmentPropertyName.NumContacts.getName());
         METADATA_SEGMENT_PROPERTY_2.setValue("200");
 
+        DataCollection dataCollection = dataCollectionService.getDataCollectionByType(MultiTenantContext
+                .getCustomerSpace().toString(), DataCollectionType.Segmentation);
+        arbitraryAttribute = dataCollection.getTables().get(0).getAttributes().get(5);
     }
 
     private void createSegmentInOtherTenant() {
@@ -76,7 +84,12 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
         METADATA_SEGMENT.setCreated(new Date());
         METADATA_SEGMENT.addSegmentProperty(METADATA_SEGMENT_PROPERTY_1);
         METADATA_SEGMENT.addSegmentProperty(METADATA_SEGMENT_PROPERTY_2);
-        METADATA_SEGMENT.setRestriction(new ConcreteRestriction(false, null, ComparisonType.EQUAL, null));
+        METADATA_SEGMENT.setRestriction(new ConcreteRestriction( //
+                false, //
+                new ColumnLookup(SchemaInterpretation.valueOf(arbitraryAttribute.getTable().getInterpretation()),
+                        arbitraryAttribute.getName()), //
+                ComparisonType.EQUAL, //
+                null));
         segmentEntityMgr.createOrUpdate(METADATA_SEGMENT);
 
         MetadataSegment retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
@@ -88,6 +101,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
         assertEquals(retrieved.getMetadataSegmentProperties().size(), 2);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumAccounts), 100);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumContacts), 200);
+        assertEquals(retrieved.getAttributeDependencies().size(), 1);
     }
 
     @Test(groups = "functional", dependsOnMethods = "createSegment")

@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.metadata;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -25,23 +27,30 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy implements Dat
 
     private LoadingCache<Pair<String, DataCollectionType>, DataCollection> dataCollectionCache;
 
+    private ScheduledExecutorService cacheReloader = Executors.newSingleThreadScheduledExecutor();
+
     protected DataCollectionProxy() {
         super("metadata");
 
-        dataCollectionCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(15, TimeUnit.MINUTES)
+        dataCollectionCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(60, TimeUnit.MINUTES)
                 .build(new CacheLoader<Pair<String, DataCollectionType>, DataCollection>() {
                     @Override
                     public DataCollection load(Pair<String, DataCollectionType> key) throws Exception {
                         String customerSpace = key.getLeft();
                         DataCollectionType type = key.getRight();
-                        log.info(String.format(
-                                "Data collection with type %s for customer %s is not in cache.  Loading...", type,
+                        log.info(String.format("Loading collection with type %s for customer %s...", type,
                                 customerSpace));
                         String url = constructUrl("/customerspaces/{customerSpace}/datacollections/types/{type}",
                                 customerSpace, type);
                         return get("getDataCollection", url, DataCollection.class);
                     }
                 });
+        cacheReloader.scheduleWithFixedDelay(() -> {
+            for (Pair<String, DataCollectionType> pair : dataCollectionCache.asMap().keySet()) {
+                dataCollectionCache.refresh(pair);
+            }
+        }, 0, 15, TimeUnit.MINUTES);
+
     }
 
     @SuppressWarnings("unchecked")

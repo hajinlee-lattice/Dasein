@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,12 +71,14 @@ public class LogicalRestriction extends Restriction {
 
     @Override
     public Collection<? extends GraphNode> getChildren() {
-        return null;
+        return restrictions;
     }
 
     @Override
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
-        return null;
+        Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
+        map.put("restrictions", getChildren());
+        return map;
     }
 
     @Override

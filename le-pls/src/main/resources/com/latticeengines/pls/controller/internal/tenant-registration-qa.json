@@ -213,6 +213,10 @@
           "Data": "All_Weekend"
         }
       ]
+    },
+    {
+      "RootPath": "/Metadata",
+      "Nodes": []
     }
   ],
   "CustomerSpaceInfo": {

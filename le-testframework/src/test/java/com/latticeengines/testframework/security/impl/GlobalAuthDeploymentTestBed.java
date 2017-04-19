@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -205,8 +206,22 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     @Override
     public void deleteTenant(Tenant tenant) {
         deleteTenantViaTenantConsole(tenant);
-        magicRestTemplate.delete(plsApiHostPort + "/pls/admin/tenants/" + tenant.getId());
         log.info("DELETE tenant from pls and GA");
+    }
+
+    private void waitForTenantConsoleUninstall(CustomerSpace customerSpace) {
+        while (true) {
+            try {
+                if (!SpaceLifecycleManager.exists(customerSpace.getContractId(), customerSpace.getTenantId(),
+                        customerSpace.getSpaceId())) {
+                    return;
+                } else {
+                    Thread.sleep(1000);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**
@@ -215,8 +230,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     public Tenant bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment,
             Map<String, Boolean> featureFlagMap) {
         Tenant tenant = addBuiltInTestTenant();
-        String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase())
-                .replace("{env}", environment);
+        String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase()).replace(
+                "{env}", environment);
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         try {
             provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName, featureFlagMap);
@@ -257,9 +272,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
         TenantRegistration tenantRegistration = JsonUtils.deserialize(payload, TenantRegistration.class);
         log.info("Tenant Registration:\n" + JsonUtils.serialize(tenantRegistration));
-        HttpClientWithOptionalRetryUtils.sendPostRequest(
-                adminApiHostPort + "/admin/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders,
-                payload);
+        HttpClientWithOptionalRetryUtils.sendPostRequest(adminApiHostPort + "/admin/tenants/" + dlTenantName
+                + "?contractId=" + dlTenantName, false, adHeaders, payload);
     }
 
     private String overWriteEncrptionFeatureFlagToFalse(InputStream ins) throws IOException {

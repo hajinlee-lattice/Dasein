@@ -66,7 +66,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "createSegment")
     public void getNumAccountsForSegment() {
-        FrontEndRestriction restriction = new FrontEndRestriction();
+        FrontEndRestriction restriction = getArbitraryRestriction();
 
         long count = restTemplate.postForObject(
                 String.format("%s/pls/accounts/count/restriction", getRestAPIHostPort()), restriction, Long.class);
@@ -101,6 +101,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         segment.setSimpleRestriction(getArbitraryRestriction());
         segment = restTemplate.postForObject(String.format("%s/pls/metadatasegments/", getRestAPIHostPort()), segment,
                 MetadataSegment.class);
+        assertEquals(segment.getAttributeDependencies().size(), 1);
     }
 
     @SuppressWarnings("unchecked")

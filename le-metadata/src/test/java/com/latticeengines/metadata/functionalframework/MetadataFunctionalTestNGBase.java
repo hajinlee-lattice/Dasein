@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.functionalframework;
 
+import com.latticeengines.metadata.service.TenantPurgeService;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -77,6 +78,9 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected TableEntityMgr tableEntityMgr;
 
     @Autowired
+    private TenantPurgeService tenantPurgeService;
+
+    @Autowired
     protected TenantEntityMgr tenantEntityMgr;
 
     @Autowired
@@ -137,10 +141,12 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
         Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
         if (t1 != null) {
+            tenantPurgeService.purge(t1);
             tenantEntityMgr.delete(t1);
         }
         Tenant t2 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE2);
         if (t2 != null) {
+            tenantPurgeService.purge(t2);
             tenantEntityMgr.delete(t2);
         }
 

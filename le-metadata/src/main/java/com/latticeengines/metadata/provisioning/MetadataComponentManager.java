@@ -4,9 +4,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.MetadataProvisioningService;
+import com.latticeengines.metadata.service.TenantPurgeService;
 
 @Component
 public class MetadataComponentManager {
@@ -15,6 +18,9 @@ public class MetadataComponentManager {
 
     @Autowired
     private MetadataProvisioningService metadataProvisioningService;
+
+    @Autowired
+    private TenantPurgeService tenantPurgeService;
 
     public void provisionImportTables(CustomerSpace space, DocumentDirectory configDir) {
 
@@ -27,4 +33,11 @@ public class MetadataComponentManager {
         metadataProvisioningService.removeImportTables(space);
     }
 
+    public void purgeData(CustomerSpace space) {
+        log.info(String.format("Removing tenant %s", space.toString()));
+        Tenant tenant = new Tenant();
+        tenant.setId(space.toString());
+        tenant.setName(space.getTenantId());
+        tenantPurgeService.purge(tenant);
+    }
 }

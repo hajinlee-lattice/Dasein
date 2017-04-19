@@ -1,9 +1,10 @@
 package com.latticeengines.metadata.provisioning;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 
 public class MetadataDestroyer implements CustomerSpaceServiceDestroyer {
 
@@ -14,6 +15,14 @@ public class MetadataDestroyer implements CustomerSpaceServiceDestroyer {
     @Override
     public boolean destroy(CustomerSpace space, String serviceName) {
         try {
+            componentManager.purgeData(space);
+            componentManager.removeImportTables(space);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+
             componentManager.removeImportTables(space);
         } catch (Exception e) {
             log.error(e.getMessage());
