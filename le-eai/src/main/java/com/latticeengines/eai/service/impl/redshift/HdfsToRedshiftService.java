@@ -53,9 +53,6 @@ public class HdfsToRedshiftService {
     }
 
     public void createRedshiftTable(HdfsToRedshiftConfiguration configuration) {
-        if (configuration.isAppend()) {
-            return;
-        }
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         redshiftService.dropTable(redshiftTableConfig.getTableName());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
