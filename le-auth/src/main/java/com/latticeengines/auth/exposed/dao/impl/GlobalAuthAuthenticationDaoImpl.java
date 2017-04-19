@@ -82,13 +82,4 @@ public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthe
         }
     }
 
-    @Override
-    public Boolean deleteByUserId(Long userId) {
-        Session session = sessionFactory.getCurrentSession();
-        Class<GlobalAuthAuthentication> entityClz = getEntityClass();
-        String sqlStr = String.format("delete from %s where User_ID = %d", entityClz.getAnnotation(Table.class).name(), userId);
-        SQLQuery query = session.createSQLQuery(sqlStr);
-        query.executeUpdate();
-        return true;
-    }
 }

@@ -603,15 +603,16 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         String[] emailStr = emails.trim().split(",");
         for (String email : emailStr) {
             GlobalAuthUser gaUser = gaUserEntityMgr.findByEmail(email.trim());
-            if (gaUser != null) {
-                gaUser.setIsActive(false);
-                gaUserEntityMgr.update(gaUser);
-                log.info(String.format("%s set user %s isActive to false", userName, gaUser.getFirstName()));
-                gaAuthenticationEntityMgr.deleteByUserId(gaUser.getPid());
-                log.info(String.format("%s delete the %s's GlobalAuthentication", userName, gaUser.getFirstName()));
-                gaUserTenantRightEntityMgr.deleteByUserId(gaUser.getPid());
-                log.info(String.format("%s delete the %s's GlobalUserTenantRight", userName, gaUser.getFirstName()));
+            if (gaUser == null)
+            {
+                log.info(String.format("the email %s is not valid, and cann't find user in table GlobalUser", email));
+                continue;
             }
+            gaUser.setIsActive(false);
+            gaUserEntityMgr.update(gaUser);
+            log.info(String.format("%s set user %s isActive to false", userName, gaUser.getFirstName()));
+            gaUserTenantRightEntityMgr.deleteByUserId(gaUser.getPid());
+            log.info(String.format("%s delete the %s's GlobalUserTenantRight", userName, gaUser.getFirstName()));
         }
         return true;
     }

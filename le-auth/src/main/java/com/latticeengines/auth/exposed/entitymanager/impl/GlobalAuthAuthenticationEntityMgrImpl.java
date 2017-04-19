@@ -70,9 +70,4 @@ public class GlobalAuthAuthenticationEntityMgrImpl extends
         super.update(gaAuthentication);
     }
 
-    @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
-    public Boolean deleteByUserId(Long userId) {
-        return gaAuthenticationDao.deleteByUserId(userId);
-    }
 }

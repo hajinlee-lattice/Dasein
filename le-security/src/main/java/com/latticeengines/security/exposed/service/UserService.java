@@ -46,5 +46,5 @@ public interface UserService {
 
     GlobalAuthUser findByEmailNoJoin(String username);
 
-    boolean deleteUserByEmail(String emial);
+    boolean deleteUserByEmail(String email);
 }
