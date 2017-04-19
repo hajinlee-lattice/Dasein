@@ -17,8 +17,6 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedule
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerLeafQueueInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerQueueInfo;
 import org.apache.hadoop.yarn.util.Times;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -85,7 +83,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
     }
 
     @Override
-    public void run(JobExecutionContext context) throws JobExecutionException {
+    public void run() {
         generateQueueMetrics();
 
         generateInProgressJobMetrics();
@@ -153,7 +151,8 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
     }
 
     private void generateInProgressJobMetrics() {
-        List<ApplicationReport> runningAppReports = getYarnService().getRunningApplications(GetApplicationsRequest.newInstance());
+        List<ApplicationReport> runningAppReports = getYarnService()
+                .getRunningApplications(GetApplicationsRequest.newInstance());
 
         log.info(String.format("Processing %d apps in progress", runningAppReports.size()));
         for (ApplicationReport runningAppReport : runningAppReports) {

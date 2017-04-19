@@ -3,9 +3,6 @@ package com.latticeengines.dataplatform.service.impl.watchdog;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
@@ -32,7 +29,7 @@ public abstract class WatchdogPlugin {
         return plugins;
     }
 
-    public abstract void run(JobExecutionContext context) throws JobExecutionException;
+    public abstract void run();
 
     public String getName() {
         String fqn = getClass().getName();

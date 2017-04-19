@@ -14,8 +14,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -42,7 +40,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     }
 
     @Override
-    public void run(JobExecutionContext context) throws JobExecutionException {
+    public void run() {
         ThrottleConfiguration latestConfig = throttleConfigurationEntityMgr.getLatestConfig();
         List<ModelingJob> jobsToKill = getJobsToKill(latestConfig);
         if (jobsToKill.size() != 0) {
@@ -73,8 +71,8 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
             // if P0, resubmit immediately with no delay. If any other
             // priorities, delay by some latency
             if (!jobIdsToExcludeFromResubmission.contains(appId)
-                    && (appReport.getQueue().contains("Priority0") || System.currentTimeMillis()
-                            - appReport.getFinishTime() > retryWaitTime)//
+                    && (appReport.getQueue().contains("Priority0")
+                            || System.currentTimeMillis() - appReport.getFinishTime() > retryWaitTime)//
                     && System.currentTimeMillis() - appReport.getFinishTime() < maxRetryTimeThreshold) {
                 appIds.add(appId);
             }
@@ -105,8 +103,8 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 modelToJobCounter.put(modelId, jobCounter);
                 if (jobCounter >= cutoffIndex) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Finding job [over the rank cutoff]: " + modelingJob.getId() + " for model "
-                                + modelId);
+                        log.debug(
+                                "Finding job [over the rank cutoff]: " + modelingJob.getId() + " for model " + modelId);
                     }
                     jobsToKill.add(((ModelingJob) modelingJob));
                 }

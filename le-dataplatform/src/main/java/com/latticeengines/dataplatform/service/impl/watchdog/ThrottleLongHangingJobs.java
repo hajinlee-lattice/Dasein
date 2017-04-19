@@ -13,8 +13,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -44,7 +42,7 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
     }
 
     @Override
-    public void run(JobExecutionContext context) throws JobExecutionException {
+    public void run() {
         List<ApplicationReport> appReports = yarnService.getRunningApplications(GetApplicationsRequest.newInstance());
 
         if (appReports.isEmpty()) {

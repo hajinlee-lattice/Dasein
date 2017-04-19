@@ -27,6 +27,6 @@ public class GenerateYarnMetricsTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Test(groups = { "functional" })
     public void testGenerateMetrics() throws Exception {
-        generateYarnMetrics.run(null);
+        generateYarnMetrics.run();
     }
 }

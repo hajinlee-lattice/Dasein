@@ -24,7 +24,7 @@ public class JobWatchdogCallable implements Callable<Boolean> {
     @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         for (WatchdogPlugin plugin : plugins.values()) {
-            plugin.run(null);
+            plugin.run();
         }
         return true;
     }

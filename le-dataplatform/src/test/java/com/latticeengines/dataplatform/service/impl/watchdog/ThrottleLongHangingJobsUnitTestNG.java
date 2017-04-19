@@ -44,7 +44,7 @@ public class ThrottleLongHangingJobsUnitTestNG {
 
         for (int i = 0; i < 5; i++) {
             try {
-                throttleLongHangingJobs.run(null);
+                throttleLongHangingJobs.run();
                 Thread.sleep(3000);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -60,7 +60,7 @@ public class ThrottleLongHangingJobsUnitTestNG {
         ThrottleLongHangingJobs throttleLongHangingJobs = setupThrottleLongHangingJobs(yarnService);
 
         try {
-            throttleLongHangingJobs.run(null);
+            throttleLongHangingJobs.run();
             Thread.sleep(3000);
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +70,7 @@ public class ThrottleLongHangingJobsUnitTestNG {
         yarnService = generateYarnService(3, 0.5f);
         throttleLongHangingJobs.setYarnService(yarnService);
         try {
-            throttleLongHangingJobs.run(null);
+            throttleLongHangingJobs.run();
             Thread.sleep(3000);
         } catch (Exception e) {
             e.printStackTrace();

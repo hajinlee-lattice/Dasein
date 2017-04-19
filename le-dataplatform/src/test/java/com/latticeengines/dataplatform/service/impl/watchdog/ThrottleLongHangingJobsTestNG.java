@@ -14,7 +14,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -47,7 +46,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
     @Autowired
     private ModelingJobService modelingJobService;
-    
+
     @Autowired
     private VersionManager versionManager;
 
@@ -62,7 +61,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
     private String baseDir = "/functionalTests/" + suffix;
 
-    @BeforeClass(groups = {"functional"})
+    @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         // Set up classifiers
         classifier1Min = setupClassifier("train_1min.py");
@@ -79,9 +78,12 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
         String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
         String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/iris.json");
-        String train1MinScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
-        String train2MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_2mins.py");
-        String train4MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_4mins.py");
+        String train1MinScriptPath = getFileUrlFromResource(
+                "com/latticeengines/dataplatform/fairscheduler/train_1min.py");
+        String train2MinsScriptPath = getFileUrlFromResource(
+                "com/latticeengines/dataplatform/fairscheduler/train_2mins.py");
+        String train4MinsScriptPath = getFileUrlFromResource(
+                "com/latticeengines/dataplatform/fairscheduler/train_4mins.py");
 
         copyEntries.add(new CopyEntry(trainingFilePath, baseDir + "/training", false));
         copyEntries.add(new CopyEntry(testFilePath, baseDir + "/test", false));
@@ -102,22 +104,20 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
             @Override
             public void run() {
-                try {
-                    throttleLongHangingJobs.run(null);
-                } catch (JobExecutionException e) {
-                    e.printStackTrace();
-                }
+
+                throttleLongHangingJobs.run();
+
             }
         }, 8L);
     }
 
-    @AfterClass(groups = {"functional"})
+    @AfterClass(groups = { "functional" })
     public void tearDown() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path("/functionalTests"), true);
     }
 
-    @Test(groups = {"functional"})
+    @Test(groups = { "functional" })
     public void testThrottleLongHangingJobs() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
         Model model = produceIrisMetadataModel();
@@ -144,8 +144,8 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
     private Classifier setupClassifier(String script) {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
-        classifier.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
-                "petal_width" }));
+        classifier.setFeatures(
+                Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length", "petal_width" }));
         classifier.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier.setSchemaHdfsPath(baseDir + "/scheduler/iris.json");
         classifier.setModelHdfsDir(baseDir + "/scheduler/result");
@@ -154,9 +154,12 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         classifier.setTestDataHdfsPath(baseDir + "/test/nn_test.dat");
         classifier.setDataProfileHdfsPath(baseDir + "/training/a.avro");
         classifier.setConfigMetadataHdfsPath(baseDir + "/training/a.avsc");
-        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/lepipeline.tar.gz");
-        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/pipeline.py");
-        classifier.setPipelineDriver("/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/pipeline.json");
+        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersionInStack(stackName)
+                + "/dataplatform/scripts/lepipeline.tar.gz");
+        classifier.setPythonPipelineScriptHdfsPath(
+                "/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/pipeline.py");
+        classifier.setPipelineDriver(
+                "/app/" + versionManager.getCurrentVersionInStack(stackName) + "/dataplatform/scripts/pipeline.json");
 
         return classifier;
     }
@@ -164,7 +167,8 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
     private ModelingJob getJob(Classifier classifier, int priority, String customer) {
         ModelingJob modelingJob = new ModelingJob();
         modelingJob.setClient("pythonClient");
-        Properties[] properties = getPropertiesPair(classifier, LedpQueueAssigner.getModelingQueueNameForSubmission(), priority, customer);
+        Properties[] properties = getPropertiesPair(classifier, LedpQueueAssigner.getModelingQueueNameForSubmission(),
+                priority, customer);
         modelingJob.setAppMasterPropertiesObject(properties[0]);
         modelingJob.setContainerPropertiesObject(properties[1]);
         return modelingJob;
