@@ -76,11 +76,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     @Autowired
     private ScoreHistoryEntityMgr scoreHistoryEntityMgr;
 
-    @Value("${scoringapi.score.history.publish.enabled:false}")
+    @Value("${scoringapi.score.history.publish.enabled:true}")
     private boolean shouldPublish;
 
     @Override
-    public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
+    public ScoreResponse process(CustomerSpace space, ScoreRequest request,
+            boolean isDebug, //
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
             boolean isCalledViaApiConsole) {
         return process(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching, requestId,
@@ -88,7 +89,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     @Override
-    public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
+    public ScoreResponse process(CustomerSpace space, ScoreRequest request,
+            boolean isDebug, //
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
             boolean isCalledViaApiConsole, boolean enforceFuzzyMatch, boolean skipDnBCache) {
         split("requestPreparation");
@@ -111,11 +113,11 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
             requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getDisplayName());
             if (scoringArtifacts.getModelSummary().getStatus() != ModelSummaryStatus.ACTIVE) {
-                throw new ScoringApiException(LedpCode.LEDP_31114,
-                        new String[] { scoringArtifacts.getModelSummary().getId() });
+                throw new ScoringApiException(LedpCode.LEDP_31114, new String[] { scoringArtifacts.getModelSummary()
+                        .getId() });
             }
-            requestInfo.put("ModelType",
-                    (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
+            requestInfo.put("ModelType", (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts
+                    .getModelType().name()));
             shouldSkipMatching = shouldSkipMatching(scoringArtifacts, performFetchOnlyForMatching);
             fieldSchemas = scoringArtifacts.getFieldSchemas();
 
@@ -127,8 +129,9 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 ScoringApiException missingEssentialFieldsException = checkForMissingFields(scoringArtifacts,
                         fieldSchemas, request.getRecord(), modelJsonTypeHandler);
                 if (missingEssentialFieldsException != null) {
-                    if (!performFetchOnlyForMatching || StringStandardizationUtils.objectIsNullOrEmptyString(
-                            request.getRecord().get(FieldInterpretation.LatticeAccountId.toString()))) {
+                    if (!performFetchOnlyForMatching
+                            || StringStandardizationUtils.objectIsNullOrEmptyString(request.getRecord().get(
+                                    FieldInterpretation.LatticeAccountId.toString()))) {
                         throw missingEssentialFieldsException;
                     }
                 }
@@ -232,7 +235,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         split("scoreRecord");
         if (shouldPublish) {
-            scoreHistoryEntityMgr.publish(request, scoreResponse);
+            scoreHistoryEntityMgr.publish(space.getTenantId(), request, scoreResponse);
             split("publishScoreHistory");
         }
 
@@ -316,7 +319,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             }
             split("scoreRecord");
             if (shouldPublish) {
-                scoreHistoryEntityMgr.publish(request.getRecords(), scoreResponse);
+                scoreHistoryEntityMgr.publish(space.getTenantId(), request.getRecords(), scoreResponse);
                 split("publishScoreHistory");
             }
         } catch (Exception ex) {
@@ -341,8 +344,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
         handleBulkMatchAndEnrich(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching,
                 requestId, uniqueFieldSchemasMap, originalOrderParsedTupleList,
-                partiallyOrderedParsedRecordWithMatchReqList, originalOrderModelSummaryList, unorderedCombinedRecordMap,
-                unorderedLeadEnrichmentMap, unorderedMatchLogMap, unorderedMatchErrorLogMap);
+                partiallyOrderedParsedRecordWithMatchReqList, originalOrderModelSummaryList,
+                unorderedCombinedRecordMap, unorderedLeadEnrichmentMap, unorderedMatchLogMap, unorderedMatchErrorLogMap);
 
         handleBulkEnrichOnly(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching, requestId,
                 uniqueFieldSchemasMap, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
@@ -358,8 +361,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     private void handleBulkBadRecords(List<RecordModelTuple> partiallyOrderedBadRecordList,
             Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap) {
         if (!partiallyOrderedBadRecordList.isEmpty()) {
-            Map<RecordModelTuple, Map<String, Object>> partiallyOrderedBadRecordMap = generateMapForBadRecords(
-                    partiallyOrderedBadRecordList);
+            Map<RecordModelTuple, Map<String, Object>> partiallyOrderedBadRecordMap = generateMapForBadRecords(partiallyOrderedBadRecordList);
             unorderedCombinedRecordMap.putAll(partiallyOrderedBadRecordMap);
         }
     }
@@ -369,8 +371,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList,
             Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap) {
         if (!partiallyOrderedParsedRecordWithoutMatchReqList.isEmpty()) {
-            Map<RecordModelTuple, Map<String, Object>> unorderedFormattedRecordWithoutMatchReqMap = format(
-                    partiallyOrderedParsedRecordWithoutMatchReqList);
+            Map<RecordModelTuple, Map<String, Object>> unorderedFormattedRecordWithoutMatchReqMap = format(partiallyOrderedParsedRecordWithoutMatchReqList);
             addMissingFields(uniqueFieldSchemasMap, unorderedFormattedRecordWithoutMatchReqMap,
                     originalOrderParsedTupleList);
             unorderedCombinedRecordMap.putAll(unorderedFormattedRecordWithoutMatchReqMap);
@@ -389,9 +390,9 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             boolean shouldEnrichOnly = true;
             Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(
                     true).matchAndJoin(space, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
-                            uniqueFieldSchemasMap, originalOrderModelSummaryList, request.isHomogeneous(),
-                            enrichInternalAttributes, performFetchOnlyForMatching, shouldEnrichOnly, isDebug, requestId,
-                            unorderedMatchLogMap, unorderedMatchErrorLogMap);
+                    uniqueFieldSchemasMap, originalOrderModelSummaryList, request.isHomogeneous(),
+                    enrichInternalAttributes, performFetchOnlyForMatching, shouldEnrichOnly, isDebug, requestId,
+                    unorderedMatchLogMap, unorderedMatchErrorLogMap);
 
             unorderedLeadEnrichmentMap.putAll(bulkExtractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT));
         }
@@ -411,9 +412,9 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             boolean shouldEnrichOnly = false;
             Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(
                     true).matchAndJoin(space, partiallyOrderedParsedRecordWithMatchReqList, uniqueFieldSchemasMap,
-                            originalOrderModelSummaryList, request.isHomogeneous(), enrichInternalAttributes,
-                            performFetchOnlyForMatching, shouldEnrichOnly, isDebug, requestId, unorderedMatchLogMap,
-                            unorderedMatchErrorLogMap);
+                    originalOrderModelSummaryList, request.isHomogeneous(), enrichInternalAttributes,
+                    performFetchOnlyForMatching, shouldEnrichOnly, isDebug, requestId, unorderedMatchLogMap,
+                    unorderedMatchErrorLogMap);
 
             Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkExtractMap(
                     unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
@@ -498,7 +499,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     private void extractParsedTuple(Map<String, //
-    Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap, //
+            Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap, //
             List<RecordModelTuple> partiallyOrderedParsedRecordWithMatchReqList, //
             List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList, //
             List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, //
@@ -553,9 +554,9 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         int idx = 0;
 
         List<RecordScoreResponse> debugResponseList = new ArrayList<>();
-        List<RecordScoreResponse> result = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                originalOrderParsedTupleList, unorderedLeadEnrichmentMap, true, unorderedMatchLogMap,
-                unorderedMatchErrorLogMap);
+        List<RecordScoreResponse> result = generateScoreResponse(uniqueScoringArtifactsMap,
+                unorderedTransformedRecords, originalOrderParsedTupleList, unorderedLeadEnrichmentMap, true,
+                unorderedMatchLogMap, unorderedMatchErrorLogMap);
         try {
             for (RecordScoreResponse recordResponse : result) {
                 DebugRecordScoreResponse debugRecordResponse = new DebugRecordScoreResponse(recordResponse);
@@ -620,8 +621,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     transformedRecord = unorderedTransformedRecords.get(tuple);
 
                     ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(uniqueScoringArtifactsMap, tuple);
-                    ModelJsonTypeHandler ModelJsonTypeHandler = getModelJsonTypeHandler(
-                            scoringArtifacts.getModelJsonType());
+                    ModelJsonTypeHandler ModelJsonTypeHandler = getModelJsonTypeHandler(scoringArtifacts
+                            .getModelJsonType());
                     if (isDebugMode) {
                         resp = ModelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
                                 null, unorderedMatchLogMap.get(tuple), unorderedMatchErrorLogMap.get(tuple));
@@ -636,8 +637,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 }
 
                 if (recordResp != null && tuple.getException() == null
-                        && recordResp.getEnrichmentAttributeValues() == null
-                        && tuple.getRecord().isPerformEnrichment()) {
+                        && recordResp.getEnrichmentAttributeValues() == null && tuple.getRecord().isPerformEnrichment()) {
                     Map<String, Object> enrichmentList = unorderedLeadEnrichmentMap.get(tuple);
                     if (enrichmentList == null) {
                         enrichmentList = new HashMap<>();
@@ -740,8 +740,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 if (modelArtifactTuple.getKey() == null) {
                     ScoringArtifacts scoringArtifact = modelArtifactTuple.getValue();
 
-                    ModelJsonTypeHandler modelJsonTypeHandler = getModelJsonTypeHandler(
-                            scoringArtifact.getModelJsonType());
+                    ModelJsonTypeHandler modelJsonTypeHandler = getModelJsonTypeHandler(scoringArtifact
+                            .getModelJsonType());
 
                     if (!shouldSkipMatching(scoringArtifact, performFetchOnlyForMatching)) {
                         missingEssentialFieldsOrBadModelException = checkForMissingFields(record.getRecordId(),
@@ -824,8 +824,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     if (t != null && t instanceof LedpException) {
                         ex = (LedpException) t;
                     } else {
-                        ex = new LedpException(LedpCode.LEDP_31102,
-                                new String[] { "Error while fetching " + modelId + ": " + e.getMessage() });
+                        ex = new LedpException(LedpCode.LEDP_31102, new String[] { "Error while fetching " + modelId
+                                + ": " + e.getMessage() });
                     }
                 }
             }
@@ -849,14 +849,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
-            ModelJsonTypeHandler modelJsonTypeHandler) {
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, ModelJsonTypeHandler modelJsonTypeHandler) {
         return parseRecord(null, fieldSchemas, record, modelJsonTypeHandler);
     }
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(String recordId,
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
-            ModelJsonTypeHandler modelJsonTypeHandler) {
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, ModelJsonTypeHandler modelJsonTypeHandler) {
         return modelJsonTypeHandler.parseRecord(null, fieldSchemas, record, null);
     }
 
@@ -875,8 +873,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     private ScoringApiException checkForMissingFields(ScoringArtifacts scoringArtifact,
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
-            ModelJsonTypeHandler modelJsonTypeHandler) {
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, ModelJsonTypeHandler modelJsonTypeHandler) {
         return checkForMissingFields(null, scoringArtifact, fieldSchemas, record, modelJsonTypeHandler, null);
     }
 
@@ -941,13 +938,13 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             return null;
         }
 
-        Map<String, Object> standardTransformedRecord = recordTransformer.transform(
-                scoringArtifacts.getModelArtifactsDir().getAbsolutePath(),
-                scoringArtifacts.getEventTableDataComposition().transforms, matchedRecord);
+        Map<String, Object> standardTransformedRecord = recordTransformer.transform(scoringArtifacts
+                .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getEventTableDataComposition().transforms,
+                matchedRecord);
 
-        Map<String, Object> datascienceTransformedRecord = recordTransformer.transform(
-                scoringArtifacts.getModelArtifactsDir().getAbsolutePath(),
-                scoringArtifacts.getDataScienceDataComposition().transforms, standardTransformedRecord);
+        Map<String, Object> datascienceTransformedRecord = recordTransformer.transform(scoringArtifacts
+                .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getDataScienceDataComposition().transforms,
+                standardTransformedRecord);
         return datascienceTransformedRecord;
     }
 
@@ -961,8 +958,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     protected String getWarningPrefix(String modelId) {
-        return StringStandardizationUtils.objectIsNullOrEmptyString(modelId) ? ""
-                : "[For ModelId - " + modelId + "] => ";
+        return StringStandardizationUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId
+                + "] => ";
     }
 
     private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts, boolean performFetchOnlyForMatching) {
