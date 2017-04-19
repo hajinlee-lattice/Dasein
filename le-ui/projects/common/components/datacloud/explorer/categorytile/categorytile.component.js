@@ -93,12 +93,23 @@ angular
                     index = vm.enrichmentsMap[enrichmentKey],
                     enrichment = vm.enrichments[index],
                     stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].RowStats && vm.cube.Stats[enrichmentKey].RowStats.Bkts && vm.cube.Stats[enrichmentKey].RowStats.Bkts.List ? vm.cube.Stats[enrichmentKey].RowStats.Bkts.List : null),
-                    stat = (stats && stats.length ? stats[0] : null),
                     segmentRangeKey = null;
+
+                /**
+                 * sort stats by record count if there are more then 1
+                 */
+                if(stats && stats.length > 1) {
+                    stats = _.sortBy(stats, function(item){
+                        return parseInt(item.Cnt);
+                    });
+                }
+
+                var stat = (stats && stats.length ? stats[0] : null);
+
                 if(stat && stat.Range) {
                     segmentRangeKey = vm.makeSegmentsRangeKey(enrichment,stat.Range);
                 }
-                //console.log(vm.cube.Stats[enrichmentKey].RowStats.Bkts.List);
+                // if 
                 if(stats && stats.length > 1) {
                     for(var i in stats) {
                         if(stats[i] && stats[i].Range) {

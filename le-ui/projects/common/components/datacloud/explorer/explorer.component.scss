@@ -284,11 +284,15 @@
                 }
             }
         }
-        .company {
+        .first-spot-info-card {
             .box-inner {
                 text-align: left;
                 border-top-width: 1px;
                 border-radius: 4px;
+            }
+        }
+        .company {
+            .box-inner {
                 &.company-info {
                     font-size: 11px;
                     h2, h3 {
@@ -348,6 +352,104 @@
                                     border-right: none;
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+        .lattice-rating {
+            & > h2 {
+                .ratings-logo {
+                    display: block;
+                    height: 40px;
+                    width: 40px;
+                    border: 1px solid #d0d1d0;
+                    border-radius: 50%;
+                    margin: 0 auto;
+                    padding: 10px;
+                    & > img {
+                        width: 100%;
+                        height: 100%;
+                    }
+                }
+            }
+            .lattice-ratings {
+                position: relative;
+                .lattice-rating-list {
+                    &:nth-child(even){
+                        background: #eff3f4;
+                    }
+                    padding: 1px 0;
+                    .rating-item {
+                        @include flex-container;
+                        & > li {
+                            @include flex-item(0 1 auto);
+                            min-width: 40px;
+                            margin-right: 5px;
+                            &:nth-child(1) {
+                                text-align: right;
+                                padding-right: 5px;
+                            }
+                            &.rating-label {
+                                width: 40px; 
+                            }
+                            &.rating-lift,
+                            &.rating-count{
+                                width: 40px;
+                            }
+                            &.rating-bar {
+                                @include flex-item(1 1 auto);
+                                margin-right: 20px;
+                                & > div {
+                                    background: #457eba;
+                                    height: 80%;
+                                    position: relative;
+                                    top: 50%;
+                                    transform: translateY(-50%);
+                                }
+                            }
+                        }
+                    }
+                    &:nth-child(1) {
+                        color: #aaa;
+                    }
+                    &:nth-child(2) .rating-bar > div {
+                        opacity: .5;
+                    }
+                    &:nth-child(3) .rating-bar > div {
+                        opacity: .6;
+                    }
+                    &:nth-child(4) .rating-bar > div {
+                        opacity: .7;
+                    }
+                    &:nth-child(5) .rating-bar > div {
+                        opacity: .8;
+                    }
+                    &:nth-child(6) .rating-bar > div {
+                        opacity: .9;
+                    }
+                    &:nth-child(7) .rating-bar > div {
+                        opacity: 10;
+                    }
+                }
+                .rating-slices {
+                    position: absolute;
+                    top: 20px;
+                    right: 90px;
+                    left: 45px;
+                    bottom: 0;
+                    font-size: 10px;
+                    @include flex-container;
+                    .rating-slice {
+                        @include flex-item(1 1 auto);
+                        height: 100%;
+                        position: relative;
+                        border-left: 1px solid #d0d1d0;
+                        strong {
+                            position: absolute;
+                            bottom: -16px;
+                            left: -4px;
+                            text-align: right;
                         }
                     }
                 }

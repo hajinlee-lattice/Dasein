@@ -2,6 +2,7 @@
 angular.module('common.datacloud.explorer', [
     'common.datacloud.explorer.filters',
     'common.datacloud.explorer.companyprofile',
+    'common.datacloud.explorer.latticeratingcard',
     'common.datacloud.explorer.categorytile',
     'common.datacloud.explorer.subcategorytile',
     'common.datacloud.explorer.attributetile',
@@ -9,9 +10,9 @@ angular.module('common.datacloud.explorer', [
 ])
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
-    ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount,
+    ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore,
-    SegmentServiceProxy, QueryRestriction
+    SegmentServiceProxy, QueryRestriction, CurrentConfiguration, EnrichmentCount
 ){
     var vm = this,
         enrichment_chunk_size = 5000,
@@ -83,6 +84,7 @@ angular.module('common.datacloud.explorer', [
         openHighlighter: {},
         categoryCounts: {},
         TileTableItems: {},
+        workingBuckets: CurrentConfiguration,
         highlightMetadata: {
             categories: {}
         },
@@ -1120,7 +1122,6 @@ angular.module('common.datacloud.explorer', [
             if (typeof limit != 'undefined') {
                 percentage = percentage.toFixed(limit);
             }
-
             return percentage + suffix;
         }
 

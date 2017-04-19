@@ -16,9 +16,14 @@
         </ul>
 
         <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="vm.enrichments_completed">
+            <li explorer-lattice-rating-card
+                ng-if="!vm.category && vm.section == 'segment.analysis' && vm.inModel()"
+                class="category lattice-rating-card first-spot-info-card"
+                vm="vm">
+            </li>
             <li explorer-company-profile
                 ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'"
-                class="category company"
+                class="category company first-spot-info-card"
                 vm="vm">
             </li>
             <li explorer-category-tile

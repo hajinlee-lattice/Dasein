@@ -53,6 +53,9 @@ angular
         },
         QueryRestriction: function() {
             return null;
+        },
+        CurrentConfiguration: function() {
+            return null;
         }
     };
 
@@ -404,7 +407,20 @@ angular
     $stateProvider
         .state('home.model.analysis', getState('main'))
         .state('home.model.analysis.explorer', getState('explorer'))
-        .state('home.model.analysis.explorer.attributes', getState('attributes'))
+        .state('home.model.analysis.explorer.attributes', getState('attributes', {
+            resolve: {
+                CurrentConfiguration: ['$q', '$stateParams', 'ModelRatingsService', function($q, $stateParams, ModelRatingsService) {
+                    var deferred = $q.defer(),
+                        id = $stateParams.modelId;
+
+                    ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }]
+            }
+        }))
         .state('home.model.analysis.explorer.query', getState('query'))
         .state('home.model.analysis.accounts', getState('accounts'))
         .state('home.model.analysis.contacts', getState('contacts'))
