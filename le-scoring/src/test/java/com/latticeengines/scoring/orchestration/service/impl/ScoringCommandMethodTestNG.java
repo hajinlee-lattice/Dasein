@@ -59,7 +59,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
     private static final double cleanUpInterval = 0.000001;
 
-    private ScoringManagerServiceImpl scoringManager;
+    private ScoringManagerCallable scoringManager;
 
     private static final String inputTable = "some_table";
 
@@ -67,11 +67,17 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        this.scoringManager = new ScoringManagerServiceImpl();
-        this.scoringManager.setCustomerBaseDir(this.customerBaseDir);
-        this.scoringManager.setEnableCleanHdfs(true);
-        this.scoringManager.setCleanUpInterval(cleanUpInterval);
-        this.scoringManager.init(this.applicationContext);
+        ScoringManagerCallable.Builder builder = new ScoringManagerCallable.Builder();
+        builder.customerBaseDir(this.customerBaseDir);
+        builder.enableCleanHdfs(true);
+        builder.cleanUpInterval(cleanUpInterval);
+        builder.applicationContext(this.applicationContext);
+        builder.scoringCommandEntityMgr(scoringCommandEntityMgr);
+        builder.scoringCommandResultEntityMgr(scoringCommandResultEntityMgr);
+        builder.metadataService(dbMetadataService);
+        builder.scoringJdbcTemplate(scoringJdbcTemplate);
+        builder.yarnConfiguration(yarnConfiguration);
+        this.scoringManager = new ScoringManagerCallable(builder);
         ((AlertServiceImpl) this.alertService).enableTestMode();
         this.scoringProcessor.setAlertService(this.alertService);
         if (!CollectionUtils.isEmpty(this.dbMetadataService.showTable(this.scoringJdbcTemplate, inputTable))) {
@@ -83,7 +89,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testCleanTables() throws  NumberFormatException, InterruptedException {
+    public void testCleanTables() throws NumberFormatException, InterruptedException {
         assertEquals(this.scoringCommandEntityMgr.findAll().size(), 0);
         assertEquals(this.scoringCommandResultEntityMgr.findAll().size(), 0);
         ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, inputTable, 0, 100,
@@ -150,7 +156,8 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
         this.scoringProcessor.setScoringCommand(scoringCommand);
         String failedAppId = "application_1415144508340_0729";
-        ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand, ScoringCommandStep.SCORE_DATA);
+        ScoringCommandState scoringCommandState = new ScoringCommandState(scoringCommand,
+                ScoringCommandStep.SCORE_DATA);
         this.scoringCommandStateEntityMgr.create(scoringCommandState);
         this.scoringProcessor.handleJobFailed(failedAppId);
         this.scoringProcessor.handleJobFailed();
@@ -161,9 +168,9 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         assertFalse(dbMetadataService.checkIfColumnExists(scoringJdbcTemplate, "LeadInputQueue", "Model_GUID"));
         assertTrue(dbMetadataService.checkIfColumnExists(scoringJdbcTemplate, testInputTable,
                 ScoringDaemonService.MODEL_GUID));
-        assertEquals(
-                dbMetadataService.getDistinctColumnValues(scoringJdbcTemplate, testInputTable,
-                        ScoringDaemonService.MODEL_GUID).get(0), "ms__1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3-PLSModel");
+        assertEquals(dbMetadataService
+                .getDistinctColumnValues(scoringJdbcTemplate, testInputTable, ScoringDaemonService.MODEL_GUID).get(0),
+                "ms__1e8e6c34-80ec-4f5b-b979-e79c8cc6bec3-PLSModel");
     }
 
 }
