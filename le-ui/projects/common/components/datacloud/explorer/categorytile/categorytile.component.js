@@ -48,14 +48,6 @@ angular
                     });
                 }
                 return order;
-                /*
-                ret = vm.lookupMode 
-                ? [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ]
-                    : vm.section == 'segment.analysis' 
-                        ? [ 'SegmentChecked', '-Value'  ]
-                        : [ '-HighlightHighlighted', '-Value' ];
-                return ret;
-                */
             }
 
             vm.categoryClick = function(category, $event) {

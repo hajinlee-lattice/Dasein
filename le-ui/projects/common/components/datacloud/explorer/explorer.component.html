@@ -17,7 +17,7 @@
 
         <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="vm.enrichments_completed">
             <li explorer-lattice-rating-card
-                ng-if="!vm.category && vm.section == 'segment.analysis' && vm.inModel()"
+                ng-if="!vm.category && vm.section == 'segment.analysis' && vm.inModel() && vm.workingBuckets.length"
                 class="category lattice-rating-card first-spot-info-card"
                 vm="vm">
             </li>

@@ -209,7 +209,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
   }
 	@include media(">medium") {
 		display: inline-block;
-		padding: 9px 15px;
+		//padding: 9px 15px;
 		&.icon-button {
 			padding: 0.75em 1em;
 		}

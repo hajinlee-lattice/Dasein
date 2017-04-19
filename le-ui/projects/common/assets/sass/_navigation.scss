@@ -65,6 +65,18 @@ span.ico-container {
                 height: 15px;
                 width: 23px;
             }
+            &.ico-analysis {
+                height: 21px;
+                width: 18px;
+            }
+            &.ico-segments {
+                height: 24px;
+                width: 24px;
+            }
+            &.ico-model {
+                height: 22px;
+                width: 22px;
+            }
         }
     }
     .ico {
@@ -500,7 +512,7 @@ html.no-cssmask {
     }
     .page-icon {
         margin-left: 1em;
-        background-color: #e5e5e5;
+        background-color: #ef6a30;
         span {
             -webkit-transition: all 250ms linear, transform 0s linear;
             -moz-transition: all 250ms linear, transform 0s linear;
