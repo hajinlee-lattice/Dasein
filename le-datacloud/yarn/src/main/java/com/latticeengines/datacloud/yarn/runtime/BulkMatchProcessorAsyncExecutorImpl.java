@@ -9,8 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Future;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.RateLimitingService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
@@ -18,6 +16,8 @@ import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+
+import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
@@ -147,10 +147,17 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         processorContext.getRowsProcessed().addAndGet(internalCompletedRecords.size());
         checkMatchCode(processorContext, combinedContext);
 
+        Runtime runtime = Runtime.getRuntime();
+        log.info(String.format(
+                "Runtime memory usage monitor before processing match output: TotalMemory: %d. FreeMemory: %d",
+                runtime.totalMemory(), runtime.freeMemory()));
         processMatchOutput(processorContext, combinedContext.getOutput());
         int rows = processorContext.getRowsProcessed().get();
         processorContext.getDataCloudProcessor().setProgress(0.07f + 0.9f * rows / processorContext.getBlockSize());
         log.info("Processed " + rows + " out of " + processorContext.getBlockSize() + " rows.");
+        log.info(String.format(
+                "Runtime memory usage monitor after processing match output: TotalMemory: %d. FreeMemory: %d",
+                runtime.totalMemory(), runtime.freeMemory()));
 
         completedFutures.clear();
         internalCompletedRecords.clear();

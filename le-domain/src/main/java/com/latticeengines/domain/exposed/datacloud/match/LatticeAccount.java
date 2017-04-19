@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -81,6 +83,11 @@ public class LatticeAccount extends BaseFabricEntity<LatticeAccount> implements 
         if (record.get(ATTRIBUTES) != null) {
             String serializedAttributes = record.get(ATTRIBUTES).toString();
             log.info("serialized attr: " + serializedAttributes);
+            log.info(String.format(
+                    "serializedAttributes contains expected word? %b serializedAttributes contains question mark? %b",
+                    StringUtils.contains(serializedAttributes, "社会"), StringUtils.contains(serializedAttributes, "?")));
+            log.info(String.format("Charset.defaultCharset()=%s System.getProperty('file.encoding')=%s",
+                    Charset.defaultCharset(), System.getProperty("file.encoding")));
             Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedAttributes, Map.class);
             log.info(String.format("map object: %s", mapAttributes.get("AlexaCategories")));
             setAttributes(mapAttributes);

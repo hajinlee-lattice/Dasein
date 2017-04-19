@@ -157,7 +157,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         // OOM error, then that means the requested memory is really less than
         // what can be handled.
         String xmx = minAllocationInMb > 1536 ? String.format("-Xmx%dm", minAllocationInMb - 512) : "-Xmx1024m";
-        xmx += " -XX:PermSize=256m -XX:MaxPermSize=256m";
+        xmx += " -XX:PermSize=256m -XX:MaxPermSize=256m -verbose:gc -Xloggc:<LOG_DIR>/gc.log";
         return xmx;
     }
 

@@ -448,6 +448,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                             retryBatch.getServiceBatchId(), mins));
                     retryBulkRequest(retryBatch);
                 }
+                if (submittedBatches.size() > 0) {
+                    log.info(String.format("There are %d batched requests waiting for DnB batch api to return results",
+                            submittedBatches.size()));
+                }
                 break;
             case FETCHER:
                 synchronized (finishedBatches) {
@@ -487,10 +491,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 throw new UnsupportedOperationException(
                         "BulkLookupStrategy " + bulkLookupStrategy.name() + " is not supported in DnB bulk match");
             }
-            if (submittedBatches.size() > 0) {
-                log.info(String.format("There are %d batched requests waiting for DnB batch api to return results",
-                        submittedBatches.size()));
-            }
+            Runtime runtime = Runtime.getRuntime();
+            log.info(String.format("BulkLookupStrategy: %s. TotalMemory: %d. FreeMemory: %d", bulkLookupStrategy.name(),
+                    runtime.totalMemory(), runtime.freeMemory()));
         } catch (Exception ex) {
             log.error(ex);
         }
