@@ -266,6 +266,9 @@ angular
                 segment: 'Create'
             },
             resolve: angular.extend({}, DataCloudResolve, {
+                LoadStub: ['$q', 'QueryStore', function($q, QueryStore) {
+                    return $q.all([QueryStore.loadData('contacts'), QueryStore.loadData('accounts')]);
+                }],
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var deferred = $q.defer();
 
@@ -360,8 +363,8 @@ angular
                 }
             }
         },
-        accounts: {
-            url: '/accounts',
+        xaccounts: {
+            url: '/x/accounts',
             params: {
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Accounts'
@@ -381,8 +384,8 @@ angular
                 }
             }
         },
-        contacts: {
-            url: '/contacts',
+        xcontacts: {
+            url: '/x/contacts',
             params: {
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Contacts'
@@ -401,6 +404,63 @@ angular
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
                 }
             }
+        },
+        accounts: {
+            url: '/accounts',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Accounts'
+            },
+            views: {
+                "main@": {
+                    resolve: {
+                        CountMetadata: ['$q', 'QueryStore', function($q, QueryStore) {
+                            var deferred = $q.defer();
+                            deferred.resolve(QueryStore.getCounts().accounts);
+                            return deferred.promise;
+                        }],
+                        Columns: ['QueryStore', function(QueryStore) {
+                            return QueryStore.columns.accounts;
+                        }],
+                        Records: ['QueryStore', function(QueryStore) {
+                            return QueryStore.getRecordsForUiState('accounts');
+                        }]
+                    },
+                    controller: 'QueryResultsStubCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/query/results/stub/queryresults.component.html'
+                }
+            }
+        },
+        contacts: {
+            url: '/contacts',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Contacts'
+            },
+            views: {
+                "main@": {
+                    resolve: {
+                        CountMetadata: ['$q', 'QueryStore', function($q, QueryStore) {
+                            var deferred = $q.defer();
+                            deferred.resolve(QueryStore.getCounts().contacts);
+                            return deferred.promise;
+                        }],
+                        Columns: ['QueryStore', function(QueryStore) {
+                            return QueryStore.columns.contacts;
+                        }],
+                        Records: ['QueryStore', function(QueryStore) {
+                            return QueryStore.getRecordsForUiState('contacts');
+                        }]
+                    },
+                    controller: 'QueryResultsStubCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/query/results/stub/queryresults.component.html'
+                }
+            }
+        },
+        abstract: {
+            abstract: true
         }
     };
 
@@ -422,6 +482,10 @@ angular
             }
         }))
         .state('home.model.analysis.explorer.query', getState('query'))
+        .state('home.model.analysis.x', getState('abstract'))
+        .state('home.model.analysis.x.accounts', getState('xaccounts'))
+        .state('home.model.analysis.x.contacts', getState('xcontacts'))
+        // stub for demo
         .state('home.model.analysis.accounts', getState('accounts'))
         .state('home.model.analysis.contacts', getState('contacts'))
 
@@ -442,6 +506,10 @@ angular
             }
         }))
         .state('home.segment.explorer.query', getState('query'))
+        .state('home.segment.x', getState('abstract'))
+        .state('home.segment.x.accounts', getState('xaccounts'))
+        .state('home.segment.x.contacts', getState('xcontacts'))
+        // stub for demo
         .state('home.segment.accounts', getState('accounts'))
         .state('home.segment.contacts', getState('contacts'));
 });

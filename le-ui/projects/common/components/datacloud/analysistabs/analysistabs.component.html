@@ -1,7 +1,7 @@
 <section id="AnalysisTabsView" class="containerx">
     <ul>
-        <li class="tab-browse" 
-            ui-sref="{{ vm.attributes }}" 
+        <li class="tab-browse"
+            ui-sref="{{ vm.attributes }}"
             ui-sref-active="active">
             <div class="tab-container">
                 <h2>Attributes
@@ -26,8 +26,8 @@
             <div class="tab-container">
                 <h2>Accounts</h2>
                 <div class="enrichmentCounts">
-                    <span ng-if="vm.counts.accounts.state === 'done'" class="count">{{vm.counts.accounts.count|number}}</span>
-                    <span ng-if="vm.counts.accounts.state === 'loading'" class="count"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span ng-if="!vm.counts.accounts.loading" class="count">{{vm.counts.accounts.value|number}}</span>
+                    <span ng-if="vm.counts.accounts.loading" class="count"><i class="fa fa-spinner fa-spin"></i></span>
                 </div>
             </div>
         </li>
@@ -35,7 +35,8 @@
             <div class="tab-container">
                 <h2>Contacts</h2>
                 <div class="enrichmentCounts">
-                    <span class="count">28,752</span>
+                    <span ng-if="!vm.counts.contacts.loading" class="count">{{vm.counts.contacts.value|number}}</span>
+                    <span ng-if="vm.counts.contacts.loading" class="count"><i class="fa fa-spinner fa-spin"></i></span>
                 </div>
             </div>
         </li>

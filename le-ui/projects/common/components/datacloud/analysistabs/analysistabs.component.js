@@ -2,7 +2,7 @@ angular.module('common.datacloud.analysistabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
     ])
 .controller('AnalysisTabsController', function (
-    $state, $stateParams, $scope, FeatureFlagService, BrowserStorageUtility, 
+    $state, $stateParams, $scope, FeatureFlagService, BrowserStorageUtility,
     ResourceUtility, DataCloudStore, QueryStore
 ) {
     var vm = this,
@@ -17,16 +17,16 @@ angular.module('common.datacloud.analysistabs', [
     });
 
     vm.init = function() {
-        vm.attributes = vm.inModel() 
-            ? 'home.model.analysis.explorer' 
+        vm.attributes = vm.inModel()
+            ? 'home.model.analysis.explorer'
             : 'home.segment.explorer';
 
-        vm.accounts = vm.inModel() 
-            ? 'home.model.analysis.accounts' 
+        vm.accounts = vm.inModel()
+            ? 'home.model.analysis.accounts'
             : 'home.segment.accounts';
 
-        vm.contacts = vm.inModel() 
-            ? 'home.model.analysis.contacts' 
+        vm.contacts = vm.inModel()
+            ? 'home.model.analysis.contacts'
             : 'home.segment.contacts';
     }
 
@@ -37,17 +37,17 @@ angular.module('common.datacloud.analysistabs', [
 
     vm.setStateParams = function(section) {
         var goHome = false;
-        
+
         if (section && section == vm.section && section) {
             goHome = true;
         }
-        
+
         vm.section = section;
-        
+
         var params = {
             section: vm.section
-        }
-        
+        };
+
         if (goHome) {
             params.category = '';
             params.subcategory = '';

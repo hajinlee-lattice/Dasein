@@ -1,0 +1,57 @@
+<div class="container query-results">
+
+    <ul class="filters">
+        <li class="query">
+            <div class="ng-search">
+                <form>
+                    <a class="button icon-button white-button" ng-click="vm.clearSearch()">
+                        <span class="fa fa-search" ng-show="!vm.search.length"></span>
+                        <span class="fa fa-times" ng-show="vm.search.length"></span>
+                    </a>
+                    <input type="text" class="form-control" placeholder="Search" ng-model="vm.search" ng-change="vm.current = 1"/>
+                </form>
+            </div>
+        </li>
+        <li class="buttons">
+            <div>
+                <a href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}"><button class="button icon-button white-button"><i class="fa fa-download"></i></button></a>
+                <button class="button icon-button white-button" ui-sref="{{ vm.refineQuery() }}" ng-disabled="vm.saving">Refine Query</button>
+                <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
+                <button ng-if="vm.saving" disabled class="button icon-button blue-button">Saving <i class="fa fa-spinner fa-pulse fw"></i></button>
+            </div>
+        </li>
+    </ul>
+    <ul class="filters pagination">
+        <li ng-show="max > 1">
+            <pd-pagination-controls
+                current="vm.current"
+                max="max = (vm.results | filter: vm.search).length / vm.pagesize">
+            </pd-pagination-controls>
+        </li>
+    </ul>
+
+    <table class="list-table" ng-if="max > 0">
+        <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
+            <tr>
+                <th ng-repeat="col in ::vm.columns" ng-click="vm.sort(col.column_name)">
+                    <span ng-class="{'sort': vm.sortBy === col.column_name}">{{::col.display_name}}</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="r in vm.results |
+                            filter: vm.search |
+                            orderBy: vm.sortBy : vm.sortDesc |
+                            limitTo: vm.pagesize: ((vm.current - 1) * vm.pagesize)">
+                 <td ng-repeat="col in ::vm.columns">
+                    {{::r[col.column_name]}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p ng-if="max === 0">
+        No Records Found
+    <p>
+
+</div>

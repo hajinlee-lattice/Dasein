@@ -21,6 +21,10 @@
             text-align: right;
             margin: 0 8px;
         }
+
+        &.pagination {
+            min-height: 20px;
+        }
     }
 
     table {

@@ -32,7 +32,11 @@ angular.module('common.datacloud.query.factory.restriction', [])
         return (a.bucket.max === b.bucket.max) &&
             (a.bucket.min === b.bucket.min) &&
             (a.bucket.is_null_only === b.bucket.is_null_only);
-    }
+    };
+
+    BucketRestriction.getColumnFromBucket = function(bucket) {
+        return bucket.bucketRestriction.lhs.columnLookup.column_name;
+    };
 
     return BucketRestriction;
 });
