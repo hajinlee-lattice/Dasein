@@ -12,4 +12,6 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
     void removeDataCollection(String name);
 
     DataCollection getDataCollection(DataCollectionType type);
+
+    void fillInTables(DataCollection collection);
 }

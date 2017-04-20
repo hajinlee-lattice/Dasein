@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableTag;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.metadata.dao.DataCollectionDao;
 import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
@@ -43,6 +44,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Autowired
     private SegmentationDataCollectionService segmentationDataCollectionService;
+
+    @Autowired
+    private TableTypeHolder tableTypeHolder;
 
     @Override
     public DataCollectionDao getDao() {
@@ -101,6 +105,21 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
 
         return collection;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public void fillInTables(DataCollection dataCollection) {
+        tableTypeHolder.setTableType(TableType.DATATABLE);
+        List<Table> tables = tableTagEntityMgr.getTablesForTag(dataCollection.getName());
+        dataCollection.setTables(tables);
+        fillInDefaultTables(dataCollection);
+    }
+
+    private void fillInDefaultTables(DataCollection dataCollection) {
+        if (dataCollection.getType() == DataCollectionType.Segmentation) {
+            segmentationDataCollectionService.fillInDefaultTables(dataCollection);
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

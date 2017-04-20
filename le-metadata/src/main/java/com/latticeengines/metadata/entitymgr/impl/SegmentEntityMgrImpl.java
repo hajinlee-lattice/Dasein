@@ -4,13 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,9 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -52,25 +43,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Autowired
     private SegmentPropertyDao segmentPropertyDao;
 
-    @PostConstruct
-    public void setup() {
-        cacheReloader.scheduleWithFixedDelay(() -> {
-            for (String space : dataCollectionCache.asMap().keySet()) {
-                dataCollectionCache.refresh(space);
-            }
-        }, 0, 15, TimeUnit.MINUTES);
-    }
-
-    private LoadingCache<String, DataCollection> dataCollectionCache = CacheBuilder.newBuilder().maximumSize(1000)
-            .expireAfterWrite(60, TimeUnit.MINUTES).build(new CacheLoader<String, DataCollection>() {
-                @Override
-                public DataCollection load(String customerSpace) throws Exception {
-                    return dataCollectionService
-                            .getDataCollectionByType(customerSpace, DataCollectionType.Segmentation);
-                }
-            });
-
-    private ScheduledExecutorService cacheReloader = Executors.newSingleThreadScheduledExecutor();
+    @Autowired
+    private DataCollectionCache dataCollectionCache;
 
     @Override
     public BaseDao<MetadataSegment> getDao() {
@@ -115,7 +89,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         }
 
         if (segment.getDataCollection() == null) {
-            segment.setDataCollection(getDataCollection());
+            segment.setDataCollection(dataCollectionService.getDataCollectionByType(MultiTenantContext.getTenant()
+                    .getId(), DataCollectionType.Segmentation));
         }
 
         addAttributeDependencies(segment);
@@ -163,17 +138,4 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         return segment;
     }
 
-    private DataCollection getDataCollection() {
-        DataCollection dataCollection;
-        try {
-            dataCollection = dataCollectionCache.get(MultiTenantContext.getTenant().getId());
-        } catch (ExecutionException e) {
-            log.warn(
-                    String.format("Could not lookup DataCollection for customer %s in cache",
-                            MultiTenantContext.getCustomerSpace()), e);
-            dataCollection = dataCollectionService.getDataCollectionByType(MultiTenantContext.getTenant().getId(),
-                    DataCollectionType.Segmentation);
-        }
-        return dataCollection;
-    }
 }
