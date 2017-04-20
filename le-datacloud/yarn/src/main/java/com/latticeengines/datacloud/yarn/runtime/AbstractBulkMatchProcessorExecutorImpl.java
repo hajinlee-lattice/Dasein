@@ -28,6 +28,7 @@ import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
@@ -139,8 +140,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         }
         groupOutput.setResult(recordsWithErrors);
 
-//        MatchOutput blockOutput = MatchUtils.mergeOutputs(processorContext.getBlockOutput(), groupOutput);
-//        processorContext.setBlockOutput(blockOutput);
+        MatchOutput blockOutput = MatchUtils.mergeOutputs(processorContext.getBlockOutput(), groupOutput);
+        processorContext.setBlockOutput(blockOutput);
         log.info("Merge group output into block output.");
     }
 
