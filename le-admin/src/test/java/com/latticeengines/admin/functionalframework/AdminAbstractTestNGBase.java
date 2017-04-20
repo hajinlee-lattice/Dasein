@@ -209,21 +209,21 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     }
 
     protected BootstrapState waitUntilStateIsNotInitial(String contractId, String tenantId, String serviceName) {
-        return waitUntilStateIsNotInitial(contractId, tenantId, serviceName, 200);
+        return waitUntilStateIsNotInitial(contractId, tenantId, serviceName, 100);
     }
 
     protected BootstrapState waitUntilStateIsNotInitial(String contractId, String tenantId, String serviceName,
             int numOfRetries) {
-        BootstrapState state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
-        while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0) {
+        BootstrapState state;
+        do {
             numOfRetries--;
             try {
-                Thread.sleep(1000L);
+                Thread.sleep(2000L);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Waiting for component state update interrupted", e);
             }
             state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
-        }
+        } while (state != null && state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
         return state;
     }
 
