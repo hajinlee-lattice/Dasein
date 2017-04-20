@@ -1,0 +1,18 @@
+<section class="container data-import" ng-controller="ImportWizard as vm">
+  <div class="row">
+    <div class="columns twelve box-outline">
+      <div class="section-header">
+        <h4>Import {{ vm.title }}</h4>
+      </div>
+      <hr />
+      <div class="section-body with-padding row">
+        <div class="columns three" ui-view="wizard_progress"></div>
+        <div class="columns nine" ui-view="wizard_content"></div>
+      </div>
+      <hr />
+      <div class="container section-actions row form-actions">
+        <div ui-view="wizard_controls"></div>
+      </div>
+    </div>
+  </div>
+</section>

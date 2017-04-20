@@ -29,6 +29,7 @@ angular.module('common.datacloud.explorer', [
             button_select: 'Enrichment Disabled',
             button_selected: 'Enrichment Enabled',
             button_deselect: 'Enrichment Enabled',
+            button_import_data: 'Import Data',
             button_refine_query: 'Refine Query',
             button_save_segment: 'Save Segment',
             deselected_messsage: 'Attribute will be turned off for enrichment',

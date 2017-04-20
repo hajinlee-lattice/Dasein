@@ -1,6 +1,8 @@
 angular
 .module('mainApp')
-.run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility, LookupStore) {
+.run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility, LookupStore, $timeout) {
+    var self = this;
+    
     $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
         // when user hits browser Back button after app instantiate, send back to login
         if (fromState.name == 'home.models' && toState.name == 'home') {
@@ -15,7 +17,6 @@ angular
             $state.go(toState.redirectTo, params);
         }
 
-        ShowSpinner(LoadingString);
         ServiceErrorUtility.hideBanner();
     });
 

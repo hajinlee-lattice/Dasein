@@ -47,6 +47,9 @@
         </ul>
         <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
     </li>
+    <li class="refine-query" ng-if="!vm.inModel() && vm.section == 'segment.analysis'">
+        <button class="save button white-button" ng-click="vm.importData()">{{vm.label.button_import_data}}</button>
+    </li>
     <li class="refine-query" ng-if="vm.section == 'segment.analysis'">
         <button class="save button white-button" ng-disabled="vm.refineQueryDisabled" ng-click="vm.refineQuery()">{{vm.label.button_refine_query}}</button>
     </li>

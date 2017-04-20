@@ -1,0 +1,64 @@
+<section class="container data-import" ng-controller="ImportEntry as vm">
+  <div class="row">
+    <div class="columns eight offset-two box-outline">
+      <div class="section-header">
+        <h4>Upload File</h4>
+      </div>
+      <hr />
+      <div class="section-body with-padding">
+        <div class="button {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'accounts';" ui-sref="home.import.entry.accounts">
+          Accounts
+        </div>
+        <div class="button {{ vm.goState == 'accountfields' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'accountfields';" ui-sref="home.import.entry.accountfields">
+          Account Fields
+        </div>
+        <div class="button {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'contacts';" ui-sref="home.import.entry.contacts">
+          Contacts
+        </div>
+        <div class="button {{ vm.goState == 'contactfields' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'contactfields';" ui-sref="home.import.entry.contactfields">
+          Contact Fields
+        </div>
+        <div class="button {{ vm.goState == 'eloquoa' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'eloquoa';" ui-sref="home.import.entry.eloquoa">
+          Eloquoa Engagements
+        </div>
+
+        <div class="import-additional-info" ui-view="entry_content"></div>
+
+        <div 
+            file-uploader-container
+            label="Select and Upload File"
+            params="vm.params"
+            input-name="csvFileName"
+            info-template="vm.params.infoTemplate"
+            file-select="vm.fileSelect(fileName)"
+            file-load="vm.fileLoad(headers)"
+            file-done="vm.fileDone(result)"
+            file-cancel="vm.fileCancel()"
+            class="form-group file-upload" 
+            ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
+        </div>
+      </div>
+      <hr />
+      <div class="container section-actions row form-actions">
+        <div class="pull-left">
+            <button 
+                type="button" 
+                class="button white-button block-button"
+                ui-sref="home.import.entry">
+              Back
+            </button>
+        </div>
+
+        <div class="pull-right">
+            <button 
+                type="button" 
+                class="button blue-button"
+                ng-disabled="!vm.goState"
+                ng-click="vm.click()">
+              Next, Configure the Import
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

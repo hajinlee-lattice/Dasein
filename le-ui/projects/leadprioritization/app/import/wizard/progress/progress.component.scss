@@ -1,0 +1,17 @@
+.import-wizard-progress {
+    li {
+        color: #ef6a31;
+        text-decoration: underline;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    li.previous {
+        color: #aaa;
+        text-decoration: none;
+        cursor: default;
+    }
+
+    li.current {
+        color: black;
+    }
+}
