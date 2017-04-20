@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -84,6 +85,7 @@ public class GenerateDemoJsonTestNG {
         if (buckets.getBucketList() == null) {
             buckets.setBucketList(new ArrayList<>());
         }
+        buckets.setType(BucketType.Boolean);
         Bucket bucket = new Bucket();
         bucket.setBucketLabel(value);
         bucket.setCount((long) random.nextInt(15000));
