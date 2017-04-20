@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
@@ -234,10 +233,4 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
             }
         }
     }
-
-    @Override
-    public void bulkLookup(BulkLookupStrategy bulkLookupStrategy) {
-    }
-
-
 }

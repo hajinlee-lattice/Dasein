@@ -2,8 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
     <context:component-scan base-package="com.latticeengines.datacloud.match" />
 
@@ -13,7 +15,8 @@
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
     <import resource="classpath:datafabric-context.xml" />
-    
+
+    <task:scheduler id="dnbBatchScheduler" pool-size="3"/>    
 
     <bean id="externalColumnDao" class="com.latticeengines.datacloud.match.dao.impl.ExternalColumnDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
