@@ -15,7 +15,7 @@
 		                <div class="list-data pull-left"><span ng-if="configuration[0].last_modified_by_user">Created by: {{configuration[0].last_modified_by_user}}</span></div>
 		                <div class="list-data pull-right">Published on: {{configuration[0].creation_timestamp | date : 'MMM d, y h:mm:ss a'}}</div>
 		            </div><!-- End .chart-header -->
-		            <ul class="bucket-tiles published">
+		            <ul class="bucket-tiles published buckets-{{configuration.length}}">
 		            	<li ng-repeat="bucket in configuration">
 		                    <div class="bucket-label">{{bucket.bucket_name}}</div>
 		                    <dl>

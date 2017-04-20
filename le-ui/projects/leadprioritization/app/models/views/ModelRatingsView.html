@@ -60,18 +60,18 @@
                     </li>
                 </ul>
                 <div 
-                    id="" 
-                    class="bar-colors" 
+                    id="barColors" 
+                    class="bar-colors buckets-{{vm.workingBuckets.length}}" 
                     ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
                     <div 
                         class="overlay" 
                         ng-attr-style="{{'
                             height: '+ vm.dugoutHeight +'px;
                             right: '+ bucket.right_bound_score +'%;
-                            width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'}}" 
+                            width: '+ bucket.width +'%;'}}" 
                         ng-repeat="bucket in vm.workingBuckets"
                         ng-mouseover="vm.bucketHover($event)">
-                    </div>
+                    </div>  
                 </div><!-- End .bar-colors -->
                 <ul class="horizontal-axis">
                     <li class="hidden"></li>
@@ -109,7 +109,7 @@
                 </ul><!-- End .horizontal-axis -->
             </div><!-- End .ratings-chart -->
 
-            <ul id="bucketTiles" class="bucket-tiles large-buckets">
+            <ul id="bucketTiles" class="bucket-tiles large-buckets buckets-{{vm.workingBuckets.length}}">
             	<li ng-repeat="bucket in vm.workingBuckets">
             		<div class="bucket-label">{{bucket.bucket_name}}</div>
             		<dl>
@@ -128,7 +128,7 @@
             <h3>Currently published configuration</h3>
 
             <refresher condition="vm.updateContent">
-            <ul class="bucket-tiles published">
+            <ul class="bucket-tiles published buckets-{{vm.workingBuckets.length}}">
                 <li ng-repeat="bucket in ::vm.currentConfiguration">
                     <div class="bucket-label">{{::bucket.bucket_name}}</div>
                     <dl>

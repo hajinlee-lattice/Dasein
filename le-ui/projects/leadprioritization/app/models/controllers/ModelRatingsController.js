@@ -42,7 +42,8 @@ angular.module('lp.models.ratings', [
         ratingsSummary: RatingsSummary,
         bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
         bucketTiles: document.getElementById("bucketTiles"),
-        slidersContainer: document.getElementById("sliders")
+        slidersContainer: document.getElementById("sliders"),
+        barColors: document.getElementById("barColors")
     });
 
     vm.init = function() {
@@ -101,14 +102,10 @@ angular.module('lp.models.ratings', [
 
         if (vm.buckets.length === 6) {
             vm.bucketNames = ['A+', 'A', 'B', 'C', 'D', 'F'];
-            vm.bucketTiles.classList.add('six-buckets');
             vm.canAddBucket = false;
         } else if (vm.buckets.length < 6) {
             vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
-            vm.bucketTiles.classList.remove('six-buckets');
-            vm.canAddBucket = true;            
-        } else if (vm.buckets.length === 1) {
-            vm.canAddBucket = false;
+            vm.canAddBucket = true;
         };
 
         // loop through buckets in object and set their values
@@ -122,6 +119,9 @@ angular.module('lp.models.ratings', [
             // set each buckets left_bound_score to the previous buckets right_bound_score minus one
             vm.buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
             vm.buckets[0].left_bound_score = 99;
+
+            vm.buckets[i].width = (vm.buckets[i].left_bound_score - vm.buckets[i].right_bound_score) + 1;
+            vm.buckets[0].width = (vm.buckets[0].left_bound_score - vm.buckets[0].right_bound_score);
 
             vm.rightScore = vm.buckets[i].right_bound_score - 1;
             vm.rightLeads = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_leads;
@@ -348,10 +348,7 @@ angular.module('lp.models.ratings', [
             vm.modelType = "Accounts";
         }
 
-        console.log(vm.historicalBuckets);
-
         angular.forEach(vm.historicalBuckets, function(value, key) {
-
             if (value.length === 6) {
                 vm.bucketNames = ['A+', 'A', 'B', 'C', 'D', 'F'];
             } else if (value.length < 6) {

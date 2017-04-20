@@ -50,17 +50,20 @@
 	}
 	.data {
 		position: absolute;
-		bottom: 8px;
+		bottom: 10px;
 		left: 1%;
 		display: flex;
 		align-items: flex-end;
 		width: 99%;
+		background: -moz-linear-gradient(left, rgba(30,87,153,0) 0%, rgba(255,255,255,0) 1%, rgba(255,255,255,1) 1%, rgba(255,255,255,1) 96%, rgba(248,251,254,0) 96%, rgba(125,185,232,0) 100%);
+		background: -webkit-linear-gradient(left, rgba(30,87,153,0) 0%,rgba(255,255,255,0) 1%,rgba(255,255,255,1) 1%,rgba(255,255,255,1) 96%,rgba(248,251,254,0) 96%,rgba(125,185,232,0) 100%);
+		background: linear-gradient(to right, rgba(30,87,153,0) 0%,rgba(255,255,255,0) 1%,rgba(255,255,255,1) 1%,rgba(255,255,255,1) 96%,rgba(248,251,254,0) 96%,rgba(125,185,232,0) 100%);
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#001e5799', endColorstr='#007db9e8',GradientType=1 );
 		li {
 			bottom: 0;
 			margin-right: 0.135%;
     		width: 2.85%;
-			background-color: #b8b8b8;
-			border-top: #818181 solid 3px;
+			background-color: #818181;
 			&:last-child {
 				width: 2.5%;
 			}
@@ -87,26 +90,92 @@
 
 .bar-colors {
 	width: 100%;
-	mix-blend-mode: overlay;
+	-webkit-mix-blend-mode: overlay;
+    -moz-mix-blend-mode: overlay;
+    -o-mix-blend-mode: overlay;
+    -ms-mix-blend-mode: overlay;
+    mix-blend-mode:overlay;    
 	.overlay {
 		position: absolute;
-		&:nth-child(1) {
-			background-color: #81c16b;
+	}
+	&.buckets-6 {
+		.overlay {
+			&:nth-child(1) {
+				background-color: #51a6fd;
+			}
+			&:nth-child(2) {
+				background-color: #5498dd;
+			}
+			&:nth-child(3) {
+				background-color: #4788ca;
+			}
+			&:nth-child(4) {
+				background-color: #357ac1;
+			}
+			&:nth-child(5) {
+				background-color: #1a66b4;
+			}
+			&:nth-child(6) {
+				background-color: #115499;
+			}
 		}
-		&:nth-child(2) {
-			background-color: #f7b44e;
+	}
+	&.buckets-5 {
+		.overlay {
+			&:nth-child(1) {
+				background-color: #51a6fd;
+			}
+			&:nth-child(2) {
+				background-color: #5498dd;
+			}
+			&:nth-child(3) {
+				background-color: #4788ca;
+			}
+			&:nth-child(4) {
+				background-color: #357ac1;
+			}
+			&:nth-child(5) {
+				background-color: #115499;
+			}
 		}
-		&:nth-child(3) {
-			background-color: #ea6e2b;
+	}
+	&.buckets-4 {
+		.overlay {
+			&:nth-child(1) {
+				background-color: #51a6fd;
+			}
+			&:nth-child(2) {
+				background-color: #5498dd;
+			}
+			&:nth-child(3) {
+				background-color: #4788ca;
+			}
+			&:nth-child(4) {
+				background-color: #115499;
+			}
 		}
-		&:nth-child(4) {
-			background-color: #dd1e23;
+	}
+	&.buckets-3 {
+		.overlay {
+			&:nth-child(1) {
+				background-color: #51a6fd;
+			}
+			&:nth-child(2) {
+				background-color: #5498dd;
+			}
+			&:nth-child(3) {
+				background-color: #115499;
+			}
 		}
-		&:nth-child(5) {
-			background-color: #1c7edd;
-		}
-		&:nth-child(6) {
-			background-color: #7b7b7b;
+	}
+	&.buckets-2 {
+		.overlay {
+			&:nth-child(1) {
+				background-color: #51a6fd;
+			}
+			&:nth-child(2) {
+				background-color: #115499;
+			}
 		}
 	}
 }
@@ -233,38 +302,127 @@
     	background: url('/assets/images/ico-ratings-published.png') 97% 4px/18px no-repeat;
 		border: solid 1px #e8e8e8;
 		text-align: center;
-    	&:nth-child(1){
-    		.bucket-label{
-    			background-color: #70bb56;
-    		}
-    	}
-    	&:nth-child(2){
-    		.bucket-label{
-    			background-color: #ffb93d;
-    		}
-    	}
-    	&:nth-child(3){
-    		.bucket-label{
-    			background-color: #f56c35;
-
-    		}
-    	}
-    	&:nth-child(4){
-    		.bucket-label{
-    			background-color: #d62b30;
-    		}
-    	}    	
-    	&:nth-child(5){
-    		.bucket-label{
-				background-color: #24639b;
-    		}
-    	}    	
-    	&:nth-child(6){
-    		.bucket-label{
-				background-color: #494949;
-    		}
-    	}
     }
+    &.buckets-6 {
+		li {
+			&:nth-child(1) {
+				.bucket-label{
+					background-color: #51a6fd;
+				}
+			}
+			&:nth-child(2) {
+				.bucket-label{
+					background-color: #5498dd;
+				}
+			}
+			&:nth-child(3) {
+				.bucket-label{
+					background-color: #4788ca;
+				}
+			}
+			&:nth-child(4) {
+				.bucket-label{
+					background-color: #357ac1;
+				}
+			}
+			&:nth-child(5) {
+				.bucket-label{
+					background-color: #1a66b4;
+				}
+			}
+			&:nth-child(6) {
+				.bucket-label{
+					background-color: #115499;
+				}
+			}
+		}
+	}
+	&.buckets-5 {
+		li {
+			&:nth-child(1) {
+				.bucket-label{
+					background-color: #51a6fd;
+				}
+			}
+			&:nth-child(2) {
+				.bucket-label{
+					background-color: #5498dd;
+				}
+			}
+			&:nth-child(3) {
+				.bucket-label{
+					background-color: #4788ca;
+				}
+			}
+			&:nth-child(4) {
+				.bucket-label{
+					background-color: #357ac1;
+				}
+			}
+			&:nth-child(5) {
+				.bucket-label{
+					background-color: #115499;
+				}
+			}
+		}
+	}
+	&.buckets-4 {
+		li {
+			&:nth-child(1) {
+				.bucket-label{
+					background-color: #51a6fd;
+				}
+			}
+			&:nth-child(2) {
+				.bucket-label{
+					background-color: #5498dd;
+				}
+			}
+			&:nth-child(3) {
+				.bucket-label{
+					background-color: #4788ca;
+				}
+			}
+			&:nth-child(4) {
+				.bucket-label{
+					background-color: #115499;
+				}
+			}
+		}
+	}
+	&.buckets-3 {
+		li {
+			&:nth-child(1) {
+				.bucket-label{
+					background-color: #51a6fd;
+				}
+			}
+			&:nth-child(2) {
+				.bucket-label{
+					background-color: #5498dd;
+				}
+			}
+			&:nth-child(3) {
+				.bucket-label{
+					background-color: #115499;
+				}
+			}
+		}
+	}
+	&.buckets-2 {
+		li {
+			&:nth-child(1) {
+				.bucket-label{
+					background-color: #51a6fd;
+				}
+			}
+			&:nth-child(2) {
+				.bucket-label{
+					background-color: #115499;
+				}
+			}
+		}
+	}
     &.large-buckets {
     	li {
     		padding: 12px 18px;
