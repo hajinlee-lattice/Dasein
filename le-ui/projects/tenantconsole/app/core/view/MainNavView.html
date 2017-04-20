@@ -52,7 +52,7 @@
             </ul>
         </div>
     </div>
-	<script type="text/ng-template" id="addNewPopModal.html">
+	<script type="text/ng-template" id="deactivateUsersModal.html">
         <div class="modal-header">
             <h3 class="modal-title">Deactive users</h3>
         </div>
@@ -60,15 +60,18 @@
             <form class="add-tenant-form form-inline" name="addform" novalidate>
                 <div class="control-group" ng-class='{"has-error": showEmailIdError}'>
                     <label class="control-label">Emails</label>
-                    <input type="text" name="emailId" class="form-control"
+                    <input type="text" name="emailId" class="form-control" required
                            ng-model-options="{ debounce: 200 }" ng-model="emails"
-                           ng-change="validateEmailInfo()" required/>
-                    <p ng-if="showEmailIdError" class="help-block"><span class="text-danger">{{ EmailIdErrorMsg }}</span></p>
+                           ng-change="validateEmailInfo()"
+                           ng-disabled="okClicked || saving"/>
+                    <p ng-if="errorMsg" class="help-block"><span class="text-danger">{{ errorMsg }}</span></p>
+                    <p ng-if="okClicked && !saving" class="help-block">You are about to delete users: {{emails}} </p>
+                    <p ng-if="saving" class="help-block"><i class="fa fa-spinner fa-spin"></i> deleting</p>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" ng-click="ok()" ng-disabled="!isValid">OK</button>
+            <button class="btn btn-primary" ng-click="ok()" ng-disabled="!isValid">{{okClicked ? 'Confirm' :'Ok'}}</button>
             <button class="btn btn-default" ng-click="cancel()">Cancel</button>
         </div>
     </script>

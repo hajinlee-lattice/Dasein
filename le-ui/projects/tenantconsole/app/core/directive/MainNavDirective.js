@@ -66,20 +66,21 @@ app.directive('mainNav', function(){
 
             $scope.onDeactiveUserClick = function(){
                 var modalInstance = $uibModal.open({
-                    templateUrl: 'addNewPopModal.html',
-                    controller: function($scope, $uibModalInstance, _, $window ){
+                    templateUrl: 'deactivateUsersModal.html',
+                    controller: function($scope, $uibModalInstance, _, $window, MainNavService){
                         $scope.emails = "";
                         $scope.isValid = true;
+                        $scope.okClicked = false;
+                        $scope.saving = false;
+                        $scope.errorMsg = "";
 
                         $scope.validateEmailInfo = function(){
                             if ($scope.addform.emailId.$error.required || $scope.emails === '') {
-                                $scope.EmailIdErrorMsg = "Emails is required.";
-                                $scope.showEmailIdError = true;
+                                $scope.errorMsg = 'Emails is required.';
                                 $scope.isValid = false;
                                 return false;
-                            }
-                            else {
-                                $scope.showEmailIdError = false;
+                            } else {
+                                $scope.errorMsg = '';
                                 $scope.isValid = true;
                             }
                             return true;
@@ -87,20 +88,37 @@ app.directive('mainNav', function(){
 
                         $scope.ok = function () {
                             if ($scope.validateEmailInfo()) {
-                                if ($window.confirm("Please confirm deactive users?")) {
-                                    $uibModalInstance.close($scope.emails);
+                                if ($scope.okClicked) {
+                                    $scope.saving = true;
+
+                                    MainNavService.deactiveUserStatus($scope.emails).then(function() {
+                                        $uibModalInstance.close();
+                                    }).catch(function(result) {
+                                        $scope.saving = false;
+
+                                        if (result && result.errMsg) {
+                                            $scope.errorMsg = result.errMsg;
+                                        } else {
+                                            $scope.errorMsg = 'Unexpected Error. Please try again';
+                                        }
+                                    });
+                                } else {
+                                    $scope.okClicked = true;
                                 }
                             }
                         };
 
                         $scope.cancel = function () {
-                            $uibModalInstance.dismiss('cancel');
+                            if (!$scope.okClicked) {
+                                $uibModalInstance.dismiss('cancel');
+                            } else {
+                                $scope.okClicked = false;
+                            }
                         };
                     }
                 });
 
-                modalInstance.result.then(function (emails) {
-                    MainNavService.deactiveUserStatus(emails);
+                modalInstance.result.then(function () {
                     $state.go('TENANT.LIST');
                 }, function () {
                     $state.go('TENANT.LIST');
