@@ -610,9 +610,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             }
             gaUser.setIsActive(false);
             gaUserEntityMgr.update(gaUser);
-            log.info(String.format("%s set user %s isActive to false", userName, gaUser.getFirstName()));
+            log.info(String.format("%s set user %s isActive to false", userName, gaUser.getEmail()));
             gaUserTenantRightEntityMgr.deleteByUserId(gaUser.getPid());
-            log.info(String.format("%s delete the %s's GlobalUserTenantRight", userName, gaUser.getFirstName()));
+            log.info(String.format("%s delete the %s's GlobalUserTenantRight", userName, gaUser.getEmail()));
         }
         return true;
     }
