@@ -54,6 +54,7 @@ public class DataFlowServiceImpl implements DataFlowService {
         DataFlowJob dataFlowJob = createJob(dataFlowConfig);
         ApplicationId appId = jobService.submitJob(dataFlowJob);
         dataFlowJob.setId(appId.toString());
+        dataFlowJob.setDataFlowBeanName(dataFlowConfig.getDataFlowBeanName());
         jobEntityMgr.create(dataFlowJob);
         return appId;
     }
@@ -77,8 +78,8 @@ public class DataFlowServiceImpl implements DataFlowService {
         containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
-        if ("FLINK".equalsIgnoreCase(cascadingEngine) && (dataFlowConfig.getDataFlowParameters() != null
-                && !dataFlowConfig.getDataFlowParameters().noFlink)) {
+        if ("FLINK".equalsIgnoreCase(cascadingEngine)
+                && (dataFlowConfig.getDataFlowParameters() != null && !dataFlowConfig.getDataFlowParameters().noFlink)) {
             if ("local".equals(flinkMode)) {
                 appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkLocalVcores));
                 appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkLocalMemory));

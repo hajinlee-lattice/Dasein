@@ -1,6 +1,7 @@
 package com.latticeengines.dependencyclient.exposed;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -9,6 +10,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.event.service.spi.EventListenerRegistry;
+import org.hibernate.event.spi.DeleteEvent;
+import org.hibernate.event.spi.DeleteEventListener;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.event.spi.PersistEvent;
 import org.hibernate.event.spi.PersistEventListener;
@@ -22,7 +25,7 @@ import com.latticeengines.proxy.exposed.metadata.DependableObjectProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
-public class DependencyInterceptor implements PersistEventListener {
+public class DependencyInterceptor implements PersistEventListener, DeleteEventListener {
     private static final Log log = LogFactory.getLog(DependencyInterceptor.class);
 
     @Autowired
@@ -48,7 +51,7 @@ public class DependencyInterceptor implements PersistEventListener {
                 log.info(String.format("Updating dependencies for [name %s, type %s, #dependencies %d]", dependable
                         .getDependableName(), dependable.getDependableType(), dependable.getDependencies().size()));
                 DependableObject object = DependableObject.fromDependable(dependable);
-                dependableObjectProxy.createOrUpdate(MultiTenantContext.getCustomerSpace().toString(), object);
+                dependableObjectProxy.createOrUpdate(MultiTenantContext.getTenant().getId(), object);
             }
         }
     }
@@ -58,6 +61,24 @@ public class DependencyInterceptor implements PersistEventListener {
         onPersist(event);
     }
 
+    @Override
+    public void onDelete(DeleteEvent event) throws HibernateException {
+        if (enabled) {
+            if (event.getObject() instanceof Dependable && !(event.getObject() instanceof DependableObject)) {
+                Dependable dependable = (Dependable) event.getObject();
+                log.info(String.format("Deleting dependencies for [name %s, type %s, #dependencies %d]", dependable
+                        .getDependableName(), dependable.getDependableType(), dependable.getDependencies().size()));
+                dependableObjectProxy.delete(MultiTenantContext.getTenant().getId(), //
+                        dependable.getDependableType().toString(), dependable.getDependableName());
+            }
+        }
+    }
+
+    @Override
+    public void onDelete(DeleteEvent event, Set transientEntities) throws HibernateException {
+        onDelete(event);
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -65,4 +86,5 @@ public class DependencyInterceptor implements PersistEventListener {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
 }

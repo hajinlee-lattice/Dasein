@@ -3,6 +3,7 @@ package com.latticeengines.dataflowapi.yarn.runtime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -18,13 +19,14 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
+import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowJob;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
-import com.latticeengines.domain.exposed.metadata.DependableObject;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.flink.FlinkConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -40,6 +42,9 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private JobEntityMgr jobEntityMgr;
 
     @Autowired
     private DataTransformationService dataTransformationService;
@@ -117,7 +122,31 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         if (!dataFlowConfig.shouldSkipRegisteringTable()) {
             metadataProxy.updateTable(dataFlowConfig.getCustomerSpace().toString(), table.getName(), table);
         }
+        updateJob(table, sourceTables);
         return null;
+    }
+
+    private void updateJob(Table table, Map<String, Table> sourceTables) {
+        try {
+            DataFlowJob job = (DataFlowJob) jobEntityMgr.findByObjectId(appId.toString());
+            int count = 0;
+            while (job == null && count++ < 10) {
+                log.info("Retrieving job");
+                job = (DataFlowJob) jobEntityMgr.findByObjectId(appId.toString());
+                Thread.sleep(1000);
+            }
+            if (job == null) {
+                log.error(String.format("Could not locate job with appId %s", appId));
+                return;
+            }
+            if (table != null) {
+                job.setTargetTableName(table.getName());
+            }
+            job.setSourceTableNames(sourceTables.values().stream().map(t -> t.getName()).collect(Collectors.toList()));
+            jobEntityMgr.update(job);
+        } catch (Exception e) {
+            log.error("Failed to update job", e);
+        }
     }
 
     private DataFlowContext getDataFlowContext(DataFlowConfiguration dataFlowConfig, Map<String, Table> sourceTables) {
