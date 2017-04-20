@@ -163,7 +163,7 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(payload, headers);
         String url = getRestHostPort() + "/admin/internal/services/deactiveUserStatus";
-        magicRestTemplate.exchange(url, HttpMethod.PUT, requestEntity, Boolean.class);
+        restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Boolean.class);
 
         GlobalAuthUser userAfterDeactive = userService.findByEmailNoJoin(email);
         Assert.assertNotNull(userAfterDeactive);

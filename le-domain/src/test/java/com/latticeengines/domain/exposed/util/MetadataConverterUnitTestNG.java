@@ -8,9 +8,11 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -20,8 +22,14 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BucketRange;
 
 public class MetadataConverterUnitTestNG {
-    private Configuration configuration = new Configuration();
+    private Configuration configuration;
 
+    @BeforeClass(groups = "unit")
+    void init()
+    {
+        configuration = new Configuration();
+        configuration.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
+    }
     private String getResourceAbsolutePath(String resourcePath) {
         try {
             ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
