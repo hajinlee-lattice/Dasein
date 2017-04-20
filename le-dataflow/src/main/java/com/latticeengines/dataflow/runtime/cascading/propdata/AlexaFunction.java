@@ -29,9 +29,9 @@ public class AlexaFunction extends BaseOperation implements Function {
         for (int i = 1; i <= 10; i++) {
             String[] fields = inputGroup(i);
             String countryCode = arguments.getString(fields[0]);
-            Double pageViews = arguments.getDouble(fields[1]);
-            Integer rank = arguments.getInteger(fields[2]);
-            Double users = arguments.getDouble(fields[3]);
+            Double pageViews = (Double) arguments.getObject(fields[1]);
+            Integer rank = (Integer) arguments.getObject(fields[2]);
+            Double users = (Double) arguments.getObject(fields[3]);
             result = parseArgument(result, countryCode, pageViews, rank, users);
         }
         functionCall.getOutputCollector().add(result);

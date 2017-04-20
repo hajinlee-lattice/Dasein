@@ -27,6 +27,8 @@ public class AlexaRefreshFlow extends MostRecentFlow {
 
     private static final String DOMAIN = "URL";
     public static final String[] COUNTRY_FIELDS = AlexaFunction.OUTPUT_FIELDS;
+    public static final String[] RANK_FIELDS = new String[] { "Rank", "ReachRank", "ViewsRank", "US_Rank", "AU_Rank",
+            "GB_Rank", "CA_Rank" };
     private List<String> sourceFields;
 
     @Override
@@ -43,7 +45,16 @@ public class AlexaRefreshFlow extends MostRecentFlow {
         Node country = getCountryRanks(source);
         FieldList joinField = new FieldList(DOMAIN);
         Node join = country.join(joinField, industry, joinField, JoinType.OUTER);
+        join = cleanInvalidRank(join);
         return retainFields(join);
+    }
+
+    private Node cleanInvalidRank(Node node) {
+        for (String rankField : RANK_FIELDS) {
+            node = node.apply(String.format("%s == null || %s <= 0 ? null : %s", rankField, rankField, rankField),
+                    new FieldList(rankField), new FieldMetadata(rankField, Integer.class));
+        }
+        return node;
     }
 
     private Node retainFields(Node node) {

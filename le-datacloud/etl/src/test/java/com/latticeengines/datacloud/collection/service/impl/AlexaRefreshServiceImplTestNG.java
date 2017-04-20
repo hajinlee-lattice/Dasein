@@ -73,5 +73,15 @@ public class AlexaRefreshServiceImplTestNG extends MostRecentServiceImplTestNGBa
         Assert.assertEquals(row.get("CA_PageViews"), 1.5);
         Assert.assertEquals(row.get("CA_Rank"), 43206);
         Assert.assertEquals(row.get("CA_Users"), 2.0);
+
+        domain = "38spatial.com";
+        row = jdbcTemplateCollectionDB.queryForMap(
+                "SELECT [" + source.getDomainField() + "], [ReachRank], [US_Rank], [GB_Rank], [ViewsRank] FROM ["
+                        + source.getSqlTableName() + "] WHERE [" + source.getDomainField() + "] = '" + domain + "'");
+        Assert.assertEquals(row.get(source.getDomainField()), domain);
+        Assert.assertNull(row.get("ReachRank"));
+        Assert.assertNull(row.get("US_Rank"));
+        Assert.assertNull(row.get("GB_Rank"));
+        Assert.assertEquals(row.get("ViewsRank"), 16101525);
     }
 }
