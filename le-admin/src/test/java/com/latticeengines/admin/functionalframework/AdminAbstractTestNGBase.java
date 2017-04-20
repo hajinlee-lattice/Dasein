@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -222,14 +223,18 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
             } catch (InterruptedException e) {
                 throw new RuntimeException("Waiting for component state update interrupted", e);
             }
-            state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
+            String url = String.format("%s/admin/tenants/%s/services/%s/state?contractId=%s", getRestHostPort(),
+                    tenantId, serviceName, contractId);
+            state = restTemplate.getForObject(url, BootstrapState.class);
         } while (state != null && state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
         return state;
     }
 
     protected BootstrapState waitUntilStateIsNotUninstalling(String contractId, String tenantId, String serviceName,
                                                         int numOfRetries) {
-        BootstrapState state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
+        String url = String.format("%s/admin/tenants/%s/services/%s/state?contractId=%s", getRestHostPort(),
+                tenantId, serviceName, contractId);
+        BootstrapState state = restTemplate.getForObject(url, BootstrapState.class);
         while ((state.state.equals(BootstrapState.State.UNINSTALLING) ||
                 state.state.equals(BootstrapState.State.INITIAL))  && numOfRetries > 0) {
             numOfRetries--;
@@ -248,7 +253,9 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
             numOfRetries--;
             try {
                 Thread.sleep(1000L);
-                TenantDocument doc = tenantService.getTenant(contractId, tenantId);
+                String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(),
+                        tenantId, contractId);
+                TenantDocument doc = restTemplate.getForObject(url, TenantDocument.class);
                 if (doc.getTenantInfo() == null) {
                     return true;
                 }
