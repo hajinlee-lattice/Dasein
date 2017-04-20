@@ -254,12 +254,6 @@
             <version>4.0.0.RELEASE</version>
             <scope>provided</scope>
         </dependency>
-        
-        <dependency>
-             <groupId>com.mchange</groupId>
-             <artifactId>c3p0</artifactId>
-             <version>${c3p0.version}</version> 
-        </dependency>
 
         <dependency>
             <groupId>org.hibernate</groupId>

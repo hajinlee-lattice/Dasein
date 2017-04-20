@@ -512,7 +512,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         inspectOriginalModelSummaryPredictors(replacedModelSummary);
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummaryForClonedModel", timeOut = 600000)
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummaryForClonedModel", timeOut = 900000)
     public void scoreTrainingDataOfClonedModel() throws InterruptedException, IOException {
         log.info("Scoring the training data of the cloned model summary ...");
         System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
