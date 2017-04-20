@@ -206,7 +206,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         long timeout = (long) (processorContext.getTimeOut() * 0.75);
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < timeout) {
-            if (isQuotaAvaiable()) {
+            if (isDnBQuotaAvaiable()) {
                 return;
             }
             try {
@@ -221,7 +221,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         throw new RuntimeException("DnB bulk match is congested. Fail the bulk match job!");
     }
 
-    private boolean isQuotaAvaiable() {
+    private boolean isDnBQuotaAvaiable() {
         for (int i = 0; i < 4; i++) {
             RateLimitedAcquisition rlAcq = rateLimitingService.acquireDnBBulkRequest(1, true);
             if (!rlAcq.isAllowed()) {
