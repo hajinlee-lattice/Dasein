@@ -376,9 +376,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
 
     private void dnbBatchDispatchRequest() {
         try {
-            Runtime runtime = Runtime.getRuntime();
-            log.info(String.format("Before dispatching request -- TotalMemory: %d. FreeMemory: %d",
-                    runtime.totalMemory(), runtime.freeMemory()));
             // Failed batch requests to process
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
             List<DnBBatchMatchContext> batchesToSubmit = new ArrayList<>();
@@ -434,8 +431,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             for (DnBBatchMatchContext batchContext : failedBatches) {
                 processBulkMatchResult(batchContext, false);
             }
-            log.info(String.format("After dispatching request -- TotalMemory: %d. FreeMemory: %d",
-                    runtime.totalMemory(), runtime.freeMemory()));
         } catch (Exception ex) {
             log.error(ex);
         }
@@ -443,9 +438,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
 
     private void dnbBatchCheckStatus() {
         try {
-            Runtime runtime = Runtime.getRuntime();
-            log.info(String.format("Before checking status -- TotalMemory: %d. FreeMemory: %d", runtime.totalMemory(),
-                    runtime.freeMemory()));
             // Failed batch requests to process
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
             int pendingRecordNum = getUnsubmittedRecordNum() + getSubmittedRecordNum();
@@ -502,8 +494,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 log.info(String.format("There are %d batched requests waiting for DnB batch api to return results",
                         submittedBatches.size()));
             }
-            log.info(String.format("After checking status -- TotalMemory: %d. FreeMemory: %d", runtime.totalMemory(),
-                    runtime.freeMemory()));
         } catch (Exception ex) {
             log.error(ex);
         }

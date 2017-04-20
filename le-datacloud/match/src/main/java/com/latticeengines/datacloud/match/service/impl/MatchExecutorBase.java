@@ -205,7 +205,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setMatchLogs(internalRecord.getMatchLogs());
             outputRecord.setDebugValues(internalRecord.getDebugValues());
             outputRecords.add(outputRecord);
-            log.info("output record: " + JsonUtils.serialize(outputRecord));
         }
 
         matchContext.getOutput().setResult(outputRecords);
