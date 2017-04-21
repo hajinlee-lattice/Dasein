@@ -72,8 +72,7 @@ public class LockManager {
         if (privateLocks.contains(lockName)) {
             division = CamilleEnvironment.getDivision();
         }
-        Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), division,
-                lockName);
+        Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), division, lockName);
         Camille camille = CamilleEnvironment.getCamille();
         InterProcessReadWriteLock lock = locks.get(lockName);
         if (lock == null) {
@@ -82,18 +81,14 @@ public class LockManager {
 
         try {
             if (lock.readLock().acquire(duration, timeUnit)) {
-                if (lock.readLock().isAcquiredInThisProcess()) {
-                    if (camille.exists(lockPath)) {
-                        return camille.get(lockPath).getData();
-                    } else {
-                        throw new Exception("The lock path " + lockPath + " does not exist.");
-                    }
+                if (camille.exists(lockPath)) {
+                    return camille.get(lockPath).getData();
                 } else {
-                    throw new Exception(
-                            "Current thread is suppose to have the read lock " + lockName + ", but it does not.");
+                    throw new Exception("The lock path " + lockPath + " does not exist.");
                 }
             } else {
-                throw new Exception("Failed to acquire read lock " + lockName);
+                throw new Exception(
+                        "Current thread is suppose to have the read lock " + lockName + ", but it does not.");
             }
         } catch (Exception e) {
             throw new Exception("Failed to peek data at lock " + lockName, e);
@@ -102,7 +97,7 @@ public class LockManager {
                 try {
                     lock.readLock().release();
                 } catch (Exception e) {
-                    log.error("Exception when acquiring read lock " + lockName, e);
+                    log.error("Exception when releasing read lock " + lockName, e);
                 }
             }
         }
@@ -116,14 +111,10 @@ public class LockManager {
         }
         try {
             if (lock.writeLock().acquire(duration, timeUnit)) {
-                if (lock.writeLock().isAcquiredInThisProcess()) {
-                    return true;
-                } else {
-                    throw new Exception(
-                            "Current thread is suppose to have the write lock " + lockName + ", but it does not.");
-                }
+                return true;
             } else {
-                throw new Exception("Failed to acquire write lock " + lockName);
+                throw new Exception(
+                        "Current thread is suppose to have the write lock " + lockName + ", but it does not.");
             }
         } catch (Exception e) {
             log.error("Exception when acquiring write lock " + lockName, e);
@@ -144,18 +135,15 @@ public class LockManager {
             log.warn("Lock " + lockName + " is not registered");
             return;
         }
-        if (lock.writeLock().isAcquiredInThisProcess()) {
-            try {
-                lock.writeLock().release();
-            } catch (Exception e) {
-                log.error("Exception when acquiring write lock " + lockName, e);
-            }
+        try {
+            lock.writeLock().release();
+        } catch (Exception e) {
+            log.error("Exception when releasing write lock " + lockName, e);
         }
     }
 
     public static void upsertData(String lockName, String data, String division) throws Exception {
-        Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), division,
-                lockName);
+        Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), division, lockName);
         Camille camille = CamilleEnvironment.getCamille();
         InterProcessReadWriteLock lock = locks.get(lockName);
         if (lock == null) {
