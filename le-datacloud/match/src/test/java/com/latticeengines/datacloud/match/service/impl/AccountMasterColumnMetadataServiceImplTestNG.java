@@ -230,6 +230,7 @@ public class AccountMasterColumnMetadataServiceImplTestNG
         version1.setAccountLookupHdfsVersion("version99");
         version1.setMajorVersion("99.0");
         version1.setStatus(DataCloudVersion.Status.APPROVED);
+        version1.setMetadataRefreshDate(new Date());
         return Arrays.asList(version1);
     }
 }
