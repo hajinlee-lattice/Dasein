@@ -43,6 +43,8 @@ public class DataCollectionCache {
             .build(new CacheLoader<Pair<String, DataCollectionType>, DataCollection>() {
                 @Override
                 public DataCollection load(Pair<String, DataCollectionType> pair) throws Exception {
+                    log.info(String.format("Loading data collection for customer %s type %s", pair.getLeft(),
+                            pair.getRight()));
                     Tenant previous = MultiTenantContext.getTenant();
                     try {
                         Tenant tenant = tenantService.findByTenantId(pair.getLeft());

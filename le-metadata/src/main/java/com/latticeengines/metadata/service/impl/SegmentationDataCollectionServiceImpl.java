@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.service.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("segmentationDataCollectionService")
 public class SegmentationDataCollectionServiceImpl implements SegmentationDataCollectionService {
+    private static final Log log = LogFactory.getLog(SegmentationDataCollectionServiceImpl.class);
 
     @Autowired
     private MetadataService metadataService;
@@ -37,11 +40,16 @@ public class SegmentationDataCollectionServiceImpl implements SegmentationDataCo
         if (dataCollection.getTable(SchemaInterpretation.BucketedAccountMaster) == null) {
             Tenant tenant = MultiTenantContext.getTenant();
             try {
+                log.info(String.format("Populating BucketedAccountMaster table for tenant %s", tenant.getId()));
                 MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(DataCloudConstants.SERVICE_CUSTOMERSPACE));
                 Table table = metadataService.getTable(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE),
                         DataCloudConstants.BUCKETED_ACCOUNT_MASTER_TABLE_NAME);
                 if (table != null) {
                     dataCollection.addTable(table);
+                } else {
+                    log.warn(String
+                            .format("Could not locate BucketedAccountMaster table in order to populate Segmentation data collection for tenant %s",
+                                    tenant.getId()));
                 }
             } finally {
                 MultiTenantContext.setTenant(tenant);
