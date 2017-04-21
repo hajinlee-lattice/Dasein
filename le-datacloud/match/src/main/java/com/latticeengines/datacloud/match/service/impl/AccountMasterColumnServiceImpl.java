@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -9,6 +10,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,8 +25,9 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 @Component("accountMasterColumnService")
-public class AccountMasterColumnServiceImpl
-        extends BaseMetadataColumnServiceImpl<AccountMasterColumn> {
+public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImpl<AccountMasterColumn> {
+
+    private Log log = LogFactory.getLog(AccountMasterColumnServiceImpl.class);
 
     @Resource(name = "accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> metadataColumnEntityMgr;
@@ -31,6 +35,7 @@ public class AccountMasterColumnServiceImpl
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
+    private ConcurrentMap<String, Date> cachedRefreshDate = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, ConcurrentMap<String, AccountMasterColumn>> whiteColumnCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, ConcurrentSkipListSet<String>> blackColumnCache = new ConcurrentHashMap<>();
 
@@ -55,8 +60,7 @@ public class AccountMasterColumnServiceImpl
     }
 
     @Override
-    public List<AccountMasterColumn> findByColumnSelection(Predefined selectName,
-            String dataCloudVersion) {
+    public List<AccountMasterColumn> findByColumnSelection(Predefined selectName, String dataCloudVersion) {
         return getMetadataColumnEntityMgr().findByTag(selectName.getName(), dataCloudVersion);
     }
 
@@ -71,10 +75,9 @@ public class AccountMasterColumnServiceImpl
     }
 
     @Override
-    protected AccountMasterColumn updateSavedMetadataColumn(String dataCloudVersion,
-            ColumnMetadata columnMetadata) {
-        AccountMasterColumn savedAccountMasterColumn = metadataColumnEntityMgr
-                .findById(columnMetadata.getColumnId(), dataCloudVersion);
+    protected AccountMasterColumn updateSavedMetadataColumn(String dataCloudVersion, ColumnMetadata columnMetadata) {
+        AccountMasterColumn savedAccountMasterColumn = metadataColumnEntityMgr.findById(columnMetadata.getColumnId(),
+                dataCloudVersion);
 
         savedAccountMasterColumn.setAmColumnId(columnMetadata.getColumnId());
         savedAccountMasterColumn.setDescription(columnMetadata.getDescription());
@@ -85,8 +88,7 @@ public class AccountMasterColumnServiceImpl
         savedAccountMasterColumn.setStatisticalType(columnMetadata.getStatisticalType());
         savedAccountMasterColumn.setFundamentalType(columnMetadata.getFundamentalType());
         savedAccountMasterColumn.setPremium(columnMetadata.isPremium());
-        savedAccountMasterColumn
-                .setDiscretizationStrategy(columnMetadata.getDiscretizationStrategy());
+        savedAccountMasterColumn.setDiscretizationStrategy(columnMetadata.getDiscretizationStrategy());
         savedAccountMasterColumn.setInternalEnrichment(columnMetadata.isCanInternalEnrich());
 
         ApprovedUsage approvedUsage = ApprovedUsage.NONE;
@@ -106,12 +108,27 @@ public class AccountMasterColumnServiceImpl
 
         if (columnMetadata.isCanEnrich() && !savedGroups.contains(Predefined.Enrichment.name())) {
             savedGroups.add(Predefined.Enrichment.name());
-        } else if (!columnMetadata.isCanEnrich()
-                && savedGroups.contains(Predefined.Enrichment.name())) {
+        } else if (!columnMetadata.isCanEnrich() && savedGroups.contains(Predefined.Enrichment.name())) {
             savedGroups.remove(Predefined.Enrichment.name());
         }
         savedAccountMasterColumn.setGroups(StringUtils.join(savedGroups, ","));
         return savedAccountMasterColumn;
     }
 
+    @Override
+    protected boolean refreshCacheNeeded(String version) {
+        DataCloudVersion versionObject = versionEntityMgr.findVersion(version);
+        Date versionRefreshDate = versionObject.getMetadataRefreshDate();
+        if (cachedRefreshDate.get(version) != null && versionRefreshDate
+                .compareTo(cachedRefreshDate.get(version)) <= 0) {
+            log.info("version : " + version + "refresh date : " + versionRefreshDate);
+            log.info("Cached column selection not updated since metadata refresh date is the same");
+            return false;
+        } else {
+            // update the cache refresh date value
+            log.info("version : " + version + "refresh date : " + versionRefreshDate);
+            cachedRefreshDate.put(version, versionRefreshDate);
+            return true;
+        }
+    }
 }
