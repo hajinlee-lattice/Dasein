@@ -7,7 +7,8 @@ angular.module('common.datacloud.query.filter', [])
             attribute: '=',
             onMove: '&',
             onDelete: '=',
-            group: "@"
+            group: "@",
+            showLift: '='
         },
         templateUrl: '/components/datacloud/query/filter/queryfilter.component.html',
         controller: 'QueryFilterController',

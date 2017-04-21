@@ -3,10 +3,12 @@ angular.module('common.datacloud.query.builder', [])
 
     var vm = this;
     angular.extend(this, {
+        inModel: $state.current.name.split('.')[1] === 'model',
         filters: {
             any: [],
             all: []
         },
+        cubeStats: null,
         loading: true,
         saving: false
     });
@@ -23,9 +25,15 @@ angular.module('common.datacloud.query.builder', [])
         DataCloudStore.getEnrichments().then(function(result) {
             vm.filters = createFiltersFromRestrictions(QueryRestriction, result.data);
             vm.loading = false;
+        }).then(function() {
+            if (vm.inModel) {
+                DataCloudStore.getCube().then(function(result) {
+                    vm.cubeStats = result.data.Stats;
+                    addLiftToRestrictions();
+                });
+            }
         });
     };
-    vm.init();
 
     vm.update = function() {
         var restrictions = createRestrictionsFromFilters(vm.filters);
@@ -38,7 +46,7 @@ angular.module('common.datacloud.query.builder', [])
         delete src[key];
 
         vm.update();
-    }
+    };
 
     vm.delete = function(group, columnName, index) {
         var filterGroup = vm.filters[group];
@@ -52,13 +60,8 @@ angular.module('common.datacloud.query.builder', [])
         vm.update();
     };
 
-    vm.inModel = function() {
-        var name = $state.current.name.split('.');
-        return name[1] == 'model';
-    }
-
     vm.goAttributes = function() {
-        if (vm.inModel()) {
+        if (vm.inModel) {
             $state.go('home.model.analysis.explorer.attributes');
         } else{
             $state.go('home.segment.explorer.attributes');
@@ -69,7 +72,7 @@ angular.module('common.datacloud.query.builder', [])
         vm.saving = true;
         SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
             if (!result.errorMsg) {
-                if (vm.inModel()) {
+                if (vm.inModel) {
                     $state.go('home.model.segmentation', {}, {notify: true});
                 } else {
                     $state.go('home.segments', {}, {notify: true});
@@ -78,7 +81,7 @@ angular.module('common.datacloud.query.builder', [])
         }).finally(function() {
             vm.saving = false;
         });
-    }
+    };
 
     function findAttribute(columnName, attributes) {
         for (var i = 0; i < attributes.length; i++) {
@@ -114,12 +117,14 @@ angular.module('common.datacloud.query.builder', [])
                     }
                 }
 
-                filterGroup[fieldName].buckets.push({range: group[i].bucketRestriction.range});
+                filterGroup[fieldName].buckets.push({
+                    range: group[i].bucketRestriction.range
+                });
             }
         }
 
         return filterFields;
-    };
+    }
 
     function createRestrictionsFromFilters(filters) {
         var restrictions = { any:[], all:[] };
@@ -138,4 +143,38 @@ angular.module('common.datacloud.query.builder', [])
 
         return restrictions;
     }
+
+    function addLiftToRestrictions() {
+        for (var groupKey in vm.filters) {
+            var group = vm.filters[groupKey];
+            for (var fieldName in group) {
+                var restrictionBuckets = group[fieldName].buckets;
+
+                var cubeStat = vm.cubeStats[fieldName];
+                if (cubeStat && cubeStat.RowStats && cubeStat.RowStats.Bkts && cubeStat.RowStats.Bkts.List) {
+                    var cubeBuckets = cubeStat.RowStats.Bkts.List;
+
+                    for (var i = 0; i < restrictionBuckets.length; i++) {
+                        var liftSet = false;
+                        for (var j = 0; j < cubeBuckets.length; j++) {
+                            if (BucketRestriction.isEqualRange(restrictionBuckets[i].range, cubeBuckets[j].Range)) {
+                                restrictionBuckets[i].lift = cubeBuckets[j].Lift.toFixed(1) + 'x'
+                                liftSet = true;
+                                break;
+                            }
+                        }
+                        if (!liftSet) {
+                            restrictionBuckets[i].lift = null;
+                        }
+                    }
+                } else {
+                    for (var i = 0; i < restrictionBuckets.length; i++) {
+                        restrictionBuckets[i].lift = null;
+                    }
+                }
+            }
+        }
+    }
+
+    vm.init();
 });

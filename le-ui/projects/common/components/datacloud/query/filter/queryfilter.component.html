@@ -29,7 +29,10 @@
             <div class="query-filter-row" ng-repeat="b in attribute.buckets">
                 <div class="query-filter-cell query-filter-value">{{b.range | QueryRange}}</div>
                 <!-- <div class="query-filter-cell query-filter-lead"></div> -->
-                <div ng-if="showLift" class="query-filter-cell query-filter-lift"><div class="query-lift-highlight"></div></div>
+                <div ng-if="showLift" class="query-filter-cell query-filter-lift">
+                    <div ng-if="b.lift" class="query-lift-highlight">{{b.lift}}</div>
+                    <div ng-if="b.lift === undefined"><i class="fa fa-spinner fa-spin"></i></div>
+                </div>
                 <div class="query-filter-cell query-filter-delete"><a href ng-click="vm.deleteBucket($index)">&times;</a></div>
             </div>
         </div>
