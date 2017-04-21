@@ -43,12 +43,14 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     private Log log = LogFactory.getLog(AccountMasterColumnSelectionServiceImpl.class);
 
     @Value("${datacloud.match.columnselection.am.refresh.minute:13}")
+
     private long refreshInterval;
 
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
 
     private ConcurrentMap<String, Object> accountMasterColumnSelection = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Date> cachedRefreshDate = new ConcurrentHashMap<>();
     private static final String PREDEFINED_SELECTION_MAP = "PredefinedSelectionMap";
     private static final String COMLETE_CODEBOOK_CACHE = "CompleteCodeBookCache";
     private static final String CODEBOOK_LOOKUP = "CodeBookLookup";
@@ -151,11 +153,10 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
         return toReturn;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection,
-            String dataCloudVersion) {
+    public Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection, String dataCloudVersion) {
 
         if (StringUtils.isEmpty(dataCloudVersion)) {
             dataCloudVersion = getLatestVersion();
@@ -172,8 +173,8 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
             // It is fine because there is no such use case for now
 
             if (codeBookMap.containsKey(columnId)) {
-                for(String decodedField: codeBookLookup.keySet()){
-                    if(codeBookLookup.get(decodedField).equals(columnId)) {
+                for (String decodedField : codeBookLookup.keySet()) {
+                    if (codeBookLookup.get(decodedField).equals(columnId)) {
                         if (!decodeFieldMap.containsKey(columnId)) {
                             decodeFieldMap.put(columnId, new ArrayList<String>());
                         }
@@ -250,9 +251,14 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         cs.createAccountMasterColumnSelection(externalColumns);
         return cs;
     }
-    
+
     @SuppressWarnings("unchecked")
-    private void loadCacheForVersion(String version, ConcurrentMap<String, Object> accountMasterColumnSelection) {
+    private void loadCacheForVersion(DataCloudVersion version,
+            ConcurrentMap<String, Object> accountMasterColumnSelection) {
+        /*
+         * ensuring that the required types are present in the hash map :
+         * predefined_selection_map, complete_codebook_cache, codebook_lookup
+         */
         if (!accountMasterColumnSelection.containsKey(PREDEFINED_SELECTION_MAP)) {
             ConcurrentMap<String, ConcurrentMap<Predefined, ColumnSelection>> predefinedSelectionMap = new ConcurrentHashMap<>();
             accountMasterColumnSelection.put(PREDEFINED_SELECTION_MAP, predefinedSelectionMap);
@@ -266,6 +272,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
             accountMasterColumnSelection.put(CODEBOOK_LOOKUP, codeBookLookup);
         }
 
+        // getting data from the new map
         ConcurrentMap<String, ConcurrentMap<Predefined, ColumnSelection>> predefinedSelectionMap = ((ConcurrentMap<String, ConcurrentMap<Predefined, ColumnSelection>>) accountMasterColumnSelection
                 .get(PREDEFINED_SELECTION_MAP));
         ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>> completeCodeBookCache = (ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>>) accountMasterColumnSelection
@@ -273,31 +280,60 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         ConcurrentMap<String, ConcurrentMap<String, String>> codeBookLookup = (ConcurrentMap<String, ConcurrentMap<String, String>>) accountMasterColumnSelection
                 .get(CODEBOOK_LOOKUP);
 
-        predefinedSelectionMap.put(version, new ConcurrentHashMap<Predefined, ColumnSelection>());
+        if (cachedRefreshDate.get(version.getVersion()) != null
+                && version.getMetadataRefreshDate().compareTo(cachedRefreshDate.get(version.getVersion())) <= 0) {
+            ConcurrentMap<String, ConcurrentMap<Predefined, ColumnSelection>> predefinedSelectionMapOld = ((ConcurrentMap<String, ConcurrentMap<Predefined, ColumnSelection>>) this.accountMasterColumnSelection
+                    .get(PREDEFINED_SELECTION_MAP));
+            ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>> completeCodeBookCacheOld = (ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>>) this.accountMasterColumnSelection
+                    .get(COMLETE_CODEBOOK_CACHE);
+            ConcurrentMap<String, ConcurrentMap<String, String>> codeBookLookupOld = (ConcurrentMap<String, ConcurrentMap<String, String>>) this.accountMasterColumnSelection
+                    .get(CODEBOOK_LOOKUP);
+            /*
+             * updating the meta data by version into the new concurrent map as
+             * per the required type for predefined selection map
+             */
+            predefinedSelectionMap.put(version.getVersion(), predefinedSelectionMapOld.get(version.getVersion()));
+            
+            // for complete code book cache
+            completeCodeBookCache.put(version.getVersion(), completeCodeBookCacheOld.get(version.getVersion()));
+
+            // for code book lookup
+            codeBookLookup.put(version.getVersion(), codeBookLookupOld.get(version.getVersion()));
+            log.info("Version : " + version.getVersion() + "metadataRefreshDate : " + version.getMetadataRefreshDate());
+            log.info("Cached column selection is not updated because the metadata refresh date is the same");
+            return;
+        }
+
+        predefinedSelectionMap.put(version.getVersion(), new ConcurrentHashMap<Predefined, ColumnSelection>());
         for (Predefined selection : Predefined.supportedSelections) {
             try {
-                ColumnSelection cs = getPredefinedColumnSelectionFromDb(selection, version);
-                predefinedSelectionMap.get(version).put(selection, cs);
+                ColumnSelection cs = getPredefinedColumnSelectionFromDb(selection, version.getVersion());
+                predefinedSelectionMap.get(version.getVersion()).put(selection, cs);
             } catch (Exception e) {
                 log.error(e);
             }
         }
-
         ConcurrentMap<String, BitCodeBook> newCodeBookMap = new ConcurrentHashMap<>();
         ConcurrentMap<String, String> newCodeBookLookup = new ConcurrentHashMap<>();
-        constructCodeBookMap(newCodeBookMap, newCodeBookLookup, version);
-        completeCodeBookCache.put(version, newCodeBookMap);
-        codeBookLookup.put(version, newCodeBookLookup);
-        log.info("Loaded " + newCodeBookMap.size() + " bit code books for version " + version + " into cache.");
-        log.info("Loaded " + newCodeBookLookup.size() + " columns in bit code lookup for version " + version);
+        constructCodeBookMap(newCodeBookMap, newCodeBookLookup, version.getVersion());
+        completeCodeBookCache.put(version.getVersion(), newCodeBookMap);
+        codeBookLookup.put(version.getVersion(), newCodeBookLookup);
+        log.info("Loaded " + newCodeBookMap.size() + " bit code books for version " + version.getVersion()
+                + " into cache.");
+        log.info("Loaded " + newCodeBookLookup.size() + " columns in bit code lookup for version "
+                + version.getVersion());
+
+        // update the cache refresh date value
+        log.info("Version : " + version.getVersion() + "metadataRefreshDate : " + version.getMetadataRefreshDate());
+        cachedRefreshDate.put(version.getVersion(), version.getMetadataRefreshDate());
     }
 
     private void loadCaches() {
         ConcurrentMap<String, Object> accountMasterColumnSelectionBak = accountMasterColumnSelection;
         try {
             ConcurrentMap<String, Object> accountMasterColumnSelectionNew = new ConcurrentHashMap<>();
-            List<String> cachedVersions = getAllVersions();
-            for (String version : cachedVersions) {
+            List<DataCloudVersion> cachedVersions = versionEntityMgr.allVerions();
+            for (DataCloudVersion version : cachedVersions) {
                 loadCacheForVersion(version, accountMasterColumnSelectionNew);
             }
             accountMasterColumnSelection = accountMasterColumnSelectionNew;
@@ -305,15 +341,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
             log.error(e);
             accountMasterColumnSelection = accountMasterColumnSelectionBak;
         }
-    }
-
-    private List<String> getAllVersions() {
-        List<DataCloudVersion> dataCloudVersions = versionEntityMgr.allVerions();
-        List<String> versions = new ArrayList<>();
-        for (DataCloudVersion dataCloudVersion : dataCloudVersions) {
-            versions.add(dataCloudVersion.getVersion());
-        }
-        return versions;
     }
 
     private String getLatestVersion() {
