@@ -10,6 +10,8 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
 import com.latticeengines.domain.exposed.ulysses.PrimaryField;
@@ -68,7 +70,19 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
         log.info("Primary Fields: " + primaryFields);
         verifyPrimaryFields(primaryFields);
         Assert.assertNotNull(primaryFieldConfig.getValidationExpression());
-        log.info("Primary Field Default Validation Expression: " + primaryFieldConfig.getValidationExpression().getExpression());
-        Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(), FieldInterpretationCollections.NON_FUZZY_MATCH_VALIDATION_EXPRESSION);
+        log.info("Primary Fields Validation Expression: " + primaryFieldConfig.getValidationExpression().getExpression());
+        FeatureFlagValueMap ffMap = getFeatureFlags();
+        if(ffMap.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())) {
+        	Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(), FieldInterpretationCollections.FUZZY_MATCH_VALIDATION_EXPRESSION);
+        } else {
+        	Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(), FieldInterpretationCollections.NON_FUZZY_MATCH_VALIDATION_EXPRESSION);
+        }
+        
+    }
+    
+    private FeatureFlagValueMap getFeatureFlags() {
+        FeatureFlagValueMap map = getOAuth2RestTemplate().getForObject(
+                getUlyssesRestAPIPort() + "/ulysses/tenant/featureflags", FeatureFlagValueMap.class);
+        return map;
     }
 }
