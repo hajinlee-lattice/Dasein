@@ -2,9 +2,7 @@ package com.latticeengines.admin.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
+import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -106,9 +104,14 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         }
         PLSconfig.setRootPath("/" + PLSComponent.componentName);
 
+        SerializableDocumentDirectory modelingConfig = serviceService
+                .getDefaultServiceConfig(ModelingComponent.componentName);
+        modelingConfig.setRootPath("/" + ModelingComponent.componentName);
+
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
         configDirs.add(PLSconfig);
+        configDirs.add(modelingConfig);
 
         // Orchestrate tenant
         TenantRegistration reg = new TenantRegistration();

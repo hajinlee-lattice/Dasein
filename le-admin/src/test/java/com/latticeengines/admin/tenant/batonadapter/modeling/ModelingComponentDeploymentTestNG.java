@@ -3,6 +3,7 @@ package com.latticeengines.admin.tenant.batonadapter.modeling;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,6 +17,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
+@Component
 public class ModelingComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Autowired

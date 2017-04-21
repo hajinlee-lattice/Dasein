@@ -19,6 +19,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
 import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
+import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
+import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponentDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -35,6 +37,9 @@ public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     @Autowired
     private PLSComponentDeploymentTestNG plsComponentTestNG;
 
+    @Autowired
+    private ModelingComponentDeploymentTestNG modelingComponentDeploymentTestNG;
+
     @Value("${common.test.microservice.url}")
     private String microserviceUrl;
 
@@ -50,6 +55,9 @@ public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         DocumentDirectory confDir = plsComponentTestNG.getPLSDocumentDirectory();
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(confDir);
         properties.put(PLSComponent.componentName, sDir.flatten());
+
+        sDir = new SerializableDocumentDirectory(modelingComponentDeploymentTestNG.getModelingDocumentDirectory());
+        properties.put(ModelingComponent.componentName, sDir.flatten());
 
         sDir = new SerializableDocumentDirectory(batonService.getDefaultConfiguration(getServiceName()));
         properties.put(getServiceName(), sDir.flatten());
