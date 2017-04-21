@@ -48,12 +48,6 @@ public class SetTenantAspect {
         setSecurityContext(customerSpace);
     }
 
-    @Before("execution(* com.latticeengines.metadata.service.impl.DependableObjectServiceImpl.*(..))")
-    public void allMethodsDependableObjectService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        setSecurityContext(customerSpace);
-    }
-
     private void setSecurityContext(String customerSpace) {
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
         if (tenant == null) {

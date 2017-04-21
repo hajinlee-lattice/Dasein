@@ -27,7 +27,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.dependencyclient.exposed.DependencyInterceptor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -89,9 +88,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Autowired
     protected TableTypeHolder tableTypeHolder;
 
-    @Autowired
-    private DependencyInterceptor dependencyInterceptor;
-
     protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
 
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
@@ -104,7 +100,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     }
 
     public void setup() {
-        dependencyInterceptor.setEnabled(false);
         tableLocation1 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(CUSTOMERSPACE1), "x.y.z");
         tableLocation2 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
