@@ -56,10 +56,13 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
     }
 
     @Override
-    protected ExternalColumn updateSavedMetadataColumn(String dataCloudVersion,
-                                                       ColumnMetadata columnMetadata) {
+    protected ExternalColumn updateSavedMetadataColumn(String dataCloudVersion, ColumnMetadata columnMetadata) {
         // no-op
         return externalColumnEntityMgr.findById(columnMetadata.getColumnId(), dataCloudVersion);
     }
 
+    @Override
+    protected boolean refreshCacheNeeded(String version) {
+        return true;
+    }
 }
