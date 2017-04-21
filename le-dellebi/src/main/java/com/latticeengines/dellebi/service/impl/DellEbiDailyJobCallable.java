@@ -51,7 +51,7 @@ public class DellEbiDailyJobCallable implements Callable<Boolean> {
             }
 
         } else {
-            log.error("EBI daily Job Flow did not find file or failed!");
+            log.info("EBI daily Job Flow did not find file or failed!");
         }
 
         long endTime = System.currentTimeMillis();
