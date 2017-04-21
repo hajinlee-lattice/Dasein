@@ -106,8 +106,10 @@ public abstract class BaseFileFlowService implements FileFlowService {
             String zipFilePath = zipDir + "/" + fileName;
             OutputStream os = fs.create(new Path(zipFilePath), true);
             log.info("Starting to download file to HDFS, fileName=" + fileName);
+            Long startTime = System.currentTimeMillis();
             int bytesCopied = FileCopyUtils.copy(is, os);
-            log.info(String.format("Finished downloading file to HDFS, fileName=%s, bytes=%d", fileName, bytesCopied));
+            log.info(String.format("Finished downloading file to HDFS, fileName=%s, bytes=%d, duration=%dmins",
+                    fileName, bytesCopied, (System.currentTimeMillis() - startTime) / 60 / 1000));
 
             if (HdfsUtils.fileExists(yarnConfiguration, txtDir)) {
                 HdfsUtils.rmdir(yarnConfiguration, txtDir);
