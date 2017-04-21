@@ -6,20 +6,23 @@
       </div>
       <hr />
       <div class="section-body with-padding">
-        <div class="button {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'accounts';" ui-sref="home.import.entry.accounts">
-          Accounts
-        </div>
-        <div class="button {{ vm.goState == 'accountfields' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'accountfields';" ui-sref="home.import.entry.accountfields">
-          Account Fields
-        </div>
-        <div class="button {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'contacts';" ui-sref="home.import.entry.contacts">
-          Contacts
-        </div>
-        <div class="button {{ vm.goState == 'contactfields' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'contactfields';" ui-sref="home.import.entry.contactfields">
-          Contact Fields
-        </div>
-        <div class="button {{ vm.goState == 'eloquoa' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'eloquoa';" ui-sref="home.import.entry.eloquoa">
-          Eloquoa Engagements
+
+        <div class="button-tabs">
+          <div class="button account {{ vm.goState == 'accounts' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'accounts';" ui-sref="home.import.entry.accounts">
+            <span>Accounts</span>
+          </div>
+          <div class="button account {{ vm.goState == 'accountfields' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'accountfields';" ui-sref="home.import.entry.accountfields">
+            <span>Account <br/>Custom Fields</span>
+          </div>
+          <div class="button contact {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'contacts';" ui-sref="home.import.entry.contacts">
+            <span>Contacts</span>
+          </div>
+          <div class="button contact {{ vm.goState == 'contactfields' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'contactfields';" ui-sref="home.import.entry.contactfields">
+            <span>Contact <br/>Custom Fields</span>
+          </div>
+          <div class="button eloqua {{ vm.goState == 'eloquoa' ? 'blue' : 'white' }}-button" ng-click="vm.goState = 'eloquoa';" ui-sref="home.import.entry.eloquoa">
+            <span>Eloquoa <br/>Engagements</span>
+          </div>
         </div>
 
         <div class="import-additional-info" ui-view="entry_content"></div>

@@ -43,6 +43,8 @@ angular.module('lp.import.entry', [
         vm.params.importError = false;
         vm.showImportError = false;
 
+        vm.params.infoTemplate = "<p>Please prepare a CSV file with the data you wish to import, using the sample CSV file above as a guide.</p><p>You will be asked to map your fields to the Lattice system, so you may want to keep the uploaded file handy for the next few steps.</p>";
+
         if (columns.length > 0) {
             for (var i = 0; i < columns.length; i++) {
                 if (nonDuplicatedColumns.indexOf(columns[i]) < 0) {
