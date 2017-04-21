@@ -89,31 +89,36 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.addRestriction = function(attribute) {
-        attribute.bucket = attribute.bucket || { max: 'No', min: 'No', is_null_only: false };
+        attribute.range = attribute.range || { max: 'No', min: 'No', is_null_only: false };
         attribute.objectType = attribute.objectType || 'BucketedAccountMaster';
 
         var attributes = this.findAttributes(attribute.columnName);
         var found = false;
         for (var i = 0; i < attributes.length; i++) {
             var attributeMeta = attributes[i];
-            if (BucketRestriction.isEqualBucket(attribute, attributeMeta.attribute)) {
+            if (BucketRestriction.isEqualRange(attribute.range, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
                 found = true;
                 break;
             }
         }
 
         if (!found) {
-            this.restriction.all.push(new BucketRestriction(attribute.columnName, attribute.objectType, attribute.bucket));
+            this.restriction.all.push({
+                bucketRestriction: new BucketRestriction(attribute.columnName, attribute.objectType, attribute.range)
+            });
             this.updateUiState(attribute.columnName, 1, this.restriction.all.length + this.restriction.any.length);
         }
     };
 
     this.removeRestriction = function(attribute) {
+        attribute.range = attribute.range || { max: 'No', min: 'No', is_null_only: false };
+
         var attributes = this.findAttributes(attribute.columnName);
         for (var i = 0; i < attributes.length; i++) {
             var attributeMeta = attributes[i];
-            var columnName = attributeMeta.attribute.bucketRestriction.lhs.columnLookup.column_name;
-            if (attribute.columnName === columnName) {
+            var columnName = BucketRestriction.getColumnName(attributeMeta.bucketRestriction);
+            if (attribute.columnName === columnName &&
+                BucketRestriction.isEqualRange(attribute.range, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
                 this.restriction[attributeMeta.groupKey].splice(attributeMeta.index, 1);
                 this.updateUiState(attribute.columnName, -1, this.restriction.all.length + this.restriction.any.length);
                 break;
@@ -135,7 +140,7 @@ angular.module('common.datacloud.query.service',[
 
         for (var i = 0; i < group.length; i++) {
             if (group[i].bucketRestriction.lhs.columnLookup.column_name === columnName) {
-                results.push({index: i, attribute: group[i], groupKey: groupKey});
+                results.push({index: i, bucketRestriction: group[i].bucketRestriction, groupKey: groupKey});
             }
         }
 
@@ -330,7 +335,7 @@ angular.module('common.datacloud.query.service',[
         for (var groupKey in restriction) {
             var group = restriction[groupKey];
             for (var i = 0; i < group.length; i++) {
-                var columnName = BucketRestriction.getColumnName(group[i]);
+                var columnName = BucketRestriction.getColumnName(group[i].bucketRestriction);
 
                 uiStateFound = this.updateUiStateMapAndGetState(columnName, 1, totalLen);
             }

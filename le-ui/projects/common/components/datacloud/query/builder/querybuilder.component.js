@@ -98,8 +98,8 @@ angular.module('common.datacloud.query.builder', [])
 
             var group = restrictions[groupKey];
             for (var i = 0; i < group.length; i++) {
-                var fieldName = BucketRestriction.getColumnName(group[i]);
-                var objectType = BucketRestriction.getObjectType(group[i]);
+                var fieldName = BucketRestriction.getColumnName(group[i].bucketRestriction);
+                var objectType = BucketRestriction.getObjectType(group[i].bucketRestriction);
                 if (!filterGroup[fieldName]) {
                     var attribute = findAttribute(fieldName, attributesMetadata);
                     if (attribute) {
@@ -129,7 +129,9 @@ angular.module('common.datacloud.query.builder', [])
             for (var fieldName in group) {
                 var attribute = group[fieldName];
                 for (var i = 0; i < attribute.buckets.length; i++) {
-                    restrictions[groupKey].push(new BucketRestriction(fieldName, attribute.objectType, attribute.buckets[i].range));
+                    restrictions[groupKey].push({
+                        bucketRestriction: new BucketRestriction(fieldName, attribute.objectType, attribute.buckets[i].range)
+                    });
                 }
             }
         }

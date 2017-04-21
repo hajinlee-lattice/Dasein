@@ -1,46 +1,38 @@
 angular.module('common.datacloud.query.factory.restriction', [])
 .factory('BucketRestriction', function() {
-    function BucketRestriction(columnName, objectType, bucket) {
-        this.bucketRestriction = {
-            lhs: {
-                columnLookup: {
-                    column_name: columnName,
-                    object_type: objectType || 'BucketedAccountMaster'
-                }
-            },
-            range: bucket
+    function BucketRestriction(columnName, objectType, range) {
+        this.lhs = {
+            columnLookup: {
+                column_name: columnName,
+                object_type: objectType || 'BucketedAccountMaster'
+            }
         };
+        this.range = range;
     }
 
     BucketRestriction.isBucketRestrictionLike = function(bucketRestriction) {
-        return bucketRestriction.hasOwnProperty('bucketRestriction') &&
-            bucketRestriction.bucketRestriction.hasOwnProperty('range');
+        return bucketRestriction instanceof BucketRestriction ||
+            (bucketRestriction.hasOwnProperty('range') &&
+            bucketRestriction.hasOwnProperty('lhs') &&
+            bucketRestriction.lhs.hasOwnProperty('columnLookup'));
     };
 
-    BucketRestriction.isEqualBucket = function (a, b) {
-        if (BucketRestriction.isBucketRestrictionLike(a)) {
-            a = {
-                bucket: a.bucketRestriction.range
-            };
-        }
-
-        if (BucketRestriction.isBucketRestrictionLike(b)) {
-            b = {
-                bucket: b.bucketRestriction.range
-            };
-        }
-
-        return (a.bucket.max === b.bucket.max) &&
-            (a.bucket.min === b.bucket.min) &&
-            (a.bucket.is_null_only === b.bucket.is_null_only);
+    BucketRestriction.isEqualRange = function (a, b) {
+        return (a.max === b.max) &&
+            (a.min === b.min) &&
+            (a.is_null_only === b.is_null_only);
     };
 
-    BucketRestriction.getColumnName = function(bucket) {
-        return bucket.bucketRestriction.lhs.columnLookup.column_name;
+    BucketRestriction.getColumnName = function(bucketRestriction) {
+        return bucketRestriction.lhs.columnLookup.column_name;
     };
 
-    BucketRestriction.getObjectType = function(bucket) {
-        return bucket.bucketRestriction.lhs.columnLookup.object_type || 'BucketedAccountMaster';
+    BucketRestriction.getObjectType = function(bucketRestriction) {
+        return bucketRestriction.lhs.columnLookup.object_type || 'BucketedAccountMaster';
+    };
+
+    BucketRestriction.getRange = function(bucketRestriction) {
+        return bucketRestriction.range;
     };
 
     return BucketRestriction;

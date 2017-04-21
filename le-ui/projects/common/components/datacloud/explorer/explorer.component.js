@@ -784,7 +784,7 @@ angular.module('common.datacloud.explorer', [
 
         DataCloudStore.getAllTopAttributes().then(function(result){
             var timestamp = new Date().getTime();
-            
+
             Object.keys(EnrichmentTopAttributes).forEach(function(catKey) {
                 var category = result[catKey]['SubCategories']; // ben
 
@@ -802,9 +802,9 @@ angular.module('common.datacloud.explorer', [
                     });
                 });
             });
-            
+
             vm.topAttributes = EnrichmentTopAttributes;
-            
+
             var timestamp2 = new Date().getTime();
             console.info('getTopAttributes();\t\t', timestamp2 - timestamp + 'ms');
         });
@@ -869,7 +869,7 @@ angular.module('common.datacloud.explorer', [
                             'HighlightHighlighted',
                             'SegmentChecked'
                         ];
-                    
+
                     map.forEach(function(key){
                         item[key] = enrichment[key];
                     });
@@ -923,7 +923,7 @@ angular.module('common.datacloud.explorer', [
 
         _items['other'] = other || items;
         items = _items;
-        
+
         vm.TileTableItems[category][(subcategory || 'all')] = items;
 
         var timestamp4 = new Date().getTime(),
@@ -933,11 +933,11 @@ angular.module('common.datacloud.explorer', [
             d = (timestamp4 - timestamp3);
 
         console.info(
-            'getTileTableItems();\t', 
-            '[' + (isNaN(a) ? '' : a + ':') + (isNaN(b) ? '' : b + ':') + c + ':' + d + ']\t '+ 
-            (timestamp4 - timestamp) + 'ms\t', 
-            category, '\t', 
-            subcategory, '\t', 
+            'getTileTableItems();\t',
+            '[' + (isNaN(a) ? '' : a + ':') + (isNaN(b) ? '' : b + ':') + c + ':' + d + ']\t '+
+            (timestamp4 - timestamp) + 'ms\t',
+            category, '\t',
+            subcategory, '\t',
             items
         );
 
@@ -1300,13 +1300,12 @@ angular.module('common.datacloud.explorer', [
         var attributeKey = vm.makeSegmentsRangeKey(enrichment, stat.Range),
             fieldName = enrichment.FieldName;
 
-
         vm.segmentAttributeInputRange[attributeKey] = !vm.segmentAttributeInputRange[attributeKey];
         vm.saveSegmentEnabled = true;
         if (vm.segmentAttributeInputRange[attributeKey] === true) {
-            QueryStore.addRestriction({columnName: fieldName, bucket: stat.Range});
+            QueryStore.addRestriction({columnName: fieldName, range: stat.Range});
         } else {
-            QueryStore.removeRestriction({columnName: fieldName, bucket: stat.Range});
+            QueryStore.removeRestriction({columnName: fieldName, range: stat.Range});
         }
     }
 
