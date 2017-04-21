@@ -125,16 +125,17 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         boolean created = restTemplate.postForObject(url, reg, Boolean.class);
         Assert.assertTrue(created);
 
+    }
+
+    @Test(groups = { "deployment" }, enabled = false)
+    public void testUpdateUserStatusBaseOnEmails(){
         BootstrapState state = waitUntilStateIsNotInitial(TestContractId, TestTenantId, PLSComponent.componentName);
         try {
             Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
         } catch (AssertionError e) {
             Assert.fail("Idempotent test failed.", e);
         }
-    }
 
-    @Test(groups = { "deployment" })
-    public void testUpdateUserStatusBaseOnEmails(){
         String payload = "one@lattice-engines.com, two@test.lattice-engines.com, lpl@lattice-engines.com ";
 
         String userName = "lpl@lattice-engines.com";
