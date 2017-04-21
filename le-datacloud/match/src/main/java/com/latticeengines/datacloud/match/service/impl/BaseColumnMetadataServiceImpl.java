@@ -212,16 +212,21 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     }
 
     private void loadCache() {
-        log.info("Start loading black and white column caches for version " + getLatestVersion());
-
-        for (Predefined selection : Predefined.values()) {
-            try {
-                predefinedMetaDataCache.put(selection,
-                        fromMetadataColumnService(selection, getLatestVersion()));
-            } catch (Exception e) {
-                log.error("Failed to load Cache! Type=" + selection, e);
+        if (refreshCacheNeeded()) {
+            String latestVersion = getLatestVersion();
+            log.info("Start loading black and white column caches for version " + latestVersion);
+            for (Predefined selection : Predefined.values()) {
+                try {
+                    predefinedMetaDataCache.put(selection, fromMetadataColumnService(selection, latestVersion));
+                } catch (Exception e) {
+                    log.error("Failed to load Cache! Type=" + selection, e);
+                }
             }
+        } else {
+            log.info("Cache is already update-to-date as per the metadata refresh date so not refreshing it again");
         }
     }
+
+    abstract protected boolean refreshCacheNeeded();
 
 }
