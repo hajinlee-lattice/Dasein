@@ -1,249 +1,96 @@
 {
-    "pipeline_steps": [
-        {
-            "KeyWhenSortingByAscending": 1, 
-            "Name": "addtitleattributesstep", 
-            "ColumnTransformFilePath": "addtitleattributesstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "thldPopPerc": 0.05, 
-                "dsTitleImputation": "emptyDictionary", 
-                "params": "params", 
-                "targetCol": "targetColumn", 
-                "thldCnt": 500, 
-                "titleColName": "Title", 
-                "addedFeatures": "emptyList", 
-                "maxTitleLen": 30
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "AddTitleAttributesStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 2, 
-            "Name": "addcompanyattributesstep", 
-            "ColumnTransformFilePath": "addcompanyattributesstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "maxStrLen": 30, 
-                "dsCompanyImputation": "emptyDictionary", 
-                "companyNameColName": "CompanyName", 
-                "addedFeatures": "emptyList", 
-                "params": "params", 
-                "targetCol": "targetColumn", 
-                "thldCnt": 500, 
-                "thldPopPerc": 0.05
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "AddCompanyNameAttributesStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 3, 
-            "Name": "addemailattributesstep", 
-            "ColumnTransformFilePath": "addemailattributesstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "maxStrLen": 30, 
-                "invalidEmailThld": 5, 
-                "thldPopPerc": 0.05, 
-                "dsEmailImputation": "emptyDictionary", 
-                "params": "params", 
-                "targetCol": "targetColumn", 
-                "thldCnt": 500, 
-                "addedFeatures": "emptyList", 
-                "emailColName": "Email"
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "AddEmailAttributesStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 4, 
-            "Name": "addphoneattributesstep", 
-            "ColumnTransformFilePath": "addphoneattributesstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "phoneColName": "PhoneNumber", 
-                "addedFeatures": "emptyList", 
-                "params": "params", 
-                "targetCol": "targetColumn", 
-                "thldCnt": 500, 
-                "dsPhoneImputation": "emptyDictionary", 
-                "thldPopPerc": 0.05
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "AddPhoneAttributesStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 5, 
-            "Name": "addnameattributesstep", 
-            "ColumnTransformFilePath": "addnameattributesstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "maxStrLen": 30, 
-                "dsNameImputation": "emptyDictionary", 
-                "firstNameColName": "FirstName", 
-                "thldPopPerc": 0.05, 
-                "thldCnt": 500, 
-                "params": "params", 
-                "targetCol": "targetColumn", 
-                "lastNameColName": "LastName", 
-                "addedFeatures": "emptyList"
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "AddNameAttributesStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 6, 
-            "Name": "categoricalgroupingstep", 
-            "ColumnTransformFilePath": "categoricalgroupingstep.py", 
-            "OperatesOnColumns": [
-                "Categorical"
-            ], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "dsCategVarGroupingInfo": "emptyDictionary", 
-                "thresholdError": 3, 
-                "ldcFeatures": [
-                    "HPAEmailSuffix", 
-                    "LE_COUNTRY", 
-                    "LE_INDUSTRY", 
-                    "LDC_State", 
-                    "LDC_PrimaryIndustry", 
-                    "AlexaCategories", 
-                    "AlexaLanguage"
-                ], 
-                "thresholdBinSize": 0.05, 
-                "params": "params", 
-                "targetCol": "targetColumn", 
-                "categoricalColumns": "categoricalColumns", 
-                "groupedFeatures": [], 
-                "maxNumberUniqueValues": 10, 
-                "thresholdSigSize": 0.01
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "CategoricalGroupingStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 7, 
-            "Name": "highnumberuniquevaluesremovalstep", 
-            "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "profile": "dataprofile", 
-                "maxNumberUniqueValues": 200, 
-                "params": "params", 
-                "categoricalColumns": "categoricalColumns"
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "HighNumberUniqueValuesRemovalStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 8, 
-            "Name": "pivotstep", 
-            "ColumnTransformFilePath": "pivotstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "maxCategoricalCount": 10, 
-                "pvalueThreshold": 0.1, 
-                "columnsToPivot": "emptyDictionary", 
-                "minCategoricalCount": 5, 
-                "categoricalColumns": "categoricalColumns", 
-                "dataprofile": "dataprofile"
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "PivotStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 9, 
-            "Name": "assignconversionratetoallcategoricalvalues", 
-            "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py", 
-            "OperatesOnColumns": [
-                "Categorical"
-            ], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "categoricalColumnMapping": "emptyDictionary", 
-                "totalPositiveThreshold": 12, 
-                "targetColumn": "targetColumn", 
-                "categoricalColumns": "categoricalColumns"
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "AssignConversionRateToAllCategoricalValues", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 10, 
-            "Name": "columntypeconversionstep", 
-            "ColumnTransformFilePath": "columntypeconversionstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "columnsToConvert": "columnsToTransform"
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "ColumnTypeConversionStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 11, 
-            "Name": "imputationstep", 
-            "ColumnTransformFilePath": "imputationstep.py", 
-            "OperatesOnColumns": [
-                "Numerical"
-            ], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "columns": "orderedDictContinuousColumns", 
-                "imputationValues": "emptyDictionary", 
-                "targetCol": "targetColumn"
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "ImputationStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 12, 
-            "Name": "featureselectionstep", 
-            "ColumnTransformFilePath": "featureselectionstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {
-                "params": "params", 
-                "enabled": "false", 
-                "numFeatures": 50
-            }, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "FeatureSelectionStep", 
-            "RTSFilePath": null
-        }, 
-        {
-            "KeyWhenSortingByAscending": 13, 
-            "Name": "exportdfstep", 
-            "ColumnTransformFilePath": "exportdfstep.py", 
-            "OperatesOnColumns": [], 
-            "UniqueColumnTransformName": null, 
-            "NamedParameterListToInit": {}, 
-            "LoadFromHdfs": false, 
-            "MainClassName": "ExportDataFrameStep", 
-            "RTSFilePath": null
-        }
-    ], 
-    "pipeline_script": "/app//dataplatform/scripts/pipeline.py", 
-    "pipeline_lib_script": "/app//dataplatform/scripts/lepipeline.tar.gz", 
-    "pipeline_driver": "/app//dataplatform/scripts/pipeline.json", 
-    "name": "ModelQualityDeploymentTest"
+  "pipeline_steps": [
+    {
+      "KeyWhenSortingByAscending": 7,
+      "Name": "highnumberuniquevaluesremovalstep",
+      "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py",
+      "OperatesOnColumns": [],
+      "UniqueColumnTransformName": null,
+      "NamedParameterListToInit": {
+        "profile": "dataprofile",
+        "maxNumberUniqueValues": 200,
+        "params": "params",
+        "categoricalColumns": "categoricalColumns"
+      },
+      "LoadFromHdfs": false,
+      "MainClassName": "HighNumberUniqueValuesRemovalStep",
+      "RTSFilePath": null
+    },
+    {
+      "KeyWhenSortingByAscending": 8,
+      "Name": "pivotstep",
+      "ColumnTransformFilePath": "pivotstep.py",
+      "OperatesOnColumns": [],
+      "UniqueColumnTransformName": null,
+      "NamedParameterListToInit": {
+        "maxCategoricalCount": 10,
+        "pvalueThreshold": 0.1,
+        "columnsToPivot": "emptyDictionary",
+        "minCategoricalCount": 5,
+        "categoricalColumns": "categoricalColumns",
+        "dataprofile": "dataprofile"
+      },
+      "LoadFromHdfs": false,
+      "MainClassName": "PivotStep",
+      "RTSFilePath": null
+    },
+    {
+      "KeyWhenSortingByAscending": 9,
+      "Name": "enumeratedcolumntransformstep",
+      "MainClassName": "EnumeratedColumnTransformStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [
+        "Categorical"
+      ],
+      "NamedParameterListToInit": {
+        "columns": "categoricalColumns"
+      },
+      "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
+    },
+    {
+      "KeyWhenSortingByAscending": 10,
+      "Name": "columntypeconversionstep",
+      "ColumnTransformFilePath": "columntypeconversionstep.py",
+      "OperatesOnColumns": [],
+      "UniqueColumnTransformName": null,
+      "NamedParameterListToInit": {
+        "columnsToConvert": "columnsToTransform"
+      },
+      "LoadFromHdfs": false,
+      "MainClassName": "ColumnTypeConversionStep",
+      "RTSFilePath": null
+    },
+    {
+      "KeyWhenSortingByAscending": 11,
+      "Name": "imputationstep",
+      "ColumnTransformFilePath": "imputationstep.py",
+      "OperatesOnColumns": [
+        "Numerical"
+      ],
+      "UniqueColumnTransformName": null,
+      "NamedParameterListToInit": {
+        "columns": "orderedDictContinuousColumns",
+        "imputationValues": "emptyDictionary",
+        "targetCol": "targetColumn"
+      },
+      "LoadFromHdfs": false,
+      "MainClassName": "ImputationStep",
+      "RTSFilePath": null
+    },
+    {
+      "KeyWhenSortingByAscending": 13,
+      "Name": "exportdfstep",
+      "ColumnTransformFilePath": "exportdfstep.py",
+      "OperatesOnColumns": [],
+      "UniqueColumnTransformName": null,
+      "NamedParameterListToInit": {},
+      "LoadFromHdfs": false,
+      "MainClassName": "ExportDataFrameStep",
+      "RTSFilePath": null
+    }
+  ],
+  "pipeline_script": "/app//dataplatform/scripts/pipeline.py",
+  "pipeline_lib_script": "/app//dataplatform/scripts/lepipeline.tar.gz",
+  "pipeline_driver": "/app//dataplatform/scripts/pipeline.json",
+  "name": "ModelQualityDeploymentTest"
 }
