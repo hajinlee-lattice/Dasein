@@ -98,6 +98,19 @@ Icons
 		background-image: url("/assets/images/ico-analysis-white.png");
 		background-size: 18px;
 	}
+	&.ico-contact-us {
+		background-color: transparent !important;
+        position: relative;
+        &:before {
+            @include font-awesome-inline("\f003");
+            font-size: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateY(-50%) translateX(-50%);
+
+        }
+	}
 	&.ico-marketo-apikey {
 		-webkit-mask-image: url("/assets/images/ico-marketo-apikey.svg");
 		mask: url("/assets/images/ico-marketo-apikey.svg");
