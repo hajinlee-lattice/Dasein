@@ -37,4 +37,9 @@ public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<Ext
     protected String getLatestVersion() {
         return latstRtsCache;
     }
+
+    @Override
+    protected boolean refreshCacheNeeded() {
+        return true;
+    }
 }
