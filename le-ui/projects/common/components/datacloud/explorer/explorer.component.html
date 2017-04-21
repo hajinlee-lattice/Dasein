@@ -107,7 +107,7 @@
                         | orderBy: vm.sortOrder()))
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize
                         | limitTo: vm.pagesize
-                        track by enrichment.FieldNameInTarget"
+                        track by enrichment.FieldName"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
                     ng-class="{'active': enrichment.IsSelected, 'disabled-grayout': enrichment.HighlightHidden && vm.section == 'team'}"
                     vm="vm" enrichment="enrichment">

@@ -217,6 +217,13 @@ angular.module('common.datacloud.explorer', [
         if (DataCloudStore.enrichments) {
             vm.xhrResult(DataCloudStore.enrichments, true);
         } else {
+            if (DemoData) {
+                vm.xhrResult({
+                    data: DemoData.enrichments,
+                    status: 200,
+                });
+            }
+
             for (var j=0; j<iterations; j++) {
                 DataCloudStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
             }
@@ -286,6 +293,7 @@ angular.module('common.datacloud.explorer', [
 
             if(vm.enrichments_completed) {
                 getEnrichmentCube().then(function(result){
+                    Object.assign(result.data, DemoData.cube);
                     vm.cube = result.data;
                 });
             }
@@ -781,7 +789,7 @@ angular.module('common.datacloud.explorer', [
     var getTopAttributes = function(opts) {
         var opts = opts || {},
             category = opts.category;
-console.log('getting', vm.topAttributes, DataCloudStore.topAttributes);
+
         DataCloudStore.getAllTopAttributes().then(function(result){
             var timestamp = new Date().getTime();
 
@@ -837,8 +845,6 @@ console.log('getting', vm.topAttributes, DataCloudStore.topAttributes);
 
         var timestamp = new Date().getTime();
 
-console.log('gotching', vm.topAttributes, DataCloudStore.topAttributes);
-
         if (vm.topAttributes[category]) {
             var timestamp_a = new Date().getTime();
 
@@ -872,11 +878,14 @@ console.log('gotching', vm.topAttributes, DataCloudStore.topAttributes);
                             'SegmentChecked'
                         ];
 
-                    map.forEach(function(key){
-                        item[key] = enrichment[key];
-                    });
+                    if (enrichment) {
+                        map.forEach(function(key){
+                            //console.log(key, enrichment, item);
+                                item[key] = enrichment[key];
+                        });
 
-                    enrichment.NonNullCount = item.NonNullCount;
+                        enrichment.NonNullCount = item.NonNullCount;
+                    }
                 });
             }
             var timestamp_c = new Date().getTime();

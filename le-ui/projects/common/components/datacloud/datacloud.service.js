@@ -207,6 +207,7 @@ angular.module('common.datacloud')
             var vm = this;
 
             DataCloudService.getAllTopAttributes(opts).then(function(response) {
+                Object.assign(response.data, DemoData.topn);
                 vm.topAttributes = response.data; // ben
                 deferred.resolve(vm.topAttributes);
             });

@@ -2,21 +2,6 @@
     .import-additional-info {
         margin: 2em 0;
     }
-    .fa.fa-file-text {
-        position: absolute;
-        right: 0.5em;
-        top: 0.6em;
-    }
-    &, * {
-        -webkit-transition: none;
-        -webkit-animation: none;
-        -moz-transition: none;
-        -moz-animation: none;
-        -ms-transition: none;
-        -ms-animation: none;
-        transition: none;
-        animation: none;
-    }
     .button-tabs {
         display: flex;
         justify-content: space-between;

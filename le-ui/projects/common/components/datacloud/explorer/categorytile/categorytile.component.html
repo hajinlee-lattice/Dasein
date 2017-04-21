@@ -2,7 +2,7 @@
     <span>
         <h2 title="{{category}}">
             <div class="category-icon">
-                <img ng-src="{{vm.categoryIcon(category)}}" />
+                <img ng-src="{{vm.categoryIcon(category)}}" onerror="this.style.display='none'" />
             </div>
             <div class="category-label">{{category}}</div>
         </h2>
