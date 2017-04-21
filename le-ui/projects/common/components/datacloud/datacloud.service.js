@@ -9,7 +9,7 @@ angular.module('common.datacloud')
         this.count = null;
         this.selectedCount = null;
         this.premiumSelectMaximum = null;
-        this.topAttributes = null;
+        this.topAttributes = this.topAttributes || null;;
         this.cube = this.cube || null;
         this.metadataSegments = this.metadataSegments || null;
         this.metadata = this.metadata || {

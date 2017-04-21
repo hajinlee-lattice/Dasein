@@ -781,7 +781,7 @@ angular.module('common.datacloud.explorer', [
     var getTopAttributes = function(opts) {
         var opts = opts || {},
             category = opts.category;
-
+console.log('getting', vm.topAttributes, DataCloudStore.topAttributes);
         DataCloudStore.getAllTopAttributes().then(function(result){
             var timestamp = new Date().getTime();
 
@@ -836,6 +836,8 @@ angular.module('common.datacloud.explorer', [
         }
 
         var timestamp = new Date().getTime();
+
+console.log('gotching', vm.topAttributes, DataCloudStore.topAttributes);
 
         if (vm.topAttributes[category]) {
             var timestamp_a = new Date().getTime();

@@ -190,14 +190,17 @@ Icons
 		mask: url("/assets/images/ico-alerts.svg");
 	}
 	&.ico-scoring {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-scoring.svg");
 		mask: url("/assets/images/ico-scoring.svg");
 	}
 	&.ico-refine {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-refine.svg");
 		mask: url("/assets/images/ico-refine.svg");
 	}
 	&.ico-remodel {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-remodel.svg");
 		mask: url("/assets/images/ico-remodel.svg");
 	}
@@ -206,10 +209,12 @@ Icons
 		mask: url("/assets/images/ico-remodel-large.svg");
 	}
 	&.ico-attributes {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-attributes.svg");
 		mask: url("/assets/images/ico-attributes.svg");
 	}
 	&.ico-leads {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-leads.svg");
 		mask: url("/assets/images/ico-leads.svg");
 	}
