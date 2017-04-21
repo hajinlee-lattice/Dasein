@@ -1,11 +1,5 @@
 package com.latticeengines.dellebi.service.impl;
 
-import com.latticeengines.dellebi.util.LoggingUtils;
-import jcifs.smb.NtStatus;
-import jcifs.smb.NtlmPasswordAuthentication;
-import jcifs.smb.SmbException;
-import jcifs.smb.SmbFile;
-
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,10 +14,16 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dellebi.mbean.SmbFilesMBean;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileType;
+import com.latticeengines.dellebi.util.LoggingUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
+
+import jcifs.smb.NtStatus;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
 
 @Component("smbFileFlowService")
 public class SmbFileFlowServiceImpl extends BaseFileFlowService {
@@ -161,18 +161,14 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
                 return false;
             }
 
-            if (isFailedFile(fileName)) {
+            if (!isProcessingNeeded(fileName)) {
                 return false;
             }
+
             Long lastModifiedTime = file.lastModified();
             if (!isValidForDate(fileName, lastModifiedTime)) {
                 return false;
             }
-
-            if (isProcessedFile(fileName)) {
-                return false;
-            }
-
         } catch (SmbException e) {
             log.error("Can not validate smbFile, name=" + fileName, e);
             return false;

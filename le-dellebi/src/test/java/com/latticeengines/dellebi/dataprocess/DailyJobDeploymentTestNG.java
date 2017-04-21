@@ -4,13 +4,10 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import jcifs.smb.NtlmPasswordAuthentication;
-import jcifs.smb.SmbFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -29,9 +26,12 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 
-public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
 
-    static final Log log = LogFactory.getLog(DailyJobFunctionalTestNG.class);
+public class DailyJobDeploymentTestNG extends DellEbiTestNGBase {
+
+    static final Log log = LogFactory.getLog(DailyJobDeploymentTestNG.class);
 
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
@@ -53,19 +53,19 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
 
     private DellEbiExecutionLog dellEbiExecutionLog;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         dellEbiConfigEntityMgr.initialService();
         smbClean(getValidateNameData());
         smbClean(getStartDateNameData());
     }
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "deployment")
     public void setUpBeforeMethod() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, dataHadoopWorkingPath);
     }
 
-    @Test(groups = "functional", dataProvider = "fileDataProvider", enabled=true)
+    @Test(groups = "deployment", dataProvider = "fileDataProvider", enabled = true)
     public void testExecute(String file, String sourceType, Boolean isProcessed) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "WrongType, order_detail ,Order_Summary ,Warranty,SKU_Global,SKU_Manufacturer,"
@@ -107,7 +107,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
 
     }
 
-    @Test(groups = "functional", dataProvider = "startDateFileDataProvider")
+    @Test(groups = "deployment", dataProvider = "startDateFileDataProvider")
     public void testStartDate(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "quote,order_detail";
@@ -151,7 +151,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         }
     }
 
-    @Test(groups = "functional", dataProvider = "filteredTypeFileDataProvider", enabled = true)
+    @Test(groups = "deployment", dataProvider = "filteredTypeFileDataProvider", enabled = true)
     public void testFilteredTypeFile(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "quote,order_detail,Order_Summary,SKU_Global,SKU_Manufacturer,"

@@ -56,6 +56,24 @@ public abstract class BaseFileFlowService implements FileFlowService {
         return dellEbiConfigEntityMgr.getTypeByFileName(zipFileName);
     }
 
+    protected boolean isProcessingNeeded(String fileName) {
+        DellEbiExecutionLog executionLog = dellEbiExecutionLogEntityMgr.getEntryByFile(fileName);
+        if (executionLog == null) { // File is never processed, 1st try
+            return true;
+        }
+        // if error message contains "is running but stuck", do not retry
+        String error = executionLog.getError();
+        if (error != null && error.contains("is running but stuck")) {
+            return false;
+        }
+        // if status = Failed (NOT TriedFailed), retry
+        if (executionLog.getStatus() == DellEbiExecutionLogStatus.Failed.getStatus()) {
+            return true;
+        }
+        // Files with other status (New, Processing, Processed), do not retry
+        return false;
+    }
+
     protected boolean isFailedFile(String zipFileName) {
 
         boolean rc = false;
