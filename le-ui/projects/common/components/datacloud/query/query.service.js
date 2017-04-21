@@ -88,9 +88,9 @@ angular.module('common.datacloud.query.service',[
         return null;
     };
 
-    var tickTock = true;
     this.addRestriction = function(attribute) {
-        attribute.bucket = (tickTock = !tickTock) ? { max: 'No', min: 'No', is_null_only: false } : { max: 'Yes', min: 'Yes', is_null_only: false };
+        attribute.bucket = attribute.bucket || { max: 'No', min: 'No', is_null_only: false };
+        attribute.objectType = attribute.objectType || 'BucketedAccountMaster';
 
         var attributes = this.findAttributes(attribute.columnName);
         var found = false;
@@ -103,7 +103,7 @@ angular.module('common.datacloud.query.service',[
         }
 
         if (!found) {
-            this.restriction.all.push(new BucketRestriction(attribute.columnName, attribute.bucket));
+            this.restriction.all.push(new BucketRestriction(attribute.columnName, attribute.objectType, attribute.bucket));
             this.updateUiState(attribute.columnName, 1, this.restriction.all.length + this.restriction.any.length);
         }
     };
@@ -330,7 +330,7 @@ angular.module('common.datacloud.query.service',[
         for (var groupKey in restriction) {
             var group = restriction[groupKey];
             for (var i = 0; i < group.length; i++) {
-                var columnName = BucketRestriction.getColumnFromBucket(group[i]);
+                var columnName = BucketRestriction.getColumnName(group[i]);
 
                 uiStateFound = this.updateUiStateMapAndGetState(columnName, 1, totalLen);
             }

@@ -1,10 +1,11 @@
 angular.module('common.datacloud.query.factory.restriction', [])
 .factory('BucketRestriction', function() {
-    function BucketRestriction(columnName, bucket) {
+    function BucketRestriction(columnName, objectType, bucket) {
         this.bucketRestriction = {
             lhs: {
                 columnLookup: {
-                    column_name: columnName
+                    column_name: columnName,
+                    object_type: objectType || 'BucketedAccountMaster'
                 }
             },
             range: bucket
@@ -34,8 +35,12 @@ angular.module('common.datacloud.query.factory.restriction', [])
             (a.bucket.is_null_only === b.bucket.is_null_only);
     };
 
-    BucketRestriction.getColumnFromBucket = function(bucket) {
+    BucketRestriction.getColumnName = function(bucket) {
         return bucket.bucketRestriction.lhs.columnLookup.column_name;
+    };
+
+    BucketRestriction.getObjectType = function(bucket) {
+        return bucket.bucketRestriction.lhs.columnLookup.object_type || 'BucketedAccountMaster';
     };
 
     return BucketRestriction;
