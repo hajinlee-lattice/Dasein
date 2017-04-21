@@ -27,8 +27,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.newrelic.api.agent.Trace;
 
-public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
-        implements MetadataColumnService<E> {
+public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
 
     private static final Log log = LogFactory.getLog(BaseMetadataColumnServiceImpl.class);
 
@@ -62,8 +61,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
     }
 
     @Override
-    public void updateMetadataColumns(String dataCloudVersion,
-            List<ColumnMetadata> columnMetadatas) {
+    public void updateMetadataColumns(String dataCloudVersion, List<ColumnMetadata> columnMetadatas) {
         List<E> metadataColumns = new ArrayList<>();
         for (ColumnMetadata columnMetadata : columnMetadatas) {
             metadataColumns.add(updateSavedMetadataColumn(dataCloudVersion, columnMetadata));
@@ -98,8 +96,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
                 }
             }
         } else {
-            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache()
-                    .get(dataCloudVersion);
+            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache().get(dataCloudVersion);
             for (String columnId : columnIds) {
                 if (blackColumnCache != null && blackColumnCache.contains(columnId)) {
                     toReturn.add(null);
@@ -152,8 +149,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
             return null;
         }
         if (column == null) {
-            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache()
-                    .get(dataCloudVersion);
+            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache().get(dataCloudVersion);
             if (blackColumnCache == null) {
                 blackColumnCache = new ConcurrentSkipListSet<>();
                 getBlackColumnCache().put(dataCloudVersion, blackColumnCache);
@@ -174,20 +170,22 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
     private void loadCache() {
         List<String> allVersions = getAllVersions();
         for (String dataCloudVersion : allVersions) {
-            log.info("Start loading black and white column caches for version " + dataCloudVersion);
-            List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
-            ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
-            for (E column : columns) {
-                whiteColumnCache.put(column.getColumnId(), column);
+            if (refreshCacheNeeded(dataCloudVersion)) {
+                log.info("Start loading black and white column caches for version " + dataCloudVersion);
+                List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+                ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
+                for (E column : columns) {
+                    whiteColumnCache.put(column.getColumnId(), column);
+                }
+                synchronized (getWhiteColumnCache()) {
+                    getWhiteColumnCache().put(dataCloudVersion, whiteColumnCache);
+                }
+                synchronized (getBlackColumnCache()) {
+                    getBlackColumnCache().clear();
+                }
+                log.info(
+                        "Loaded " + whiteColumnCache.size() + " columns into white cache. version=" + dataCloudVersion);
             }
-            synchronized (getWhiteColumnCache()) {
-                getWhiteColumnCache().put(dataCloudVersion, whiteColumnCache);
-            }
-            synchronized (getBlackColumnCache()) {
-                getBlackColumnCache().clear();
-            }
-            log.info("Loaded " + whiteColumnCache.size() + " columns into white cache. version="
-                    + dataCloudVersion);
         }
     }
 
@@ -200,5 +198,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
     abstract protected List<String> getAllVersions();
 
     abstract protected E updateSavedMetadataColumn(String dataCloudVersion, ColumnMetadata columnMetadata);
+
+    abstract protected boolean refreshCacheNeeded(String version);
 
 }
