@@ -19,6 +19,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.IsUserModifiable;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.db.IsUserModifiable;
 @Table(name = "BUCKET_METADATA")
 @Entity
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
 
     private static final long serialVersionUID = 5914215732568807732L;
