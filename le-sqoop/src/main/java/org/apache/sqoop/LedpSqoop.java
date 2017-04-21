@@ -19,7 +19,6 @@ import com.cloudera.sqoop.util.OptionsFileUtil;
 public class LedpSqoop extends Sqoop {
     protected static final Log log = LogFactory.getLog(LedpSqoop.class);
 
-
     private SqoopTool tool;
     private SqoopOptions options;
     private String[] childPrgmArgs;
@@ -40,35 +39,37 @@ public class LedpSqoop extends Sqoop {
      * does not call System.exit() as main() will.
      */
     public static int runTool(String[] args, Configuration conf) {
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        URL[] urls = ((URLClassLoader)cl).getURLs();
-        StringBuilder sb = new StringBuilder();
-        for (URL url: urls) {
-            sb.append(url.getFile() + "\n");
-        }
-        log.info("Sqoop Classpath:\n" + sb.toString());
+        synchronized (LedpSqoop.class) {
+            ClassLoader cl = ClassLoader.getSystemClassLoader();
+            URL[] urls = ((URLClassLoader) cl).getURLs();
+            StringBuilder sb = new StringBuilder();
+            for (URL url : urls) {
+                sb.append(url.getFile() + "\n");
+            }
+            log.info("Sqoop Classpath:\n" + sb.toString());
 
-        // Expand the options
-        String[] expandedArgs = null;
-        try {
-            expandedArgs = OptionsFileUtil.expandArguments(args);
-        } catch (Exception ex) {
-            LOG.error("Error while expanding arguments", ex);
-            System.err.println(ex.getMessage());
-            System.err.println("Try 'sqoop help' for usage.");
-            return 1;
-        }
+            // Expand the options
+            String[] expandedArgs = null;
+            try {
+                expandedArgs = OptionsFileUtil.expandArguments(args);
+            } catch (Exception ex) {
+                LOG.error("Error while expanding arguments", ex);
+                System.err.println(ex.getMessage());
+                System.err.println("Try 'sqoop help' for usage.");
+                return 1;
+            }
 
-        String toolName = expandedArgs[0];
-        Configuration pluginConf = SqoopTool.loadPlugins(conf);
-        SqoopTool tool = SqoopTool.getTool(toolName);
-        if (null == tool) {
-            System.err.println("No such sqoop tool: " + toolName + ". See 'sqoop help'.");
-            return 1;
-        }
+            String toolName = expandedArgs[0];
+            Configuration pluginConf = SqoopTool.loadPlugins(conf);
+            SqoopTool tool = SqoopTool.getTool(toolName);
+            if (null == tool) {
+                System.err.println("No such sqoop tool: " + toolName + ". See 'sqoop help'.");
+                return 1;
+            }
 
-        LedpSqoop sqoop = new LedpSqoop(tool, pluginConf);
-        return sqoop.run(Arrays.copyOfRange(expandedArgs, 1, expandedArgs.length));
+            LedpSqoop sqoop = new LedpSqoop(tool, pluginConf);
+            return sqoop.run(Arrays.copyOfRange(expandedArgs, 1, expandedArgs.length));
+        }
     }
 
     public int run(String[] args) {
@@ -104,7 +105,8 @@ public class LedpSqoop extends Sqoop {
 
                 LOG.info("SqoopTool Run Options: " + options.toString());
                 try {
-                    LOG.info("SqoopTool Options: " + LedpSqoop.class.getClassLoader().getResource("org/apache/sqoop/LedpSqoop.class"));
+                    LOG.info("SqoopTool Options: "
+                            + LedpSqoop.class.getClassLoader().getResource("org/apache/sqoop/LedpSqoop.class"));
                 } catch (Exception e) {
                     LOG.info("Could not get location for Sqoop jar" + e.getMessage());
                 }
