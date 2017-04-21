@@ -1138,13 +1138,7 @@ console.log('gotching', vm.topAttributes, DataCloudStore.topAttributes);
     }
 
     var getEnrichmentCube = function() {
-        var deferred = $q.defer();
-
-        DataCloudStore.getCube().then(function(result) {
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
+        return DataCloudStore.getCube();
     }
 
     vm.makeSegmentsRangeKey = function(enrichment, range){

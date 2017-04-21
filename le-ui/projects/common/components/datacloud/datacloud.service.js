@@ -220,25 +220,22 @@ angular.module('common.datacloud')
         this.topAttributes[category] = items;
     }
 
-    var _cubeCalled = null;
     this.getCube = function() {
-        if (!_cubeCalled) {
-            var deferred = $q.defer();
-            if (this.cube) {
-                deferred.resolve(this.cube);
-            } else {
-                DataCloudService.getCube().then(function(response){
-                    DataCloudStore.setCube(response);
-                    deferred.resolve(response);
-                });
-            }
-            _cubeCalled = deferred.promise;
+        if (this.cube) {
+            return this.cube;
         }
-        return _cubeCalled;
+
+        var deferred = $q.defer();
+        DataCloudService.getCube().then(function(response){
+            deferred.resolve(response);
+        });
+
+        DataCloudStore.setCube(deferred.promise);
+        return deferred.promise;
     }
 
-    this.setCube = function(items) {
-        this.cube = items;
+    this.setCube = function(cubePromise) {
+        this.cube = cubePromise;
     }
 
     this.getMetadataSegments = function() {
