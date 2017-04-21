@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
@@ -186,7 +185,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         latticeSchemaField.setName(attribute.getName());
         // latticeSchemaField.setFieldType(attribute.getPhysicalDataType());
-        latticeSchemaField.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+        latticeSchemaField.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
         if (!attribute.getNullable()) {
             latticeSchemaField.setRequiredType(RequiredType.Required);
 
@@ -203,25 +202,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         return latticeSchemaField;
-    }
-
-    private UserDefinedType getFieldTypeFromPhysicalType(String attributeType) {
-        UserDefinedType fieldType;
-        switch (attributeType.toUpperCase()) {
-        case "BOOLEAN":
-            fieldType = UserDefinedType.BOOLEAN;
-            break;
-        case "LONG":
-        case "INT":
-        case "DOUBLE":
-            fieldType = UserDefinedType.NUMBER;
-            break;
-        case "STRING":
-        default:
-            fieldType = UserDefinedType.TEXT;
-            break;
-        }
-        return fieldType;
     }
 
     private String getRequiredIfNoField(List<InputValidatorWrapper> inputValidatorWrappers) {

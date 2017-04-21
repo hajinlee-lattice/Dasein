@@ -8,24 +8,25 @@ public enum UserDefinedType {
 
     TEXT(Schema.Type.STRING, FieldType.STRING), //
     NUMBER(Schema.Type.DOUBLE, FieldType.FLOAT), //
-    BOOLEAN(Schema.Type.BOOLEAN, FieldType.BOOLEAN);
-    
+    BOOLEAN(Schema.Type.BOOLEAN, FieldType.BOOLEAN), //
+    DATE(Schema.Type.LONG, FieldType.LONG); //
+
     private Schema.Type avroType;
     private FieldType fieldType;
-    
+
     UserDefinedType(Schema.Type avroType, FieldType fieldType) {
         this.avroType = avroType;
         this.fieldType = fieldType;
     }
-    
+
     public Schema.Type getAvroType() {
         return avroType;
     }
-    
+
     public FieldType getFieldType() {
         return fieldType;
     }
-    
+
     public Object cast(String value) {
         if (avroType == Schema.Type.DOUBLE) {
             return Double.valueOf(value);

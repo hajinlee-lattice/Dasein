@@ -2,8 +2,11 @@ package com.latticeengines.pls.metadata.resolution;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +28,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -36,13 +40,11 @@ public class MetadataResolver {
     private static Logger log = Logger.getLogger(MetadataResolver.class);
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false", "1", "0");
 
-    private static final Set<String> BOOLEAN_SET = Sets
-            .newHashSet(new String[]{"Interest_esb__c", "Interest_tcat__c", "kickboxAcceptAll",
-                    "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
-                    "HasAnypointLogin", "HasCEDownload", "HasEEDownload"});
-    private static final Set<String> STR_SET = Sets
-            .newHashSet(new String[]{"Lead_Source_Asset__c", "kickboxStatus", "SICCode",
-                    "Source_Detail__c", "Cloud_Plan__c"});
+    private static final Set<String> BOOLEAN_SET = Sets.newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c",
+            "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
+            "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
+    private static final Set<String> STR_SET = Sets.newHashSet(
+            new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode", "Source_Detail__c", "Cloud_Plan__c" });
 
     private String csvPath;
     private FieldMappingDocument fieldMappingDocument;
@@ -87,17 +89,16 @@ public class MetadataResolver {
         log.info("Current header list: " + headerFields);
         List<Attribute> attrs = new ArrayList<>();
         for (final String header : headerFields) {
-            Attribute attr = Iterables.find(result.metadata.getAttributes(),
-                    new Predicate<Attribute>() {
-                        @Override
-                        public boolean apply(Attribute input) {
-                            if (input.getDisplayName().equals(header)) {
-                                return true;
-                            }
-                            return false;
-                        }
+            Attribute attr = Iterables.find(result.metadata.getAttributes(), new Predicate<Attribute>() {
+                @Override
+                public boolean apply(Attribute input) {
+                    if (input.getDisplayName().equals(header)) {
+                        return true;
+                    }
+                    return false;
+                }
 
-                    });
+            });
             attrs.add(attr);
         }
         result.metadata.setAttributes(attrs);
@@ -122,8 +123,7 @@ public class MetadataResolver {
                     if (fieldMapping.getMappedField().equals(attribute.getName())) {
                         foundMatchingAttribute = true;
                         attribute.setDisplayName(fieldMapping.getUserField());
-                        attribute
-                                .setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
+                        attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
                         break;
                     }
                 }
@@ -135,8 +135,7 @@ public class MetadataResolver {
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()) {
-                attributes.add(getAttributeFromFieldName(fieldMapping.getUserField(),
-                        fieldMapping.getFieldType()));
+                attributes.add(getAttributeFromFieldName(fieldMapping.getUserField(), fieldMapping.getFieldType()));
             }
         }
 
@@ -238,8 +237,7 @@ public class MetadataResolver {
 
                     knownColumn.setUserField(header);
                     knownColumn.setMappedField(attribute.getName());
-                    knownColumn.setFieldType(
-                            getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+                    knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                     knownColumn.setMappedToLatticeField(true);
                     result.fieldMappings.add(knownColumn);
                     break;
@@ -278,13 +276,15 @@ public class MetadataResolver {
         }
     }
 
-    private UserDefinedType getFieldTypeFromPhysicalType(String attributeType) {
+    public static UserDefinedType getFieldTypeFromPhysicalType(String attributeType) {
         UserDefinedType fieldType;
         switch (attributeType.toUpperCase()) {
         case "BOOLEAN":
             fieldType = UserDefinedType.BOOLEAN;
             break;
         case "LONG":
+            fieldType = UserDefinedType.DATE;
+            break;
         case "INT":
         case "DOUBLE":
             fieldType = UserDefinedType.NUMBER;
@@ -318,8 +318,7 @@ public class MetadataResolver {
 
         String fieldType;
         if (userDefinedType == null) {
-            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString()
-                    .toLowerCase();
+            fieldType = getFieldTypeFromColumnContent(fieldName).getAvroType().toString().toLowerCase();
         } else {
             fieldType = userDefinedType.getAvroType().toString().toLowerCase();
         }
@@ -332,6 +331,8 @@ public class MetadataResolver {
         attribute.setFundamentalType(getFundamentalTypeFromFieldType(fieldType));
         attribute.setStatisticalType(getStatisticalTypeFromFieldType(fieldType));
         attribute.setNullable(true);
+        attribute.setLogicalDataType(
+                userDefinedType == UserDefinedType.DATE ? LogicalDataType.Date : attribute.getLogicalDataType());
         attribute.setTags(ModelingMetadata.INTERNAL_TAG);
 
         return attribute;
@@ -375,8 +376,7 @@ public class MetadataResolver {
     }
 
     private UserDefinedType getFieldTypeFromColumnContent(String columnHeaderName) {
-        String mappedFieldName = ValidateFileHeaderUtils
-                .convertFieldNameToAvroFriendlyFormat(columnHeaderName);
+        String mappedFieldName = ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(columnHeaderName);
         if (mappedFieldName.startsWith("Activity_Count_")) {
             return UserDefinedType.NUMBER;
         } else if (BOOLEAN_SET.contains(mappedFieldName)) {
@@ -392,11 +392,9 @@ public class MetadataResolver {
         try {
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
             InputStream is = fs.open(new Path(csvPath));
-            columnFields = ValidateFileHeaderUtils.getCSVColumnValues(columnHeaderName, is,
-                    closeableResourcePool);
+            columnFields = ValidateFileHeaderUtils.getCSVColumnValues(columnHeaderName, is, closeableResourcePool);
 
-            log.info(String.format("column with header %s is: %s", columnHeaderName,
-                    columnFields.toString()));
+            log.info(String.format("column with header %s is: %s", columnHeaderName, columnFields.toString()));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         } finally {
@@ -412,11 +410,38 @@ public class MetadataResolver {
             fundamentalType = UserDefinedType.BOOLEAN;
         } else if (isDoubleTypeColumn(columnFields)) {
             fundamentalType = UserDefinedType.NUMBER;
+        } else if (isDateTypeColumn(columnFields)) {
+            fundamentalType = UserDefinedType.DATE;
         } else {
             fundamentalType = UserDefinedType.TEXT;
         }
 
         return fundamentalType;
+    }
+
+    private boolean isDateTypeColumn(List<String> columnFields) {
+        String[] supportedDateFormat = { "YYYY-MM-DD", "YYYY-MM-DD'T'HH:mm:ss.sssZ" };
+        for (String columnField : columnFields) {
+            Date date = null;
+            for (String format : supportedDateFormat) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat(format);
+                    date = sdf.parse(columnField);
+                    if (!columnField.equals(sdf.format(date))) {
+                        date = null;
+                    }
+                } catch (ParseException ex) {
+                }
+                if (date != null) {
+                    break;
+                }
+                date = null;
+            }
+            if (date == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isBooleanTypeColumn(List<String> columnFields) {

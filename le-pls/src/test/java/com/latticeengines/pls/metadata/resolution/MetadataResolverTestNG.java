@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
@@ -54,13 +53,10 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     String hdfsPath2 = "/tmp/test_metadata_resolution2";
 
-    @Autowired
-    private MetadataProxy metadataProxy;
-
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {
-        String path = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath();
+        String path = ClassLoader
+                .getSystemResource("com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath();
 
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath);
@@ -75,11 +71,11 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     public void getFieldMappingsTest() {
         MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
 
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(SchemaRepository
-                .instance().getSchema(SchemaInterpretation.SalesforceAccount));
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(
+                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
 
-        Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column", "Boolean Column",
-                "Number Column", "Almost Boolean Column" });
+        Set<String> expectedUnknownColumns = Sets
+                .newHashSet(new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column" });
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -89,8 +85,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
             }
         }
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(
-                SchemaInterpretation.SalesforceAccount));
+        resolver.calculateBasedOnFieldMappingDocument(
+                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
 
         assertTrue(resolver.isMetadataFullyDefined());
         Table table = resolver.getMetadata();
@@ -135,8 +131,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @Test(groups = "functional")
     public void getMappingFromDocument_mapUnknownColumnToLatticeAttr_assertMappedCorrectly() {
         MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(SchemaRepository
-                .instance().getSchema(SchemaInterpretation.SalesforceAccount));
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(
+                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equals("Some Column")) {
@@ -149,8 +145,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         }
 
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(
-                SchemaInterpretation.SalesforceAccount));
+        resolver.calculateBasedOnFieldMappingDocument(
+                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
 
         Table table = resolver.getMetadata();
         assertEquals(table.getAttribute(InterfaceName.Industry).getDisplayName(), "Some Column");
@@ -159,8 +155,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @Test(groups = "functional")
     public void getMappingFromDocument_mapUnknownColumnToIgnore_assertColumnsIgnored() {
         MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(SchemaRepository.instance().getSchema(
-                SchemaInterpretation.SalesforceAccount));
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(
+                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
 
         assertFalse(resolver.isMetadataFullyDefined());
         List<String> ignoredFields = new ArrayList<>();
@@ -171,15 +167,16 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         }
         fieldMappingDocument.setIgnoredFields(ignoredFields);
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(
-                SchemaInterpretation.SalesforceAccount));
+        resolver.calculateBasedOnFieldMappingDocument(
+                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
 
         assertTrue(resolver.isMetadataFullyDefined());
         Table table = resolver.getMetadata();
         for (Attribute attribute : table.getAttributes()) {
             if (ignoredFields.contains(attribute.getDisplayName())) {
                 log.info("The ignored field is " + attribute.getDisplayName());
-                assertEquals(attribute.getApprovedUsage(), Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE, ModelingMetadata.IGNORED_APPROVED_USAGE));
+                assertEquals(attribute.getApprovedUsage(),
+                        Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE, ModelingMetadata.IGNORED_APPROVED_USAGE));
             }
         }
     }
@@ -187,8 +184,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @Test(groups = "functional")
     public void getMappingFromDocument_setColumnToSpecificType_assertTypeIsSet() {
         MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(SchemaRepository.instance().getSchema(
-                SchemaInterpretation.SalesforceAccount));
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(
+                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equals("Almost Boolean Column")) {
@@ -201,8 +198,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         }
 
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(
-                SchemaInterpretation.SalesforceAccount));
+        resolver.calculateBasedOnFieldMappingDocument(
+                SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
         assertTrue(resolver.isMetadataFullyDefined());
 
         Table table = resolver.getMetadata();
@@ -212,8 +209,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void testCalculateBasedOnExistingMetadata() throws IOException {
-        String path = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/table.json").getPath();
+        String path = ClassLoader
+                .getSystemResource("com/latticeengines/pls/service/impl/fileuploadserviceimpl/table.json").getPath();
 
         Table table = JsonUtils.deserialize(FileUtils.readFileToString(new File(path)), Table.class);
         table.getAttributeFromDisplayName("Some Column").setApprovedUsage(ApprovedUsage.NONE.toString());
@@ -226,8 +223,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 List<String> tags = attr.getTags();
 
                 if (schema.getAttribute(attr.getName()) == null
-                        && (approvedUsages == null || approvedUsages.isEmpty() || approvedUsages.get(0).equals(
-                                ApprovedUsage.NONE.toString())) //
+                        && (approvedUsages == null || approvedUsages.isEmpty()
+                                || approvedUsages.get(0).equals(ApprovedUsage.NONE.toString())) //
                         || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()))) {
                     log.info("Removing attr:" + attr.getName());
                     return true;
