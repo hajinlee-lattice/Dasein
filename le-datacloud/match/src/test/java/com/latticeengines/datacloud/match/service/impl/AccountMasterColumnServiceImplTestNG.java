@@ -103,6 +103,7 @@ public class AccountMasterColumnServiceImplTestNG extends DataCloudMatchFunction
         accountMasterColumnEntityMgr.create(ACCOUNT_MASTER_COLUMN_1);
         accountMasterColumnEntityMgr.create(ACCOUNT_MASTER_COLUMN_2);
         accountMasterColumnEntityMgr.create(ACCOUNT_MASTER_COLUMN_3);
+
     }
 
     @Test(groups = "functional")
@@ -232,6 +233,7 @@ public class AccountMasterColumnServiceImplTestNG extends DataCloudMatchFunction
         version1.setAccountLookupHdfsVersion("version99");
         version1.setMajorVersion("99.0");
         version1.setStatus(DataCloudVersion.Status.APPROVED);
+        version1.setMetadataRefreshDate(new Date());
 
         DataCloudVersion version2 = new DataCloudVersion();
         version2.setVersion(DATA_CLOUD_VERSION_2);
@@ -240,6 +242,7 @@ public class AccountMasterColumnServiceImplTestNG extends DataCloudMatchFunction
         version2.setAccountLookupHdfsVersion("version99");
         version2.setMajorVersion("99.0");
         version2.setStatus(DataCloudVersion.Status.NEW);
+        version2.setMetadataRefreshDate(new Date());
 
         DataCloudVersion version3 = new DataCloudVersion();
         version3.setVersion(DATA_CLOUD_VERSION_3);
@@ -248,6 +251,7 @@ public class AccountMasterColumnServiceImplTestNG extends DataCloudMatchFunction
         version3.setAccountLookupHdfsVersion("version99");
         version3.setMajorVersion("99.0");
         version3.setStatus(DataCloudVersion.Status.DEPRECATED);
+        version3.setMetadataRefreshDate(new Date());
 
         return Arrays.asList(version1, version2, version3);
     }
