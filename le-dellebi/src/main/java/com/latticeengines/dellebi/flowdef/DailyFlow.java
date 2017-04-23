@@ -109,6 +109,7 @@ public class DailyFlow {
         if (fileName == null) {
             log.info("There's no valid file or can not get file!");
             context.setProperty(DellEbiFlowService.RESULT_KEY, Boolean.FALSE);
+            context.setProperty(DellEbiFlowService.NO_FILE_FOUND, Boolean.TRUE);
             return context;
         }
 

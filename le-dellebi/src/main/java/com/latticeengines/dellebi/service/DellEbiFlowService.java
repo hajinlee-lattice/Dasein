@@ -14,6 +14,7 @@ public interface DellEbiFlowService {
     public static final String CFG_LIST = "CFG_LIST";
     public static final String TYPES_LIST = "TYPES_LIST";
     public static final String RESULT_KEY = "RESULT";
+    public static final String NO_FILE_FOUND = "NO_FILE_FOUND";
 
     public static final String START_TIME = "startTime";
 

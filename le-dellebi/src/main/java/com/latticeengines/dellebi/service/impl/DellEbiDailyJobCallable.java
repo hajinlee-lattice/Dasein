@@ -51,7 +51,12 @@ public class DellEbiDailyJobCallable implements Callable<Boolean> {
             }
 
         } else {
-            log.info("EBI daily Job Flow did not find file or failed!");
+        	boolean noFileFound = context.getProperty(DellEbiFlowService.NO_FILE_FOUND, Boolean.class);
+        	if (noFileFound) {
+                log.info("EBI daily Job Flow didn't find any file to process.");        		        		
+        	} else {
+                log.info("EBI daily Job Flow failed!");        		
+        	}
         }
 
         long endTime = System.currentTimeMillis();
