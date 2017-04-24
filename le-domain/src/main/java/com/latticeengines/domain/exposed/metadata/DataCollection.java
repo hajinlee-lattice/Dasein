@@ -18,6 +18,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
@@ -36,7 +37,8 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_DATA_COLLECTION")
+@javax.persistence.Table(name = "METADATA_DATA_COLLECTION", uniqueConstraints = @UniqueConstraint(columnNames = {
+        "TENANT_ID", "NAME", "TYPE" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
