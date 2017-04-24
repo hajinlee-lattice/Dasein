@@ -18,14 +18,14 @@
                     <li class="rating-count">Records</li>
                 </ul>
             </li>
-            <li class="lattice-rating-list" ng-repeat="rating in vm.latticeRatings.ratings | limitTo:6">
+            <li class="lattice-rating-list {{rating.Classname}}" ng-repeat="rating in vm.latticeRatings.ratings | limitTo:6">
                 <ul class="rating-item">
                     <li class="rating-label">
                         <input type="checkbox" />
                         {{rating.Lbl}}
                     </li>
                     <li class="rating-bar">
-                        <div style="width: 100%;" ng-style="{width:vm.percentage(rating.Lift, vm.latticeRatings.top_lift, '%', 0)}">
+                        <div class="{{rating.Classname}}" style="width: 100%;" ng-style="{width:vm.percentage(rating.Lift, vm.latticeRatings.top_lift, '%', 0)}">
                     </li>
                     <li class="rating-lift">{{rating.Lift.toFixed(1)}}x</li>
                     <li class="rating-count">{{rating.Cnt|number}}</li>

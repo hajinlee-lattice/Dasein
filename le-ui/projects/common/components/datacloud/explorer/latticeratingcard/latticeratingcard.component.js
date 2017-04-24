@@ -30,7 +30,8 @@ angular
                         var bucket_data = {
                             Lbl: bucket.bucket_name,
                             Cnt: bucket.num_leads,
-                            Lift: bucket.lift
+                            Lift: bucket.lift,
+                            Classname: bucket.bucket_name.replace('+', '-plus')
                         }
                         data.ratings.push(bucket_data);
                     });

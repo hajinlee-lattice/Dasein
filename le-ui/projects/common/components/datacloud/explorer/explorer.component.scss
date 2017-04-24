@@ -370,6 +370,7 @@
             .lattice-ratings {
                 position: relative;
                 .lattice-rating-list {
+                    font-size: 11px;
                     &:nth-child(even){
                         background: #eff3f4;
                     }
@@ -397,11 +398,29 @@
                                 @include flex-item(1 1 auto);
                                 margin-right: 20px;
                                 & > div {
-                                    background: #457eba;
+                                    background: #5097DC;
                                     height: 80%;
                                     position: relative;
                                     top: 50%;
                                     transform: translateY(-50%);
+                                    &.A-plus {
+                                        background-color: #4BA6FF;
+                                    }
+                                    &.A {
+                                        background-color: #5097DC;
+                                    }
+                                    &.B {
+                                        background-color: #4188CD;
+                                    }
+                                    &.C { 
+                                        background-color: #337ABF;
+                                    }
+                                    &.D { 
+                                        background-color: #2067AC;
+                                    }
+                                    &.F { 
+                                        background-color: #0D5499;
+                                    }
                                 }
                             }
                         }
@@ -409,6 +428,7 @@
                     &:nth-child(1) {
                         color: #aaa;
                     }
+                    /*
                     &:nth-child(2) .rating-bar > div {
                         opacity: .5;
                     }
@@ -427,6 +447,7 @@
                     &:nth-child(7) .rating-bar > div {
                         opacity: 10;
                     }
+                    */
                 }
                 .rating-slices {
                     position: absolute;
@@ -808,6 +829,7 @@
                         }
                     }
                 }
+                /*
                 &:nth-child(2) > .column.data.lift em div {
                     opacity: .4;
                 }
@@ -823,6 +845,7 @@
                 &:nth-child(6) > .column.data.lift em div {
                     opacity: 1;
                 }
+                */
             }
         }
         .attributes-more {

@@ -77,6 +77,14 @@ span.ico-container {
                 height: 22px;
                 width: 22px;
             }
+            &.ico-attributes {
+                height: 22px;
+                width: 22px;
+            }
+            &.ico-eloqua {
+                height: 22px;
+                width: 22px;
+            }
         }
     }
     .ico {
@@ -510,6 +518,16 @@ html.no-cssmask {
         text-transform: uppercase;
         letter-spacing: 2px;
     }
+    &.model-details-page {
+        .page-icon,
+        .page-name,
+        .model-name {
+            font-size: 18px;
+        }
+        .page-name {
+            margin-top: 21px;
+        }
+    }
     .page-icon {
         margin-left: 1em;
         background-color: rgba(239, 106, 48, 1);
@@ -528,7 +546,8 @@ html.no-cssmask {
         max-width: 500px;
         padding-right: 15px;
         border-right: 1px solid #ededed;
-        padding-left: 20px;
+        padding-left: 25px;
+        margin-left: 40px;
         margin-top: 20px;
         font-size: 16px;
         &:before {

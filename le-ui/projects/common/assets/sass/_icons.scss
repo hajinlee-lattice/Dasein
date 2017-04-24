@@ -232,18 +232,22 @@ Icons
 		mask: url("/assets/images/ico-leads.svg");
 	}
 	&.ico-marketo {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-marketo.svg");
 		mask: url("/assets/images/ico-marketo.svg");
 	}
 	&.ico-eloqua {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-app-settings.svg");
 		mask: url("/assets/images/ico-app-settings.svg");
 	}
 	&.ico-salesforce {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-salesforce.svg");
 		mask: url("/assets/images/ico-salesforce.svg");
 	}
 	&.ico-api-console {
+		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-api-console.svg");
 		mask: url("/assets/images/ico-api-console.svg");
 	}
