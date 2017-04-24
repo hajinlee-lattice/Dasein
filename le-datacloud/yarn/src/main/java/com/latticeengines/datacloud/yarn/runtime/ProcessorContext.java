@@ -302,7 +302,7 @@ public class ProcessorContext {
 
         keyMap = jobConfiguration.getMatchInput().getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
-        timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(30));
+        timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(60));
         this.recordTimeOut = timeOut;
         if (useRemoteDnB) {
             timeOut = timeOut * 2;
