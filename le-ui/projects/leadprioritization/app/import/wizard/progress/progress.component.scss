@@ -1,17 +1,61 @@
 .import-wizard-progress {
+    position: relative;
+    color: #aaa;
+    &:before {
+            content: '';
+            position: absolute;
+            display: block;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            bottom: 10px;
+            border-left: 1px solid #d0d0d0;
+    }
     li {
-        color: #ef6a31;
-        text-decoration: underline;
+        position: relative;
+        text-decoration: none;
         cursor: pointer;
-        font-weight: bold;
+        margin-bottom: 40px;
+        padding-left: 30px;
+        &:before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            background-color: #f2f1f1;
+            width: 23px;
+            height: 23px;
+            border-radius: 50%;
+            border: 1px solid #d0d0d0;
+        }
+        &:after {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
     }
     li.previous {
-        color: #aaa;
-        text-decoration: none;
         cursor: default;
+        &:before {
+            background-color: #fff;
+        }
+        &:not(.current):after {
+            @include font-awesome-inline("\f00c");
+            color: #0f9e4d;
+            left: 4px;
+        }
     }
 
     li.current {
+        font-weight: bold;
         color: black;
+        &:before {
+            background-color: #fff;
+        }
     }
 }
