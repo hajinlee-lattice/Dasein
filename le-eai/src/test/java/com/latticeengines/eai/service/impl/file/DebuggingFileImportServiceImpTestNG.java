@@ -44,13 +44,13 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
     private URL metadataUrl;
 
     private URL dataUrl;
-    
+
     private String fileName = "";
 
     @Autowired
     private JobService jobService;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "manual")
     public void setup() throws Exception {
         cleanup();
     }
@@ -66,7 +66,7 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
         metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/table.json");
     }
 
-    @Test(groups = "functional", dataProvider = "getPropertiesProvider", enabled = false)
+    @Test(groups = "manual", dataProvider = "getPropertiesProvider", enabled = true)
     public void importMetadataAndDataAndWriteToHdfs(Map<String, String> properties) throws Exception {
         cleanup();
         ImportContext ctx = new ImportContext(yarnConfiguration);
@@ -113,17 +113,18 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
 
     private Map<String, String> getProperties(boolean useMetadataFile) {
         Map<String, String> props = new HashMap<>();
-//        if (useMetadataFile) {
-//            props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
-//        } else {
-//            String contents;
-//            try {
-//                contents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//            props.put(ImportProperty.METADATA, contents);
-//        }
+        // if (useMetadataFile) {
+        // props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
+        // } else {
+        // String contents;
+        // try {
+        // contents = FileUtils.readFileToString(new
+        // File(metadataUrl.getPath()));
+        // } catch (Exception e) {
+        // throw new RuntimeException(e);
+        // }
+        // props.put(ImportProperty.METADATA, contents);
+        // }
         // change file name
         props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/" + fileName);
         return props;
