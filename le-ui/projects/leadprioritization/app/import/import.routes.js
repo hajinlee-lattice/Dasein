@@ -98,6 +98,8 @@ angular
             url: '/accountids',
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardAccountIDs',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/accountids/accountids.component.html'
                 }
             }
@@ -165,6 +167,8 @@ angular
             url: '/accountids',
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardAccountIDs',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/accountids/accountids.component.html'
                 }
             }

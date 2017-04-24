@@ -5,12 +5,12 @@ angular.module('lp.import.wizard.accountids', [])
     var vm = this;
 
     angular.extend(vm, {
-
+        state: ImportWizardStore.getAccountIdState()
     });
 
     vm.init = function() {
 
-    }
+    };
 
     vm.init();
 });
