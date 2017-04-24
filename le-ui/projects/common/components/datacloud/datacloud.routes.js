@@ -266,8 +266,8 @@ angular
                 segment: 'Create'
             },
             resolve: angular.extend({}, DataCloudResolve, {
-                LoadStub: ['$q', 'QueryStore', function($q, QueryStore) {
-                    return $q.all([QueryStore.loadData('contacts'), QueryStore.loadData('accounts')]);
+                LoadStub: ['QueryStore', function(QueryStore) {
+                    return QueryStore.loadData();
                 }],
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var deferred = $q.defer();

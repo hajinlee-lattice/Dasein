@@ -251,9 +251,9 @@ angular.module('common.datacloud.query.service',[
 // stubbed for demo
 .service('QueryServiceStub', function($http, $timeout, BucketRestriction) {
 
-    var uiStates = [];
-    var defaultState = { "name": "default", "bitmask": 0, "nodes":{}, "counts":{"accounts":null, "contacts":null} }
-    var undefinedState = { "name": "default", "bitmask": -1, "nodes":{}, "counts":{"accounts":0, "contacts":0} }
+    var uiStates = [{"name":"a","bitmask":256,"counts":{"accounts":39,"contacts":204},"nodes":{"Demo_Title":true}},{"name":"b","bitmask":128,"counts":{"accounts":33,"contacts":62},"nodes":{"Demo_Department":true,"Demo_Title":true}},{"name":"c","bitmask":64,"counts":{"accounts":33,"contacts":61},"nodes":{"Demo_Is_With_Company":true,"Demo_Department":true,"Demo_Title":true}},{"name":"d","bitmask":32,"counts":{"accounts":6,"contacts":16},"nodes":{"Demo_Has_Purchased":true,"Demo_Is_With_Company":true,"Demo_Department":true,"Demo_Title":true}},{"name":"e","bitmask":16,"counts":{"accounts":2,"contacts":4},"nodes":{"A":true,"Demo_Has_Purchased":true,"Demo_Is_With_Company":true,"Demo_Department":true,"Demo_Title":true}},{"name":"f","bitmask":8,"counts":{"accounts":1,"contacts":3},"nodes":{"Demo_Last_Quarter_Spending_Trends_(%)":true,"A":true,"Demo_Has_Purchased":true,"Demo_Is_With_Company":true,"Demo_Department":true,"Demo_Title":true}}];
+    var defaultState = { "name": "default", "bitmask": 0, "nodes":{}, "counts":{"accounts":null, "contacts":null} };
+    var undefinedState = { "name": "default", "bitmask": -1, "nodes":{}, "counts":{"accounts":0, "contacts":0} };
     var self = this;
 
     this.columns = {
@@ -274,20 +274,24 @@ angular.module('common.datacloud.query.service',[
         this.updateCount();
     };
 
-    this.loadData = function(context) { // combine accounts and contacts if file is small enough
+    this.loadData = function() {
         var self = this;
-        self.setContextCount(context, true);
+        this.validContexts.forEach(function(context) {
+            self.setContextCount(context, true);
+        });
 
         return $http({
             method: 'GET',
-            url: 'assets/resources/stub/'+context+'.json',
+            url: 'assets/resources/stub/records.json',
         }).then(function(result) {
             var data = result.data || {}
-            self.columns[context] = data.columns || [];
-            self.records[context] = data.records || [];
+            for (var context in data) {
+                self.columns[context] = data[context].columns || [];
+                self.records[context] = data[context].records || [];
 
-            if (self.uiState === defaultState) {
-                self.uiState.counts[context] = data.count;
+                if (self.uiState === defaultState) {
+                    self.uiState.counts[context] = self.records[context].length;
+                }
             }
         });
     };
