@@ -13,6 +13,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -32,18 +33,22 @@ public class GenerateDemoJsonTestNG {
 
     @Test(groups = "manual")
     public void generateJson() throws IOException {
-        File file = new File("/home/bross/Downloads/category-taxonomy.csv");
+        String path = ClassLoader.getSystemResource("com/latticeengines/pls/manual/category-taxonomy.csv").getPath();
+        File file = new File(path);
         CSVParser parser = CSVParser.parse(file, Charset.defaultCharset(), CSVFormat.RFC4180);
         List<LeadEnrichmentAttribute> attributes = new ArrayList<>();
         AccountMasterCube cube = new AccountMasterCube();
         cube.setStatistics(new HashMap<>());
-        Map<String, List<TopNAttributes.TopAttribute>> subcategories = new HashMap<>();
+        Map<String, TopNAttributes> topn = new HashMap<>();
         for (CSVRecord record : parser) {
             String category = record.get(0);
             String subcategory = record.get(1);
+            if (StringUtils.isEmpty(subcategory)) {
+                subcategory = "Other";
+            }
             String attribute = record.get(2);
             String value = record.get(3);
-            String fieldName = "Demo_" + attribute.replace(" ", "_");
+            String fieldName = "Demo - " + subcategory + " - " + attribute;
             if (!attributes.stream().anyMatch(a -> a.getFieldName().equals(fieldName))) {
                 attributes.add(createLeadEnrichmentAttribute(category, subcategory, attribute, fieldName));
             }
@@ -54,18 +59,26 @@ public class GenerateDemoJsonTestNG {
             }
             addBucket(statistics, value);
 
-            List<TopNAttributes.TopAttribute> list = subcategories.get(subcategory);
-            if (list == null) {
-                list = new ArrayList<>();
-                subcategories.put(subcategory, list);
+            TopNAttributes topNAttributes = topn.get(category);
+            if (topNAttributes == null) {
+                topNAttributes = new TopNAttributes();
+                topNAttributes.setTopAttributes(new HashMap<>());
+                topn.put(category, topNAttributes);
             }
-            if (!list.stream().anyMatch(a -> a.getAttribute().equals(fieldName))) {
-                list.add(createTopAttribute(fieldName));
+            List<TopNAttributes.TopAttribute> attributesInSubcategory = topNAttributes.getTopAttributes().get(
+                    subcategory);
+            if (attributesInSubcategory == null) {
+                attributesInSubcategory = new ArrayList<>();
+                topNAttributes.getTopAttributes().put(subcategory, attributesInSubcategory);
+            }
+
+            if (!attributesInSubcategory.stream().anyMatch(a -> a.getAttribute().equals(fieldName))) {
+                attributesInSubcategory.add(createTopAttribute(fieldName));
             }
         }
         FileUtils.write(new File("/tmp/buckets.json"), JsonUtils.serialize(cube));
         FileUtils.write(new File("/tmp/attributes.json"), JsonUtils.serialize(attributes));
-        FileUtils.write(new File("/tmp/topn.json"), JsonUtils.serialize(subcategories));
+        FileUtils.write(new File("/tmp/topn.json"), JsonUtils.serialize(topn));
     }
 
     private TopNAttributes.TopAttribute createTopAttribute(String fieldName) {
@@ -77,6 +90,7 @@ public class GenerateDemoJsonTestNG {
     private void addBucket(AttributeStatistics statistics, String value) {
         if (statistics.getRowBasedStatistics() == null) {
             statistics.setRowBasedStatistics(new AttributeStatsDetails());
+            statistics.getRowBasedStatistics().setNonNullCount((long) random.nextInt(15000));
         }
         if (statistics.getRowBasedStatistics().getBuckets() == null) {
             statistics.getRowBasedStatistics().setBuckets(new Buckets());

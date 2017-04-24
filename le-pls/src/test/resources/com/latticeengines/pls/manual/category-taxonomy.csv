@@ -1,0 +1,75 @@
+Contact,,Title,"VP         		"
+Contact,,Title,"Director			"
+Contact,,Department,"IT		"
+Contact,,Department,Finance
+Contact,,Department,Accounting
+Contact,,Is With Company,Yes
+Contact,,Is With Company,No
+Product,Cisco 4451,Has Purchased,Yes
+Product,Cisco 4451,Has Purchased,No
+Product,Cisco 4451,Total Purchase Amount,20000-40000
+Product,Cisco 4451,Total Purchase Amount,40000-80000
+Product,Cisco 4451,Total Purchase Amount,80000-160000
+Product,Cisco 4451,Total Purchase Amount,160000+
+Product,Cisco 4451,Last Month Spending Trends (%),Decline 10-20 
+Product,Cisco 4451,Last Month Spending Trends (%),Decline 10-0
+Product,Cisco 4451,Last Month Spending Trends (%),Increase 0-10
+Product,Cisco 4451,Last Month Spending Trends (%),Increase 10-20
+Product,Cisco 4451,Last Quarter Spending Trends (%),Decline 10-20 
+Product,Cisco 4451,Last Quarter Spending Trends (%),Decline 10-0
+Product,Cisco 4451,Last Quarter Spending Trends (%),Increase 0-10
+Product,Cisco 4451,Last Quarter Spending Trends (%),Increase 10-20
+Product,Cisco 4451,Last Year Spending Trends (%),Decline 10-20 
+Product,Cisco 4451,Last Year Spending Trends (%),Decline 10-0
+Product,Cisco 4451,Last Year Spending Trends (%),Increase 0-10
+Product,Cisco 4451,Last Year Spending Trends (%),Increase 10-20
+Product,Cisco 4451,Last Month Spending Trends ($),Decline 40000+
+Product,Cisco 4451,Last Month Spending Trends ($),Decline 20000-40000
+Product,Cisco 4451,Last Month Spending Trends ($),Increase 20000-40000
+Product,Cisco 4451,Last Month Spending Trends ($),Increase 40000+
+Product,Cisco 4451,Last Quarter Spending Trends ($),Decline 80000+
+Product,Cisco 4451,Last Quarter Spending Trends ($),Decline 40000-80000
+Product,Cisco 4451,Last Quarter Spending Trends ($),Decline 20000-40000
+Product,Cisco 4451,Last Quarter Spending Trends ($),Increase 20000-40000
+Product,Cisco 4451,Last Quarter Spending Trends ($),Increase 40000-80000
+Product,Cisco 4451,Last Quarter Spending Trends ($),Increase 80000+
+Product,Cisco 4451,Last Year Spending Trends ($),Decline 160000+ 
+Product,Cisco 4451,Last Year Spending Trends ($),Decline 80000-160000
+Product,Cisco 4451,Last Year Spending Trends ($),Decline 40000-80000
+Product,Cisco 4451,Last Year Spending Trends ($),Increase 40000-80000
+Product,Cisco 4451,Last Year Spending Trends ($),Increase 80000-160000
+Product,Cisco 4451,Last Year Spending Trends ($),Increase 160000+
+Product,Cisco 4321,Has Purchased,Yes
+Product,Cisco 4321,Has Purchased,No
+Product,Cisco 4321,Total Purchase Amount,10000-20000
+Product,Cisco 4321,Total Purchase Amount,20000-40000
+Product,Cisco 4321,Total Purchase Amount,40000-60000
+Product,Cisco 4321,Total Purchase Amount,60000+
+Product,Cisco 4321,Last Month Spending Trends (%),Decline 10-20 
+Product,Cisco 4321,Last Month Spending Trends (%),Decline 10-0
+Product,Cisco 4321,Last Month Spending Trends (%),Increase 0-10
+Product,Cisco 4321,Last Month Spending Trends (%),Increase 10-20
+Product,Cisco 4321,Last Quarter Spending Trends (%),Decline 10-20 
+Product,Cisco 4321,Last Quarter Spending Trends (%),Decline 10-0
+Product,Cisco 4321,Last Quarter Spending Trends (%),Increase 0-10
+Product,Cisco 4321,Last Quarter Spending Trends (%),Increase 10-20
+Product,Cisco 4321,Last Year Spending Trends (%),Decline 10-20 
+Product,Cisco 4321,Last Year Spending Trends (%),Decline 10-0
+Product,Cisco 4321,Last Year Spending Trends (%),Increase 0-10
+Product,Cisco 4321,Last Year Spending Trends (%),Increase 10-20
+Product,Cisco 4321,Last Month Spending Trends ($),Decline 5000+
+Product,Cisco 4321,Last Month Spending Trends ($),Decline 1000-5000
+Product,Cisco 4321,Last Month Spending Trends ($),Increase 1000-5000
+Product,Cisco 4321,Last Month Spending Trends ($),Increase 5000+
+Product,Cisco 4321,Last Quarter Spending Trends ($),Decline 20000+
+Product,Cisco 4321,Last Quarter Spending Trends ($),Decline 10000-20000
+Product,Cisco 4321,Last Quarter Spending Trends ($),Decline 1000-10000
+Product,Cisco 4321,Last Quarter Spending Trends ($),Increase 1000-10000
+Product,Cisco 4321,Last Quarter Spending Trends ($),Increase 10000-20000
+Product,Cisco 4321,Last Quarter Spending Trends ($),Increase 20000+
+Product,Cisco 4321,Last Year Spending Trends ($),Decline 40000+ 
+Product,Cisco 4321,Last Year Spending Trends ($),Decline 20000-40000
+Product,Cisco 4321,Last Year Spending Trends ($),Decline 10000-20000
+Product,Cisco 4321,Last Year Spending Trends ($),Increase 10000-20000
+Product,Cisco 4321,Last Year Spending Trends ($),Increase 20000-40000
+Product,Cisco 4321,Last Year Spending Trends ($),Increase 40000+
