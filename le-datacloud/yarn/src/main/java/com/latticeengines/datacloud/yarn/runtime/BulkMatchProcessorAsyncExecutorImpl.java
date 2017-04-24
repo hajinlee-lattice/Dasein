@@ -9,6 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import scala.concurrent.Future;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.RateLimitingService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
@@ -16,8 +18,6 @@ import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-
-import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
@@ -110,6 +110,24 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         checkTimeout(processorContext, startTime);
     }
 
+    private void consumeFutures(ProcessorContext processorContext, List<InternalOutputRecord> internalCompletedRecords,
+            List<Future<Object>> completedFutures, MatchContext combinedContext) {
+        List<InternalOutputRecord> batchCompletedRecords = new ArrayList<>();
+        List<Future<Object>> batchCompletedFutures = new ArrayList<>();
+        for (int i = 0; i < completedFutures.size(); i++) {
+            batchCompletedRecords.add(internalCompletedRecords.get(i));
+            batchCompletedFutures.add(completedFutures.get(i));
+            if (batchCompletedFutures.size() >= NUM_1K) {
+                consumeBatchFutures(processorContext, batchCompletedRecords, batchCompletedFutures, combinedContext);
+            }
+        }
+        if (batchCompletedFutures.size() > 0) {
+            consumeBatchFutures(processorContext, batchCompletedRecords, batchCompletedFutures, combinedContext);
+        }
+        internalCompletedRecords.clear();
+        completedFutures.clear();
+    }
+
     private void checkTimeout(ProcessorContext processorContext, Long startTime) {
         if (System.currentTimeMillis() - startTime > processorContext.getTimeOut()) {
             throw new RuntimeException(String.format("Did not finish matching %d rows in %.2f minutes.",
@@ -126,25 +144,26 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         }
     }
 
-    private void consumeFutures(ProcessorContext processorContext, List<InternalOutputRecord> internalCompletedRecords,
-            List<Future<Object>> completedFutures, MatchContext combinedContext) {
-        if (CollectionUtils.isEmpty(completedFutures) || CollectionUtils.isEmpty(internalCompletedRecords)) {
+    private void consumeBatchFutures(ProcessorContext processorContext,
+            List<InternalOutputRecord> batchCompletedRecords, List<Future<Object>> batchCompletedFutures,
+            MatchContext combinedContext) {
+        if (CollectionUtils.isEmpty(batchCompletedFutures) || CollectionUtils.isEmpty(batchCompletedRecords)) {
             log.warn("There's no input or future records!");
             return;
         }
-        if (internalCompletedRecords.size() != completedFutures.size()) {
+        if (batchCompletedRecords.size() != batchCompletedFutures.size()) {
             String msg = "Input records and future records do have the same number!";
             log.error(msg);
             throw new RuntimeException(msg);
         }
-        
-        combinedContext.setInternalResults(internalCompletedRecords);
-        combinedContext.setFuturesResult(completedFutures);
-        log.info("Sending " + completedFutures.size() + " of futures to get results.");
+
+        combinedContext.setInternalResults(batchCompletedRecords);
+        combinedContext.setFuturesResult(batchCompletedFutures);
+        log.info("Sending " + batchCompletedFutures.size() + " of futures to get results.");
 
         combinedContext = matchExecutor.executeMatchResult(combinedContext);
         log.info("Returned " + combinedContext.getOutput().getResult().size() + " of record results.");
-        processorContext.getRowsProcessed().addAndGet(internalCompletedRecords.size());
+        processorContext.getRowsProcessed().addAndGet(batchCompletedRecords.size());
         checkMatchCode(processorContext, combinedContext);
 
         Runtime runtime = Runtime.getRuntime();
@@ -159,14 +178,15 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 "Runtime memory usage monitor after processing match output: TotalMemory: %d. FreeMemory: %d",
                 runtime.totalMemory(), runtime.freeMemory()));
 
-        completedFutures.clear();
-        internalCompletedRecords.clear();
+        batchCompletedFutures.clear();
+        batchCompletedRecords.clear();
     }
 
     private void checkMatchCode(ProcessorContext processorContext, MatchContext combinedContext) {
         for (InternalOutputRecord outputRecord : combinedContext.getInternalResults()) {
             if (DnBReturnCode.UNMATCH_TIMEOUT.equals(outputRecord.getDnbCode())) {
-                throw new RuntimeException(String.format("Did not finish matching in %.2f minutes due to DnB limits, please try later!",
+                throw new RuntimeException(String.format(
+                        "Did not finish matching in %.2f minutes due to DnB limits, please try later!",
                         processorContext.getRecordTimeOut() / 60000.0));
             }
         }
@@ -181,12 +201,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         for (int i = 0; i < futures.size(); i++) {
             Future<Object> future = futures.get(i);
             InternalOutputRecord internRecord = internalRecords.get(i);
-            if (future.isCompleted() && currentCompletedfutures.size() < NUM_1K) {
+            if (future.isCompleted()) {
                 currentCompletedfutures.add(future);
                 currentCompletedRecords.add(internRecord);
-                if (currentCompletedfutures.size() >= NUM_1K) {
-                    break;
-                }
             }
         }
         if (currentCompletedfutures.size() > 0) {
@@ -210,9 +227,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 return;
             }
             try {
-                log.info(String.format(
-                        "DnB bulk match quota is not available. Wait for 4 mins. Have waited for %d mins up to now. Plan to wait for %d mins for total.",
-                        (System.currentTimeMillis() - startTime) / 60000, timeout / 60000));
+                log.info(String
+                        .format("DnB bulk match quota is not available. Wait for 4 mins. Have waited for %d mins up to now. Plan to wait for %d mins for total.",
+                                (System.currentTimeMillis() - startTime) / 60000, timeout / 60000));
                 Thread.sleep(240_000L);
             } catch (Exception ex) {
                 log.warn("Failed to sleep!");
@@ -232,8 +249,8 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 return true;
             }
             try {
-                log.info(String.format("Wait for 15 seconds to ensure DnB bulk match quota is available. Try times: %d",
-                        i + 1));
+                log.info(String.format(
+                        "Wait for 15 seconds to ensure DnB bulk match quota is available. Try times: %d", i + 1));
                 Thread.sleep(15_000L);
             } catch (Exception ex) {
                 log.warn("Failed to sleep!");
