@@ -94,6 +94,7 @@ public class GenerateDemoJsonTestNG {
         }
         if (statistics.getRowBasedStatistics().getBuckets() == null) {
             statistics.getRowBasedStatistics().setBuckets(new Buckets());
+            statistics.getRowBasedStatistics().setNonNullCount(0L);
         }
         Buckets buckets = statistics.getRowBasedStatistics().getBuckets();
         if (buckets.getBucketList() == null) {
@@ -104,6 +105,8 @@ public class GenerateDemoJsonTestNG {
         bucket.setBucketLabel(value);
         bucket.setCount((long) random.nextInt(15000));
         buckets.getBucketList().add(bucket);
+        statistics.getRowBasedStatistics().setNonNullCount(
+                statistics.getRowBasedStatistics().getNonNullCount() + bucket.getCount());
     }
 
     private LeadEnrichmentAttribute createLeadEnrichmentAttribute(String category, String subcategory,
