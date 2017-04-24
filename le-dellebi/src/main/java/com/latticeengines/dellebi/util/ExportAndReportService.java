@@ -157,7 +157,10 @@ public class ExportAndReportService {
                     startTime);
 
             try {
+                startTime = System.currentTimeMillis();
                 dellEbiFlowService.runStoredProcedure(context);
+                LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Finish executing the Store Procedure",
+                        startTime);
             } catch (Exception e) {
                 errorMsg = "Failed to execute the Store Procedure";
                 log.error(errorMsg, e);
