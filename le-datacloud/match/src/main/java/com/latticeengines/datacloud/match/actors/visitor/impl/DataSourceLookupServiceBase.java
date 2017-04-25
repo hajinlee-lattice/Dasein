@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +16,7 @@ import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 
 public abstract class DataSourceLookupServiceBase implements DataSourceLookupService {
     private static final Log log = LogFactory.getLog(DataSourceLookupServiceBase.class);
@@ -114,5 +117,14 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     protected MatchActorSystem getActorSystem() {
         return actorSystem;
+    }
+
+    @Override
+    public Map<String, Integer> getTotalPendingReqStats() {
+        Map<String, Integer> res = new HashMap<>();
+        res.put(MatchConstants.REQUEST_NUM, reqs.size());
+        res.put(MatchConstants.ADDRESS_NUM, reqReturnAddrs.size());
+        ExecutorService executor = actorSystem.getDataSourceServiceExecutor();
+        return res;
     }
 }

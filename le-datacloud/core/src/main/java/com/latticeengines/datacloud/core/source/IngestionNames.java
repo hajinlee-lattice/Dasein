@@ -14,4 +14,5 @@ public class IngestionNames {
     public static final String DNB_CASHESEED = "DnBCacheSeed";
     public static final String ORB_INTELLIGENCE = "OrbIntelligence";
     public static final String HGDATA = "HGData";
+    public static final String BOMBORA_SURGE = "BomboraSurge";
 }

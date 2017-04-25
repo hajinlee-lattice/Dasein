@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.match.exposed.service.MatchPrecheckService;
+import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -49,7 +49,7 @@ public class MatchResource {
     private List<BulkMatchService> bulkMatchServiceList;
 
     @Autowired
-    private MatchPrecheckService matchPrecheckService;
+    private MatchMonitorService matchPrecheckService;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;

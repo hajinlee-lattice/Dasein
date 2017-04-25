@@ -22,6 +22,8 @@ public class DnBBatchMatchContext {
 
     private String retryForServiceBatchId;
 
+    private boolean sealed; // contexts is fixed, no longer add new context in
+
     public DnBBatchMatchContext() {
         contexts = new HashMap<>();
     }
@@ -30,6 +32,7 @@ public class DnBBatchMatchContext {
         logDnBBulkResult = batchContext.getLogDnBBulkResult();
         retryTimes = 1;
         retryForServiceBatchId = batchContext.getServiceBatchId();
+        sealed = true;
         for (String lookupRequestId : batchContext.getContexts().keySet()) {
             DnBMatchContext context = new DnBMatchContext();
             context.copyMatchInput(batchContext.getContexts().get(lookupRequestId));
@@ -99,6 +102,14 @@ public class DnBBatchMatchContext {
 
     public void setRetryForServiceBatchId(String retryForServiceBatchId) {
         this.retryForServiceBatchId = retryForServiceBatchId;
+    }
+
+    public boolean isSealed() {
+        return sealed;
+    }
+
+    public void setSealed(boolean sealed) {
+        this.sealed = sealed;
     }
 
 }

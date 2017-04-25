@@ -23,6 +23,7 @@ public class HdfsPathBuilder {
     public static final String SUCCESS_FILE = "_SUCCESS";
     public static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
     public static final String UTC = "UTC";
+    public static final String VERSION_FILE = "_CURRENT_VERSION";
 
     private static final String MATCH_PREFIX = "match_";
     private static final String JSON_FILE_EXTENSION = ".json";
@@ -46,7 +47,6 @@ public class HdfsPathBuilder {
     private static final String MATCHES_SEGMENT = "Matches";
     private static final String BLOCKS_SEGMENT = "Blocks";
     private static final String RAW_DATA_FLOW_TYPE = "Raw";
-    private static final String VERSION_FILE = "_CURRENT_VERSION";
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
 

@@ -46,9 +46,11 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
                         ingestionDir.toString());
                 if (!CollectionUtils.isEmpty(fullPaths)) {
                     for (String fullPath : fullPaths) {
-                        if (fullPath.startsWith(ingestionDir.toString())) {
+                        if (!fullPath.contains(HdfsPathBuilder.VERSION_FILE)
+                                && fullPath.startsWith(ingestionDir.toString())) {
                             versions.add(new Path(fullPath).getName());
-                        } else if (fullPath.contains(ingestionDir.toString())) {
+                        } else if (!fullPath.contains(HdfsPathBuilder.VERSION_FILE)
+                                && fullPath.contains(ingestionDir.toString())) {
                             versions.add(new Path(
                                     fullPath.substring(fullPath.indexOf(ingestionDir.toString())))
                                             .getName());

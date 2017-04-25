@@ -18,13 +18,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
+import com.latticeengines.datacloud.match.actors.visitor.DynamoDBLookupService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("dynamoDBLookupService")
-public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
+public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase implements DynamoDBLookupService {
     private static final Log log = LogFactory.getLog(DynamoDBLookupServiceImpl.class);
 
     @Autowired
@@ -232,5 +234,13 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                 }
             }
         }
+    }
+    
+    /************************ Dynamo Lookup Service Status ************************/
+    @Override
+    public Map<String, Integer> getPendingReqStats() {
+        Map<String, Integer> res = new HashMap<>();
+        res.put(MatchConstants.REQUEST_NUM, pendingReqIds.size());
+        return res;
     }
 }

@@ -2,8 +2,10 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -13,7 +15,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
+import com.latticeengines.datacloud.match.actors.visitor.DnBLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.metric.DnBMatchHistory;
@@ -44,13 +46,14 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("dnBLookupService")
-public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
+public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements DnBLookupService {
     private static final Log log = LogFactory.getLog(DnBLookupServiceImpl.class);
 
     @Value("${datacould.dnb.realtime.timeout.minute}")
@@ -127,8 +130,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     private final List<DnBBatchMatchContext> submittedBatches = Collections.synchronizedList(new ArrayList<>());
     @SuppressWarnings("unchecked")
     private final List<DnBBatchMatchContext> finishedBatches = Collections.synchronizedList(new ArrayList<>());
-
-    private static AtomicInteger previousUnsubmittedNum = new AtomicInteger(0);
 
     @Autowired
     @Qualifier("dnbBatchScheduler")
@@ -359,14 +360,18 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             saveReq(lookupRequestId, returnAddress, request);
             // Bucket single contexts to batched contexts in unsubmittedReqs
             synchronized (unsubmittedBatches) {
-                if (unsubmittedBatches.isEmpty() || unsubmittedBatches.get(unsubmittedBatches.size() - 1).getContexts()
-                        .size() == maximumBatchSize) {
+                // If unsubmittedBatches is empty, or last unsubmitted batch is sealed, 
+                // or last unsubmitted batch size is 10K, create a new batch
+                if (unsubmittedBatches.isEmpty() || unsubmittedBatches.get(unsubmittedBatches.size() - 1).isSealed()
+                        || unsubmittedBatches.get(unsubmittedBatches.size() - 1).getContexts()
+                                .size() == maximumBatchSize) {
                     DnBBatchMatchContext batchContext = new DnBBatchMatchContext();
                     batchContext.setLogDnBBulkResult(context.getLogDnBBulkResult());
                     unsubmittedBatches.add(batchContext);
                 }
                 unsubmittedBatches.get(unsubmittedBatches.size() - 1).getContexts().put(context.getLookupRequestId(),
                         context);
+                unsubmittedBatches.get(unsubmittedBatches.size() - 1).setTimestamp(new Date());
             }
         } else {
             context.setDuration(System.currentTimeMillis() - request.getTimestamp());
@@ -376,24 +381,27 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
 
     private void dnbBatchDispatchRequest() {
         try {
+            if (unsubmittedBatches.isEmpty()) {
+                return;
+            }
             // Failed batch requests to process
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
             List<DnBBatchMatchContext> batchesToSubmit = new ArrayList<>();
-            // Get the batches to submit (batch size = 10K or unsubmitted record number is not changed)
+            // Get batches to submit:
+            // batch size = 10K, or batch is sealed, or timestamp of last inserted record is 2 mins ago
             synchronized (unsubmittedBatches) {
-                int unsubmittedNum = getUnsubmittedRecordNum();
+                int unsubmittedNum = getUnsubmittedStats().get(MatchConstants.REQUEST_NUM);
                 if (unsubmittedNum > 0) {
                     log.info(String.format("There are %d records unsubmitted before request dispatching",
                             unsubmittedNum));
-                    if (unsubmittedNum >= maximumBatchSize || unsubmittedNum == previousUnsubmittedNum.get()) {
-                        Iterator<DnBBatchMatchContext> iter = unsubmittedBatches.iterator();
-                        while (iter.hasNext()) {
-                            DnBBatchMatchContext batchContext = iter.next();
-                            if (batchContext.getContexts().size() == maximumBatchSize
-                                    || unsubmittedNum == previousUnsubmittedNum.get()) {
-                                batchesToSubmit.add(batchContext);
-                                iter.remove();
-                            }
+                    Iterator<DnBBatchMatchContext> iter = unsubmittedBatches.iterator();
+                    while (iter.hasNext()) {
+                        DnBBatchMatchContext batchContext = iter.next();
+                        if (batchContext.isSealed() || batchContext.getContexts().size() == maximumBatchSize
+                                || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) >= 120000) {
+                            batchContext.setSealed(true);
+                            batchesToSubmit.add(batchContext);
+                            iter.remove();
                         }
                     }
                 }
@@ -422,17 +430,16 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                     break;
                 }
             }
-            int unsubmittedNum = getUnsubmittedRecordNum();
+            int unsubmittedNum = getUnsubmittedStats().get(MatchConstants.REQUEST_NUM);
             if (unsubmittedNum > 0) {
                 log.info(String.format("There are %d records unsubmitted after request dispatching", unsubmittedNum));
             }
-            previousUnsubmittedNum.set(unsubmittedNum);
             // Process failed batch requests
             for (DnBBatchMatchContext batchContext : failedBatches) {
                 processBulkMatchResult(batchContext, false);
             }
         } catch (Exception ex) {
-            log.error(ex);
+            log.error("Exception in dispatching dnb batch requests", ex);
         }
     }
 
@@ -440,11 +447,20 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         try {
             // Failed batch requests to process
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
-            int pendingRecordNum = getUnsubmittedRecordNum() + getSubmittedRecordNum();
             // Batch requests to retry
             List<DnBBatchMatchContext> retryBatches = new ArrayList<>();
+            if (submittedBatches.isEmpty()) {
+                return;
+            }
             synchronized (submittedBatches) {
                 dnbBulkLookupStatusChecker.checkStatus(submittedBatches);
+                boolean hasRetried = false;
+                for (DnBBatchMatchContext batch : submittedBatches) {
+                    if (batch.getRetryForServiceBatchId() != null) {
+                        hasRetried = true;
+                        break;
+                    }
+                }
                 Iterator<DnBBatchMatchContext> iter = submittedBatches.iterator();
                 while (iter.hasNext()) {
                     DnBBatchMatchContext submittedBatch = iter.next();
@@ -460,14 +476,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                         if (submittedBatch.getRetryTimes() < bulkRetryTimes && submittedBatch.getTimestamp() != null
                                 && (System.currentTimeMillis()
                                         - submittedBatch.getTimestamp().getTime() >= bulkRetryWait)) {
-                            if (pendingRecordNum <= bulkRetryPendingRecordThreshold) {
+                            if (!hasRetried) {
                                 retryBatches.add(submittedBatch);
                             } else {
                                 long mins = (System.currentTimeMillis() - submittedBatch.getTimestamp().getTime()) / 60
                                         / 1000;
                                 log.info(String.format(
-                                        "Bulk match with serviceBatchId = %s was submitted %d minutes ago and hasn't got result back. Should retry. But currently there are already %d records unsubmitted or waiting for results. Will not resubmit for this time.",
-                                        submittedBatch.getServiceBatchId(), mins, pendingRecordNum));
+                                        "Batch request %s was submitted %d minutes ago, but currently there has been one retried batch submitted, skip retry this time.",
+                                        submittedBatch.getServiceBatchId(), mins));
                             }
                         }
                         break;
@@ -485,29 +501,28 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             // Retry batch requests
             for (DnBBatchMatchContext retryBatch : retryBatches) {
                 long mins = (System.currentTimeMillis() - retryBatch.getTimestamp().getTime()) / 60 / 1000;
-                log.info(String.format(
-                        "Bulk match with serviceBatchId = %s was submitted %d minutes ago and hasn't got result back. Resubmit it!",
+                log.info(String.format("Batch request %s was submitted %d mins ago. Retry it!",
                         retryBatch.getServiceBatchId(), mins));
                 retryBulkRequest(retryBatch);
             }
             if (submittedBatches.size() > 0) {
-                log.info(String.format("There are %d batched requests waiting for DnB batch api to return results",
+                log.info(String.format("There are %d batch requests waiting for DnB batch api to return results",
                         submittedBatches.size()));
             }
         } catch (Exception ex) {
-            log.error(ex);
+            log.error("Exception in checking dnb batch request status", ex);
         }
     }
 
     private void dnbBatchFetchResult() {
         try {
-            Runtime runtime = Runtime.getRuntime();
-            log.info(String.format("Before fetching result -- TotalMemory: %d. FreeMemory: %d", runtime.totalMemory(),
-                    runtime.freeMemory()));
             // Failed batch requests to process
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
             // Success batch requests to process
             List<DnBBatchMatchContext> successBatches = new ArrayList<>();
+            if (finishedBatches.isEmpty()) {
+                return;
+            }
             synchronized (finishedBatches) {
                 Iterator<DnBBatchMatchContext> iter = finishedBatches.iterator();
                 while (iter.hasNext()) {
@@ -540,31 +555,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             for (DnBBatchMatchContext batchContext : successBatches) {
                 processBulkMatchResult(batchContext, true);
             }
-            log.info(String.format("After fetching result -- TotalMemory: %d. FreeMemory: %d", runtime.totalMemory(),
-                    runtime.freeMemory()));
         } catch (Exception ex) {
-            log.error(ex);
+            log.error("Exception in fetching dnb batch request result", ex);
         }
-    }
-
-    private int getUnsubmittedRecordNum() {
-        if (unsubmittedBatches.isEmpty()) {
-            return 0;
-        }
-        synchronized (unsubmittedBatches) {
-            return maximumBatchSize * (unsubmittedBatches.size() > 1 ? unsubmittedBatches.size() - 1 : 0)
-                    + unsubmittedBatches.get(unsubmittedBatches.size() - 1).getContexts().size();
-        }
-    }
-
-    private int getSubmittedRecordNum() {
-        int res = 0;
-        synchronized (submittedBatches) {
-            for (DnBBatchMatchContext batchContext : submittedBatches) {
-                res += batchContext.getContexts().size();
-            }
-        }
-        return res;
     }
 
     private void retryBulkRequest(DnBBatchMatchContext batchContext) {
@@ -580,8 +573,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             String returnAddr = getReqReturnAddr(lookupRequestId);
             if (returnAddr == null) {
                 log.info(String.format(
-                        "Fail to find return address for lookup request %s. Bulk match request might be retried and response of this request has been sent. Give up!",
-                        lookupRequestId));
+                        "Result of record (lookupRequestId=%s) has been returned. serviceBatchId=%s%s. Do not return for 2nd time.",
+                        lookupRequestId, batchContext.getServiceBatchId(),
+                        batchContext.getRetryForServiceBatchId() == null ? ""
+                                : " (retry for " + batchContext.getRetryForServiceBatchId() + ")"));
                 return;
             }
             DnBMatchContext context = batchContext.getContexts().get(lookupRequestId);
@@ -679,5 +674,48 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             }
         };
         return task;
+    }
+
+    /************************ DnB Lookup Service Status ************************/
+    @Override
+    public Map<String, Integer> getUnsubmittedStats() {
+        Map<String, Integer> res = new HashMap<>();
+        synchronized (unsubmittedBatches) {
+            res.put(MatchConstants.BATCH_NUM, unsubmittedBatches.size());
+            int requestNum = 0;
+            for (DnBBatchMatchContext batchContext : unsubmittedBatches) {
+                requestNum += batchContext.getContexts().size();
+            }
+            res.put(MatchConstants.REQUEST_NUM, requestNum);
+        }
+        return res;
+    }
+
+    @Override
+    public Map<String, Integer> getSubmittedStats() {
+        Map<String, Integer> res = new HashMap<>();
+        synchronized (submittedBatches) {
+            res.put(MatchConstants.BATCH_NUM, submittedBatches.size());
+            int requestNum = 0;
+            for (DnBBatchMatchContext batchContext : submittedBatches) {
+                requestNum += batchContext.getContexts().size();
+            }
+            res.put(MatchConstants.REQUEST_NUM, requestNum);
+        }
+        return res;
+    }
+
+    @Override
+    public Map<String, Integer> getFinishedStats() {
+        Map<String, Integer> res = new HashMap<>();
+        synchronized (finishedBatches) {
+            res.put(MatchConstants.BATCH_NUM, finishedBatches.size());
+            int requestNum = 0;
+            for (DnBBatchMatchContext batchContext : finishedBatches) {
+                requestNum += batchContext.getContexts().size();
+            }
+            res.put(MatchConstants.REQUEST_NUM, requestNum);
+        }
+        return res;
     }
 }

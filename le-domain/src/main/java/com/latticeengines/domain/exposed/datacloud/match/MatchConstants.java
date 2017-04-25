@@ -65,4 +65,9 @@ public final class MatchConstants {
     static final String DERIVED_COLUMNS = Predefined.DerivedColumns.getName();
     static final String RTS = Predefined.RTS.getName();
 
+    // For MatchMonitorService
+    public static final String REQUEST_NUM = "RequestNum";
+    public static final String BATCH_NUM = "BatchNum";
+    public static final String ADDRESS_NUM = "AddressNum";
+
 }
