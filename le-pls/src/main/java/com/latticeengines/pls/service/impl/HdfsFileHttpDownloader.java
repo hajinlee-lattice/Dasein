@@ -76,26 +76,40 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
             }
         };
 
+        String eventTableName = "";
+        if (!StringUtils.isEmpty(summary.getEventTableName())) {
+            eventTableName = summary.getEventTableName();
+        }
+
         customer = CustomerSpace.parse(customer).getTenantId();
-        String singularIdPath = modelingServiceHdfsBaseDir + customer + "/models/";
+        String singularIdPath = modelingServiceHdfsBaseDir + customer + "/models/" + eventTableName;
         List<String> paths = new ArrayList<>();
         if (HdfsUtils.fileExists(yarnConfiguration, singularIdPath)) {
             paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, singularIdPath, fileFilter));
         }
+        if (!CollectionUtils.isEmpty(paths)) {
+            return paths.get(0);
+        }
 
         customer = CustomerSpace.parse(customer).toString();
-        String tupleIdPath = modelingServiceHdfsBaseDir + customer + "/models/";
+        String tupleIdPath = modelingServiceHdfsBaseDir + customer + "/models/" + eventTableName;
         if (HdfsUtils.fileExists(yarnConfiguration, tupleIdPath)) {
             paths.addAll(HdfsUtils.getFilesForDirRecursive(yarnConfiguration, tupleIdPath, fileFilter));
         }
+        if (!CollectionUtils.isEmpty(paths)) {
+            return paths.get(0);
+        }
 
-        String postMatchEventTablePath = modelingServiceHdfsBaseDir + customer + "/data/" + summary.getEventTableName()
+        String postMatchEventTablePath = modelingServiceHdfsBaseDir + customer + "/data/" + eventTableName
                 + "/csv_files/";
         if (HdfsUtils.fileExists(yarnConfiguration, postMatchEventTablePath)) {
             paths.addAll(HdfsUtils.getFilesForDir(yarnConfiguration, postMatchEventTablePath, filter));
         }
+        if (!CollectionUtils.isEmpty(paths)) {
+            return paths.get(0);
+        }
 
-        String eventTableScoreFilePath = modelingServiceHdfsBaseDir + customer + "/data/" + summary.getEventTableName()
+        String eventTableScoreFilePath = modelingServiceHdfsBaseDir + customer + "/data/" + eventTableName
                 + "/csv_files/score_event_table_output";
         if (HdfsUtils.fileExists(yarnConfiguration, eventTableScoreFilePath)) {
             paths.addAll(HdfsUtils.getFilesForDir(yarnConfiguration, eventTableScoreFilePath, filter));
