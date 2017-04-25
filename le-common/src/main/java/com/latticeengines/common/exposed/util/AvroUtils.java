@@ -230,7 +230,7 @@ public class AvroUtils {
                 }
                 count += partialCount;
             }
-
+            executorService.shutdown();
             return count;
         } catch (IOException e) {
             throw new RuntimeException(e);

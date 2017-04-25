@@ -148,7 +148,7 @@ public class HdfsToS3ExportService {
         Long count = 0L;
         ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, filePaths.size()));
         Map<String, Future<Long>> futures = new LinkedHashMap<>();
-        for (String filePath : filePaths) {
+        for (final String filePath : filePaths) {
             futures.put(filePath, executorService.submit(new Callable<Long>() {
 
                 Integer splitIdx = 0;
@@ -218,7 +218,7 @@ public class HdfsToS3ExportService {
                 downloadProgress = count.doubleValue() / totalRecords.doubleValue();
                 log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
             }
-
+            executorService.shutdown();
         }
 
         log.info("Downloading finished.");
