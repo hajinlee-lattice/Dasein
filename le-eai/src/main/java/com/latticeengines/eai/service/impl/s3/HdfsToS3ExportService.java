@@ -165,6 +165,8 @@ public class HdfsToS3ExportService {
                         File localFile = new File(LOCAL_CACHE + "/" + new Path(filePath).getName());
                         try {
                             HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, localFile.getPath());
+                            FileUtils.deleteQuietly(
+                                    new File(LOCAL_CACHE + "/." + new Path(filePath).getName() + ".crc"));
                             Configuration localConfig = new Configuration();
                             localConfig.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
                             long count = AvroUtils.count(localConfig, localFile.getPath());
