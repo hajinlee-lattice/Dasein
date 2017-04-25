@@ -145,6 +145,22 @@
             color: $datacloud-color-website-profile;
         }
     }
+    .category-product {
+        .query-lift-bg {
+            background-color: $datacloud-color-product;
+        }
+        .query-category-color {
+            color: $datacloud-color-product;
+        }
+    }
+    .category-contact {
+        .query-lift-bg {
+            background-color: $datacloud-color-contact;
+        }
+        .query-category-color {
+            color: $datacloud-color-contact;
+        }
+    }
 }
 
 .query-filter-action {
