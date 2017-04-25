@@ -110,16 +110,42 @@ angular
         })
         .state('home.import.wizard.accounts.one.two', {
             url: '/thirdpartyids',
+            resolve: {
+                Identifiers: function() {
+                    return [
+                        { name: 'CRM ID', value: '' },
+                        { name: 'MAP ID', value: '' }
+                    ];
+                }
+            },
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardThirdPartyIDs',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/thirdpartyids/thirdpartyids.component.html'
                 }
             }
         })
         .state('home.import.wizard.accounts.one.two.three', {
             url: '/latticefields',
+            resolve: {
+                AccountMatchingFields: function() {
+                    return [
+                        { name: 'Website Address', options: '' },
+                        { name: 'D-U-N-S', options: '' }
+                    ];
+                },
+                AnalysisFields: function() {
+                    return [
+                        { name: 'Is Customer', options: '' },
+                        { name: 'Revenue', options: '' }
+                    ];
+                }
+            },
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardLatticeFields',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/latticefields/latticefields.component.html'
                 }
             }
