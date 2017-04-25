@@ -148,7 +148,7 @@ public class HdfsToS3ExportService {
         Long count = 0L;
         ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, filePaths.size()));
         Map<String, Future<Long>> futures = new LinkedHashMap<>();
-        for (final String filePath : filePaths) {
+        for (String filePath : filePaths) {
             futures.put(filePath, executorService.submit(new Callable<Long>() {
 
                 Integer splitIdx = 0;
