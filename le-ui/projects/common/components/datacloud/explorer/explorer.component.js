@@ -293,7 +293,7 @@ angular.module('common.datacloud.explorer', [
 
             if(vm.enrichments_completed) {
                 getEnrichmentCube().then(function(result){
-                    Object.assign(result.data, DemoData.cube);
+                    angular.extend(result.data.Stats, DemoData.cube.Stats);
                     vm.cube = result.data;
                 });
             }
