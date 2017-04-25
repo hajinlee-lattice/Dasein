@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterStatisticsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -114,8 +113,8 @@ public class AccountMasterStatsDeploymentTestNG
         List<Integer> inputSteps2 = new ArrayList<Integer>();
         inputSteps2.add(0);
         step2.setInputSteps(inputSteps2);
-        step2.setTargetSource("accountMasterStatsMinMax");
-        step2.setTransformer("accountMasterStatsMinMaxTransformer");
+        step2.setTargetSource("amStatsMinMax");
+        step2.setTransformer("amStatsMinMaxTransformer");
 
         AccountMasterStatisticsConfig confParam2 = getAccountMasterStatsParameters();
         String confParamStr2 = null;
@@ -127,15 +126,15 @@ public class AccountMasterStatsDeploymentTestNG
 
         step2.setConfiguration(confParamStr2);
 
-        /////////////////
+        //////////////////
 
         TransformationStepConfig step3 = new TransformationStepConfig();
         List<Integer> inputSteps3 = new ArrayList<Integer>();
         inputSteps3.add(0);
         inputSteps3.add(1);
         step3.setInputSteps(inputSteps3);
-        step3.setTargetSource(targetSourceName);
-        step3.setTransformer("accountMasterStatsTransformer");
+        step3.setTargetSource("amStatsMinMaxJoin");
+        step3.setTransformer("amStatsMinMaxJoinTransformer");
 
         AccountMasterStatisticsConfig confParam3 = getAccountMasterStatsParameters();
         String confParamStr3 = null;
@@ -149,14 +148,101 @@ public class AccountMasterStatsDeploymentTestNG
 
         //////////////////
 
+        TransformationStepConfig step4 = new TransformationStepConfig();
+        List<Integer> inputSteps4 = new ArrayList<Integer>();
+        inputSteps4.add(2);
+        step4.setInputSteps(inputSteps4);
+        step4.setTargetSource("amStatsBucketedSource");
+        step4.setTransformer("amStatsLeafSubstitutionTransformer");
+
+        AccountMasterStatisticsConfig confParam4 = getAccountMasterStatsParameters();
+        String confParamStr4 = null;
+        try {
+            confParamStr4 = om.writeValueAsString(confParam4);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        step4.setConfiguration(confParamStr4);
+
+        /////////////////
+
+        TransformationStepConfig step5 = new TransformationStepConfig();
+        List<Integer> inputSteps5 = new ArrayList<Integer>();
+        inputSteps5.add(3);
+        step5.setInputSteps(inputSteps5);
+        step5.setTargetSource("amStatsLeafNode");
+        step5.setTransformer("amStatsLeafNodeTransformer");
+
+        AccountMasterStatisticsConfig confParam5 = getAccountMasterStatsParameters();
+        String confParamStr5 = null;
+        try {
+            confParamStr5 = om.writeValueAsString(confParam5);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        step5.setConfiguration(confParamStr5);
+
+        //////////////////
+
+        TransformationStepConfig step6 = new TransformationStepConfig();
+        List<Integer> inputSteps6 = new ArrayList<Integer>();
+        inputSteps6.add(4);
+        step6.setInputSteps(inputSteps6);
+        step6.setTargetSource("amStatsDimExpandMerge");
+        step6.setTransformer("amStatsDimExpandMergeTransformer");
+
+        AccountMasterStatisticsConfig confParam6 = getAccountMasterStatsParameters();
+        String confParamStr6 = null;
+        try {
+            confParamStr6 = om.writeValueAsString(confParam6);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        step6.setConfiguration(confParamStr6);
+
+        //////////////////
+
+        TransformationStepConfig step7 = new TransformationStepConfig();
+        List<Integer> inputSteps7 = new ArrayList<Integer>();
+        inputSteps7.add(5);
+        step7.setInputSteps(inputSteps7);
+        step7.setTargetSource(targetSourceName);
+        step7.setTransformer("amStatsReportTransformer");
+
+        AccountMasterStatisticsConfig confParam7 = getAccountMasterStatsParameters();
+        String confParamStr7 = null;
+        try {
+            confParamStr7 = om.writeValueAsString(confParam7);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        step7.setConfiguration(confParamStr7);
+
+        //////////////////
+
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
         steps.add(step1);
         steps.add(step2);
         steps.add(step3);
+        steps.add(step4);
+        steps.add(step5);
+        steps.add(step6);
+        steps.add(step7);
 
         configuration.setSteps(steps);
 
         configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
+
+        try {
+            System.out.println(om.writeValueAsString(configuration));
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return configuration;
     }
 
@@ -171,13 +257,13 @@ public class AccountMasterStatsDeploymentTestNG
         Map<String, Map<String, Long>> dimensionValuesIdMap = new HashMap<>();
         param.setDimensionValuesIdMap(dimensionValuesIdMap);
         param.setCubeColumnName("EncodedCube");
-        param.setNumericalBucketsRequired(false);
         param.setDataCloudVersion(DATA_CLOUD_VERSION);
 
         List<String> dimensions = new ArrayList<>();
         dimensions.add("Location");
         dimensions.add("Industry");
         param.setDimensions(dimensions);
+        param.setNumericalBucketsRequired(true);
         return param;
     }
 
@@ -229,9 +315,9 @@ public class AccountMasterStatsDeploymentTestNG
                         Object expectedVal = data[idx];
                         if (verifyRecord) {
                             if ((val == null && expectedVal != null) //
-                                || (val != null && !val.equals(expectedVal))) {
+                                    || (val != null && !val.equals(expectedVal))) {
                                 if (val != null && val instanceof String
-                                    && ((String) val).startsWith((String) expectedVal)) {
+                                        && ((String) val).startsWith((String) expectedVal)) {
                                     // consider it matching field
                                 } else {
                                     foundMatchingRecord = false;
@@ -262,7 +348,7 @@ public class AccountMasterStatsDeploymentTestNG
                     }
                 }
 
-                if (!foundMatchingRecord){
+                if (!foundMatchingRecord) {
                     break;
                 }
 
@@ -304,7 +390,7 @@ public class AccountMasterStatsDeploymentTestNG
                         System.out.println("Empty encoded cube");
                     }
                 } catch (IOException e) {
-                   throw new RuntimeException(e);
+                    throw new RuntimeException(e);
                 }
 
                 System.out.println("\n\n================" + rowNum);
@@ -336,7 +422,7 @@ public class AccountMasterStatsDeploymentTestNG
             if (!attr.equals("FeatureTermCellular")) {
                 continue;
             }
-            System.out.println("Attribute " + attr); 
+            System.out.println("Attribute " + attr);
             AttributeStatsDetails actualRowBasedAttrStats = actualCube.getStatistics().get(attr)
                     .getRowBasedStatistics();
             if (actualRowBasedAttrStats.getNonNullCount() != 0) {
@@ -344,10 +430,6 @@ public class AccountMasterStatsDeploymentTestNG
             }
             if (actualRowBasedAttrStats.getBuckets() != null) {
                 System.out.println("Bucket type " + actualRowBasedAttrStats.getBuckets().getType());
-                if (actualRowBasedAttrStats.getBuckets().getType() == BucketType.Numerical) {
-                    System.out.println("Skipping numerical buckets for now");
-                    continue;
-                }
 
                 if (CollectionUtils.isNotEmpty(actualRowBasedAttrStats.getBuckets().getBucketList())) {
                     for (int i = 0; i < actualRowBasedAttrStats.getBuckets().getBucketList().size(); i++) {
@@ -362,8 +444,7 @@ public class AccountMasterStatsDeploymentTestNG
 
     private void printBucket(Bucket actualBkt) {
 
-        System.out.print("Bucket " + actualBkt.getBucketLabel() + " " + actualBkt.getCount() + " " +
-                            actualBkt.getId());
+        System.out.print("Bucket " + actualBkt.getBucketLabel() + " " + actualBkt.getCount() + " " + actualBkt.getId());
         if (actualBkt.getEncodedCountList() != null) {
             System.out.print("Encoded counts ");
             for (int i = 0; i < actualBkt.getEncodedCountList().length; i++) {
@@ -380,19 +461,18 @@ public class AccountMasterStatsDeploymentTestNG
             System.out.println("Compare attribute " + attr);
             AttributeStatsDetails actualRowBasedAttrStats = actualCube.getStatistics().get(attr)
                     .getRowBasedStatistics();
-            AttributeStatsDetails expectedRowBasedAttrStats = expectedCube.getStatistics().get(attr)
-                    .getRowBasedStatistics();
+            AttributeStatsDetails expectedRowBasedAttrStats = null;
+
+            expectedRowBasedAttrStats = expectedCube.getStatistics().get(attr).getRowBasedStatistics();
+
             Assert.assertEquals(actualRowBasedAttrStats.getNonNullCount(), expectedRowBasedAttrStats.getNonNullCount());
             if (actualRowBasedAttrStats.getBuckets() != null) {
                 Assert.assertNotNull(actualRowBasedAttrStats.getBuckets().getType());
+
                 Assert.assertEquals(actualRowBasedAttrStats.getBuckets().getType(),
                         expectedRowBasedAttrStats.getBuckets().getType());
+
                 System.out.println("Bucket type " + actualRowBasedAttrStats.getBuckets().getType() + "XXX");
-                if (actualRowBasedAttrStats.getBuckets().getType() == BucketType.Numerical) {
-                    // TBD: Disable the check since numerical bucket count seems a bit random.
-                    System.out.println("Skipping numerical buckets for now");
-                    continue;
-                }
 
                 if (CollectionUtils.isNotEmpty(actualRowBasedAttrStats.getBuckets().getBucketList())) {
                     Assert.assertEquals(actualRowBasedAttrStats.getBuckets().getBucketList().size(),

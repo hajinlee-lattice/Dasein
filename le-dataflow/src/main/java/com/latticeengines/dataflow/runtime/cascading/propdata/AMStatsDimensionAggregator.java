@@ -13,9 +13,9 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class AccountMasterStatsDimensionAggregator
-        extends BaseAggregator<AccountMasterStatsDimensionAggregator.Context>
-        implements Aggregator<AccountMasterStatsDimensionAggregator.Context> {
+public class AMStatsDimensionAggregator
+        extends BaseAggregator<AMStatsDimensionAggregator.Context>
+        implements Aggregator<AMStatsDimensionAggregator.Context> {
     private static final long serialVersionUID = 4217950767704131475L;
     private static ObjectMapper OM = new ObjectMapper();
 
@@ -26,7 +26,7 @@ public class AccountMasterStatsDimensionAggregator
     }
 
 
-    public AccountMasterStatsDimensionAggregator(Fields fieldDeclaration) {
+    public AMStatsDimensionAggregator(Fields fieldDeclaration) {
         super(fieldDeclaration);
     }
 

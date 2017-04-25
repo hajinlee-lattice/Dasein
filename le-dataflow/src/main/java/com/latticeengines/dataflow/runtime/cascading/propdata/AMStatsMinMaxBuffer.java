@@ -21,13 +21,13 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "serial" })
-public class AccountMasterStatsMinMaxBuffer extends BaseOperation implements Buffer {
-    private static final Log log = LogFactory.getLog(AccountMasterStatsMinMaxBuffer.class);
+public class AMStatsMinMaxBuffer extends BaseOperation implements Buffer {
+    private static final Log log = LogFactory.getLog(AMStatsMinMaxBuffer.class);
 
     private Map<String, Integer> namePositionMap;
     private String minMaxKey;
 
-    public AccountMasterStatsMinMaxBuffer(Params parameterObject) {
+    public AMStatsMinMaxBuffer(Params parameterObject) {
         super(parameterObject.fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.minMaxKey = parameterObject.minMaxKey;
@@ -64,7 +64,7 @@ public class AccountMasterStatsMinMaxBuffer extends BaseOperation implements Buf
 
     private void calculateMinMax(StatsAttributeParser attributeParser, //
             Iterator<TupleEntry> argumentsInGroup, //
-            Map<String, Object[]> attributeManMaxValues, //
+            Map<String, Object[]> attributeMinMaxValues, //
             Map<String, Object> groupKeyValues) {
         int idx = 0;
         while (argumentsInGroup.hasNext()) {
@@ -89,7 +89,7 @@ public class AccountMasterStatsMinMaxBuffer extends BaseOperation implements Buf
                             || obj instanceof Integer //
                             || obj instanceof Double) {
                         attributeParser.parseNumericValForMinMax(//
-                                attributeManMaxValues, obj, fieldName);
+                                attributeMinMaxValues, obj, fieldName);
                     }
                 }
             }

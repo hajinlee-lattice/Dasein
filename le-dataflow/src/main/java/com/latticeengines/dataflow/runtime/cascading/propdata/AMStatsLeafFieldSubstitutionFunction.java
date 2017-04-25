@@ -30,7 +30,9 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AccountMasterStatsLeafFieldSubstitutionFunction extends BaseOperation implements Function {
+public class AMStatsLeafFieldSubstitutionFunction
+        extends BaseOperation<Map> //
+        implements Function<Map> {
     private static final long serialVersionUID = -4039806083023012431L;
     private static BooleanTextHandler booleanTextHandler = new BooleanTextHandler();
 
@@ -41,8 +43,9 @@ public class AccountMasterStatsLeafFieldSubstitutionFunction extends BaseOperati
     private List<Integer> encodedColumnsPos;
     private List<String> leafSchemaNewColumnNames;
     private Set<String> dimensionSet;
+    private volatile Map<String, List<Object>> minMaxInfo = null;
 
-    public AccountMasterStatsLeafFieldSubstitutionFunction(//
+    public AMStatsLeafFieldSubstitutionFunction(//
             Params params, //
             List<FieldMetadata> leafSchemaNewColumns, //
             List<FieldMetadata> leafSchemaOldColumns) {
@@ -76,7 +79,7 @@ public class AccountMasterStatsLeafFieldSubstitutionFunction extends BaseOperati
 
     @SuppressWarnings("unchecked")
     @Override
-    public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
+    public void operate(FlowProcess flowProcess, FunctionCall<Map> functionCall) {
         Map<String, Object> dimensionFieldValuesMap = new HashMap<>();
 
         TupleEntry entry = functionCall.getArguments();
@@ -100,10 +103,8 @@ public class AccountMasterStatsLeafFieldSubstitutionFunction extends BaseOperati
 
         StatsAttributeParser attributeParser = new StatsAttributeParser();
 
-        Map<String, List<Object>> minMaxInfo = null;
-
-        if (params.numericalBucketsRequired) {
-            minMaxInfo = parseMinMaxInfo(entry, minMaxInfo);
+        if (params.numericalBucketsRequired && minMaxInfo == null) {
+            minMaxInfo = parseMinMaxInfo(entry);
         }
 
         Map<String, FundamentalType> fieldFundamentalTypeMap = new HashMap<>();
@@ -266,16 +267,15 @@ public class AccountMasterStatsLeafFieldSubstitutionFunction extends BaseOperati
 
         for (String dimension : params.minMaxAndDimensionList) {
             if (!dimension.equals(params.minMaxKey)) {
-                Long dimensionId = (Long) dimensionFieldValuesMap.get(dimension);
+                Object dimensionId = dimensionFieldValuesMap.get(dimension);
                 int pos = fields.getPos(params.tempRenamedPrefix + dimension);
                 result.set(pos, dimensionId);
             }
         }
     }
 
-    private Map<String, List<Object>> parseMinMaxInfo(TupleEntry entry, //
-            Map<String, List<Object>> minMaxInfo) {
-
+    private Map<String, List<Object>> parseMinMaxInfo(TupleEntry entry) {
+        Map<String, List<Object>> minMaxInfo = new HashMap<>();
         String minMaxObjStr = entry.getString(params.minMaxKey);
 
         if (minMaxObjStr != null) {

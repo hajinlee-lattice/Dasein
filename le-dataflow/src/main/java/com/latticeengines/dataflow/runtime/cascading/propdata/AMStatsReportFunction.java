@@ -30,8 +30,8 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AccountMasterStatsReportFunction extends BaseOperation implements Function {
-    private static final Log log = LogFactory.getLog(AccountMasterStatsReportFunction.class);
+public class AMStatsReportFunction extends BaseOperation implements Function {
+    private static final Log log = LogFactory.getLog(AMStatsReportFunction.class);
     private static final long serialVersionUID = -2621164226184745299L;
 
     private static final int MaxColSize = 4096;
@@ -51,7 +51,7 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
     private Integer[] splunkReportAttrLoc;
     private Map<String, Integer> namePositionMap;
 
-    public AccountMasterStatsReportFunction(Params parameterObject) {
+    public AMStatsReportFunction(Params parameterObject) {
         super(parameterObject.reportOutputColumnFieldsDeclaration);
         this.namePositionMap = getPositionMap(parameterObject.reportOutputColumnFieldsDeclaration);
         this.reportOutputColumnNames = new ArrayList<String>();

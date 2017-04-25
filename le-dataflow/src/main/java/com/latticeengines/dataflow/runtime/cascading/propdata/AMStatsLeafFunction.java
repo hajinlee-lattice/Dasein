@@ -20,7 +20,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AccountMasterStatsLeafFunction extends BaseOperation implements Function {
+public class AMStatsLeafFunction extends BaseOperation implements Function {
     private static final long serialVersionUID = -4039806083023012431L;
 
     private Map<String, List<String>> dimensionDefinitionMap;
@@ -29,7 +29,7 @@ public class AccountMasterStatsLeafFunction extends BaseOperation implements Fun
     private Map<String, Map<String, Long>> requiredDimensionsValues;
     private String dimensionColumnPrepostfix;
 
-    public AccountMasterStatsLeafFunction(Params parameterObject) {
+    public AMStatsLeafFunction(Params parameterObject) {
         super(parameterObject.fieldDeclaration);
         requiredDimensionsRootAttrId = new HashMap<>();
         reverseDimensionDefinitionMap = new HashMap<>();

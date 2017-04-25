@@ -23,7 +23,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AccountMasterStatsDimensionExpandBuffer extends BaseOperation implements Buffer {
+public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffer {
     private static final long serialVersionUID = 4217950767704131475L;
     private static final int MAX_DEPTH = 5;
     private static ObjectMapper OM = new ObjectMapper();
@@ -32,7 +32,7 @@ public class AccountMasterStatsDimensionExpandBuffer extends BaseOperation imple
     private String normalizedExpandField;
     private String expandField;
 
-    public AccountMasterStatsDimensionExpandBuffer(Params parameterObject) {
+    public AMStatsDimensionExpandBuffer(Params parameterObject) {
         super(parameterObject.fieldDeclaration);
         this.expandField = parameterObject.expandField;
 
