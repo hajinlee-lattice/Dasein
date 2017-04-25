@@ -207,19 +207,18 @@ public class HdfsToS3ExportService {
                     return 0L;
                 }
             }));
-
-            for (Map.Entry<String, Future<Long>> entry : futures.entrySet()) {
-                String file = entry.getKey();
-                try {
-                    count += entry.getValue().get();
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to count file " + file, e);
-                }
-                downloadProgress = count.doubleValue() / totalRecords.doubleValue();
-                log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
-            }
-            executorService.shutdown();
         }
+        for (Map.Entry<String, Future<Long>> entry : futures.entrySet()) {
+            String file = entry.getKey();
+            try {
+                count += entry.getValue().get();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to count file " + file, e);
+            }
+            downloadProgress = count.doubleValue() / totalRecords.doubleValue();
+            log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
+        }
+        executorService.shutdown();
 
         log.info("Downloading finished.");
     }
