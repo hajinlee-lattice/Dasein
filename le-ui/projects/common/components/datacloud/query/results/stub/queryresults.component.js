@@ -4,7 +4,7 @@ angular.module('common.datacloud.query.results')
 
     var vm = this;
     angular.extend(vm, {
-        context: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
+        resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
         count: CountMetadata,
         columns: Columns,

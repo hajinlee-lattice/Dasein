@@ -5,7 +5,7 @@ angular.module('common.datacloud.query.results', [
 
     var vm = this;
     angular.extend(vm, {
-        context: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
+        resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
         count: CountMetadata ? CountMetadata.count : 0,
         countMetadata: CountMetadata || {},
@@ -26,7 +26,7 @@ angular.module('common.datacloud.query.results', [
         }
 
         var query = { free_form_text_search: vm.search };
-        QueryStore.GetCountByQuery(vm.context, query).then(function(results) {
+        QueryStore.GetCountByQuery(vm.resourceType, query).then(function(results) {
             vm.count = results;
         });
 
@@ -105,7 +105,7 @@ angular.module('common.datacloud.query.results', [
             };
         }
 
-        QueryStore.GetDataByQuery(vm.context, query).then(function(results) {
+        QueryStore.GetDataByQuery(vm.resourceType, query).then(function(results) {
             vm.results = results.data;
         });
     }

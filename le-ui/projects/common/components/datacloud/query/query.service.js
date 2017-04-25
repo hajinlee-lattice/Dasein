@@ -4,7 +4,7 @@ angular.module('common.datacloud.query.service',[
 
     angular.extend(this, QueryServiceStub);
 
-    this.validContexts = ['accounts', 'contacts'];
+    this.validResourceTypes = ['accounts', 'contacts'];
     this.segment = null;
     this.restriction = {
         all: [],
@@ -25,14 +25,14 @@ angular.module('common.datacloud.query.service',[
         return this.counts;
     };
 
-    this.setContextCount = function(context, loading, value) {
-        var contextCount = this.getCounts()[context];
-        if (contextCount) {
+    this.setResourceTypeCount = function(resourceType, loading, value) {
+        var resourceTypeCount = this.getCounts()[resourceType];
+        if (resourceTypeCount) {
             if (typeof value  !== 'undefined') {
-                contextCount.value = value;
+                resourceTypeCount.value = value;
             }
             if (typeof loading !== 'undefined') {
-                contextCount.loading = loading;
+                resourceTypeCount.loading = loading;
             }
         }
     };
@@ -90,7 +90,7 @@ angular.module('common.datacloud.query.service',[
 
     this.addRestriction = function(attribute) {
         attribute.range = attribute.range || { max: 'No', min: 'No', is_null_only: false };
-        attribute.objectType = attribute.objectType || 'BucketedAccountMaster';
+        attribute.resourceType = attribute.resourceType || 'BucketedAccountMaster';
 
         var attributesFound = this.findAttributes(attribute.columnName);
         var attributes = attributesFound.attributes;
@@ -108,7 +108,7 @@ angular.module('common.datacloud.query.service',[
         if (!found) {
             groupKey = groupKey || 'all';
             this.restriction[groupKey].push({
-                bucketRestriction: new BucketRestriction(attribute.columnName, attribute.objectType, attribute.range)
+                bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.range)
             });
             this.updateUiState(attribute.columnName, 1, this.restriction.all.length + this.restriction.any.length);
         }
@@ -146,7 +146,7 @@ angular.module('common.datacloud.query.service',[
         return { groupKey: groupKey, attributes: attributes };
     };
 
-    this.findAttributesInGroup = function (groupKey, columnName) {
+    this.findAttributesInGroup = function(groupKey, columnName) {
         var group = this.restriction[groupKey];
         var results = [];
 
@@ -159,53 +159,53 @@ angular.module('common.datacloud.query.service',[
         return results;
     };
 
-    this.GetCountByRestriction = function(context) {
-        if (!this.isValidContext(context)) {
+    this.GetCountByRestriction = function(resourceType) {
+        if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
-            deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
+            deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
             return deferred;
         }
 
-        return QueryService.GetCountByRestriction(context, this.restriction);
+        return QueryService.GetCountByRestriction(resourceType, this.restriction);
     };
 
-    this.GetCountByQuery = function(context, query) {
+    this.GetCountByQuery = function(resourceType, query) {
         query.restriction = this.getRestriction();
 
-        if (!this.isValidContext(context)) {
+        if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
-            deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
+            deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
             return deferred.promise;
         }
 
-        return QueryService.GetCountByQuery(context, query);
+        return QueryService.GetCountByQuery(resourceType, query);
     };
 
-    this.GetDataByQuery = function(context, query) {
+    this.GetDataByQuery = function(resourceType, query) {
         query.restriction = this.getRestriction();
 
-        if (!this.isValidContext(context)) {
+        if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
-            deferred.resolve({error: {errMsg:'Invalid Context: ' + context} });
+            deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
             return deferred.promise;
         }
 
-        return QueryService.GetDataByQuery(context, query);
+        return QueryService.GetDataByQuery(resourceType, query);
     };
 
-    this.isValidContext = function(context) {
-        return this.validContexts.indexOf(context) > -1;
+    this.isValidResourceType = function(resourceType) {
+        return this.validResourceTypes.indexOf(resourceType) > -1;
     };
 
 })
 .service('QueryService', function($http, $q) {
 
-    this.GetCountByRestriction = function(context, restriction) {
+    this.GetCountByRestriction = function(resourceType, restriction) {
         var defer = $q.defer();
 
         $http({
             method: 'POST',
-            url: '/pls/' + context + '/count/restriction',
+            url: '/pls/' + resourceType + '/count/restriction',
             data: restriction
         }).success(function(response) {
             defer.resolve(response);
@@ -216,12 +216,12 @@ angular.module('common.datacloud.query.service',[
         return defer.promise;
     };
 
-    this.GetCountByQuery = function(context, query) {
+    this.GetCountByQuery = function(resourceType, query) {
         var defer = $q.defer();
 
         $http({
             method: 'POST',
-            url: '/pls/' + context + '/count',
+            url: '/pls/' + resourceType + '/count',
             data: query
         }).success(function(response) {
             defer.resolve(response);
@@ -232,12 +232,12 @@ angular.module('common.datacloud.query.service',[
         return defer.promise;
     };
 
-    this.GetDataByQuery = function (context, query) {
+    this.GetDataByQuery = function(resourceType, query) {
         var defer = $q.defer();
 
         $http({
             method: 'POST',
-            url: '/pls/' + context + '/data',
+            url: '/pls/' + resourceType + '/data',
             data: query
         }).success(function(response) {
             defer.resolve(response);
@@ -276,8 +276,8 @@ angular.module('common.datacloud.query.service',[
 
     this.loadData = function() {
         var self = this;
-        this.validContexts.forEach(function(context) {
-            self.setContextCount(context, true);
+        this.validResourceTypes.forEach(function(resourceType) {
+            self.setResourceTypeCount(resourceType, true);
         });
 
         return $http({
@@ -285,12 +285,12 @@ angular.module('common.datacloud.query.service',[
             url: 'assets/resources/stub/records.json',
         }).then(function(result) {
             var data = result.data || {}
-            for (var context in data) {
-                self.columns[context] = data[context].columns || [];
-                self.records[context] = data[context].records || [];
+            for (var resourceType in data) {
+                self.columns[resourceType] = data[resourceType].columns || [];
+                self.records[resourceType] = data[resourceType].records || [];
 
                 if (self.uiState === defaultState) {
-                    self.uiState.counts[context] = self.records[context].length;
+                    self.uiState.counts[resourceType] = self.records[resourceType].length;
                 }
             }
         });
@@ -305,19 +305,19 @@ angular.module('common.datacloud.query.service',[
         var self = this;
         var delay = 500;
 
-        for (var i = 0; i < this.validContexts.length; i++){
-            var context = this.validContexts[i];
-            this.setContextCount(context, true);
+        for (var i = 0; i < this.validResourceTypes.length; i++){
+            var resourceType = this.validResourceTypes[i];
+            this.setResourceTypeCount(resourceType, true);
 
-            if (timeout[context]) {
-                $timeout.cancel(timeout[context]);
+            if (timeout[resourceType]) {
+                $timeout.cancel(timeout[resourceType]);
             }
 
-            timeout[context] = $timeout((function(x) {
-                return function () {
-                    self.setContextCount(x, false, self.uiState.counts[x]);
+            timeout[resourceType] = $timeout((function(x) {
+                return function() {
+                    self.setResourceTypeCount(x, false, self.uiState.counts[x]);
                 }
-            })(context), delay + delay * Math.random());
+            })(resourceType), delay + delay * Math.random());
         }
     };
 
@@ -369,14 +369,14 @@ angular.module('common.datacloud.query.service',[
         this.setUiState(uiStateFound || undefinedState);
     };
 
-    this.getRecordsForUiState = function(context) {
-        if (!this.isValidContext(context)) {
+    this.getRecordsForUiState = function(resourceType) {
+        if (!this.isValidResourceType(resourceType)) {
             return [];
         }
 
         var bitmask = this.uiState.bitmask;
 
-        return this.records[context].filter(function(record) {
+        return this.records[resourceType].filter(function(record) {
             return (record.uiState & bitmask) === bitmask;
         });
     };
