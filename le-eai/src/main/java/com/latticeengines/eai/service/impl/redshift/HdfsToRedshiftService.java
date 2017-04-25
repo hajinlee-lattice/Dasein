@@ -42,7 +42,7 @@ public class HdfsToRedshiftService {
 
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         HdfsToS3Configuration s3Configuration = new HdfsToS3Configuration();
-        s3Configuration.setSplitSize(2 * 1024L * 1024 * 1024);
+        s3Configuration.setSplitSize(500L * 1024 * 1024);
         s3Configuration.setS3Bucket(redshiftTableConfig.getS3Bucket());
         s3Configuration.setS3Prefix(s3Prefix(redshiftTableConfig));
         s3Configuration.setExportInputPath(configuration.getExportInputPath());
