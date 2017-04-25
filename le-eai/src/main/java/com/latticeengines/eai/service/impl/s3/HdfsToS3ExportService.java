@@ -175,6 +175,7 @@ public class HdfsToS3ExportService {
                             return count;
                         } catch (Exception e) {
                             log.error("Failed to download the file " + filePath + " from hdfs to local", e);
+                            return 0L;
                         }
                     } else {
                         log.info("Downloading original file " + filePath + " into splits on local.");
@@ -204,7 +205,6 @@ public class HdfsToS3ExportService {
                         }
                         return recordsInFile;
                     }
-                    return 0L;
                 }
             }));
         }
