@@ -21,7 +21,8 @@ public class IngestionApiProviderServiceImpl implements IngestionApiProviderServ
         try {
             version = apiClient.get(null, config.getVersionUrl());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to call api " + config.getVersionUrl() + " to get version");
+            throw new RuntimeException(String.format("Failed to call api %s to get version", config.getVersionUrl()),
+                    e);
         }
         DateFormat df = new SimpleDateFormat(config.getVersionFormat());
         TimeZone timezone = TimeZone.getTimeZone("UTC");
@@ -29,7 +30,7 @@ public class IngestionApiProviderServiceImpl implements IngestionApiProviderServ
         try {
             return HdfsPathBuilder.dateFormat.format(df.parse(version));
         } catch (ParseException e) {
-            throw new RuntimeException("Failed to parse timestamp " + version);
+            throw new RuntimeException(String.format("Failed to parse timestamp %s", version), e);
         }
     }
 }

@@ -26,9 +26,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.service.PropDataTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -45,9 +45,9 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("ingestionService")
@@ -119,8 +119,7 @@ public class IngestionServiceImpl implements IngestionService {
     public Ingestion getIngestionByName(String ingestionName) {
         Ingestion ingestion = ingestionEntityMgr.getIngestionByName(ingestionName);
         if (ingestion == null) {
-            throw new IllegalArgumentException(
-                    "Ingestion " + ingestionName + " does not have configuration.");
+            throw new IllegalArgumentException(String.format("Fail to find ingestion %s", ingestionName));
         }
         return ingestion;
     }
@@ -162,10 +161,11 @@ public class IngestionServiceImpl implements IngestionService {
     public void checkCompleteIngestions() {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
         for (Ingestion ingestion : ingestions) {
+            List<String> mostRecentVersions = null;
             switch (ingestion.getIngestionType()) {
             case SFTP:
                 SftpConfiguration sftpConfig = (SftpConfiguration) ingestion.getProviderConfiguration();
-                List<String> mostRecentVersions = ingestionVersionService
+                mostRecentVersions = ingestionVersionService
                         .getMostRecentVersionsFromHdfs(ingestion.getIngestionName(), sftpConfig.getCheckVersion());
                 for (String version : mostRecentVersions) {
                     checkCompleteVersionFromSftp(ingestion.getIngestionName(), version, sftpConfig);
@@ -180,8 +180,10 @@ public class IngestionServiceImpl implements IngestionService {
                 }
                 break;
             default:
-                break;
+                throw new UnsupportedOperationException(
+                        String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
             }
+            ingestionVersionService.updateCurrentVersion(ingestion, mostRecentVersions);
         }
     }
 
@@ -195,9 +197,9 @@ public class IngestionServiceImpl implements IngestionService {
             if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
                 return;
             }
-        } catch (IOException e1) {
-            throw new RuntimeException(
-                    "Failed to check " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS dir " + hdfsDir.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to check %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
+                    hdfsDir.toString()), e);
         }
 
         String fileNamePattern = ingestionVersionService.getFileNamePattern(version,
@@ -220,8 +222,8 @@ public class IngestionServiceImpl implements IngestionService {
         try {
             HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Failed to create " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS dir " + hdfsDir.toString());
+            throw new RuntimeException(String.format("Failed to create %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
+                    hdfsDir.toString()), e);
         }
     }
 
@@ -234,18 +236,18 @@ public class IngestionServiceImpl implements IngestionService {
             if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
                 return;
             }
-        } catch (IOException e1) {
-            throw new RuntimeException(
-                    "Failed to check " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS dir " + hdfsDir.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to check %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
+                    hdfsDir.toString()), e);
         }
         Path file = new Path(hdfsDir.toString(), apiConfig.getFileName());
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, file.toString())) {
                 HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
             }
-        } catch (IOException e1) {
-            throw new RuntimeException("Failed to check " + file.toString() + " in HDFS or create "
-                    + hdfsPathBuilder.SUCCESS_FILE + " in HDFS dir " + hdfsDir.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to check %s in HDFS or create %s in HDFS dir %s",
+                    file.toString(), hdfsPathBuilder.SUCCESS_FILE, hdfsDir.toString()), e);
         }
     }
 
@@ -268,7 +270,7 @@ public class IngestionServiceImpl implements IngestionService {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to scan hdfs directory " + hdfsDir.toString());
+            throw new RuntimeException(String.format("Failed to scan hdfs directory %s", hdfsDir.toString()), e);
         }
         return result;
     }
@@ -305,8 +307,8 @@ public class IngestionServiceImpl implements IngestionService {
                     progresses.add(progress);
                 break;
             default:
-                throw new UnsupportedOperationException("Ingestion criteria "
-                        + ingestion.getIngestionCriteria() + " is not supported.");
+            throw new UnsupportedOperationException(
+                    String.format("Ingestion criteria %s is not supported.", ingestion.getIngestionCriteria()));
         }
         return progresses;
     }
@@ -337,7 +339,8 @@ public class IngestionServiceImpl implements IngestionService {
             }
             break;
         default:
-            throw new RuntimeException("Ingestion type " + ingestion.getIngestionType() + " is not supported");
+            throw new UnsupportedOperationException(
+                    String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
         }
 
         return result;
@@ -355,8 +358,8 @@ public class IngestionServiceImpl implements IngestionService {
                         config.getCheckVersion(), config.getCheckStrategy(),
                         config.getFileTimestamp());
             default:
-                throw new RuntimeException(
-                        "Ingestion type " + ingestion.getIngestionType() + " is not supported");
+            throw new UnsupportedOperationException(
+                    String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
         }
     }
 
@@ -366,33 +369,32 @@ public class IngestionServiceImpl implements IngestionService {
                 .constructIngestionDir(ingestion.getIngestionName());
         List<String> result = new ArrayList<String>();
         switch (ingestion.getIngestionType()) {
-            case SFTP:
-                SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
-                final String fileExtension = config.getFileExtension();
-                HdfsFileFilter filter = new HdfsFileFilter() {
-                    @Override
-                    public boolean accept(FileStatus file) {
-                        return file.getPath().getName().endsWith(fileExtension);
-                    }
-                };
-                try {
-                    if (HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())) {
-                        List<String> hdfsFiles = HdfsUtils.getFilesForDirRecursive(
-                                yarnConfiguration, ingestionDir.toString(), filter);
-                        if (!CollectionUtils.isEmpty(hdfsFiles)) {
+        case SFTP:
+            SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
+            final String fileExtension = config.getFileExtension();
+            HdfsFileFilter filter = new HdfsFileFilter() {
+                @Override
+                public boolean accept(FileStatus file) {
+                    return file.getPath().getName().endsWith(fileExtension);
+                }
+            };
+            try {
+                if (HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())) {
+                    List<String> hdfsFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration,
+                            ingestionDir.toString(), filter);
+                    if (!CollectionUtils.isEmpty(hdfsFiles)) {
                             for (String fullName : hdfsFiles) {
-                                result.add(new Path(fullName).getName());
-                            }
+                            result.add(new Path(fullName).getName());
                         }
                     }
-                } catch (IOException e) {
-                    throw new RuntimeException(
-                            "Failed to scan hdfs directory " + ingestionDir.toString());
                 }
-                return result;
-            default:
-                throw new RuntimeException(
-                        "Ingestion type " + ingestion.getIngestionType() + " is not supported");
+            } catch (IOException e) {
+                throw new RuntimeException(String.format("Failed to scan hdfs directory %s", ingestionDir.toString()));
+            }
+            return result;
+        default:
+            throw new UnsupportedOperationException(
+                    String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
         }
     }
 

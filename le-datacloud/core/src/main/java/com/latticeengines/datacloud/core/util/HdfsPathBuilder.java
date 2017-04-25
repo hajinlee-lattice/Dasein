@@ -15,6 +15,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 @Component("hdfsPathBuilder")
@@ -152,6 +153,11 @@ public class HdfsPathBuilder {
         Path baseDir = constructSourceDir(sourceName);
         String avscFile = sourceName + AVRO_SCHEMA_FILE_EXTENSION;
         return baseDir.append(SCHEMA).append(version).append(avscFile);
+    }
+
+    public Path constructVersionFile(Ingestion ingestion) {
+        Path baseDir = constructIngestionDir(ingestion.getIngestionName());
+        return baseDir.append(VERSION_FILE);
     }
 
     public Path constructVersionFile(Source source) {

@@ -90,7 +90,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             return apiConfiguration.getFileUrl();
         default:
             throw new UnsupportedOperationException(
-                    "Ingestion type " + ingestion.getIngestionType() + " is not supported.");
+                    String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
         }
     }
 
@@ -115,10 +115,10 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
                 try {
                     fileVersion = HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
                 } catch (ParseException e) {
-                    throw new RuntimeException("Failed to parse timestamp " + timestampStr);
+                    throw new RuntimeException(String.format("Failed to parse timestamp %s", timestampStr), e);
                 }
             } else {
-                throw new RuntimeException("Failed to parse filename " + fileName);
+                throw new RuntimeException(String.format("Failed to parse filename %s", fileName));
                     }
             break;
         case API:
@@ -160,8 +160,8 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             case SFTP:
             return createSftpToHdfsRouteConfiguration(progress);
         default:
-            throw new UnsupportedOperationException("Ingestion type "
-                    + progress.getIngestion().getIngestionType() + " is not supported.");
+            throw new UnsupportedOperationException(
+                    String.format("Ingestion type %s is not supported", progress.getIngestion().getIngestionType()));
         }
     }
 
