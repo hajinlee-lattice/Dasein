@@ -1,7 +1,7 @@
 <div class="pd-pagination">
     <button 
             type="button" 
-            class="button icon-button white-button" 
+            class="button icon-button white-button pd-pagination-start" 
             ng-click="current = 1"
             ng-disabled="current <= 1"
         >
@@ -35,7 +35,7 @@
     </button>
     <button 
             type="button" 
-            class="button icon-button white-button" 
+            class="button icon-button white-button pd-pagination-end" 
             ng-click="current = Math.ceil(max)"
             ng-disabled="current >= max"
         >

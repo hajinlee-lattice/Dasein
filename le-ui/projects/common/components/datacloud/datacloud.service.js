@@ -14,6 +14,7 @@ angular.module('common.datacloud')
         this.metadataSegments = this.metadataSegments || null;
         this.metadata = this.metadata || {
             current: 1,
+            currentCategory: 1,
             toggle: {
                 show: {
                     nulls: false,

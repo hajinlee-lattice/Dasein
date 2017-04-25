@@ -33,6 +33,20 @@ angular
                 return path + icon;
             }
 
+            vm.categoryStartFrom = function() {
+                var size = vm.category ? vm.categorySize : vm.pagesize,
+                    current = vm.metadata.currentCategory - 1,
+                    items = vm.categoriesMenu;
+
+                return current * size + size > items.length 
+                    ? items.length - size 
+                    : current * size;
+            }
+
+            vm.categoryLimitTo = function() {
+                return vm.category ? vm.categorySize : vm.pagesize;
+            }
+
             vm.categoryOrderBy = function() {
                 if(vm.lookupMode) {
                     order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];

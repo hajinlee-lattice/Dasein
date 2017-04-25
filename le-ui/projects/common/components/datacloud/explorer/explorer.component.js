@@ -53,6 +53,7 @@ angular.module('common.datacloud.explorer', [
         count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
+        show_segmentation: FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL),
         enabledManualSave: false,
         enrichments_loaded: false,
         enrichments_completed: false,
@@ -89,7 +90,8 @@ angular.module('common.datacloud.explorer', [
         highlightMetadata: {
             categories: {}
         },
-        pagesize: 24
+        pagesize: 24,
+        categorySize: 7
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
@@ -150,6 +152,7 @@ angular.module('common.datacloud.explorer', [
             //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
             vm.no_lookup_results_message = true;
         }
+        
         if(vm.section === 'segment.analysis') {
             vm.metadataSegments = QueryRestriction;
         }
@@ -293,7 +296,7 @@ angular.module('common.datacloud.explorer', [
 
             if(vm.enrichments_completed) {
                 getEnrichmentCube().then(function(result){
-                    angular.extend(result.data.Stats, DemoData.cube.Stats);
+                    result.data.Stats = angular.extend({}, result.data.Stats, DemoData.cube.Stats);
                     vm.cube = result.data;
                 });
             }
@@ -820,11 +823,36 @@ angular.module('common.datacloud.explorer', [
 
     var getEnrichmentCategories = function() {
         if (EnrichmentTopAttributes) {
-            vm.categories = Object.keys(EnrichmentTopAttributes).sort();
+
+            vm.categories = Object.keys(EnrichmentTopAttributes);
+
+            if (vm.show_segmentation && vm.section == 'segment.analysis') {
+                var topCategories = [
+                    'Contact',
+                    'Product',
+                    'Firmographics',
+                    'Intent',
+                    'Technology Profile'
+                ];
+
+                topCategories.forEach(function(category, index) {
+                    vm.categories.move(vm.categories.indexOf(category), index);
+                });
+            } else {
+                var removeCategories = [
+                    'Product',
+                    'Contact'
+                ];
+
+                removeCategories.forEach(function(category) {
+                    vm.categories.splice(vm.categories.indexOf(category), 1);
+                })
+            }
 
             for (var i in vm.categories) {
                 vm.categoryCounts[vm.categories[i]] = null;
             }
+
             vm.enable_category_dropdown = true;
         }
     }

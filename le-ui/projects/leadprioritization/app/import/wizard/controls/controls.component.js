@@ -22,6 +22,8 @@ angular.module('lp.import.wizard.controls', [])
             $state.go(vm.next);
         } else if (isPrev && vm.prev) {
             $state.go(vm.prev);
+        } else if (!isPrev && !vm.next) {
+            $state.go('home.segment')
         }
     }
 

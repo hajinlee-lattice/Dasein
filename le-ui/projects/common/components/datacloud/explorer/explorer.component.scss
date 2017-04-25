@@ -10,6 +10,21 @@
         background-color: rgba($color, $opacity);
     }
 
+    .enrichment-wizard-category-pagination {
+        .pd-pagination {
+            text-align: right;
+            margin-right: 1em;
+        }
+        .pd-pagination-center,
+        .pd-pagination-start,
+        .pd-pagination-end {
+            display: none;
+        }
+        .button {
+            height: 1.5em;
+            padding: 0em 1em;
+        }
+    }
     .filters {
         @include flex-container;
         padding-bottom: 10px;
@@ -151,6 +166,11 @@
                         font-size: 20px;
                         .category-label {
                             max-height: 45px;
+                            height: 2em;
+                            white-space: initial;
+                            .category-label-span {
+                                
+                            }
                         }
                     }
                     .count {
