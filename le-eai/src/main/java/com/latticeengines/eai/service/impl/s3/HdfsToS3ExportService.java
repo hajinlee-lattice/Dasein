@@ -20,7 +20,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -159,52 +158,36 @@ public class HdfsToS3ExportService {
                 }
 
                 protected Long copyToLocal(String filePath) throws IllegalArgumentException, IOException {
-                    if (config.getSplitSize() == null
-                            || config.getSplitSize() >= HdfsUtils.getFileSize(yarnConfiguration, filePath)) {
-                        log.info("split_size is either not specified or too larget. download the whole file.");
-                        File localFile = new File(LOCAL_CACHE + "/" + new Path(filePath).getName());
-                        try {
-                            HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, localFile.getPath());
-                            FileUtils.deleteQuietly(
-                                    new File(LOCAL_CACHE + "/." + new Path(filePath).getName() + ".crc"));
-                            Configuration localConfig = new Configuration();
-                            localConfig.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
-                            long count = AvroUtils.count(localConfig, localFile.getPath());
-                            log.info("Downloaded " + count + " records"
-                                    + String.format(" (%.2f MB)", FileUtils.sizeOf(localFile) / 1024.0 / 1024.0));
-                            return count;
-                        } catch (Exception e) {
-                            log.error("Failed to download the file " + filePath + " from hdfs to local", e);
-                            return 0L;
+                    log.info("Downloading original file " + filePath + " to local.");
+                    Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
+                    Long recordsInFile = 0L;
+                    while (iterator.hasNext()) {
+                        String fileName = new Path(filePath).getName();
+                        if (config.getSplitSize() != null
+                                && config.getSplitSize() < HdfsUtils.getFileSize(yarnConfiguration, filePath)) {
+                            fileName = new Path(filePath).getName().replace(".avro", "-" + splitIdx + ".avro");
                         }
-                    } else {
-                        log.info("Downloading original file " + filePath + " into splits on local.");
-                        Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
-                        Long recordsInFile = 0L;
-                        while (iterator.hasNext()) {
-                            String splitFileName = new Path(filePath).getName().replace(".avro",
-                                    "-" + splitIdx + ".avro");
-                            File avroFile = new File(LOCAL_CACHE + "/" + splitFileName);
-                            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
-                                    new GenericDatumWriter<GenericRecord>())) {
-                                FileUtils.touch(avroFile);
-                                writer.create(schema, avroFile);
-                                Long fileSize = FileUtils.sizeOf(avroFile);
-                                while (fileSize < splitSize && iterator.hasNext()) {
-                                    GenericRecord datum = iterator.next();
-                                    writer.append(datum);
-                                    recordsInFile++;
-                                    fileSize = FileUtils.sizeOf(avroFile);
-                                }
-                                log.info("Downloaded " + recordsInFile + " records to split " + splitFileName
-                                        + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
-                            } catch (IOException e) {
-                                throw new RuntimeException("Failed to write to split file " + splitFileName, e);
+
+                        File avroFile = new File(LOCAL_CACHE + "/" + fileName);
+                        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
+                                new GenericDatumWriter<GenericRecord>())) {
+                            FileUtils.touch(avroFile);
+                            writer.create(schema, avroFile);
+                            Long fileSize = FileUtils.sizeOf(avroFile);
+                            while (fileSize < splitSize && iterator.hasNext()) {
+                                GenericRecord datum = iterator.next();
+                                writer.append(datum);
+                                recordsInFile++;
+                                fileSize = FileUtils.sizeOf(avroFile);
                             }
-                            splitIdx++;
+                            log.info("Downloaded " + recordsInFile + " records to " + fileName
+                                    + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to write to split file " + fileName, e);
                         }
-                        return recordsInFile;
+                        splitIdx++;
                     }
+                    return recordsInFile;
                 }
             }));
         }
