@@ -389,6 +389,9 @@
                                 width: 50px;
                                 margin-right: 0;
                                 text-align: left;
+                                & > input {
+                                    pointer-events: none;
+                                }
                             }
                             &.rating-lift,
                             &.rating-count{
@@ -456,6 +459,7 @@
                     left: 50px;
                     bottom: 0;
                     font-size: 10px;
+                    pointer-events: none;
                     @include flex-container;
                     .rating-slice {
                         @include flex-item(1 1 auto);
@@ -1237,6 +1241,44 @@
         }
         &.background-color {
             background-color: #26649b;
+        }
+    }
+    .category-contact {
+        &.color {
+            color: #ff9e64;
+        }
+        &.border {
+            border-color: #ff9e64;
+        }
+        &.border-top {
+            border-top-color: #ff9e64;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(255,158,100);
+            border-color: #ff9e64;
+        }
+        &.background-color {
+            background-color: #ff9e64;
+        }
+    }
+    .category-product {
+        &.color {
+            color: #cd80bc;
+        }
+        &.border {
+            border-color: #cd80bc;
+        }
+        &.border-top {
+            border-top-color: #cd80bc;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(205,128,188);
+            border-color: #cd80bc;
+        }
+        &.background-color {
+            background-color: #cd80bc;
         }
     }
     .disabled-grayout {

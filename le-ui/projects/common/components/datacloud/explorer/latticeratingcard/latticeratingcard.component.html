@@ -1,7 +1,7 @@
 <div class="box-inner lattice-rating round-box">
     <h2>
         <div class="category-icon ratings-logo">
-            <img src="https://localhost:3000/lp/assets/images/logoonly_lattice.png" />
+            <img src="/lp/assets/images/logoonly_lattice.png" />
         </div>
         <div class="category-label">
             Lattice Rating
@@ -18,10 +18,17 @@
                     <li class="rating-count">Records</li>
                 </ul>
             </li>
-            <li class="lattice-rating-list {{rating.Classname}}" ng-repeat="rating in vm.latticeRatings.ratings | limitTo:6">
+            <li class="lattice-rating-list {{rating.Classname}}" 
+                ng-repeat="rating in vm.latticeRatings.ratings | limitTo:6"
+                ng-click="vm.selectBucketInput('Lattice_Ratings', rating.Lbl)">
                 <ul class="rating-item">
                     <li class="rating-label">
-                        <input type="checkbox" />
+                        <input  type="checkbox" 
+                                ng-model="vm.segmentBucketInput['Lattice_Ratings' + rating.Lbl]" 
+                                ng-checked="vm.segmentBucketInput['Lattice_Ratings' + rating.Lbl]" 
+                                name="{{'Lattice_Ratings' + rating.Lbl}}" 
+                                id="{{'Lattice_Ratings' + rating.Lbl}}" 
+                                ng-if="vm.section == 'segment.analysis'" />
                         {{rating.Lbl}}
                     </li>
                     <li class="rating-bar">

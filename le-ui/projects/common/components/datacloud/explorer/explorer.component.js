@@ -1314,6 +1314,20 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
+    vm.segmentBucketInput = vm.segmentBucketInput || {};
+    vm.selectBucketInput = function(id, bucket) {
+        var bucketId = id + bucket,
+            range = {min: bucket, max: bucket, null_only: false};
+
+        vm.segmentBucketInput[bucketId] = !vm.segmentBucketInput[bucketId];
+        vm.saveSegmentEnabled = true;
+        if (vm.segmentBucketInput[bucketId] === true) {
+            QueryStore.addRestriction({columnName: id, range: range});
+        } else {
+            QueryStore.removeRestriction({columnName: id, range: range});
+        }
+    }
+
     vm.inModel = function() {
         var name = $state.current.name.split('.');
         return name[1] == 'model';

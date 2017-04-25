@@ -17,6 +17,7 @@
         cursor: pointer;
         margin-bottom: 40px;
         padding-left: 30px;
+        transition: none;
         &:before {
             content: '';
             display: block;
@@ -29,6 +30,7 @@
             height: 23px;
             border-radius: 50%;
             border: 1px solid #d0d0d0;
+            transition: none;
         }
         &:after {
             content: '';
@@ -37,6 +39,7 @@
             top: 50%;
             left: 0;
             transform: translateY(-50%);
+            transition: none;
         }
     }
     li.previous {

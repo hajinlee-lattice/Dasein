@@ -30,7 +30,7 @@
     <span class="lesser-description" ng-if="vm.lookupMode">
         {{ enrichment.Description }}
     </span>
-    <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' && !vm.lookupMode">
+    <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && !vm.lookupMode">
         <h5><label>Attribute range</label><label>Records</label></h5>
         <ul class="attribute-stats">
             <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List | limitTo: 5"

@@ -20,6 +20,10 @@ angular
         })
         .state('home.import.entry.accounts', {
             url: '/accounts',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'My Data'
+            },
             views: {
                 'entry_content@home.import.entry': {
                     templateUrl: 'app/import/entry/accounts/accounts.component.html'
