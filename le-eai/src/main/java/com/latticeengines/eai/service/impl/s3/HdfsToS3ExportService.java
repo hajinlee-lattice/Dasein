@@ -210,13 +210,11 @@ public class HdfsToS3ExportService {
 
             for (Map.Entry<String, Future<Long>> entry : futures.entrySet()) {
                 String file = entry.getKey();
-                Long partialCount;
                 try {
-                    partialCount = entry.getValue().get();
+                    count += entry.getValue().get();
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to count file " + file, e);
                 }
-                count += partialCount;
                 downloadProgress = count.doubleValue() / totalRecords.doubleValue();
                 log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
             }
