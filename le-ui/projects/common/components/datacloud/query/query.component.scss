@@ -89,6 +89,62 @@
     font-weight: bold;
     margin: 1em 0;
     padding: 0.3em 1em;
+    .category-firmographics {
+        .query-lift-bg {
+            background-color: $datacloud-color-firmographics;
+        }
+        .query-category-color {
+            color: $datacloud-color-firmographics;
+        }
+    }
+    .category-growth-trends {
+        .query-lift-bg {
+            background-color: $datacloud-color-growth-trends;
+        }
+        .query-category-color {
+            color: $datacloud-color-growth-trends;
+        }
+    }
+    .category-intent {
+        .query-lift-bg {
+            background-color: $datacloud-color-intent;
+        }
+        .query-category-color {
+            color: $datacloud-color-intent;
+        }
+    }
+    .category-online-presence {
+        .query-lift-bg {
+            background-color: $datacloud-color-online-presence;
+        }
+        .query-category-color {
+            color: $datacloud-color-online-presence;
+        }
+    }
+    .category-technology-profile {
+        .query-lift-bg {
+            background-color: $datacloud-color-technology-profile;
+        }
+        .query-category-color {
+            color: $datacloud-color-technology-profile;
+        }
+    }
+    .category-website-keywords {
+        .query-lift-bg {
+            background-color: $datacloud-color-website-keywords;
+        }
+        .query-category-color {
+            color: $datacloud-color-website-keywords;
+        }
+    }
+    .category-website-profile {
+        .query-lift-bg {
+            background-color: $datacloud-color-website-profile;
+        }
+        .query-category-color {
+            color: $datacloud-color-website-profile;
+        }
+    }
 }
 
 .query-filter-action {
@@ -101,42 +157,35 @@
         color: black;
     }
 }
+
 .query-filter-name {
     flex: 1 0 auto;
     max-width: 500px;
-    .category-firmographics {
-        color: $datacloud-color-firmographics;
-    }
-    .category-growth-trends {
-        color: $datacloud-color-growth-trends;
-    }
-    .category-intent {
-        color: $datacloud-color-intent;
-    }
-    .category-online-presence {
-        color: $datacloud-color-online-presence;
-    }
-    .category-technology-profile {
-        color: $datacloud-color-technology-profile;
-    }
-    .category-website-keywords {
-        color: $datacloud-color-website-keywords;
-    }
-    .category-website-profile {
-        color: $datacloud-color-website-profile;
-    }
 }
+
 .query-filter-type {
     width: 15%;
     padding-top: 20px;
     padding-left: 2px;
     color: #888888;
 }
+
 .query-filter-buckets {
     flex: 0 0 auto;
     width: 40%;
+    .query-lift-bg {
+        display: inline-block;
+        text-align: center;
+        color: white;
+        background: black;
+        width: 42px;
+        border-radius: 4px;
+    }
 }
 
+.query-filter-value {
+    width: 50%;
+}
 .query-filter-table {
     display: table;
     width: 100%;
@@ -174,20 +223,3 @@
     content: "\f063"; /* down */
 }
 
-.query-filter-lift {
-    .query-lift-highlight {
-        display: inline-block;
-        text-align: center;
-        color: white;
-        background: black;
-        width: 42px;
-        border-radius: 4px;
-    }
-}
-.query-filter-value {
-    width: 50%;
-}
-
-.query-filter-category {
-    font-size: 12px;
-}
