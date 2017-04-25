@@ -62,6 +62,7 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         version1.setAccountLookupHdfsVersion("version1");
         version1.setMajorVersion("98.0");
         version1.setStatus(DataCloudVersion.Status.APPROVED);
+        version1.setMetadataRefreshDate(new Date());
 
         DataCloudVersion version2 = new DataCloudVersion();
         version2.setVersion("98.0.1");
@@ -70,6 +71,7 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         version2.setAccountLookupHdfsVersion("version2");
         version2.setMajorVersion("98.0");
         version2.setStatus(DataCloudVersion.Status.APPROVED);
+        version2.setMetadataRefreshDate(new Date());
 
         return Arrays.asList(version1, version2);
     }
