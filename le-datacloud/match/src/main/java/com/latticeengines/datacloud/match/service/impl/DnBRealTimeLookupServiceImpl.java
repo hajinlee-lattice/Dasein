@@ -168,8 +168,12 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             context.setDnbCode(parseDnBHttpError(httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
-            log.error(String.format("LedpException in DnB realtime request: %s %s",
-                    ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
+            // If DnB cannot find duns for match input, HttpStatus.NOT_FOUND (LedpCode.LEDP_25038) is returned. 
+            // Treat LedpCode.LEDP_25038 as normal response. Do not log
+            if (ledpEx.getCode() != LedpCode.LEDP_25038) {
+                log.error(String.format("LedpException in DnB realtime request: %s %s",
+                        ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
+            }
             switch (ledpEx.getCode()) {
             case LEDP_25027:
                 context.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);

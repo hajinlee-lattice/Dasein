@@ -81,7 +81,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
                             + " Timestamp=" + batchContext.getTimestamp() + " ServiceId="
                             + batchContext.getServiceBatchId());
                 } else {
-                    log.info("Encountered issue in fetching batch results from dnb. DnBCode="
+                    log.error("Encountered issue in fetching batch results from dnb. DnBCode="
                             + batchContext.getDnbCode().getMessage());
                 }
                 return batchContext;
@@ -248,7 +248,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             matchedNameLocation.setPhoneNumber(phoneNumber);
             output.setDnbCode(DnBReturnCode.OK);
         } catch (Exception e) {
-            log.warn(String.format("Fail to extract duns from match result of DnB bulk match request %s: %s",
+            log.error(String.format("Fail to extract duns from match result of DnB bulk match request %s: %s",
                     serviceBatchId, record));
             output.setDnbCode(DnBReturnCode.UNMATCH);
         }

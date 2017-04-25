@@ -144,7 +144,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
             batchContext.setServiceBatchId(serviceBatchId);
             batchContext.setDnbCode(DnBReturnCode.SUBMITTED);
         } else {
-            log.warn(String.format("Fail to extract serviceBatchId from response of DnB bulk match request: %s",
+            log.error(String.format("Fail to extract serviceBatchId from response of DnB bulk match request: %s",
                     response));
             batchContext.setDnbCode(DnBReturnCode.BAD_RESPONSE);
         }

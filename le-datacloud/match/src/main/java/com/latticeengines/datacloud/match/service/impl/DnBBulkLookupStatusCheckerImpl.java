@@ -170,7 +170,7 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     protected void parseError(Exception ex, Map<String, DnBBatchMatchContext> batch) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
-            log.info(String.format("HttpClientErrorException in DnB realtime request: HttpStatus %d %s",
+            log.error(String.format("HttpClientErrorException in DnB realtime request: HttpStatus %d %s",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
             for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
