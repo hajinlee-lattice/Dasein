@@ -32,9 +32,7 @@ angular
         vm.initialized = true;
 
         vm.standardFieldsList[1] = (vm.schema === 'SalesforceAccount') ? 'Website' : 'Email';
-        if (!Model.EventTableProvenance || !Model.EventTableProvenance.Exclude_Propdata_Columns) {
-            vm.requiredFieldsMissing[vm.standardFieldsList[1]] = true;
-        }
+        vm.requiredFieldsMissing[vm.standardFieldsList[1]] = true;
 
         var fuzzyMatchEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH);
         var isRTS = Model.EventTableProvenance &&
