@@ -48,9 +48,10 @@ public class GenerateDemoJsonTestNG {
             }
             String attribute = record.get(2);
             String value = record.get(3);
+            String description = record.get(4);
             String fieldName = "Demo - " + subcategory + " - " + attribute;
             if (!attributes.stream().anyMatch(a -> a.getFieldName().equals(fieldName))) {
-                attributes.add(createLeadEnrichmentAttribute(category, subcategory, attribute, fieldName));
+                attributes.add(createLeadEnrichmentAttribute(category, subcategory, attribute, fieldName, description));
             }
             AttributeStatistics statistics = cube.getStatistics().get(fieldName);
             if (statistics == null) {
@@ -110,12 +111,13 @@ public class GenerateDemoJsonTestNG {
     }
 
     private LeadEnrichmentAttribute createLeadEnrichmentAttribute(String category, String subcategory,
-            String displayName, String fieldName) {
+            String displayName, String fieldName, String description) {
         LeadEnrichmentAttribute attribute = new LeadEnrichmentAttribute();
         attribute.setDisplayName(displayName);
         attribute.setFieldName(fieldName);
         attribute.setCategory(category);
         attribute.setSubcategory(subcategory);
+        attribute.setDescription(description);
         attribute.setFundamentalType(FundamentalType.BOOLEAN);
         return attribute;
     }
