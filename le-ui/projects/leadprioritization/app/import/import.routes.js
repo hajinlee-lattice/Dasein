@@ -154,6 +154,8 @@ angular
             url: '/customfields',
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardCustomFields',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/customfields/customfields.component.html'
                 }
             }
@@ -215,6 +217,8 @@ angular
             url: '/customfields',
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardCustomFields',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/customfields/customfields.component.html'
                 }
             }
@@ -265,6 +269,8 @@ angular
             url: '/customfields',
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardCustomFields',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/customfields/customfields.component.html'
                 }
             }
@@ -315,6 +321,8 @@ angular
             url: '/customfields',
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardCustomFields',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/customfields/customfields.component.html'
                 }
             }
@@ -366,6 +374,8 @@ angular
             url: '/customfields',
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardCustomFields',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/customfields/customfields.component.html'
                 }
             }
