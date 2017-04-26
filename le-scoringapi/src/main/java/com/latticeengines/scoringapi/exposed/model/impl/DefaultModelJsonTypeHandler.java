@@ -228,9 +228,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     public ScoringApiException checkForMissingEssentialFields(String recordId, //
             String modelId, //
             boolean hasOneOfDomain, //
-            boolean hasCompanyName, //
+            boolean hasKeyFieldForMatching, //
             List<String> missingMatchFields) {
-        if (!hasOneOfDomain && !hasCompanyName) {
+        if (!hasOneOfDomain && !hasKeyFieldForMatching) {
             return new ScoringApiException(LedpCode.LEDP_31199,
                     new String[] { Joiner.on(",").join(missingMatchFields) });
         }
