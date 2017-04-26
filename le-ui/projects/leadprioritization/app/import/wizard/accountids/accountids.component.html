@@ -1,5 +1,5 @@
 <div class="import-accountid container">
-    <h2>[icon] Account IDs</h2>
+    <h2>Account IDs</h2>
 
     <p ng-if="::vm.state.accountDedupeField">You chose to use your ID field for deduplication. It is important the IDs associated with any previously uploaded accounts remain the same, and any new accounts that you upload have a unique ID.</p>
 
@@ -17,7 +17,7 @@
             </div>
             <div>
                 <label for="dedupeField">Unique Identifier</label>
-                <select id="dedupeField"
+                <select id="dedupeField" class="form-control"
                     ng-model="vm.state.selectedField"
                     ng-disabled="vm.state.dedupeType !== 'custom'"
                     ng-options="f as f for f in vm.state.fields">

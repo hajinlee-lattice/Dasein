@@ -1,4 +1,8 @@
 .import-accountid {
+    h2 {
+        background-image: url('/assets/images/ico-data-import-dark.png');
+    }
+
     .dedupe-options {
         @include flex-container;
         flex-direction: row;
@@ -7,6 +11,7 @@
     .dedupe-options-item {
         @include flex-item(0 0 auto);
         width: 50%;
+        margin: 20px 0 34px;
         &:first-child {
             padding-right: 2em;
         }
