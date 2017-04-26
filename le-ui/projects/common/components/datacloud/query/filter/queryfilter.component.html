@@ -1,13 +1,13 @@
-<div class="query-filter query-{{group}}">
+<div class="query-filter query-{{::group}}">
     <div class="query-filter-action">
-        <a href ng-click="onMove()" data-stooltip="Move to {{group.toUpperCase() === 'ANY' ? 'All' : 'Any'}}">
+        <a href ng-click="onMove()" data-stooltip="Move to {{::group.toUpperCase() === 'ANY' ? 'All' : 'Any'}}">
             <i class="fa arrow"></i>
         </a>
     </div>
-    <div class="query-filter-name category-{{attribute.categoryClassName}}">
+    <div class="query-filter-name category-{{::attribute.categoryClassName}}">
         <div class="query-filter-table">
-            <p class="query-category-color">{{attribute.category}}</p>
-            <p>{{attribute.displayName}}</p>
+            <p class="query-category-color">{{::attribute.category}}</p>
+            <p>{{::attribute.displayName}}</p>
         </div>
     </div>
     <div class="query-filter-type">
@@ -18,7 +18,7 @@
         </div>
     </div>
     <!-- leads removed for segment:demo:fixme -->
-    <div class="query-filter-buckets category-{{attribute.categoryClassName}}">
+    <div class="query-filter-buckets category-{{::attribute.categoryClassName}}">
         <div class="query-filter-table">
             <div class="query-filter-row query-filter-header">
                 <div class="query-filter-cell query-filter-value">Value</div>

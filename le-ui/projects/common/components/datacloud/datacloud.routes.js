@@ -466,8 +466,7 @@ angular
 
     $stateProvider
         .state('home.model.analysis', getState('main'))
-        .state('home.model.analysis.explorer', getState('explorer'))
-        .state('home.model.analysis.explorer.attributes', getState('attributes', {
+        .state('home.model.analysis.explorer', getState('explorer', {
             resolve: {
                 CurrentConfiguration: ['$q', '$stateParams', 'ModelRatingsService', function($q, $stateParams, ModelRatingsService) {
                     var deferred = $q.defer(),
@@ -481,6 +480,7 @@ angular
                 }]
             }
         }))
+        .state('home.model.analysis.explorer.attributes', getState('attributes'))
         .state('home.model.analysis.explorer.query', getState('query'))
         .state('home.model.analysis.x', getState('abstract'))
         .state('home.model.analysis.x.accounts', getState('xaccounts'))
@@ -505,7 +505,13 @@ angular
                 subcategory: { value: null, squash: true }
             }
         }))
-        .state('home.segment.explorer.query', getState('query'))
+        .state('home.segment.explorer.query', getState('query', {
+            resolve: {
+                CurrentConfiguration: function() {
+                    return null;
+                }
+            }
+        }))
         .state('home.segment.x', getState('abstract'))
         .state('home.segment.x.accounts', getState('xaccounts'))
         .state('home.segment.x.contacts', getState('xcontacts'))

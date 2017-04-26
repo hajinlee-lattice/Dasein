@@ -1,5 +1,8 @@
 angular.module('common.datacloud.query.builder', [])
-.controller('QueryBuilderCtrl', function($scope, $state, QueryRestriction, QueryStore, DataCloudStore, SegmentServiceProxy, BucketRestriction) {
+.controller('QueryBuilderCtrl', function($scope, $state,
+    QueryRestriction, QueryStore, DataCloudStore, SegmentServiceProxy, BucketRestriction, CurrentConfiguration) {
+
+    var LATTICE_RATINGS_FIELD_NAME = 'Lattice_Ratings';
 
     var vm = this;
     angular.extend(this, {
@@ -93,7 +96,9 @@ angular.module('common.datacloud.query.builder', [])
         return null;
     }
 
-    function createFiltersFromRestrictions(restrictions, attributesMetadata) {
+    function createFiltersFromRestrictions(restrictions, enrichmentData) {
+        var attributeCache = {};
+
         var filterFields = {};
         for (var groupKey in restrictions) {
             filterFields[groupKey] = {};
@@ -104,7 +109,14 @@ angular.module('common.datacloud.query.builder', [])
                 var fieldName = BucketRestriction.getColumnName(group[i].bucketRestriction);
                 var objectType = BucketRestriction.getObjectType(group[i].bucketRestriction);
                 if (!filterGroup[fieldName]) {
-                    var attribute = findAttribute(fieldName, attributesMetadata);
+                    var attribute;
+                    if (attributeCache[fieldName]) {
+                        attribute = attributeCache[fieldName];
+                    } else {
+                        attribute = findAttribute(fieldName, enrichmentData);
+                        attributeCache[fieldName] = attribute;
+                    }
+
                     if (attribute) {
                         filterGroup[fieldName] = {
                             category: attribute.Category,
@@ -112,6 +124,19 @@ angular.module('common.datacloud.query.builder', [])
                             columnName: fieldName,
                             objectType: objectType,
                             displayName: attribute.DisplayName,
+                            buckets: []
+                        };
+                    } else {
+                        if (fieldName === LATTICE_RATINGS_FIELD_NAME && !vm.inModel) {
+                            continue;
+                        }
+
+                        filterGroup[fieldName] = {
+                            category: 'Unknown',
+                            categoryClassName: '',
+                            columnName: fieldName,
+                            objectType: objectType,
+                            displayName: fieldName,
                             buckets: []
                         };
                     }
@@ -150,30 +175,51 @@ angular.module('common.datacloud.query.builder', [])
             for (var fieldName in group) {
                 var restrictionBuckets = group[fieldName].buckets;
 
-                var cubeStat = vm.cubeStats[fieldName];
-                if (cubeStat && cubeStat.RowStats && cubeStat.RowStats.Bkts && cubeStat.RowStats.Bkts.List) {
-                    var cubeBuckets = cubeStat.RowStats.Bkts.List;
-
-                    for (var i = 0; i < restrictionBuckets.length; i++) {
-                        var liftSet = false;
-                        for (var j = 0; j < cubeBuckets.length; j++) {
-                            if (BucketRestriction.isEqualRange(restrictionBuckets[i].range, cubeBuckets[j].Range)) {
-                                restrictionBuckets[i].lift = cubeBuckets[j].Lift.toFixed(1) + 'x'
-                                liftSet = true;
-                                break;
-                            }
-                        }
-                        if (!liftSet) {
-                            restrictionBuckets[i].lift = null;
-                        }
-                    }
+                var cubeBuckets;
+                if (fieldName === LATTICE_RATINGS_FIELD_NAME && vm.inModel) {
+                    cubeBuckets = getCubeBucketsFromModelRatings();
                 } else {
-                    for (var i = 0; i < restrictionBuckets.length; i++) {
-                        restrictionBuckets[i].lift = null;
+                    var cubeStat = vm.cubeStats[fieldName];
+                    cubeBuckets = cubeStat ? cubeStat.RowStats.Bkts.List || [] : [];
+                }
+
+                for (var i = 0; i < restrictionBuckets.length; i++) {
+                    for (var j = 0; j < cubeBuckets.length; j++) {
+                        if (BucketRestriction.isEqualRange(restrictionBuckets[i].range, cubeBuckets[j].Range)) {
+                            restrictionBuckets[i].lift = cubeBuckets[j].Lift.toFixed(1) + 'x';
+                            break;
+                        }
                     }
+
+                    restrictionBuckets[i].lift = restrictionBuckets[i].lift || null;
                 }
             }
         }
+    }
+
+
+    var _cachedRatingsCubeBuckets = null;
+    function getCubeBucketsFromModelRatings() {
+        if (!_cachedRatingsCubeBuckets) {
+            _cachedRatingsCubeBuckets = [];
+
+            if (CurrentConfiguration) {
+                _cachedRatingsCubeBuckets = CurrentConfiguration.map(function(bucket) {
+                    return {
+                        "Lbl": bucket.bucket_name,
+                        "Cnt": bucket.num_leads,
+                        "Range": {
+                            "min": bucket.bucket_name,
+                            "max": bucket.bucket_name,
+                            "is_null_only": false
+                        },
+                        "Lift": bucket.lift
+                    };
+                });
+            }
+        }
+
+        return _cachedRatingsCubeBuckets;
     }
 
     vm.init();
