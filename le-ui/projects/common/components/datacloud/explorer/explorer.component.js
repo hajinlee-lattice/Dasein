@@ -1342,11 +1342,23 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.segmentBucketInput = vm.segmentBucketInput || {};
+    var getSegmentBucketInputs = function() {
+        var buckets = {},
+            metadataSegments = vm.metadataSegments || QueryRestriction;
+        if(metadataSegments && metadataSegments.all) {
+            metadataSegments.all.forEach(function(item){
+                if(item.bucketRestriction.lhs.columnLookup.column_name === "Lattice_Ratings")
+                var bucketId = item.bucketRestriction.lhs.columnLookup.column_name + item.bucketRestriction.range.max;
+
+                buckets[bucketId] = true;
+            });
+        }
+        return buckets;
+    }
+    vm.segmentBucketInput = getSegmentBucketInputs();
     vm.selectBucketInput = function(id, bucket) {
         var bucketId = id + bucket,
             range = {min: bucket, max: bucket, is_null_only: false};
-
         vm.segmentBucketInput[bucketId] = !vm.segmentBucketInput[bucketId];
         vm.saveSegmentEnabled = true;
         if (vm.segmentBucketInput[bucketId] === true) {
