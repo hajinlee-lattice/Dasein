@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.service.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -47,6 +49,11 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     @Autowired
     private PipelineToPipelineStepsEntityMgr pipelineToPipelineStepsEntityMgr;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
+    private final String pipelineJson = "/app/%s/%s/dataplatform/scripts/pipeline.json";
+
     @Override
     public Pipeline createLatestProductionPipeline() {
         String version = getVersion();
@@ -60,11 +67,11 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         pipeline = new Pipeline();
         pipeline.setName(pipelineName);
         pipeline.setDescription("Production pipeline version: " + pipeline.getName());
-        String pipelineJson = String.format("/app/%s/dataplatform/scripts/pipeline.json", version);
-        setPipelineProperties(pipeline, pipelineJson);
+        String pipelineJsonPath = String.format(pipelineJson, stackName, getActiveStack().get("ArtifactVersion"));
+        setPipelineProperties(pipeline, pipelineJsonPath);
 
         try {
-            String pipelineContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, pipelineJson);
+            String pipelineContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, pipelineJsonPath);
             pipeline.addStepsFromPipelineJson(pipelineContents);
 
             for (PipelineStep ps : pipeline.getPipelineSteps()) {
@@ -85,6 +92,8 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
             pipeline.setVersion(versionNo);
 
             pipelineEntityMgr.create(pipeline);
+        } catch (FileNotFoundException e) {
+            throw new LedpException(LedpCode.LEDP_35007, new String[] { pipelineJsonPath });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

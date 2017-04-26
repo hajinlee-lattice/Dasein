@@ -232,7 +232,6 @@ public enum LedpCode {
     LEDP_18127("Cannot copy model with application id: {0}. Error when copying ABCD buckets"), //
     LEDP_18128("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
-
     LEDP_18129("Table name should be specified for Vdb table import workflow."), //
     LEDP_18130("Import table total rows should be greater than 0."), //
     LEDP_18131("Invalid read table data endpoint for Vdb table import workflow."), //
@@ -551,7 +550,8 @@ public enum LedpCode {
     LEDP_35003("{0} cannot be empty"), //
     LEDP_35004("{0} cannot be empty for {1} type tenant"), //
     LEDP_35005("Training set not found in HDFS for Tenant: {0} and modelID: {1}"), //
-    LEDP_35006("No SchemaInterpretation found for the training set specified for Tenant: {0} and modelID: {1}"),
+    LEDP_35006("No SchemaInterpretation found for the training set specified for Tenant: {0} and modelID: {1}"), //
+    LEDP_35007("The pipeline.json file was not found in the location : {0}"), //
 
     // le-app
     LEDP_36001("Invalid attribute name: {0}"), //
