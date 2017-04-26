@@ -7,6 +7,7 @@ angular.module('common.datacloud.query.results', [
     angular.extend(vm, {
         resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
+        inModel: $state.current.name.split('.')[1] === 'model',
         count: CountMetadata ? CountMetadata.count : 0,
         countMetadata: CountMetadata || {},
         columns: [{displayName: 'Company Name', key: 'business_name'}],
@@ -35,16 +36,11 @@ angular.module('common.datacloud.query.results', [
         updatePage();
     };
 
-    vm.inModel = function() {
-        var name = $state.current.name.split('.');
-        return name[1] == 'model';
-    }
-
     vm.refineQuery = function() {
-        return vm.inModel()
+        return vm.inModel
             ? 'home.model.analysis.explorer.query'
             : 'home.segment.explorer.query'
-    }
+    };
 
     vm.clearSearch = function() {
         vm.search = '';

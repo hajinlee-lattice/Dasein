@@ -15,6 +15,7 @@
         <li class="buttons">
             <div>
                 <a href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}" target="_self" download><button class="button icon-button white-button" ng-disabled="vm.results.length < 1"><i class="fa fa-download"></i></button></a>
+                <button ng-if="!vm.inModel" class="button white-button" ui-sref="home.import.entry">Import Data</button>
                 <button class="button icon-button white-button" ui-sref="{{ vm.refineQuery() }}" ng-disabled="vm.saving">Refine Query</button>
                 <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
                 <button ng-if="vm.saving" disabled class="button icon-button blue-button">Saving <i class="fa fa-spinner fa-pulse fw"></i></button>
