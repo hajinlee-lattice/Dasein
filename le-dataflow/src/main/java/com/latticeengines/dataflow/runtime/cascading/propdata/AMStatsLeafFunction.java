@@ -1,15 +1,13 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -56,6 +54,7 @@ public class AMStatsLeafFunction extends BaseOperation implements Function {
         this.dimensionDefinitionMap = parameterObject.dimensionDefinitionMap;
 
         for (String key : parameterObject.dimensionDefinitionMap.keySet()) {
+
             List<String> subDimensions = parameterObject.dimensionDefinitionMap.get(key);
             for (String subDimension : subDimensions) {
                 reverseDimensionDefinitionMap.put(subDimension, key);
@@ -66,7 +65,7 @@ public class AMStatsLeafFunction extends BaseOperation implements Function {
     @SuppressWarnings("unchecked")
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
-        Tuple result = Tuple.size(dimensionDefinitionMap.keySet().size());
+        Tuple result = Tuple.size(requiredDimensionsValues.size());
         Map<String, Map<String, Long>> dimensionFieldValuesMap = new HashMap<>();
         for (String dimensionKey : dimensionDefinitionMap.keySet()) {
             dimensionFieldValuesMap.put(dimensionKey, new HashMap<String, Long>());
@@ -115,28 +114,21 @@ public class AMStatsLeafFunction extends BaseOperation implements Function {
         }
     }
 
-    @SuppressWarnings("serial")
-    public static class Params implements Serializable {
-        public Fields fieldDeclaration;
-        public List<FieldMetadata> leafSchemaOldColumns;
-        public Map<String, List<String>> dimensionDefinitionMap;
-        public Map<String, CategoricalDimension> requiredDimensions;
-        public Map<String, ColumnMetadata> columnMetadatasMap;
-        public Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
-        public String dimensionColumnPrepostfix;
+    public static class Params {
+        Fields fieldDeclaration;
+        Map<String, List<String>> dimensionDefinitionMap;
+        Map<String, CategoricalDimension> requiredDimensions;
+        Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
+        String dimensionColumnPrepostfix;
 
-        public Params(Fields fieldDeclaration, List<FieldMetadata> leafSchemaOldColumns,
-                Map<String, List<String>> dimensionDefinitionMap, Map<String, CategoricalDimension> requiredDimensions,
-                Map<String, ColumnMetadata> columnMetadatasMap,
-                Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap,
-                String dimensionColumnPrepostfix) {
+        public Params(Fields fieldDeclaration, Map<String, List<String>> dimensionDefinitionMap, //
+                Map<String, CategoricalDimension> requiredDimensions,
+                Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap) {
             this.fieldDeclaration = fieldDeclaration;
-            this.leafSchemaOldColumns = leafSchemaOldColumns;
             this.dimensionDefinitionMap = dimensionDefinitionMap;
             this.requiredDimensions = requiredDimensions;
-            this.columnMetadatasMap = columnMetadatasMap;
             this.requiredDimensionsValuesMap = requiredDimensionsValuesMap;
-            this.dimensionColumnPrepostfix = dimensionColumnPrepostfix;
+            this.dimensionColumnPrepostfix = AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX;
         }
     }
 }

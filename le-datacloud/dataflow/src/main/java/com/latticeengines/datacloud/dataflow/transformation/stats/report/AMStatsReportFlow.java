@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.dataflow.transformation.stats.report;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,42 +23,48 @@ public class AMStatsReportFlow extends AMStatsFlowBase {
 
     @Override
     public Node construct(AccountMasterStatsParameters parameters) {
-        String dataCloudVersion = parameters.getDataCloudVersion();
-
         Node node = addSource(parameters.getBaseTables().get(0));
 
-        Map<String, List<String>> dimensionDefinitionMap = parameters.getDimensionDefinitionMap();
-
-        Fields groupByFields = new Fields();
-
-        String[] dimensionIdFieldNames = new String[dimensionDefinitionMap.keySet().size()];
-        int i = 0;
-        for (String dimensionKey : dimensionDefinitionMap.keySet()) {
-            groupByFields = groupByFields.append(new Fields(dimensionKey));
-            dimensionIdFieldNames[i++] = dimensionKey;
-        }
-
-        List<FieldMetadata> fms = node.getSchema();
-        node = createReportGenerationNode(parameters, dimensionIdFieldNames, fms, node, dataCloudVersion);
-
-        return node;
+        return createReportGenerationNode(parameters, node);
     }
 
-    private Node createReportGenerationNode(AccountMasterStatsParameters parameters, String[] dimensionIdFieldNames,
-            List<FieldMetadata> fms, Node grouped, String dataCloudVersion) {
-        List<String> splunkReportColumns = new ArrayList<>();
-        List<FieldMetadata> reportOutputColumns = getFinalReportColumns(parameters.getFinalDimensionColumns(),
-                parameters.getCubeColumnName(), splunkReportColumns);
+    private Node createReportGenerationNode(AccountMasterStatsParameters parameters, Node grouped) {
 
-        List<FieldMetadata> reportOutputColumnsFms = new ArrayList<>();
-        reportOutputColumnsFms.addAll(reportOutputColumns);
+        List<String> splunkReportColumns = new ArrayList<>();
+        List<FieldMetadata> reportOutputColumns = //
+                getFinalReportColumns(parameters.getFinalDimensionColumns(), //
+                        parameters.getCubeColumnName(), splunkReportColumns);
 
         Node report = generateFinalReport(grouped, //
-                getFieldList(fms), reportOutputColumns, //
-                getFieldList(reportOutputColumnsFms), Fields.RESULTS, //
-                parameters.getCubeColumnName(), parameters.getRootIdsForNonRequiredDimensions(), //
-                splunkReportColumns, parameters.getColumnsForStatsCalculation(), //
-                parameters.getColumnIdsForStatsCalculation(), dataCloudVersion);
+                getFieldList(grouped.getSchema()), //
+                reportOutputColumns, //
+                Fields.RESULTS, //
+                splunkReportColumns, //
+                parameters);
+        return report;
+    }
+
+    private Node generateFinalReport(Node grouped, FieldList applyToFieldList, List<FieldMetadata> reportOutputColumns,
+            Fields overrideFieldStrategy, List<String> splunkReportColumns, AccountMasterStatsParameters parameters) {
+
+        AMStatsReportFunction.Params functionParam = //
+                new AMStatsReportFunction.Params(//
+                        getFields(reportOutputColumns), //
+                        reportOutputColumns, getTotalKey(), //
+                        splunkReportColumns, parameters);
+
+        AMStatsReportFunction reportGenerationFunction = //
+                new AMStatsReportFunction(functionParam);
+
+        Node report = grouped.apply(reportGenerationFunction, //
+                applyToFieldList, reportOutputColumns, //
+                getFieldList(reportOutputColumns), overrideFieldStrategy);
+
+        report = report.addRowID(AccountMasterStatsParameters.PID_KEY);
+
+        report = report.addColumnWithFixedValue(AccountMasterStatsParameters.DATA_CLOUD_VERSION,
+                parameters.getDataCloudVersion(), String.class);
+
         return report;
     }
 
@@ -86,34 +91,5 @@ public class AMStatsReportFlow extends AMStatsFlowBase {
         splunkReportColumns.add(AccountMasterStatsParameters.ATTR_COUNT_4_KEY);
         finalReportColumns.add(new FieldMetadata(AccountMasterStatsParameters.ATTR_COUNT_4_KEY, String.class));
         return finalReportColumns;
-    }
-
-    private Node generateFinalReport(Node grouped, FieldList applyToFieldList, List<FieldMetadata> reportOutputColumns,
-            FieldList reportOutputColumnFieldList, Fields overrideFieldStrategy, String cubeColumnName,
-            Map<String, Long> rootIdsForNonRequiredDimensions, List<String> splunkReportColumns,
-            List<String> columnsForStatsCalculation, List<Integer> columnIdsForStatsCalculation,
-            String dataCloudVersion) {
-
-        String[] reportOutputColumnFields = reportOutputColumnFieldList.getFields();
-
-        Fields reportOutputColumnFieldsDeclaration = new Fields(reportOutputColumnFields);
-
-        AMStatsReportFunction.Params functionParam = //
-                new AMStatsReportFunction.Params(//
-                        reportOutputColumnFieldsDeclaration, reportOutputColumns, cubeColumnName, //
-                        getTotalKey(), splunkReportColumns, rootIdsForNonRequiredDimensions, //
-                        columnsForStatsCalculation, columnIdsForStatsCalculation, //
-                        AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX, //
-                        AccountMasterStatsParameters.GROUP_TOTAL_KEY);
-
-        AMStatsReportFunction reportGenerationFunction = new AMStatsReportFunction(functionParam);
-        Node report = grouped.apply(reportGenerationFunction, applyToFieldList, reportOutputColumns,
-                reportOutputColumnFieldList, overrideFieldStrategy);
-
-        report = report.addRowID(AccountMasterStatsParameters.PID_KEY);
-        report = report.addColumnWithFixedValue(AccountMasterStatsParameters.DATA_CLOUD_VERSION, dataCloudVersion,
-                String.class);
-
-        return report;
     }
 }

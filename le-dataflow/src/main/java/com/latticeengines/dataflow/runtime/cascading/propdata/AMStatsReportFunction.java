@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.AMStatsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
@@ -41,15 +42,17 @@ public class AMStatsReportFunction extends BaseOperation implements Function {
 
     private int cubeColumnPos;
     private Map<String, Long> rootIdsForNonRequiredDimensions;
+    private Map<String, Integer> namePositionMap;
+    private Map<String, Integer> attrIdsMapForSplunk;
+
     private List<String> reportOutputColumnNames;
-    private String groupTotalKey;
     private List<String> splunkReportColumns;
-    private String dimensionColumnPrepostfix;
-    public Map<String, Integer> attrIdsMapForSplunk;
-    private String finalGroupTotalKey;
 
     private Integer[] splunkReportAttrLoc;
-    private Map<String, Integer> namePositionMap;
+
+    private String finalGroupTotalKey;
+    private String groupTotalKey;
+    private String dimensionColumnPrepostfix;
 
     public AMStatsReportFunction(Params parameterObject) {
         super(parameterObject.reportOutputColumnFieldsDeclaration);
@@ -274,23 +277,20 @@ public class AMStatsReportFunction extends BaseOperation implements Function {
 
         public Params(Fields reportOutputColumnFieldsDeclaration, //
                 List<FieldMetadata> reportOutputColumns, //
-                String cubeColumnName, String groupTotalKey, //
+                String groupTotalKey, //
                 List<String> splunkReportColumns, //
-                Map<String, Long> rootIdsForNonRequiredDimensions, //
-                List<String> columnsForStatsCalculation, //
-                List<Integer> columnIdsForStatsCalculation, //
-                String dimensionColumnPrepostfix, String finalGroupTotalKey) {
-            super();
+                AccountMasterStatsParameters parameters) {
             this.reportOutputColumnFieldsDeclaration = reportOutputColumnFieldsDeclaration;
             this.reportOutputColumns = reportOutputColumns;
-            this.cubeColumnName = cubeColumnName;
+            this.cubeColumnName = parameters.getCubeColumnName();
             this.groupTotalKey = groupTotalKey;
             this.splunkReportColumns = splunkReportColumns;
-            this.rootIdsForNonRequiredDimensions = rootIdsForNonRequiredDimensions;
-            this.columnsForStatsCalculation = columnsForStatsCalculation;
-            this.columnIdsForStatsCalculation = columnIdsForStatsCalculation;
-            this.dimensionColumnPrepostfix = dimensionColumnPrepostfix;
-            this.finalGroupTotalKey = finalGroupTotalKey;
+            this.rootIdsForNonRequiredDimensions = parameters.getRootIdsForNonRequiredDimensions();
+            this.columnsForStatsCalculation = parameters.getColumnsForStatsCalculation();
+            this.columnIdsForStatsCalculation = parameters.getColumnIdsForStatsCalculation();
+            this.dimensionColumnPrepostfix = AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX;
+            this.finalGroupTotalKey = AccountMasterStatsParameters.GROUP_TOTAL_KEY;
+
         }
     }
 }

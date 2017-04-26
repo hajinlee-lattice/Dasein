@@ -11,6 +11,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.AttributeStatsDetailsMergeUtil;
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
 
@@ -29,7 +30,7 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
     private static ObjectMapper OM = new ObjectMapper();
 
     private Map<Long, List<Long>> dimensionValueAncestorPathMap;
-    private String normalizedExpandField;
+
     private String expandField;
 
     public AMStatsDimensionExpandBuffer(Params parameterObject) {
@@ -37,12 +38,14 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
         this.expandField = parameterObject.expandField;
 
         dimensionValueAncestorPathMap = new HashMap<>();
-        normalizedExpandField = parameterObject.expandField.substring(
+
+        String normalizedExpandField = parameterObject.expandField.substring(
                 parameterObject.dimensionColumnPrepostfix.length(),
                 parameterObject.expandField.length() - parameterObject.dimensionColumnPrepostfix.length());
 
         Map<String, CategoricalAttribute> expandDimensionFieldValuesMap = //
-                parameterObject.requiredDimensionsValuesMap.get(normalizedExpandField);
+                parameterObject.requiredDimensionsValuesMap.get(
+                        normalizedExpandField);
 
         calculateDimensionValueAncestorPathMap(expandDimensionFieldValuesMap);
 
@@ -125,7 +128,6 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
                 }
             }
             Long nonFixedDimensionId = originalTuple.getLong(pos);
-
 
             List<Long> ancestorList = dimensionValueAncestorPathMap.get(nonFixedDimensionId);
             mergeAndPutTuple(fieldsArray, tuplesMap, originalTuple, nonFixedDimensionId);
@@ -218,20 +220,18 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
         public String expandField;
         public Map<String, List<String>> hierarchicalDimensionTraversalMap;
         public Fields fieldDeclaration;
-        public int pos;
         public Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
         public String dimensionColumnPrepostfix;
 
-        public Params(String expandField, Map<String, List<String>> hierarchicalDimensionTraversalMap,
-                Fields fieldDeclaration, int pos,
-                Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap,
-                String dimensionColumnPrepostfix) {
+        public Params(String expandField, //
+                Map<String, List<String>> hierarchicalDimensionTraversalMap, //
+                Fields fieldDeclaration, //
+                Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap) {
             this.expandField = expandField;
             this.hierarchicalDimensionTraversalMap = hierarchicalDimensionTraversalMap;
             this.fieldDeclaration = fieldDeclaration;
-            this.pos = pos;
             this.requiredDimensionsValuesMap = requiredDimensionsValuesMap;
-            this.dimensionColumnPrepostfix = dimensionColumnPrepostfix;
+            this.dimensionColumnPrepostfix = AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX;
         }
     }
 }

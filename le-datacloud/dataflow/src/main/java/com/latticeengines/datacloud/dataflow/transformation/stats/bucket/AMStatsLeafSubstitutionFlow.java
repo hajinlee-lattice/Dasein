@@ -51,58 +51,12 @@ public class AMStatsLeafSubstitutionFlow extends AMStatsFlowBase {
             dimensionIdFieldNames[i++] = dimensionKey;
             originalDimensionColName.add(dimensionDefinitionMap.get(dimensionKey).get(0));
         }
+
         node = node.rename(new FieldList(originalDimensionColName), new FieldList(dimensionIdFieldNames));
 
-        List<FieldMetadata> joinedSchema = node.getSchema();
-
-        List<FieldMetadata> inputSchemaForFieldSubstituteFunction = new ArrayList<>();
-        List<FieldMetadata> outputSchemaForFieldSubstituteFunction = new ArrayList<>();
-        List<String> oldValueColumnsForSubstitution = new ArrayList<>();
-        List<String> newValueColumnsForSubstitution = new ArrayList<>();
-        List<String> renamedNonDimensionFieldIds = new ArrayList<>();
-        List<FieldMetadata> minMaxAndDimensionList = new ArrayList<>();
-        List<String> renamedMinMaxAndDimensionIds = new ArrayList<>();
-
-        for (FieldMetadata fieldMeta : joinedSchema) {
-            inputSchemaForFieldSubstituteFunction.add(fieldMeta);
-            boolean isDimension = false;
-            for (String dimensionFieldName : dimensionIdFieldNames) {
-                if (fieldMeta.getFieldName().equals(dimensionFieldName)) {
-                    isDimension = true;
-                    break;
-                }
-            }
-            if (fieldMeta.getFieldName().equals(getMinMaxKey()) || isDimension) {
-                minMaxAndDimensionList.add(fieldMeta);
-                renamedMinMaxAndDimensionIds.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
-            }
-
-            if (!fieldMeta.getFieldName().equals(getMinMaxKey())) {
-                if (!isDimension) {
-                    FieldMetadata newFieldMeta = new FieldMetadata(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName(),
-                            String.class);
-                    outputSchemaForFieldSubstituteFunction.add(newFieldMeta);
-                    oldValueColumnsForSubstitution.add(fieldMeta.getFieldName());
-                    newValueColumnsForSubstitution.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
-                    renamedNonDimensionFieldIds.add(TEMP_RENAMED_PREFIX + fieldMeta.getFieldName());
-                }
-            }
-        }
-
-        for (String dim : dimensionIdFieldNames) {
-            oldValueColumnsForSubstitution.add(dim);
-            newValueColumnsForSubstitution.add(dim);
-        }
-
-        if (parameters.isNumericalBucketsRequired()) {
-            oldValueColumnsForSubstitution.add(getMinMaxKey());
-            newValueColumnsForSubstitution.add(getMinMaxKey());
-        }
-
-        node = createLeafFieldSubstitutionNode(node, parameters, //
-                inputSchemaForFieldSubstituteFunction, outputSchemaForFieldSubstituteFunction, //
-                minMaxAndDimensionList, renamedMinMaxAndDimensionIds, dimensionIdFieldNames, //
-                oldValueColumnsForSubstitution, newValueColumnsForSubstitution, renamedNonDimensionFieldIds, //
+        node = createLeafFieldSubstitutionNode(node, //
+                parameters, //
+                dimensionIdFieldNames, //
                 parameters.isNumericalBucketsRequired());
 
         node = node.rename(new FieldList(dimensionIdFieldNames), new FieldList(originalDimensionColName));
@@ -112,26 +66,21 @@ public class AMStatsLeafSubstitutionFlow extends AMStatsFlowBase {
 
     private Node createLeafFieldSubstitutionNode(Node node, //
             AccountMasterStatsParameters parameters, //
-            List<FieldMetadata> inputSchemaForFieldSubstituteFunction, //
-            List<FieldMetadata> outputSchemaForFieldSubstituteFunction, //
-            List<FieldMetadata> minMaxAndDimensionList, //
-            List<String> renamedMinMaxAndDimensionIds, //
-            String[] dimensionIdFieldNames, List<String> oldValueColumnsForSubstitution, //
-            List<String> newValueColumnsForSubstitution, List<String> renamedNonDimensionFieldIds, //
+            String[] dimensionIdFieldNames, //
             boolean isNumericalBucketsRequired) {
 
-        List<FieldMetadata> combinedOutputSchemaForFieldSubstituteFunction = new ArrayList<>();
-        combinedOutputSchemaForFieldSubstituteFunction.addAll(outputSchemaForFieldSubstituteFunction);
-        combinedOutputSchemaForFieldSubstituteFunction.addAll(minMaxAndDimensionList);
-
+        List<FieldMetadata> outputSchemaForFieldSubstituteFunction = new ArrayList<>();
+        List<String> oldValueColumnsForSubstitution = new ArrayList<>();
+        List<String> newValueColumnsForSubstitution = new ArrayList<>();
+        List<String> renamedNonDimensionFieldIds = new ArrayList<>();
+        List<FieldMetadata> minMaxAndDimensionList = new ArrayList<>();
+        List<String> renamedMinMaxAndDimensionIds = new ArrayList<>();
         List<String> combinedRenamedFields = new ArrayList<>();
-        combinedRenamedFields.addAll(renamedNonDimensionFieldIds);
-        combinedRenamedFields.addAll(renamedMinMaxAndDimensionIds);
 
-        List<String> minMaxAndDimensionStrList = new ArrayList<>();
-        for (FieldMetadata fieldMeta : minMaxAndDimensionList) {
-            minMaxAndDimensionStrList.add(fieldMeta.getFieldName());
-        }
+        List<FieldMetadata> combinedOutputSchemaForFieldSubstituteFunction = processFields(node, parameters,
+                dimensionIdFieldNames, outputSchemaForFieldSubstituteFunction, oldValueColumnsForSubstitution,
+                newValueColumnsForSubstitution, renamedNonDimensionFieldIds, minMaxAndDimensionList,
+                renamedMinMaxAndDimensionIds, combinedRenamedFields);
 
         // it is important to use renamed column names for output schema as we
         // are replacing field values (which can be any type of object) with
@@ -146,25 +95,16 @@ public class AMStatsLeafSubstitutionFlow extends AMStatsFlowBase {
         AMStatsLeafFieldSubstitutionFunction.Params functionParams = //
                 new AMStatsLeafFieldSubstitutionFunction.Params(//
                         outputFieldsDeclaration, //
-                        AccountMasterStatsParameters.ENCODED_YES, //
-                        AccountMasterStatsParameters.ENCODED_NO, //
                         TEMP_RENAMED_PREFIX, //
                         getMinMaxKey(), //
-                        parameters.getMaxBucketCount(), //
-                        parameters.getTypeFieldMap(), parameters.getEncodedColumns(), //
-                        parameters.isNumericalBucketsRequired(), minMaxAndDimensionStrList);
+                        parameters, minMaxAndDimensionList, node.getFieldNames());
 
         AMStatsLeafFieldSubstitutionFunction leafCreationFunction = //
-                new AMStatsLeafFieldSubstitutionFunction(//
-                        functionParams, outputSchemaForFieldSubstituteFunction, //
-                        inputSchemaForFieldSubstituteFunction);
+                new AMStatsLeafFieldSubstitutionFunction(functionParams);
 
-        List<FieldMetadata> targetMetadataList = new ArrayList<FieldMetadata>();
-        targetMetadataList.addAll(outputSchemaForFieldSubstituteFunction);
-        targetMetadataList.addAll(inputSchemaForFieldSubstituteFunction);
-        targetMetadataList.addAll(minMaxAndDimensionList);
         node = node.apply(leafCreationFunction, //
-                getFieldList(inputSchemaForFieldSubstituteFunction), outputSchemaForFieldSubstituteFunction,
+                getFieldList(node.getSchema()), //
+                outputSchemaForFieldSubstituteFunction, //
                 getFieldList(combinedOutputSchemaForFieldSubstituteFunction));
 
         // once we have calculated stats obj using renamed columns names, now
@@ -178,5 +118,48 @@ public class AMStatsLeafSubstitutionFlow extends AMStatsFlowBase {
             node = node.discard(new FieldList(getMinMaxKey()));
         }
         return node;
+    }
+
+    private List<FieldMetadata> processFields(Node node, AccountMasterStatsParameters parameters,
+            String[] dimensionIdFieldNames, List<FieldMetadata> outputSchemaForFieldSubstituteFunction,
+            List<String> oldValueColumnsForSubstitution, List<String> newValueColumnsForSubstitution,
+            List<String> renamedNonDimensionFieldIds, List<FieldMetadata> minMaxAndDimensionList,
+            List<String> renamedMinMaxAndDimensionIds, List<String> combinedRenamedFields) {
+        for (FieldMetadata fieldMeta : node.getSchema()) {
+            boolean isDimension = false;
+            String fieldName = fieldMeta.getFieldName();
+            String renamedFieldName = TEMP_RENAMED_PREFIX + fieldName;
+
+            for (String dimensionFieldName : dimensionIdFieldNames) {
+                if (fieldName.equals(dimensionFieldName)) {
+                    isDimension = true;
+                    break;
+                }
+            }
+            if (fieldName.equals(getMinMaxKey()) || isDimension) {
+                minMaxAndDimensionList.add(fieldMeta);
+                renamedMinMaxAndDimensionIds.add(renamedFieldName);
+            } else {
+                FieldMetadata newFieldMeta = new FieldMetadata(renamedFieldName, String.class);
+                outputSchemaForFieldSubstituteFunction.add(newFieldMeta);
+                oldValueColumnsForSubstitution.add(fieldName);
+                newValueColumnsForSubstitution.add(renamedFieldName);
+                renamedNonDimensionFieldIds.add(renamedFieldName);
+
+            }
+        }
+
+        if (parameters.isNumericalBucketsRequired()) {
+            oldValueColumnsForSubstitution.add(getMinMaxKey());
+            newValueColumnsForSubstitution.add(getMinMaxKey());
+        }
+
+        List<FieldMetadata> combinedOutputSchemaForFieldSubstituteFunction = new ArrayList<>();
+        combinedOutputSchemaForFieldSubstituteFunction.addAll(outputSchemaForFieldSubstituteFunction);
+        combinedOutputSchemaForFieldSubstituteFunction.addAll(minMaxAndDimensionList);
+
+        combinedRenamedFields.addAll(renamedNonDimensionFieldIds);
+        combinedRenamedFields.addAll(renamedMinMaxAndDimensionIds);
+        return combinedOutputSchemaForFieldSubstituteFunction;
     }
 }

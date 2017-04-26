@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -107,7 +106,7 @@ public class AMStatsMinMaxBuffer extends BaseOperation implements Buffer {
         return positionMap;
     }
 
-    public static class Params implements Serializable {
+    public static class Params {
         String minMaxKey;
         Fields fieldDeclaration;
 

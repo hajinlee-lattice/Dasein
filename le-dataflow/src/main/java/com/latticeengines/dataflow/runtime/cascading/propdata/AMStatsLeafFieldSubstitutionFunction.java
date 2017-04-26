@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.StatsAttributeParser;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.handlers.BooleanTextHandler;
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
@@ -30,37 +30,59 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AMStatsLeafFieldSubstitutionFunction
-        extends BaseOperation<Map> //
+public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
         implements Function<Map> {
     private static final long serialVersionUID = -4039806083023012431L;
     private static BooleanTextHandler booleanTextHandler = new BooleanTextHandler();
 
     private static ObjectMapper OM = new ObjectMapper();
 
-    private Map<String, Integer> namePositionMap;
-    private Params params;
-    private List<Integer> encodedColumnsPos;
-    private List<String> leafSchemaNewColumnNames;
-    private Set<String> dimensionSet;
     private volatile Map<String, List<Object>> minMaxInfo = null;
 
-    public AMStatsLeafFieldSubstitutionFunction(//
-            Params params, //
-            List<FieldMetadata> leafSchemaNewColumns, //
-            List<FieldMetadata> leafSchemaOldColumns) {
+    private Map<String, Integer> namePositionMap;
+    private Map<String, FundamentalType> fieldFundamentalTypeMap;
+    private Map<FundamentalType, List<String>> typeFieldMap;
+
+    private List<String> minMaxAndDimensionList;
+    private List<Integer> encodedColumnsPos;
+
+    private Set<String> dimensionSet;
+
+    private int maxBucketCount;
+
+    private boolean numericalBucketsRequired;
+
+    private String encodedNo;
+    private String encodedYes;
+    private String minMaxKey;
+    private String tempRenamedPrefix;
+
+    public AMStatsLeafFieldSubstitutionFunction(Params params) {
         super(params.outputFieldsDeclaration);
-        this.params = params;
-        leafSchemaNewColumnNames = new ArrayList<String>();
+
+        minMaxKey = params.minMaxKey;
+        numericalBucketsRequired = params.numericalBucketsRequired;
+        maxBucketCount = params.maxBucketCount;
+        encodedNo = params.encodedNo;
+        encodedYes = params.encodedYes;
+        tempRenamedPrefix = params.tempRenamedPrefix;
+        typeFieldMap = params.typeFieldMap;
 
         namePositionMap = new HashMap<>();
 
-        for (int i = 0; i < leafSchemaOldColumns.size(); i++) {
-            namePositionMap.put(leafSchemaOldColumns.get(i).getFieldName(), i);
+        for (int i = 0; i < params.fieldNames.size(); i++) {
+            namePositionMap.put(params.fieldNames.get(i), i);
         }
 
-        for (FieldMetadata metadata : leafSchemaNewColumns) {
-            leafSchemaNewColumnNames.add(metadata.getFieldName());
+        minMaxAndDimensionList = new ArrayList<>();
+        dimensionSet = new HashSet<>();
+
+        for (FieldMetadata fieldMeta : params.minMaxAndDimensionList) {
+            minMaxAndDimensionList.add(fieldMeta.getFieldName());
+            if (fieldMeta.getFieldName().equals(minMaxKey)) {
+                continue;
+            }
+            dimensionSet.add(fieldMeta.getFieldName());
         }
 
         encodedColumnsPos = new ArrayList<>();
@@ -68,12 +90,11 @@ public class AMStatsLeafFieldSubstitutionFunction
             encodedColumnsPos.add(namePositionMap.get(enCol));
         }
 
-        dimensionSet = new HashSet<>();
-        for (String dimension : params.minMaxAndDimensionList) {
-            if (dimension.equals(params.minMaxKey)) {
-                continue;
+        fieldFundamentalTypeMap = new HashMap<>();
+        for (FundamentalType type : params.typeFieldMap.keySet()) {
+            for (String fieldName : params.typeFieldMap.get(type)) {
+                fieldFundamentalTypeMap.put(fieldName, type);
             }
-            dimensionSet.add(dimension);
         }
     }
 
@@ -92,7 +113,7 @@ public class AMStatsLeafFieldSubstitutionFunction
         while (it.hasNext()) {
             String fieldName = (String) it.next();
 
-            if (fieldName.equals(params.minMaxKey)) {
+            if (fieldName.equals(minMaxKey)) {
                 Object val = entry.getObject(fieldName);
                 dimensionFieldValuesMap.put(fieldName, val);
             } else if (dimensionSet.contains(fieldName)) {
@@ -103,15 +124,8 @@ public class AMStatsLeafFieldSubstitutionFunction
 
         StatsAttributeParser attributeParser = new StatsAttributeParser();
 
-        if (params.numericalBucketsRequired && minMaxInfo == null) {
+        if (numericalBucketsRequired && minMaxInfo == null) {
             minMaxInfo = parseMinMaxInfo(entry);
-        }
-
-        Map<String, FundamentalType> fieldFundamentalTypeMap = new HashMap<>();
-        for (FundamentalType type : params.typeFieldMap.keySet()) {
-            for (String fieldName : params.typeFieldMap.get(type)) {
-                fieldFundamentalTypeMap.put(fieldName, type);
-            }
         }
 
         int idx = 0;
@@ -119,7 +133,7 @@ public class AMStatsLeafFieldSubstitutionFunction
         while (itr.hasNext()) {
             String fieldName = (String) itr.next();
             Object val = entry.getObject(fieldName);
-            if (fieldName.equals(params.minMaxKey)) {
+            if (fieldName.equals(minMaxKey)) {
                 dimensionFieldValuesMap.put(fieldName, val);
             } else if (dimensionSet.contains(fieldName)) {
                 dimensionFieldValuesMap.put(fieldName, val);
@@ -165,9 +179,9 @@ public class AMStatsLeafFieldSubstitutionFunction
         Map<String, Map<String, Long[]>> binaryCodedBuckets = new HashMap<>();
 
         Map<String, Map<String, Long>> nAttributeBucketIds = new HashMap<>();
-        attributeParser.parseAttribute(params.typeFieldMap, encodedColumnsPos, attributeValueBuckets, null, null,
-                binaryCodedBuckets, minMaxInfo, pos, val, fieldName, params.maxBucketCount, params.encodedNo,
-                params.encodedYes, params.numericalBucketsRequired, nAttributeBucketIds);
+        attributeParser.parseAttribute(typeFieldMap, encodedColumnsPos, attributeValueBuckets, null, null,
+                binaryCodedBuckets, minMaxInfo, pos, val, fieldName, maxBucketCount, encodedNo, encodedYes,
+                numericalBucketsRequired, nAttributeBucketIds);
 
         if (isRegularBooleanField(attributeValueBuckets, fieldName, isEncodedAttr)) {
             for (String lbl : attributeValueBuckets.get(fieldName).keySet()) {
@@ -200,10 +214,10 @@ public class AMStatsLeafFieldSubstitutionFunction
         Map<String, Map<String, Long>> nAttributeValueBuckets = new HashMap<>();
         Map<String, Map<String, Long>> nAttributeBucketIds = new HashMap<>();
 
-        attributeParser.parseAttribute(params.typeFieldMap, encodedColumnsPos, //
+        attributeParser.parseAttribute(typeFieldMap, encodedColumnsPos, //
                 nAttributeValueBuckets, null, null, null, minMaxInfo, pos, val, //
-                fieldName, params.maxBucketCount, params.encodedNo, //
-                params.encodedYes, params.numericalBucketsRequired, nAttributeBucketIds);
+                fieldName, maxBucketCount, encodedNo, //
+                encodedYes, numericalBucketsRequired, nAttributeBucketIds);
 
         AttributeStatsDetails attrStatsDetails = new AttributeStatsDetails();
         Buckets buckets = new Buckets();
@@ -265,10 +279,10 @@ public class AMStatsLeafFieldSubstitutionFunction
     private void updateResult(Tuple result, Map<String, Object> dimensionFieldValuesMap, //
             Fields fields) {
 
-        for (String dimension : params.minMaxAndDimensionList) {
-            if (!dimension.equals(params.minMaxKey)) {
+        for (String dimension : minMaxAndDimensionList) {
+            if (!dimension.equals(minMaxKey)) {
                 Object dimensionId = dimensionFieldValuesMap.get(dimension);
-                int pos = fields.getPos(params.tempRenamedPrefix + dimension);
+                int pos = fields.getPos(tempRenamedPrefix + dimension);
                 result.set(pos, dimensionId);
             }
         }
@@ -276,7 +290,7 @@ public class AMStatsLeafFieldSubstitutionFunction
 
     private Map<String, List<Object>> parseMinMaxInfo(TupleEntry entry) {
         Map<String, List<Object>> minMaxInfo = new HashMap<>();
-        String minMaxObjStr = entry.getString(params.minMaxKey);
+        String minMaxObjStr = entry.getString(minMaxKey);
 
         if (minMaxObjStr != null) {
             Map<?, ?> tempMinMaxInfoMap1 = JsonUtils.deserialize(minMaxObjStr, Map.class);
@@ -337,9 +351,8 @@ public class AMStatsLeafFieldSubstitutionFunction
         return count;
     }
 
-    @SuppressWarnings("serial")
-    public static class Params implements Serializable {
-        public Fields outputFieldsDeclaration;
+    public static class Params {
+        Fields outputFieldsDeclaration;
         String encodedYes;
         String encodedNo;
         String tempRenamedPrefix;
@@ -348,22 +361,24 @@ public class AMStatsLeafFieldSubstitutionFunction
         Map<FundamentalType, List<String>> typeFieldMap;
         List<String> encodedColumns;
         boolean numericalBucketsRequired;
-        List<String> minMaxAndDimensionList;
+        List<FieldMetadata> minMaxAndDimensionList;
+        List<String> fieldNames;
 
-        public Params(Fields outputFieldsDeclaration, String encodedYes, String encodedNo, //
-                String tempRenamedPrefix, String minMaxKey, int maxBucketCount, //
-                Map<FundamentalType, List<String>> typeFieldMap, List<String> encodedColumns, //
-                boolean numericalBucketsRequired, List<String> minMaxAndDimensionList) {
+        public Params(Fields outputFieldsDeclaration, //
+                String tempRenamedPrefix, String minMaxKey, //
+                AccountMasterStatsParameters statsParameters, //
+                List<FieldMetadata> minMaxAndDimensionList, List<String> fieldNames) {
             this.outputFieldsDeclaration = outputFieldsDeclaration;
-            this.encodedYes = encodedYes;
-            this.encodedNo = encodedNo;
+            this.encodedYes = AccountMasterStatsParameters.ENCODED_YES;
+            this.encodedNo = AccountMasterStatsParameters.ENCODED_NO;
             this.tempRenamedPrefix = tempRenamedPrefix;
             this.minMaxKey = minMaxKey;
-            this.maxBucketCount = maxBucketCount;
-            this.typeFieldMap = typeFieldMap;
-            this.encodedColumns = encodedColumns;
-            this.numericalBucketsRequired = numericalBucketsRequired;
+            this.maxBucketCount = statsParameters.getMaxBucketCount();
+            this.typeFieldMap = statsParameters.getTypeFieldMap();
+            this.encodedColumns = statsParameters.getEncodedColumns();
+            this.numericalBucketsRequired = statsParameters.isNumericalBucketsRequired();
             this.minMaxAndDimensionList = minMaxAndDimensionList;
+            this.fieldNames = fieldNames;
         }
 
     }
