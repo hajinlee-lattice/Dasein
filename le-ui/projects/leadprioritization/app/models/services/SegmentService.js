@@ -94,13 +94,14 @@ angular
     this.CreateOrUpdateSegment = function(segment) {
         var deferred = $q.defer();
 
-        console.log(segment);
-
         $http({
             method: 'POST',
             url: '/pls/metadatasegments/',
             data: segment,
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'ErrorDisplayMethod': 'none' // segment:demo:fixme
+            }
         }).then(
             function onSuccess(response) {
                 var result = {
