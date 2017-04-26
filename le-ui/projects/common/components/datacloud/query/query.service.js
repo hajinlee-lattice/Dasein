@@ -251,9 +251,9 @@ angular.module('common.datacloud.query.service',[
 // stubbed for demo
 .service('QueryServiceStub', function($http, $timeout, BucketRestriction) {
 
-    var uiStates = [{"name":"a","bitmask":256,"counts":{"accounts":39,"contacts":204},"nodes":{"Demo_Title":true}},{"name":"b","bitmask":128,"counts":{"accounts":33,"contacts":62},"nodes":{"Demo_Department":true,"Demo_Title":true}},{"name":"c","bitmask":64,"counts":{"accounts":33,"contacts":61},"nodes":{"Demo_Is_With_Company":true,"Demo_Department":true,"Demo_Title":true}},{"name":"d","bitmask":32,"counts":{"accounts":6,"contacts":16},"nodes":{"Demo_Has_Purchased":true,"Demo_Is_With_Company":true,"Demo_Department":true,"Demo_Title":true}},{"name":"e","bitmask":16,"counts":{"accounts":2,"contacts":4},"nodes":{"A":true,"Demo_Has_Purchased":true,"Demo_Is_With_Company":true,"Demo_Department":true,"Demo_Title":true}},{"name":"f","bitmask":8,"counts":{"accounts":1,"contacts":3},"nodes":{"Demo_Last_Quarter_Spending_Trends_(%)":true,"Lattice_Rating":true,"Demo_Has_Purchased":true,"Demo_Is_With_Company":true,"Demo_Department":true,"Demo_Title":true}}];
-    var defaultState = { "name": "default", "bitmask": 0, "nodes":{}, "counts":{"accounts":null, "contacts":null} };
-    var undefinedState = { "name": "default", "bitmask": -1, "nodes":{}, "counts":{"accounts":0, "contacts":0} };
+    var uiStates = [{"name":"1","bitmask":256,"counts":{"accounts":39,"contacts":204},"nodes":{"Demo - Other - Title":true}},{"name":"2","bitmask":128,"counts":{"accounts":33,"contacts":62},"nodes":{"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"3","bitmask":64,"counts":{"accounts":33,"contacts":61},"nodes":{"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"4","bitmask":32,"counts":{"accounts":6,"contacts":16},"nodes":{"Demo - Cisco 4451 - Has Purchased":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"5","bitmask":16,"counts":{"accounts":2,"contacts":4},"nodes":{"Lattice_Ratings":true,"Demo - Cisco 4451 - Has Purchased":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"6","bitmask":8,"counts":{"accounts":1,"contacts":3},"nodes":{"Demo_Last_Quarter_Spending_Trends_(%)":true,"Lattice_Ratings":true,"Demo - Cisco 4451 - Has Purchased":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}}];
+    var defaultState = { "name": "0", "bitmask": 0, "nodes":{}, "counts":{"accounts":null, "contacts":null} };
+    var undefinedState = { "name": "-1", "bitmask": -1, "nodes":{}, "counts":{"accounts":0, "contacts":0} };
     var self = this;
 
     this.columns = {
@@ -272,6 +272,10 @@ angular.module('common.datacloud.query.service',[
     this.setUiState = function(uiState) {
         this.uiState = uiState;
         this.updateCount();
+    };
+
+    this.getUiState = function() {
+        return this.uiState;
     };
 
     this.loadData = function() {

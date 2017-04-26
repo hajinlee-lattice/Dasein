@@ -1,0 +1,205 @@
+name,email,website,mkto_id,sfdc_id
+"Bob Bobski",Bob.Bobski@intel.com,www.intel.com,1001,11
+"Byrne Bradley",Byrne.Bradley@burlington.com,www.burlington.com,1003,13
+"Roby Martha",Roby.Martha@dickenson-consulting.com,www.dickenson-consulting.com,1004,14
+"Brooks Mo",Brooks.Mo@universityofarizona.com,www.universityofarizona.com,1007,17
+"Sewell Terri A.",Sewell.Terri.A@walmart.com,www.walmart.com,1009,19
+"Young Don",Young.Don@mobil.com,www.mobil.com,1010,20
+"O'Halleran Tom",O'Halleran.Tom@berkshirehathaway.com,www.berkshirehathaway.com,1012,22
+"Gosar Paul A.",Gosar.Paul.A@ge.com,www.ge.com,1015,25
+"Schweikert David",Schweikert.David@cvshealth.com,www.cvshealth.com,1017,27
+"Sinema Kyrsten",Sinema.Kyrsten@valero.com,www.valero.com,1020,30
+"Womack Steve",Womack.Steve@fanniemae.com,www.fanniemae.com,1023,33
+"Garamendi John",Garamendi.John@chase.com,www.chase.com,1027,37
+"McClintock Tom",McClintock.Tom@bankofamerica.com,www.bankofamerica.com,1028,38
+"Matsui Doris O.",Matsui.Doris.O.@cardinalhealth.com,www.cardinalhealth.com,1030,40
+"Bera Ami",Bera.Ami@boeing.com,www.boeing.com,1031,41
+"DeSaulnier Mark",DeSaulnier.Mark@microsoft.com,www.microsoft.com,1035,45
+"Pelosi Nancy",Pelosi.Nancy@us.pg.com,www.us.pg.com,1036,46
+"Lee Barbara",Lee.Barbara@homedepot.com,www.homedepot.com,1037,47
+"Panetta Jimmy",Panetta.Jimmy@grandhotels.com,www.grandhotels.com,1044,54
+"Knight Steve",Knight.Steve@mobil.com,www.mobil.com,1049,59
+"Chu Judy",Chu.Judy@berkshirehathaway.com,www.berkshirehathaway.com,1051,61
+"Schiff Adam",Schiff.Adam@apple.com,www.apple.com,1052,62
+"Lieu Ted",Lieu.Ted@mckesson.com,www.mckesson.com,1057,67
+"Ruiz Raul",Ruiz.Raul@valero.com,www.valero.com,1059,69
+"Takano Mark",Takano.Mark@hp.com,www.hp.com,1064,74
+"Calvert Ken",Calvert.Ken@thekrogerco.com,www.thekrogerco.com,1065,75
+"Correa J. Luis",Correa.J..Luis@cardinalhealth.com,www.cardinalhealth.com,1069,79
+"Lowenthal Alan",Lowenthal.Alan@boeing.com,www.boeing.com,1070,80
+"Rohrabacher Dana",Rohrabacher.Dana@citi.com,www.citi.com,1071,81
+"Issa Darrell",Issa.Darrell@amazon.com,www.amazon.com,1072,82
+"Vargas Juan",Vargas.Juan@microsoft.com,www.microsoft.com,1074,84
+"Peters Scott",Peters.Scott@us.pg.com,www.us.pg.com,1075,85
+"DeGette Diana",DeGette.Diana@adm.com,www.adm.com,1077,87
+"Tipton Scott",Tipton.Scott@intel.com,www.intel.com,1079,89
+"Buck Ken",Buck.Ken@edgecomm.com,www.edgecomm.com,1080,90
+"Perlmutter Ed",Perlmutter.Ed@grandhotels.com,www.grandhotels.com,1083,93
+"Courtney Joe",Courtney.Joe@universityofarizona.com,www.universityofarizona.com,1085,95
+"DeLauro Rosa L.",DeLauro.Rosa.L@uos.com,www.uos.com,1086,96
+"Himes Jim",Himes.Jim@walmart.com,www.walmart.com,1087,97
+"Blunt Rochester Lisa",Blunt.Rochester.Lisa@chevron.com,www.chevron.com,1089,99
+"Norton Eleanor Holmes",Norton.Eleanor.Holmes@berkshirehathaway.com,www.berkshirehathaway.com,1090,100
+"Yoho Ted",Yoho.Ted@ge.com,www.ge.com,1093,103
+"Lawson Al",Lawson.Al@cvshealth.com,www.cvshealth.com,1095,105
+"DeSantis Ron",DeSantis.Ron@mckesson.com,www.mckesson.com,1096,106
+"Soto Darren",Soto.Darren@unitedhealthgroup.com,www.unitedhealthgroup.com,1099,109
+"Webster Daniel",Webster.Daniel@fanniemae.com,www.fanniemae.com,1101,111
+"Castor Kathy",Castor.Kathy@thekrogerco.com,www.thekrogerco.com,1104,114
+"Ross Dennis",Ross.Dennis@chase.com,www.chase.com,1105,115
+"Buchanan Vern",Buchanan.Vern@bankofamerica.com,www.bankofamerica.com,1106,116
+"Mast Brian",Mast.Brian@cardinalhealth.com,www.cardinalhealth.com,1108,118
+"Frankel Lois",Frankel.Lois@amazon.com,www.amazon.com,1111,121
+"Wilson Frederica",Wilson.Frederica@us.pg.com,www.us.pg.com,1114,124
+"Diaz-Balart Mario",Diaz-Balart.Mario@homedepot.com,www.homedepot.com,1115,125
+"Curbelo Carlos",Curbelo.Carlos@adm.com,www.adm.com,1116,126
+"Carter Buddy",Carter.Buddy@intel.com,www.intel.com,1118,128
+"Bishop Jr. Sanford D.",Bishop.Jr.Sanford.D.@edgecomm.com,www.edgecomm.com,1119,129
+"Johnson Henry C. Jr.",Johnson.Henry.C.Jr@dickenson-consulting.com,www.dickenson-consulting.com,1121,131
+"Lewis John",Lewis.John@grandhotels.com,www.grandhotels.com,1122,132
+"Hice Jody",Hice.Jody@walmart.com,www.walmart.com,1126,136
+"Loudermilk Barry",Loudermilk.Barry@mobil.com,www.mobil.com,1127,137
+"Allen Rick",Allen.Rick@chevron.com,www.chevron.com,1128,138
+"Graves Tom",Graves.Tom@apple.com,www.apple.com,1130,140
+"Gabbard Tulsi",Gabbard.Tulsi@ford.com,www.ford.com,1133,143
+"Labrador Raul R.",Labrador.Raul.R@cvshealth.com,www.cvshealth.com,1134,144
+"Simpson Mike",Simpson.Mike@mckesson.com,www.mckesson.com,1135,145
+"Rush Bobby L.",Rush.Bobby.L@att.com,www.att.com,1136,146
+"Kelly Robin",Kelly.Robin@valero.com,www.valero.com,1137,147
+"Gutierrez Luis",Gutierrez.Luis@verizon.net,www.verizon.net,1139,149
+"Quigley Mike",Quigley.Mike@fanniemae.com,www.fanniemae.com,1140,150
+"Roskam Peter J.",Roskam.Peter.J@costco.com,www.costco.com,1141,151
+"Davis Danny K.",Davis.Danny.K@hp.com,www.hp.com,1142,152
+"Krishnamoorthi Raja",Krishnamoorthi.Raja@thekrogerco.com,www.thekrogerco.com,1143,153
+"Schakowsky Jan",Schakowsky.Jan@chase.com,www.chase.com,1144,154
+"Schneider Bradley",Schneider.Bradley@bankofamerica.com,www.bankofamerica.com,1145,155
+"Foster Bill",Foster.Bill@ibm.com,www.ibm.com,1146,156
+"Davis Rodney",Davis.Rodney@boeing.com,www.boeing.com,1148,158
+"Hultgren Randy",Hultgren.Randy@citi.com,www.citi.com,1149,159
+"Bustos Cheri",Bustos.Cheri@microsoft.com,www.microsoft.com,1152,162
+"Banks Jim",Banks.Jim@walgreens.com,www.walgreens.com,1156,166
+"Messer Luke",Messer.Luke@burlington.com,www.burlington.com,1159,169
+"Carson Andra",Carson.Andra@dickenson-consulting.com,www.dickenson-consulting.com,1160,170
+"Bucshon Larry",Bucshon.Larry@grandhotels.com,www.grandhotels.com,1161,171
+"Loebsack David",Loebsack.David@uos.com,www.uos.com,1164,174
+"Jenkins Lynn",Jenkins.Lynn@berkshirehathaway.com,www.berkshirehathaway.com,1168,178
+"Yoder Kevin",Yoder.Kevin@apple.com,www.apple.com,1169,179
+"Yarmuth John A.",Yarmuth.John.A@ford.com,www.ford.com,1172,182
+"Massie Thomas",Massie.Thomas@cvshealth.com,www.cvshealth.com,1173,183
+"Barr Andy",Barr.Andy@att.com,www.att.com,1175,185
+"Scalise Steve",Scalise.Steve@valero.com,www.valero.com,1176,186
+"Richmond Cedric",Richmond.Cedric@unitedhealthgroup.com,www.unitedhealthgroup.com,1177,187
+"Higgins Clay",Higgins.Clay@verizon.net,www.verizon.net,1178,188
+"Johnson Mike",Johnson.Mike@fanniemae.com,www.fanniemae.com,1179,189
+"Abraham Ralph",Abraham.Ralph@costco.com,www.costco.com,1180,190
+"Pingree Chellie",Pingree.Chellie@thekrogerco.com,www.thekrogerco.com,1182,192
+"Harris Andy",Harris.Andy@bankofamerica.com,www.bankofamerica.com,1184,194
+"Brown Anthony",Brown.Anthony@boeing.com,www.boeing.com,1187,197
+"Hoyer Steny H.",Hoyer.Steny.H@citi.com,www.citi.com,1188,198
+"Neal Richard E.",Neal.Richard.E@us.pg.com,www.us.pg.com,1192,202
+"McGovern James",McGovern.James@homedepot.com,www.homedepot.com,1193,203
+"Tsongas Niki",Tsongas.Niki@adm.com,www.adm.com,1194,204
+"Clark Katherine",Clark.Katherine@intel.com,www.intel.com,1196,206
+"Capuano Michael E.",Capuano.Michael.E.@burlington.com,www.burlington.com,1198,208
+"Bergman Jack",Bergman.Jack@uos.com,www.uos.com,1201,211
+"Kildee Daniel",Kildee.Daniel@mobil.com,www.mobil.com,1205,215
+"Upton Fred",Upton.Fred@chevron.com,www.chevron.com,1206,216
+"Walberg Tim",Walberg.Tim@berkshirehathaway.com,www.berkshirehathaway.com,1207,217
+"Mitchell Paul",Mitchell.Paul@ge.com,www.ge.com,1210,220
+"Dingell Debbie",Dingell.Debbie@cvshealth.com,www.cvshealth.com,1212,222
+"Lewis Jason",Lewis.Jason@unitedhealthgroup.com,www.unitedhealthgroup.com,1216,226
+"Peterson Collin C.",Peterson.Collin.C@thekrogerco.com,www.thekrogerco.com,1221,231
+"Nolan Rick",Nolan.Rick@chase.com,www.chase.com,1222,232
+"Thompson Bennie G.",Thompson.Bennie.G@ibm.com,www.ibm.com,1224,234
+"Harper Gregg",Harper.Gregg@cardinalhealth.com,www.cardinalhealth.com,1225,235
+"Palazzo Steven",Palazzo.Steven@boeing.com,www.boeing.com,1226,236
+"Wagner Ann",Wagner.Ann@amazon.com,www.amazon.com,1228,238
+"Hartzler Vicky",Hartzler.Vicky@microsoft.com,www.microsoft.com,1230,240
+"Cleaver Emanuel",Cleaver.Emanuel@us.pg.com,www.us.pg.com,1231,241
+"Smith Jason",Smith.Jason@walgreens.com,www.walgreens.com,1234,244
+"Smith Adrian",Smith.Adrian@burlington.com,www.burlington.com,1237,247
+"Titus Dina",Titus.Dina@dickenson-consulting.com,www.dickenson-consulting.com,1238,248
+"Rosen Jacky",Rosen.Jacky@uos.com,www.uos.com,1240,250
+"Kihuen Ruben J.",Kihuen.Ruben.J@universityofarizona.com,www.universityofarizona.com,1241,251
+"Norcross Donald",Norcross.Donald@mobil.com,www.mobil.com,1244,254
+"Smith Chris",Smith.Chris@apple.com,www.apple.com,1247,257
+"Pallone Jr. Frank",Pallone.Jr.Frank@ge.com,www.ge.com,1249,259
+"Lance Leonard",Lance.Leonard@ford.com,www.ford.com,1250,260
+"Sires Albio",Sires.Albio@cvshealth.com,www.cvshealth.com,1251,261
+"Pascrell Jr. Bill",Pascrell.Jr..Bill@mckesson.com,www.mckesson.com,1252,262
+"Lujan Grisham Michelle",Lujan.Grisham.Michelle@verizon.net,www.verizon.net,1256,266
+"Pearce Steve",Pearce.Steve@fanniemae.com,www.fanniemae.com,1257,267
+"Lujan Ben R.",Lujan.Ben.R@costco.com,www.costco.com,1258,268
+"Suozzi Thomas",Suozzi.Thomas@chase.com,www.chase.com,1261,271
+"Rice Kathleen",Rice.Kathleen@bankofamerica.com,www.bankofamerica.com,1262,272
+"Meng Grace",Meng.Grace@cardinalhealth.com,www.cardinalhealth.com,1264,274
+"Velazquez Nydia M.",Velazquez.Nydia.M@boeing.com,www.boeing.com,1265,275
+"Jeffries Hakeem",Jeffries.Hakeem@citi.com,www.citi.com,1266,276
+"Nadler Jerrold",Nadler.Jerrold@wellsfargo.com,www.wellsfargo.com,1268,278
+"Donovan Daniel",Donovan.Daniel@microsoft.com,www.microsoft.com,1269,279
+"Maloney Carolyn",Maloney.Carolyn@us.pg.com,www.us.pg.com,1270,280
+"Espaillat Adriano",Espaillat.Adriano@homedepot.com,www.homedepot.com,1271,281
+"Engel Eliot",Engel.Eliot@intel.com,www.intel.com,1274,284
+"Maloney Sean Patrick",Maloney.Sean.Patrick@burlington.com,www.burlington.com,1276,286
+"Faso John",Faso.John@dickenson-consulting.com,www.dickenson-consulting.com,1277,287
+"Tenney Claudia",Tenney.Claudia@universityofarizona.com,www.universityofarizona.com,1280,290
+"Slaughter Louise",Slaughter.Louise@mobil.com,www.mobil.com,1283,293
+"Collins Chris",Collins.Chris@berkshirehathaway.com,www.berkshirehathaway.com,1285,295
+"Butterfield G.K.",Butterfield.G.K.@apple.com,www.apple.com,1286,296
+"Price David",Price.David@ford.com,www.ford.com,1289,299
+"Foxx Virginia",Foxx.Virginia@cvshealth.com,www.cvshealth.com,1290,300
+"Rouzer David",Rouzer.David@att.com,www.att.com,1292,302
+"Hudson Richard",Hudson.Richard@valero.com,www.valero.com,1293,303
+"Meadows Mark",Meadows.Mark@fanniemae.com,www.fanniemae.com,1296,306
+"Sablan Gregorio",Sablan.Gregorio@chase.com,www.chase.com,1300,310
+"Chabot Steve",Chabot.Steve@bankofamerica.com,www.bankofamerica.com,1301,311
+"Wenstrup Brad",Wenstrup.Brad@ibm.com,www.ibm.com,1302,312
+"Turner Michael",Turner.Michael@homedepot.com,www.homedepot.com,1310,320
+"Fudge Marcia L.",Fudge.Marcia.L@adm.com,www.adm.com,1311,321
+"Tiberi Pat",Tiberi.Pat@walgreens.com,www.walgreens.com,1312,322
+"Joyce David",Joyce.David@edgecomm.com,www.edgecomm.com,1314,324
+"Stivers Steve",Stivers.Steve@burlington.com,www.burlington.com,1315,325
+"Mullin Markwayne",Mullin.Markwayne@uos.com,www.uos.com,1318,328
+"Russell Steve",Russell.Steve@walmart.com,www.walmart.com,1321,331
+"Walden Greg",Walden.Greg@chevron.com,www.chevron.com,1323,333
+"DeFazio Peter",DeFazio.Peter@apple.com,www.apple.com,1325,335
+"Evans Dwight",Evans.Dwight@ford.com,www.ford.com,1328,338
+"Perry Scott",Perry.Scott@mckesson.com,www.mckesson.com,1330,340
+"Meehan Pat",Meehan.Pat@unitedhealthgroup.com,www.unitedhealthgroup.com,1333,343
+"Shuster Bill",Shuster.Bill@fanniemae.com,www.fanniemae.com,1335,345
+"Marino Tom",Marino.Tom@costco.com,www.costco.com,1336,346
+"Barletta Lou",Barletta.Lou@hp.com,www.hp.com,1337,347
+"Boyle Brendan",Boyle.Brendan@chase.com,www.chase.com,1339,349
+"Dent Charles W.",Dent.Charles.W.@ibm.com,www.ibm.com,1341,351
+"Cartwright Matthew",Cartwright.Matthew@boeing.com,www.boeing.com,1343,353
+"Murphy Tim",Murphy.Tim@citi.com,www.citi.com,1344,354
+"Duncan Jeff",Duncan.Jeff@adm.com,www.adm.com,1350,360
+"Clyburn James E.",Clyburn.James.E.@intel.com,www.intel.com,1352,362
+"Noem Kristi",Noem.Kristi@burlington.com,www.burlington.com,1354,364
+"Duncan Jr. John J.",Duncan.Jr..John.J.@grandhotels.com,www.grandhotels.com,1356,366
+"Fleischmann Chuck",Fleischmann.Chuck@uos.com,www.uos.com,1357,367
+"DesJarlais Scott",DesJarlais.Scott@universityofarizona.com,www.universityofarizona.com,1358,368
+"Cooper Jim",Cooper.Jim@uos.com,www.uos.com,1359,369
+"Black Diane",Black.Diane@walmart.com,www.walmart.com,1360,370
+"Poe Ted",Poe.Ted@gm.com,www.gm.com,1365,375
+"Culberson John",Culberson.John@att.com,www.att.com,1370,380
+"Brady Kevin",Brady.Kevin@valero.com,www.valero.com,1371,381
+"Green Al",Green.Al@unitedhealthgroup.com,www.unitedhealthgroup.com,1372,382
+"McCaul Michael T.",McCaul.Michael.T.@verizon.net,www.verizon.net,1373,383
+"Conaway K. Michael",Conaway.K..Michael@fanniemae.com,www.fanniemae.com,1374,384
+"Granger Kay",Granger.Kay@costco.com,www.costco.com,1375,385
+"Smith Lamar",Smith.Lamar@amazon.com,www.amazon.com,1384,394
+"Hurd Will",Hurd.Will@microsoft.com,www.microsoft.com,1386,396
+"Williams Roger",Williams.Roger@homedepot.com,www.homedepot.com,1388,398
+"Green Gene",Green.Gene@edgecomm.com,www.edgecomm.com,1392,402
+"Vela Filemon",Vela.Filemon@universityofarizona.com,www.universityofarizona.com,1397,407
+"Babin Brian",Babin.Brian@walmart.com,www.walmart.com,1399,409
+"Stewart Chris",Stewart.Chris@chevron.com,www.chevron.com,1401,411
+"Love Mia",Love.Mia@apple.com,www.apple.com,1403,413
+"Welch Peter",Welch.Peter@gm.com,www.gm.com,1404,414
+"McEachin A. Donald",McEachin.A..Donald@att.com,www.att.com,1409,419
+"Beyer Don",Beyer.Don@fanniemae.com,www.fanniemae.com,1413,423
+"Griffith Morgan",Griffith.Morgan@costco.com,www.costco.com,1414,424
+"Herrera Beutler Jaime",Herrera.Beutler.Jaime@ibm.com,www.ibm.com,1419,429
+"Smith Adam",Smith.Adam@microsoft.com,www.microsoft.com,1425,435
+"McKinley David",McKinley.David@homedepot.com,www.homedepot.com,1427,437

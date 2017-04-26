@@ -227,16 +227,17 @@ public class LatticeInsightsResource {
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
-    private static final String SEGMENT_CONTACTS_FILE_LOCAL_PATH = "com/latticeengines/pls/controller/internal/mock-segment-contacts.csv";
+    private static final String SEGMENT_CONTACTS_FILE_LOCAL_PATH = "com/latticeengines/pls/controller/internal/export-state-%s.csv";
 
     @RequestMapping(value = SEGMENTS_PATH
             + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
-    public void downloadSegmentCSV(HttpServletRequest request, HttpServletResponse response)
+    public void downloadSegmentCSV(HttpServletRequest request, HttpServletResponse response,
+            @RequestParam(value = "state", required = true) String state)
             throws FileNotFoundException, IOException {
         InputStream stream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(SEGMENT_CONTACTS_FILE_LOCAL_PATH);
+                .getResourceAsStream(String.format(SEGMENT_CONTACTS_FILE_LOCAL_PATH, state));
         String inputStream = IOUtils.toString(new InputStreamReader(stream));
         DlFileHttpDownloader downloader = new DlFileHttpDownloader("application/csv",
                 "segments-contacts.csv", inputStream);

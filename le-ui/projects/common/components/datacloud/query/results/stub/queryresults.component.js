@@ -1,6 +1,6 @@
 angular.module('common.datacloud.query.results')
 .controller('QueryResultsStubCtrl', function($scope, $state, $stateParams, BrowserStorageUtility,
-        SegmentServiceProxy, CountMetadata, Columns, Records) {
+    QueryStore, SegmentServiceProxy, CountMetadata, Columns, Records) {
 
     var vm = this;
     angular.extend(vm, {
@@ -16,7 +16,8 @@ angular.module('common.datacloud.query.results')
         sortBy: (Columns && Columns.length > 0) ? Columns[0].column_name : null,
         sortDesc: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
-        saving: false
+        saving: false,
+        QueryStore: QueryStore
     });
 
     vm.inModel = function() {
