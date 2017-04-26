@@ -1345,7 +1345,7 @@ angular.module('common.datacloud.explorer', [
     vm.segmentBucketInput = vm.segmentBucketInput || {};
     vm.selectBucketInput = function(id, bucket) {
         var bucketId = id + bucket,
-            range = {min: bucket, max: bucket, null_only: false};
+            range = {min: bucket, max: bucket, is_null_only: false};
 
         vm.segmentBucketInput[bucketId] = !vm.segmentBucketInput[bucketId];
         vm.saveSegmentEnabled = true;
