@@ -72,7 +72,7 @@ public class DataCloudVersion implements HasPid, Serializable {
     private Status status;
 
     @JsonProperty("MetadataRefreshDate")
-    @Column(name = "MetadataRefreshDate")
+    @Column(name = "MetadataRefreshDate", nullable = false)
     private Date metadataRefreshDate;
 
     @Override

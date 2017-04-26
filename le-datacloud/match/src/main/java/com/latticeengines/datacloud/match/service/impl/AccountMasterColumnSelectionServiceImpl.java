@@ -122,6 +122,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         if (StringUtils.isEmpty(dataCloudVersion)) {
             dataCloudVersion = getLatestVersion();
         }
+
         Map<String, String> codeBookLookup = ((ConcurrentMap<String, ConcurrentMap<String, String>>) accountMasterColumnSelection
                 .get(CODEBOOK_LOOKUP)).get(dataCloudVersion);
         Map<String, BitCodeBook> codeBookMap = ((ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>>) accountMasterColumnSelection
@@ -280,8 +281,10 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         ConcurrentMap<String, ConcurrentMap<String, String>> codeBookLookup = (ConcurrentMap<String, ConcurrentMap<String, String>>) accountMasterColumnSelection
                 .get(CODEBOOK_LOOKUP);
 
-        if (cachedRefreshDate.get(version.getVersion()) != null
-                && version.getMetadataRefreshDate().compareTo(cachedRefreshDate.get(version.getVersion())) <= 0) {
+        Date metadataRefreshDate = version.getMetadataRefreshDate();
+        Date cachedDate = cachedRefreshDate.get(version.getVersion());
+
+        if (metadataRefreshDate == null || (cachedDate != null && metadataRefreshDate.compareTo(cachedDate) <= 0)) {
             ConcurrentMap<String, ConcurrentMap<Predefined, ColumnSelection>> predefinedSelectionMapOld = ((ConcurrentMap<String, ConcurrentMap<Predefined, ColumnSelection>>) this.accountMasterColumnSelection
                     .get(PREDEFINED_SELECTION_MAP));
             ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>> completeCodeBookCacheOld = (ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>>) this.accountMasterColumnSelection
@@ -299,8 +302,9 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
             // for code book lookup
             codeBookLookup.put(version.getVersion(), codeBookLookupOld.get(version.getVersion()));
-            log.info("Version : " + version.getVersion() + "metadataRefreshDate : " + version.getMetadataRefreshDate());
-            log.info("Cached column selection is not updated because the metadata refresh date is the same");
+            log.info("Version : " + version.getVersion() + "metadataRefreshDate : " + version.getMetadataRefreshDate()
+                    + "Cached column selection is not updated because the metadata refresh date is the same");
+
             return;
         }
 
@@ -319,12 +323,10 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         completeCodeBookCache.put(version.getVersion(), newCodeBookMap);
         codeBookLookup.put(version.getVersion(), newCodeBookLookup);
         log.info("Loaded " + newCodeBookMap.size() + " bit code books for version " + version.getVersion()
-                + " into cache.");
-        log.info("Loaded " + newCodeBookLookup.size() + " columns in bit code lookup for version "
-                + version.getVersion());
+                + " into cache. Loaded " + newCodeBookLookup.size() + " columns in bit code lookup for version "
+                + version.getVersion() + "MetadataRefreshDate : " + version.getMetadataRefreshDate());
 
         // update the cache refresh date value
-        log.info("Version : " + version.getVersion() + "metadataRefreshDate : " + version.getMetadataRefreshDate());
         cachedRefreshDate.put(version.getVersion(), version.getMetadataRefreshDate());
     }
 
@@ -334,6 +336,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
             ConcurrentMap<String, Object> accountMasterColumnSelectionNew = new ConcurrentHashMap<>();
             List<DataCloudVersion> cachedVersions = versionEntityMgr.allVerions();
             for (DataCloudVersion version : cachedVersions) {
+                log.info("version : "+version.getVersion()+" version metadata refresh date : "+version.getMetadataRefreshDate());
                 loadCacheForVersion(version, accountMasterColumnSelectionNew);
             }
             accountMasterColumnSelection = accountMasterColumnSelectionNew;

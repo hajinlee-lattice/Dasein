@@ -54,17 +54,14 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         DataCloudVersion approvedVersion = versionEntityMgr.currentApprovedVersion();
         String approvedVersionValue = approvedVersion.getVersion();
         Date approvedVersionDate = approvedVersion.getMetadataRefreshDate();
-        if (cachedRefreshDate.get(approvedVersionValue) != null
-                && approvedVersionDate
-                        .compareTo(cachedRefreshDate.get(approvedVersionValue)) <= 0) {
-            log.info("Metadata Refresh Date : " + approvedVersionDate);
-            log.info("Cache is already update-to-date as per the metadata refresh date so not refreshing it again");
+        Date cachedDate = cachedRefreshDate.get(approvedVersionValue);
+        if (approvedVersionDate == null || (cachedDate != null && approvedVersionDate.compareTo(cachedDate) <= 0)) {
+            log.info("Metadata Refresh Date : " + approvedVersionDate
+                    + " Cache is already update-to-date as per the metadata refresh date so not refreshing it again");
             return false;
         }
         cachedRefreshDate.put(approvedVersionValue, approvedVersionDate);
-        log.info("Metadata Refresh Date : " + approvedVersionDate);
-        log.info("Cache refreshed successfully");
+        log.info("Metadata Refresh Date : " + approvedVersionDate + " Refreshing cache");
         return true;
     }
-
 }

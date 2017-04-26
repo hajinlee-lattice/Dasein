@@ -119,16 +119,14 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
     protected boolean refreshCacheNeeded(String version) {
         DataCloudVersion versionObject = versionEntityMgr.findVersion(version);
         Date versionRefreshDate = versionObject.getMetadataRefreshDate();
-        if (cachedRefreshDate.get(version) != null && versionRefreshDate
-                .compareTo(cachedRefreshDate.get(version)) <= 0) {
-            log.info("version : " + version + "refresh date : " + versionRefreshDate);
-            log.info("Cached column selection not updated since metadata refresh date is the same");
+        Date cachedDate = cachedRefreshDate.get(version);
+        if (versionRefreshDate == null || (cachedDate != null && versionRefreshDate.compareTo(cachedDate) <= 0)) {
+            log.info("Version : " + version + " Refresh Date : " + versionRefreshDate
+                    + " Cached column selection not updated since metadata refresh date is the same");
             return false;
-        } else {
-            // update the cache refresh date value
-            log.info("version : " + version + "refresh date : " + versionRefreshDate);
-            cachedRefreshDate.put(version, versionRefreshDate);
-            return true;
         }
+        log.info("version : " + version + "refresh date : " + versionRefreshDate + "Refreshing cache");
+        cachedRefreshDate.put(version, versionRefreshDate);
+        return true;
     }
 }
