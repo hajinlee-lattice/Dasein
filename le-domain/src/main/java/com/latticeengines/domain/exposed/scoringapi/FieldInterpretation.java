@@ -19,7 +19,7 @@ public enum FieldInterpretation {
     Website(FieldType.STRING, "Website"), //
     CompanyName(FieldType.STRING, "CompanyName"), //
     Industry, //
-    DUNS, //
+    DUNS(FieldType.STRING, "DUNS"), //
     LatticeAccountId; //
 
     private final String fieldName; // Added this field, incase if actual
