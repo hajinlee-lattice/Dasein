@@ -505,13 +505,7 @@ angular
                 subcategory: { value: null, squash: true }
             }
         }))
-        .state('home.segment.explorer.query', getState('query', {
-            resolve: {
-                CurrentConfiguration: function() {
-                    return null;
-                }
-            }
-        }))
+        .state('home.segment.explorer.query', getState('query'))
         .state('home.segment.x', getState('abstract'))
         .state('home.segment.x.accounts', getState('xaccounts'))
         .state('home.segment.x.contacts', getState('xcontacts'))
