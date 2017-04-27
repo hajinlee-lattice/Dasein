@@ -9,10 +9,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatusDocument {
 
-    public static final String ONLINE = "online";
+    public static final String ONLINE = "ONLINE";
     public static final String DOWN = "DOWN";
     public static final String UP = "UP";
     public static final String OK = "OK";
+    public static final String UNAVAILABLE = "UNAVAILABLE";
 
     private String status;
 
@@ -48,6 +49,10 @@ public class StatusDocument {
 
     public static StatusDocument down() {
         return new StatusDocument(DOWN);
+    }
+
+    public static StatusDocument unavailable() {
+        return new StatusDocument(UNAVAILABLE);
     }
 
     @Override
