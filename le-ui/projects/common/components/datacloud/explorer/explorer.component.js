@@ -1192,10 +1192,10 @@ angular.module('common.datacloud.explorer', [
     var getExplorerSegments = function(enrichments) {
         vm.clearExplorerSegments();
         var metadataSegments = vm.metadataSegments || QueryRestriction;
-        for(var i = 0; i < metadataSegments.length; i++) {
+        for(var i in metadataSegments) {
             var restrictions = metadataSegments[i];
-            for(var j = 0; j < restrictions.length; j++) {
-                var item = restrictions[j];
+            for(var i in restrictions) {
+                var item = restrictions[i];
                 if(item.bucketRestriction) {
                     var restriction = item.bucketRestriction,
                         key = restriction.lhs.columnLookup.column_name,
@@ -1328,9 +1328,9 @@ angular.module('common.datacloud.explorer', [
         vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.addRestriction({columnName: attributeKey, range: {min:'VP', max:'VP', is_null_only:false} });
+            QueryStore.addRestriction({columnName: attributeKey});
         } else {
-            QueryStore.removeRestriction({columnName: attributeKey, range: {min:'VP', max:'VP', is_null_only:false} });
+            QueryStore.removeRestriction({columnName: attributeKey});
         }
     }
 
