@@ -92,30 +92,20 @@ angular
                     vm.updateStateParams();
                 }
             }
-            
-            vm.displayAttributeValue = function(attribute, property) {
-                var property = property || 'Lbl',
-                    enrichmentKey = attribute.Attribute || attribute.FieldName,
+
+            vm.getAttributeStat = function(attribute) {
+                var enrichmentKey = attribute.Attribute || attribute.FieldName,
                     index = vm.enrichmentsMap[enrichmentKey],
                     enrichment = vm.enrichments[index],
                     stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].RowStats && vm.cube.Stats[enrichmentKey].RowStats.Bkts && vm.cube.Stats[enrichmentKey].RowStats.Bkts.List ? vm.cube.Stats[enrichmentKey].RowStats.Bkts.List : null),
                     segmentRangeKey = null;
-
-                /**
-                 * sort stats by record count if there are more then 1
-                 */
-                if(stats && stats.length > 1) {
-                    stats = _.sortBy(stats, function(item){
-                        return parseInt(item.Cnt);
-                    });
-                }
 
                 var stat = (stats && stats.length ? stats[0] : null);
 
                 if(stat && stat.Range) {
                     segmentRangeKey = vm.makeSegmentsRangeKey(enrichment,stat.Range);
                 }
-                // if 
+
                 if(stats && stats.length > 1) {
                     for(var i in stats) {
                         if(stats[i] && stats[i].Range) {
@@ -127,6 +117,25 @@ angular
 
                     }
                 }
+                return stat;
+            }
+            
+            vm.displayAttributeValue = function(attribute, property) {
+                var property = property || 'Lbl',
+                    enrichmentKey = attribute.Attribute || attribute.FieldName,
+                    stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].RowStats && vm.cube.Stats[enrichmentKey].RowStats.Bkts && vm.cube.Stats[enrichmentKey].RowStats.Bkts.List ? vm.cube.Stats[enrichmentKey].RowStats.Bkts.List : null);
+
+                /**
+                 * sort stats by record count if there are more then 1
+                 */
+                if(stats && stats.length > 1) {
+                    stats = _.sortBy(stats, function(item){
+                        return parseInt(item.Cnt);
+                    });
+                }
+
+                var stat = vm.getAttributeStat(attribute);
+
                 if(stat && stat[property]) {
                     if(property === 'Lift') {
                         return stat[property].toFixed(1) + 'x';
@@ -134,6 +143,7 @@ angular
                     return stat[property];
                 }
             }
+
         }
     };
 });

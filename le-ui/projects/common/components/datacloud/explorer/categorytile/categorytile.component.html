@@ -32,8 +32,8 @@
             <ul class="attributes noselect-children">
                 <li class="header" ng-show="categoryAttributes.length > 0">
                     <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
-                    <div class="column data" ng-if="highlightAttributes.length == 0 && vm.section == 'segment.analysis'">Value</div>
-                    <div class="column data" ng-if="highlightAttributes.length == 0">{{ vm.lookupMode ? 'Value' : (vm.section == 'segment.analysis' && vm.inModel() ? 'Lift' : 'Records') }}</div>
+                    <div class="column data" ng-if="!highlightAttributes.length && vm.section == 'segment.analysis'">Value</div>
+                    <div class="column data" ng-if="!highlightAttributes.length">{{ vm.lookupMode ? 'Value' : (vm.section == 'segment.analysis' && vm.inModel() ? 'Lift' : 'Records') }}</div>
                 </li>
                 <li ng-repeat="attribute in (categoryAttributes = (TileTableItems.other 
                         | filter: vm.enrichmentsFilter() 
@@ -48,12 +48,13 @@
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
                     <div class="column label" title="{{attribute.DisplayName}}">
+                        <input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !vm.cube.Stats" ng-disabled="true" />
                         <input  type="checkbox" 
-                                ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName]" 
+                                ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName]"
                                 ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.FieldName] || attribute.SegmentChecked" 
                                 name="{{attribute.Attribute || attribute.FieldName}}" 
                                 id="{{attribute.Attribute || attribute.FieldName}}" 
-                                ng-if="vm.section == 'segment.analysis'" />
+                                ng-if="vm.section == 'segment.analysis' && vm.cube.Stats" />
                         {{ attribute.DisplayName }}
                     </div>
                     <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !vm.cube.Stats"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
