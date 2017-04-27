@@ -152,21 +152,15 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
         DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(LOG_ENTRY, DellEbiExecutionLog.class);
 
-        List<DellEbiExecutionLog> executionLogs = dellEbiExecutionLogEntityMgr.getEntriesByFile(zipFileName);
-        int count = 0;
-        for (DellEbiExecutionLog executionLog : executionLogs) {
-            if (executionLog.getStatus() == DellEbiExecutionLogStatus.Completed.getStatus()) {
-                break;
-            } else {
-                count++;
-            }
-        }
+        DellEbiExecutionLog executionLog = dellEbiExecutionLogEntityMgr.getEntryByFile(zipFileName);
+        int count = executionLog.getRetryCount();
+        count++;
 
         if (count >= FAIL_TRIES) {
-            dellEbiExecutionLogEntityMgr.recordRetryFailure(dellEbiExecutionLog, err);
+            dellEbiExecutionLogEntityMgr.recordRetryFailure(dellEbiExecutionLog, err, count);
             log.info("Failed to re-try file name=" + zipFileName);
         } else {
-            dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, err);
+            dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, err, count);
         }
 
         LoggingUtils.logErrorWithDuration(log, dellEbiExecutionLog, err, null,

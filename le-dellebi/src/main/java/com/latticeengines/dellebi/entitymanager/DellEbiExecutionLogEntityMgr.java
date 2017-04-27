@@ -13,9 +13,9 @@ public interface DellEbiExecutionLogEntityMgr {
 
     DellEbiExecutionLog getEntryByFile(String file);
 
-    void recordFailure(DellEbiExecutionLog dellEbiExecutionLog, String err);
+    void recordFailure(DellEbiExecutionLog dellEbiExecutionLog, String err, int retryCount);
 
-    void recordRetryFailure(DellEbiExecutionLog dellEbiExecutionLog, String err);
+    void recordRetryFailure(DellEbiExecutionLog dellEbiExecutionLog, String err, int retryCount);
 
     List<DellEbiExecutionLog> getEntriesByFile(String file);
 

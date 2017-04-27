@@ -60,7 +60,7 @@ public class DellEbiExecutionLogEntityMgrImpl extends BaseEntityMgrImpl<DellEbiE
 
     @Override
     @Transactional(value = "transactionManagerDellEbiCfg")
-    public void recordFailure(DellEbiExecutionLog dellEbiExecutionLog, String err) {
+    public void recordFailure(DellEbiExecutionLog dellEbiExecutionLog, String err, int retryCount) {
         if (dellEbiExecutionLog == null || err == null) {
             throw new LedpException(LedpCode.LEDP_29001);
         }
@@ -68,12 +68,13 @@ public class DellEbiExecutionLogEntityMgrImpl extends BaseEntityMgrImpl<DellEbiE
         dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Failed.getStatus());
         dellEbiExecutionLog.setEndDate(new Date());
         dellEbiExecutionLog.setError(err);
+        dellEbiExecutionLog.setRetryCount(retryCount);
         executeUpdate(dellEbiExecutionLog);
     }
 
     @Override
     @Transactional(value = "transactionManagerDellEbiCfg")
-    public void recordRetryFailure(DellEbiExecutionLog dellEbiExecutionLog, String err) {
+    public void recordRetryFailure(DellEbiExecutionLog dellEbiExecutionLog, String err, int retryCount) {
         if (dellEbiExecutionLog == null || err == null) {
             throw new LedpException(LedpCode.LEDP_29001);
         }
@@ -81,6 +82,7 @@ public class DellEbiExecutionLogEntityMgrImpl extends BaseEntityMgrImpl<DellEbiE
         dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.TriedFailed.getStatus());
         dellEbiExecutionLog.setEndDate(new Date());
         dellEbiExecutionLog.setError(err);
+        dellEbiExecutionLog.setRetryCount(retryCount);
         executeUpdate(dellEbiExecutionLog);
     }
 

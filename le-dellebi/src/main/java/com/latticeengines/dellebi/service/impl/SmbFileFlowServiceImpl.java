@@ -91,13 +91,17 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             String zipFileName = scanedFile.getName();
             String fileType = getFileType(zipFileName);
 
-            DellEbiExecutionLog dellEbiExecutionLog = new DellEbiExecutionLog();
 
-            try {
+            DellEbiExecutionLog dellEbiExecutionLog = dellEbiExecutionLogEntityMgr.getEntryByFile(zipFileName);
+            if(dellEbiExecutionLog == null)
+            {
+                dellEbiExecutionLog = new DellEbiExecutionLog();
                 dellEbiExecutionLog.setFile(zipFileName);
                 dellEbiExecutionLog.setStartDate(new Date());
                 dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.NewFile.getStatus());
                 dellEbiExecutionLogEntityMgr.createOrUpdate(dellEbiExecutionLog);
+            }
+            try {
                 context.setProperty(DellEbiFlowService.FILE_TYPE, fileType);
                 txtFileName = downloadAndUnzip(scanedFile.getInputStream(), zipFileName);
                 dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Downloaded.getStatus());
@@ -110,7 +114,8 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
                 LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Finish Downloading job!",
                         dellEbiExecutionLog.getStartDate().getTime());
             } catch (Exception ex) {
-                dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage());
+                int retryCount = dellEbiExecutionLog.getRetryCount() + 1;
+                dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage(), retryCount);
             }
         }
 

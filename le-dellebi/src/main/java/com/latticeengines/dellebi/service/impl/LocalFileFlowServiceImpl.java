@@ -89,7 +89,8 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
                 LoggingUtils.logInfoWithDuration(log, dellEbiExecutionLog, "Finish Downloading job!",
                         dellEbiExecutionLog.getStartDate().getTime());
             } catch (Exception ex) {
-                dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage());
+            	int retryCount = dellEbiExecutionLog.getRetryCount() + 1;
+                dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage(), retryCount);
             }
         }
     }

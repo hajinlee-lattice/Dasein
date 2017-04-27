@@ -44,6 +44,9 @@ public class DellEbiExecutionLog implements HasPid, Serializable {
     @Column(name = "Error", nullable = true)
     private String error;
 
+    @Column(name = "RetryCount", nullable = false, columnDefinition = "int default 0")
+    private int retryCount;
+
     @Override
     public Long getPid() {
         return id;
@@ -93,5 +96,14 @@ public class DellEbiExecutionLog implements HasPid, Serializable {
     public void setError(String error) {
         this.error = error;
     }
+
+	public int getRetryCount() {
+		return retryCount;
+	}
+
+	public void setRetryCount(int retryCount) {
+		this.retryCount = retryCount;
+	}
+
 
 }
