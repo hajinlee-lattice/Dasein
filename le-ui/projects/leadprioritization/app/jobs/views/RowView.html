@@ -3,12 +3,12 @@
         <span class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three" ng-if="state != 'model'" ng-attr-data-stooltip="{{job.modelName}}">
             <a ng-if="job.modelId && job.modelName && !isPMML && !job.isDeleted"
-               class="model-name" 
+               class="model-name"
                ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
                     {{job.modelName}}
             </a>
             <a ng-if="job.modelId && job.modelName && isPMML && !job.isDeleted"
-               class="model-name" 
+               class="model-name"
                ui-sref="home.model.jobs({ modelId: '{{ job.modelId | escape }}' })">
                     {{job.modelName}}
             </a>
@@ -27,7 +27,7 @@
                     (Deleted) {{job.modelName}}
                 </span>
             </strong>
-            <strong ng-if="job.modelId && !job.modelName" 
+            <strong ng-if="job.modelId && !job.modelName"
                     class="model-name">
                 <span>
                     --
@@ -41,19 +41,19 @@
         <span class="columns two {{job.status}}" ng-show="job.status">{{job.status}}</span>
         <span class="columns two">
             <span ng-if="(jobCompleted || jobFailed) && job.id != null">
-                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
+                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button"
                       ng-if="jobType == 'fitModelWorkflow'">
                     <a ui-sref="home.jobs.status.ready({jobId: job.id})">
                         <i class="fa fa-list-alt"></i>Report
                     </a>
                 </span>
-                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
+                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button"
                       ng-if="jobType == 'importMatchAndModelWorkflow'">
                     <a ui-sref="home.jobs.status.csv({jobId: job.id})">
                         <i class="fa fa-list-alt"></i>Report
                     </a>
                 </span>
-                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
+                <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button"
                       ng-if="isScoringJob && job.status != 'Failed'">
                     <a href="/files/scores/jobs/{{job.id}}/results/score?Authorization={{auth}}&TenantId={{TenantId}}">
                         <i data-ng-show="!showProgress" class="fa fa-download"></i>
@@ -64,7 +64,7 @@
             </span>
             <span class="button orange-button" ng-if="jobRunning && !job.cancelling">
                 <a href="javascript:void(0)" data-ng-click="cancelJobClick($event)">
-                    <i class="fa fa-stop-circle"></i>Cancel Job 
+                    <i class="fa fa-stop-circle"></i>Cancel Job
                 </a>
             </span>
             <span class="button white-button" ng-if="jobRunning && job.cancelling">
@@ -72,7 +72,7 @@
                     <i class="fa fa-stop-circle"></i>Cancelling...
                 </span>
             </span>
-            
+
             <span ng-if="state != 'model'" style="position: absolute; right: 1em;">
                 <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && job.status != 'Pending'">
                     <span><i class="fa fa-angle-double-down fa-lg"></i></span>
@@ -94,17 +94,17 @@
                 <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow' || jobType == 'modelAndEmailWorkflow'">
                     <li ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
                         <div>
-                                
+
                             <span class="load-data">
                                 <p>Processing File</p>
                                 <p class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
-                                <span 
-                                    class="loading-small" 
-data-ng-if="
-jobStepsRunningStates.load_data || 
-jobStepsRunningStates.undefined && !jobStepsCompletedStates.load_data"></span>
+                                <span
+                                    class="loading-small"
+                                    data-ng-if="
+                                    jobStepsRunningStates.load_data ||
+                                    jobStepsRunningStates.undefined && !jobStepsCompletedStates.load_data"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.load_data"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'load_data'"></i>
                             </span>
@@ -113,17 +113,17 @@ jobStepsRunningStates.undefined && !jobStepsCompletedStates.load_data"></span>
                     </li>
                     <li ng-class="{success : jobStepsCompletedStates.generate_insights, error : (stepFailed == 'generate_insights')}">
                         <div>
-                                
+
                             <span class="match-cloud">
                                 <p>Matching to Data Cloud</p>
                                 <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
-                                <span 
-                                    class="loading-small" 
-data-ng-if="
-jobStepsRunningStates.generate_insights || 
-jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && !jobStepsCompletedStates.generate_insights"></span>
+                                <span
+                                    class="loading-small"
+                                    data-ng-if="
+                                    jobStepsRunningStates.generate_insights ||
+                                    jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && !jobStepsCompletedStates.generate_insights"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'generate_insights'"></i>
                             </span>
@@ -138,11 +138,11 @@ jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && !jobStep
                                 <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
-                                <span 
-                                    class="loading-small" 
-data-ng-if="
-jobStepsRunningStates.create_global_target_market || 
-jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && !jobStepsCompletedStates.create_global_target_market"></span>
+                                <span
+                                    class="loading-small"
+                                    data-ng-if="
+                                    jobStepsRunningStates.create_global_target_market ||
+                                    jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && !jobStepsCompletedStates.create_global_target_market"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'create_global_target_market'"></i>
                             </span>
@@ -151,19 +151,19 @@ jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && 
                     </li>
                     <li ng-class="{success : jobStepsCompletedStates.score_training_set, error : (stepFailed == 'score_training_set')}">
                         <div>
-                                
+
                             <span class="scoring-training-set">
                                 <p>Scoring Training Set</p>
                                 <p class="completion-times">{{ stepsCompletedTimes.score_training_set | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
-                                <span 
-                                    class="loading-small" 
-data-ng-if="
-jobStepsRunningStates.score_training_set || 
-jobStepsRunningStates.undefined && jobStepsCompletedStates.create_global_target_market &&
-job.status === 'Running'
-"></span>
+                                <span
+                                    class="loading-small"
+                                    data-ng-if="
+                                    jobStepsRunningStates.score_training_set ||
+                                    jobStepsRunningStates.undefined && jobStepsCompletedStates.create_global_target_market &&
+                                    job.status === 'Running'
+                                    "></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.score_training_set"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'score_training_set'"></i>
                             </span>
