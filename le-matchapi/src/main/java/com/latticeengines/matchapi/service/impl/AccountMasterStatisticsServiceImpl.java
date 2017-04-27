@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
@@ -52,10 +53,8 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("accountMasterStatisticsService")
 public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisticsService {
-    private static final String ENCODED_YES = "YES";
-    private static final String ENCODED_NO = "NO";
-    private static final String DECODED_YES = "Yes";
-    private static final String DECODED_NO = "No";
+    private static final String YES = "Yes";
+    private static final String NO = "No";
 
     @Value("${datacloud.core.accountmasterstats.locationbased}")
     private boolean isLocationBased;
@@ -272,9 +271,44 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             if (!isLocationBased && entry.getValue().getRowBasedStatistics().getNonNullCount() > nonNullCount) {
                 nonNullCount = entry.getValue().getRowBasedStatistics().getNonNullCount();
             }
+            standardizeAttrStatsLbl(entry.getValue());
         }
         cube.setNonNullCount(nonNullCount);
         return cube;
+    }
+
+    private void standardizeAttrStatsLbl(AttributeStatistics stats) {
+        AttributeStatsDetails rowBasedStats = stats.getRowBasedStatistics();
+        if (rowBasedStats == null || rowBasedStats.getBuckets() == null
+                || rowBasedStats.getBuckets().getBucketList() == null) {
+            return;
+        }
+        List<Bucket> buckets = rowBasedStats.getBuckets().getBucketList();
+        for (Bucket bucket : buckets) {
+            if (bucket.getBucketLabel() != null && bucket.getBucketLabel().equalsIgnoreCase("Y")) {
+                bucket.setBucketLabel(YES);
+            } else if (bucket.getBucketLabel() != null && bucket.getBucketLabel().equalsIgnoreCase("N")) {
+                bucket.setBucketLabel(NO);
+            }
+            BucketRange range = bucket.getRange();
+            if (range == null) {
+                continue;
+            }
+            if (range.getMin() != null && range.getMin() instanceof String
+                    && ((String) range.getMin()).equalsIgnoreCase("Y")) {
+                range.setMin(YES);
+            } else if (range.getMin() != null && range.getMin() instanceof String
+                    && ((String) range.getMin()).equalsIgnoreCase("N")) {
+                range.setMin(NO);
+            }
+            if (range.getMax() != null && range.getMax() instanceof String
+                    && ((String) range.getMax()).equalsIgnoreCase("Y")) {
+                range.setMax(YES);
+            } else if (range.getMax() != null && range.getMax() instanceof String
+                    && ((String) range.getMax()).equalsIgnoreCase("N")) {
+                range.setMax(NO);
+            }
+        }
     }
 
     private Map<String, ColumnMetadata> getColumnMetadata() {
@@ -378,13 +412,13 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                     if (bucket.getEncodedCountList().length > idx) {
                         decodedBuckets.getBucketList().get(loopId).setCount(bucket.getEncodedCountList()[idx]);
                         total += bucket.getEncodedCountList()[idx];
-                        if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(ENCODED_NO)) {
+                        if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(NO)) {
                             noBucketId = loopId;
                             noBucketCount = bucket.getEncodedCountList()[idx];
                         }
                     } else {
                         decodedBuckets.getBucketList().get(loopId).setCount(0L);
-                        if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(ENCODED_NO)) {
+                        if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(NO)) {
                             noBucketId = loopId;
                             noBucketCount = 0L;
                         }
@@ -394,11 +428,11 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                     // added in stats generation code to use "Yes", "No" for
                     // encoded attribute labels
                     if (decodedBuckets.getBucketList().get(loopId).getBucketLabel() //
-                            .equalsIgnoreCase(ENCODED_NO)) {
-                        decodedBuckets.getBucketList().get(loopId).setBucketLabel(DECODED_NO);
+                            .equalsIgnoreCase(NO)) {
+                        decodedBuckets.getBucketList().get(loopId).setBucketLabel(NO);
                     } else if (decodedBuckets.getBucketList().get(loopId).getBucketLabel() //
-                            .equalsIgnoreCase(ENCODED_YES)) {
-                        decodedBuckets.getBucketList().get(loopId).setBucketLabel(DECODED_YES);
+                            .equalsIgnoreCase(YES)) {
+                        decodedBuckets.getBucketList().get(loopId).setBucketLabel(YES);
                     }
                 }
                 loopId++;
