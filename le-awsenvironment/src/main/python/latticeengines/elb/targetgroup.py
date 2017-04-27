@@ -7,16 +7,6 @@ def main():
     args = parse_args()
     args.func(args)
 
-def find_tgrp_arn(name):
-    client = boto3.client('elbv2')
-    response = client.describe_target_groups()
-    for tgrp in response['TargetGroups']:
-        if tgrp['TargetGroupName'] == name:
-            tgrp_arn = tgrp['TargetGroupArn']
-            print "Found target group " + tgrp_arn
-            return tgrp_arn
-    raise Exception("Cannot find target group named "+ name)
-
 def register_cli(args):
     register(args.tgrp, args.instance, args.port)
 
