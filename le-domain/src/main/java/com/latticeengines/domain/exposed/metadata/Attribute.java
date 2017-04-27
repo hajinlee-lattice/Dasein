@@ -33,8 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.visitor.Visitor;
-import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
@@ -331,11 +329,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Override
     public Set<Map.Entry<String, Object>> getEntries() {
         return properties.entrySet();
-    }
-
-    @Override
-    public void accept(Visitor visitor, VisitorContext ctx) {
-        visitor.visit(this, ctx);
     }
 
     @Transient
@@ -875,8 +868,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public List<BucketRange> getBucketRangeList() {
         Object obj = properties.get("BucketRangeList");
-        return obj == null ? null : JsonUtils.getObjectMapper().convertValue(obj,
-                new TypeReference<List<BucketRange>>() {
+        return obj == null ? null
+                : JsonUtils.getObjectMapper().convertValue(obj, new TypeReference<List<BucketRange>>() {
                 });
     }
 
