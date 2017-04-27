@@ -285,27 +285,23 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         }
         List<Bucket> buckets = rowBasedStats.getBuckets().getBucketList();
         for (Bucket bucket : buckets) {
-            if (bucket.getBucketLabel() != null && bucket.getBucketLabel().equalsIgnoreCase("Y")) {
+            if (isEquivalentYes(bucket.getBucketLabel())) {
                 bucket.setBucketLabel(YES);
-            } else if (bucket.getBucketLabel() != null && bucket.getBucketLabel().equalsIgnoreCase("N")) {
+            } else if (isEquivalentNo(bucket.getBucketLabel())) {
                 bucket.setBucketLabel(NO);
             }
             BucketRange range = bucket.getRange();
             if (range == null) {
                 continue;
             }
-            if (range.getMin() != null && range.getMin() instanceof String
-                    && ((String) range.getMin()).equalsIgnoreCase("Y")) {
+            if (isEquivalentYes(range.getMin())) {
                 range.setMin(YES);
-            } else if (range.getMin() != null && range.getMin() instanceof String
-                    && ((String) range.getMin()).equalsIgnoreCase("N")) {
+            } else if (isEquivalentNo(range.getMin())) {
                 range.setMin(NO);
             }
-            if (range.getMax() != null && range.getMax() instanceof String
-                    && ((String) range.getMax()).equalsIgnoreCase("Y")) {
+            if (isEquivalentYes(range.getMax())) {
                 range.setMax(YES);
-            } else if (range.getMax() != null && range.getMax() instanceof String
-                    && ((String) range.getMax()).equalsIgnoreCase("N")) {
+            } else if (isEquivalentNo(range.getMax())) {
                 range.setMax(NO);
             }
         }
@@ -423,17 +419,6 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                             noBucketCount = 0L;
                         }
                     }
-
-                    // TODO - this is a temporary fix, actual fix needs to be
-                    // added in stats generation code to use "Yes", "No" for
-                    // encoded attribute labels
-                    if (decodedBuckets.getBucketList().get(loopId).getBucketLabel() //
-                            .equalsIgnoreCase(NO)) {
-                        decodedBuckets.getBucketList().get(loopId).setBucketLabel(NO);
-                    } else if (decodedBuckets.getBucketList().get(loopId).getBucketLabel() //
-                            .equalsIgnoreCase(YES)) {
-                        decodedBuckets.getBucketList().get(loopId).setBucketLabel(YES);
-                    }
                 }
                 loopId++;
             }
@@ -498,5 +483,21 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         if (st.getBuckets() != null && st.getBuckets().getType() == BucketType.Numerical) {
             st.getBuckets().setBucketList(emptyBucket);
         }
+    }
+
+    private boolean isEquivalentYes(Object str) {
+        if (str != null && str instanceof String
+                && (((String) str).equalsIgnoreCase(YES) || ((String) str).equalsIgnoreCase("Y"))) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isEquivalentNo(Object str) {
+        if (str != null && str instanceof String
+                && (((String) str).equalsIgnoreCase(NO) || ((String) str).equalsIgnoreCase("N"))) {
+            return true;
+        }
+        return false;
     }
 }
