@@ -175,7 +175,7 @@ def create_load_balancers(tg_map, stack, ui=False):
         lpi_lb.idle_timeout(600)
         lpi_lb.depends_on(tg_map["lpi"])
         lpi_lb.add_tag("le-product", "lpi")
-        tg.add_tag("le-stack", stack)
+        lpi_lb.add_tag("le-stack", stack)
         resources.append(lpi_lb)
         albs["lpi"] = lpi_lb
 
@@ -184,7 +184,7 @@ def create_load_balancers(tg_map, stack, ui=False):
         ac_lb.idle_timeout(600)
         ac_lb.depends_on(tg_map["adminconsole"])
         ac_lb.add_tag("le-product", "lpi")
-        tg.add_tag("le-stack", stack)
+        ac_lb.add_tag("le-stack", stack)
         resources.append(ac_lb)
         albs["adminconsole"] = ac_lb
 
