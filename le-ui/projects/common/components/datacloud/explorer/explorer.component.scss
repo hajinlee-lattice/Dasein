@@ -9,20 +9,33 @@
         background-color: $color;
         background-color: rgba($color, $opacity);
     }
-
     .enrichment-wizard-category-pagination {
+        opacity: 0;
         .pd-pagination {
-            text-align: right;
-            margin-right: 1em;
+            position: absolute;
+            left: 0.9em;
+            right: 1.9em;
+            margin-top: 3.75em;
+            z-index: 1;
         }
         .pd-pagination-center,
         .pd-pagination-start,
         .pd-pagination-end {
             display: none;
         }
+        .pd-pagination-prev {
+            float: left;
+        }
+        .pd-pagination-next {
+            float: right;
+        }
         .button {
-            height: 1.5em;
-            padding: 0em 1em;
+            padding: 0.25em 0.75em;
+        }
+    }
+    .carousel-container:hover {
+        .enrichment-wizard-category-pagination {
+            opacity: 1;
         }
     }
     .filters {

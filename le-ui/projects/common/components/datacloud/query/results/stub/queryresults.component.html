@@ -45,7 +45,10 @@
                             orderBy: vm.sortBy : vm.sortDesc |
                             limitTo: vm.pagesize: ((vm.current - 1) * vm.pagesize)">
                  <td ng-repeat="col in ::vm.columns">
-                    {{::r[col.column_name]}}
+                    <span   class="results-table-item results-table-item-{{ col.column_name == 'name' && r.website ? 'company' : col.column_name }}"
+                            ng-click="vm.gotoCompanyProfile(col.column_name, r[col.column_name], r)">
+                        {{::r[col.column_name]}}
+                    </span>
                 </td>
             </tr>
         </tbody>

@@ -38,7 +38,7 @@
     <li class="save" ng-if="vm.enabledManualSave">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
     </li>
-    <li class="download dropdown-container" ng-if="!vm.lookupMode && vm.section != 'insights' && vm.section != 'browse' && vm.section != 'team'">
+    <li class="download dropdown-container" ng-if="!vm.lookupMode && vm.section != 'insights' && vm.section != 'browse' && vm.section != 'team' && vm.section != 'segment.analysis'">
         <h2 class="button icon-button white-button">
             <i class="fa fa-download"></i>
         </h2>
@@ -46,6 +46,13 @@
             <li ng-repeat="button in vm.download_button.items"><a href="{{button.href}}"><i class="{{button.icon}}"></i>{{button.label}}</a></li>
         </ul>
         <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
+    </li>
+    <li class="download-link dropdown-container" ng-if="vm.section == 'segment.analysis'">
+        <a href="/files/latticeinsights/segments/downloadcsv?Authorization=4dd108a3-dab8-4cdb-a9f4-96b8ae4f88ff.wEeY4Fv8tyT0384D&amp;state=0" target="_self" download="">
+            <button class="button icon-button white-button" ng-disabled="vm.results.length < 1">
+                <i class="fa fa-download"></i>
+            </button>
+        </a>
     </li>
     <li class="refine-query" ng-if="!vm.inModel() && vm.section == 'segment.analysis'">
         <button class="save button white-button" ui-sref="home.import.entry">{{vm.label.button_import_data}}</button>

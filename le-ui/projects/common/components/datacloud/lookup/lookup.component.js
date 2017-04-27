@@ -20,13 +20,11 @@ angular
     }
 
     vm.next = function() {
-        var timestamp = new Date().getTime();
-
         if (vm.iframeMode) {
             LookupStore.add('Authentication', vm.Authentication);
         }
 
-        LookupStore.add('timestamp', timestamp);
+        LookupStore.add('timestamp', new Date().getTime());
         LookupStore.add('request', vm.request);
         LookupStore.add('params', vm.params);
 

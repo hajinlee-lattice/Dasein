@@ -1,6 +1,8 @@
-angular.module('common.datacloud.query.results')
+angular.module('common.datacloud.query.results', [ 
+    'common.datacloud.lookup' 
+])
 .controller('QueryResultsStubCtrl', function($scope, $state, $stateParams, BrowserStorageUtility,
-    QueryStore, SegmentServiceProxy, CountMetadata, Columns, Records) {
+    QueryStore, SegmentServiceProxy, CountMetadata, Columns, Records, LookupStore) {
 
     var vm = this;
     angular.extend(vm, {
@@ -51,4 +53,16 @@ angular.module('common.datacloud.query.results')
             vm.saving = false;
         });
     };
+
+    vm.gotoCompanyProfile = function(column, value, row) {
+        if ((column == 'name' && row.website) || column == 'website' || column == 'company') {
+            LookupStore.add('timestamp', new Date().getTime());
+
+            LookupStore.request.record[(row.company ? 'CompanyName' : 'Domain')] = (row.website ? row.website : value);
+
+            ShowSpinner(value);
+
+            $state.go('home.datacloud.lookup.tabs');
+        }
+    }
 });

@@ -40,6 +40,24 @@
             cursor: pointer;
         }
 
+        .results-table-item-company,
+        .results-table-item-website {
+            cursor: pointer;
+            color: #3989C4;
+
+            &:active,
+            &:active {
+                text-decoration: underline;
+                color: #0f72a0;
+            }
+
+            &:hover,
+            &:hover {
+                text-decoration: underline;
+                color: #1f73b0;
+            }
+        }
+
         .sort:after {
           font-family: FontAwesome;
           text-anchor: middle;
