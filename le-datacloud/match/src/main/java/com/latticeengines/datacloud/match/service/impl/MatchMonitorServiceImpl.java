@@ -27,7 +27,7 @@ import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 
-@Component("matchPrecheckService")
+@Component("matchMonitorService")
 public class MatchMonitorServiceImpl implements MatchMonitorService {
     private static final Log log = LogFactory.getLog(MatchMonitorServiceImpl.class);
 
@@ -68,7 +68,8 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
         }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(2)), TimeUnit.MINUTES.toMillis(2));
     }
 
-    private void monitor() {
+    @Override
+    public synchronized void monitor() {
         StringBuilder sb = new StringBuilder();
         sb.append("\n---------------- Match Service Status ----------------\n");
         // Memory Checking

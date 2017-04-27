@@ -133,7 +133,7 @@ public class MatchInput implements Fact, Dimension {
     private boolean logDnBBulkResult;
 
     // Flag to add DnB columns match output file
-    @JsonProperty("matchDebugEnabled")
+    @JsonProperty("MatchDebugEnabled")
     private boolean matchDebugEnabled;
     
     private String matchResultPath;

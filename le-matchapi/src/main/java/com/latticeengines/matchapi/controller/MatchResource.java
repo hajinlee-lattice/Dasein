@@ -49,7 +49,7 @@ public class MatchResource {
     private List<BulkMatchService> bulkMatchServiceList;
 
     @Autowired
-    private MatchMonitorService matchPrecheckService;
+    private MatchMonitorService matchMonitorService;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
@@ -64,7 +64,7 @@ public class MatchResource {
     )
     public void matchRealTime(@RequestBody MatchInput input, HttpServletResponse response) {
         try {
-            matchPrecheckService.precheck(input.getDataCloudVersion());
+            matchMonitorService.precheck(input.getDataCloudVersion());
             MatchOutput output = realTimeMatchService.match(input);
             log.info("match output record: " + JsonUtils.serialize(output));
             if (output != null) {
@@ -88,7 +88,7 @@ public class MatchResource {
         try {
             if (CollectionUtils.isNotEmpty(input.getInputList())) {
                 for (MatchInput matchInput : input.getInputList()) {
-                    matchPrecheckService.precheck(matchInput.getDataCloudVersion());
+                    matchMonitorService.precheck(matchInput.getDataCloudVersion());
                 }
             }
             BulkMatchOutput output = realTimeMatchService.matchBulk(input);
@@ -114,7 +114,7 @@ public class MatchResource {
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             String matchVersion = input.getDataCloudVersion();
-            matchPrecheckService.precheck(matchVersion);
+            matchMonitorService.precheck(matchVersion);
             BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
