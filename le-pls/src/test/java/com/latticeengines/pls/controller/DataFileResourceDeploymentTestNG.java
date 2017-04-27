@@ -57,7 +57,7 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         switchToSuperAdmin();
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId());
-        String dir = modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId() + "/models/Q_PLS_Modeling_TENANT1/" + UUID
+        String dir = modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId() + "/models/ANY_TABLE/" + UUID
                 + "/1423547416066_0001/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua-token.json");
@@ -72,11 +72,12 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_explorer.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/rf_model.txt");
-        String newDir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(mainTestTenant.getId()) + "/data/ANY_TABLE/csv_files";
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), newDir
-                + "/postMatchEventTable_allTraining-r-00000.csv");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), newDir
-                + "/postMatchEventTable_allTest-r-00000.csv");
+        String newDir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(mainTestTenant.getId())
+                + "/data/ANY_TABLE/csv_files";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(),
+                newDir + "/postMatchEventTable_allTraining-r-00000.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(),
+                newDir + "/postMatchEventTable_allTest-r-00000.csv");
 
         String content = FileUtils.readFileToString(new File(modelSummaryUrl.getFile()));
         content = content.replace("{uuid}", UUID);
@@ -85,7 +86,6 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         summary.setId("ms__" + UUID + "-model");
 
         restTemplate.postForEntity(getRestAPIHostPort() + "/pls/modelsummaries", summary, ModelSummary.class);
-
         HdfsUtils.writeToFile(yarnConfiguration, dir + "/enhancements/modelsummary.json", JsonUtils.serialize(summary));
     }
 
