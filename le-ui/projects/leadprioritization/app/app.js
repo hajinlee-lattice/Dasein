@@ -150,6 +150,3 @@ var mainApp = angular.module('mainApp', [
 .filter('escape', function() {
     return window.escape;
 });
-Array.prototype.move = function(from, to) {
-    this.splice(to, 0, this.splice(from, 1)[0]);
-};

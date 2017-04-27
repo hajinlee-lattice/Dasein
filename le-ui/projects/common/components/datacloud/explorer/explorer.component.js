@@ -152,7 +152,7 @@ angular.module('common.datacloud.explorer', [
             //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
             vm.no_lookup_results_message = true;
         }
-        
+
         if(vm.section === 'segment.analysis') {
             vm.metadataSegments = QueryRestriction;
         }
@@ -821,6 +821,12 @@ angular.module('common.datacloud.explorer', [
         });
     }
 
+    function swap(context, i, j) {
+        var temp = context[i];
+        context[i] = context[j]
+        context[j] = temp;
+    }
+
     var getEnrichmentCategories = function() {
         if (EnrichmentTopAttributes) {
 
@@ -836,7 +842,7 @@ angular.module('common.datacloud.explorer', [
                 ];
 
                 topCategories.forEach(function(category, index) {
-                    vm.categories.move(vm.categories.indexOf(category), index);
+                    swap(vm.categories, vm.categories.indexOf(category), index);
                 });
             } else {
                 var removeCategories = [
@@ -1186,10 +1192,10 @@ angular.module('common.datacloud.explorer', [
     var getExplorerSegments = function(enrichments) {
         vm.clearExplorerSegments();
         var metadataSegments = vm.metadataSegments || QueryRestriction;
-        for(var i in metadataSegments) {
+        for(var i = 0; i < metadataSegments.length; i++) {
             var restrictions = metadataSegments[i];
-            for(var i in restrictions) {
-                var item = restrictions[i];
+            for(var j = 0; j < restrictions.length; j++) {
+                var item = restrictions[j];
                 if(item.bucketRestriction) {
                     var restriction = item.bucketRestriction,
                         key = restriction.lhs.columnLookup.column_name,
@@ -1322,9 +1328,9 @@ angular.module('common.datacloud.explorer', [
         vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.addRestriction({columnName: attributeKey});
+            QueryStore.addRestriction({columnName: attributeKey, range: {min:'VP', max:'VP', is_null_only:false} });
         } else {
-            QueryStore.removeRestriction({columnName: attributeKey});
+            QueryStore.removeRestriction({columnName: attributeKey, range: {min:'VP', max:'VP', is_null_only:false} });
         }
     }
 
