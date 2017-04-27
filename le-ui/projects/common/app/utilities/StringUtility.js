@@ -1,4 +1,4 @@
-angular.module('mainApp.appCommon.utilities.StringUtility', [])                                                                                                                                                                        
+angular.module('mainApp.appCommon.utilities.StringUtility', [])
 .service('StringUtility', function () {
 
     this.IsEmptyString = function (stringToCheck) {
@@ -8,7 +8,7 @@ angular.module('mainApp.appCommon.utilities.StringUtility', [])
         }
         return isEmpty;
     };
-    
+
     this.AddCommas = function (stringToChange) {
         if (stringToChange == null) {
             return null;
@@ -26,5 +26,11 @@ angular.module('mainApp.appCommon.utilities.StringUtility', [])
     this.SubstituteAllSpecialCharsWithSpaces = function(stringToChange) {
         stringToChange = stringToChange.trim();
         return stringToChange.replace(/[^a-zA-Z0-9]/g, ' ');
+    };
+
+    this.Title = function(stringToChange) {
+        return stringToChange.replace(/(^|\s)[a-z]/g, function(c) {
+            return c.toUpperCase();
+        });
     };
 });
