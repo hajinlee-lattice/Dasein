@@ -93,9 +93,9 @@
                 .tab-container > h2 {
                     padding-left: 24px;
                     &:after {
-                        height: 13px;
-                        width: 17px;
-                        background: url(/assets/images/enrichments/tabs/lattice-data-cloud-attributes.png) no-repeat center center;
+                        height: 16px;
+                        width: 16px;
+                        background: url(/assets/images/enrichments/tabs/attribute.png) no-repeat center center;
                     }
                 }
             }
@@ -104,18 +104,18 @@
                     padding-left: 24px;
                     &:after {
                         height: 16px;
-                        width: 17px;
-                        background: url(/assets/images/enrichments/tabs/enrichment-icon.png) no-repeat center center;
+                        width: 16px;
+                        background: url(/assets/images/enrichments/tabs/accounts.png) no-repeat center center;
                     }
                 }
             }
             &.tab-team {
                 .tab-container > h2 {
-                    padding-left: 28px;
+                    padding-left: 24px;
                     &:after {
-                        height: 20px;
-                        width: 20px;
-                        background: url(/assets/images/ico-salesforce-black.png) no-repeat center center;
+                        height: 16px;
+                        width: 16px;
+                        background: url(/assets/images/enrichments/tabs/contacts.png) no-repeat center center;
                     }
                 }
             }
