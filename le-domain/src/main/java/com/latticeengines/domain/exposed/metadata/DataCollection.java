@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_DATA_COLLECTION", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "TENANT_ID", "NAME", "TYPE" }))
+        "TENANT_ID", "TYPE" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
