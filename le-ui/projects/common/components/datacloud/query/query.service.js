@@ -89,7 +89,6 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.addRestriction = function(attribute) {
-        attribute.range = attribute.range || { max: 'No', min: 'No', is_null_only: false };
         attribute.resourceType = attribute.resourceType || 'BucketedAccountMaster';
 
         var attributesFound = this.findAttributes(attribute.columnName);
@@ -115,8 +114,6 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.removeRestriction = function(attribute) {
-        attribute.range = attribute.range || { max: 'No', min: 'No', is_null_only: false };
-
         var attributesFound = this.findAttributes(attribute.columnName);
         var attributes = attributesFound.attributes;
         var groupKey = attributesFound.groupKey;
