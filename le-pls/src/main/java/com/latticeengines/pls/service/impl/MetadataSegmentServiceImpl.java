@@ -82,7 +82,11 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         Query query = new Query();
         query.setRestriction(segment.getRestriction());
 
-        long count = accountProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
-        segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts, count);
+        try {
+            long count = accountProxy.getCount(MultiTenantContext.getTenant().getId(), query);
+            segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts, count);
+        } catch (Exception e) {
+            log.error(String.format("Failed to update statistics for segment %s", segment.getName()), e);
+        }
     }
 }
