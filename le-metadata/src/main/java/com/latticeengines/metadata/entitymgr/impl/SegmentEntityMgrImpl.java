@@ -93,7 +93,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
                     .getId(), DataCollectionType.Segmentation));
         }
 
-        addAttributeDependencies(segment);
+        // TODO temporary commented out for DEMO
+        // addAttributeDependencies(segment);
 
         super.createOrUpdate(segment);
         for (MetadataSegmentProperty metadataSegmentProperty : segment.getMetadataSegmentProperties()) {
