@@ -365,7 +365,7 @@ angular.module('common.datacloud.explorer', [
                 //console.log(vm.filter(vm.enrichments, 'FieldName', 'TechIndicator_AmazonSimpleDB'));
             }
 
-            //console.log('vm.highlightMetadata:\t ', vm.highlightMetadata); //ben
+            //console.log('vm.highlightMetadata:\t ', vm.highlightMetadata);
         }
     }
 
@@ -797,7 +797,7 @@ angular.module('common.datacloud.explorer', [
             var timestamp = new Date().getTime();
 
             Object.keys(EnrichmentTopAttributes).forEach(function(catKey) {
-                var category = result[catKey]['SubCategories']; // ben
+                var category = result[catKey]['SubCategories'];
 
                 Object.keys(category).forEach(function(subcategory) {
                     var items = category[subcategory];
@@ -1325,9 +1325,10 @@ angular.module('common.datacloud.explorer', [
         vm.hasCategoryCount = result.length;
         return result.length;
     }
-
-    vm.segmentAttributeInput = vm.segmentAttributeInput || {};
+    
+    vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
+        //vm.TileTableItems = {}; //ben
         if(!vm.cube.Stats) {
             return false;
         }
@@ -1336,6 +1337,7 @@ angular.module('common.datacloud.explorer', [
             attributeRangeKey = (stat.Range ? vm.makeSegmentsRangeKey(attribute, stat.Range) : '');
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
+        DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
         if(attributeRangeKey) {
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
@@ -1358,10 +1360,19 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         vm.saveSegmentEnabled = true;
 
+        //vm.enrichments[index].SegmentChecked = true;
+
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
             QueryStore.addRestriction({columnName: fieldName, range: stat.Range});
         } else {
             QueryStore.removeRestriction({columnName: fieldName, range: stat.Range});
+        }
+        /*
+         * Rebuild the tile table items
+         */
+        vm.TileTableItems = {};
+        if(vm.metadataSegments || QueryRestriction) {
+            getExplorerSegments(vm.enrichments);
         }
     }
 
