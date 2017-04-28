@@ -20,6 +20,9 @@
             @include flex-item(1 1 auto);
             text-align: right;
             margin: 0 8px;
+            button {
+                margin-left: 6px;
+            }
         }
 
         &.pagination {
@@ -86,6 +89,9 @@
 
     .controls {
         margin-bottom: 10px;
+        button {
+            margin-left: 6px;
+        }
     }
 
     strong {

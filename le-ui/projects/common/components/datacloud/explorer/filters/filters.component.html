@@ -48,10 +48,10 @@
         <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
     </li>
     <li class="download-link dropdown-container" ng-if="vm.section == 'segment.analysis'">
-        <a href="/files/latticeinsights/segments/downloadcsv?Authorization=4dd108a3-dab8-4cdb-a9f4-96b8ae4f88ff.wEeY4Fv8tyT0384D&amp;state=0" target="_self" download="">
-            <button class="button icon-button white-button" ng-disabled="vm.results.length < 1">
-                <i class="fa fa-download"></i>
-            </button>
+        <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"
+            target="_self" download=""
+            class="button icon-button white-button">
+            <i class="fa fa-download"></i>
         </a>
     </li>
     <li class="refine-query" ng-if="!vm.inModel() && vm.section == 'segment.analysis'">
