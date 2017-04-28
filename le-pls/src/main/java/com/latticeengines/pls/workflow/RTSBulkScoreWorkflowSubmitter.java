@@ -83,8 +83,10 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             skipIdMatch = !modelSummary.isMatch();
         }
-        skipIdMatch = skipIdMatch && !enableLeadEnrichment;
         String modelType = modelSummary != null ? modelSummary.getModelType() : ModelType.PYTHONMODEL.getModelType();
+        enableLeadEnrichment = enableLeadEnrichment & !modelType.equals(ModelType.PMML.getModelType());
+        skipIdMatch = skipIdMatch && !enableLeadEnrichment;
+
         log.info("Data Cloud Version=" + dataCloudVersion);
         List<BucketMetadata> bucketMetadataList = bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
         if (bucketMetadataList == null) {

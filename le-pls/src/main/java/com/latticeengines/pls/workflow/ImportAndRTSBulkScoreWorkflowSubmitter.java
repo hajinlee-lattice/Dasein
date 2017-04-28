@@ -102,8 +102,11 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             skipIdMatch = !modelSummary.isMatch();
         }
-        skipIdMatch = skipIdMatch && !enableLeadEnrichment;
+
         String modelType = modelSummary.getModelType();
+        enableLeadEnrichment = enableLeadEnrichment & !modelType.equals(ModelType.PMML.getModelType());
+        skipIdMatch = skipIdMatch && !enableLeadEnrichment;
+
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
         List<BucketMetadata> bucketMetadataList = bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
