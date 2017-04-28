@@ -1,5 +1,7 @@
 package com.latticeengines.playmaker.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 import io.swagger.annotations.Api;
@@ -18,6 +22,9 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(value = "/tenants")
 public class TenantResource {
+
+    @Autowired
+    private OAuthUserEntityMgr oAuthUserEntityMgr;
 
     @Autowired
     private PlaymakerTenantEntityMgr playmakerEntityMgr;
@@ -53,5 +60,12 @@ public class TenantResource {
     @ApiOperation(value = "Delete playmaker tenant")
     public void deleteTenant(@PathVariable String tenantName) {
         playmakerEntityMgr.deleteByTenantName(tenantName);
+    }
+
+    @RequestMapping(value = "/oauthtotenant", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get tenant info from OAuth token")
+    public String getOauthTokenToTenant(HttpServletRequest request) {
+        return OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
     }
 }

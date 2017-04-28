@@ -13,6 +13,7 @@ import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
 public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
 
+    private String tenantName = null;
     private RestTemplate restTemplate = null;
     protected OAuth2RestTemplate adminRestTemplate = null;
 
@@ -33,7 +34,6 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
         } catch (Exception ex) {
             Assert.assertEquals(ex.getMessage(), "401 Unauthorized");
         }
-
         adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
                 newTenant.getTenantPassword(), "playmaker");
     }
@@ -45,7 +45,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
         Assert.assertNotNull(newTenant);
         Assert.assertNotNull(newTenant.getTenantPassword());
         System.out.println("Tenant name=" + newTenant.getTenantName() + " password=" + newTenant.getTenantPassword());
-
+        tenantName = newTenant.getTenantName();
         adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
                 newTenant.getTenantPassword(), "playmaker");
     }
@@ -63,6 +63,14 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
     }
 
     @Test(groups = "deployment", dependsOnMethods = "updateTenantWithTenantName")
+    public void getOauthTokenToTenant() {
+        String url = apiHostPort + "/tenants/oauthtotenant";
+        String tenantNameViaToken = adminRestTemplate.getForObject(url, String.class);
+        Assert.assertNotNull(tenantNameViaToken);
+        Assert.assertEquals(tenantNameViaToken, tenantName);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToTenant")
     public void deleteTenantWithTenantName() {
         String url = apiHostPort + "/tenants/" + tenant.getTenantName();
         adminRestTemplate.delete(url);
