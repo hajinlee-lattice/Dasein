@@ -245,6 +245,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
         }
         if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
+            context.setCalledRemoteDnB(true);
+            context.setRequestTime(new Date());
             Callable<DnBMatchContext> task = createCallableForRemoteDnBApiCall(context);
             Future<DnBMatchContext> dnbFuture = dnbDataSourceServiceExecutor.submit(task);
 
@@ -255,6 +257,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 throw new RuntimeException(e);
             }
 
+            context.setResponseTime(new Date());
             validateDuns(context);
             dnbMatchResultValidator.validate(context);
             DnBCache dnBCache = dnbCacheService.addCache(context);
@@ -580,6 +583,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 return;
             }
             DnBMatchContext context = batchContext.getContexts().get(lookupRequestId);
+            context.setCalledRemoteDnB(true);
+            context.setRequestTime(batchContext.getTimestamp());
+            context.setResponseTime(new Date());
             if (!success) {
                 context.setDnbCode(batchContext.getDnbCode());
             } else {

@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.dnb;
 
+import java.util.Date;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -51,6 +53,12 @@ public class DnBMatchContext implements Fact, Dimension {
     private Boolean dunsInAM;
 
     private String dataCloudVersion;
+
+    private boolean calledRemoteDnB;
+
+    private Date requestTime;
+
+    private Date responseTime;
 
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
@@ -326,6 +334,30 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
+    }
+
+    public boolean isCalledRemoteDnB() {
+        return calledRemoteDnB;
+    }
+
+    public void setCalledRemoteDnB(boolean calledRemoteDnB) {
+        this.calledRemoteDnB = calledRemoteDnB;
+    }
+
+    public Date getRequestTime() {
+        return requestTime;
+    }
+
+    public void setRequestTime(Date requestTime) {
+        this.requestTime = requestTime;
+    }
+
+    public Date getResponseTime() {
+        return responseTime;
+    }
+
+    public void setResponseTime(Date responseTime) {
+        this.responseTime = responseTime;
     }
 
     public enum DnBMatchStrategy {
