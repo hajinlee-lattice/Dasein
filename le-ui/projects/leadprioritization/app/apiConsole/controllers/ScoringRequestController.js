@@ -7,8 +7,8 @@ angular.module('lp.apiconsole.ScoringRequestController', [
     return {
         templateUrl: 'app/apiConsole/views/ScoringRequestView.html',
         controller: function (
-            $scope, $rootScope, $q, $stateParams, _, ResourceUtility, 
-            BrowserStorageUtility, APIConsoleService
+            $scope, $rootScope, $q, $stateParams, _, ResourceUtility,
+            BrowserStorageUtility, APIConsoleService, ModelStore, FeatureFlagService
         ) {
             $scope.ResourceUtility = ResourceUtility;
             $scope.showScoringRequestError = false;
@@ -20,8 +20,11 @@ angular.module('lp.apiconsole.ScoringRequestController', [
                 Tenant = ClientSession ? ClientSession.Tenant : {},
                 tenantId = (Tenant.Identifier || '').split('.')[0];
 
-            var displayOrder = ["Email", "CompanyName", "State", "Country", "Website", "FirstName", "LastName"];
+            var displayOrder = ['Email', 'CompanyName', 'State', 'Country', 'Website', 'DUNS', 'FirstName', 'LastName'];
             var oldFieldsValuesHash = {};
+
+            var fuzzyMatchEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH);
+            var fuzzyMatchFieldsSet = ['CompanyName', 'State', 'Country', 'DUNS', 'City', 'PostalCode', 'PhoneNumber'];
 
             $scope.modelChanged = function ($event) {
                 $scope.scoringRequested = false;
@@ -37,21 +40,26 @@ angular.module('lp.apiconsole.ScoringRequestController', [
                     $scope.showFieldsLoadingError = false;
                     storeOldFieldsValues();
                     $scope.fields = [];
-                    // Note: Consider access token will be available in 24 hours, we store it in storage.
-                    // If user login one account in different browsers, the saved access token in prior browser will invalid.
-                    var token = BrowserStorageUtility.getOAuthAccessToken();
-                    if (token != null) {
-                        getModelFields(token);
-                    } else {
-                        APIConsoleService.GetOAuthAccessToken(tenantId).then(function (tokenResult) {
-                            if (tokenResult.Success) {
-                                BrowserStorageUtility.setOAuthAccessToken(tokenResult.ResultObj);
-                                getModelFields(tokenResult.ResultObj);
-                            } else {
-                                handleGetModelFieldsError(tokenResult);
-                            }
-                        });
-                    }
+
+                    ModelStore.getModel($scope.modelId).then(function(model) {
+                        $scope.schemaInterpretation = model.ModelDetails.SourceSchemaInterpretation;
+
+                        // Note: Consider access token will be available in 24 hours, we store it in storage.
+                        // If user login one account in different browsers, the saved access token in prior browser will invalid.
+                        var token = BrowserStorageUtility.getOAuthAccessToken();
+                        if (token != null) {
+                            getModelFields(token);
+                        } else {
+                            APIConsoleService.GetOAuthAccessToken(tenantId).then(function (tokenResult) {
+                                if (tokenResult.Success) {
+                                    BrowserStorageUtility.setOAuthAccessToken(tokenResult.ResultObj);
+                                    getModelFields(tokenResult.ResultObj);
+                                } else {
+                                    handleGetModelFieldsError(tokenResult);
+                                }
+                            });
+                        }
+                    });
                 }
             };
 
@@ -71,11 +79,15 @@ angular.module('lp.apiconsole.ScoringRequestController', [
                 $scope.fieldsLoadingError = null;
                 $scope.fields = [];
                 $scope.scoringRequested = false;
+                $scope.schemaInterpretation = null;
             }
 
             function getModelFields(token) {
                 APIConsoleService.GetModelFields(token, $scope.modelId).then(function (result) {
                     if (result.Success) {
+                        if (fuzzyMatchEnabled) {
+                            addMissingFuzzyMatchFields(result.ResultObj);
+                        }
                         shuffleFieldsInOrder(result.ResultObj);
                         $scope.showFields = true;
                         $scope.fieldsLoading = false;
@@ -83,6 +95,36 @@ angular.module('lp.apiconsole.ScoringRequestController', [
                         handleGetModelFieldsError(result);
                     }
                 });
+            }
+
+            function addMissingFuzzyMatchFields(fields) {
+                var fuzzyMatchFieldsMap = {}
+                fuzzyMatchFieldsSet.forEach(function(field) {
+                    fuzzyMatchFieldsMap[field] = true;
+                });
+
+                if ($scope.schemaInterpretation === 'SalesforceAccount') {
+                    fuzzyMatchFieldsMap.Website = true;
+                } else {
+                    fuzzyMatchFieldsMap.Email = true;
+                }
+
+                fields.forEach(function(field) {
+                    if (fuzzyMatchFieldsMap[field.name]) {
+                        fuzzyMatchFieldsMap[field.name] = false;
+                    }
+                });
+
+                for (var field in fuzzyMatchFieldsMap) {
+                    if (fuzzyMatchFieldsMap[field] === true) {
+                        fields.push({
+                            displayName: field,
+                            name: field,
+                            fieldType: "STRING",
+                            isPrimary: true
+                        });
+                    }
+                }
             }
 
             function shuffleFieldsInOrder(fields) {
