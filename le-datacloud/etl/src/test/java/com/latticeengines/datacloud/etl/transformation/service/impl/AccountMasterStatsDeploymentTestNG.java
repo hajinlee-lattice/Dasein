@@ -97,15 +97,26 @@ public class AccountMasterStatsDeploymentTestNG
 
         ObjectMapper om = new ObjectMapper();
 
-        TransformationStepConfig step1 = new TransformationStepConfig();
+        TransformationStepConfig step0 = new TransformationStepConfig();
         List<String> baseSources = new ArrayList<String>();
         baseSources.add("AccountMaster");
-        step1.setBaseSources(baseSources);
-        step1.setBaseVersions(null);
-        step1.setTransformer("sourceDeduper");
-        step1.setTargetSource("AccountMasterDeduped");
+        step0.setBaseSources(baseSources);
+        step0.setBaseVersions(null);
+        step0.setTransformer("sourceDeduper");
+        step0.setTargetSource("AccountMasterDeduped");
         String deduperConfig = getDeduperConfig();
-        step1.setConfiguration(deduperConfig);
+        step0.setConfiguration(deduperConfig);
+
+        ///////////////////
+
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<Integer> inputSteps1 = new ArrayList<Integer>();
+        inputSteps1.add(0);
+        step1.setInputSteps(inputSteps1);
+        step1.setTargetSource("amStatsHQDuns");
+        step1.setTransformer("amStatsHQDunsTransformer");
+        String confParam1 = getDeduperConfig();
+        step1.setConfiguration(confParam1);
 
         ///////////////////
 
@@ -131,7 +142,7 @@ public class AccountMasterStatsDeploymentTestNG
         TransformationStepConfig step3 = new TransformationStepConfig();
         List<Integer> inputSteps3 = new ArrayList<Integer>();
         inputSteps3.add(0);
-        inputSteps3.add(1);
+        inputSteps3.add(2);
         step3.setInputSteps(inputSteps3);
         step3.setTargetSource("amStatsMinMaxJoin");
         step3.setTransformer("amStatsMinMaxJoinTransformer");
@@ -150,7 +161,7 @@ public class AccountMasterStatsDeploymentTestNG
 
         TransformationStepConfig step4 = new TransformationStepConfig();
         List<Integer> inputSteps4 = new ArrayList<Integer>();
-        inputSteps4.add(2);
+        inputSteps4.add(3);
         step4.setInputSteps(inputSteps4);
         step4.setTargetSource("amStatsBucketedSource");
         step4.setTransformer("amStatsLeafSubstitutionTransformer");
@@ -169,7 +180,7 @@ public class AccountMasterStatsDeploymentTestNG
 
         TransformationStepConfig step5 = new TransformationStepConfig();
         List<Integer> inputSteps5 = new ArrayList<Integer>();
-        inputSteps5.add(3);
+        inputSteps5.add(4);
         step5.setInputSteps(inputSteps5);
         step5.setTargetSource("amStatsLeafNode");
         step5.setTransformer("amStatsLeafNodeTransformer");
@@ -188,7 +199,7 @@ public class AccountMasterStatsDeploymentTestNG
 
         TransformationStepConfig step6 = new TransformationStepConfig();
         List<Integer> inputSteps6 = new ArrayList<Integer>();
-        inputSteps6.add(4);
+        inputSteps6.add(5);
         step6.setInputSteps(inputSteps6);
         step6.setTargetSource("amStatsDimExpandMerge");
         step6.setTransformer("amStatsDimExpandMergeTransformer");
@@ -207,7 +218,7 @@ public class AccountMasterStatsDeploymentTestNG
 
         TransformationStepConfig step7 = new TransformationStepConfig();
         List<Integer> inputSteps7 = new ArrayList<Integer>();
-        inputSteps7.add(5);
+        inputSteps7.add(6);
         step7.setInputSteps(inputSteps7);
         step7.setTargetSource(targetSourceName);
         step7.setTransformer("amStatsReportTransformer");
@@ -225,6 +236,7 @@ public class AccountMasterStatsDeploymentTestNG
         //////////////////
 
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        steps.add(step0);
         steps.add(step1);
         steps.add(step2);
         steps.add(step3);

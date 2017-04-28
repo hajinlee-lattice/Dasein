@@ -27,6 +27,12 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String DATA_CLOUD_VERSION = "DataCloudVersion";
     public static final String ENCODED_NO = "NO";
     public static final String ENCODED_YES = "YES";
+    public static final String DUNS = "LDC_DUNS";
+    public static final String DDUNS = "DOMESTIC_ULTIMATE_DUNS_NUMBER";
+    public static final String GDUNS = "GLOBAL_ULTIMATE_DUNS_NUMBER";
+    public static final String HQ_DUNS = "HQ_DUNS";
+    public static final String STATUS_CODE = "STATUS_CODE";
+    public static final String SUBSIDIARY_INDICATOR = "SUBSIDIARY_INDICATOR";
     public static final Integer DEFAULT_MAX_BUCKET_COUNT = 5;
 
     private Map<String, List<String>> dimensionDefinitionMap;
