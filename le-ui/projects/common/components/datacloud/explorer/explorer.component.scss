@@ -3,6 +3,13 @@
     @media (max-width: 1300px) {
         padding: 0 2.12766%;
     }
+}
+.open-nav .enrichment-wizard-container {
+    @media (max-width: 1491px) {
+        padding: 0 2.12766%;
+    }
+}
+.enrichment-wizard-container {
     position: relative;
     margin-top: 1.5em;
     $box-width: calc(99.99%/3); //99.99 is because of IE and rounding errors at 100%/3 (or any odd number)
