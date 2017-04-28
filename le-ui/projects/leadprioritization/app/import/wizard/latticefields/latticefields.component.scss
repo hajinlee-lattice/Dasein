@@ -9,14 +9,17 @@
 		background-repeat: no-repeat;
 		background-position: left;
 		background-size: 18px;
-		padding: 0 0 6px 20px;
+		padding: 8px 0 6px 28px;
 		margin: 40px 0 10px;
 		border-bottom: #ddd solid 1px;
 		&:first-of-type {
 			margin-top: 20px;
 		}
-		&.account-matching {
+		&.Account-matching {
 			background-image: url('/assets/images/ico-third-party-id-dark.png');
+		}
+		&.Contact-matching {
+			background-image: url('/assets/images/ico-user-black.png');
 		}
 		&.analysis {
 			background-image: url('/assets/images/ico-third-party-id-dark.png');
@@ -27,6 +30,7 @@
 		display: inline-block;
 		width: 48%;
 		margin-right: 2%;
+		margin-bottom: 14px;
 		&:nth-child(even){
 			margin-right: 0;
 		}
@@ -34,6 +38,14 @@
 	
 	label {
 		font-weight: bold;
+	}
+	p {
+		margin-bottom: 16px;
+	}
+	select {
+		background: #fff;
+	    height: 30px;
+	    font-size: 14px;
 	}
 
 }

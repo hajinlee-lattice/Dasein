@@ -129,16 +129,27 @@ angular
         .state('home.import.wizard.accounts.one.two.three', {
             url: '/latticefields',
             resolve: {
-                AccountMatchingFields: function() {
+                Type: function(){
+                    return "Account";
+                },
+                MatchingFields: function() {
                     return [
-                        { name: 'Website Address', options: '' },
-                        { name: 'D-U-N-S', options: '' }
+                        { name: 'Website Address', options: [{ name: "Website" }, { name: "Another Value" }] },
+                        { name: 'D-U-N-S', options: [{ name: "DUNS" }, { name: "Another Value" }] },
+                        { name: 'Company Name', options: [{ name: "Name" }, { name: "Another Value" }] },
+                        { name: 'Phone', options: [{ name: "Phone Number" }, { name: "Another Value" }] },
+                        { name: 'City', options: [{ name: "CompanyCity" }, { name: "Another Value" }] },
+                        { name: 'Country', options: [{ name: "Country" }, { name: "Another Value" }] },
+                        { name: 'State', options: [{ name: "CompanyState" }, { name: "Another Value" }] },
+                        { name: 'Zip', options: [{ name: "Zipcode" }, { name: "Another Value" }] }
                     ];
                 },
                 AnalysisFields: function() {
                     return [
-                        { name: 'Is Customer', options: '' },
-                        { name: 'Revenue', options: '' }
+                        { name: 'Is Customer', options: [{ name: "Customer" }, { name: "Another Value" }] },
+                        { name: 'Revenue', options: [{ name: "Revenue" }, { name: "Another Value" }] },
+                        { name: 'Industry', options: [{ name: "Industry" }, { name: "Another Value" }] },
+                        { name: 'Employees', options: [{ name: "Employees" }, { name: "Another Value" }] }
                     ];
                 }
             },
@@ -259,8 +270,39 @@ angular
         })
         .state('home.import.wizard.contacts.one', {
             url: '/latticefields',
+            resolve: {
+                Type: function(){
+                    return "Contact";
+                },
+                MatchingFields: function() {
+                    return [
+                        { name: 'Contact ID', options: [{ name: "ContactID" }, { name: "Another Value" }] },
+                        { name: 'Account ID', options: [{ name: "AccountID" }, { name: "Another Value" }] },
+                        { name: 'Last Name', options: [{ name: "LastName" }, { name: "Another Value" }] },
+                        { name: 'First Name', options: [{ name: "FirstName" }, { name: "Another Value" }] },
+                        { name: 'Title', options: [{ name: "Title" }, { name: "Another Value" }] },
+                        { name: 'Email', options: [{ name: "Email" }, { name: "Another Value" }] }
+                    ];
+                },
+                AnalysisFields: function() {
+                    return [
+                        { name: 'Lead Status', options: [{ name: "LeadStatus" }, { name: "Another Value" }] },
+                        { name: 'Lead Source', options: [{ name: "LeadSource" }, { name: "Another Value" }] },
+                        { name: 'Lead Type', options: [{ name: "Contact" }, { name: "Another Value" }] },
+                        { name: 'Twitter', options: [{ name: "Twitter" }, { name: "Another Value" }] },
+                        { name: 'LinkedIn URL', options: [{ name: "LinkedInURL" }, { name: "Another Value" }] },
+                        { name: 'Created Date', options: [{ name: "CreatedDate" }, { name: "Another Value" }] },
+                        { name: 'Last Modified Date', options: [{ name: "LastModified" }, { name: "Another Value" }] },
+                        { name: 'Has Opted Out of Email', options: [{ name: "OptedOutEmail" }, { name: "Another Value" }] },
+                        { name: 'Has Opted Out of Phone Calls', options: [{ name: "OptedOutPhone" }, { name: "Another Value" }] },
+                        { name: 'Birthdate', options: [{ name: "Birthdate" }, { name: "Another Value" }] }
+                    ];
+                }
+            },
             views: {
                 'wizard_content@home.import.wizard': {
+                    controller: 'ImportWizardLatticeFields',
+                    controllerAs: 'vm',
                     templateUrl: 'app/import/wizard/latticefields/latticefields.component.html'
                 }
             }

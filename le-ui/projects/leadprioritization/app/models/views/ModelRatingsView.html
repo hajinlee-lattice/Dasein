@@ -64,11 +64,11 @@
                     class="bar-colors buckets-{{vm.workingBuckets.length}}" 
                     ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
                     <div 
-                        class="overlay" 
+                        class="overlay bucket-{{$index}}"
                         ng-attr-style="{{'
                             height: '+ vm.dugoutHeight +'px;
                             right: '+ bucket.right_bound_score +'%;
-                            width: '+ bucket.width +'%;'}}" 
+                            width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'}}" 
                         ng-repeat="bucket in vm.workingBuckets"
                         ng-mouseover="vm.bucketHover($event)">
                     </div>  

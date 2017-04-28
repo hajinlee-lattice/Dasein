@@ -47,6 +47,18 @@
         table {
             width: 100%;
         }
+        thead th {
+            background: #f2f1f1;
+            color: #333 !important;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        tbody td {
+            background: #fafbfb;
+            font-size: 12px;
+            font-weight: normal;
+            padding: 4px;
+        }
     }
     .form-group {
         margin-bottom: 60px;
