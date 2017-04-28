@@ -117,16 +117,6 @@ def create_load_balancers(tg_map, stack, ui=False):
     resources.append(private_lb)
     albs["private"] = private_lb
 
-    # 2nd tier private tomcat
-    private2_lb = ApplicationLoadBalancer("private2", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
-    private2_lb.idle_timeout(600)
-    private2_lb.add_tag("le-product", "lpi")
-    private2_lb.add_tag("le-stack", stack)
-    for k, v in tg_map.items():
-        private2_lb.depends_on(v)
-    resources.append(private2_lb)
-    albs["private2"] = private2_lb
-
     # public tomcat
     public_lb = ApplicationLoadBalancer("public", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
     public_lb.idle_timeout(600)
@@ -138,10 +128,8 @@ def create_load_balancers(tg_map, stack, ui=False):
     albs["public"] = public_lb
 
     # listeners
-    private_lsnr = create_listener(private_lb, tg_map["haproxy"])
+    private_lsnr = create_listener(private_lb, tg_map["swaggerprivate"])
     resources.append(private_lsnr)
-    private2_lsnr = create_listener(private2_lb, tg_map["swaggerprivate"])
-    resources.append(private2_lsnr)
     public_lsnr = create_listener(public_lb, tg_map["swaggerpublic"])
     resources.append(public_lsnr)
 
@@ -155,12 +143,10 @@ def create_load_balancers(tg_map, stack, ui=False):
     resources.append(create_listener_rule(private_lsnr, tg_map["eai"], "/eai/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["scoring"], "/scoring/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["modeling"], "/modeling/*"))
-
-    # listener rules
-    resources.append(create_listener_rule(private2_lsnr, tg_map["api"], "/rest/*"))
-    resources.append(create_listener_rule(private2_lsnr, tg_map["datacloudapi"], "/datacloudapi/*"))
-    resources.append(create_listener_rule(private2_lsnr, tg_map["modelquality"], "/modelquality/*"))
-    resources.append(create_listener_rule(private2_lsnr, tg_map["propdata"], "/propdata/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["api"], "/rest/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["datacloudapi"], "/datacloudapi/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["modelquality"], "/modelquality/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["propdata"], "/propdata/*"))
 
     resources.append(create_listener_rule(public_lsnr, tg_map["pls"], "/pls/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/score/*"))
