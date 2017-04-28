@@ -891,6 +891,7 @@ angular.module('common.datacloud.explorer', [
             } else {
                 items = vm.topAttributes[category].SubCategories[subcategory];
             }
+            
             var timestamp_b = new Date().getTime();
 
             if (!vm.lookupMode && items) {
@@ -914,7 +915,6 @@ angular.module('common.datacloud.explorer', [
 
                     if (enrichment) {
                         map.forEach(function(key){
-                            //console.log(key, enrichment, item);
                                 item[key] = enrichment[key];
                         });
 
@@ -1163,6 +1163,7 @@ angular.module('common.datacloud.explorer', [
 
         if (includeKeywords) {
             list.push('Website Keywords');
+            list.push('Product');
         }
 
         return list.indexOf(category) >= 0;
