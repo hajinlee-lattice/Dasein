@@ -84,8 +84,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     }
 
     private Table preMatchEventTable() {
-        Table preMatchEventTable = metadataProxy.getTable(
-                configuration.getCustomerSpace().toString(), configuration.getInputTableName());
+        Table preMatchEventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                configuration.getInputTableName());
         preMatchEventTable.setName(preMatchEventTable.getName() + "_" + System.currentTimeMillis());
         return preMatchEventTable;
     }
@@ -107,8 +107,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
         if (getConfiguration().getCustomizedColumnSelection() == null
                 && getConfiguration().getPredefinedColumnSelection() == null) {
-            throw new RuntimeException(
-                    "Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
+            throw new RuntimeException("Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
         }
 
         Predefined predefined = getConfiguration().getPredefinedColumnSelection();
@@ -127,67 +126,52 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } else {
             matchInput.setCustomSelection(getConfiguration().getCustomizedColumnSelection());
 
-            putObjectInContext(MATCH_CUSTOMIZED_SELECTION,
-                    getConfiguration().getCustomizedColumnSelection());
+            putObjectInContext(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
 
         }
         matchInput.setDataCloudVersion(getConfiguration().getDataCloudVersion());
         log.info("Using Data Cloud Version = " + getConfiguration().getDataCloudVersion());
+
+        matchInput.setRequestSource(getConfiguration().getMatchRequestSource());
 
         matchInput.setTenant(new Tenant(configuration.getCustomerSpace().toString()));
         matchInput.setOutputBufferType(IOBufferType.AVRO);
 
         Map<MatchKey, List<String>> matchInputKeys = new HashMap<>();
         if (configuration.getSourceSchemaInterpretation() != null
-                && configuration.getSourceSchemaInterpretation()
-                        .equals(SchemaInterpretation.SalesforceAccount.toString())) {
+                && configuration.getSourceSchemaInterpretation().equals(
+                        SchemaInterpretation.SalesforceAccount.toString())) {
             if (preMatchEventTable.getAttribute(InterfaceName.Website.name()) == null
-                    || (preMatchEventTable.getAttribute(InterfaceName.Website.name())
-                            .getApprovedUsage() != null
-                            && preMatchEventTable.getAttribute(InterfaceName.Website.name())
-                                    .getApprovedUsage()
-                                    .contains(ApprovedUsage.IGNORED.getName()))) {
+                    || (preMatchEventTable.getAttribute(InterfaceName.Website.name()).getApprovedUsage() != null && preMatchEventTable
+                            .getAttribute(InterfaceName.Website.name()).getApprovedUsage()
+                            .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
-                matchInputKeys.put(MatchKey.Domain,
-                        Collections.singletonList(InterfaceName.Website.name()));
+                matchInputKeys.put(MatchKey.Domain, Collections.singletonList(InterfaceName.Website.name()));
             }
         } else if (configuration.getSourceSchemaInterpretation() != null
-                && configuration.getSourceSchemaInterpretation()
-                        .equals(SchemaInterpretation.SalesforceLead.toString())) {
+                && configuration.getSourceSchemaInterpretation().equals(SchemaInterpretation.SalesforceLead.toString())) {
             if (preMatchEventTable.getAttribute(InterfaceName.Email.name()) == null
-                    || (preMatchEventTable.getAttribute(InterfaceName.Email.name())
-                            .getApprovedUsage() != null
-                            && preMatchEventTable.getAttribute(InterfaceName.Email.name())
-                                    .getApprovedUsage()
-                                    .contains(ApprovedUsage.IGNORED.getName()))) {
+                    || (preMatchEventTable.getAttribute(InterfaceName.Email.name()).getApprovedUsage() != null && preMatchEventTable
+                            .getAttribute(InterfaceName.Email.name()).getApprovedUsage()
+                            .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
-                matchInputKeys.put(MatchKey.Domain,
-                        Collections.singletonList(InterfaceName.Email.name()));
+                matchInputKeys.put(MatchKey.Domain, Collections.singletonList(InterfaceName.Email.name()));
             }
         }
         for (MatchKey matchKey : MATCH_KEYS_TO_DISPLAY_NAMES.keySet()) {
-            if (preMatchEventTable
-                    .getAttribute(
-                            MATCH_KEYS_TO_DISPLAY_NAMES
-                                    .get(matchKey)) == null
-                    || (preMatchEventTable
-                            .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) != null
-                            && preMatchEventTable
-                                    .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
-                                    .getApprovedUsage() != null
-                            && preMatchEventTable
-                                    .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
-                                    .getApprovedUsage()
-                                    .contains(ApprovedUsage.IGNORED.getName()))) {
+            if (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) == null
+                    || (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) != null
+                            && preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
+                                    .getApprovedUsage() != null && preMatchEventTable
+                            .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)).getApprovedUsage()
+                            .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(matchKey, new ArrayList<>());
             } else {
                 log.info(String.format("attribute: %s is found as: %s", matchKey,
-                        JsonUtils.serialize(preMatchEventTable
-                                .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)))));
-                matchInputKeys.put(matchKey,
-                        Arrays.asList(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)));
+                        JsonUtils.serialize(preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)))));
+                matchInputKeys.put(matchKey, Arrays.asList(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)));
             }
         }
         matchInput.setKeyMap(matchInputKeys);
@@ -200,11 +184,9 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
         Schema providedSchema;
         try {
-            providedSchema = TableUtils.createSchema(preMatchEventTable.getName(),
-                    preMatchEventTable);
+            providedSchema = TableUtils.createSchema(preMatchEventTable.getName(), preMatchEventTable);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create avro schema from pre-match event table.",
-                    e);
+            throw new RuntimeException("Failed to create avro schema from pre-match event table.", e);
         }
 
         Schema extractedSchema;
@@ -226,8 +208,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
         matchInput.setInputBuffer(inputBuffer);
 
-        matchInput.setExcludeUnmatchedWithPublicDomain(
-                getConfiguration().isExcludeUnmatchedWithPublicDomain());
+        matchInput.setExcludeUnmatchedWithPublicDomain(getConfiguration().isExcludeUnmatchedWithPublicDomain());
 
         matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
 
@@ -240,8 +221,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         if (StringUtils.isEmpty(appId)) {
             appId = "null";
         }
-        log.info(String.format("Waiting for match command %s [ApplicationId=%s] to complete",
-                rootUid, appId));
+        log.info(String.format("Waiting for match command %s [ApplicationId=%s] to complete", rootUid, appId));
 
         MatchStatus status = null;
         do {
@@ -270,19 +250,18 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } while (!status.isTerminal());
 
         if (!MatchStatus.FINISHED.equals(status)) {
-            throw new IllegalStateException("The terminal status of match is " + status
-                    + " instead of " + MatchStatus.FINISHED);
+            throw new IllegalStateException("The terminal status of match is " + status + " instead of "
+                    + MatchStatus.FINISHED);
         }
 
     }
 
     private Table createMatchResultTable() {
-        Table matchResultTable = MetadataConverter.getTable(yarnConfiguration,
-                matchCommand.getResultLocation(), null, null);
+        Table matchResultTable = MetadataConverter.getTable(yarnConfiguration, matchCommand.getResultLocation(), null,
+                null);
         String resultTableName = LDC_MATCH + "_" + matchCommand.getRootOperationUid();
         matchResultTable.setName(resultTableName);
-        metadataProxy.createTable(configuration.getCustomerSpace().toString(), resultTableName,
-                matchResultTable);
+        metadataProxy.createTable(configuration.getCustomerSpace().toString(), resultTableName, matchResultTable);
 
         try {
             // wait 3 seconds for metadata to create the table

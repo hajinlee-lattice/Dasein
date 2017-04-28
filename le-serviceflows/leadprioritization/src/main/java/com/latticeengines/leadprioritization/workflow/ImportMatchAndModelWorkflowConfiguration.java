@@ -6,6 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -200,6 +201,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder matchDebugEnabled(boolean matchDebugEnabled) {
             combineMatchDebugWithScores.setSkipStep(!matchDebugEnabled);
+            return this;
+        }
+
+        public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
+            match.setMatchRequestSource(matchRequestSource);
             return this;
         }
 

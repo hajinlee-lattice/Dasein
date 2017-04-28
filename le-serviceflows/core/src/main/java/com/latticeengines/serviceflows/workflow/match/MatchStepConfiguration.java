@@ -5,6 +5,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -59,6 +60,9 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("skip_dedupe")
     private boolean skipDedupe;
+
+    @JsonProperty("match_request_source")
+    private MatchRequestSource matchRequestSource;
 
     @JsonProperty("db_url")
     public String getDbUrl() {
@@ -237,4 +241,13 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     public void setSkipDedupe(boolean skipDedupe) {
         this.skipDedupe = skipDedupe;
     }
+
+    public void setMatchRequestSource(MatchRequestSource matchRequestSource) {
+        this.matchRequestSource = matchRequestSource;
+    }
+
+    public MatchRequestSource getMatchRequestSource() {
+        return matchRequestSource;
+    }
+    
 }

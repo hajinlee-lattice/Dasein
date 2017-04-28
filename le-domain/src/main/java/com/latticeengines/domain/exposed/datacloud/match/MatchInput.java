@@ -70,7 +70,7 @@ public class MatchInput implements Fact, Dimension {
     private Long timeout;
 
     @JsonProperty("RequestSource")
-    private String requestSource;   // scoring|modeling
+    private MatchRequestSource requestSource = MatchRequestSource.SCORING;
 
     // legacy configuration to be removed
     @JsonIgnore
@@ -103,7 +103,7 @@ public class MatchInput implements Fact, Dimension {
     private Integer realTimeThreadPoolSize;
 
     // ====================
-    //  BEGIN FLAGS
+    // BEGIN FLAGS
     // ====================
 
     @JsonProperty("ExcludeUnmatchedWithPublicDomain")
@@ -135,7 +135,7 @@ public class MatchInput implements Fact, Dimension {
     // Flag to add DnB columns match output file
     @JsonProperty("MatchDebugEnabled")
     private boolean matchDebugEnabled;
-    
+
     private String matchResultPath;
 
     @JsonProperty("DisableDunsValidation")
@@ -149,15 +149,14 @@ public class MatchInput implements Fact, Dimension {
     private boolean bulkOnly;
 
     // ====================
-    //  END FLAGS
+    // END FLAGS
     // ====================
 
-
-    public String getRequestSource() {
+    public MatchRequestSource getRequestSource() {
         return requestSource;
     }
 
-    public void setRequestSource(String requestSource) {
+    public void setRequestSource(MatchRequestSource requestSource) {
         this.requestSource = requestSource;
     }
 
@@ -176,7 +175,6 @@ public class MatchInput implements Fact, Dimension {
     public void setTimeout(Long timeout) {
         this.timeout = timeout;
     }
-
 
     public Boolean getExcludeUnmatchedWithPublicDomain() {
         return Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);

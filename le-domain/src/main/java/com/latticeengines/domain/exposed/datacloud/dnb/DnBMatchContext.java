@@ -60,6 +60,8 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private Date responseTime;
 
+    private boolean passAcceptanceCriteria;
+
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
         matchedNameLocation = new NameLocation();
@@ -75,11 +77,13 @@ public class DnBMatchContext implements Fact, Dimension {
         matchStrategy = context.getMatchStrategy();
         logDnBBulkResult = context.getLogDnBBulkResult();
         patched = context.getPatched();
-        timestamp = context.getTimestamp();     // Used to check timeout for each record in DnB bulk match
+        timestamp = context.getTimestamp(); // Used to check timeout for each
+                                            // record in DnB bulk match
         dataCloudVersion = context.getDataCloudVersion();
     }
 
-    // Used to copy bulk match result. Should not copy dataCloudVersion & dunsInAM
+    // Used to copy bulk match result. Should not copy dataCloudVersion &
+    // dunsInAM
     public void copyMatchResult(DnBMatchContext result) {
         duns = result.getDuns();
         dnbCode = result.getDnbCode();
@@ -193,7 +197,7 @@ public class DnBMatchContext implements Fact, Dimension {
     public String getDnbCodeAsString() {
         if (dnbCode != null) {
             return dnbCode.getMessage();
-        } else  {
+        } else {
             return null;
         }
     }
@@ -362,6 +366,14 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public enum DnBMatchStrategy {
         EMAIL, ENTITY, BATCH
+    }
+
+    public boolean isPassAcceptanceCriteria() {
+        return passAcceptanceCriteria;
+    }
+
+    public void setPassAcceptanceCriteria(boolean passAcceptanceCriteria) {
+        this.passAcceptanceCriteria = passAcceptanceCriteria;
     }
 
 }

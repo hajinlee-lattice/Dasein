@@ -1,13 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -21,6 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+
 import com.latticeengines.actors.exposed.traveler.TravelLog;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -28,7 +29,6 @@ import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
-import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
@@ -36,27 +36,15 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
-import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
-    private static final String FABRIC_MATCH_HISTORY = "FabricMatchHistory";
 
     private static final Log log = LogFactory.getLog(FuzzyMatchServiceImpl.class);
 
     private static final Timeout REALTIME_TIMEOUT = new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
     private static final Timeout BATCH_TIMEOUT = new Timeout(new FiniteDuration(3, TimeUnit.HOURS));
-
-    @Resource(name = "genericFabricEntityManager")
-    private GenericFabricEntityManager<MatchHistory> fabricEntityManager;
 
     @Autowired
     private MatchActorSystem actorSystem;
@@ -66,13 +54,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Autowired
     private DomainCollectService domainCollectService;
-
-    @PostConstruct
-    public void init() {
-        if (isMatchHistoryEnabled) {
-            fabricEntityManager.createOrGetNamedBatchId(FABRIC_MATCH_HISTORY, null, false);
-        }
-    }
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
@@ -97,7 +78,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         logLevel = setLogLevel(logLevel);
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
         List<FuzzyMatchHistory> fuzzyMatchHistories = new ArrayList<>();
-        List<MatchHistory> matchHistories = new ArrayList<>();
         for (int idx = 0; idx < matchFutures.size(); idx++) {
             Future<Object> future = matchFutures.get(idx);
             if (future != null) {
@@ -135,47 +115,29 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 traveler.setBatchMode(actorSystem.isBatchMode());
                 fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
                 if (isMatchHistoryEnabled)
-                    matchHistories.add(getMatchHistory(matchRecord, traveler));
+                    matchRecord.setFabricMatchHistory(getDnbMatchHistory(matchRecord, traveler));
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
             }
         }
 
         writeFuzzyMatchHistory(fuzzyMatchHistories);
-        publishMatchHistory(matchHistories);
     }
 
-    private MatchHistory getMatchHistory(InternalOutputRecord matchRecord, MatchTraveler traveler) {
-        MatchHistory matchHistory = new MatchHistory();
-        matchHistory.setDomain(matchRecord.getParsedDomain()).setDuns(matchRecord.getParsedDuns())
-                .setEmail(matchRecord.getParsedEmail()).setIsPublicDomain(matchRecord.isPublicDomain());
-        matchHistory.withNameLocation(matchRecord.getParsedNameLocation()).setMatched(matchRecord.isMatched())
-                .setLatticeAccountId(matchRecord.getLatticeAccountId()).setMatchMode(traveler.getMode())
-                .setTimestampSeconds(System.currentTimeMillis() / 1000);
+    private MatchHistory getDnbMatchHistory(InternalOutputRecord matchRecord, MatchTraveler traveler) {
+        MatchHistory matchHistory = matchRecord.getFabricMatchHistory();
+        matchHistory.setMatched(traveler.isMatched()).setMatchMode(traveler.getMode());
         if (CollectionUtils.isNotEmpty(traveler.getDnBMatchContexts())) {
-            DnBMatchContext matchContext = traveler.getDnBMatchContexts().get(0);
-            if (matchContext != null) {
-                matchHistory.withDnBMatchResult(matchContext);
+            DnBMatchContext dnbMatchContext = traveler.getDnBMatchContexts().get(0);
+            if (dnbMatchContext != null) {
+                matchHistory.withDnBMatchResult(dnbMatchContext);
             }
         }
-        return matchHistory;
-    }
 
-    private void publishMatchHistory(List<MatchHistory> matchHistories) {
-        if (!isMatchHistoryEnabled) {
-            return;
-        }
-        if (CollectionUtils.isEmpty(matchHistories)) {
-            return;
-        }
-        for (MatchHistory matchHistory : matchHistories) {
-            GenericRecordRequest recordRequest = new GenericRecordRequest();
-            recordRequest.setId(UUID.randomUUID().toString());
-            matchHistory.setId(recordRequest.getId());
-            recordRequest.setStores(Arrays.asList(FabricStoreEnum.HDFS))
-                    .setRepositories(Arrays.asList(FABRIC_MATCH_HISTORY)).setBatchId(FABRIC_MATCH_HISTORY);
-            fabricEntityManager.publishEntity(recordRequest, matchHistory, MatchHistory.class);
-        }
+        if (traveler.getTotalTravelTime() != null)
+            matchHistory.setMatchRetrievalTime("" + traveler.getTotalTravelTime());
+
+        return matchHistory;
     }
 
     private void setDnbReturnCode(MatchTraveler traveler, InternalOutputRecord matchRecord) {

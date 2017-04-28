@@ -74,18 +74,22 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
 
     public boolean validate(DnBMatchContext res) {
         if (res.getDnbCode() != DnBReturnCode.OK || Boolean.TRUE.equals(res.getPatched())) {
+            res.setPassAcceptanceCriteria(true);
             return true;
         }
 
         if (Boolean.TRUE.equals(res.isOutOfBusiness()) || Boolean.FALSE.equals(res.isDunsInAM())) {
             res.setDnbCode(DnBReturnCode.DISCARD);
+            res.setPassAcceptanceCriteria(false);
             return false;
         }
 
         if (!matchCriteria.accept(res.getConfidenceCode(), res.getMatchGrade())) {
             res.setDnbCode(DnBReturnCode.DISCARD);
+            res.setPassAcceptanceCriteria(false);
             return false;
         }
+        res.setPassAcceptanceCriteria(true);
         return true;
     }
 

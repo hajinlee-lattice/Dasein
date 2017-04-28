@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -118,6 +119,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder matchDebugEnabled(boolean matchDebugEnabled) {
             scoreWorkflowConfigurationBuilder.matchDebugEnabled(matchDebugEnabled);
+            return this;
+        }
+        
+        public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
+            scoreWorkflowConfigurationBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
 

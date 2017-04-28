@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -123,6 +124,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .columnSelection(selection, selectionVersion) //
                 .dataCloudVersion(dataCloudVersion) //
                 .matchDebugEnabled(plsFeatureFlagService.isMatchDebugEnabled()) //
+                .matchRequestSource(MatchRequestSource.SCORING) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/"
                         + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")

@@ -17,6 +17,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -147,6 +148,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns())
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .matchDebugEnabled(plsFeatureFlagService.isMatchDebugEnabled())
+                .matchRequestSource(MatchRequestSource.MODELING)
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE)
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion())
                 // null means latest

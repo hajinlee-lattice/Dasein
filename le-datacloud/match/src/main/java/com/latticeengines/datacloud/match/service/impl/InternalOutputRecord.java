@@ -1,11 +1,13 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
+import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
@@ -17,6 +19,11 @@ public class InternalOutputRecord extends OutputRecord {
     private String parsedDuns;
     private NameLocation parsedNameLocation;
     private String parsedEmail;
+    private String origDomain;
+    private NameLocation origNameLocation;
+    private String origDuns;
+    private String origEmail;
+
     private Map<String, Map<String, Object>> resultsInPartition = new HashMap<>();
     private Map<String, Object> queryResult = new HashMap<>();
     private List<Boolean> columnMatched;
@@ -28,6 +35,8 @@ public class InternalOutputRecord extends OutputRecord {
 
     private List<String> debugValues;
     private DnBReturnCode dnbCode;
+    private MatchHistory fabricMatchHistory = new MatchHistory();
+    private Date requestTimeStamp = new Date();
 
     public String getParsedDomain() {
         return parsedDomain;
@@ -75,6 +84,38 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setParsedEmail(String parsedEmail) {
         this.parsedEmail = parsedEmail;
+    }
+
+    public String getOrigDomain() {
+        return origDomain;
+    }
+
+    public void setOrigDomain(String origDomain) {
+        this.origDomain = origDomain;
+    }
+
+    public NameLocation getOrigNameLocation() {
+        return origNameLocation;
+    }
+
+    public void setOrigNameLocation(NameLocation origNameLocation) {
+        this.origNameLocation = origNameLocation;
+    }
+
+    public String getOrigDuns() {
+        return origDuns;
+    }
+
+    public void setOrigDuns(String origDuns) {
+        this.origDuns = origDuns;
+    }
+
+    public String getOrigEmail() {
+        return origEmail;
+    }
+
+    public void setOrigEmail(String origEmail) {
+        this.origEmail = origEmail;
     }
 
     public Map<String, Map<String, Object>> getResultsInPartition() {
@@ -156,5 +197,21 @@ public class InternalOutputRecord extends OutputRecord {
     public DnBReturnCode getDnbCode() {
         return dnbCode;
     }
-    
+
+    public MatchHistory getFabricMatchHistory() {
+        return fabricMatchHistory;
+    }
+
+    public void setFabricMatchHistory(MatchHistory fabricMatchHistory) {
+        this.fabricMatchHistory = fabricMatchHistory;
+    }
+
+    public Date getRequestTimeStamp() {
+        return requestTimeStamp;
+    }
+
+    public void setRequestTimeStamp(Date requestTimeStamp) {
+        this.requestTimeStamp = requestTimeStamp;
+    }
+
 }

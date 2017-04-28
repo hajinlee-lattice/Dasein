@@ -35,6 +35,11 @@ public final class MatchConstants {
     public static final String AM_PHONE_NUM_FIELD = "LE_COMPANY_PHONE";
     public static final String AM_DUNS_FIELD = "LDC_DUNS";
     public static final String AM_COUNTRY_CODE_FIELD = "CURRENCY_CODE";
+    public static final String AM_EMPLOYEE_RANGE_FIELD = "LE_EMPLOYEE_RANGE";
+    public static final String AM_REVENUE_RANGE_FIELD = "LE_REVENUE_RANGE";
+    public static final String AM_PRIMARY_INDUSTRY_FIELD = "LDC_PrimaryIndustry";
+    public static final String AM_SECOND_INDUSTRY_FIELD = "LE_INDUSTRY";
+    public static final String AM_DOMAIN_SOURCE = "LDC_DomainSource";
 
     // those are the internal avro attributes
     public static final String INT_LDC_LID = "__LDC_LID__";

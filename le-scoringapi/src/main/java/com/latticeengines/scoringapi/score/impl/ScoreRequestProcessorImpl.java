@@ -76,7 +76,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     @Autowired
     private ScoreHistoryEntityMgr scoreHistoryEntityMgr;
 
-    @Value("${scoringapi.score.history.publish.enabled:true}")
+    @Value("${scoringapi.score.history.publish.enabled:false}")
     private boolean shouldPublish;
 
     @Override

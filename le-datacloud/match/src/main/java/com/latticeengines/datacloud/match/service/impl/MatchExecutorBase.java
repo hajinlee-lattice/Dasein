@@ -6,14 +6,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
@@ -21,16 +26,24 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
+import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.newrelic.api.agent.Trace;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
 
     private static final Log log = LogFactory.getLog(MatchExecutorBase.class);
+
+    private static final String FABRIC_MATCH_HISTORY = "FabricMatchHistory";
 
     @Autowired
     private BeanDispatcherImpl beanDispatcher;
@@ -44,6 +57,19 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @Autowired
     protected MetricService metricService;
 
+    @Value("${datacloud.match.publish.match.history:false}")
+    private boolean isMatchHistoryEnabled;
+
+    @Resource(name = "genericFabricEntityManager")
+    private GenericFabricEntityManager<MatchHistory> fabricEntityManager;
+
+    @PostConstruct
+    public void init() {
+        if (isMatchHistoryEnabled) {
+            fabricEntityManager.createOrGetNamedBatchId(FABRIC_MATCH_HISTORY, null, false);
+        }
+    }
+
     @MatchStep
     protected MatchContext complete(MatchContext matchContext) {
         DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
@@ -52,6 +78,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         matchContext.getOutput().setFinishedAt(new Date());
         Long receiveTime = matchContext.getOutput().getReceivedAt().getTime();
         matchContext.getOutput().getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - receiveTime);
+        processMatchHistory(matchContext);
+
         return matchContext;
     }
 
@@ -71,6 +99,69 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         return matchContext;
     }
 
+    private void processMatchHistory(MatchContext matchContext) {
+        if (!isMatchHistoryEnabled) {
+            return;
+        }
+        List<InternalOutputRecord> records = matchContext.getInternalResults();
+        if (CollectionUtils.isEmpty(records)) {
+            return;
+        }
+        List<MatchHistory> matchHistories = new ArrayList<>();
+        for (InternalOutputRecord record : records) {
+            MatchHistory matchHistory = record.getFabricMatchHistory();
+            if (matchHistory == null) {
+                continue;
+            }
+            matchHistory.setRawDomain(record.getOrigDomain()).setRawDUNS(record.getOrigDuns())
+                    .setRawEmail(record.getOrigEmail()).withRawNameLocation(record.getOrigNameLocation());
+            matchHistory.setStandardisedDomain(record.getParsedDomain()).setStandardisedDUNS(record.getParsedDuns())
+                    .setStandardisedEmail(record.getParsedEmail())
+                    .withStandardisedNameLocation(record.getParsedNameLocation());
+            matchHistory.setIsPublicDomain(record.isPublicDomain()).setLatticeAccountId(record.getLatticeAccountId());
+
+            matchHistory.setMatched(record.isMatched()).setMatchedDomain(record.getMatchedDomain())
+                    .setMatchedEmail(record.getMatchedEmail()).setMatchedDUNS(record.getMatchedDuns())
+                    .withMatchedNameLocation(record.getMatchedNameLocation());
+            matchHistory.setMatchedEmployeeRange(record.getMatchedEmployeeRange())
+                    .setMatchedRevenueRange(record.getMatchedRevenueRange())
+                    .setMatchedPrimaryIndustry(record.getMatchedPrimaryIndustry())
+                    .setMatchedSecondaryIndustry(record.getMatchedSecondIndustry())
+                    .setDomainSource(record.getDomainSource())
+                    .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()));
+
+            MatchInput matchInput = matchContext.getInput();
+            if (matchInput != null) {
+                if (matchInput.getTenant() != null) {
+                    matchHistory.setTenantId(matchInput.getTenant().getName());
+                }
+                if (matchInput.getRequestSource() != null)
+                    matchHistory.setRequestSource(matchInput.getRequestSource().toString());
+            }
+
+            matchHistories.add(matchHistory);
+        }
+
+        publishMatchHistory(matchHistories);
+    }
+
+    private void publishMatchHistory(List<MatchHistory> matchHistories) {
+        if (!isMatchHistoryEnabled) {
+            return;
+        }
+        if (CollectionUtils.isEmpty(matchHistories)) {
+            return;
+        }
+        for (MatchHistory matchHistory : matchHistories) {
+            GenericRecordRequest recordRequest = new GenericRecordRequest();
+            recordRequest.setId(UUID.randomUUID().toString());
+            matchHistory.setId(recordRequest.getId());
+            recordRequest.setStores(Arrays.asList(FabricStoreEnum.HDFS))
+                    .setRepositories(Arrays.asList(FABRIC_MATCH_HISTORY)).setBatchId(FABRIC_MATCH_HISTORY);
+            fabricEntityManager.publishEntity(recordRequest, matchHistory, MatchHistory.class);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @VisibleForTesting
     @MatchStep
@@ -84,8 +175,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
-        boolean excludeUnmatchedPublicDomain = Boolean.TRUE
-                .equals(matchContext.getInput().getExcludeUnmatchedWithPublicDomain());
+        boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput()
+                .getExcludeUnmatchedWithPublicDomain());
 
         List<OutputRecord> outputRecords = new ArrayList<>();
         Integer[] columnMatchCount = new Integer[columns.size()];
@@ -112,8 +203,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             Map<String, Object> results = internalRecord.getQueryResult();
 
-            List<MetadataColumn> metadataColumns = metadataColumnService.getMetadataColumns(columnNames,
-                    matchContext.getInput().getDataCloudVersion());
+            List<MetadataColumn> metadataColumns = metadataColumnService.getMetadataColumns(columnNames, matchContext
+                    .getInput().getDataCloudVersion());
             Map<String, MetadataColumn> metadataColumnMap = new HashMap<>();
             for (MetadataColumn column : metadataColumns) {
                 metadataColumnMap.put(column.getColumnId(), column);

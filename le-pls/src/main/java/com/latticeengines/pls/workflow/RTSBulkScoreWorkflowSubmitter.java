@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -117,6 +118,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .excludeDataCloudAttrs(skipIdMatch) //
                 .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //
                 .matchDebugEnabled(plsFeatureFlagService.isMatchDebugEnabled()) //
+                .matchRequestSource(MatchRequestSource.ENRICHMENT) //
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //
                 .build();

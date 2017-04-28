@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -164,6 +165,11 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
 
         public Builder matchDebugEnabled(boolean enableMatchDebug) {
             rtsBulkScoreWorkflowConfigurationBuilder.matchDebugEnabled(enableMatchDebug);
+            return this;
+        }
+        
+        public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
+            rtsBulkScoreWorkflowConfigurationBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
         

@@ -18,7 +18,7 @@ public class OutputRecord {
 
     @JsonProperty("Input")
     private List<Object> input;
-
+    
     @JsonProperty("PreMatchDomain")
     private String preMatchDomain;
 
@@ -45,6 +45,17 @@ public class OutputRecord {
 
     @JsonProperty("MatchedEmail")
     private String matchedEmail;
+
+    @JsonProperty("MatcheEmployeeRange")
+    private String matchedEmployeeRange;
+    @JsonProperty("MatchedRevenueRange")
+    private String matchedRevenueRange;
+    @JsonProperty("MatchedPrimaryIndustry")
+    private String matchedPrimaryIndustry;
+    @JsonProperty("MatchedSecondIndustry")
+    private String matchedSecondIndustry;
+    @JsonProperty("DomainSource")
+    private String domainSource;
 
     @JsonProperty("Output")
     private List<Object> output;
@@ -204,12 +215,51 @@ public class OutputRecord {
         this.dnbCacheIds = dnbCacheIds;
     }
 
+    public String getMatchedEmployeeRange() {
+        return matchedEmployeeRange;
+    }
+
+    public void setMatchedEmployeeRange(String matchedEmployeeRange) {
+        this.matchedEmployeeRange = matchedEmployeeRange;
+    }
+
+    public String getMatchedRevenueRange() {
+        return matchedRevenueRange;
+    }
+
+    public void setMatchedRevenueRange(String matchedRevenueRange) {
+        this.matchedRevenueRange = matchedRevenueRange;
+    }
+
+    public String getMatchedPrimaryIndustry() {
+        return matchedPrimaryIndustry;
+    }
+
+    public void setMatchedPrimaryIndustry(String matchedPrimaryIndustry) {
+        this.matchedPrimaryIndustry = matchedPrimaryIndustry;
+    }
+
+    public String getMatchedSecondIndustry() {
+        return matchedSecondIndustry;
+    }
+
+    public void setMatchedSecondIndustry(String matchedSecondIndustry) {
+        this.matchedSecondIndustry = matchedSecondIndustry;
+    }
+
+    public String getDomainSource() {
+        return domainSource;
+    }
+
+    public void setDomainSource(String domainSource) {
+        this.domainSource = domainSource;
+    }
+
     public void log(String log) {
         if (this.matchLogs == null) {
             matchLogs = new ArrayList<>();
         }
         matchLogs.add(log);
     }
-
 
 }

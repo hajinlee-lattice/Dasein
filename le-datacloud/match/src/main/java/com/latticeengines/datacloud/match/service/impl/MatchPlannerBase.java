@@ -61,8 +61,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Trace
     public ColumnSelection parseColumnSelection(MatchInput input) {
-        ColumnSelectionService columnSelectionService = beanDispatcher
-                .getColumnSelectionService(input.getDataCloudVersion());
+        ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(input
+                .getDataCloudVersion());
         if (input.getUnionSelection() != null) {
             return combineSelections(columnSelectionService, input.getUnionSelection(), input.getDataCloudVersion());
         } else if (input.getPredefinedSelection() != null) {
@@ -106,9 +106,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Set<NameLocation> nameLocationSet = new HashSet<>();
 
         for (int i = 0; i < input.getData().size(); i++) {
-            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
-                    input.getFields().size(), keyPositionMap, domainSet, nameLocationSet,
-                    input.getExcludeUnmatchedWithPublicDomain(), input.isPublicDomainAsNormalDomain());
+            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i, input.getFields()
+                    .size(), keyPositionMap, domainSet, nameLocationSet, input.getExcludeUnmatchedWithPublicDomain(),
+                    input.isPublicDomainAsNormalDomain());
             if (record != null) {
                 record.setColumnMatched(new ArrayList<>());
                 records.add(record);
@@ -129,8 +129,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return matchContext;
     }
 
-    MatchOutput initializeMatchOutput(MatchInput input, ColumnSelection columnSelection,
-            List<ColumnMetadata> metadatas) {
+    MatchOutput initializeMatchOutput(MatchInput input, ColumnSelection columnSelection, List<ColumnMetadata> metadatas) {
         MatchOutput output = new MatchOutput(input.getRootOperationUid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
@@ -177,14 +176,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-            Set<String> domainSet, boolean treadPublicDomainAsNormal,
-            InternalOutputRecord record) {
+            Set<String> domainSet, boolean treadPublicDomainAsNormal, InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.Domain)) {
             List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
             try {
                 String cleanDomain = null;
                 for (Integer domainPos : domainPosList) {
                     String originalDomain = (String) inputRecord.get(domainPos);
+                    record.setOrigDomain(originalDomain);
                     cleanDomain = DomainUtils.parseDomain(originalDomain);
                     if (StringUtils.isNotEmpty(cleanDomain)) {
                         break;
@@ -253,14 +252,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 }
             }
 
-            NameLocation nameLocation = new NameLocation();
-            nameLocation.setName(originalName);
-            nameLocation.setState(originalState);
-            nameLocation.setCountry(originalCountry);
-            nameLocation.setCity(originalCity);
-            nameLocation.setZipcode(originalZipCode);
-            nameLocation.setPhoneNumber(originalPhoneNumber);
+            NameLocation origNameLocation = getNameLocation(originalName, originalCountry, originalState, originalCity,
+                    originalZipCode, originalPhoneNumber);
+            record.setOrigNameLocation(origNameLocation);
 
+            NameLocation nameLocation = getNameLocation(originalName, originalCountry, originalState, originalCity,
+                    originalZipCode, originalPhoneNumber);
             nameLocationService.normalize(nameLocation);
             record.setParsedNameLocation(nameLocation);
             nameLocationSet.add(nameLocation);
@@ -271,6 +268,18 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
+    private NameLocation getNameLocation(String originalName, String originalCountry, String originalState,
+            String originalCity, String originalZipCode, String originalPhoneNumber) {
+        NameLocation nameLocation = new NameLocation();
+        nameLocation.setName(originalName);
+        nameLocation.setState(originalState);
+        nameLocation.setCountry(originalCountry);
+        nameLocation.setCity(originalCity);
+        nameLocation.setZipcode(originalZipCode);
+        nameLocation.setPhoneNumber(originalPhoneNumber);
+        return nameLocation;
+    }
+
     private void parseRecordForDuns(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
             InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.DUNS)) {
@@ -279,6 +288,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 String cleanDuns = null;
                 for (Integer dunsPos : dunsPosList) {
                     String originalDuns = String.valueOf(inputRecord.get(dunsPos));
+                    record.setOrigDuns(originalDuns);
                     if (StringUtils.isNotEmpty(originalDuns)) {
                         cleanDuns = originalDuns;
                         break;
