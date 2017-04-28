@@ -33,15 +33,6 @@ angular
                 return selected;
             }
 
-            vm.subcategoryIcon = function(category, subcategory){
-                var path = '/assets/images/enrichments/subcategories/',
-                    category = vm.subcategoryRenamer(category),
-                    subcategory = vm.subcategoryRenamer(subcategory),
-                    icon = category + (subcategory ? '-'+subcategory : '') + '.png';
-
-                return path + icon;
-            }
-
             vm.subcategoryClick = function(subcategory, $event) {
                 var target = angular.element($event.target),
                     currentTarget = angular.element($event.currentTarget);

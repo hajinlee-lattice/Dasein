@@ -33,6 +33,17 @@ angular
                 return path + icon;
             }
 
+            vm.subcategoryIcon = function(category, subcategory){
+                console.log(subcategory);
+                var path = '/assets/images/enrichments/subcategories/',
+                    category = vm.subcategoryRenamer(category),
+                    subcategory = vm.subcategoryRenamer(subcategory),
+                    icon = category + (subcategory ? '-'+subcategory : '') + '.png';
+
+                return path + icon;
+            }
+
+
             vm.categoryStartFrom = function() {
                 var size = vm.category ? vm.categorySize : vm.pagesize,
                     current = vm.metadata.currentCategory - 1,
