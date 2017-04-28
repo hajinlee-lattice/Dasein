@@ -15,17 +15,17 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class DefaultYarnClientCustomizationUnitTestNG {
-    
+
     private DefaultYarnClientCustomization customization = null;
     private Configuration yarnConfiguration = null;
     private Properties containerProperties = null;
-    
+
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
         yarnConfiguration = mock(Configuration.class);
         containerProperties = new Properties();
     }
-    
+
     @AfterMethod(groups = "unit")
     public void tearDownMethod() {
         containerProperties.clear();
@@ -38,19 +38,18 @@ public class DefaultYarnClientCustomizationUnitTestNG {
         if (requestedMemory != null) {
             containerProperties.setProperty(ContainerProperty.MEMORY.name(), requestedMemory);
         }
-        
+
         String xmx = customization.getXmxSetting(containerProperties);
         assertEquals(xmx, expectedValue);
     }
-    
+
     @DataProvider(name = "settings")
     public Object[][] getSettings() {
-        return new Object[][] {
-                { 1024, "2048", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
-                { -1, "2048", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
-                { 2048, "1024", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
-                { 2048, null, "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
-                { -1, null, "-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
+        return new Object[][] { { 1024, "2048", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m" }, //
+                { -1, "2048", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m" }, //
+                { 2048, "1024", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m" }, //
+                { 2048, null, "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m" }, //
+                { -1, null, "-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m" }, //
         };
     }
 }
