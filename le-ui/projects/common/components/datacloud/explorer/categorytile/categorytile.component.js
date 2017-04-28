@@ -120,6 +120,12 @@ angular
                 return stat;
             }
             
+            vm.getAttributeRange = function(attribute) {
+                var stat = vm.getAttributeStat(attribute),
+                    range = (stat && stat.Range ? stat.Range : {});
+                return range;
+            }
+
             vm.displayAttributeValue = function(attribute, property) {
                 var property = property || 'Lbl',
                     enrichmentKey = attribute.Attribute || attribute.FieldName,

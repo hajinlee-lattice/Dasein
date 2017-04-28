@@ -1209,7 +1209,7 @@ angular.module('common.datacloud.explorer', [
                         fieldName = enrichment.FieldName,
                         category = enrichment.Category,
                         index = vm.enrichmentsMap[fieldName];
-                        if(index) {
+                        if(index || index === 0) {
                             vm.enrichments[index].SegmentChecked = true;
                             vm.enrichments[index].SegmentRangesChecked = {};
                             vm.segmentAttributeInput[vm.enrichments[index].FieldName] = true;
@@ -1222,6 +1222,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.clearExplorerSegments = function() {
         var _enrichments = vm.filter(vm.enrichments, 'SegmentChecked', true);
+        vm.segmentAttributeInput = {};
         _enrichments.forEach(function(enrichment){
             index = vm.enrichmentsMap[enrichment.FieldName];
             if(index) {
