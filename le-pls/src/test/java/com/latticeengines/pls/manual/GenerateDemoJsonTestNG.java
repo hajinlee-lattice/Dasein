@@ -49,6 +49,7 @@ public class GenerateDemoJsonTestNG {
             String attribute = record.get(2);
             String value = record.get(3);
             String description = record.get(4);
+            long frequency = Long.parseLong(record.get(5));
             String fieldName = "Demo - " + subcategory + " - " + attribute;
             if (!attributes.stream().anyMatch(a -> a.getFieldName().equals(fieldName))) {
                 attributes.add(createLeadEnrichmentAttribute(category, subcategory, attribute, fieldName, description));
@@ -58,7 +59,7 @@ public class GenerateDemoJsonTestNG {
                 statistics = new AttributeStatistics();
                 cube.getStatistics().put(fieldName, statistics);
             }
-            addBucket(statistics, value);
+            addBucket(statistics, value, frequency);
 
             TopNAttributes topNAttributes = topn.get(category);
             if (topNAttributes == null) {
@@ -73,8 +74,15 @@ public class GenerateDemoJsonTestNG {
                 topNAttributes.getTopAttributes().put(subcategory, attributesInSubcategory);
             }
 
-            if (!attributesInSubcategory.stream().anyMatch(a -> a.getAttribute().equals(fieldName))) {
-                attributesInSubcategory.add(createTopAttribute(fieldName));
+            TopNAttributes.TopAttribute topAttribute = attributesInSubcategory.stream()
+                    .filter(a -> a.getAttribute().equals(fieldName)).findFirst().orElse(null);
+
+            if (topAttribute == null) {
+                topAttribute = createTopAttribute(fieldName);
+                attributesInSubcategory.add(topAttribute);
+            } else {
+                topAttribute.setNonNullCount(cube.getStatistics().get(fieldName).getRowBasedStatistics()
+                        .getNonNullCount());
             }
         }
         FileUtils.write(new File("/tmp/buckets.json"), JsonUtils.serialize(cube));
@@ -83,15 +91,13 @@ public class GenerateDemoJsonTestNG {
     }
 
     private TopNAttributes.TopAttribute createTopAttribute(String fieldName) {
-        TopNAttributes.TopAttribute topAttribute = new TopNAttributes.TopAttribute(fieldName,
-                (long) random.nextInt(15000));
+        TopNAttributes.TopAttribute topAttribute = new TopNAttributes.TopAttribute(fieldName, 0L);
         return topAttribute;
     }
 
-    private void addBucket(AttributeStatistics statistics, String value) {
+    private void addBucket(AttributeStatistics statistics, String value, long frequency) {
         if (statistics.getRowBasedStatistics() == null) {
             statistics.setRowBasedStatistics(new AttributeStatsDetails());
-            statistics.getRowBasedStatistics().setNonNullCount((long) random.nextInt(15000));
         }
         if (statistics.getRowBasedStatistics().getBuckets() == null) {
             statistics.getRowBasedStatistics().setBuckets(new Buckets());
@@ -104,7 +110,7 @@ public class GenerateDemoJsonTestNG {
         buckets.setType(BucketType.Boolean);
         Bucket bucket = new Bucket();
         bucket.setBucketLabel(value);
-        bucket.setCount((long) random.nextInt(15000));
+        bucket.setCount(frequency);
         buckets.getBucketList().add(bucket);
         statistics.getRowBasedStatistics().setNonNullCount(
                 statistics.getRowBasedStatistics().getNonNullCount() + bucket.getCount());
