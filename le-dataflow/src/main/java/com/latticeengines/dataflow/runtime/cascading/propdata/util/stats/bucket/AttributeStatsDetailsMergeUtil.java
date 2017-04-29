@@ -11,7 +11,6 @@ import org.apache.commons.collections.CollectionUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -19,29 +18,23 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class AttributeStatsDetailsMergeUtil {
-    private static ObjectMapper OM = new ObjectMapper();
 
     public static AttributeStatsDetails addStatsDetails(AttributeStatsDetails firstStatsDetails,
             AttributeStatsDetails secondStatsDetails, boolean printTop) {
-        try {
-            if (firstStatsDetails == null || secondStatsDetails == null) {
-                if (firstStatsDetails != null) {
-                    return OM.readValue(OM.writeValueAsBytes(firstStatsDetails), //
-                            AttributeStatsDetails.class);
-                } else if (secondStatsDetails != null) {
-                    return OM.readValue(OM.writeValueAsBytes(secondStatsDetails), //
-                            AttributeStatsDetails.class);
-                } else {
-                    return null;
-                }
+        if (firstStatsDetails == null || secondStatsDetails == null) {
+            if (firstStatsDetails != null) {
+                return firstStatsDetails;
+            } else if (secondStatsDetails != null) {
+                return secondStatsDetails;
+            } else {
+                return null;
             }
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
         }
 
         AttributeStatsDetails resultAttributeStatsDetails = new AttributeStatsDetails();
         if (printTop) {
-            System.out.println("First count " + firstStatsDetails.getNonNullCount() + "Second count " + secondStatsDetails.getNonNullCount());
+            System.out.println("First count " + firstStatsDetails.getNonNullCount() + "Second count "
+                    + secondStatsDetails.getNonNullCount());
         }
         resultAttributeStatsDetails.setNonNullCount(firstStatsDetails.getNonNullCount() //
                 + secondStatsDetails.getNonNullCount());
@@ -54,7 +47,8 @@ public class AttributeStatsDetailsMergeUtil {
         return resultAttributeStatsDetails;
     }
 
-    public static Buckets addBuckets(Buckets firstBucketObj, Buckets secondBucketsObj, boolean printTop) {
+    public static Buckets addBuckets(Buckets firstBucketObj, //
+            Buckets secondBucketsObj, boolean printTop) {
         if (firstBucketObj == null && secondBucketsObj == null) {
             return null;
         } else if (firstBucketObj == null) {
@@ -67,7 +61,7 @@ public class AttributeStatsDetailsMergeUtil {
 
         try {
             Buckets resultBucketsObj = null;
-            resultBucketsObj = OM.readValue(OM.writeValueAsBytes(firstBucketObj), Buckets.class);
+            resultBucketsObj = firstBucketObj;
 
             if (CollectionUtils.isNotEmpty(secondBucketsObj.getBucketList())) {
                 for (Bucket secondBucket : secondBucketsObj.getBucketList()) {
@@ -105,7 +99,7 @@ public class AttributeStatsDetailsMergeUtil {
         Bucket matchingResultBucket = findMatchingResultBucket(resultBucketsObj, secondBucket);
 
         if (matchingResultBucket == null) {
-            matchingResultBucket = OM.readValue(OM.writeValueAsBytes(secondBucket), Bucket.class);
+            matchingResultBucket = secondBucket;
             resultBucketsObj.getBucketList().add(matchingResultBucket);
         } else {
             if (matchingResultBucket.getEncodedCountList() == null) {

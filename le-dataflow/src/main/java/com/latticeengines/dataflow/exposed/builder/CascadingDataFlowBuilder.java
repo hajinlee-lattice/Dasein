@@ -305,6 +305,49 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return new Node(register(toRegister, fm, sourceTableName), this);
     }
 
+    protected List<String> getSourceFiles(String sourceTableName) {
+        DataFlowContext ctx = getDataFlowCtx();
+        Map sourceTables = ctx.getProperty(DataFlowProperty.SOURCETABLES, Map.class);
+        Table sourceTable = (Table) sourceTables.get(sourceTableName);
+        if (sourceTable == null) {
+            throw new RuntimeException(String.format("Could not find source with name %s", sourceTableName));
+        }
+        validateTableForSource(sourceTable);
+
+        Configuration config = ctx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
+
+        List<Extract> extracts = filterExtracts(sourceTable.getName(), sourceTable.getExtracts());
+
+        for (Extract extract : extracts) {
+
+            String path = null;
+            try {
+                log.info(String.format("Retrieving extract for table %s located at %s", sourceTableName,
+                        extract.getPath()));
+                List<String> matches = HdfsUtils.getFilesByGlob(config, extract.getPath());
+                if (HdfsUtils.isDirectory(config, extract.getPath())) {
+                    matches = HdfsUtils.getFilesByGlob(config, extract.getPath() + "/*.avro");
+                }
+
+                if (matches.size() == 0) {
+                    throw new IllegalStateException(
+                            String.format("Could not find extract with path %s in HDFS", extract.getPath()));
+                }
+
+                return matches;
+            } catch (Exception e) {
+                if (path != null) {
+                    throw new LedpException(LedpCode.LEDP_26006, e, new String[] { path });
+                } else {
+                    throw new LedpException(LedpCode.LEDP_26005, e);
+                }
+
+            }
+        }
+
+        return null;
+    }
+
     protected Table getSourceMetadata(String sourceName) {
         DataFlowContext ctx = getDataFlowCtx();
         @SuppressWarnings("unchecked")
@@ -988,7 +1031,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             flow.writeDOT("dot/wcr.dot");
             flow.addListener(dataFlowListener);
             flow.addStepListener(dataFlowStepListener);
-            //flow.complete();
+            // flow.complete();
 
             CascadeConnector connector = new CascadeConnector();
             Cascade cascade = connector.connect(flow);

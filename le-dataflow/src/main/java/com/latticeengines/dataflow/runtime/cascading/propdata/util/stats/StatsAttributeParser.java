@@ -10,10 +10,10 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.handler
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 public class StatsAttributeParser {
-    private static BooleanHandler booleanHandler = new BooleanHandler();
-    private static BooleanTextHandler booleanTextHandler = new BooleanTextHandler();
-    private static EncodedAttributeHandler encodedAttributeHandler = new EncodedAttributeHandler();
-    private static NumericHandler numericHandler = new NumericHandler();
+    private BooleanHandler booleanHandler = new BooleanHandler();
+    private BooleanTextHandler booleanTextHandler = new BooleanTextHandler();
+    private EncodedAttributeHandler encodedAttributeHandler = new EncodedAttributeHandler();
+    private NumericHandler numericHandler = new NumericHandler();
 
     public void parseNumericValForMinMax(Map<String, Object[]> attributeManMaxValues, //
             Object obj, String fieldName) {

@@ -49,9 +49,6 @@ public class AMStatsDimExpandMergeFlow extends AMStatsFlowBase {
         String[] allFields = new String[node.getSchema().size()];
         for (FieldMetadata fieldMeta : node.getSchema()) {
             String name = fieldMeta.getFieldName();
-            if (name.equals("_Location_") || name.equals("_Industry_")) {
-                log.info("DimensionName " + name + " Position " + idx);
-            }
             allFields[idx++] = name;
             fields = fields.append(new Fields(name, fieldMeta.getJavaType()));
             for (String dimensionId : dimensionIdFieldNames) {

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +65,8 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     private boolean numericalBucketsRequired;
 
     private String dataCloudVersion;
+
+    private List<String> hqDunsRelatedColumns;
 
     public Map<String, List<String>> getDimensionDefinitionMap() {
         return dimensionDefinitionMap;
@@ -184,6 +187,14 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
+    }
+
+    public List<String> getHqDunsRelatedColumns() {
+        return hqDunsRelatedColumns == null ? new ArrayList<>() : hqDunsRelatedColumns;
+    }
+
+    public void setHqDunsRelatedColumns(List<String> hqDunsRelatedColumns) {
+        this.hqDunsRelatedColumns = hqDunsRelatedColumns;
     }
 
 }

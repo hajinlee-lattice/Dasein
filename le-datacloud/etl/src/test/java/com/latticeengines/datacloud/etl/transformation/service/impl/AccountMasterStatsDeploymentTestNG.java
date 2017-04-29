@@ -29,6 +29,7 @@ import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
@@ -122,7 +123,7 @@ public class AccountMasterStatsDeploymentTestNG
 
         TransformationStepConfig step2 = new TransformationStepConfig();
         List<Integer> inputSteps2 = new ArrayList<Integer>();
-        inputSteps2.add(0);
+        inputSteps2.add(1);
         step2.setInputSteps(inputSteps2);
         step2.setTargetSource("amStatsMinMax");
         step2.setTransformer("amStatsMinMaxTransformer");
@@ -141,11 +142,11 @@ public class AccountMasterStatsDeploymentTestNG
 
         TransformationStepConfig step3 = new TransformationStepConfig();
         List<Integer> inputSteps3 = new ArrayList<Integer>();
-        inputSteps3.add(0);
+        inputSteps3.add(1);
         inputSteps3.add(2);
         step3.setInputSteps(inputSteps3);
-        step3.setTargetSource("amStatsMinMaxJoin");
-        step3.setTransformer("amStatsMinMaxJoinTransformer");
+        step3.setTargetSource("amStatsBucketedSource");
+        step3.setTransformer("amStatsLeafSubstitutionTransformer");
 
         AccountMasterStatisticsConfig confParam3 = getAccountMasterStatsParameters();
         String confParamStr3 = null;
@@ -157,14 +158,14 @@ public class AccountMasterStatsDeploymentTestNG
 
         step3.setConfiguration(confParamStr3);
 
-        //////////////////
+        /////////////////
 
         TransformationStepConfig step4 = new TransformationStepConfig();
         List<Integer> inputSteps4 = new ArrayList<Integer>();
         inputSteps4.add(3);
         step4.setInputSteps(inputSteps4);
-        step4.setTargetSource("amStatsBucketedSource");
-        step4.setTransformer("amStatsLeafSubstitutionTransformer");
+        step4.setTargetSource("amStatsLeafNode");
+        step4.setTransformer("amStatsLeafNodeTransformer");
 
         AccountMasterStatisticsConfig confParam4 = getAccountMasterStatsParameters();
         String confParamStr4 = null;
@@ -176,14 +177,14 @@ public class AccountMasterStatsDeploymentTestNG
 
         step4.setConfiguration(confParamStr4);
 
-        /////////////////
+        //////////////////
 
         TransformationStepConfig step5 = new TransformationStepConfig();
         List<Integer> inputSteps5 = new ArrayList<Integer>();
         inputSteps5.add(4);
         step5.setInputSteps(inputSteps5);
-        step5.setTargetSource("amStatsLeafNode");
-        step5.setTransformer("amStatsLeafNodeTransformer");
+        step5.setTargetSource("amStatsDimExpandMerge");
+        step5.setTransformer("amStatsDimExpandMergeTransformer");
 
         AccountMasterStatisticsConfig confParam5 = getAccountMasterStatsParameters();
         String confParamStr5 = null;
@@ -201,8 +202,8 @@ public class AccountMasterStatsDeploymentTestNG
         List<Integer> inputSteps6 = new ArrayList<Integer>();
         inputSteps6.add(5);
         step6.setInputSteps(inputSteps6);
-        step6.setTargetSource("amStatsDimExpandMerge");
-        step6.setTransformer("amStatsDimExpandMergeTransformer");
+        step6.setTargetSource(targetSourceName);
+        step6.setTransformer("amStatsReportTransformer");
 
         AccountMasterStatisticsConfig confParam6 = getAccountMasterStatsParameters();
         String confParamStr6 = null;
@@ -216,25 +217,6 @@ public class AccountMasterStatsDeploymentTestNG
 
         //////////////////
 
-        TransformationStepConfig step7 = new TransformationStepConfig();
-        List<Integer> inputSteps7 = new ArrayList<Integer>();
-        inputSteps7.add(6);
-        step7.setInputSteps(inputSteps7);
-        step7.setTargetSource(targetSourceName);
-        step7.setTransformer("amStatsReportTransformer");
-
-        AccountMasterStatisticsConfig confParam7 = getAccountMasterStatsParameters();
-        String confParamStr7 = null;
-        try {
-            confParamStr7 = om.writeValueAsString(confParam7);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        step7.setConfiguration(confParamStr7);
-
-        //////////////////
-
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
         steps.add(step0);
         steps.add(step1);
@@ -243,7 +225,6 @@ public class AccountMasterStatsDeploymentTestNG
         steps.add(step4);
         steps.add(step5);
         steps.add(step6);
-        steps.add(step7);
 
         configuration.setSteps(steps);
 
@@ -475,6 +456,9 @@ public class AccountMasterStatsDeploymentTestNG
                     .getRowBasedStatistics();
             AttributeStatsDetails expectedRowBasedAttrStats = null;
 
+            if (attr.equals(AccountMasterStatsParameters.HQ_DUNS)) {
+                continue;
+            }
             expectedRowBasedAttrStats = expectedCube.getStatistics().get(attr).getRowBasedStatistics();
 
             Assert.assertEquals(actualRowBasedAttrStats.getNonNullCount(), expectedRowBasedAttrStats.getNonNullCount());
