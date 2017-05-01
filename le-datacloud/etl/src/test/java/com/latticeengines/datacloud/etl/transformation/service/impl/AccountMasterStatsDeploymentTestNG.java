@@ -183,8 +183,8 @@ public class AccountMasterStatsDeploymentTestNG
         List<Integer> inputSteps5 = new ArrayList<Integer>();
         inputSteps5.add(4);
         step5.setInputSteps(inputSteps5);
-        step5.setTargetSource("amStatsDimExpandMerge");
-        step5.setTransformer("amStatsDimExpandMergeTransformer");
+        step5.setTargetSource("amStatsDimAggregate");
+        step5.setTransformer("amStatsDimAggregateTransformer");
 
         AccountMasterStatisticsConfig confParam5 = getAccountMasterStatsParameters();
         String confParamStr5 = null;
@@ -202,8 +202,8 @@ public class AccountMasterStatsDeploymentTestNG
         List<Integer> inputSteps6 = new ArrayList<Integer>();
         inputSteps6.add(5);
         step6.setInputSteps(inputSteps6);
-        step6.setTargetSource(targetSourceName);
-        step6.setTransformer("amStatsReportTransformer");
+        step6.setTargetSource("amStatsDimExpandMerge");
+        step6.setTransformer("amStatsDimExpandMergeTransformer");
 
         AccountMasterStatisticsConfig confParam6 = getAccountMasterStatsParameters();
         String confParamStr6 = null;
@@ -217,6 +217,25 @@ public class AccountMasterStatsDeploymentTestNG
 
         //////////////////
 
+        TransformationStepConfig step7 = new TransformationStepConfig();
+        List<Integer> inputSteps7 = new ArrayList<Integer>();
+        inputSteps7.add(6);
+        step7.setInputSteps(inputSteps7);
+        step7.setTargetSource(targetSourceName);
+        step7.setTransformer("amStatsReportTransformer");
+
+        AccountMasterStatisticsConfig confParam7 = getAccountMasterStatsParameters();
+        String confParamStr7 = null;
+        try {
+            confParamStr7 = om.writeValueAsString(confParam7);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        step7.setConfiguration(confParamStr7);
+
+        //////////////////
+
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
         steps.add(step0);
         steps.add(step1);
@@ -225,6 +244,7 @@ public class AccountMasterStatsDeploymentTestNG
         steps.add(step4);
         steps.add(step5);
         steps.add(step6);
+        steps.add(step7);
 
         configuration.setSteps(steps);
 
