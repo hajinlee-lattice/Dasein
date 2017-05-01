@@ -28,8 +28,8 @@
       <tbody>
         <tr ng-repeat="analyticTest in vm_analyticTest.analyticTests |
           filter:{'name': search} |
-          startFrom: ((vm_analyticTest.cur - 1) * vm_analyticTest.max) |
-          limitTo:vm_analyticTest.max">
+          startFrom: ((vm_analyticTest.cur - 1) * vm_analyticTest.pageSize) |
+          limitTo:vm_analyticTest.pageSize">
           <td ng-repeat="col in ::vm_analyticTest.columns">
             {{::analyticTest[col.key] | joinList:', '}}
           </td>
@@ -39,7 +39,7 @@
         </tr>
       </tbody>
     </table>
-    <ul uib-pagination total-items="vm_analyticTest.total" ng-model="vm_analyticTest.cur" max-size="vm_analyticTest.max" class="pagination-sm" boundary-links="true"></ul>
+    <ul uib-pagination total-items="vm_analyticTest.analyticTests.length" ng-model="vm_analyticTest.cur" max-size="20" items-per-page="vm_analyticTest.pageSize" class="pagination-sm" boundary-links="true"></ul>
   </div>
   <div class="row" ng-if="vm_analyticTest.isCreatingTest">
     <hr>

@@ -38,7 +38,10 @@ angular.module('app.modelquality.controller.AnalyticPipelineCtrl', [
         loading: false,
         error: false,
         message: null,
-        spinnerMsg: null
+        spinnerMsg: null,
+        // pagination
+        cur: 1,
+        pageSize: 20
     });
 
     vm.selectPipeline = function (analyticPipeline) {

@@ -128,13 +128,11 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
             {key:'analytic_pipeline_names', type: 'multiSelect'},
             {key:'analytic_test_type', type: 'select'},
             {key:'analytic_test_tag', type: 'input'}
-        ]
+        ],
+        // pagination
+        cur: 1,
+        pageSize: 10
     });
-
-    // pagination
-    vm.cur = 1;
-    vm.max = 10;
-    vm.total = vm.analyticTests.length;
 
     vm.newTest = function () {
         vm.isCreatingTest = true;

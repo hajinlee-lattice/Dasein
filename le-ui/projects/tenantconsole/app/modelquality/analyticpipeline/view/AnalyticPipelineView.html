@@ -1,6 +1,20 @@
 <section class="row create-pipeline-main">
   <div ng-class="vm_analyticPipeline.stepMetadata ? 'col-xs-3' : 'col-xs-4'" class="pipeline-list-container no-gutter">
     <h4>{{::vm_analyticPipeline.labels.PIPELINES}}</h4>
+    <ul uib-pagination total-items="vm_analyticPipeline.analyticPipelines.length"
+      ng-if="vm_analyticPipeline.analyticPipelines.length > vm_analyticPipeline.pageSize"
+      class="pagination-sm"
+      ng-model="vm_analyticPipeline.cur"
+      items-per-page="vm_analyticPipeline.pageSize"
+      boundary-links="true"
+      force-ellipses="true"
+      rotate="true"
+      max-size="3"
+      previous-text="<"
+      next-text=">"
+      first-text="<<"
+      last-text=">>">
+    </ul>
     <form class="form-inline">
       <div class="form-group">
       <label for="search">Search:
@@ -10,7 +24,10 @@
     </form>
     <ul class="pipeline-list">
       <li ng-repeat="pipeline in vm_analyticPipeline.analyticPipelines |
-        filter:{'name':search}"
+        filter:{'name':search} |
+        orderBy:'name' |
+        startFrom:((vm_analyticPipeline.cur - 1) * vm_analyticPipeline.pageSize) |
+        limitTo:vm_analyticPipeline.pageSize"
         ng-class="{selected: vm_analyticPipeline.selectedPipeline === pipeline}"
         ng-click="vm_analyticPipeline.selectPipeline(pipeline)">
         <div>{{::pipeline.name}}</div>
