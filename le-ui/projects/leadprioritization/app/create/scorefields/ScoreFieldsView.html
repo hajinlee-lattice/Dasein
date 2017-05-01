@@ -14,7 +14,7 @@
 				</option>
 				<option value="{{ field.userField }}"
 						ng-selected="true">
-					{{ field.userField }}
+						{{ (vm.AvailableFields.length === 0 && field.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : field.userField }}
 				</option>
 				<option value="{{ AvailableField }}"
 						ng-repeat="AvailableField in vm.AvailableFields"
@@ -153,7 +153,7 @@
 									</option>
 									<option value="{{ field.userField }}"
 											ng-selected="true">
-										{{ field.userField }}
+										{{ (vm.AvailableFields.length === 0 && field.userField === vm.ignoredFieldLabel) ? '-- No Fields Available --' : field.userField }}
 									</option>
 									<option value="{{ AvailableField }}"
 											ng-repeat="AvailableField in vm.AvailableFields"
