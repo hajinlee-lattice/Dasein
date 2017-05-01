@@ -7,63 +7,63 @@ Contact,,Department,Accounting,Departments associated with contacts.,123
 Contact,,Department,Engineering,Departments associated with contacts.,59
 Contact,,Is With Company,Yes,A flag that describes whether a contact is still with the company.,428
 Contact,,Is With Company,No,A flag that describes whether a contact is still with the company.,1
-Product,Cisco 4451,Has Purchased,Yes,A flag that describes whether an account has purchased the product.,10
-Product,Cisco 4451,Has Purchased,No, A flag that describes whether an account has purchased the product.,29
-Product,Cisco 4451,Total Purchase Amount,20000-40000,The total amount (in USD) an account spend on the product.,7
-Product,Cisco 4451,Total Purchase Amount,40000-80000,The total amount (in USD) an account spend on the product.,1
-Product,Cisco 4451,Total Purchase Amount,80000-160000,The total amount (in USD) an account spend on the product.,1
-Product,Cisco 4451,Total Purchase Amount,160000+,The total amount (in USD) an account spend on the product.,1
-Product,Cisco 4451,Last Month Spending Trends (%),< 10-20,The spending trend for the product for the last month as compared to the average of the previous 3 months.,7
-Product,Cisco 4451,Last Month Spending Trends (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,1
-Product,Cisco 4451,Last Month Spending Trends (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,1
-Product,Cisco 4451,Last Month Spending Trends (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,1
-Product,Cisco 4451,Last Quarter Spending Trends (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,7
-Product,Cisco 4451,Last Quarter Spending Trends (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
-Product,Cisco 4451,Last Quarter Spending Trends (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
-Product,Cisco 4451,Last Quarter Spending Trends (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
-Product,Cisco 4451,Last Year Spending Trends (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,7
-Product,Cisco 4451,Last Year Spending Trends (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,1
-Product,Cisco 4451,Last Year Spending Trends (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,1
-Product,Cisco 4451,Last Year Spending Trends (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,1
-Product,Cisco 4451,Last Month Spending Trends ($),< 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",7
-Product,Cisco 4451,Last Month Spending Trends ($),< 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
-Product,Cisco 4451,Last Month Spending Trends ($),> 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
-Product,Cisco 4451,Last Month Spending Trends ($),> 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
-Product,Cisco 4451,Last Quarter Spending Trends ($),< 80000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",2
-Product,Cisco 4451,Last Quarter Spending Trends ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
-Product,Cisco 4451,Last Quarter Spending Trends ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
-Product,Cisco 4451,Last Quarter Spending Trends ($),> 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
-Product,Cisco 4451,Last Year Spending Trends ($),< 160000+ ,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",0
-Product,Cisco 4451,Last Year Spending Trends ($),< 80000-160000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
-Product,Cisco 4451,Last Year Spending Trends ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",5
-Product,Cisco 4451,Last Year Spending Trends ($),> 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1
-Product,Cisco 4321,Has Purchased,Yes,A flag that describes whether an account has purchased the product.,12
-Product,Cisco 4321,Has Purchased,No, A flag that describes whether an account has purchased the product.,27
-Product,Cisco 4321,Total Purchase Amount,10000-20000,The total amount (in USD) an account spend on the product.,3
-Product,Cisco 4321,Total Purchase Amount,20000-40000,The total amount (in USD) an account spend on the product.,3
-Product,Cisco 4321,Total Purchase Amount,40000-60000,The total amount (in USD) an account spend on the product.,3
-Product,Cisco 4321,Total Purchase Amount,60000+,The total amount (in USD) an account spend on the product.,3
-Product,Cisco 4321,Last Month Spending Trends (%),< 10-20 ,The spending trend for the product for the last month as compared to the average of the previous 3 months.,4
-Product,Cisco 4321,Last Month Spending Trends (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,4
-Product,Cisco 4321,Last Month Spending Trends (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3
-Product,Cisco 4321,Last Month Spending Trends (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,1
-Product,Cisco 4321,Last Quarter Spending Trends (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,4
-Product,Cisco 4321,Last Quarter Spending Trends (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,4
-Product,Cisco 4321,Last Quarter Spending Trends (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3
-Product,Cisco 4321,Last Quarter Spending Trends (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
-Product,Cisco 4321,Last Year Spending Trends (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,2
-Product,Cisco 4321,Last Year Spending Trends (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,2
-Product,Cisco 4321,Last Year Spending Trends (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,4
-Product,Cisco 4321,Last Year Spending Trends (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,4
-Product,Cisco 4321,Last Month Spending Trends ($),< 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",4
-Product,Cisco 4321,Last Month Spending Trends ($),< 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",4
-Product,Cisco 4321,Last Month Spending Trends ($),> 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3
-Product,Cisco 4321,Last Month Spending Trends ($),> 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
-Product,Cisco 4321,Last Quarter Spending Trends ($),< 20000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
-Product,Cisco 4321,Last Quarter Spending Trends ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
-Product,Cisco 4321,Last Quarter Spending Trends ($),< 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3
-Product,Cisco 4321,Last Quarter Spending Trends ($),> 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
-Product,Cisco 4321,Last Year Spending Trends ($),< 40000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
-Product,Cisco 4321,Last Year Spending Trends ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
-Product,Cisco 4321,Last Year Spending Trends ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4
-Product,Cisco 4321,Last Year Spending Trends ($),> 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4
+Product,Cisco 4451,Cisco 4451: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,10
+Product,Cisco 4451,Cisco 4451: Has Purchased,No, A flag that describes whether an account has purchased the product.,29
+Product,Cisco 4451,Cisco 4451: Total Purchase Amount,20000-40000,The total amount (in USD) an account spend on the product.,7
+Product,Cisco 4451,Cisco 4451: Total Purchase Amount,40000-80000,The total amount (in USD) an account spend on the product.,1
+Product,Cisco 4451,Cisco 4451: Total Purchase Amount,80000-160000,The total amount (in USD) an account spend on the product.,1
+Product,Cisco 4451,Cisco 4451: Total Purchase Amount,160000+,The total amount (in USD) an account spend on the product.,1
+Product,Cisco 4451,Cisco 4451: Last Month Spending Trends (%),< 10-20,The spending trend for the product for the last month as compared to the average of the previous 3 months.,7
+Product,Cisco 4451,Cisco 4451: Last Month Spending Trends (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,1
+Product,Cisco 4451,Cisco 4451: Last Month Spending Trends (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,1
+Product,Cisco 4451,Cisco 4451: Last Month Spending Trends (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,1
+Product,Cisco 4451,Cisco 4451: Last Quarter Spending Trends (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,7
+Product,Cisco 4451,Cisco 4451: Last Quarter Spending Trends (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
+Product,Cisco 4451,Cisco 4451: Last Quarter Spending Trends (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
+Product,Cisco 4451,Cisco 4451: Last Quarter Spending Trends (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
+Product,Cisco 4451,Cisco 4451: Last Year Spending Trends (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,7
+Product,Cisco 4451,Cisco 4451: Last Year Spending Trends (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,1
+Product,Cisco 4451,Cisco 4451: Last Year Spending Trends (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,1
+Product,Cisco 4451,Cisco 4451: Last Year Spending Trends (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,1
+Product,Cisco 4451,Cisco 4451: Last Month Spending Trends ($),< 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",7
+Product,Cisco 4451,Cisco 4451: Last Month Spending Trends ($),< 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
+Product,Cisco 4451,Cisco 4451: Last Month Spending Trends ($),> 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
+Product,Cisco 4451,Cisco 4451: Last Month Spending Trends ($),> 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
+Product,Cisco 4451,Cisco 4451: Last Quarter Spending Trends ($),< 80000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",2
+Product,Cisco 4451,Cisco 4451: Last Quarter Spending Trends ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
+Product,Cisco 4451,Cisco 4451: Last Quarter Spending Trends ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
+Product,Cisco 4451,Cisco 4451: Last Quarter Spending Trends ($),> 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
+Product,Cisco 4451,Cisco 4451: Last Year Spending Trends ($),< 160000+ ,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",0
+Product,Cisco 4451,Cisco 4451: Last Year Spending Trends ($),< 80000-160000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
+Product,Cisco 4451,Cisco 4451: Last Year Spending Trends ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",5
+Product,Cisco 4451,Cisco 4451: Last Year Spending Trends ($),> 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1
+Product,Cisco 4321,Cisco 4321: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,12
+Product,Cisco 4321,Cisco 4321: Has Purchased,No, A flag that describes whether an account has purchased the product.,27
+Product,Cisco 4321,Cisco 4321: Total Purchase Amount,10000-20000,The total amount (in USD) an account spend on the product.,3
+Product,Cisco 4321,Cisco 4321: Total Purchase Amount,20000-40000,The total amount (in USD) an account spend on the product.,3
+Product,Cisco 4321,Cisco 4321: Total Purchase Amount,40000-60000,The total amount (in USD) an account spend on the product.,3
+Product,Cisco 4321,Cisco 4321: Total Purchase Amount,60000+,The total amount (in USD) an account spend on the product.,3
+Product,Cisco 4321,Cisco 4321: Last Month Spending Trends (%),< 10-20 ,The spending trend for the product for the last month as compared to the average of the previous 3 months.,4
+Product,Cisco 4321,Cisco 4321: Last Month Spending Trends (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,4
+Product,Cisco 4321,Cisco 4321: Last Month Spending Trends (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3
+Product,Cisco 4321,Cisco 4321: Last Month Spending Trends (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,1
+Product,Cisco 4321,Cisco 4321: Last Quarter Spending Trends (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,4
+Product,Cisco 4321,Cisco 4321: Last Quarter Spending Trends (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,4
+Product,Cisco 4321,Cisco 4321: Last Quarter Spending Trends (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3
+Product,Cisco 4321,Cisco 4321: Last Quarter Spending Trends (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
+Product,Cisco 4321,Cisco 4321: Last Year Spending Trends (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,2
+Product,Cisco 4321,Cisco 4321: Last Year Spending Trends (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,2
+Product,Cisco 4321,Cisco 4321: Last Year Spending Trends (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,4
+Product,Cisco 4321,Cisco 4321: Last Year Spending Trends (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,4
+Product,Cisco 4321,Cisco 4321: Last Month Spending Trends ($),< 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",4
+Product,Cisco 4321,Cisco 4321: Last Month Spending Trends ($),< 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",4
+Product,Cisco 4321,Cisco 4321: Last Month Spending Trends ($),> 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3
+Product,Cisco 4321,Cisco 4321: Last Month Spending Trends ($),> 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
+Product,Cisco 4321,Cisco 4321: Last Quarter Spending Trends ($),< 20000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
+Product,Cisco 4321,Cisco 4321: Last Quarter Spending Trends ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
+Product,Cisco 4321,Cisco 4321: Last Quarter Spending Trends ($),< 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3
+Product,Cisco 4321,Cisco 4321: Last Quarter Spending Trends ($),> 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
+Product,Cisco 4321,Cisco 4321: Last Year Spending Trends ($),< 40000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
+Product,Cisco 4321,Cisco 4321: Last Year Spending Trends ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
+Product,Cisco 4321,Cisco 4321: Last Year Spending Trends ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4
+Product,Cisco 4321,Cisco 4321: Last Year Spending Trends ($),> 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4
