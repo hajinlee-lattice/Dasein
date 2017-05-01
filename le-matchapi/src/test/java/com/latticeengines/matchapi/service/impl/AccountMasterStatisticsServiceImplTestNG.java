@@ -31,7 +31,9 @@ public class AccountMasterStatisticsServiceImplTestNG extends MatchapiFunctional
         for (Map.Entry<Category, Long> entry : catIdMap.entrySet()) {
             Category category = entry.getKey();
             Long attrId = entry.getValue();
-            verifyAttribute(attrId, DataCloudConstants.ATTR_CATEGORY, category.name());
+            if (attrId != null) {
+                verifyAttribute(attrId, DataCloudConstants.ATTR_CATEGORY, category.name());
+            }
         }
 
         for (Category category : Category.values()) {
