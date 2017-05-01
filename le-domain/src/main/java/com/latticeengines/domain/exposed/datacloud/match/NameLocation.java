@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,7 +12,9 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NameLocation implements Fact {
+public class NameLocation implements Fact, Serializable {
+
+    private static final long serialVersionUID = 8509368904723299727L;
 
     @JsonProperty("Name")
     private String name;

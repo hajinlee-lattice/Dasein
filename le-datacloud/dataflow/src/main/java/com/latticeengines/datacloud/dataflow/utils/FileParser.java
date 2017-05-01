@@ -52,12 +52,12 @@ public class FileParser {
         return locationMap;
     }
 
-    public static String standardizeBomboraMetroArea(String metroArea) {
-        if (StringUtils.isEmpty(metroArea)) {
+    private static String standardizeBomboraMetroArea(String metroArea) {
+        if (StringUtils.isBlank(metroArea)) {
             return null;
         }
-        metroArea = metroArea.replaceAll(" ", "").replace("\t", "").replace("\n", "").replace("\r", "");
         metroArea = metroArea.replaceAll("\\(.*\\)", "");
+        metroArea = metroArea.replace("\t", " ").replace("\n", "").replace("\r", "").trim();
         return metroArea;
     }
 
@@ -71,9 +71,10 @@ public class FileParser {
         List<NameLocation> locations = new ArrayList<>();
         String[] areaList = metroArea.split("/");
         String state = null;
+        country = StringUtils.isNotBlank(country) ? country.trim() : null;
         for (int i = areaList.length - 1; i >= 0; i--) {
             String area = areaList[i];
-            if (StringUtils.isEmpty(area)) {
+            if (StringUtils.isBlank(area)) {
                 continue;
             }
             String[] loc = area.split(",");
@@ -82,12 +83,14 @@ public class FileParser {
             }
             if (loc.length == 2) {
                 state = loc[1];
+                state = StringUtils.isNotBlank(state) ? state.trim() : null;
             }
             String city = loc[0];
+            city = StringUtils.isNotBlank(city) ? city.trim() : null;
             NameLocation location = new NameLocation();
             location.setCountry(country);
             // Remove Chinese invalid province
-            if (!(country.equalsIgnoreCase("China") && state.contains("CN-"))) {
+            if (!(country != null && state != null && country.equalsIgnoreCase("China") && state.contains("CN-"))) {
                 location.setState(state);
             }
             location.setCity(city);
