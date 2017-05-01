@@ -22,9 +22,6 @@ public class PLSInstaller extends LatticeComponentInstaller {
             int dataVersion, DocumentDirectory configDir) {
         if (tenantService == null) {
             throw new IllegalStateException("PLS Installer is not wired with a TenantService.");
-        } else {
-            System.out.println("There are " + String.valueOf(tenantService.getTenants(null).size())
-                    + " registered tenants.");
         }
 
         return configDir;

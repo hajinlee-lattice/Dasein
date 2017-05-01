@@ -35,20 +35,20 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory.Node;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
-import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory.Node;
-import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapPropertyConstant;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapPropertyConstant;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -227,14 +227,12 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public boolean deleteTenant(final String userName, final String contractId, final String tenantId,
             final boolean deleteZookeeper) {
-        CustomerSpace space = new CustomerSpace(contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        CustomerSpace space = new CustomerSpace(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         Map<String, Map<String, String>> props = new HashMap<>();
         for (LatticeComponent component : orchestrator.components) {
             BootstrapState state = getTenantServiceState(contractId, tenantId, component.getName());
-            if (state.state.equals(BootstrapState.State.INITIAL) ||
-                    state.state.equals(BootstrapState.State.UNINSTALLED) ||
-                    state.state.equals(BootstrapState.State.UNINSTALLING)) {
+            if (state.state.equals(BootstrapState.State.INITIAL) || state.state.equals(BootstrapState.State.UNINSTALLED)
+                    || state.state.equals(BootstrapState.State.UNINSTALLING)) {
                 continue;
             }
             SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(
@@ -242,8 +240,8 @@ public class TenantServiceImpl implements TenantService {
             Map<String, String> properties = sDir.flatten();
 
             properties.put(BootstrapPropertyConstant.BOOTSTRAP_COMMAND, BootstrapPropertyConstant.BOOTSTRAP_UNINSTALL);
-            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
-                    space.getContractId(), space.getTenantId(), space.getSpaceId(), component.getName());
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space.getContractId(),
+                    space.getTenantId(), space.getSpaceId(), component.getName());
             try {
                 BootstrapStateUtil.setState(path, BootstrapState.constructDeletingState());
             } catch (Exception e) {
@@ -297,7 +295,7 @@ public class TenantServiceImpl implements TenantService {
         }
 
         Set<String> components = serviceService.getRegisteredServices();
-        log.info(String.format("Checking status of services %s", components));
+        log.info(String.format("Checking status of services %s for tenant %s", components, tenantId));
         BootstrapState state = null;
         for (String serviceName : components) {
             LatticeComponent latticeComponent = orchestrator.getComponent(serviceName);
@@ -312,10 +310,11 @@ public class TenantServiceImpl implements TenantService {
                         newState = BootstrapState.createInitialState();
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException(String.format("Error getting the newState of the Service: %s",
-                            serviceName));
+                    throw new RuntimeException(String.format(
+                            "Error getting the newState of the Service: %s for tenant %s", serviceName, tenantId));
                 }
-                log.info(String.format("State of required service %s is %s", serviceName, newState));
+                log.info(String.format("State of required service %s for tenant %s is %s", serviceName, tenantId,
+                        newState));
 
                 if (newState != null) {
                     if (state == null) {
@@ -337,9 +336,10 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
-        SerializableDocumentDirectory rawDir = tenantEntityMgr
-                .getTenantServiceConfig(contractId, tenantId, serviceName);
+    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId,
+            String serviceName) {
+        SerializableDocumentDirectory rawDir = tenantEntityMgr.getTenantServiceConfig(contractId, tenantId,
+                serviceName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadataIgnoreOptionsValidation(metaDir);
         return rawDir;
@@ -378,10 +378,11 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {
+    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2,
+            String serviceName) {
         if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR)) {
-            return BootstrapState.constructErrorState(0, 0, "At least one of the components encountered an error : "
-                    + serviceName);
+            return BootstrapState.constructErrorState(0, 0,
+                    "At least one of the components encountered an error : " + serviceName);
         }
 
         if (state1.state.equals(BootstrapState.State.MIGRATED) || state2.state.equals(BootstrapState.State.MIGRATED)) {
