@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,8 @@ public class AMStatsResource {
 
     private static final ObjectMapper OM = new ObjectMapper();
 
+    private static final Log log = LogFactory.getLog(AMStatsResource.class);
+
     @Autowired
     private AccountMasterStatisticsService accountMasterStatisticsService;
 
@@ -37,6 +41,8 @@ public class AMStatsResource {
     private void getCube(@RequestBody AccountMasterFactQuery query, HttpServletResponse response) {
         AccountMasterCube cube = accountMasterStatisticsService.query(query);
         try {
+            // Temporary log to debug failed matchapi test
+            log.info("GetCube api is hit");
             GzipUtils.writeToGzipStream(response, cube);
         } catch (IOException e) {
             throw new RuntimeException(e);
