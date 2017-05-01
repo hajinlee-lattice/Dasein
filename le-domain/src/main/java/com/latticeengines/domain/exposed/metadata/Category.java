@@ -8,6 +8,7 @@ public enum Category {
     GROWTH_TRENDS("Growth Trends"), //
     INTENT("Intent"), //
     LEAD_INFORMATION("Lead Information"), //
+    ACCOUNT_INFORMATION("Account Information"), //
     ONLINE_PRESENCE("Online Presence"), //
     TECHNOLOGY_PROFILE("Technology Profile"), //
     WEBSITE_KEYWORDS("Website Keywords"), //
@@ -19,7 +20,7 @@ public enum Category {
 
     static {
         nameMap = new HashMap<>();
-        for (Category category: Category.values()) {
+        for (Category category : Category.values()) {
             nameMap.put(category.getName(), category);
         }
     }
@@ -28,9 +29,13 @@ public enum Category {
         this.name = name;
     }
 
-    public String getName() { return this.name; }
+    public String getName() {
+        return this.name;
+    }
 
-    public String toString() { return this.name; }
+    public String toString() {
+        return this.name;
+    }
 
     public static Category fromName(String name) {
         if (name == null) {
@@ -38,7 +43,7 @@ public enum Category {
         }
         if (nameMap.containsKey(name)) {
             return nameMap.get(name);
-        } else  {
+        } else {
             throw new IllegalArgumentException("Cannot find a Category with name " + name);
         }
     }

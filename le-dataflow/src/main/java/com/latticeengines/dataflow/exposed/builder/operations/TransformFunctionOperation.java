@@ -1,11 +1,8 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
-import java.lang.reflect.Constructor;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,24 +17,13 @@ import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class TransformFunctionOperation extends Operation {
 
-    private static final Log log = LogFactory.getLog(TransformFunctionOperation.class);
-
-    @SuppressWarnings("unchecked")
     public TransformFunctionOperation(Input prior, String packageName, TransformDefinition definition) {
 
         FieldList fieldsToApply = new FieldList(definition.arguments.values().toArray(new String[] {}));
         FieldMetadata targetField = new FieldMetadata(definition.output, definition.type.type());
 
-        RealTimeTransform transform;
-        try {
-            Class<RealTimeTransform> c = (Class<RealTimeTransform>) Class
-                    .forName(getRTSClassFromPythonName(packageName, definition.name));
-            Constructor<RealTimeTransform> ctor = c.getConstructor();
-            transform = ctor.newInstance();
-        } catch (Exception e1) {
-            log.error(e1);
-            throw new RuntimeException(e1);
-        }
+        RealTimeTransform transform = GetAndValidateRealTimeTransformUtils
+                .fetchAndValidateRealTimeTransform(definition);
 
         TransformMetadata metadata = transform.getMetadata();
 
@@ -75,15 +61,5 @@ public class TransformFunctionOperation extends Operation {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String getRTSClassFromPythonName(String packageName, String pythonModuleName) {
-        String[] tokens = pythonModuleName.split("_");
-        StringBuilder sb = new StringBuilder(packageName + ".");
-
-        for (String token : tokens) {
-            sb.append(StringUtils.capitalize(token));
-        }
-        return sb.toString();
     }
 }

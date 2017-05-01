@@ -17,10 +17,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -95,6 +97,7 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
         summary1.setTestConversionCount(20L);
         summary1.setTotalConversionCount(100L);
         summary1.setConstructionTime(System.currentTimeMillis());
+        summary1.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString());
         if (summary1.getConstructionTime() == null) {
             summary1.setConstructionTime(System.currentTimeMillis());
         }
@@ -112,7 +115,7 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
         summary1.addPredictor(s1p1);
         Predictor s1p2 = new Predictor();
         s1p2.setApprovedUsage("ModelAndModelInsights");
-        s1p2.setCategory("Banking");
+        s1p2.setCategory(Category.LEAD_INFORMATION.getName());
         s1p2.setName("Website_Custom");
         s1p2.setDisplayName("Website_Custom");
         s1p2.setFundamentalType("");
@@ -170,7 +173,10 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
         String uncompressedStr = new String(CompressionUtils.decompressByteArray(keyValue.getData()));
         assertEquals(keyValue.getTenantId(), summary1.getTenantId());
         assertTrue(uncompressedStr.contains("\"Segmentations\":"));
-        assertTrue(uncompressedStr.contains("\"RevenueUIIssueFixed\":true"));
+        assertTrue(
+                uncompressedStr.contains(String.format("\"%s\":true", ModelSummaryServiceImpl.REVENUE_UI_ISSUE_FIXED)));
+        assertTrue(uncompressedStr
+                .contains(String.format("\"%s\":true", ModelSummaryServiceImpl.ACCOUNT_CATEGORY_ISSUE_FIXED)));
         assertTrue(uncompressedStr.equals(keyValueEntityMgr.findByTenantId(tenant1.getPid()).get(0).getPayload()));
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -178,25 +184,35 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
         ArrayNode predictors = (ArrayNode) details.get("Predictors");
         for (JsonNode predictor : predictors) {
             assertTrue(!predictor.get("Name").asText().equals("WebMasterRegistrationsTopAttributes"));
-            if (!predictor.get("Name").asText().equals("BusinessAnnualSalesAbs")) {
-                continue;
-            }
-            ArrayNode elements = (ArrayNode) predictor.get("Elements");
-            for (JsonNode element : elements) {
-                if (element.get("LowerInclusive").asText() != null) {
-                    assertTrue(element.get("LowerInclusive").asLong() == 0
-                            || element.get("LowerInclusive").asLong() > 20000000);
-                }
-                if (element.get("UpperExclusive").asText() != null) {
-                    assertTrue(element.get("UpperExclusive").asLong() == 0
-                            || element.get("UpperExclusive").asLong() > 20000000);
-                }
+            if (predictor.get("Name").asText().equals(ModelSummaryServiceImpl.BUSINESS_ANNUAL_SALES_ABS)) {
+                testFixBusinessAnnualSalesAbs(predictor);
+            } else if (predictor.get("Name").asText().equals("Website_Custom")) {
+                testFixAccountCategory(predictor);
             }
         }
         retrievedSummary = modelSummaryService.getModelSummary(summary1.getId());
         KeyValue keyValue2 = retrievedSummary.getDetails();
         String uncompressedStr2 = new String(CompressionUtils.decompressByteArray(keyValue2.getData()));
         assertEquals(uncompressedStr, uncompressedStr2);
+    }
+
+    private void testFixBusinessAnnualSalesAbs(JsonNode predictor) {
+        ArrayNode elements = (ArrayNode) predictor.get(ModelSummaryServiceImpl.ELEMENTS);
+        for (JsonNode element : elements) {
+            if (element.get(ModelSummaryServiceImpl.LOWER_INCLUSIVE).asText() != null) {
+                assertTrue(element.get(ModelSummaryServiceImpl.LOWER_INCLUSIVE).asLong() == 0
+                        || element.get(ModelSummaryServiceImpl.LOWER_INCLUSIVE).asLong() > 20000000);
+            }
+            if (element.get(ModelSummaryServiceImpl.UPPER_EXCLUSIVE).asText() != null) {
+                assertTrue(element.get(ModelSummaryServiceImpl.UPPER_EXCLUSIVE).asLong() == 0
+                        || element.get(ModelSummaryServiceImpl.UPPER_EXCLUSIVE).asLong() > 20000000);
+            }
+        }
+    }
+
+    private void testFixAccountCategory(JsonNode predictor) {
+        String category = predictor.get(ModelSummaryServiceImpl.CATEGORY).asText();
+        assertEquals(category, Category.ACCOUNT_INFORMATION.getName());
     }
 
 }

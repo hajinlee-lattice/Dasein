@@ -104,12 +104,11 @@ public class SchemaRepository {
     private Table getTimeSeriesSchema() {
         Table table = createTable(SchemaInterpretation.TimeSeries);
         table.setLastModifiedKey(createLastModifiedKey("Timestamp"));
-        
+
         /*
-         * Each transaction row has to be associated with an account keyed off the following:
-         *   1. AccountId - could be SFDC external id
-         *   2. CompanyName+Location
-         *   3. DUNS number
+         * Each transaction row has to be associated with an account keyed off
+         * the following: 1. AccountId - could be SFDC external id 2.
+         * CompanyName+Location 3. DUNS number
          */
 
         table.addAttribute(attr("AccountId") //
@@ -252,7 +251,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Website) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .build());
         table.addAttribute(attr("Event") //
@@ -271,7 +270,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("City") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY", "BILLING CITY" })) //
@@ -279,7 +278,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.City) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("State") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "BILLING STATE", "BILLING PROVINCE" })) //
@@ -287,7 +286,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.State) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("Country") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY", "BILLING COUNTRY" })) //
@@ -295,7 +294,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Country) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("PostalCode") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "POSTALCODE", "BILLING ZIP", "POSTAL CODE" })) //
@@ -303,7 +302,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("DUNS") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "DUNS", "DUNS NUMBER" })) //
@@ -311,7 +310,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.DUNS) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
 
         table.addAttribute(attr("Industry") //
@@ -320,7 +319,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Industry) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("AnnualRevenue") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ANNUALREVENUE", "ANNUAL REVENUE" })) //
@@ -329,7 +328,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
                 .allowedDisplayNames(
@@ -339,7 +338,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("CreatedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CREATEDDATE", "CREATED DATE" })) //
@@ -348,7 +347,7 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("LastModifiedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
@@ -357,7 +356,7 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("YearStarted") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "YEARSTARTED", "YEAR STARTED" })) //
@@ -366,7 +365,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
@@ -374,7 +373,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
 
         return table;

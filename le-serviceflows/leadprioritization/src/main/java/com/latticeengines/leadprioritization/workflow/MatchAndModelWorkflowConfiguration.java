@@ -3,6 +3,9 @@ package com.latticeengines.leadprioritization.workflow;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.htrace.commons.logging.Log;
+import org.apache.htrace.commons.logging.LogFactory;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -15,8 +18,10 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -35,6 +40,9 @@ import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 
 public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
+
+    private static final Log log = LogFactory.getLog(MatchAndModelWorkflowConfiguration.class);
+
     public static class Builder {
         private MatchAndModelWorkflowConfiguration configuration = new MatchAndModelWorkflowConfiguration();
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
@@ -148,9 +156,20 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder transformationGroup(TransformationGroup transformationGroup) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
-            addStandardAttributes.setTransforms(TransformationPipeline.getTransforms(transformationGroup));
+            addStandardAttributes.setTransforms(getTransformDefinitions(transformationGroup));
             model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
             return this;
+        }
+
+        public List<TransformDefinition> getTransformDefinitions(TransformationGroup transformationGroup) {
+            String schemaInterpretationStr = addStandardAttributes.getSourceSchemaInterpretation();
+            log.info(String.format("Current model's schema is %s.", schemaInterpretationStr));
+            SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
+            if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+                return UpdateTransformDefinitionsUtils.updateTransformDefinitions(transformationGroup);
+            } else {
+                return TransformationPipeline.getTransforms(transformationGroup);
+            }
         }
 
         public Builder sourceModelSummary(ModelSummary modelSummary) {

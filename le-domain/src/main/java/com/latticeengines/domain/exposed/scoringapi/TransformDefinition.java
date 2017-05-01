@@ -39,9 +39,9 @@ public class TransformDefinition implements Serializable {
 
     @JsonIgnore
     public String outputDisplayName;
-    
+
     @JsonIgnore
-    public TransformationMetadata transformationMetadata; 
+    public TransformationMetadata transformationMetadata;
 
     @Override
     public int hashCode() {

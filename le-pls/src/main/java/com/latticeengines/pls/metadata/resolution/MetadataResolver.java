@@ -19,6 +19,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -56,6 +58,10 @@ public class MetadataResolver {
     }
 
     private Result result;
+
+    public MetadataResolver() {
+        super();
+    }
 
     public MetadataResolver(String csvPath, Configuration yarnConfiguration,
             FieldMappingDocument fieldMappingDocument) {
@@ -327,7 +333,7 @@ public class MetadataResolver {
         attribute.setPhysicalDataType(fieldType);
         attribute.setDisplayName(fieldName);
         attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
-        attribute.setCategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        attribute.setCategory(getCategoryBasedOnSchemaType(result.metadata.getInterpretation()));
         attribute.setFundamentalType(getFundamentalTypeFromFieldType(fieldType));
         attribute.setStatisticalType(getStatisticalTypeFromFieldType(fieldType));
         attribute.setNullable(true);
@@ -336,6 +342,18 @@ public class MetadataResolver {
         attribute.setTags(ModelingMetadata.INTERNAL_TAG);
 
         return attribute;
+    }
+
+    @VisibleForTesting
+    String getCategoryBasedOnSchemaType(String schemaInterpretationString) {
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationString);
+        switch (schemaInterpretation) {
+        case SalesforceAccount:
+            return ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION;
+        case SalesforceLead:
+        default:
+            return ModelingMetadata.CATEGORY_LEAD_INFORMATION;
+        }
     }
 
     private String getFundamentalTypeFromFieldType(String fieldType) {

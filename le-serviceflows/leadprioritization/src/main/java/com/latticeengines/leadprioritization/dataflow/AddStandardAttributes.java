@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.operations.GetAndValidateRealTimeTransformUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -121,6 +122,6 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
                 return last;
             }
         }
-        return last.addTransformFunction("com.latticeengines.transform.v2_0_25.functions", definition);
+        return last.addTransformFunction(GetAndValidateRealTimeTransformUtils.PACKATE_NAME, definition);
     }
 }

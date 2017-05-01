@@ -28,6 +28,7 @@ public class ModelingMetadata {
     public static final String RATIO_STAT_TYPE = "ratio";
     public static final String CATEGORY_EXTENSION = "Category";
     public static final String CATEGORY_LEAD_INFORMATION = "Lead Information";
+    public static final String CATEGORY_ACCOUNT_INFORMATION = "Account Information";
     public static final String CATEGORY_ONLINE_PRESENCE = "Online Presence";
     public static final String CATEGORY_GROWTH_TRENDS = "Growth Trends";
     public static final String CATEGORY_FIRMOGRAPHICS = "Firmographics";
@@ -57,7 +58,6 @@ public class ModelingMetadata {
             this.key = key;
             this.value = value;
         }
-
 
         @JsonProperty("Key")
         public String getKey() {
@@ -113,7 +113,7 @@ public class ModelingMetadata {
 
     public static class AttributeMetadata {
         @AllowedValues(values = { //
-        MODEL_APPROVED_USAGE, //
+                MODEL_APPROVED_USAGE, //
                 MODEL_AND_MODEL_INSIGHTS_APPROVED_USAGE, //
                 MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE, //
                 NONE_APPROVED_USAGE })
