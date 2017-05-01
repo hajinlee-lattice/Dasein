@@ -34,17 +34,21 @@
                     <td>{{ModelId}}</td>
                 </tr>
                 <tr>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_EVENT_TABLE_NAME_LABEL')}}</td>
+                    <td>{{EventTableName}}</td>
+                </tr>
+                <tr>
                     <td>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</td>
                     <td>
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/modeljson?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
-                        
+
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/predictorcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
-                        
+
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_DIAGNOSTICS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/diagnosticsjson?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
-                        
+
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_METADATA_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/metadataavsc?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a></span>
                     </td>

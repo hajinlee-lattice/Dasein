@@ -28,6 +28,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.TrainingFileExist = data.ModelDetails.TrainingFileExist;
     $scope.AuthToken = BrowserStorageUtility.getTokenDocument();
     $scope.sourceType = data.ModelDetails.SourceSchemaInterpretation;
+    $scope.EventTableName = data.EventTableProvenance.EventTableName;
     var propertyLength = data.ModelDetails.ModelSummaryProvenanceProperties.length;
     for (var i = 0; i < propertyLength; i++) {
         if (data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.option == ResourceUtility.getString("MODEL_TRAINING_FILE_PATH")) {
@@ -49,11 +50,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.exportThresholdClicked = function () {
         var csvRows = ThresholdExplorerService.PrepareExportData(data);
         alasql("SELECT * INTO CSV('performance.csv') FROM ?", [csvRows]);
-    };
-})
-.directive('adminInfoSummaryWidget', function () {
-    return {
-        templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
     };
 })
 .directive('healthScore', function() {
