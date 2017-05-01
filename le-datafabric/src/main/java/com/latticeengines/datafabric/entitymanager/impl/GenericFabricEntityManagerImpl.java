@@ -372,6 +372,8 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
                     log.error("Set GenericFabricEntityManagerImpl to be Disabled!");
                 }
             }
+        } else {
+            lastCheckTime = System.currentTimeMillis();
         }
     }
 
