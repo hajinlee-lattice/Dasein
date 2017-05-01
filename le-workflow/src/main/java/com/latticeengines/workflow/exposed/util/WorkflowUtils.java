@@ -24,24 +24,34 @@ public class WorkflowUtils {
             WorkflowJobEntityMgr workflowJobEntityMgr) {
         YarnApplicationState jobState = null;
 
-        if (workflowJob.getApplicationId() != null && (workflowJob.getStatus() == null
-                || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED)) {
+        if (workflowJob.getApplicationId() != null
+                && (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED)) {
             try {
-                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy
-                        .getJobStatus(workflowJob.getApplicationId());
+                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(workflowJob
+                        .getApplicationId());
                 jobState = status.getState();
                 workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
             } catch (Exception e) {
-                log.warn("Not able to find job status from yarn with applicationId:"
-                        + job.getApplicationId());
+                log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId()
+                        + ".  Assuming it failed and was purged from the system.");
+                com.latticeengines.domain.exposed.dataplatform.JobStatus terminal = getTerminalStatus(workflowJob);
+                jobState = terminal.getState();
+                workflowJobEntityMgr.updateStatusFromYarn(workflowJob, terminal);
             }
         }
         // We only trust the WorkflowJob status if it is non-null
-        JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus(),
-                jobState);
+        JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus(), jobState);
         if (status != null) {
             job.setJobStatus(status);
         }
+    }
+
+    private static com.latticeengines.domain.exposed.dataplatform.JobStatus getTerminalStatus(WorkflowJob workflowJob) {
+        com.latticeengines.domain.exposed.dataplatform.JobStatus terminal = new com.latticeengines.domain.exposed.dataplatform.JobStatus();
+        terminal.setStatus(FinalApplicationStatus.FAILED);
+        terminal.setState(YarnApplicationState.KILLED);
+        terminal.setStartTime(workflowJob.getStartTimeInMillis());
+        return terminal;
     }
 
     private static JobStatus getJobStatusFromFinalApplicationStatus(FinalApplicationStatus status,
