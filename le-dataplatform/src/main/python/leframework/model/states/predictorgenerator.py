@@ -85,6 +85,7 @@ class PredictorGenerator(State):
             elements.append(element)
 
         if len(elements) < 2:
+            self.logger.info("Since elements count is less than 2, do not include " + colname + " in predictor list.")
             return None
 
         predictor = OrderedDict()
