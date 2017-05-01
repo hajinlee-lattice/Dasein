@@ -1,5 +1,5 @@
-angular.module('common.datacloud.query.results', [ 
-    'common.datacloud.lookup' 
+angular.module('common.datacloud.query.results', [
+    'common.datacloud.lookup'
 ])
 .controller('QueryResultsStubCtrl', function($scope, $state, $stateParams, BrowserStorageUtility,
     QueryStore, SegmentServiceProxy, CountMetadata, Columns, Records, LookupStore) {
@@ -56,6 +56,7 @@ angular.module('common.datacloud.query.results', [
 
     vm.gotoCompanyProfile = function(column, value, row) {
         if ((column == 'name' && row.website) || column == 'website' || column == 'company') {
+            LookupStore.reset();
             LookupStore.add('timestamp', new Date().getTime());
 
             LookupStore.request.record[(row.company ? 'CompanyName' : 'Domain')] = (row.website ? row.website : value);
