@@ -74,7 +74,7 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
                 if yy[k][0] == 0 or yy[k][1] < self.totalPositiveThreshold:
                     return 1.0
                 return (yy[k][1] / yy[k][0]) / meanConversionRate
-            keyConversionRate = { k:PrecisionUtil.setPrecision(conversionRateCalc(k), 6) for k in yy.keys() }
+            keyConversionRate = { k:PrecisionUtil.setPrecision(conversionRateCalc(k), 10) for k in yy.keys() }
             self.categoricalColumnMapping[column] = keyConversionRate
 
     def __applyConversionRate(self, categoryValue):

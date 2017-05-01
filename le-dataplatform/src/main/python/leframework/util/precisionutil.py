@@ -11,7 +11,7 @@ class PrecisionUtil(object):
 
     @classmethod
     def setPrecisionOfValue(cls, x, precision):
-        if x is None or not isinstance(x, numbers.Real) or np.isnan(x) or x == 0.0:
+        if x is None or not isinstance(x, float) or np.isnan(x) or x == 0.0:
             return x
         l = np.log10(np.fabs(x))
         e = np.int64(l)
