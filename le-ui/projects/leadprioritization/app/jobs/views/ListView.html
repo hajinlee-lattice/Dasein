@@ -26,13 +26,12 @@
                 <search-filter query="query"></search-filter>
             </div>
             <div class="pull-right">
-                <a ng-if="state == 'all'" ui-sref="home.models"><button type="button" class="button orange-button">View Models</button></a>
                 <!--
                 <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
                 -->
 
                 <a ng-if="state == 'model'" ui-sref="home.model.scoring" class="button orange-button">Score a File</a>
-                
+
             </div>
         </div><!-- End .row -->
     </div><!-- End .table-header -->
@@ -43,7 +42,7 @@
             </pd-pagination-controls>
         </div>
     </div>
-    
+
     <div class="row jobs-table">
         <div class="columns twelve panel panel-default box-outline">
             <div class="section-body">
@@ -62,16 +61,16 @@
                 </table>
 
                 <div class="jobs-table-content">
-                    <div 
-                        data-job-status-row 
-                        data-ng-repeat="job in header.filter.filtered | 
-                            filter: query | 
-                            orderBy: header.sort.order + header.sort.property | 
+                    <div
+                        data-job-status-row
+                        data-ng-repeat="job in header.filter.filtered |
+                            filter: query |
+                            orderBy: header.sort.order + header.sort.property |
                             startFrom: (current - 1) * pagesize |
-                            limitTo: pagesize" 
+                            limitTo: pagesize"
                         job="job"
                         state="state"
-                        statuses="statuses" 
+                        statuses="statuses"
                         expanded="expanded"
                         cancelling="cancelling"
                         admin="isInternalAdmin"
