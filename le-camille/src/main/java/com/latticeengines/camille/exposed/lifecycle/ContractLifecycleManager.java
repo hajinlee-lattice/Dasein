@@ -66,8 +66,8 @@ public class ContractLifecycleManager {
     public static boolean exists(String contractId) throws Exception {
         LifecycleUtils.validateIds(contractId);
 
-        return CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId));
+        return CamilleEnvironment.getCamille()
+                .exists(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId));
     }
 
     public static ContractInfo getInfo(String contractId) throws Exception {
@@ -85,8 +85,8 @@ public class ContractLifecycleManager {
         List<AbstractMap.SimpleEntry<String, ContractInfo>> toReturn = new ArrayList<>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder
-                .buildContractsPath(CamilleEnvironment.getPodId()));
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c
+                .getChildren(PathBuilder.buildContractsPath(CamilleEnvironment.getPodId()));
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
             try {
@@ -95,7 +95,8 @@ public class ContractLifecycleManager {
                     toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), contractInfo));
                 }
             } catch (Exception ex) {
-                log.warn("Failed to get Contract Info.");
+                log.warn(String.format("Failed to get Contract Info for contract %s.",
+                        childPair.getValue().getSuffix()));
             }
         }
 
