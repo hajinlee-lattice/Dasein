@@ -26,6 +26,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 
 public class ModelingHdfsUtils {
 
@@ -92,22 +94,22 @@ public class ModelingHdfsUtils {
 
         String sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
                 sourceCustomerRoot + "/data/", eventTableName);
-        String targetStandardDataCompositionPath = sourceStandardDataCompositionPath.replace(sourceCustomerRoot,
-                targetCustomerRoot).replace(eventTableName, cpEventTableName);
+        String targetStandardDataCompositionPath = sourceStandardDataCompositionPath
+                .replace(sourceCustomerRoot, targetCustomerRoot).replace(eventTableName, cpEventTableName);
         HdfsUtils.copyFiles(yarnConfiguration, new Path(sourceStandardDataCompositionPath).getParent().toString(),
                 new Path(targetStandardDataCompositionPath).getParent().toString());
     }
 
-    public static String getModelFileNameFromLocalDir(String sourceModelLocalRoot) throws IllegalArgumentException,
-            IOException {
+    public static String getModelFileNameFromLocalDir(String sourceModelLocalRoot)
+            throws IllegalArgumentException, IOException {
         Configuration localFileSystemConfig = new Configuration();
         localFileSystemConfig.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
         return ModelingHdfsUtils.getModelFileName(localFileSystemConfig, sourceModelLocalRoot);
     }
 
     public static JsonNode constructNewModelSummary(String contents, String targetTenantId, String cpTrainingTableName,
-            String cpEventTableName, String uuid, String modelDisplayName, Map<String, Artifact> artifactsMap, String newModuleName)
-            throws IOException {
+            String cpEventTableName, String uuid, String modelDisplayName, Map<String, Artifact> artifactsMap,
+            String newModuleName, SourceFile sourceFile) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode json = objectMapper.readTree(contents);
 
@@ -120,6 +122,9 @@ public class ModelingHdfsUtils {
         ObjectNode provenance = (ObjectNode) json.get("EventTableProvenance");
         provenance.put("TrainingTableName", cpTrainingTableName);
         provenance.put("EventTableName", cpEventTableName);
+        if (sourceFile != null) {
+            provenance.put(ProvenancePropertyName.TrainingFilePath.getName(), sourceFile.getPath());
+        }
         if (!artifactsMap.isEmpty()) {
             if (artifactsMap.containsKey(ArtifactType.PivotMapping.getCode())) {
                 provenance.put("Pivot_Artifact_Path", artifactsMap.get(ArtifactType.PivotMapping.getCode()).getPath());
@@ -146,9 +151,8 @@ public class ModelingHdfsUtils {
         return new Path(paths.get(0)).getParent().getName();
     }
 
-    public static Map<String, Artifact> copyArtifactsInModule(Configuration yarnConfiguration,
-            List<Artifact> artifacts, CustomerSpace customerSpace, String newModuleName)
-            throws IllegalArgumentException, IOException {
+    public static Map<String, Artifact> copyArtifactsInModule(Configuration yarnConfiguration, List<Artifact> artifacts,
+            CustomerSpace customerSpace, String newModuleName) throws IllegalArgumentException, IOException {
         Map<String, Artifact> newArtifactsMap = new HashMap<>();
 
         for (Artifact artifact : artifacts) {
@@ -156,8 +160,8 @@ public class ModelingHdfsUtils {
             com.latticeengines.domain.exposed.camille.Path path = PathBuilder.buildMetadataPathForArtifactType(
                     CamilleEnvironment.getPodId(), //
                     customerSpace, newModuleName, artifactType);
-            String hdfsPath = String
-                    .format("%s/%s.%s", path.toString(), artifact.getName(), artifactType.getFileType());
+            String hdfsPath = String.format("%s/%s.%s", path.toString(), artifact.getName(),
+                    artifactType.getFileType());
             HdfsUtils.copyFiles(yarnConfiguration, artifact.getPath(), hdfsPath);
             Artifact newArtifact = new Artifact();
             newArtifact.setPath(hdfsPath);

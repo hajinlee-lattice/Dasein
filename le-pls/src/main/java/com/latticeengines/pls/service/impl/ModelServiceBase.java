@@ -29,7 +29,9 @@ import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -54,6 +56,9 @@ public abstract class ModelServiceBase implements ModelService {
 
     @Autowired
     protected TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    protected SourceFileEntityMgr sourceFileEntityMgr;
 
     @Value("${pls.modelingservice.basedir}")
     protected String customerBaseDir;
@@ -123,13 +128,14 @@ public abstract class ModelServiceBase implements ModelService {
             }
         }
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
+        SourceFile sourceFile = sourceFileEntityMgr.getByTableName(cpTrainingTableName);
         JsonNode newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
                 cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap,
-                newModuleName);
+                newModuleName, sourceFile);
 
         String modelFileName = ModelingHdfsUtils.getModelFileNameFromLocalDir(sourceModelLocalRoot);
-        JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName, "ms__"
-                + uuid + "-PLSModel");
+        JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName,
+                "ms__" + uuid + "-PLSModel");
         FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/enhancements/.modelsummary.json.crc"));
         FileUtils.write(new File(modelSummaryLocalPath), newModelSummary.toString(), "UTF-8", false);
 

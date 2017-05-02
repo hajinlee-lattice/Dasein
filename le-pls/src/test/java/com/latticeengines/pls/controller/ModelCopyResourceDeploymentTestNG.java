@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
@@ -204,8 +205,6 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         modelCopyService.copyModel(tenant2.getId(), ORIGINAL_MODELID);
 
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant2.getId());
-        // log.info("Wait for 900 seconds to download model summary");
-        // Thread.sleep(900000L);
 
         setupSecurityContext(tenant2);
 
@@ -242,6 +241,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         JsonNode provenance = json.get("EventTableProvenance");
         assertEquals(provenance.get("TrainingTableName").asText(), newTrainingTableName);
         assertEquals(provenance.get("EventTableName").asText(), newEventTableName);
+        assertEquals(provenance.get(ProvenancePropertyName.TrainingFilePath.getName()).asText(),
+                sourceFileEntityMgr.getByTableName(newTrainingTableName).getPath());
 
         paths = HdfsUtils.getFilesForDir(yarnConfiguration,
                 new Path(modelSummaryPath).getParent().getParent().toString(), ".*.model.json");
