@@ -8,20 +8,18 @@
     </ul>
     <div ng-if="!vm.loading">
         <div class="row controls">
-            <div class="columns six">
+            <div>
                 <h2>Build a segment with records that have:</h2>
             </div>
-            <div class="columns six">
-                <div class="pull-right">
-                    <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"
-                        class="button icon-button white-button" target="_self" download>
-                        <i class="fa fa-download"></i>
-                    </a>
-                    <button ng-if="!vm.inModel" class="button white-button" ui-sref="home.import.entry">Import Data</button>
-                    <button class="button icon-button white-button" ng-click="vm.goAttributes()" ng-disabled="vm.saving">Select Attributes</button>
-                    <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
-                    <button ng-if="vm.saving" disabled class="button icon-button blue-button">Saving <i class="fa fa-spinner fa-pulse fw"></i></button>
-                </div>
+            <div class="buttons">
+                <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"
+                    class="button icon-button white-button" target="_self" download>
+                    <i class="fa fa-download"></i>
+                </a>
+                <button ng-if="!vm.inModel" class="button white-button" ui-sref="home.import.entry">Import Data</button>
+                <button class="button icon-button white-button" ng-click="vm.goAttributes()" ng-disabled="vm.saving">Select Attributes</button>
+                <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
+                <button ng-if="vm.saving" disabled class="button icon-button blue-button">Saving <i class="fa fa-spinner fa-pulse fw"></i></button>
             </div>
         </div>
         <div class="row filter-group" ng-class="{disabled: vm.saving}">

@@ -13,11 +13,11 @@
         justify-content: center;
 
         .query {
-            @include flex-item(0 1 auto);
+            @include flex-item(1 0 auto);
         }
 
         .buttons {
-            @include flex-item(1 1 auto);
+            @include flex-item(1 0 auto);
             text-align: right;
             margin: 0 8px;
             button {
@@ -89,8 +89,16 @@
 
     .controls {
         margin-bottom: 10px;
-        button {
-            margin-left: 6px;
+        @include flex-container;
+        justify-content: center;
+
+        .buttons {
+            @include flex-item(1 0 auto);
+            text-align: right;
+            margin: 0 8px;
+            button {
+                margin-left: 6px;
+            }
         }
     }
 
