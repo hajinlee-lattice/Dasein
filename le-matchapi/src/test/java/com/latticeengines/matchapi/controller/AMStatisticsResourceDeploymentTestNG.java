@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -45,6 +46,9 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
 
     @Test(groups = { "deployment" }, enabled = true)
     public void testGetTopCube() {
+        for (BucketType t : BucketType.values()) {
+            log.info("BucketType " + t.name());
+        }
         AccountMasterFactQuery query = createQuery(CategoricalAttribute.ALL, CategoricalAttribute.ALL);
         AccountMasterCube cube = amStatsProxy.getCube(query);
         Assert.assertNotNull(cube);
