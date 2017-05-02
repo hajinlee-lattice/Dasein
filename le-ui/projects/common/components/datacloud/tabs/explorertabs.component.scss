@@ -13,6 +13,7 @@
         border-left: 1px solid #d0d1d0;
         max-width: 1200px;
         margin: 0 auto;
+        width: 100%; /* for IE */
         & > li {
             @include flex-item(1 1 auto);
             border-right: 1px solid #d0d1d0;

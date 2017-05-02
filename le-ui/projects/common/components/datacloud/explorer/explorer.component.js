@@ -1353,10 +1353,14 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
-    vm.selectSegmentAttributeRange = function(enrichment, stat) {
-        var attributeKey = enrichment.Attribute || enrichment.FieldName,
+    vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
+        var disable = disable || false,
+            attributeKey = enrichment.Attribute || enrichment.FieldName,
             attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Range),
             fieldName = enrichment.FieldName;
+        if(disable) {
+            return false;
+        }
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];

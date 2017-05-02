@@ -32,7 +32,7 @@
                         {{rating.Lbl}}
                     </li>
                     <li class="rating-bar">
-                        <div class="{{rating.Classname}}" style="width: 100%;" ng-style="{width:vm.percentage(rating.Lift, vm.latticeRatings.top_lift, '%', 0)}">
+                        <div class="{{rating.Classname}}" style="width: 100%;" ng-style="{width:vm.percentage(rating.Lift.toFixed(1), vm.latticeRatings.top_lift.toFixed(1), '%', 0)}">
                     </li>
                     <li class="rating-lift">{{rating.Lift.toFixed(1)}}x</li>
                     <li class="rating-count">{{rating.Cnt|number}}</li>
