@@ -1,5 +1,8 @@
 package com.latticeengines.leadprioritization.dataflow;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
@@ -24,29 +27,34 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         Node scoreTable = addSource(parameters.getScoreResultsTableName());
 
         Node scoreWithRating = scoreTable;
-        boolean noRatingColumnInScoreTable = scoreWithRating
-                .getSourceAttribute(ScoreResultField.Rating.displayName) == null ? true : false;
-        boolean notPMMLModel = parameters.getModelType() == null ? true
-                : parameters.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
+        boolean noRatingColumnInScoreTable = scoreWithRating.getSourceAttribute(ScoreResultField.Rating.displayName) == null ? true
+                : false;
+        boolean notPMMLModel = parameters.getModelType() == null ? true : parameters.getModelType().equals(
+                ModelType.PYTHONMODEL.getModelType());
 
         if (noRatingColumnInScoreTable && notPMMLModel) {
-            scoreWithRating = scoreTable.apply(
-                    new AddRatingColumnFunction(ScoreResultField.Percentile.displayName,
-                            ScoreResultField.Rating.displayName, parameters.getBucketMetadata()),
-                    new FieldList(ScoreResultField.Percentile.displayName),
-                    new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
+            scoreWithRating = scoreTable.apply(new AddRatingColumnFunction(ScoreResultField.Percentile.displayName,
+                    ScoreResultField.Rating.displayName, parameters.getBucketMetadata()), new FieldList(
+                    ScoreResultField.Percentile.displayName), new FieldMetadata(ScoreResultField.Rating.displayName,
+                    String.class));
         }
 
         Node combinedResultTable = null;
+        String idColumn;
         if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {
-            combinedResultTable = inputTable.leftJoin(InterfaceName.Id.name(), scoreWithRating,
-                    InterfaceName.Id.name());
+            idColumn = InterfaceName.Id.name();
         } else {
-            combinedResultTable = inputTable.leftJoin(InterfaceName.InternalId.name(), scoreWithRating,
-                    InterfaceName.InternalId.name());
+            idColumn = InterfaceName.InternalId.name();
         }
 
-        combinedResultTable = combinedResultTable.groupByAndLimit(new FieldList(InterfaceName.InternalId.name()), 1);
+        List<String> retainFields = new ArrayList<>(inputTable.getFieldNames());
+        List<String> scoreWithRatingColumns = scoreWithRating.getFieldNames();
+        scoreWithRatingColumns.remove(idColumn);
+        retainFields.addAll(scoreWithRatingColumns);
+
+        combinedResultTable = inputTable.leftJoin(idColumn, scoreWithRating, idColumn);
+        combinedResultTable = combinedResultTable.groupByAndLimit(new FieldList(idColumn), 1);
+        combinedResultTable = combinedResultTable.retain(new FieldList(retainFields));
         return combinedResultTable;
     }
 
