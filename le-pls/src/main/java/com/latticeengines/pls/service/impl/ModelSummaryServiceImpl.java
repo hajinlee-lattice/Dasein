@@ -186,7 +186,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             if (!summary.getModelType().equals(ModelType.PMML.getModelType())) {
                 fixBusinessAnnualSalesAbs(summary);
                 fixLATTICEGT200DiscreteValue(summary);
-                if (summary.getSourceSchemaInterpretation().equals(SchemaInterpretation.SalesforceAccount.toString())) {
+                String sourceSchemaInterpretationStr = summary.getSourceSchemaInterpretation();
+                if (sourceSchemaInterpretationStr != null
+                        && sourceSchemaInterpretationStr.equals(SchemaInterpretation.SalesforceAccount.toString())) {
                     fixAccountCategory(summary);
                 }
             }

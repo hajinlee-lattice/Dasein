@@ -346,12 +346,21 @@ public class MetadataResolver {
 
     @VisibleForTesting
     String getCategoryBasedOnSchemaType(String schemaInterpretationString) {
-        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationString);
-        switch (schemaInterpretation) {
-        case SalesforceAccount:
-            return ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION;
-        case SalesforceLead:
-        default:
+        if (schemaInterpretationString == null) {
+            log.warn("schema string is null");
+            return ModelingMetadata.CATEGORY_LEAD_INFORMATION;
+        }
+        try {
+            SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationString);
+            switch (schemaInterpretation) {
+            case SalesforceAccount:
+                return ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION;
+            case SalesforceLead:
+            default:
+                return ModelingMetadata.CATEGORY_LEAD_INFORMATION;
+            }
+        } catch (Exception e) {
+            log.warn(String.format("Error finding proper category for schema string %s", schemaInterpretationString));
             return ModelingMetadata.CATEGORY_LEAD_INFORMATION;
         }
     }

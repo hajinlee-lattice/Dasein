@@ -17,5 +17,9 @@ public class MetadatatResolverUnitTestNG {
                 ModelingMetadata.CATEGORY_LEAD_INFORMATION);
         Assert.assertEquals(metadataResolver.getCategoryBasedOnSchemaType("Category"),
                 ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        Assert.assertEquals(metadataResolver.getCategoryBasedOnSchemaType("someRandomeCategory"),
+                ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        Assert.assertEquals(metadataResolver.getCategoryBasedOnSchemaType(null),
+                ModelingMetadata.CATEGORY_LEAD_INFORMATION);
     }
 }

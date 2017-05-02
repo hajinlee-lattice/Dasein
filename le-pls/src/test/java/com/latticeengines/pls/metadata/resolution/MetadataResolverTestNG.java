@@ -102,7 +102,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Attribute attribute = table.getAttribute("Some_Column");
         assertEquals(attribute.getTags().size(), 1);
         assertEquals(attribute.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
-        assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+        assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION);
         assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_ALPHA);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
@@ -123,7 +123,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         for (Attribute a : table.getAttributes()) {
             assertNotEquals(a.getTags(), 0);
             assertEquals(a.getTags().get(0), ModelingMetadata.INTERNAL_TAG);
-            assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+            assertEquals(attribute.getCategory(), ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION);
         }
         assertTrue(resolver.isMetadataFullyDefined());
     }
