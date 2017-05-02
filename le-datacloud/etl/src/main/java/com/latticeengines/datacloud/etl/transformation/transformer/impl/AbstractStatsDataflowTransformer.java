@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,29 +29,18 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.DimensionAttributeProxy;
 
-@Component("accountMasterStatsTransformer")
-public class AccountMasterStatsTransformer
+public abstract class AbstractStatsDataflowTransformer
         extends AbstractDataflowTransformer<AccountMasterStatisticsConfig, AccountMasterStatsParameters> {
-    private static final Log log = LogFactory.getLog(AccountMasterStatsTransformer.class);
+    private static final Log log = LogFactory.getLog(AbstractStatsDataflowTransformer.class);
 
     @Autowired
-    private DimensionAttributeProxy dimensionAttributeProxy;
+    protected DimensionAttributeProxy dimensionAttributeProxy;
 
     @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
+    protected ColumnMetadataProxy columnMetadataProxy;
 
     @Autowired
-    private AccountMasterReport accountMasterReport;
-
-    @Override
-    public String getName() {
-        return "accountMasterStatsTransformer";
-    }
-
-    @Override
-    protected String getDataFlowBeanName() {
-        return "accountMasterStatsFlow";
-    }
+    protected AccountMasterReport accountMasterReport;
 
     @Override
     public boolean validateConfig(AccountMasterStatisticsConfig config, List<String> baseSources) {
@@ -85,6 +73,7 @@ public class AccountMasterStatsTransformer
 
         for (CategoricalDimension dimension : allDimensions) {
             finalDimensionColumns.add(dimension.getDimension());
+            System.out.println(this.getClass());
             if (dimensions.contains(dimension.getDimension())) {
                 requiredDimensions.put(dimension.getDimension(), dimension);
                 List<CategoricalAttribute> dimensionAttrDetails = //
@@ -215,5 +204,4 @@ public class AccountMasterStatsTransformer
                 dimensionAttributeProxy.getAllAttributes(rootId);
         return allAttributes;
     }
-
 }
