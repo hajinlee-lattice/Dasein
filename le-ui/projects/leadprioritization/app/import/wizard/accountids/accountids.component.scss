@@ -3,6 +3,12 @@
         background-image: url('/assets/images/ico-data-import-dark.png');
     }
 
+    select {
+        background: #fff;
+        height: 30px;
+        font-size: 14px;
+    }
+
     .dedupe-options {
         @include flex-container;
         flex-direction: row;
