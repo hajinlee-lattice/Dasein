@@ -3,6 +3,8 @@ package com.latticeengines.pls.service.impl;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,6 +45,7 @@ import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
 
 public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
+    private static final Log log = LogFactory.getLog(TenantConfigServiceImplTestNG.class);
     private final static String contractId = "PLSTenantConfig";
     private final static String tenantId = contractId;
     private final static String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
@@ -278,6 +281,22 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprec
             logger.error("Error modifying the zookeeper node.");
         }
         Assert.assertEquals(configService.getMaxPremiumLeadEnrichmentAttributes(tenantId), 12);
+    }
+
+    @Test(groups = "functional")
+    public void testGetSystemStatus() {
+        Camille camille = CamilleEnvironment.getCamille();
+        Path plsPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), TenantConfigServiceImpl.PLS);
+        plsPath = plsPath.append(TenantConfigServiceImpl.SYSTEM_STATUS);
+        log.info("pls path : " + plsPath);
+        try {
+            camille.set(plsPath, new Document(TenantConfigServiceImpl.OK));
+            Assert.assertTrue(configService.getSystemStatus());
+            camille.set(plsPath, new Document(""));
+            Assert.assertFalse(configService.getSystemStatus());
+        } catch (Exception e) {
+            log.error("Failed to access zookeeper node");
+        }
     }
 
     private void testOverwriteFlag(String flagId, Boolean value) {

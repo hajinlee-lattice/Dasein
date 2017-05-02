@@ -37,7 +37,7 @@ public class HealthResource {
         if (dnbAvailable) {
             return StatusDocument.ok();
         } else {
-            return StatusDocument.unavailable();
+            return StatusDocument.matcherIsBusy();
         }
     }
 }

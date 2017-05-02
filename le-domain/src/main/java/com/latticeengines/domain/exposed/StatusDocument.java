@@ -13,7 +13,8 @@ public class StatusDocument {
     public static final String DOWN = "DOWN";
     public static final String UP = "UP";
     public static final String OK = "OK";
-    public static final String UNAVAILABLE = "UNAVAILABLE";
+    public static final String MATCHER_IS_BUSY = "MATCHER_IS_BUSY";
+    public static final String UNDER_MAINTAINANCE = "UNDER_MAINTAINANCE";
 
     private String status;
 
@@ -51,8 +52,12 @@ public class StatusDocument {
         return new StatusDocument(DOWN);
     }
 
-    public static StatusDocument unavailable() {
-        return new StatusDocument(UNAVAILABLE);
+    public static StatusDocument matcherIsBusy() {
+        return new StatusDocument(MATCHER_IS_BUSY);
+    }
+
+    public static StatusDocument underMaintainance() {
+        return new StatusDocument(UNDER_MAINTAINANCE);
     }
 
     @Override

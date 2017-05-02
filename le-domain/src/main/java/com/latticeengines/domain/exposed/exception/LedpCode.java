@@ -242,6 +242,7 @@ public enum LedpCode {
     LEDP_18136("Same load vdb table job is already submitted."), //
     LEDP_18137("Same load vdb table job is running with application id {0}"), //
     LEDP_18138("Same load vdb table job is already succeeded."), //
+    LEDP_18139("System is under maintainance"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
