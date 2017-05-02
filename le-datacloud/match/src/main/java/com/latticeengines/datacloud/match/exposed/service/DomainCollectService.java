@@ -6,4 +6,6 @@ public interface DomainCollectService {
 
     void dumpQueue();
 
+    int getQueueSize();
+
 }

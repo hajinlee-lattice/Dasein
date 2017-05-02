@@ -151,4 +151,8 @@ public class DomainCollectServiceImpl implements DomainCollectService {
                 createDate);
     }
 
+    public int getQueueSize() {
+        return domainSet.size();
+    }
+
 }

@@ -2,11 +2,14 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DynamoDBLookupService;
 import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
 import com.latticeengines.datacloud.match.entitymgr.LatticeAccountMgr;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
+import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -53,6 +57,12 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
     @Autowired
     @Resource(name = "dynamoDBLookupService")
     private DataSourceLookupService dynamoDataSourceLookupService;
+
+    @Autowired
+    private DomainCollectService domainCollectService;
+
+    // Service in other proj will push metric here
+    private ConcurrentMap<String, String> externalMetrics = new ConcurrentHashMap<>();
 
     @Autowired
     @Qualifier("taskScheduler")
@@ -95,19 +105,34 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
                     "total accepted records (include records removed from queues but still being processed): %d\n",
                     dnbTotalStats.get(MatchConstants.REQUEST_NUM)));
             sb.append(String.format("total cached return addrs: %d\n", dnbTotalStats.get(MatchConstants.ADDRESS_NUM)));
-            // DynamoLookupService Checking
-            Map<String, Integer> dynamoPendingStats = dynamoDBLookupService.getPendingReqStats();
-            Map<String, Integer> dynamoTotalStats = dynamoDataSourceLookupService.getTotalPendingReqStats();
-            sb.append("DYNAMO FETCH\n");
-            sb.append(String.format("pending records in queue: %d\n",
-                    dynamoPendingStats.get(MatchConstants.REQUEST_NUM)));
+        } else {
+            // DnBLookupService Checking
+            Map<String, Integer> dnbTotalStats = dnbDataSourceLookupService.getTotalPendingReqStats();
+            sb.append("DNB REALTIME\n");
             sb.append(String.format(
                     "total accepted records (include records removed from queues but still being processed): %d\n",
-                    dynamoTotalStats.get(MatchConstants.REQUEST_NUM)));
-            sb.append(
-                    String.format("total cached return addrs: %d\n", dynamoTotalStats.get(MatchConstants.ADDRESS_NUM)));
-        } else {
+                    dnbTotalStats.get(MatchConstants.REQUEST_NUM)));
+            sb.append(String.format("total cached return addrs: %d\n", dnbTotalStats.get(MatchConstants.ADDRESS_NUM)));
 
+        }
+        // DynamoLookupService Checking
+        Map<String, Integer> dynamoPendingStats = dynamoDBLookupService.getPendingReqStats();
+        Map<String, Integer> dynamoTotalStats = dynamoDataSourceLookupService.getTotalPendingReqStats();
+        sb.append("DYNAMO FETCH\n");
+        sb.append(String.format("pending records in queue: %d\n", dynamoPendingStats.get(MatchConstants.REQUEST_NUM)));
+        sb.append(String.format(
+                "total accepted records (include records removed from queues but still being processed): %d\n",
+                dynamoTotalStats.get(MatchConstants.REQUEST_NUM)));
+        sb.append(String.format("total cached return addrs: %d\n", dynamoTotalStats.get(MatchConstants.ADDRESS_NUM)));
+        // DomainCollectService Checking
+        sb.append("DOMAIN COLLECT\n");
+        sb.append(String.format("pending domains in queue: %d\n", domainCollectService.getQueueSize()));
+        // External Services Checking
+        synchronized (externalMetrics) {
+            for (String service : externalMetrics.keySet()) {
+                sb.append(service);
+                sb.append(externalMetrics.get(service));
+            }
         }
         log.info(sb.toString());
     }
@@ -142,5 +167,19 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
                 throw new RuntimeException("LatticeAccountMgr is disabled.");
             }
         }
+    }
+
+    public void pushMetrics(String service, String message) {
+        if (StringUtils.isBlank(service) || StringUtils.isBlank(message)) {
+            return;
+        }
+        service = service.toUpperCase();
+        if (!StringUtils.endsWith(service, "\n")) {
+            service += "\n";
+        }
+        if (!StringUtils.endsWith(message, "\n")) {
+            message += "\n";
+        }
+        externalMetrics.put(service, message);
     }
 }

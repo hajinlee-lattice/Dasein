@@ -4,4 +4,6 @@ public interface MatchMonitorService {
     void precheck(String matchVersion);
 
     void monitor();
+
+    void pushMetrics(String service, String message);
 }

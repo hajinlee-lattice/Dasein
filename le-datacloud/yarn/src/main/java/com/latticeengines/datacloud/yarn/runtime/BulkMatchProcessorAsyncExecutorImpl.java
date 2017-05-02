@@ -213,6 +213,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             internalCompletedRecords.addAll(currentCompletedRecords);
             internalRecords.removeAll(currentCompletedRecords);
         }
+        matchMonitorService.pushMetrics("FUTURES", String.format("futures in actor system: %d", futures.size()));
     }
 
     private void checkIfProceed(ProcessorContext processorContext) {
