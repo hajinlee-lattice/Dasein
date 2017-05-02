@@ -41,12 +41,8 @@ public class AMStatsResource {
     private void getCube(@RequestBody AccountMasterFactQuery query, HttpServletResponse response) {
         AccountMasterCube cube = accountMasterStatisticsService.query(query);
         try {
-            // Temporary log to debug failed matchapi test
-            log.info("GetCube api is hit");
             GzipUtils.writeToGzipStream(response, cube);
-            log.info("Api success");
         } catch (IOException e) {
-            log.error("Exception in getCube", e);
             throw new RuntimeException(e);
         }
     }

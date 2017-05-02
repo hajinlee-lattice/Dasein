@@ -29,8 +29,6 @@ public class AMStatsUtils {
     public static <T> T decompressAndDecode(String compressed, Class<T> clazz) throws IOException {
         byte[] bytes = Base64Utils.decodeBase64(compressed);
         String json = GzipUtils.decompress(bytes);
-        // Temporary log to debug failed matchapi test
-        log.info(json);
         T obj = om.readValue(json, clazz);
         return obj;
     }
