@@ -156,7 +156,8 @@ public class ComponentOrchestrator {
         }
     }
 
-    void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo, String tenantId) {
+    void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo,
+            String tenantId) {
         boolean installSuccess = checkComponentsBootStrapStatus(visitor);
         emailService(installSuccess, prodAndExternalAminInfo, tenantId);
     }
@@ -174,7 +175,8 @@ public class ComponentOrchestrator {
         List<String> existingEmailList = new ArrayList<String>();
         List<LatticeProduct> products = prodAndExternalAminInfo.products;
         if (allComponentsSuccessful) {
-            if (products.contains(LatticeProduct.PD) || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
+            if (products.contains(LatticeProduct.PD)
+                    || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
                 Map<String, Boolean> externalEmailMap = prodAndExternalAminInfo.getExternalEmailMap();
                 Set<String> externalEmails = externalEmailMap.keySet();
                 for (String externalEmail : externalEmails) {
@@ -294,8 +296,9 @@ public class ComponentOrchestrator {
                         state = batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId,
                                 component.getName());
                         if (numOfRetries-- % 10 == 0) {
-                            log.info(String.format("Bootstrap status of [%s] is %s, %d out of %d retries remained.",
-                                    component.getName(), state.state.toString(), numOfRetries, NUM_RETRIES));
+                            log.info(String.format(
+                                    "Bootstrap status of [%s] of tenant %s is %s, %d out of %d retries remained.",
+                                    component.getName(), tenantId, state.state.toString(), numOfRetries, NUM_RETRIES));
                         }
                         try {
                             Thread.sleep(WAIT_INTERVAL);
