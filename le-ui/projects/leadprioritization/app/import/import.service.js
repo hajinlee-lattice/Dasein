@@ -21,7 +21,7 @@ angular.module('lp.import')
 
     this.getCustomFields = function(type) {
         var data = [],
-            total = Math.floor(Math.random() * 10 + 1),
+            total = 7, //Math.floor(Math.random() * 10 + 1),
             types = ['Text', 'Number', 'Boolean', 'Date'];
         for(var i=0;i<total;i++) {
             var tmp = {
