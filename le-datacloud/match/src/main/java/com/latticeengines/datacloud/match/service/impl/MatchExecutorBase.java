@@ -120,7 +120,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .withStandardisedNameLocation(record.getParsedNameLocation());
             matchHistory.setIsPublicDomain(record.isPublicDomain()).setLatticeAccountId(record.getLatticeAccountId());
 
-            matchHistory.setMatched(record.isMatched()).setMatchedDomain(record.getMatchedDomain())
+            matchHistory.setMatchedDomain(record.getMatchedDomain())
                     .setMatchedEmail(record.getMatchedEmail()).setMatchedDUNS(record.getMatchedDuns())
                     .withMatchedNameLocation(record.getMatchedNameLocation());
             matchHistory.setMatchedEmployeeRange(record.getMatchedEmployeeRange())
