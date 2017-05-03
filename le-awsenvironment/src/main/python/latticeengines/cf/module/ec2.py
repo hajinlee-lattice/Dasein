@@ -128,6 +128,12 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                     }
                 },
                 "commands" : {
+                    "00_yum_update" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "yum update -y"
+                        ] ] }
+                    },
                     "01_save_ip" : {
                         "command" : { "Fn::Join": [ "\n", [
                             "#!/bin/bash",
