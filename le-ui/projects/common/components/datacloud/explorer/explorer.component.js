@@ -109,6 +109,16 @@ angular.module('common.datacloud.explorer', [
         return false;
     }
 
+    vm.relanding = function(huh) {
+        /*
+         * Rebuild the tile table items
+         */
+        vm.TileTableItems = {};
+        if(vm.metadataSegments || QueryRestriction) {
+            getExplorerSegments(vm.enrichments);
+        }
+    }
+
     vm.filter = function(items, property, value, debug) {
         if (property.indexOf('.') > -1) {
             var propsList = property.split('.');
@@ -1191,7 +1201,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.makeSegmentsRangeKey = function(enrichment, range){
         var fieldName = enrichment.Attribute || enrichment.FieldName,
-            key = fieldName + Object.values(range).join('');
+            key = fieldName + (range ? Object.values(range).join('') : '');
         return key;
     }
 
@@ -1330,7 +1340,6 @@ angular.module('common.datacloud.explorer', [
     
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
-        //vm.TileTableItems = {}; //ben
         if(!vm.cube.Stats) {
             return false;
         }

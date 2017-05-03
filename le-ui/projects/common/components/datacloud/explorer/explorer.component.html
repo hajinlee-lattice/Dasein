@@ -1,4 +1,5 @@
 <div class="enrichment-wizard-container container section-{{vm.section}}">
+    <div ng-if="!vm.category" ng-init="vm.relanding()"></div>
     <div class="status-alert-box {{vm.status_alert.type}}" ng-if="vm.status_alert.show">
         <div class="icon"></div>
         <div class="message" ng-bind-html="vm.status_alert.message"></div>

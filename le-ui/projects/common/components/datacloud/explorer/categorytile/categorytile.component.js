@@ -61,7 +61,7 @@ angular
                 if(vm.lookupMode) {
                     order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
                 } else if(vm.section == 'segment.analysis') {
-                    order = [ 'SegmentChecked', '-Value' ];
+                    order = [ 'SegmentChecked', '-NonNullCount', '-Value' ];
                 } else {
                     order = [ '-HighlightHighlighted', '-Value' ];
                 }
