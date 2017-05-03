@@ -84,7 +84,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             }
             keyValueDao.create(details);
         }
-
+        summary.setLastUpdateTime(System.currentTimeMillis());
         modelSummaryDao.create(summary);
 
         for (ModelSummaryProvenanceProperty provenanceProperty : summary.getModelSummaryProvenanceProperties()) {

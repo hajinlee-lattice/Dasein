@@ -28,9 +28,6 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 
     private static final Log log = LogFactory.getLog(ModelSummaryDownloadCallable.class);
 
-    private static Date lastFullDownloadTime = new Date(0);
-    private static int partialDownloadCount = 0;
-
     private TenantEntityMgr tenantEntityMgr;
     private String modelServiceHdfsBaseDir;
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -41,8 +38,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     private AsyncTaskExecutor modelSummaryDownloadExecutor;
     private TimeStampContainer timeStampContainer;
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
-    private long fullDownloadInterval;
-    private int maxPartialDownloadCount;
+    private boolean incremental;
 
     public ModelSummaryDownloadCallable(Builder builder) {
         this.tenantEntityMgr = builder.getTenantEntityMgr();
@@ -55,8 +51,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         this.modelSummaryDownloadExecutor = builder.getModelSummaryDownloadExecutor();
         this.timeStampContainer = builder.getTimeStampContainer();
         this.modelSummaryDownloadFlagEntityMgr = builder.getModelSummaryDownloadFlagEntityMgr();
-        this.fullDownloadInterval = builder.getFullDownloadInterval();
-        this.maxPartialDownloadCount = builder.getMaxPartialDownloadCount();
+        this.incremental = builder.getIncremental();
     }
 
     private Future<Boolean> downloadModel(Tenant tenant, Set<String> modelSummaryIds) {
@@ -84,19 +79,15 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             log.debug(timeStampContainer.getTimeStamp().getSeconds());
         }
 
-
-        if (needFullDownload()) {
+        if (!incremental) {
             Boolean result = fullDownload();
-            if (result) {
-                partialDownloadCount = 0;
-                lastFullDownloadTime = new Date(System.currentTimeMillis());
-                modelSummaryDownloadFlagEntityMgr.removeDownloadedFlag(lastFullDownloadTime.getTime()
-                        - 60 * 60 * 1000L);
-            }
             return result;
         } else {
             Boolean result = partialDownload();
-            partialDownloadCount++;
+            if (result) {
+                modelSummaryDownloadFlagEntityMgr.removeDownloadedFlag(System.currentTimeMillis()
+                        - 60 * 60 * 1000L);
+            }
             return result;
         }
     }
@@ -113,17 +104,6 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             }
         }
         return modelSummaryIds;
-    }
-
-    private Boolean needFullDownload() {
-        Date now = new Date(System.currentTimeMillis());
-        if (now.getTime() - lastFullDownloadTime.getTime() > fullDownloadInterval * 1000) {
-            return true;
-        } else if (partialDownloadCount > maxPartialDownloadCount) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private Boolean partialDownload() {
@@ -158,12 +138,20 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 
     private Boolean fullDownload() {
         long startTime = System.currentTimeMillis();
+        List<String> waitingFlags = modelSummaryDownloadFlagEntityMgr.getWaitingFlags();
+        HashSet<String> tenantIds = null;
+        if (waitingFlags != null && waitingFlags.size() > 0) {
+            tenantIds = new HashSet<>(waitingFlags);
+        }
         List<Tenant> tenants = tenantEntityMgr.findAll();
 
         Set<String> modelSummaryIds = getModelSummaryIds();
         log.info(String.format("Full download for total %d tenants", tenants.size()));
         List<Future<Boolean>> futures = new ArrayList<>();
         for (Tenant tenant : tenants) {
+            if (tenantIds != null && tenantIds.contains(tenant.getId())) {
+                continue;
+            }
             futures.add(downloadModel(tenant, modelSummaryIds));
         }
 
@@ -192,8 +180,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         private AsyncTaskExecutor modelSummaryDownloadExecutor;
         private TimeStampContainer timeStampContainer;
         private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
-        private long fullDownloadInterval;
-        private int maxPartialDownloadCount;
+        private boolean incremental;
 
         public Builder() {
 
@@ -250,13 +237,8 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder fullDownloadInterval(long fullDownloadInterval) {
-            this.fullDownloadInterval = fullDownloadInterval;
-            return this;
-        }
-
-        public Builder maxPartialDownloadCount(int maxPartialDownloadCount) {
-            this.maxPartialDownloadCount = maxPartialDownloadCount;
+        public Builder incremental(boolean incremental) {
+            this.incremental = incremental;
             return this;
         }
 
@@ -300,12 +282,8 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             return modelSummaryDownloadFlagEntityMgr;
         }
 
-        public long getFullDownloadInterval() {
-            return fullDownloadInterval;
-        }
-
-        public int getMaxPartialDownloadCount() {
-            return maxPartialDownloadCount;
+        public boolean getIncremental() {
+            return incremental;
         }
 
     }

@@ -17,6 +17,17 @@
         <property name="jobTimeout" value="${quartz.pls.modelsummarydownload.job.timeout:3600}" />
     </bean>
 
+    <bean name="plsModelSummaryFullDownload" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="modelSummaryFullDownload" />
+        <property name="cronTrigger" value="${quartz.pls.modelsummaryfulldownload.job.cron:0 0/20 * * * ?}" />
+        <property name="destUrl" value="${quartz.pls.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.pls.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.pls.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.pls.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;modelSummaryFullDownload&quot;}" />
+        <property name="jobTimeout" value="${quartz.pls.modelsummaryfulldownload.job.timeout:3600}" />
+    </bean>
+
     <bean name="plsSourceFilePurge" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="sourceFilePurge" />
         <property name="cronTrigger" value="${quartz.pls.sourcefilepurge.job.cron:0 0 5 * * ?}" />
@@ -118,6 +129,7 @@
 
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="plsModelSummaryDownload"/>
+        <ref bean="plsModelSummaryFullDownload"/>
         <ref bean="dataplatformDLOrchestration"/>
         <ref bean="dataplatformJobWatchdog"/>
         <ref bean="dellebiDailyJob1"/>

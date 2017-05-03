@@ -20,70 +20,12 @@ import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("modelSummaryDownload")
-public class ModelSummaryDownloadBean implements QuartzJobBean {
-
-    @Value("${pls.modelingservice.basedir}")
-    private String modelingServiceHdfsBaseDir;
-
-    @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
-
-    @Autowired
-    private TimeStampContainer timeStampContainer;
-
-    @Autowired
-    private FeatureImportanceParser featureImportanceParser;
-
-    @Autowired
-    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
-
-    @Autowired
-    private BucketedScoreService bucketedScoreService;
-
-    @Value("${pls.downloader.max.pool.size}")
-    private int maxPoolSize;
-
-    @Value("${pls.downloader.core.pool.size}")
-    private int corePoolSize;
-
-    @Value("${pls.downloader.queue.capacity}")
-    private int queueCapacity;
-
-    @Value("${pls.downloader.full.download.interval:300}")
-    private long fullDownloadInterval;
-
-    @Value("${pls.downloader.partial.count:20}")
-    private int maxPartialDownloadCount;
-
-    @Autowired
-    @Qualifier("taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
+public class ModelSummaryDownloadBean extends ModelSummaryDownloadAbstractBean implements QuartzJobBean {
 
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
-        ModelSummaryDownloadCallable.Builder builder = new ModelSummaryDownloadCallable.Builder();
-        builder.tenantEntityMgr(tenantEntityMgr)//
-                .modelServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-                .modelSummaryEntityMgr(modelSummaryEntityMgr) //
-                .bucketedScoreService(bucketedScoreService) //
-                .yarnConfiguration(yarnConfiguration) //
-                .modelSummaryParser(modelSummaryParser)
-                .featureImportanceParser(featureImportanceParser)
-                .modelSummaryDownloadExecutor(taskExecutor)
-                .timeStampContainer(timeStampContainer)
-                .modelSummaryDownloadFlagEntityMgr(modelSummaryDownloadFlagEntityMgr)
-                .fullDownloadInterval(fullDownloadInterval)
-                .maxPartialDownloadCount(maxPartialDownloadCount);
-        return new ModelSummaryDownloadCallable(builder);
+        super.setIncremental(true);
+        return super.getCallable(jobArguments);
     }
 
 }
