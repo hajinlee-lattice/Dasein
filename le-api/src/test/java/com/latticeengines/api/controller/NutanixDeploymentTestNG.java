@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -38,6 +39,9 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Value("${common.test.modeling.url}")
+    protected String modelingEndpointHost;
 
     private Model model;
 
@@ -76,7 +80,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     }
 
     private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
-        StringList features = restTemplate.postForObject(restEndpointHost + "/rest/features", model,
+        StringList features = restTemplate.postForObject(modelingEndpointHost + "/rest/features", model,
                 StringList.class, new Object[] {});
         return new AbstractMap.SimpleEntry<String, List<String>>("P1_Event", features.getElements());
     }
@@ -84,7 +88,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     @Test(groups = "deployment", enabled = true)
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig();
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -123,7 +127,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.setCustomer(this.model.getCustomer());
         samplingConfig.setTable(this.model.getTable());
 
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples",
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -139,8 +143,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
-        config.setTargets(Arrays.<String>asList(new String[] { "P1_Event" }));
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/profile", config,
+        config.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
@@ -152,8 +156,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         this.model.setFeaturesList(targetAndFeatures.getValue());
         this.model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/submit",
-                this.model, AppSubmission.class, new Object[] {});
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", this.model,
+                AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
 
         for (String appIdStr : submission.getApplicationIds()) {

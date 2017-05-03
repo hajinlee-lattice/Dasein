@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -31,19 +32,22 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Value("${common.test.modeling.url}")
+    protected String modelingEndpointHost;
+
     Model model;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        
+
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path(customerBaseDir + "/INTERNAL_DellAPJDeploymentTestNG"), true);
-        
+
         model = getModel("INTERNAL_DellAPJDeploymentTestNG");
     }
 
     private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
-        StringList features = restTemplate.postForObject(restEndpointHost + "/rest/features", model,
+        StringList features = restTemplate.postForObject(modelingEndpointHost + "/rest/features", model,
                 StringList.class, new Object[] {});
         return new AbstractMap.SimpleEntry<String, List<String>>("Target", features.getElements());
     }
@@ -52,19 +56,19 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
     public void load() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "load");
         LoadConfiguration config = getLoadConfig(model);
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
-    
+
     @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = true)
     public void createSamples() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "createSamples");
         SamplingConfiguration samplingConfig = getSampleConfig(model);
 
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples",
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -76,7 +80,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
     public void profile() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "profile");
         DataProfileConfiguration config = getProfileConfig(model);
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/profile", config,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
@@ -89,7 +93,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         model.setFeaturesList(targetAndFeatures.getValue());
         model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/submit", model,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
 

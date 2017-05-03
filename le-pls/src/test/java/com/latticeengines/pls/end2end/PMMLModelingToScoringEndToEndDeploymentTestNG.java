@@ -209,7 +209,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         }
         record.put("PD_DA_JobTitle", "_Part_Time");
         DebugScoreResponse response = score(record, modelId);
-        System.out.println(response.getScore());
+        log.info(String.format("Score is %s", String.valueOf(response.getScore())));
     }
 
     private DebugScoreResponse score(Map<String, Object> record, String modelId) {

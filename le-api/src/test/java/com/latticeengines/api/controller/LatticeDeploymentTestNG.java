@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -37,6 +38,9 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Value("${common.test.modeling.url}")
+    protected String modelingEndpointHost;
 
     private Model model;
 
@@ -65,8 +69,8 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
     }
 
     private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
-        StringList features = restTemplate.postForObject(restEndpointHost + "/rest/features", model, StringList.class,
-                new Object[] {});
+        StringList features = restTemplate.postForObject(modelingEndpointHost + "/rest/features", model,
+                StringList.class, new Object[] {});
         return new AbstractMap.SimpleEntry<String, List<String>>("P1_Event", features.getElements());
     }
 
@@ -74,7 +78,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
     public void load() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "load");
         LoadConfiguration config = getLoadConfig();
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -114,8 +118,8 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
 
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples", samplingConfig,
-                AppSubmission.class, new Object[] {});
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
+                samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -132,7 +136,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setSamplePrefix("all");
         config.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/profile", config,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
@@ -146,7 +150,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         model.setFeaturesList(targetAndFeatures.getValue());
         model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/submit", model,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
 

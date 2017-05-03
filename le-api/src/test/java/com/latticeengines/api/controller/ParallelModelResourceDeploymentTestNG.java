@@ -12,6 +12,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,6 +36,9 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
 
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
+
+    @Value("${common.test.modeling.url}")
+    protected String modelingEndpointHost;
 
     private Model model;
 
@@ -72,7 +76,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
     @Test(groups = "deployment")
     public void parallel_load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -84,7 +88,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         SamplingConfiguration samplingConfig = getSampleConfig(model);
         samplingConfig.setParallelEnabled(true);
 
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/createSamples",
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -97,7 +101,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         DataProfileConfiguration config = getProfileConfig(model);
         config.setParallelEnabled(true);
 
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/profile", config,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
@@ -107,7 +111,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "parallel_profile" })
     public void submit() throws Exception {
         model.setParallelEnabled(true);
-        AppSubmission submission = restTemplate.postForObject(restEndpointHost + "/rest/submit", model,
+        AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
 
