@@ -72,15 +72,8 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
             Map<String, Object> transformedRecord) {
         ScoreResponse scoreResponse = new ScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
-
         scoreResponse.setClassification(scoreEvaluation.getClassification());
-        if (scoreEvaluation.getScoreType() == ScoreType.PERCENTILE) {
-            scoreResponse.setScore(scoreEvaluation.getPercentile());
-            scoreResponse.setBucket(scoreEvaluation.getBucketName());
-        } else if (scoreEvaluation.getScoreType() == ScoreType.PROBABILITY_OR_VALUE) {
-            scoreResponse.setScore(scoreEvaluation.getProbabilityOrValue());
-            scoreResponse.setBucket(scoreEvaluation.getBucketName());
-        }
+        scoreResponse.setScore(scoreEvaluation.getPercentile());
         return scoreResponse;
     }
 
@@ -94,14 +87,16 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
         Integer i = (Integer) evaluation.get(ScoreType.PERCENTILE);
 
         ScoreEvaluation scoreEvaluation = null;
-        if (p != null) {
+
+        if (i != null) {
+            scoreEvaluation = new ScoreEvaluation(-1.0, i);
+            scoreEvaluation.setScoreType(ScoreType.PERCENTILE);
+        } else if (p != null) {
             double probability = BigDecimal.valueOf(p).setScale(8, RoundingMode.HALF_UP).doubleValue();
             scoreEvaluation = new ScoreEvaluation(probability, -1);
             scoreEvaluation.setScoreType(ScoreType.PROBABILITY_OR_VALUE);
-        } else if (i != null) {
-            scoreEvaluation = new ScoreEvaluation(-1.0, i);
-            scoreEvaluation.setScoreType(ScoreType.PERCENTILE);
         }
+
         Object c = evaluation.get(ScoreType.CLASSIFICATION);
         String classification = String.valueOf(c);
         if (c == null) {

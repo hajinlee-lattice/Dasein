@@ -18,7 +18,7 @@ public class ScoreResponse extends BaseResponse {
 
     @JsonProperty("score")
     @ApiModelProperty(value = "Score")
-    private double score;
+    private int score;
 
     @JsonProperty("rating")
     @ApiModelProperty(value = "Bucket Information Based on Score")
@@ -48,11 +48,11 @@ public class ScoreResponse extends BaseResponse {
         this.latticeId = latticeId;
     }
 
-    public double getScore() {
+    public int getScore() {
         return score;
     }
 
-    public void setScore(double score) {
+    public void setScore(int score) {
         this.score = score;
     }
 

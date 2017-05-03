@@ -89,7 +89,7 @@ public class RecordScoreResponse {
 
         @JsonProperty("score")
         @ApiModelProperty(value = "Score")
-        private Double score;
+        private Integer score;
 
         @JsonProperty("rating")
         @ApiModelProperty(value = "Bucket Information Based on Score")
@@ -115,11 +115,11 @@ public class RecordScoreResponse {
             this.modelId = modelId;
         }
 
-        public Double getScore() {
+        public Integer getScore() {
             return score;
         }
 
-        public void setScore(Double score) {
+        public void setScore(Integer score) {
             this.score = score;
         }
 

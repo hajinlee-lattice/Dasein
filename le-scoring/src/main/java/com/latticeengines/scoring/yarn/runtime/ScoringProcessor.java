@@ -464,7 +464,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 if (StringUtils.isBlank(modelId)) {
                     throw new LedpException(LedpCode.LEDP_20036);
                 }
-                Double score = tuple.getScore();
+                Integer score = tuple.getScore();
                 if (modelIsPythonType()) {
                     validateScore(score);
                     String bucketName = tuple.getBucket() == null ? "" : tuple.getBucket().name();
@@ -507,7 +507,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
     }
 
-    private void validateScore(Double score) {
+    private void validateScore(Integer score) {
         if (score != null && (score > 99 || score < 5)) {
             throw new LedpException(LedpCode.LEDP_20037);
         }

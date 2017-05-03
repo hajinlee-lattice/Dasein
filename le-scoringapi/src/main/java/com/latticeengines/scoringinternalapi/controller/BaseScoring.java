@@ -311,7 +311,7 @@ public abstract class BaseScoring extends CommonBase {
                     for (ScoreModelTuple scoreTuple : resp.getScores()) {
                         Map<String, String> logMap = new HashMap<>();
                         String modelId = scoreTuple.getModelId();
-                        Double score = scoreTuple.getScore();
+                        Integer score = scoreTuple.getScore();
                         String error = scoreTuple.getError();
                         String errorDesc = scoreTuple.getErrorDescription();
                         String recordId = record.getRecordId();
