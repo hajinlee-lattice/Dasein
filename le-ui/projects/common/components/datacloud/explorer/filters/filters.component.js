@@ -239,9 +239,9 @@ angular
 
             vm.searchFields = function(enrichment){
                 if (vm.query) {
-                    if (textSearch(enrichment.DisplayName, vm.query)) {
+                    if (enrichment.DisplayName && textSearch(enrichment.DisplayName, vm.query)) {
                         return true;
-                    } else if (textSearch(enrichment.Description, vm.query)) {
+                    } else if (enrichment.Description && textSearch(enrichment.Description, vm.query)) {
                         return true;
                     } else {
                         return false;
