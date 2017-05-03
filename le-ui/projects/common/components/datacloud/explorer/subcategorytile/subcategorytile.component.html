@@ -4,7 +4,7 @@
 
     <h2 class="noselect-children">
         <div class="category-icon">
-            <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}"  onerror="this.style.display='none'" />
+            <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" fallback-src="{{vm.categoryIcon(vm.category)}}" onerror="this.style.display='none'" />
         </div>
         <div class="category-label">{{subcategory}}</div>
     </h2>

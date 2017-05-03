@@ -1453,6 +1453,7 @@ angular.module('common.datacloud.explorer', [
         link: function postLink(scope, iElement, iAttrs) {
             iElement.bind('error', function() {
                 angular.element(this).attr("src", iAttrs.fallbackSrc);
+                angular.element(this).css({display: 'initial'}); // removes onerror hiding image
             });
         }
     }
