@@ -26,15 +26,15 @@ build_docker latticeengines/centos
 popd
 
 pushd le-jdk
-bash build.sh
+build_docker latticeengines/le-jdk
 popd
 
 pushd le-jre
-bash build.sh
+build_docker latticeengines/le-jre
 popd
 
 pushd le-tomcat
-bash build.sh
+build_docker latticeengines/le-tomcat
 popd
 
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
