@@ -61,6 +61,8 @@ public class DnBMatchContext implements Fact, Dimension {
     private Date responseTime;
 
     private boolean passAcceptanceCriteria;
+    
+    private String rootOperationUid;
 
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
@@ -82,8 +84,7 @@ public class DnBMatchContext implements Fact, Dimension {
         dataCloudVersion = context.getDataCloudVersion();
     }
 
-    // Used to copy bulk match result. Should not copy dataCloudVersion &
-    // dunsInAM
+    // Used to copy bulk match result. Should not copy dataCloudVersion & dunsInAM
     public void copyMatchResult(DnBMatchContext result) {
         duns = result.getDuns();
         dnbCode = result.getDnbCode();
@@ -364,16 +365,24 @@ public class DnBMatchContext implements Fact, Dimension {
         this.responseTime = responseTime;
     }
 
-    public enum DnBMatchStrategy {
-        EMAIL, ENTITY, BATCH
-    }
-
     public boolean isPassAcceptanceCriteria() {
         return passAcceptanceCriteria;
     }
 
     public void setPassAcceptanceCriteria(boolean passAcceptanceCriteria) {
         this.passAcceptanceCriteria = passAcceptanceCriteria;
+    }
+
+    public String getRootOperationUid() {
+        return rootOperationUid;
+    }
+
+    public void setRootOperationUid(String rootOperationUid) {
+        this.rootOperationUid = rootOperationUid;
+    }
+
+    public enum DnBMatchStrategy {
+        EMAIL, ENTITY, BATCH
     }
 
 }

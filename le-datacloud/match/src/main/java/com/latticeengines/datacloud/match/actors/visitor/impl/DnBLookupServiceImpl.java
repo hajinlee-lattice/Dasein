@@ -310,6 +310,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         MatchTraveler traveler = request.getMatchTravelerContext();
         context.setDataCloudVersion(traveler.getDataCloudVersion());
         context.setLogDnBBulkResult(traveler.getMatchInput().isLogDnBBulkResult());
+        context.setRootOperationUid(traveler.getMatchInput().getRootOperationUid());
         if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBCache cache = dnbCacheService.lookupCache(context);
@@ -572,6 +573,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     private void processBulkMatchResult(DnBBatchMatchContext batchContext, boolean success) {
         List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
+        Date finishTime = new Date();
         for (String lookupRequestId : batchContext.getContexts().keySet()) {
             String returnAddr = getReqReturnAddr(lookupRequestId);
             if (returnAddr == null) {
@@ -585,7 +587,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             DnBMatchContext context = batchContext.getContexts().get(lookupRequestId);
             context.setCalledRemoteDnB(true);
             context.setRequestTime(batchContext.getTimestamp());
-            context.setResponseTime(new Date());
+            context.setResponseTime(finishTime);
             if (!success) {
                 context.setDnbCode(batchContext.getDnbCode());
             } else {
