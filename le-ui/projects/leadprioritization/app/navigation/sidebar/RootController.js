@@ -38,6 +38,7 @@ angular
             $scope.showAnalysisPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showSegmentationPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showLatticeInsightsPage = FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS);
+            $scope.showContactUs = false;
         });
 
         $scope.statusFilter = function (item) {

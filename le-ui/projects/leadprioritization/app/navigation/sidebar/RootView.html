@@ -115,7 +115,7 @@
                 </span>
             </a>
         </li>
-        <li role="presentation" ui-sref-active="active">
+        <li ng-if="showContactUs" role="presentation" ui-sref-active="active">
             <a target="_contact_us" href="https://docs.google.com/forms/d/e/1FAIpQLSdxVGLgkna6zA_m2z6TF4eVH5OtF_qHPtyq80Oiy53vu9Of3A/viewform" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_CONTACT_US')}}">
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_CONTACT_US')}}">
                     <span class="ico ico-contact-us ico-light-gray"></span>
