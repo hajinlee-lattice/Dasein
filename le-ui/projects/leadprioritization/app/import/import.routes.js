@@ -55,12 +55,7 @@ angular
             }
         })
         .state('home.import.entry.eloquoa', {
-            url: '/eloquoa',
-            views: {
-                'entry_content@home.import.entry': {
-                    templateUrl: 'app/import/entry/eloquoa/eloquoa.component.html'
-                }
-            }
+            url: '/eloquoa'
         })
 
 

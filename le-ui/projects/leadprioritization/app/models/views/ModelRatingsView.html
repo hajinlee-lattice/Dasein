@@ -65,10 +65,19 @@
                     ng-attr-style="{{'height: '+ vm.dugoutHeight +'px;'}}">
                     <div 
                         class="overlay bucket-{{$index}}"
-                        ng-attr-style="{{'
-                            height: '+ vm.dugoutHeight +'px;
-                            right: '+ bucket.right_bound_score +'%;
-                            width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'}}" 
+                        ng-attr-style="
+                            {{
+                                $index === 0 && '
+                                height: '+ vm.dugoutHeight +'px;
+                                right: '+ bucket.right_bound_score +'%;
+                                width: '+ (bucket.left_bound_score - bucket.right_bound_score) +'%;' || 
+
+                                $index != 0 && '
+                                height: '+ vm.dugoutHeight +'px;
+                                right: '+ bucket.right_bound_score +'%;
+                                width: '+ ((bucket.left_bound_score - bucket.right_bound_score) + 1) +'%;'
+                            }} 
+                            "
                         ng-repeat="bucket in vm.workingBuckets"
                         ng-mouseover="vm.bucketHover($event)">
                     </div>  

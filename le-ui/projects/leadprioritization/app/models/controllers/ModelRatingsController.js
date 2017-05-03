@@ -60,7 +60,12 @@ angular.module('lp.models.ratings', [
 
         renderChart();
 
+
+        console.log(vm.barColors.childNodes[0]);
+
     }
+
+
 
     function renderChart(){
         var verticalAxis = document.getElementById("verticalAxis");
@@ -109,6 +114,7 @@ angular.module('lp.models.ratings', [
             vm.bucketTiles.classList.remove('six-buckets');
             vm.canAddBucket = true;
         };
+
 
         // loop through buckets in object and set their values
         for (var i = 0, len = vm.buckets.length; i < len; i++) { 

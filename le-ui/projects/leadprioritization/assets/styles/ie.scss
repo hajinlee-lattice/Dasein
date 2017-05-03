@@ -9,30 +9,97 @@
 	}
 
 	.ratings-chart .data {
+		background: transparent;
 		z-index: 3;
+		li {
+			background-color: rgba(0,0,0,0.2);
+			border-top: rgba(0,0,0,0.4) solid 3px;	
+		}
 	}
-	.ratings-chart .data li {
-		background-color: rgba(0,0,0,0.2);
-		border-top: rgba(0,0,0,0.4) solid 3px;
-	}
+
 
 	.bar-colors {
 		z-index: 2;
-	}
-	.bar-colors .overlay:nth-child(1) {
-		background-color: rgba(112,187,86,0.3);
-	}
-	.bar-colors .overlay:nth-child(2) {
-		background-color: rgba(255,185,61,0.3);
-	}
-	.bar-colors .overlay:nth-child(3) {
-		background-color: rgba(245,108,53,0.3);
-	}
-	.bar-colors .overlay:nth-child(4) {
-		background-color: rgba(214,43,48,0.3);
-	}
-	.bar-colors .overlay:nth-child(5) {
-		background-color: rgba(73,73,73,0.3);
+		&.buckets-6 {
+			.overlay {
+				&:nth-child(1) {
+					background-color: rgba(81, 166, 253, 0.8);
+				}
+				&:nth-child(2) {
+					background-color: rgba(84, 152, 221, 0.8);
+				}
+				&:nth-child(3) {
+					background-color: rgba(71, 136, 202, 0.8);
+				}
+				&:nth-child(4) {
+					background-color: rgba(53, 122, 193, 0.8);
+				}
+				&:nth-child(5) {
+					background-color: rgba(26, 102, 180, 0.8);
+				}
+				&:nth-child(6) {
+					background-color: rgba(17, 84, 153, 0.8);
+				}
+			}
+		}
+		&.buckets-5 {
+			.overlay {
+				&:nth-child(1) {
+					background-color: rgba(81, 166, 253, 0.8);
+				}
+				&:nth-child(2) {
+					background-color: rgba(84, 152, 221, 0.8);
+				}
+				&:nth-child(3) {
+					background-color: rgba(71, 136, 202, 0.8);
+				}
+				&:nth-child(4) {
+					background-color: rgba(53, 122, 193, 0.8);
+				}
+				&:nth-child(5) {
+					background-color: rgba(17, 84, 153, 0.8);
+				}
+			}
+		}
+		&.buckets-4 {
+			.overlay {
+				&:nth-child(1) {
+					background-color: rgba(81, 166, 253, 0.8);
+				}
+				&:nth-child(2) {
+					background-color: rgba(84, 152, 221, 0.8);
+				}
+				&:nth-child(3) {
+					background-color: rgba(71, 136, 202, 0.8);
+				}
+				&:nth-child(4) {
+					background-color: rgba(17, 84, 153, 0.8);
+				}
+			}
+		}
+		&.buckets-3 {
+			.overlay {
+				&:nth-child(1) {
+					background-color: rgba(81, 166, 253, 0.8);
+				}
+				&:nth-child(2) {
+					background-color: rgba(84, 152, 221, 0.8);
+				}
+				&:nth-child(3) {
+					background-color: rgba(17, 84, 153, 0.8);
+				}
+			}
+		}
+		&.buckets-2 {
+			.overlay {
+				&:nth-child(1) {
+					background-color: rgba(81, 166, 253, 0.8);
+				}
+				&:nth-child(2) {
+					background-color: rgba(17, 84, 153, 0.8);
+				}
+			}
+		}
 	}
 
 }
