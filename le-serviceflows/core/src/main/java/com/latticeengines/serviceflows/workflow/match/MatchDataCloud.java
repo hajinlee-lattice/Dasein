@@ -250,8 +250,9 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } while (!status.isTerminal());
 
         if (!MatchStatus.FINISHED.equals(status)) {
-            throw new IllegalStateException("The terminal status of match is " + status + " instead of "
-                    + MatchStatus.FINISHED);
+            IllegalStateException inner = new IllegalStateException("The terminal status of match is " + status
+                    + " instead of " + MatchStatus.FINISHED);
+            throw new LedpException(LedpCode.LEDP_00006, inner);
         }
 
     }
