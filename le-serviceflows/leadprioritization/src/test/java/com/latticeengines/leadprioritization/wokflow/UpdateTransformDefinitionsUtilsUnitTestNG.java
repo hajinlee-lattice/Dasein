@@ -24,7 +24,7 @@ public class UpdateTransformDefinitionsUtilsUnitTestNG {
                 a -> originalTransformDefinitions.add(new TransformDefinition(a.name, a.output, a.type, a.arguments)));
 
         List<TransformDefinition> udpatedTransformDefinitions = UpdateTransformDefinitionsUtils
-                .updateTransformDefinitions(TransformationGroup.STANDARD);
+                .updateTransformDefinitions(TransformationGroup.STANDARD, TransformationPipeline.PACKAGE_NAME);
         List<TransformDefinition> differentDefs = findDifferentTransformDefinition(originalTransformDefinitions,
                 udpatedTransformDefinitions);
         Assert.assertEquals(1, differentDefs.size());

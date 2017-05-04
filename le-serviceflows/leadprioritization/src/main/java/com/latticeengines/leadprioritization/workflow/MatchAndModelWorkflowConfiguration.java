@@ -166,7 +166,8 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             log.info(String.format("Current model's schema is %s.", schemaInterpretationStr));
             SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
             if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-                return UpdateTransformDefinitionsUtils.updateTransformDefinitions(transformationGroup);
+                return UpdateTransformDefinitionsUtils.updateTransformDefinitions(transformationGroup,
+                        TransformationPipeline.PACKAGE_NAME);
             } else {
                 return TransformationPipeline.getTransforms(transformationGroup);
             }
@@ -283,7 +284,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             match.setMatchRequestSource(matchRequestSource);
             return this;
         }
-        
+
         public Builder userRefinedAttributes(List<Attribute> userRefinedAttributes) {
             resolveAttributes.setUserRefinedAttributes(userRefinedAttributes);
             return this;

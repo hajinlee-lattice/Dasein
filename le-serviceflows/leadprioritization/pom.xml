@@ -101,6 +101,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-transform</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.4</version>

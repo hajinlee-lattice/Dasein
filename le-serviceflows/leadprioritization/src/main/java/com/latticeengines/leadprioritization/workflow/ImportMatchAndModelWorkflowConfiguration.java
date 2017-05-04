@@ -307,7 +307,8 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             log.info(String.format("Current model's schema is %s.", schemaInterpretationStr));
             SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
             if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-                return UpdateTransformDefinitionsUtils.updateTransformDefinitions(transformationGroup);
+                return UpdateTransformDefinitionsUtils.updateTransformDefinitions(transformationGroup,
+                        TransformationPipeline.PACKAGE_NAME);
             } else {
                 return TransformationPipeline.getTransforms(transformationGroup);
             }

@@ -11,6 +11,8 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 public class TransformationPipeline {
 
+    public static final String PACKAGE_NAME = "com.latticeengines.transform.v2_0_25.functions";
+
     public static TransformDefinition stdVisidbDsCompanynameEntropy = new TransformDefinition(
             "StdVisidbDsCompanynameEntropy", "CompanyName_Entropy", FieldType.FLOAT,
             new LinkedHashMap<String, Object>());
@@ -237,7 +239,7 @@ public class TransformationPipeline {
         case NONE:
             return Collections.emptyList();
         case ALL:
-            return ImmutableList.<TransformDefinition>builder()//
+            return ImmutableList.<TransformDefinition> builder()//
                     .addAll(getStandardTransforms()) //
                     .addAll(getPocTransforms()).build();
         case POC:
@@ -253,7 +255,7 @@ public class TransformationPipeline {
     // pipeline.
 
     public static List<TransformDefinition> getStandardTransformsV1() {
-        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition>builder()
+        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition> builder()
                 .add(stdVisidbDsCompanynameEntropy) //
                 .add(stdLengthTitle) //
                 .add(stdLengthCompanyName) //
@@ -281,7 +283,7 @@ public class TransformationPipeline {
     }
 
     public static List<TransformDefinition> getStandardTransforms() {
-        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition>builder()
+        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition> builder()
                 .add(stdVisidbDsPdAlexaRelatedlinksCount) //
                 .add(stdVisidbAlexaMonthssinceonline) //
                 .add(stdVisidbDsPdModelactionOrdered) //
@@ -299,7 +301,7 @@ public class TransformationPipeline {
     }
 
     public static List<TransformDefinition> getPocTransforms() {
-        List<TransformDefinition> pocTransformDefinitions = ImmutableList.<TransformDefinition>builder()
+        List<TransformDefinition> pocTransformDefinitions = ImmutableList.<TransformDefinition> builder()
                 .add(stdVisidbEmailIsInvalid) //
                 .add(stdVisidbEmailLength) //
                 .add(stdVisidbEmailPrefixLength) //

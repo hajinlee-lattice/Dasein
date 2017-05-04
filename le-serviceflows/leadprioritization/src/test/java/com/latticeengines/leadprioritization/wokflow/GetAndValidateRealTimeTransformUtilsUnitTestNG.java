@@ -1,13 +1,14 @@
-package com.latticeengines.dataflow.exposed.operation;
+package com.latticeengines.leadprioritization.wokflow;
 
 import java.util.LinkedHashMap;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataflow.exposed.builder.operations.GetAndValidateRealTimeTransformUtils;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.transform.TransformationPipeline;
+import com.latticeengines.domain.exposed.util.GetAndValidateRealTimeTransformUtils;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class GetAndValidateRealTimeTransformUtilsUnitTestNG {
@@ -17,7 +18,7 @@ public class GetAndValidateRealTimeTransformUtilsUnitTestNG {
         TransformDefinition stdVisidbDsCompanynameEntropy = new TransformDefinition("StdVisidbDsCompanynameEntropy",
                 "CompanyName_Entropy", FieldType.FLOAT, new LinkedHashMap<String, Object>());
         RealTimeTransform transform = GetAndValidateRealTimeTransformUtils
-                .fetchAndValidateRealTimeTransform(stdVisidbDsCompanynameEntropy);
+                .fetchAndValidateRealTimeTransform(stdVisidbDsCompanynameEntropy, TransformationPipeline.PACKAGE_NAME);
         Assert.assertNotNull(transform);
     }
 
@@ -25,7 +26,8 @@ public class GetAndValidateRealTimeTransformUtilsUnitTestNG {
     public void testUnhappyPath() {
         TransformDefinition someRandomDef = new TransformDefinition("someRandomDef", "someRandomDef", FieldType.INTEGER,
                 new LinkedHashMap<String, Object>());
-        GetAndValidateRealTimeTransformUtils.fetchAndValidateRealTimeTransform(someRandomDef);
+        GetAndValidateRealTimeTransformUtils.fetchAndValidateRealTimeTransform(someRandomDef,
+                TransformationPipeline.PACKAGE_NAME);
         Assert.fail("Should have thrown exception");
     }
 }

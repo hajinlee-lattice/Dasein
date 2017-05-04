@@ -12,6 +12,7 @@ import com.latticeengines.dataflow.runtime.cascading.TransformFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationMetadata;
+import com.latticeengines.domain.exposed.util.GetAndValidateRealTimeTransformUtils;
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
@@ -22,8 +23,8 @@ public class TransformFunctionOperation extends Operation {
         FieldList fieldsToApply = new FieldList(definition.arguments.values().toArray(new String[] {}));
         FieldMetadata targetField = new FieldMetadata(definition.output, definition.type.type());
 
-        RealTimeTransform transform = GetAndValidateRealTimeTransformUtils
-                .fetchAndValidateRealTimeTransform(definition);
+        RealTimeTransform transform = GetAndValidateRealTimeTransformUtils.fetchAndValidateRealTimeTransform(definition,
+                packageName);
 
         TransformMetadata metadata = transform.getMetadata();
 
