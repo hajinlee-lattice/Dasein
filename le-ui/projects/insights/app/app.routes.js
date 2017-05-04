@@ -41,7 +41,7 @@ angular.module('insightsApp')
             },
             views: {
                 "main": {
-                    controller: function($state, AuthStore, LookupStore) {
+                    controller: function($state, AuthStore, LookupStore, FeatureFlagService, ApiHost) {
                         parent.postMessage("init", '*');
 
                         console.log('### insightsApp: initialized, waiting for postMessage()')
@@ -56,8 +56,12 @@ angular.module('insightsApp')
                             LookupStore.add('timestamp', timestamp);
                             LookupStore.add('request', data.request);
                             AuthStore.set('Bearer ' + data.Authentication);
+                            
                             console.log('### insightsApp: redirectTo home.datacloud.insights')
-                            $state.go('home.datacloud.insights');
+                            
+                            FeatureFlagService.GetAllFlags(ApiHost).then(function() {
+                                $state.go('home.datacloud.insights');
+                            });
                         }, false);
                     }
                 }
@@ -71,7 +75,7 @@ angular.module('insightsApp')
                 }
             }
         });
-});
+}); 
 
 function ShowSpinner(LoadingString, type) {
     // state change spinner

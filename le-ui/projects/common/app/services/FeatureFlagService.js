@@ -5,9 +5,9 @@ var mod = angular.module('mainApp.core.services.FeatureFlagService', [
 
 mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {
 
-    this.GetAllFlags = function() {
+    this.GetAllFlags = function(ApiHost) {
         var deferred = $q.defer();
-        GetAllFlagsAsync(deferred);
+        GetAllFlagsAsync(deferred, ApiHost);
         return deferred.promise;
     };
 
@@ -74,27 +74,30 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
     var flagValues = {};
 
-    function GetAllFlagsAsync(promise) {
+    function GetAllFlagsAsync(promise, ApiHost) {
         // feature flag cached
         if (Object.keys(flagValues).length > 0) {
             promise.resolve(flagValues);
             return;
         }
-
-        // retrieve feature flag
         var sessionDoc = BrowserStorageUtility.getClientSession();
+        // retrieve feature flag
         if (sessionDoc === null || !sessionDoc.hasOwnProperty("Tenant")) {
             promise.resolve({}); // should not attempt to get flags before logging in a tenant
             return;
         }
-
-        var tenantId = sessionDoc.Tenant.Identifier;
+        
+        var url = (ApiHost == '/ulysses' ? ApiHost + '/tenant' : '/pls' + '/config') + '/featureflags';
+        
+        if (ApiHost != '/ulysses') {
+            var tenantId = sessionDoc.Tenant.Identifier;
+            url += '?tenantId=' + tenantId;
+        }
 
         $http({
             method: 'GET',
-            url: '/pls/config/featureflags?tenantId=' + tenantId
-        })
-        .success(function(data) {
+            url: url
+        }).success(function(data) {
             for(var key in data) {
                 flagValues[key] = data[key];
             }
@@ -103,8 +106,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             UpdateFlagsBasedOnRights();
 
             promise.resolve(flagValues);
-        })
-        .error(function() {
+        }).error(function() {
             // if cannot get feature flags from backend
             SetFlag(flags.ADMIN_ALERTS_TAB, false);
             SetFlag(flags.ALLOW_PIVOT_FILE, false);

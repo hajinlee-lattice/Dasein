@@ -66,15 +66,20 @@ angular
 .service('LookupService', function($q, $http, LookupStore) {
     this.submit = function(ApiHost) {
         var deferred = $q.defer();
+        var headers = { 
+            'Content-Type': 'application/json' 
+        };
+
+        if (ApiHost == '/ulysses') {
+            headers.ErrorDisplayMethod = 'none';
+        }
 
         $http({
             method: 'POST',
             url: ApiHost + '/companyprofiles/',
             params: LookupStore.get('params'),
             data: LookupStore.get('request'),
-            headers: { 
-                'Content-Type': 'application/json' 
-            }
+            headers: headers
         })
         .success(function(data, status, headers, config) {
             deferred.resolve(data);

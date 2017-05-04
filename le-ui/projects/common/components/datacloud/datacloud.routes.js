@@ -45,9 +45,6 @@ angular
         }],
         // below resolves are needed. Do not removed
         // override at child state when needed
-        EnrichmentAccountLookup: function() {
-            return null;
-        },
         SegmentServiceProxy: function() {
             return null;
         },
@@ -169,15 +166,6 @@ angular
                 category: {value: null, squash: true},
                 subcategory: {value: null, squash: true}
             },
-            resolve: {
-                EnrichmentAccountLookup: function($q, DataCloudStore, LookupResponse) {
-                    var deferred = $q.defer();
-
-                    deferred.resolve(LookupResponse.attributes || {});
-
-                    return deferred.promise;
-                }
-            },
             views: {
                 "main@": {
                     controller: 'DataCloudController',
@@ -194,6 +182,11 @@ angular
                 section: 'edit',
                 category: {value: null, squash: true},
                 subcategory: {value: null, squash: true}
+            },
+            resolve: {
+                LookupResponse: function() {
+                    return { attributes: null };
+                }
             },
             views: {
                 "navigation@": {
@@ -223,7 +216,7 @@ angular
                     resolve: {
                         LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
                             var deferred = $q.defer();
-
+                            
                             LookupService.submit(ApiHost).then(function(data) {
                                 var current = new Date().getTime();
                                 var old = LookupStore.get('timestamp');
@@ -233,13 +226,6 @@ angular
 
                                 deferred.resolve(data);
                             });
-
-                            return deferred.promise;
-                        },
-                        EnrichmentAccountLookup: function($q, DataCloudStore, LookupResponse) {
-                            var deferred = $q.defer();
-
-                            deferred.resolve(LookupResponse.attributes || {});
 
                             return deferred.promise;
                         }
@@ -252,9 +238,7 @@ angular
         });
 
     var getState = function(type, overwrite) {
-        var result = angular.extend({}, analysis[type]);
-
-        angular.extend(result, overwrite)
+        var result = angular.extend({}, analysis[type], overwrite)
 
         return result;
     };
@@ -477,6 +461,9 @@ angular
                     });
 
                     return deferred.promise;
+                }],
+                LookupResponse: [ function() {
+                    return { attributes: null };
                 }]
             }
         }))
@@ -503,6 +490,11 @@ angular
                 section: 'segment.analysis',
                 category: { value: null, squash: true },
                 subcategory: { value: null, squash: true }
+            },
+            resolve: {
+                LookupResponse: [ function() {
+                    return { attributes: null };
+                }]
             }
         }))
         .state('home.segment.explorer.query', getState('query'))

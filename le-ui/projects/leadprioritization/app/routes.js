@@ -10,7 +10,8 @@ angular
             window.open("/login", "_self");
         }
 
-        var LoadingString = ResourceUtility.getString("");
+        //var LoadingString = ResourceUtility.getString("");
+        ShowSpinner(/*fromState.name + " -> " + toState.name*/);
 
         if (toState.redirectTo) {
             event.preventDefault();

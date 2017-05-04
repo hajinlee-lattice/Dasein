@@ -208,7 +208,8 @@ angular.module('common.datacloud')
             var vm = this;
 
             DataCloudService.getAllTopAttributes(opts).then(function(response) {
-                Object.assign(response.data, DemoData.topn);
+                response.data = angular.extend({}, response.data, DemoData.topn)
+                //Object.assign(response.data, DemoData.topn); - didn't work on IE
                 vm.topAttributes = response.data; // ben
                 deferred.resolve(vm.topAttributes);
             });

@@ -11,8 +11,8 @@ angular.module('common.datacloud.explorer', [
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
-    EnrichmentTopAttributes, EnrichmentAccountLookup, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore,
-    SegmentServiceProxy, QueryRestriction, CurrentConfiguration, EnrichmentCount
+    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore,
+    SegmentServiceProxy, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse
 ){
     var vm = this,
         enrichment_chunk_size = 5000,
@@ -45,12 +45,12 @@ angular.module('common.datacloud.explorer', [
         },
         EnrichmentPremiumSelectMaximum: EnrichmentPremiumSelectMaximum,
         category: '',
-        lookupMode: EnrichmentAccountLookup !== null,
-        lookupFiltered: EnrichmentAccountLookup,
+        lookupMode: (LookupResponse && LookupResponse.attributes !== null),
+        lookupFiltered: LookupResponse.attributes,
         LookupResponse: LookupStore.response,
         no_lookup_results_message : false,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
-        count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
+        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : EnrichmentCount.data),
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         show_segmentation: FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL),
@@ -101,7 +101,7 @@ angular.module('common.datacloud.explorer', [
             return true;
         }
         if (vm.section == 'insights' || vm.section == 'team') {
-            if (vm.show_lattice_insights || vm.section == 'insights') {
+            if (vm.show_lattice_insights) {
                 return false;
             }
             return true;

@@ -1,7 +1,7 @@
 //Initial load of the application
 var mainApp = angular.module('mainApp', [
     'templates-main',
-    'ngAnimate',
+    //'ngAnimate',
     'ngRoute',
     'ui.router',
     'ui.bootstrap',
