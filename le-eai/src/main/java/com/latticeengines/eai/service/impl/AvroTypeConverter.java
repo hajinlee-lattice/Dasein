@@ -1,16 +1,14 @@
 package com.latticeengines.eai.service.impl;
 
 import org.apache.avro.Schema.Type;
-import org.apache.camel.TypeConverter;
-import org.apache.camel.spi.TypeConverterRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.eai.service.ValueConverter;
 
 public abstract class AvroTypeConverter {
 
@@ -41,56 +39,58 @@ public abstract class AvroTypeConverter {
         return AvroUtils.getAvroType(javaType);
     }
 
-    public static Object convertIntoJavaValueForAvroType(TypeConverterRegistry typeRegistry, Type avroType,
+    public static Object convertIntoJavaValueForAvroType(ValueConverter valueConverter, Type avroType,
             Attribute attr, Object value) {
         Class<?> targetType = null;
         switch (avroType) {
-        case DOUBLE:
-            targetType = Double.class;
-            break;
-        case FLOAT:
-            targetType = Float.class;
-            break;
-        case INT:
-            targetType = Integer.class;
-            break;
-        case LONG:
-            targetType = Long.class;
-            DateTimeFormatter dtf = null;
+            case DOUBLE:
+                targetType = Double.class;
+                break;
+            case FLOAT:
+                targetType = Float.class;
+                break;
+            case INT:
+                targetType = Integer.class;
+                break;
+            case LONG:
+                targetType = Long.class;
+                DateTimeFormatter dtf = null;
 
-            if (attr.getSourceLogicalDataType().equals("date") || attr.getSourceLogicalDataType().equals("Date")) {
-                dtf = ISODateTimeFormat.dateElementParser();
-            } else if (attr.getSourceLogicalDataType().equals("datetime")
-                    || attr.getSourceLogicalDataType().equals("Timestamp")) {
-                dtf = ISODateTimeFormat.dateTimeParser();
-            }
-            try {
-                DateTime dateTime = dtf.parseDateTime((String) value);
-                return dateTime.getMillis();
-            } catch (Exception e) {
-                log.warn(String.format("Error parsing date for column %s with value %s.", attr.getName(), value));
-            }
-        case STRING:
-            targetType = String.class;
-            break;
-        case BOOLEAN:
-            targetType = Boolean.class;
-            break;
-        case ENUM:
-            targetType = String.class;
-            break;
-        default:
-            break;
+                if (attr.getSourceLogicalDataType().equalsIgnoreCase("Date")) {
+                    dtf = ISODateTimeFormat.dateElementParser();
+                } else if (attr.getSourceLogicalDataType().equalsIgnoreCase("Datetime")
+                        || attr.getSourceLogicalDataType().equalsIgnoreCase("Timestamp")
+                        || attr.getSourceLogicalDataType().equalsIgnoreCase("DateTimeOffset")) {
+                    dtf = ISODateTimeFormat.dateTimeParser();
+                } else {
+                    break;
+                }
+                try {
+                    DateTime dateTime = dtf.parseDateTime((String) value);
+                    return dateTime.getMillis();
+                } catch (Exception e) {
+                    log.warn(String.format("Error parsing date for column %s with value %s.", attr.getName(), value));
+                }
+            case STRING:
+                targetType = String.class;
+                break;
+            case BOOLEAN:
+                targetType = Boolean.class;
+                break;
+            case ENUM:
+                targetType = String.class;
+                break;
+            default:
+                break;
         }
 
         if (value.getClass().equals(targetType)) {
             return value;
         }
 
-        TypeConverter converter = typeRegistry.lookup(targetType, value.getClass());
-
-        return converter.convertTo(targetType, value);
+        return valueConverter.convertTo(targetType, value);
     }
+
 
     public static Object getEmptyValue(Type avroType) {
         switch (avroType) {

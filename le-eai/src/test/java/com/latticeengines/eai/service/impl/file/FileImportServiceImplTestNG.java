@@ -82,7 +82,7 @@ public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGB
                 .setTables(Arrays.<Table> asList(new Table[] { createFile(new File(avroDataUrl.getPath()), "file2") }));
         fileImportConfig.setProperties(properties);
 
-        List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
+        List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx, null);
 
         ctx.setProperty(ImportProperty.HDFSFILE, //
                 properties.get(ImportProperty.HDFSFILE));

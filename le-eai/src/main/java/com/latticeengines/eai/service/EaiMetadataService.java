@@ -19,8 +19,6 @@ public interface EaiMetadataService {
 
     void updateTableSchema(List<Table> tableMetadata, ImportContext importContext);
 
-    VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier);
-
-    Boolean updateVdbImportExtract(String customerSpace, VdbImportExtract vdbImportExtract);
+    Table getTable(String customerSpace, String tableName);
 
 }

@@ -86,7 +86,7 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
         List<Table> tables = Arrays.<Table> asList(new Table[] { t });
 
         fileImportConfig.setTables(Arrays.<Table> asList(tables.get(0)));
-        fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx);
+        fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx, null);
 
         ApplicationId appId = ctx.getProperty(ImportProperty.APPID, ApplicationId.class);
         assertNotNull(appId);

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -28,7 +29,13 @@ public class SalesforceImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> importMetadata(SourceImportConfiguration srcImportConfig, ImportContext ctx) {
+    public ConnectorConfiguration generateConnectorConfiguration(String connectorConfig, ImportContext ctx) {
+        return null;
+    }
+
+    @Override
+    public List<Table> importMetadata(SourceImportConfiguration srcImportConfig, ImportContext ctx,
+                                      ConnectorConfiguration connectorConfiguration) {
         List<Table> newTables = new ArrayList<>();
         List<Table> tables = srcImportConfig.getTables();
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.SALESFORCE, "AllTables");
@@ -41,7 +48,8 @@ public class SalesforceImportServiceImpl extends ImportService {
     }
 
     @Override
-    public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext ctx) {
+    public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext ctx,
+                                         ConnectorConfiguration connectorConfiguration) {
         List<Table> tables = srcImportConfig.getTables();
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.SALESFORCE, "AllTables");
         for (Table table : tables) {

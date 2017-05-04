@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -33,7 +34,13 @@ public class MarketoImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> importMetadata(SourceImportConfiguration srcImportConfig, ImportContext ctx) {
+    public ConnectorConfiguration generateConnectorConfiguration(String connectorConfig, ImportContext ctx) {
+        return null;
+    }
+
+    @Override
+    public List<Table> importMetadata(SourceImportConfiguration srcImportConfig, ImportContext ctx,
+                                      ConnectorConfiguration connectorConfiguration) {
         setupAccessToken(ctx);
         List<Table> tablesWithMetadata = new ArrayList<>();
         List<Table> tables = srcImportConfig.getTables();
@@ -53,7 +60,8 @@ public class MarketoImportServiceImpl extends ImportService {
     }
 
     @Override
-    public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext ctx) {
+    public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext ctx,
+                                         ConnectorConfiguration connectorConfiguration) {
         setupAccessToken(ctx);
         List<Table> tables = srcImportConfig.getTables();
         for (Table table : tables) {

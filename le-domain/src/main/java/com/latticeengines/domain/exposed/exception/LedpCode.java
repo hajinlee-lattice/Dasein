@@ -101,6 +101,13 @@ public enum LedpCode {
     LEDP_17007("Got NULL Value from Table {0} for Tenant {1}"), //
     LEDP_17008("Unsupported Source Credential Check for Source Type {0}"), //
     LEDP_17009("Got NULL Value from Primary Key for Tenant {0}"), //
+    LEDP_17010("Error connector configuration!"), //
+    LEDP_17011("Cannot execute DL loadgroup! Exception: {0}"),
+    LEDP_17012("Cannot get loadgroup status from DL!"),
+    LEDP_17013("Cannot get table metadata from DL! Error message: {0}"),
+    LEDP_17014("Import table metadata error! {0}"),
+    LEDP_17015("Import table data error! {0}"),
+    LEDP_17016("Failed to get data from DL!"),
 
     // le-pls 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
@@ -243,6 +250,9 @@ public enum LedpCode {
     LEDP_18137("Same load vdb table job is running with application id {0}"), //
     LEDP_18138("Same load vdb table job is already succeeded."), //
     LEDP_18139("System is under maintainance"), //
+    LEDP_18140("Table {0} already exist, cannot create a new one"),
+    LEDP_18141("Table metadata is conflict with table already existed."),
+    LEDP_18142("Table {0} not exist, cannot import table with update rule"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -340,6 +350,8 @@ public enum LedpCode {
     LEDP_21034("Invalid Marketo SOAP endpoint: {0}"), //
     LEDP_21035("Problem communicating with Marketo SOAP endpoint: {0}"), //
     LEDP_21036("Invalid Marketo SOAP User ID or Encryption Key: {0} {1}"), //
+    LEDP_21037("Problem setting DL launch status error; DataLoader error message: {0}"), //
+    LEDP_21038("Problem setting DL launch status error: {0}"), //
 
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"), //

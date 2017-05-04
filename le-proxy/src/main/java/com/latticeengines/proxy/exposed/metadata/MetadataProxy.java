@@ -220,23 +220,4 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         return JsonUtils.convertList(raw, MetadataSegment.class);
     }
 
-    @Override
-    public VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier) {
-        String url = constructUrl("/customerspaces/{customerSpace}/vdbextract/{identifier}", customerSpace,
-                extractIdentifier);
-        return get("getVdbImportExtract", url, null, VdbImportExtract.class);
-    }
-
-    @Override
-    public Boolean updateVdbImportExtract(String customerSpace, VdbImportExtract importExtract) {
-        String url = constructUrl("/customerspaces/{customerSpace}/vdbextract/update", customerSpace);
-        return post("updateVdbImportExtract", url, importExtract, Boolean.class);
-    }
-
-    @Override
-    public Boolean createVdbImportExtract(String customerSpace, VdbImportExtract importExtract) {
-        String url = constructUrl("/customerspaces/{customerSpace}/vdbextract/create", customerSpace);
-        return post("createVdbImportExtract", url, importExtract, Boolean.class);
-    }
-
 }

@@ -6,8 +6,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
@@ -16,11 +14,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
 import com.latticeengines.domain.exposed.pls.VdbCreateTableRule;
 import com.latticeengines.domain.exposed.pls.VdbGetLoadStatusConfig;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableCancel;
@@ -30,7 +27,7 @@ import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.service.VdbImportService;
 import com.latticeengines.pls.workflow.ImportVdbTableAndPublishWorkflowSubmitter;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -42,10 +39,7 @@ public class VdbImportServiceImpl implements VdbImportService {
     private WorkflowProxy workflowProxy;
 
     @Autowired
-    private MetadataProxy metadataProxy;
-
-    @Autowired
-    private Configuration yarnConfiguration;
+    private EaiJobDetailProxy eaiJobDetailProxy;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -73,7 +67,7 @@ public class VdbImportServiceImpl implements VdbImportService {
         } catch (LedpException e) {
             VdbLoadTableStatus status = new VdbLoadTableStatus();
             status.setMessage(e.getMessage());
-            status.setVisiDBQueryHandle(loadConfig.getVdbQueryHandle());
+            status.setVdbQueryHandle(loadConfig.getVdbQueryHandle());
             switch (e.getCode()) {
                 case LEDP_18136:
                 case LEDP_18137:
@@ -94,22 +88,15 @@ public class VdbImportServiceImpl implements VdbImportService {
     @Override
     public boolean cancelLoadTableJob(String applicationId, VdbLoadTableCancel cancelConfig) {
         VdbLoadTableStatus status = new VdbLoadTableStatus();
-        status.setVisiDBQueryHandle(cancelConfig.getVdbQueryHandle());
+        status.setVdbQueryHandle(cancelConfig.getVdbQueryHandle());
         WorkflowExecutionId workflowExecutionId = workflowProxy.getWorkflowId(applicationId);
         boolean result = true;
         if (workflowExecutionId != null) {
             try {
-                workflowProxy.stopWorkflow(String.valueOf(workflowExecutionId.getId()));
                 String customSpace = CustomerSpace.parse(cancelConfig.getTenantId()).toString();
-                String extractIdentifier = String.format("%s_%s_%s", customSpace, cancelConfig.getTableName(),
+                String collectionIdentifier = String.format("%s_%s_%s", customSpace, cancelConfig.getTableName(),
                         cancelConfig.getLaunchId());
-                VdbImportExtract vdbImportExtract = metadataProxy.getVdbImportExtract(customSpace, extractIdentifier);
-                if (vdbImportExtract != null) {
-                    if (!StringUtils.isEmpty(vdbImportExtract.getLoadApplicationId())) {
-                        YarnUtils.kill(yarnConfiguration,
-                                ConverterUtils.toApplicationId(vdbImportExtract.getLoadApplicationId()));
-                    }
-                }
+                eaiJobDetailProxy.cancelImportJob(collectionIdentifier);
                 status.setJobStatus("Aborted");
                 status.setMessage(String.format("Application %s stopped", applicationId));
             } catch (Exception e) {
@@ -134,14 +121,14 @@ public class VdbImportServiceImpl implements VdbImportService {
     @Override
     public VdbLoadTableStatus getLoadTableStatus(VdbGetLoadStatusConfig config) {
         VdbLoadTableStatus vdbLoadTableStatus = new VdbLoadTableStatus();
-        vdbLoadTableStatus.setVisiDBQueryHandle(config.getVdbQueryHandle());
+        vdbLoadTableStatus.setVdbQueryHandle(config.getVdbQueryHandle());
         String customSpace = CustomerSpace.parse(config.getTenantId()).toString();
         String extractIdentifier = String.format("%s_%s_%s", customSpace, config.getTableName(), config.getLaunchId());
-        VdbImportExtract vdbImportExtract = metadataProxy.getVdbImportExtract(customSpace, extractIdentifier);
-        if (vdbImportExtract == null) {
+        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetail(extractIdentifier);
+        if (eaiImportJobDetail == null) {
             vdbLoadTableStatus.setJobStatus("DoesNotExist");
         } else {
-            switch (vdbImportExtract.getStatus()) {
+            switch (eaiImportJobDetail.getStatus()) {
                 case SUBMITTED:
                 case RUNNING:
                     vdbLoadTableStatus.setJobStatus("Running");

@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -124,14 +123,10 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     }
 
     @Override
-    public VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier) {
-        return metadataProxy.getVdbImportExtract(customerSpace, extractIdentifier);
+    public Table getTable(String customerSpace, String tableName) {
+        return metadataProxy.getTable(customerSpace, tableName);
     }
 
-    @Override
-    public Boolean updateVdbImportExtract(String customerSpace, VdbImportExtract vdbImportExtract) {
-        return metadataProxy.updateVdbImportExtract(customerSpace, vdbImportExtract);
-    }
 
     @VisibleForTesting
     void setLastModifiedTimeStamp(Table table, ImportContext importContext) {

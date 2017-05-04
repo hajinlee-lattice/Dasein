@@ -13,11 +13,14 @@ public class VdbLoadTableStatus {
     @JsonProperty("message")
     private String message;
 
-    public String getVisiDBQueryHandle() {
+    @JsonProperty("processed_records")
+    private int processedRecords;
+
+    public String getVdbQueryHandle() {
         return vdbQueryHandle;
     }
 
-    public void setVisiDBQueryHandle(String vdbQueryHandle) {
+    public void setVdbQueryHandle(String vdbQueryHandle) {
         this.vdbQueryHandle = vdbQueryHandle;
     }
 
@@ -35,5 +38,13 @@ public class VdbLoadTableStatus {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public int getProcessedRecords() {
+        return processedRecords;
+    }
+
+    public void setProcessedRecords(int processedRecords) {
+        this.processedRecords = processedRecords;
     }
 }

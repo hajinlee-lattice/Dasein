@@ -43,10 +43,4 @@ public interface MetadataInterface {
 
     List<MetadataSegment> getMetadataSegments(String customerSpace);
 
-    VdbImportExtract getVdbImportExtract(String customerSpace, String extractIdentifier);
-
-    Boolean updateVdbImportExtract(String customerSpace, VdbImportExtract importExtract);
-
-    Boolean createVdbImportExtract(String customerSpace, VdbImportExtract importExtract);
-
 }

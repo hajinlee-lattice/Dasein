@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.domain.exposed.dataloader.DataReadyResult;
+import com.latticeengines.domain.exposed.dataloader.GetDataTablesResult;
+import com.latticeengines.domain.exposed.dataloader.LaunchIdQuery;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +58,7 @@ import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.remote.exposed.service.Headers;
 import com.latticeengines.remote.util.CrmUtils;
 import com.latticeengines.remote.util.DlConfigUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
@@ -86,6 +90,9 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String GET_QUERY_STATUS = "/GetQueryStatus";
     private static final String GET_QUERY_RESULT_DATA = "/GetQueryResultData";
     private static final String GET_SOURCE_TABLE_METADATA = "/GetSourceTableMetadata";
+    private static final String EDIT_LAUNCH_STATUS = "/EditLaunchStatus";
+    private static final String READY_TO_EXPORT_DATA = "/ReadyToExportData";
+    private static final String GET_DATA_TABLES = "/GetDataTables";
     private static final String DL_USER = "LP";
 
     private static final String SEGMENT_PREFIX = "DefnSegment_";
@@ -870,14 +877,78 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         }
     }
 
+    private <T> T postWithRetry(String url, Object request, Class<T> responseType) {
+        int retries = 0;
+        RestClientException exception;
+        T response = null;
+        do {
+            if (retries > 0) {
+                try {
+                    Thread.sleep(RETRY_WAIT_TIME);
+                } catch (InterruptedException e) {
+                    // Do nothing if sleep interrupted
+                }
+                log.info("Retry #" + String.valueOf(retries) + ": Send POST to " + url);
+            }
+
+            try {
+                retries++;
+                exception = null;
+                response = restTemplate.postForObject(url, request, responseType);
+            } catch (RestClientException e) {
+                exception = e;
+            }
+        } while (exception != null && (retries <= MAX_RETRIES));
+
+        if (exception != null && retries > MAX_RETRIES) {
+            throw exception;
+        }
+
+        return response;
+    }
+
     @Override
     public VdbQueryDataResult getQueryDataResult(String dlEndPoint, VdbGetQueryData vdbGetQueryData) {
-        return restTemplate.postForObject(dlEndPoint, vdbGetQueryData,
+        return postWithRetry(dlEndPoint, vdbGetQueryData,
                 VdbQueryDataResult.class);
     }
 
     @Override
-    public void reportGetDataStatus(String dlEndPoint, VdbLoadTableStatus status) {
-        restTemplate.postForEntity(dlEndPoint, status, Void.class);
+    public void reportGetDataStatus(String dlEndpoint, VdbLoadTableStatus status) {
+        postWithRetry(dlEndpoint, status, Void.class);
+    }
+
+    @Override
+    public DataReadyResult readyToExportData(String dlEndpoint, LaunchIdQuery query) {
+        if (dlEndpoint.endsWith("/")) dlEndpoint = dlEndpoint.substring(0, dlEndpoint.length() - 1);
+        if (!dlEndpoint.endsWith(DL_REST_SERVICE)) dlEndpoint += DL_REST_SERVICE;
+        return postWithRetry(dlEndpoint + READY_TO_EXPORT_DATA, query, DataReadyResult.class);
+    }
+
+    @Override
+    public GetDataTablesResult getDataTables(String dlEndpoint, LaunchIdQuery query) {
+        if (dlEndpoint.endsWith("/")) dlEndpoint = dlEndpoint.substring(0, dlEndpoint.length() - 1);
+        if (!dlEndpoint.endsWith(DL_REST_SERVICE)) dlEndpoint += DL_REST_SERVICE;
+        return postWithRetry(dlEndpoint + GET_DATA_TABLES, query, GetDataTablesResult.class);
+    }
+
+    @Override
+    public void editLaunchStatus(String dlEndpoint, int launchId, String launchStatus, String message) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("launchId", String.valueOf(launchId));
+            paramerters.put("launchStatus", launchStatus);
+            paramerters.put("message", message);
+            String response = callDLRestService(dlEndpoint, EDIT_LAUNCH_STATUS, paramerters);
+            InstallResult result = JsonUtils.deserialize(response,
+                    InstallResult.class);
+
+            if (result.getStatus() != 3) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21037, new String[] { error });
+            }
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21038, ex);
+        }
     }
 }

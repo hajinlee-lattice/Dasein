@@ -1,6 +1,7 @@
 package com.latticeengines.eai.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +19,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
+import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -29,6 +34,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.DataExtractionService;
+import com.latticeengines.eai.service.EaiImportJobDetailService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ImportService;
@@ -40,6 +46,9 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Autowired
     private EaiMetadataService eaiMetadataService;
+
+    @Autowired
+    private EaiImportJobDetailService eaiImportJobDetailService;
 
     @Autowired
     private EaiYarnService eaiYarnService;
@@ -78,13 +87,15 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             }
 
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
-            List<Table> metadata = importService.importMetadata(sourceImportConfig, context);
+            ConnectorConfiguration connectorConfiguration = importService
+                    .generateConnectorConfiguration("", context);
+            List<Table> metadata = importService.importMetadata(sourceImportConfig, context, connectorConfiguration);
             tableMetadata.addAll(metadata);
 
             sourceImportConfig.setTables(metadata);
 
             setFilters(sourceImportConfig, customerSpace);
-            importService.importDataAndWriteToHdfs(sourceImportConfig, context);
+            importService.importDataAndWriteToHdfs(sourceImportConfig, context, connectorConfiguration);
 
         }
         return tableMetadata;
@@ -140,9 +151,51 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             eaiMetadataService.registerTables(tables, importContext);
             return importContext.getProperty(ImportProperty.APPID, ApplicationId.class);
         } else {
+            List<EaiImportJobDetail> jobDetails = initailImportJobDetail(importConfig);
             appId = eaiYarnService.submitSingleYarnContainerJob(importConfig);
+            if (jobDetails != null) {
+                for (EaiImportJobDetail eaiImportJobDetail : jobDetails) {
+                    eaiImportJobDetail.setLoadApplicationId(appId.toString());
+                    eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
+                }
+            }
         }
         return appId;
+    }
+
+    private List<EaiImportJobDetail> initailImportJobDetail(ImportConfiguration importConfig) {
+        String collectionIdentifiers = importConfig.getProperty(ImportProperty.COLLECTION_IDENTIFIERS);
+        if (!StringUtils.isEmpty(collectionIdentifiers)) {
+            @SuppressWarnings("unchecked")
+            List<Object> identifiersRaw = JsonUtils.deserialize(collectionIdentifiers, List.class);
+            List<String> identifiers = JsonUtils.convertList(identifiersRaw, String.class);
+            List<EaiImportJobDetail> jobDetails = new ArrayList<>();
+            for (String collectionIdentifier : identifiers) {
+                EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService.getImportJobDetail(collectionIdentifier);
+                if (eaiImportJobDetail != null) {
+                    switch (eaiImportJobDetail.getStatus()) {
+                        case SUBMITTED:
+                            throw new LedpException(LedpCode.LEDP_18136);
+                        case RUNNING:
+                            throw new LedpException(LedpCode.LEDP_18137, new String[]{eaiImportJobDetail.getLoadApplicationId()});
+                        case SUCCESS:
+                            throw new LedpException(LedpCode.LEDP_18138);
+                    }
+                } else {
+                    eaiImportJobDetail = new EaiImportJobDetail();
+                    eaiImportJobDetail.setCollectionIdentifier(collectionIdentifier);
+                    eaiImportJobDetail.setStatus(ImportStatus.SUBMITTED);
+                    eaiImportJobDetail.setCollectionTimestamp(new Date());
+                    eaiImportJobDetail.setProcessedRecords(0);
+                    eaiImportJobDetail.setSourceType(importConfig.getSourceConfigurations().get(0).getSourceType());
+                    eaiImportJobDetailService.createImportJobDetail(eaiImportJobDetail);
+                }
+                jobDetails.add(eaiImportJobDetail);
+            }
+            return jobDetails;
+        } else {
+            return null;
+        }
     }
 
     public String createTargetPath(String customerSpace) {

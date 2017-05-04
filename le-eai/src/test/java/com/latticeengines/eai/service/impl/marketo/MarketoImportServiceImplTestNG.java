@@ -77,7 +77,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true)
     public void importMetadata() {
-        List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, importContext);
+        List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, importContext, null);
 
         for (Table table : tables) {
             System.out.println(table);
@@ -89,7 +89,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "importMetadata" }, enabled = true)
     public void importDataAndWriteToHdfs() throws Exception {
-        marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, importContext);
+        marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, importContext, null);
         Thread.sleep(10000L);
         checkDataExists("/tmp", Arrays.<String> asList(new String[] { "Activity", "ActivityType" }), 1);
     }

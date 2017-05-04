@@ -5,10 +5,13 @@ import java.util.List;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.GetVisiDBDLRequest;
+import com.latticeengines.domain.exposed.dataloader.DataReadyResult;
+import com.latticeengines.domain.exposed.dataloader.GetDataTablesResult;
 import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
+import com.latticeengines.domain.exposed.dataloader.LaunchIdQuery;
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
 import com.latticeengines.domain.exposed.dataloader.QueryDataResult;
 import com.latticeengines.domain.exposed.dataloader.QueryStatusResult;
@@ -86,5 +89,11 @@ public interface DataLoaderService {
 
     VdbQueryDataResult getQueryDataResult(String dlEndPoint, VdbGetQueryData vdbGetQueryData);
 
-    void reportGetDataStatus(String dlEndPoint, VdbLoadTableStatus status);
+    void reportGetDataStatus(String dlEndpoint, VdbLoadTableStatus status);
+
+    DataReadyResult readyToExportData(String dlEndpoint, LaunchIdQuery query);
+
+    GetDataTablesResult getDataTables(String dlEndpoint, LaunchIdQuery query);
+
+    void editLaunchStatus(String dlEndpoint, int launchId, String launchStatus, String message);
 }

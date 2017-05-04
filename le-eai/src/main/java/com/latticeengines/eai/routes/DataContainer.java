@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.Deflater;
 
+import com.latticeengines.eai.service.impl.CamelValueConverter;
+import com.latticeengines.eai.service.ValueConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.CodecFactory;
@@ -14,7 +16,6 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
-import org.apache.camel.spi.TypeConverterRegistry;
 import org.apache.camel.spring.SpringCamelContext;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -28,10 +29,19 @@ public class DataContainer {
     private File file;
     private GenericRecord record;
     private Schema schema;
-    private TypeConverterRegistry typeConverterRegistry;
+    private ValueConverter valueConverter;
 
     public DataContainer(SpringCamelContext context, Table table) {
-        this.typeConverterRegistry = context.getTypeConverterRegistry();
+        ValueConverter valueConverter = new CamelValueConverter(context.getTypeConverterRegistry());
+        initialize(valueConverter, table);
+    }
+
+    public DataContainer(ValueConverter valueConverter, Table table) {
+        initialize(valueConverter, table);
+    }
+
+    private void initialize(ValueConverter valueConverter, Table table) {
+        this.valueConverter = valueConverter;
         this.table = table;
         this.schema = table.getSchema();
         if (schema == null) {
@@ -84,7 +94,7 @@ public class DataContainer {
         } else {
             try {
                 Type type = Type.valueOf(attribute.getPhysicalDataType());
-                record.put(attribute.getName(), AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry,
+                record.put(attribute.getName(), AvroTypeConverter.convertIntoJavaValueForAvroType(valueConverter,
                         type, attribute, value));
             } catch (Exception e) {
                 System.out.println(attribute.getName());
@@ -98,5 +108,13 @@ public class DataContainer {
 
     public File getLocalDataFile() {
         return file;
+    }
+
+    public void flush() {
+        try {
+            dataFileWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

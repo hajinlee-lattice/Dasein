@@ -15,4 +15,6 @@ public class ImportProperty extends BaseProperty {
     public static final String LAST_MODIFIED_DATE = "lastModifiedDate";
     public static final String PROCESSED_RECORDS = "processedRecords";
     public static final String METADATAURL = "metadataUrl";
+    public static final String IMPORT_CONFIG_STR = "importConfigStr";
+    public static final String COLLECTION_IDENTIFIERS = "collectionIdentifiers";
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -23,7 +24,13 @@ public class FileImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> importMetadata(SourceImportConfiguration srcImportConfig, ImportContext context) {
+    public ConnectorConfiguration generateConnectorConfiguration(String connectorConfig, ImportContext context) {
+        return null;
+    }
+
+    @Override
+    public List<Table> importMetadata(SourceImportConfiguration srcImportConfig, ImportContext context,
+                                      ConnectorConfiguration connectorConfiguration) {
         List<Table> newTables = new ArrayList<>();
         List<Table> tables = srcImportConfig.getTables();
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.FILE, "EventTable");
@@ -39,7 +46,8 @@ public class FileImportServiceImpl extends ImportService {
     }
 
     @Override
-    public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext context) {
+    public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext context,
+                                         ConnectorConfiguration connectorConfiguration) {
         context.setProperty(ImportProperty.HDFSFILE, //
                 srcImportConfig.getProperties().get(ImportProperty.HDFSFILE));
         context.setProperty(ImportProperty.METADATAFILE, //

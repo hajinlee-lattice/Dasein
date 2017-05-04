@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.latticeengines.eai.service.ValueConverter;
+import com.latticeengines.eai.service.impl.CamelValueConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
@@ -28,7 +30,7 @@ import parquet.hadoop.metadata.CompressionCodecName;
 public class ExtractDataXmlHandlerForParquet extends DefaultHandler {
     private static final Log log = LogFactory.getLog(ExtractDataXmlHandlerForParquet.class);
 
-    private TypeConverterRegistry typeConverterRegistry;
+    private ValueConverter valueConverter;
     private Map<String, Attribute> tableAttributeMap;
     private Schema schema;
     private GenericRecord record;
@@ -103,11 +105,11 @@ public class ExtractDataXmlHandlerForParquet extends DefaultHandler {
         Type type = Type.valueOf(attr.getPhysicalDataType());
 
         record.put(currentQname,
-                AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, attr, value));
+                AvroTypeConverter.convertIntoJavaValueForAvroType(valueConverter, type, attr, value));
     }
 
     public String initialize(TypeConverterRegistry typeConverterRegistry, Table table) {
-        this.typeConverterRegistry = typeConverterRegistry;
+        this.valueConverter = new CamelValueConverter(typeConverterRegistry);
         this.tableAttributeMap = table.getNameAttributeMap();
         this.schema = table.getSchema();
 

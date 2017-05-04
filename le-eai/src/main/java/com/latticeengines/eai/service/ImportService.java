@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
+import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -30,6 +31,8 @@ public abstract class ImportService {
         return services.get(sourceType);
     }
 
+    public abstract ConnectorConfiguration generateConnectorConfiguration(String connectorConfig, ImportContext context);
+
     /**
      * Import metadata from the specific connector. The original list of table
      * metadata will be decorated with the following:
@@ -41,9 +44,11 @@ public abstract class ImportService {
      *            list of tables that only has table name and attribute names
      * @return
      */
-    public abstract List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context);
+    public abstract List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context,
+                                               ConnectorConfiguration connectorConfiguration);
 
-    public abstract void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext context);
+    public abstract void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext context,
+                                                  ConnectorConfiguration connectorConfiguration);
 
     public void validate(SourceImportConfiguration extractionConfig, ImportContext context) {
         Configuration config = context.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);
