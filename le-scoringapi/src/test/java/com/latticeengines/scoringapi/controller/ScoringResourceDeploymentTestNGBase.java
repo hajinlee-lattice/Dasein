@@ -40,6 +40,10 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected static final String SALESFORCE = "SALESFORCE";
     protected static final String MISSING_FIELD_COUNTRY = "Country";
     protected static final String MISSING_FIELD_FIRSTNAME = "FirstName";
+    protected static final String MISSING_FIELD_COMPANYNAME = "CompanyName";
+    protected static final String MISSING_FIELD_DUNS = "DUNS";
+    protected static final String MISSING_FIELD_EMAIL = "Email";
+    protected static final String MISSING_FIELD_WEBSITE = "Website";
     protected static final int MAX_FOLD_FOR_TIME_TAKEN = 10;
     // allow atleast 80 seconds of upper bound for bulk scoring api to make sure
     // that this testcase can work if performance is fine. If performance
@@ -76,6 +80,12 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 attributeValues.remove(MISSING_FIELD_COUNTRY);
             } else if (i == 1) {
                 attributeValues.remove(MISSING_FIELD_FIRSTNAME);
+            } else if (i == 2) {
+                attributeValues.remove(MISSING_FIELD_COMPANYNAME);
+                attributeValues.remove(MISSING_FIELD_EMAIL);
+                attributeValues.remove(MISSING_FIELD_WEBSITE);
+            } else if (i == 3) {
+                attributeValues.remove(MISSING_FIELD_DUNS);
             }
 
             List<String> modelIds = new ArrayList<>();
