@@ -19,6 +19,7 @@ import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.api.exposed.exception.ModelingServiceRestException;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
@@ -28,8 +29,8 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(ApiFunctionalTestNGBase.class);
 
-    protected RestTemplate restTemplate = new RestTemplate();
-    protected RestTemplate ignoreErrorRestTemplate = new RestTemplate();
+    protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    protected RestTemplate ignoreErrorRestTemplate = HttpClientUtils.newRestTemplate();
 
     @Autowired
     private Configuration yarnConfiguration;
