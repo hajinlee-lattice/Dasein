@@ -182,7 +182,9 @@ angular.module('common.datacloud.query.builder', [])
                     cubeBuckets = getCubeBucketsFromModelRatings();
                 } else {
                     var cubeStat = vm.cubeStats[fieldName];
-                    cubeBuckets = cubeStat ? cubeStat.RowStats.Bkts.List || [] : [];
+                    cubeBuckets = (cubeStat && cubeStat.RowStats && cubeStat.RowStats.Bkts && cubeStat.RowStats.Bkts.List)
+                        ? cubeStat.RowStats.Bkts.List
+                        : [];
                 }
 
                 for (var i = 0; i < restrictionBuckets.length; i++) {
