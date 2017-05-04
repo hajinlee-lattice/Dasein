@@ -11,16 +11,19 @@ Contact,,Has Attended Cisco Live,Yes,A flag that describes whether a contact has
 Contact,,Has Attended Cisco Live,No,A flag that describes whether a contact has attended Cisco Live Conference last year.,149
 Contact,,Engaged in last 3 weeks,Yes,A flag that describes whether a contact has engaged with us during the last 3 weeks.,200
 Contact,,Engaged in last 3 weeks,No,A flag that describes whether a contact has engaged with us during the last 3 weeks.,249
-Engagement,,Number of Active Contacts,0-10,The number of active contacts.,350
-Engagement,,Number of Active Contacts,10-20,The number of active contacts.,50
-Engagement,,Number of Active Contacts,20+,The number of active contacts.,49
+Intent,,Cloud Security Intent,Low,Intent to obtain cloud security.,300
+Intent,,Cloud Security Intent,Medium,Intent to obtain cloud security.,100
+Intent,,Cloud Security Intent,High,Intent to obtain cloud security.,49
+Engagement,,Known Contact Engagement,Low,The number of active contacts.,350
+Engagement,,Known Contact Engagement,Medium,The number of active contacts.,50
+Engagement,,Known Contact Engagement,High,The number of active contacts.,49
 Engagement,,Anonymous Engagement Rating,Low,The level of anonymous engagement.,420
-Engagement,,Anonymous Engagement Rating,Medim,The level of anonymous engagement.,20
+Engagement,,Anonymous Engagement Rating,Medium,The level of anonymous engagement.,20
 Engagement,,Anonymous Engagement Rating,High,The level of anonymous engagement.,9
-Engagement,,Has Opportunity,Yes,Defines an account in terms of the opportunity.,249
-Engagement,,Has Opportunity,No,Defines an account in terms of the opportunity.,200
+Engagement,,Has Opportunity,Yes,Defines an account in terms of the opportunity.,49
+Engagement,,Has Opportunity,No,Defines an account in terms of the opportunity.,400
 Product,GN Platinum,GN Platinum: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,10
-Product,GN Platinum,GN Platinum: Has Purchased,No, A flag that describes whether an account has purchased the product.,29
+Product,GN Platinum,GN Platinum: Has Purchased,No,A flag that describes whether an account has purchased the product.,29
 Product,GN Platinum,GN Platinum: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,7
 Product,GN Platinum,GN Platinum: Total Amt,40000-80000,The total amount (in USD) an account spend on the product.,1
 Product,GN Platinum,GN Platinum: Total Amt,80000-160000,The total amount (in USD) an account spend on the product.,1
@@ -50,7 +53,7 @@ Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 80000-160000,"The spending 
 Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",5
 Product,GN Platinum,GN Platinum: Last Yr Trend ($),> 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1
 Product,GN Cloud,GN Cloud: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,12
-Product,GN Cloud,GN Cloud: Has Purchased,No, A flag that describes whether an account has purchased the product.,27
+Product,GN Cloud,GN Cloud: Has Purchased,No,A flag that describes whether an account has purchased the product.,27
 Product,GN Cloud,GN Cloud: Total Amt,10000-20000,The total amount (in USD) an account spend on the product.,3
 Product,GN Cloud,GN Cloud: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,3
 Product,GN Cloud,GN Cloud: Total Amt,40000-60000,The total amount (in USD) an account spend on the product.,3

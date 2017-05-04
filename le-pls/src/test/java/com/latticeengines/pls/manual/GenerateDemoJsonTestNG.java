@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -29,8 +29,6 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 
 public class GenerateDemoJsonTestNG {
 
-    private Random random = new Random();
-
     @Test(groups = "manual")
     public void generateJson() throws IOException {
         String path = ClassLoader.getSystemResource("com/latticeengines/pls/manual/category-taxonomy.csv").getPath();
@@ -40,6 +38,7 @@ public class GenerateDemoJsonTestNG {
         AccountMasterCube cube = new AccountMasterCube();
         cube.setStatistics(new HashMap<>());
         Map<String, TopNAttributes> topn = new HashMap<>();
+        List<String> categoriesToSkipTopN = Arrays.asList("Intent");
         for (CSVRecord record : parser) {
             String category = record.get(0);
             String subcategory = record.get(1);
@@ -60,6 +59,10 @@ public class GenerateDemoJsonTestNG {
                 cube.getStatistics().put(fieldName, statistics);
             }
             addBucket(statistics, value, frequency);
+
+            if (categoriesToSkipTopN.contains(category)) {
+                continue;
+            }
 
             TopNAttributes topNAttributes = topn.get(category);
             if (topNAttributes == null) {
