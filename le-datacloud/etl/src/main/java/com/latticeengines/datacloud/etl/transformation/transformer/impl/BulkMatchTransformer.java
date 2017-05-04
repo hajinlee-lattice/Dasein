@@ -69,8 +69,8 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
             }
             String logMsg = "Match Status = " + status;
             if (MatchStatus.MATCHING.equals(status)) {
-                 Float progress = matchCommand.getProgress();
-                 logMsg += String.format(": %.2f %%", progress * 100);
+                Float progress = matchCommand.getProgress();
+                logMsg += String.format(": %.2f %%", progress * 100);
             }
             log.info(logMsg);
 
@@ -83,8 +83,9 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
         } while (!status.isTerminal());
 
         if (!MatchStatus.FINISHED.equals(status)) {
-            throw new IllegalStateException(
-                "The terminal status of match is " + status + " instead of " + MatchStatus.FINISHED);
+            IllegalStateException inner = new IllegalStateException("The terminal status of match is " + status
+                    + " instead of " + MatchStatus.FINISHED);
+            throw new LedpException(LedpCode.LEDP_00006, inner);
         }
         return matchCommand;
     }
