@@ -68,7 +68,7 @@
                     </form>
                     <hr class="row-divider">
                     <button class="button gray-button" type="button" ng-click="vm.cancel()" ng-disabled="vm.remodeling">Cancel</button>
-                    <button class="button orange-button pull-right" ng-click="vm.remodel()" ng-disabled="!vm.newModelName || vm.newModelName.length > 50  || vm.remodeling || vm.disableRemodelOnError"><i class="fa fa-spinner fa-spin fa-fw" ng-if="vm.remodeling"></i>Remodel</button>
+                    <button class="button orange-button pull-right" ng-click="vm.checkStatusBeforeRemodel()" ng-disabled="!vm.newModelName || vm.newModelName.length > 50  || vm.remodeling || vm.disableRemodelOnError"><i class="fa fa-spinner fa-spin fa-fw" ng-if="vm.remodeling"></i>Remodel</button>
                 </div>
             </div>
         </div>

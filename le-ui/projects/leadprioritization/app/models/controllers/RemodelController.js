@@ -7,9 +7,9 @@ angular.module('mainApp.models.remodel', [
     'lp.models.remodel',
     'lp.jobs'
 ])
-.controller('RemodelController', function($scope, $filter, $state, $timeout, MetadataService,
+.controller('RemodelController', function($scope, $filter, $state, $timeout, $anchorScroll, MetadataService,
         RemodelTooltipService, RemodelStore, Model, DataRules, Attributes, BasicConfirmationModal,
-        RemodelingModal, ResourceUtility, StringUtility
+        RemodelingModal, ResourceUtility, StringUtility, HealthService
 ) {
 
     if (Model.ModelType === 'PmmlModel' ||
@@ -98,6 +98,14 @@ angular.module('mainApp.models.remodel', [
         }
     };
 
+    vm.checkStatusBeforeRemodel = function() {
+        HealthService.checkSystemStatus().then(function() {
+            vm.remodel();
+        }).catch(function() {
+            $anchorScroll();
+        });
+    };
+
     vm.remodel = function() {
         var modelNameFormatted = StringUtility.SubstituteAllSpecialCharsWithDashes(vm.newModelName);
 
@@ -121,7 +129,8 @@ angular.module('mainApp.models.remodel', [
         vm.remodeling = true;
         RemodelingModal.show();
 
-        MetadataService.UpdateAndCloneFields(dedupType, includePersonalEmailDomains, useLatticeAttributes, enableTransformations, modelName, modelDisplayName, originalModelSummaryId, fields, null).then(function(result) {
+        MetadataService.UpdateAndCloneFields(dedupType, includePersonalEmailDomains, useLatticeAttributes,
+                enableTransformations, modelName, modelDisplayName, originalModelSummaryId, fields, null).then(function(result) {
 
             if (result.Success === true) {
                 vm.success = true;

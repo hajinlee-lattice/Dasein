@@ -2,9 +2,11 @@ angular.module('lp.jobs', [
     'lp.jobs.status',
     'pd.navigation.pagination',
     'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.appCommon.services.HealthService',
     '720kb.tooltips'
 ])
-.controller('JobsListCtrl', function($scope, $state, $stateParams, $http, $timeout, $interval, JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal) {
+.controller('JobsListCtrl', function($scope, $state, $stateParams, $http, $timeout, $interval,
+    JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal, HealthService) {
     $scope.expanded = {};
     $scope.statuses = {};
     $scope.cancelling = {};
@@ -187,6 +189,12 @@ angular.module('lp.jobs', [
         } else {
             $state.go('home.jobs.status', { 'jobCreationSuccess': null });
         }
+    };
+
+    $scope.checkStatusBeforeScore = function() {
+        HealthService.checkSystemStatus().then(function() {
+            $state.go('home.model.scoring')
+        });
     };
 
     $scope.init();

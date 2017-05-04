@@ -2,10 +2,11 @@ angular.module('lp.models.list', [
     'mainApp.core.services.FeatureFlagService',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.widgets.ModelListTileWidget',
-    'mainApp.models.modals.CopyModelFromTenantModal'
+    'mainApp.appCommon.services.HealthService',
+    'mainApp.models.modals.CopyModelFromTenantModal',
 ])
-.controller('ModelListController', function (
-    ResourceUtility, ModelList, ModelStore, CopyModelFromTenantModal, ImportModelModal, FeatureFlagService
+.controller('ModelListController', function ($state,
+    ResourceUtility, ModelList, ModelStore, CopyModelFromTenantModal, ImportModelModal, FeatureFlagService, ServiceErrorUtility, HealthService
 ) {
     var vm = this;
 
@@ -27,7 +28,7 @@ angular.module('lp.models.list', [
                     { label: 'Model Type',      icon: 'alpha',      property: 'ModelType' }
                 ]
             },
-            filter: { 
+            filter: {
                 label: 'Filter By',
                 unfiltered: ModelList,
                 filtered: ModelList,
@@ -45,30 +46,33 @@ angular.module('lp.models.list', [
                 class: 'orange-button select-label',
                 icon: 'fa fa-chevron-down',
                 iconclass: 'orange-button select-more',
-                iconrotate: true
+                iconrotate: true,
+                click: checkStatusBeforeCreate.bind(null, 'home.models.import')
             }
         }
-    },{  
+    },{
         init: function() {
             this.header.create.items = [
-                { 
+                {
                     sref: 'home.models.import',
                     label: 'From Training Set',
-                    icon: 'fa fa-file-excel-o' 
+                    icon: 'fa fa-file-excel-o',
+                    click: checkStatusBeforeCreate.bind(null, 'home.models.import')
                 },{
                     sref: 'home.models.pmml',
                     label: 'From PMML File',
-                    icon: 'fa fa-file-code-o' 
+                    icon: 'fa fa-file-code-o',
+                    click: checkStatusBeforeCreate.bind(null, 'home.models.pmml')
                 },{
                     if: 0,
                     click: vm.showCopyModelFromTenant,
                     label: 'From Another Tenant',
-                    icon: 'ico ico-lattice-dots' 
+                    icon: 'ico ico-lattice-dots'
                 }/*,{
                     if: vm.showUploadSummaryJson,
                     click: vm.importJSON,
                     label: 'Import JSON File',
-                    icon: 'fa fa-file-text-o' 
+                    icon: 'fa fa-file-text-o'
                 }*/
             ];
 
@@ -101,7 +105,7 @@ angular.module('lp.models.list', [
             for (var i=0; i<models.length; i++) {
                 models[i].TimeStamp = Date.parse(models[i].CreatedDate);
             }
-            
+
             var active = models.filter(function(item) {
                 return item.Status == 'Active';
             });
@@ -114,6 +118,14 @@ angular.module('lp.models.list', [
             vm.pmmlLength = pmml.length;
         }
     });
+
+    function checkStatusBeforeCreate(sref, $event) {
+        $event.preventDefault();
+
+        HealthService.checkSystemStatus().then(function() {
+            $state.go(sref);
+        });
+    }
 
     vm.init();
 });

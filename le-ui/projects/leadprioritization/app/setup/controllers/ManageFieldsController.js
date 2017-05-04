@@ -10,7 +10,7 @@ angular.module('lp.managefields', [
 ])
 .controller('ManageFieldsController', function (
     $scope, $rootScope, $timeout, $state, StringUtility, ResourceUtility, SetupUtility, NavUtility, MetadataService,
-    DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal, Model) {
+    DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal, Model, HealthService) {
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
@@ -434,6 +434,12 @@ angular.module('lp.managefields', [
             return;
         }
 
+        HealthService.checkSystemStatus().then(function() {
+            $scope.remodel();
+        });
+    };
+
+    $scope.remodel = function() {
         UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes, $scope.enableTransformations, $scope.modelId,
             $scope.fields.concat($scope.fieldsNotDisplayed), Model.ModelDetails.DisplayName);
         $scope.saveInProgress = false;

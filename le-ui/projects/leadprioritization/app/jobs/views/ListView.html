@@ -30,7 +30,7 @@
                 <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
                 -->
 
-                <a ng-if="state == 'model'" ui-sref="home.model.scoring" class="button orange-button">Score a File</a>
+                <a ng-if="state == 'model'" ng-click="checkStatusBeforeScore()" class="button orange-button">Score a File</a>
 
             </div>
         </div><!-- End .row -->
