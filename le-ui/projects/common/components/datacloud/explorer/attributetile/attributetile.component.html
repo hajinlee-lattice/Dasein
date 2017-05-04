@@ -32,12 +32,16 @@
     <span class="lesser-description" ng-if="vm.lookupMode">
         {{ enrichment.Description }}
     </span>
-    <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && !vm.lookupMode">
+    <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && !vm.lookupMode && (vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' ? (vm.section == 'segment.analysis' ? true : false) : true)">
         <h5><label>Attribute range</label><label>Records</label></h5>
         <ul class="attribute-stats">
             <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List | limitTo: 5"
                 class="attribute-stat"
-                ng-class="{'select-range': vm.section == 'segment.analysis', 'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)]}"
+                ng-class="{
+                            'select-range': vm.section == 'segment.analysis', 
+                            'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)],
+                            'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean')
+                            }"
                 ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))">
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">

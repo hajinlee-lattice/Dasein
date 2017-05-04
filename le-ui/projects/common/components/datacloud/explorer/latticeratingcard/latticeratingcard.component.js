@@ -43,7 +43,7 @@ angular
                     });
                     data.total = total;
                     data.lifts = lifts;
-                    data.slice_size = Math.ceil(top_lift) / 4;
+                    data.slice_size = top_lift.toFixed(1) / 4;
                     data.top_lift = top_lift;
                     for (var i = 0; i < 4; i++) { 
                         data.slices.push(i * data.slice_size);

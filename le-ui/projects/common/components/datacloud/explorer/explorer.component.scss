@@ -734,9 +734,9 @@
                                     }
                                     &.bar_ {
                                         @include flex-item(1 1 auto);
-                                        border-left: 1px solid #d0d1d0;
                                         div {
                                             height: 100%;
+                                            border-left: 1px solid #d0d1d0;
                                             span {
                                                 display: block;
                                                 height: 10px;
@@ -754,6 +754,20 @@
                                             position: relative;
                                             top: 50%;
                                             transform: translateY(-50%);
+                                        }
+                                    }
+                                }
+                            }
+                            &.disable-bar {
+                                ul.graph {
+                                    li {
+                                        &.label {
+                                            text-align: left;
+                                        }
+                                        &.bar_ {
+                                            div {
+                                                display: none;
+                                            }
                                         }
                                     }
                                 }
@@ -1323,6 +1337,25 @@
         }
         &.background-color {
             background-color: #cd80bc;
+        }
+    }
+    .category-engagement {
+        &.color {
+            color: #aac43b;
+        }
+        &.border {
+            border-color: #aac43b;
+        }
+        &.border-top {
+            border-top-color: #aac43b;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(170,196,59);
+            border-color: #aac43b;
+        }
+        &.background-color {
+            background-color: #aac43b;
         }
     }
     .disabled-grayout {
