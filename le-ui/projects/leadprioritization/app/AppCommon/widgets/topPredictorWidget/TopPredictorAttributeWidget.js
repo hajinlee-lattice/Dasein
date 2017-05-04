@@ -206,14 +206,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("width", x)
         .attr("height", barHeight)
         .style("fill", data.color)
-        .attr('opacity', function(d) {
-            if (d > 1) {
-                return 0.8;
-            } else {
-                return 0.4;
-            }
-
-        });
+        .attr('opacity', 0.8);
 
     // These are the "borders" that accompany each bar
     chart.selectAll("rect.barBorder")
@@ -229,14 +222,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         })
         .attr("height", 1)
         .style("fill", data.color)
-        .attr('opacity', function(d) {
-            if (d > 1) {
-                return 1;
-            } else {
-                return 0.6;
-            }
-
-        });
+        .attr('opacity', 1);
 
 
     // This is the 1x line
