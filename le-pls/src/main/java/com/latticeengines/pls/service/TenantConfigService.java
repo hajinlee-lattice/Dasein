@@ -22,6 +22,4 @@ public interface TenantConfigService {
     List<LatticeProduct> getProducts(String tenantId);
 
     int getMaxPremiumLeadEnrichmentAttributes(String tenantId);
-
-    Boolean getSystemStatus();
 }

@@ -7,11 +7,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.StatusDocument;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
-import com.latticeengines.pls.service.TenantConfigService;
-import com.latticeengines.proxy.exposed.matchapi.MatchHealthProxy;
+import com.latticeengines.pls.service.SystemStatusService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,10 +19,7 @@ import io.swagger.annotations.ApiOperation;
 public class HealthCheckResource {
 
     @Autowired
-    private TenantConfigService tenantConfigService;
-
-    @Autowired
-    private MatchHealthProxy matchHealthProxy;
+    private SystemStatusService systemConfigService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -40,17 +34,7 @@ public class HealthCheckResource {
     @ApiOperation(value = "System check")
     @NoMetricsLog
     public StatusDocument systemCheck() {
-        try {
-            boolean systemStatus = tenantConfigService.getSystemStatus();
-            String rateLimitStatus = matchHealthProxy.dnbRateLimitStatus().getStatus();
-            if (systemStatus) {
-                return StatusDocument.underMaintainance();
-            } else if (rateLimitStatus.equals(StatusDocument.MATCHER_IS_BUSY)) {
-                return StatusDocument.matcherIsBusy();
-            }
-            return StatusDocument.ok();
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18139, "System is under maintainance" + e.getMessage(), e);
-        }
+        StatusDocument status = systemConfigService.getSystemStatus();
+        return status;
     }
 }

@@ -17,6 +17,7 @@ public class StatusDocument {
     public static final String UNDER_MAINTAINANCE = "UNDER_MAINTAINANCE";
 
     private String status;
+    private String message;
 
     // for JSON constructor
     @SuppressWarnings("unused")
@@ -24,6 +25,11 @@ public class StatusDocument {
 
     public StatusDocument(String status) {
         this.status = status;
+    }
+
+    public StatusDocument(String status, String message) {
+        this.status = status;
+        this.message = message;
     }
 
     @JsonProperty("status")
@@ -34,6 +40,16 @@ public class StatusDocument {
     @JsonProperty("status")
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @JsonProperty("message")
+    public String getMessage() {
+        return message;
+    }
+
+    @JsonProperty("message")
+    public void setMessage(String message) {
+        this.status = message;
     }
 
     public static StatusDocument ok() {
@@ -56,8 +72,12 @@ public class StatusDocument {
         return new StatusDocument(MATCHER_IS_BUSY);
     }
 
-    public static StatusDocument underMaintainance() {
-        return new StatusDocument(UNDER_MAINTAINANCE);
+    public static StatusDocument matcherIsBusy(String message) {
+        return new StatusDocument(MATCHER_IS_BUSY, message);
+    }
+
+    public static StatusDocument underMaintainance(String message) {
+        return new StatusDocument(UNDER_MAINTAINANCE, message);
     }
 
     @Override

@@ -5,10 +5,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +21,6 @@ import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
@@ -42,17 +39,12 @@ import com.latticeengines.pls.service.TenantDeploymentService;
 @Component("tenantConfigService")
 public class TenantConfigServiceImpl implements TenantConfigService {
 
-    private Camille camille;
     private static final Log log = LogFactory.getLog(TenantConfigServiceImpl.class);
     private static final String SPACE_CONFIGURATION_ZNODE = "/SpaceConfiguration";
     private static final String TOPOLOGY_ZNODE = "/Topology";
     private static final String DL_ADDRESS_ZNODE = "/DL_Address";
     public static final String SERVICES_ZNODE = "/Services";
     public static final String PLS_ZNODE = "/PLS";
-    public static final String SYSTEM_STATUS = "/systemstatus";
-    public static final String PLS = "PLS";
-    public static final String UNDER_MAINTAINANCE = "UNDER_MAINTAINANCE";
-    public static final String OK = "OK";
     public static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
 
     @Value("${pls.dataloader.rest.api}")
@@ -243,33 +235,6 @@ public class TenantConfigServiceImpl implements TenantConfigService {
                 return true;
             }
         } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public Boolean getSystemStatus() {
-        camille = CamilleEnvironment.getCamille();
-        boolean underMaintainance = false;
-        Path plsPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), PLS);
-        plsPath = plsPath.append(SYSTEM_STATUS);
-        log.info("plsPath : " + plsPath);
-        try {
-            String zookeeperData = camille.get(plsPath).getData();
-            if (!camille.exists(plsPath) || StringUtils.isBlank(zookeeperData)) {
-                camille.upsert(plsPath, new Document(OK), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                return false;
-            }
-            if (zookeeperData.equals("UNDER_MAINTAINANCE")) {
-                underMaintainance = true;
-                throw new LedpException(LedpCode.LEDP_18139);
-            }
-            return true;
-        } catch (Exception e) {
-            if (!underMaintainance) {
-                log.error("Failed to get Zookeeper Node status", e);
-            } else {
-                log.error("System is under maintainance : ", e);
-            }
             return false;
         }
     }

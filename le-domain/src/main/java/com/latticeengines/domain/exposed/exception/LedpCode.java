@@ -250,7 +250,6 @@ public enum LedpCode {
     LEDP_18136("Same load vdb table job is already submitted."), //
     LEDP_18137("Same load vdb table job is running with application id {0}"), //
     LEDP_18138("Same load vdb table job is already succeeded."), //
-    LEDP_18139("System is under maintainance"), //
     LEDP_18140("Table {0} already exist, cannot create a new one"),
     LEDP_18141("Table metadata is conflict with table already existed."),
     LEDP_18142("Table {0} not exist, cannot import table with update rule"),
