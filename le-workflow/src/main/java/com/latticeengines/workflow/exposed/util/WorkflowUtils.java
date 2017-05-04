@@ -34,9 +34,13 @@ public class WorkflowUtils {
             } catch (Exception e) {
                 log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId()
                         + ".  Assuming it failed and was purged from the system.");
-                com.latticeengines.domain.exposed.dataplatform.JobStatus terminal = getTerminalStatus(workflowJob);
-                jobState = terminal.getState();
-                workflowJobEntityMgr.updateStatusFromYarn(workflowJob, terminal);
+                try {
+                    com.latticeengines.domain.exposed.dataplatform.JobStatus terminal = getTerminalStatus(workflowJob);
+                    jobState = terminal.getState();
+                    workflowJobEntityMgr.updateStatusFromYarn(workflowJob, terminal);
+                } catch (Exception inner) {
+                    log.error("Failed to update WorkflowJob so that successive queries aren't necessary", inner);
+                }
             }
         }
         // We only trust the WorkflowJob status if it is non-null
@@ -50,7 +54,9 @@ public class WorkflowUtils {
         com.latticeengines.domain.exposed.dataplatform.JobStatus terminal = new com.latticeengines.domain.exposed.dataplatform.JobStatus();
         terminal.setStatus(FinalApplicationStatus.FAILED);
         terminal.setState(YarnApplicationState.KILLED);
-        terminal.setStartTime(workflowJob.getStartTimeInMillis());
+        if (workflowJob.getStartTimeInMillis() != null) {
+            terminal.setStartTime(workflowJob.getStartTimeInMillis());
+        }
         return terminal;
     }
 
