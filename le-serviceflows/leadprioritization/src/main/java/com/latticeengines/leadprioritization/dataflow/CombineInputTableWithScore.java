@@ -49,8 +49,10 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
 
         List<String> retainFields = new ArrayList<>(inputTable.getFieldNames());
         List<String> scoreWithRatingColumns = scoreWithRating.getFieldNames();
-        scoreWithRatingColumns.remove(idColumn);
-        retainFields.addAll(scoreWithRatingColumns);
+        scoreWithRatingColumns.forEach(e -> {
+            if (!retainFields.contains(e))
+                retainFields.add(e);
+        });
 
         combinedResultTable = inputTable.leftJoin(idColumn, scoreWithRating, idColumn);
         combinedResultTable = combinedResultTable.groupByAndLimit(new FieldList(InterfaceName.InternalId.name()), 1);
