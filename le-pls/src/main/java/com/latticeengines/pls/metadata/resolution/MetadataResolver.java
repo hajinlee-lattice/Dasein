@@ -374,6 +374,9 @@ public class MetadataResolver {
         case "DOUBLE":
             fundamentalType = ModelingMetadata.FT_NUMERIC;
             break;
+        case "LONG":
+            fundamentalType = ModelingMetadata.FT_YEAR;
+            break;
         case "STRING":
         default:
             fundamentalType = ModelingMetadata.FT_ALPHA;
@@ -447,22 +450,18 @@ public class MetadataResolver {
     }
 
     private boolean isDateTypeColumn(List<String> columnFields) {
-        String[] supportedDateFormat = { "YYYY-MM-DD", "YYYY-MM-DD'T'HH:mm:ss.sssZ" };
+        String[] supportedDateFormat = { "MM/dd/yyyy", "YYYY-MM-DD", "YYYY-MM-DD'T'HH:mm:ss.sssZ" };
         for (String columnField : columnFields) {
             Date date = null;
             for (String format : supportedDateFormat) {
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat(format);
                     date = sdf.parse(columnField);
-                    if (!columnField.equals(sdf.format(date))) {
-                        date = null;
+                    if (date != null) {
+                        break;
                     }
                 } catch (ParseException ex) {
                 }
-                if (date != null) {
-                    break;
-                }
-                date = null;
             }
             if (date == null) {
                 return false;

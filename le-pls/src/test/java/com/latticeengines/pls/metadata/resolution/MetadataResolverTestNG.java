@@ -31,6 +31,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
@@ -74,8 +75,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(
                 SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceAccount));
 
-        Set<String> expectedUnknownColumns = Sets
-                .newHashSet(new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column" });
+        Set<String> expectedUnknownColumns = Sets.newHashSet(
+                new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column", "Date" });
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -119,6 +120,10 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(attribute.getPhysicalDataType(), UserDefinedType.TEXT.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_ALPHA);
         assertEquals(attribute.getStatisticalType(), ModelingMetadata.NOMINAL_STAT_TYPE);
+        attribute = table.getAttribute("Date");
+        assertEquals(attribute.getPhysicalDataType(), UserDefinedType.DATE.getAvroType().toString().toLowerCase());
+        assertEquals(attribute.getLogicalDataType(), LogicalDataType.Date);
+        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_YEAR);
 
         for (Attribute a : table.getAttributes()) {
             assertNotEquals(a.getTags(), 0);
