@@ -2,6 +2,9 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -14,6 +17,7 @@ import cascading.tuple.TupleEntry;
 public class AMStatsHQDunsFunction extends BaseOperation<Map> //
         implements Function<Map> {
     private static final long serialVersionUID = -4039806083023012431L;
+    private static final Log log = LogFactory.getLog(AMStatsHQDunsFunction.class);
 
     private String subIndicatorField;
     private String statusCodeField;
@@ -47,7 +51,6 @@ public class AMStatsHQDunsFunction extends BaseOperation<Map> //
         hqDunsFieldLoc = params.outputFieldsDeclaration.getPos(hqDunsField);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall<Map> functionCall) {
         TupleEntry entry = functionCall.getArguments();
@@ -79,10 +82,16 @@ public class AMStatsHQDunsFunction extends BaseOperation<Map> //
         String duns = (String) entry.getObject(dunsFieldLoc);
         String dduns = (String) entry.getObject(ddunsFieldLoc);
         String gduns = (String) entry.getObject(gdunsFieldLoc);
+        String hqDuns = null;
 
-        String hqDuns = calculateHQDuns(Integer.parseInt(subIndicator), Integer.parseInt(statusCode), //
-                duns, dduns, gduns);
-
+        try {
+            hqDuns = calculateHQDuns(Integer.parseInt(subIndicator), //
+                    Integer.parseInt(statusCode), //
+                    duns, dduns, gduns);
+        } catch (NumberFormatException e) {
+            log.error("subIndicator = " + subIndicator + ", statusCode = " + statusCode
+                    + " should both be valid numbers: " + e.getMessage());
+        }
         result.set(hqDunsFieldLoc, hqDuns);
         functionCall.getOutputCollector().add(result);
     }
