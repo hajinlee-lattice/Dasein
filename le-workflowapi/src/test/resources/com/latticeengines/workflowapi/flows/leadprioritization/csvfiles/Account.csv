@@ -1,4 +1,4 @@
-Id,CompanyName,Type,Street,City,State,PostalCode,Country,Website,Sic,Industry,AnnualRevenue,NumberOfEmployees,Ownership,TickerSymbol,Rating,OwnerId,CreatedDate,LastModifiedDate,LastActivityDate,LastViewedDate,AccountSource,Event
+Id,CompanyName,Type,Street,City,State,PostalCode,Country,Website,Sic,Industry,AnnualRevenue,NumberOfEmployees,Ownership,TickerSymbol,OldRating,OwnerId,CreatedDate,LastModifiedDate,LastActivityDate,LastViewedDate,AccountSource,Event
 17971267,Ace Iron and Steel Incorp.,,5000 River Ridge Road,Ames,IA,50014,USA,pvh.com,,Construction,0,0,,,,00580000001YiY9AAK,1237932735000,1442910597000,0,1443740259000,,1
 65863797,Dickenson plc,Customer - Channel,309 Volunteer Street,Clintwood,VA,24228,USA,rgare.com,6752,Construction,50000000,120,Private,,,00580000001YiXVAA0,1223400194000,1442910597000,1391576400000,1438668185000,,1
 2982683,Doctor Diabetic Supply,,101 NW 24th Street,Miami,FL,33127,USA,thepantry.com,,,43400000,0,,,Warm,00580000001YiXVAA0,1246353765000,1442544231000,0,0,,1
