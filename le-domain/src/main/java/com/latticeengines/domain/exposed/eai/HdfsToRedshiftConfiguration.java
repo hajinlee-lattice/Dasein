@@ -16,6 +16,9 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
     @JsonProperty("append")
     private boolean append = false;
 
+    @JsonProperty("directly_copy")
+    private boolean directlyCopy = false;
+
     public RedshiftTableConfiguration getRedshiftTableConfiguration() {
         return redshiftTableConfiguration;
     }
@@ -38,6 +41,14 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
 
     public void setAppend(boolean append) {
         this.append = append;
+    }
+
+    public boolean isDirectlyCopy() {
+        return directlyCopy;
+    }
+
+    public void setDirectlyCopy(boolean directlyCopy) {
+        this.directlyCopy = directlyCopy;
     }
 
 }
