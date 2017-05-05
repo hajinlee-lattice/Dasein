@@ -30,7 +30,11 @@ function build_docker() {
 	sed -i "s|{{APP}}|${SRC_WAR}|g" WEB-INF/classes/log4j.properties
 	cp -f ${DIR}/context.xml META-INF/context.xml
 	cd ..
-	jar cvf ${TGT_WAR}.war -C ${TGT_WAR}/ .
+	if [ -f "${TGT_WAR}/META-INF/MANIFEST.MF" ]; then
+	    jar cmvf ${TGT_WAR}/META-INF/MANIFEST.MF ${TGT_WAR}.war -C ${TGT_WAR}/ .
+	else
+	    jar cvf ${TGT_WAR}.war -C ${TGT_WAR}/ .
+	fi
 	rm -rf ${TGT_WAR}
 
 	cd ${DIR}
