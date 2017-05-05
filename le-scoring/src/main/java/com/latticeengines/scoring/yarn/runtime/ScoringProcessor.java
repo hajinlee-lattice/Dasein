@@ -390,7 +390,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         scoreAttr.setName(ScoreResultField.Percentile.displayName);
         scoreAttr.setDisplayName(ScoreResultField.Percentile.displayName);
         scoreAttr.setSourceLogicalDataType("");
-        scoreAttr.setPhysicalDataType(Type.DOUBLE.name());
+        scoreAttr.setPhysicalDataType(Type.INT.name());
         outputTable.addAttribute(idAttr);
         outputTable.addAttribute(modelIdAttr);
         outputTable.addAttribute(scoreAttr);
