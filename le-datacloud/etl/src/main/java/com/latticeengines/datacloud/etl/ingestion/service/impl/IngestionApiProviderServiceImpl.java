@@ -5,6 +5,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -14,7 +18,15 @@ import com.latticeengines.proxy.exposed.RestApiClient;
 
 @Component("ingestionApiProviderService")
 public class IngestionApiProviderServiceImpl implements IngestionApiProviderService {
-    private RestApiClient apiClient = new RestApiClient();
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    private RestApiClient apiClient;
+
+    @PostConstruct
+    public void init() {
+        apiClient = RestApiClient.newExternalClient(applicationContext);
+    }
 
     public String getTargetVersion(ApiConfiguration config) {
         String version = null;
