@@ -28,27 +28,20 @@
         </li>
     </ul>
     <ul class="filters pagination">
-        <li ng-show="max > 1">
-            <pd-pagination-controls
-                current="vm.current"
-                max="max = (vm.results | filter: vm.search).length / vm.pagesize">
-            </pd-pagination-controls>
-        </li>
     </ul>
 
-    <table class="list-table" ng-if="max > 0">
-        <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
+    <table class="list-table" ng-if="vm.results.length > 0">
+        <thead>
             <tr>
-                <th ng-repeat="col in ::vm.columns" ng-click="vm.sort(col.column_name)">
-                    <span ng-class="{'sort': vm.sortBy === col.column_name}">{{::col.display_name}}</span>
+                <th ng-repeat="col in ::vm.columns">
+                    <span>{{::col.display_name}}</span>
                 </th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="r in vm.results |
-                            filter: vm.search |
-                            orderBy: vm.sortBy : vm.sortDesc |
-                            limitTo: vm.pagesize: ((vm.current - 1) * vm.pagesize)">
+                            limitTo: vm.pagesize |
+                            filter: vm.search">
                  <td ng-repeat="col in ::vm.columns">
                     <span   class="results-table-item results-table-item-{{ col.column_name == 'name' && r.website ? 'company' : col.column_name }}"
                             ng-click="vm.gotoCompanyProfile(col.column_name, r[col.column_name], r)">
@@ -59,7 +52,7 @@
         </tbody>
     </table>
 
-    <p ng-if="max === 0">
+    <p ng-if="vm.results.length === 0">
         No Records Found
     <p>
 

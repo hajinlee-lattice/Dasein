@@ -291,7 +291,7 @@ angular.module('common.datacloud.query.service',[
                 self.records[resourceType] = data[resourceType].records || [];
 
                 if (self.uiState === defaultState) {
-                    self.uiState.counts[resourceType] = self.records[resourceType].length * 1000;
+                    self.uiState.counts[resourceType] = self.records[resourceType].length * 993;
                 }
             }
         });
