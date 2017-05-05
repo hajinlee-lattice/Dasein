@@ -1035,11 +1035,6 @@
             "source": "TRANSFORMS",
             "type": "INTEGER"
         },
-        "DUNS": {
-            "interpretation": "DUNS",
-            "source": "REQUEST",
-            "type": "STRING"
-        },
         "Email": {
             "interpretation": "Email",
             "source": "REQUEST",

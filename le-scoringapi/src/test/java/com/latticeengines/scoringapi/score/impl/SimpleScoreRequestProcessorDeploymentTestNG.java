@@ -104,7 +104,6 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
 
         int idx = 0;
         for (RecordModelTuple tuple : originalOrderParsedTupleList) {
-            Assert.assertNull(tuple.getException());
             Record record = request.getRecords().get(idx / RECORD_MODEL_CARDINALITY);
             Assert.assertEquals(record, tuple.getRecord());
 

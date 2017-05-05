@@ -40,17 +40,13 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected static final String SALESFORCE = "SALESFORCE";
     protected static final String MISSING_FIELD_COUNTRY = "Country";
     protected static final String MISSING_FIELD_FIRSTNAME = "FirstName";
-    protected static final String MISSING_FIELD_COMPANYNAME = "CompanyName";
-    protected static final String MISSING_FIELD_DUNS = "DUNS";
-    protected static final String MISSING_FIELD_EMAIL = "Email";
-    protected static final String MISSING_FIELD_WEBSITE = "Website";
     protected static final int MAX_FOLD_FOR_TIME_TAKEN = 10;
     // allow atleast 80 seconds of upper bound for bulk scoring api to make sure
     // that this testcase can work if performance is fine. If performance
     // degrades a lot in future then this limit will correctly fail the testcase
     protected static final long MIN_UPPER_BOUND = TimeUnit.SECONDS.toMillis(80);
     protected static final long MAX_UPPER_BOUND = TimeUnit.SECONDS.toMillis(120);
-    protected static final double EXPECTED_SCORE_99 = 99.0d;
+    protected static final int EXPECTED_SCORE_99 = 99;
     protected static final int MAX_THREADS = 1;
     protected static final int RECORD_MODEL_CARDINALITY = 3;
     protected static final int MAX_MODELS = 4;
@@ -80,12 +76,6 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 attributeValues.remove(MISSING_FIELD_COUNTRY);
             } else if (i == 1) {
                 attributeValues.remove(MISSING_FIELD_FIRSTNAME);
-            } else if (i == 2) {
-                attributeValues.remove(MISSING_FIELD_COMPANYNAME);
-                attributeValues.remove(MISSING_FIELD_EMAIL);
-                attributeValues.remove(MISSING_FIELD_WEBSITE);
-            } else if (i == 3) {
-                attributeValues.remove(MISSING_FIELD_DUNS);
             }
 
             List<String> modelIds = new ArrayList<>();
@@ -179,8 +169,10 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 RecordScoreResponse result = om.readValue(om.writeValueAsString(res), RecordScoreResponse.class);
 
                 if (isPmmlModel) {
-//                    Assert.assertTrue(result.getScores().get(0).getScore() >= 0);
-//                    Assert.assertTrue(result.getScores().get(0).getScore() <= 100);
+                    // Assert.assertTrue(result.getScores().get(0).getScore() >=
+                    // 0);
+                    // Assert.assertTrue(result.getScores().get(0).getScore() <=
+                    // 100);
                     Assert.assertTrue(result.getScores().size() >= 1);
                     continue;
                 }
@@ -193,7 +185,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 }
 
                 for (int j = 0; j < RECORD_MODEL_CARDINALITY; j++) {
-                    Assert.assertEquals(result.getScores().get(j).getScore(), EXPECTED_SCORE_99);
+                    Assert.assertEquals(result.getScores().get(j).getScore().intValue(), EXPECTED_SCORE_99);
                     String modelId = result.getScores().get(j).getModelId();
                     Assert.assertTrue(modelsSubset.contains(modelId));
                     modelsSubset.remove(modelId);
