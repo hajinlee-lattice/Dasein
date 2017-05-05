@@ -193,6 +193,14 @@
             color: $datacloud-color-contact;
         }
     }
+    .category-engagement {
+        .query-lift-bg {
+            background-color: $datacloud-color-engagement;
+        }
+        .query-category-color {
+            color: $datacloud-color-engagement;
+        }
+    }
 }
 
 .query-filter-action {
