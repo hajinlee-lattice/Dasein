@@ -49,11 +49,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     @Override
     public CompanyProfile getProfile(CustomerSpace customerSpace, CompanyProfileRequest request,
             boolean enforceFuzzyMatch) {
-        if (!FeatureFlagClient.isEnabled(customerSpace, LatticeFeatureFlag.LATTICE_INSIGHTS.getName())) {
-            throw new RuntimeException(String.format("LATTICE_INSIGHTS feature flag is not enabled for customer %s",
-                    customerSpace));
-        }
-
         MatchInput matchInput = new MatchInput();
 
         List<List<Object>> data = new ArrayList<>();
