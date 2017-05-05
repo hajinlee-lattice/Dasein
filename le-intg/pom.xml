@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>le-intg</groupId>
     <artifactId>le-intg</artifactId>
-    <version>3.4.0-SNAPSHOT</version>
+    <version>3.5.0-SNAPSHOT</version>
 
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.4.0-SNAPSHOT</version>
+        <version>3.5.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

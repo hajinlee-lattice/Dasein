@@ -10,14 +10,14 @@
 
     <properties>
         <component-name>dellebi-microservice</component-name>
-        <le.microservice.version>3.4.0-SNAPSHOT</le.microservice.version>
-        <le.dellebi.version>3.4.0-SNAPSHOT</le.dellebi.version>
+        <le.microservice.version>3.5.0-SNAPSHOT</le.microservice.version>
+        <le.dellebi.version>3.5.0-SNAPSHOT</le.dellebi.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>3.4.0-SNAPSHOT</version>
+        <version>3.5.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
