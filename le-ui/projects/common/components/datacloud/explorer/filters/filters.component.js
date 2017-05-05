@@ -225,32 +225,6 @@ angular
                 return sortPrefix + order;
             }
 
-            var textSearch = function(haystack, needle, case_insensitive) {
-                var case_insensitive = (case_insensitive === false ? false : true);
-
-                if (case_insensitive) {
-                    var haystack = haystack.toLowerCase(),
-                    needle = needle.toLowerCase();
-                }
-
-                // .indexOf is faster and more supported than .includes
-                return (haystack.indexOf(needle) >= 0);
-            }
-
-            vm.searchFields = function(enrichment){
-                if (vm.query) {
-                    if (enrichment.DisplayName && textSearch(enrichment.DisplayName, vm.query)) {
-                        return true;
-                    } else if (enrichment.Description && textSearch(enrichment.Description, vm.query)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
             vm.enrichmentsFilter = function() {
                 var filter = {};
 

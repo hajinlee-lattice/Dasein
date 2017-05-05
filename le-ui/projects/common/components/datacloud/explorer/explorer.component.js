@@ -905,7 +905,7 @@ angular.module('common.datacloud.explorer', [
             var timestamp_b = new Date().getTime();
 
             if (!vm.lookupMode && items) {
-                items.forEach(function(item) {
+                items.forEach(function(item, itemKey) {
                     var index = vm.enrichmentsMap[item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
@@ -923,12 +923,16 @@ angular.module('common.datacloud.explorer', [
                             'SegmentChecked'
                         ];
 
-                    if (enrichment) {
+                    if (enrichment) { 
                         map.forEach(function(key){
-                                item[key] = enrichment[key];
+                            item[key] = enrichment[key];
                         });
 
                         enrichment.NonNullCount = item.NonNullCount;
+                        item.Hide = false;
+                    }
+                    if(!vm.searchFields(enrichment)) {
+                        item.Hide = true;
                     }
                 });
             }
@@ -1231,16 +1235,15 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.clearExplorerSegments = function() {
+    vm.clearExplorerSegments = function() { 
         var _enrichments = vm.filter(vm.enrichments, 'SegmentChecked', true);
         vm.segmentAttributeInput = {};
         _enrichments.forEach(function(enrichment){
             index = vm.enrichmentsMap[enrichment.FieldName];
-            if(index) {
+            if(index || index === 0) {
                 delete vm.enrichments[index].SegmentChecked;
             }
         });
-        var __enrichments = vm.filter(vm.enrichments, 'SegmentChecked', true);
     }
 
 
@@ -1258,9 +1261,9 @@ angular.module('common.datacloud.explorer', [
 
     vm.searchFields = function(enrichment){
         if (vm.query) {
-            if (textSearch(enrichment.DisplayName, vm.query)) {
+            if (enrichment.DisplayName && textSearch(enrichment.DisplayName, vm.query)) {
                 return true;
-            } else if (textSearch(enrichment.Description, vm.query)) {
+            } else if (enrichment.Description && textSearch(enrichment.Description, vm.query)) {
                 return true;
             } else {
                 return false;
