@@ -132,7 +132,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
                 .enableDebug(enableDebug) //
-                .matchDebugEnabled(!ModelType.PMML.getModelType().equals(modelType) && plsFeatureFlagService.isMatchDebugEnabled()) //
+                .matchDebugEnabled(!skipIdMatch && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.ENRICHMENT) //
                 .internalResourcePort(internalResourceHostPort) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //

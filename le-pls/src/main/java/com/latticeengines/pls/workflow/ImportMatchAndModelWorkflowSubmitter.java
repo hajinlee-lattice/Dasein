@@ -147,7 +147,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns())
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
-                .matchDebugEnabled(plsFeatureFlagService.isMatchDebugEnabled())
+                .matchDebugEnabled(!parameters.getExcludePropDataColumns() && plsFeatureFlagService.isMatchDebugEnabled())
                 .matchRequestSource(MatchRequestSource.MODELING)
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE)
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion())
