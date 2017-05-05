@@ -1,84 +1,84 @@
-Contact,,Title,VP,Titles associated with contacts.,204
-Contact,,Title,Director,Titles associated with contacts.,203
-Contact,,Title,Manager,Titles associated with contacts.,22
-Contact,,Department,IT,Departments associated with contacts.,124
-Contact,,Department,Finance,Departments associated with contacts.,123
-Contact,,Department,Accounting,Departments associated with contacts.,123
-Contact,,Department,Engineering,Departments associated with contacts.,59
-Contact,,Is With Company,Yes,A flag that describes whether a contact is still with the company.,428
-Contact,,Is With Company,No,A flag that describes whether a contact is still with the company.,1
-Contact,,Has Attended Cisco Live,Yes,A flag that describes whether a contact has attended Cisco Live Conference last year.,300
-Contact,,Has Attended Cisco Live,No,A flag that describes whether a contact has attended Cisco Live Conference last year.,149
-Contact,,Engaged in last 3 weeks,Yes,A flag that describes whether a contact has engaged with us during the last 3 weeks.,200
-Contact,,Engaged in last 3 weeks,No,A flag that describes whether a contact has engaged with us during the last 3 weeks.,249
-Intent,,Cloud Security Intent,Low,Intent to obtain cloud security.,300
-Intent,,Cloud Security Intent,Medium,Intent to obtain cloud security.,100
-Intent,,Cloud Security Intent,High,Intent to obtain cloud security.,49
-Engagement,,Known Contact Engagement,Low,The number of active contacts.,350
-Engagement,,Known Contact Engagement,Medium,The number of active contacts.,50
-Engagement,,Known Contact Engagement,High,The number of active contacts.,49
-Engagement,,Anonymous Engagement Rating,Low,The level of anonymous engagement.,420
-Engagement,,Anonymous Engagement Rating,Medium,The level of anonymous engagement.,20
-Engagement,,Anonymous Engagement Rating,High,The level of anonymous engagement.,9
-Engagement,,Has Opportunity,Yes,Defines an account in terms of the opportunity.,49
-Engagement,,Has Opportunity,No,Defines an account in terms of the opportunity.,400
-Product,GN Platinum,GN Platinum: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,10
-Product,GN Platinum,GN Platinum: Has Purchased,No,A flag that describes whether an account has purchased the product.,29
-Product,GN Platinum,GN Platinum: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,7
-Product,GN Platinum,GN Platinum: Total Amt,40000-80000,The total amount (in USD) an account spend on the product.,1
-Product,GN Platinum,GN Platinum: Total Amt,80000-160000,The total amount (in USD) an account spend on the product.,1
-Product,GN Platinum,GN Platinum: Total Amt,160000+,The total amount (in USD) an account spend on the product.,1
-Product,GN Platinum,GN Platinum: Last Mo Trend (%),< 10-20,The spending trend for the product for the last month as compared to the average of the previous 3 months.,7
-Product,GN Platinum,GN Platinum: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,1
-Product,GN Platinum,GN Platinum: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,1
-Product,GN Platinum,GN Platinum: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,1
-Product,GN Platinum,GN Platinum: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,7
-Product,GN Platinum,GN Platinum: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
-Product,GN Platinum,GN Platinum: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
-Product,GN Platinum,GN Platinum: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
-Product,GN Platinum,GN Platinum: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,7
-Product,GN Platinum,GN Platinum: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,1
-Product,GN Platinum,GN Platinum: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,1
-Product,GN Platinum,GN Platinum: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,1
-Product,GN Platinum,GN Platinum: Last Mo Trend ($),< 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",7
-Product,GN Platinum,GN Platinum: Last Mo Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
-Product,GN Platinum,GN Platinum: Last Mo Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
-Product,GN Platinum,GN Platinum: Last Mo Trend ($),> 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
-Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 80000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",2
-Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
-Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
-Product,GN Platinum,GN Platinum: Last Qtr Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
-Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 160000+ ,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",0
-Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 80000-160000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
-Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",5
-Product,GN Platinum,GN Platinum: Last Yr Trend ($),> 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1
-Product,GN Cloud,GN Cloud: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,12
-Product,GN Cloud,GN Cloud: Has Purchased,No,A flag that describes whether an account has purchased the product.,27
-Product,GN Cloud,GN Cloud: Total Amt,10000-20000,The total amount (in USD) an account spend on the product.,3
-Product,GN Cloud,GN Cloud: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,3
-Product,GN Cloud,GN Cloud: Total Amt,40000-60000,The total amount (in USD) an account spend on the product.,3
-Product,GN Cloud,GN Cloud: Total Amt,60000+,The total amount (in USD) an account spend on the product.,3
-Product,GN Cloud,GN Cloud: Last Mo Trend (%),< 10-20 ,The spending trend for the product for the last month as compared to the average of the previous 3 months.,4
-Product,GN Cloud,GN Cloud: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,4
-Product,GN Cloud,GN Cloud: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3
-Product,GN Cloud,GN Cloud: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,1
-Product,GN Cloud,GN Cloud: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,4
-Product,GN Cloud,GN Cloud: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,4
-Product,GN Cloud,GN Cloud: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3
-Product,GN Cloud,GN Cloud: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,1
-Product,GN Cloud,GN Cloud: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,2
-Product,GN Cloud,GN Cloud: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,2
-Product,GN Cloud,GN Cloud: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,4
-Product,GN Cloud,GN Cloud: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,4
-Product,GN Cloud,GN Cloud: Last Mo Trend ($),< 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",4
-Product,GN Cloud,GN Cloud: Last Mo Trend ($),< 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",4
-Product,GN Cloud,GN Cloud: Last Mo Trend ($),> 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3
-Product,GN Cloud,GN Cloud: Last Mo Trend ($),> 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",1
-Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 20000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
-Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",4
-Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3
-Product,GN Cloud,GN Cloud: Last Qtr Trend ($),> 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1
-Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 40000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
-Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",2
-Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4
-Product,GN Cloud,GN Cloud: Last Yr Trend ($),> 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4
+Contact,,Title,VP,Titles associated with contacts.,202572
+Contact,,Title,Director,Titles associated with contacts.,201579
+Contact,,Title,Manager,Titles associated with contacts.,21846
+Contact,,Department,IT,Departments associated with contacts.,123132
+Contact,,Department,Finance,Departments associated with contacts.,122139
+Contact,,Department,Accounting,Departments associated with contacts.,122139
+Contact,,Department,Engineering,Departments associated with contacts.,58587
+Contact,,Is With Company,Yes,A flag that describes whether a contact is still with the company.,425004
+Contact,,Is With Company,No,A flag that describes whether a contact is still with the company.,993
+Contact,,Has Attended Cisco Live,Yes,A flag that describes whether a contact has attended Cisco Live Conference last year.,297900
+Contact,,Has Attended Cisco Live,No,A flag that describes whether a contact has attended Cisco Live Conference last year.,147957
+Contact,,Engaged in last 3 weeks,Yes,A flag that describes whether a contact has engaged with us during the last 3 weeks.,198600
+Contact,,Engaged in last 3 weeks,No,A flag that describes whether a contact has engaged with us during the last 3 weeks.,247257
+Intent,,Cloud Security Intent,Low,Intent to obtain cloud security.,297900
+Intent,,Cloud Security Intent,Medium,Intent to obtain cloud security.,99300
+Intent,,Cloud Security Intent,High,Intent to obtain cloud security.,48657
+Engagement,,Known Contact Engagement,Low,The number of active contacts.,347550
+Engagement,,Known Contact Engagement,Medium,The number of active contacts.,49650
+Engagement,,Known Contact Engagement,High,The number of active contacts.,48657
+Engagement,,Anonymous Engagement Rating,Low,The level of anonymous engagement.,417060
+Engagement,,Anonymous Engagement Rating,Medium,The level of anonymous engagement.,19860
+Engagement,,Anonymous Engagement Rating,High,The level of anonymous engagement.,8937
+Engagement,,Has Opportunity,Yes,Defines an account in terms of the opportunity.,48657
+Engagement,,Has Opportunity,No,Defines an account in terms of the opportunity.,397200
+Product,GN Platinum,GN Platinum: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,9930
+Product,GN Platinum,GN Platinum: Has Purchased,No,A flag that describes whether an account has purchased the product.,28797
+Product,GN Platinum,GN Platinum: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,6951
+Product,GN Platinum,GN Platinum: Total Amt,40000-80000,The total amount (in USD) an account spend on the product.,993
+Product,GN Platinum,GN Platinum: Total Amt,80000-160000,The total amount (in USD) an account spend on the product.,993
+Product,GN Platinum,GN Platinum: Total Amt,160000+,The total amount (in USD) an account spend on the product.,993
+Product,GN Platinum,GN Platinum: Last Mo Trend (%),< 10-20,The spending trend for the product for the last month as compared to the average of the previous 3 months.,6951
+Product,GN Platinum,GN Platinum: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,993
+Product,GN Platinum,GN Platinum: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,993
+Product,GN Platinum,GN Platinum: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,993
+Product,GN Platinum,GN Platinum: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,6951
+Product,GN Platinum,GN Platinum: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,GN Platinum,GN Platinum: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,GN Platinum,GN Platinum: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,GN Platinum,GN Platinum: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,6951
+Product,GN Platinum,GN Platinum: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,GN Platinum,GN Platinum: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,GN Platinum,GN Platinum: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,GN Platinum,GN Platinum: Last Mo Trend ($),< 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",6951
+Product,GN Platinum,GN Platinum: Last Mo Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,GN Platinum,GN Platinum: Last Mo Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,GN Platinum,GN Platinum: Last Mo Trend ($),> 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 80000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1986
+Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,GN Platinum,GN Platinum: Last Qtr Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 160000+ ,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",993
+Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 80000-160000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4965
+Product,GN Platinum,GN Platinum: Last Yr Trend ($),> 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",993
+Product,GN Cloud,GN Cloud: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,11916
+Product,GN Cloud,GN Cloud: Has Purchased,No,A flag that describes whether an account has purchased the product.,26811
+Product,GN Cloud,GN Cloud: Total Amt,10000-20000,The total amount (in USD) an account spend on the product.,2979
+Product,GN Cloud,GN Cloud: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,2979
+Product,GN Cloud,GN Cloud: Total Amt,40000-60000,The total amount (in USD) an account spend on the product.,2979
+Product,GN Cloud,GN Cloud: Total Amt,60000+,The total amount (in USD) an account spend on the product.,2979
+Product,GN Cloud,GN Cloud: Last Mo Trend (%),< 10-20 ,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3972
+Product,GN Cloud,GN Cloud: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3972
+Product,GN Cloud,GN Cloud: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,2979
+Product,GN Cloud,GN Cloud: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,993
+Product,GN Cloud,GN Cloud: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3972
+Product,GN Cloud,GN Cloud: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3972
+Product,GN Cloud,GN Cloud: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,2979
+Product,GN Cloud,GN Cloud: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,GN Cloud,GN Cloud: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,1986
+Product,GN Cloud,GN Cloud: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,1986
+Product,GN Cloud,GN Cloud: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,3972
+Product,GN Cloud,GN Cloud: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,3972
+Product,GN Cloud,GN Cloud: Last Mo Trend ($),< 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3972
+Product,GN Cloud,GN Cloud: Last Mo Trend ($),< 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3972
+Product,GN Cloud,GN Cloud: Last Mo Trend ($),> 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",2979
+Product,GN Cloud,GN Cloud: Last Mo Trend ($),> 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 20000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",2979
+Product,GN Cloud,GN Cloud: Last Qtr Trend ($),> 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 40000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",3972
+Product,GN Cloud,GN Cloud: Last Yr Trend ($),> 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",3972
