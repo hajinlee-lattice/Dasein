@@ -9,14 +9,14 @@
 
     <properties>
         <component-name>quartz-microservice</component-name>
-        <le.microservice.version>3.5.0-SNAPSHOT</le.microservice.version>
-        <le.quartz.version>3.5.0-SNAPSHOT</le.quartz.version>
+        <le.microservice.version>3.6.0-SNAPSHOT</le.microservice.version>
+        <le.quartz.version>3.6.0-SNAPSHOT</le.quartz.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>3.5.0-SNAPSHOT</version>
+        <version>3.6.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 

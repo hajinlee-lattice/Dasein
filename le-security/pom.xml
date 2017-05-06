@@ -9,13 +9,13 @@
 
     <properties>
         <component-name>security</component-name>
-        <le.common.version>3.5.0-SNAPSHOT</le.common.version>
-        <le.db.version>3.5.0-SNAPSHOT</le.db.version>
-        <le.domain.version>3.5.0-SNAPSHOT</le.domain.version>
-        <le.camille.version>3.5.0-SNAPSHOT</le.camille.version>
-        <le.network.version>3.5.0-SNAPSHOT</le.network.version>
-        <le.monitor.version>3.5.0-SNAPSHOT</le.monitor.version>
-        <le.auth.version>3.5.0-SNAPSHOT</le.auth.version>
+        <le.common.version>3.6.0-SNAPSHOT</le.common.version>
+        <le.db.version>3.6.0-SNAPSHOT</le.db.version>
+        <le.domain.version>3.6.0-SNAPSHOT</le.domain.version>
+        <le.camille.version>3.6.0-SNAPSHOT</le.camille.version>
+        <le.network.version>3.6.0-SNAPSHOT</le.network.version>
+        <le.monitor.version>3.6.0-SNAPSHOT</le.monitor.version>
+        <le.auth.version>3.6.0-SNAPSHOT</le.auth.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
         <jetty.port>8084</jetty.port>
         <jetty.stop.port>10984</jetty.stop.port>
@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.5.0-SNAPSHOT</version>
+        <version>3.6.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

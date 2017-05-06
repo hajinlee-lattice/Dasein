@@ -9,19 +9,19 @@
 
     <properties>
         <component-name>dataflowapi</component-name>
-        <le.common.version>3.5.0-SNAPSHOT</le.common.version>
-        <le.dataflow.version>3.5.0-SNAPSHOT</le.dataflow.version>
-        <le.dataplatform.version>3.5.0-SNAPSHOT</le.dataplatform.version>
-        <le.domain.version>3.5.0-SNAPSHOT</le.domain.version>
-        <le.scheduler.version>3.5.0-SNAPSHOT</le.scheduler.version>
-        <le.security.version>3.5.0-SNAPSHOT</le.security.version>
-        <le.proxy.version>3.5.0-SNAPSHOT</le.proxy.version>
+        <le.common.version>3.6.0-SNAPSHOT</le.common.version>
+        <le.dataflow.version>3.6.0-SNAPSHOT</le.dataflow.version>
+        <le.dataplatform.version>3.6.0-SNAPSHOT</le.dataplatform.version>
+        <le.domain.version>3.6.0-SNAPSHOT</le.domain.version>
+        <le.scheduler.version>3.6.0-SNAPSHOT</le.scheduler.version>
+        <le.security.version>3.6.0-SNAPSHOT</le.security.version>
+        <le.proxy.version>3.6.0-SNAPSHOT</le.proxy.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>3.5.0-SNAPSHOT</version>
+        <version>3.6.0-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 
