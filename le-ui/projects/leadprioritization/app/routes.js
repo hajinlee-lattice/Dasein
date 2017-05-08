@@ -2,7 +2,7 @@ angular
 .module('mainApp')
 .run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility, LookupStore, $timeout) {
     var self = this;
-    
+
     $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
         // when user hits browser Back button after app instantiate, send back to login
         if (fromState.name == 'home.models' && toState.name == 'home') {
@@ -1475,7 +1475,7 @@ angular
                     template: '<br><div class="lookup-summary ten columns offset-one"><div class="lookup-back" ui-sref="home.insights"><ico class="fa fa-arrow-left"></ico>NEW LOOKUP</div></div></div>'
                 },
                 "main@": {
-                    controller: function(LookupStore, $stateParams) {
+                    controller: function($scope, LookupStore, $stateParams) {
                         var host = "/insights/";
 
                         $('#sureshot_iframe_container')
@@ -1483,7 +1483,9 @@ angular
 
                         var childWindow = document.getElementById('insights_iframe').contentWindow;
 
-                        window.addEventListener("message", function (event){
+                        window.addEventListener('message', handleMessage, false);
+
+                        function handleMessage(event){
                             console.log('receiving from Insights:', event.data);
                             if (event.data == 'init') {
                                 var json = {};
@@ -1495,7 +1497,11 @@ angular
                                 console.log('posting to Insights:', json);
                                 childWindow.postMessage(json,'*');
                             }
-                        }, false);
+                        }
+
+                        $scope.$on('$destroy', function() {
+                            window.removeEventListener('message', handleMessage);
+                        });
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }
