@@ -206,6 +206,8 @@ public class CustomQuartzJob extends QuartzJobBean {
         try {
             jobActive = restTemplate.postForObject(queryUrl, jobArgs, Boolean.class);
         } catch (Exception e) {
+            log.error(String.format("Cannot get job active status from %s, exception: %s",
+                    queryUrl.toString(), e.toString()));
             jobActive = false;
         }
         return jobActive;
