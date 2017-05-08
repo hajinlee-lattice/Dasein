@@ -210,14 +210,14 @@ angular.module('common.datacloud.query.builder', [])
             if (CurrentConfiguration) {
                 _cachedRatingsCubeBuckets = CurrentConfiguration.map(function(bucket) {
                     return {
-                        "Lbl": bucket.bucket_name,
-                        "Cnt": bucket.num_leads,
-                        "Range": {
-                            "min": bucket.bucket_name,
-                            "max": bucket.bucket_name,
-                            "is_null_only": false
+                        Lbl: bucket.bucket_name,
+                        Cnt: bucket.num_leads,
+                        Range: {
+                            min: bucket.bucket_name,
+                            max: bucket.bucket_name,
+                            is_null_only: false
                         },
-                        "Lift": bucket.lift
+                        Lift: bucket.lift
                     };
                 });
             }
