@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -42,14 +44,22 @@ public class VdbEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private EaiService eaiService;
 
-    private String customer = "DellEB";
+    @Value("${eai.test.vdb.connector.tenant:DLTestTenant}")
+    private String customer;
 
-    private CustomerSpace customerSpace = CustomerSpace.parse(customer);
+    @Value("${eai.test.vdb.connector.dl.endpoint:}")
+    private String dlEndPoint;
+
+    @Value("${eai.test.vdb.connector.loadgroup:}")
+    private String loadGroup;
+
+    private CustomerSpace customerSpace;
 
     private Tenant tenant;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.vdb")
     public void setup() throws Exception {
+        customerSpace = CustomerSpace.parse(customer);
         tenant = createTenant(customerSpace.toString());
         try {
             tenantService.discardTenant(tenant);
@@ -58,13 +68,16 @@ public class VdbEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
         tenantService.registerTenant(tenant);
     }
 
-    @Test(groups = { "deployment" }, enabled = false)
+    @Test(groups = { "deployment.vdb" }, enabled = true)
     public void extractAndImport() throws Exception {
+        if (StringUtils.isEmpty(dlEndPoint) || StringUtils.isEmpty(loadGroup)) {
+            return;
+        }
         VdbConnectorConfiguration vdbConnectorConfiguration = new VdbConnectorConfiguration();
         vdbConnectorConfiguration.setDlDataReady(false);
-        vdbConnectorConfiguration.setDlEndpoint("http://le-700074:8888/");
+        vdbConnectorConfiguration.setDlEndpoint(dlEndPoint);
         vdbConnectorConfiguration.setDlTenantId(customer);
-        vdbConnectorConfiguration.setDlLoadGroup("G_TargetQuery");
+        vdbConnectorConfiguration.setDlLoadGroup(loadGroup);
 
         ImportConfiguration importConfig = new ImportConfiguration();
         importConfig.setCustomerSpace(customerSpace);
@@ -81,7 +94,7 @@ public class VdbEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
         checkExtractFolderExist(startMillis);
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment.vdb")
     private void cleanUp() throws Exception {
         tenantService.discardTenant(tenant);
     }

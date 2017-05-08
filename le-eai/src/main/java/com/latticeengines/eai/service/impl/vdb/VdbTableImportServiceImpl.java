@@ -219,7 +219,6 @@ public class VdbTableImportServiceImpl extends ImportService {
         VdbLoadTableStatus vdbLoadTableStatus = new VdbLoadTableStatus();
         vdbLoadTableStatus.setJobStatus("Running");
         vdbLoadTableStatus.setMessage("Start import metadata for Vdb table");
-        reportStatus(statusUrl, vdbLoadTableStatus);
 
         String customer = context.getProperty(ImportProperty.CUSTOMER, String.class);
         List<Table> newTables = new ArrayList<>();
@@ -227,6 +226,7 @@ public class VdbTableImportServiceImpl extends ImportService {
             List<Table> tables = new ArrayList<>();
             for (Map.Entry<String, ImportVdbTableConfiguration> entry : vdbConnectorConfiguration
                     .getTableConfigurations().entrySet()) {
+                vdbLoadTableStatus.setVdbQueryHandle(entry.getValue().getVdbQueryHandle());
                 tables.add(createTable(customer, entry.getKey(), entry.getValue()));
             }
             for (Table table : tables) {
