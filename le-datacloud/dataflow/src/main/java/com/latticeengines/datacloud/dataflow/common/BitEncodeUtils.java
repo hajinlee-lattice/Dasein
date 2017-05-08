@@ -94,6 +94,9 @@ public class BitEncodeUtils {
         String keyColumn = null;
         String valueColumn = null;
         BitCodeBook.Algorithm algorithm = null;
+        String decodeStrategyStr = null;
+        String valueDictStr = null;
+        String bitUnitStr = null;
         Map<String, Integer> bitPosMap = new HashMap<>();
 
         for (SourceColumn column : columns) {
@@ -130,12 +133,38 @@ public class BitEncodeUtils {
                 algorithm = algorithm1;
             } else if (!algorithm.equals(algorithm1)) {
                 throw new IllegalArgumentException(
-                        "ValueColumn specified in SourceColumn table mismatch within one group: " + algorithm1 + " vs "
-                                + algorithm1);
+                        "Algorithm specified in SourceColumn table mismatch within one group: " + algorithm1 + " vs "
+                                + algorithm);
             }
 
             Integer bitPos = jsonNode.get("BitPosition").asInt();
             String[] targetKeys = jsonNode.get("TargetKeys").asText().split("\\|");
+
+            String decodeStrategyStr1 = jsonNode.has("DecodeStrategy") ? jsonNode.get("DecodeStrategy").asText() : null;
+            if (StringUtils.isEmpty(decodeStrategyStr)) {
+                decodeStrategyStr = decodeStrategyStr1;
+            } else if (!decodeStrategyStr.equals(decodeStrategyStr1)) {
+                throw new IllegalArgumentException(
+                        "DecodeStrategy specified in SourceColumn table mismatch within one group: "
+                                + decodeStrategyStr1 + " vs " + decodeStrategyStr);
+            }
+
+            String valueDictStr1 = jsonNode.has("ValueDict") ? jsonNode.get("ValueDict").asText() : null;
+            if (StringUtils.isEmpty(valueDictStr)) {
+                valueDictStr = valueDictStr1;
+            } else if (!valueDictStr.equals(valueDictStr1)) {
+                throw new IllegalArgumentException(
+                        "ValueDict specified in SourceColumn table mismatch within one group: " + valueDictStr1 + " vs "
+                                + valueDictStr);
+            }
+
+            String bitUnitStr1 = jsonNode.has("BitUnit") ? jsonNode.get("BitUnit").asText() : null;
+            if (StringUtils.isEmpty(bitUnitStr)) {
+                bitUnitStr = bitUnitStr1;
+            } else if (!bitUnitStr.equals(bitUnitStr1)) {
+                throw new IllegalArgumentException("BitUnit specified in SourceColumn table mismatch within one group: "
+                        + bitUnitStr1 + " vs " + bitUnitStr);
+            }
 
             switch (algorithm) {
             case KEY_EXISTS:
@@ -147,12 +176,48 @@ public class BitEncodeUtils {
             }
         }
 
+        BitCodeBook.DecodeStrategy decodeStrategy = null;
+        if (StringUtils.isNotEmpty(decodeStrategyStr)) {
+            decodeStrategy = BitCodeBook.DecodeStrategy.valueOf(decodeStrategyStr);
+        }
+
+        Map<Object, String> valueDict = new HashMap<>();
+        if (StringUtils.isNotEmpty(valueDictStr)) {
+            try {
+                String[] valueDictArr = valueDictStr.split("\\|\\|");
+                switch (decodeStrategy) {
+                case ENUM_STRING:
+                    for (int i = 0; i < valueDictArr.length; i++) {
+                        valueDict.put(valueDictArr[i], Integer.toBinaryString(i));
+                    }
+                    break;
+                default:
+                    break;
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException(String.format(
+                        "Fail to parse ValueDict %s. ENUM_STRING strategy: concatenate all possible values by ||",
+                        valueDictStr));
+            }
+        }
+
+        Integer bitUnit = null;
+        if (StringUtils.isNotEmpty(bitUnitStr)) {
+            try {
+                bitUnit = Integer.valueOf(bitUnitStr);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Fail to parse BitUnit " + bitUnitStr, e);
+            }
+        }
+
         EnrichedBitCodeBook codeBook = new EnrichedBitCodeBook();
         codeBook.setKeyColumn(keyColumn);
         codeBook.setValueColumn(valueColumn);
 
-        BitCodeBook internalCodeBook = new BitCodeBook(algorithm);
+        BitCodeBook internalCodeBook = new BitCodeBook(algorithm, decodeStrategy);
         internalCodeBook.setBitsPosMap(bitPosMap);
+        internalCodeBook.setValueDict(valueDict);
+        internalCodeBook.setBitUnit(bitUnit);
         codeBook.setBitCodeBook(internalCodeBook);
 
         return codeBook;

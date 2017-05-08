@@ -20,6 +20,8 @@ public class BitCodeBook implements Serializable {
     private Algorithm encodeAlgo;
     private DecodeStrategy decodeStrategy;
     private String encodedColumn;
+    private Map<Object, String> valueDict; // eg. A||B||C -> A:00, B:01, C:10
+    private Integer bitUnit;
 
     public BitCodeBook() {
         super();
@@ -33,6 +35,11 @@ public class BitCodeBook implements Serializable {
     public BitCodeBook(DecodeStrategy decodeStrategy) {
         this.decodeStrategy = decodeStrategy;
         this.encodeAlgo = null;
+    }
+
+    public BitCodeBook(Algorithm encodeAlgo, DecodeStrategy decodeStrategy) {
+        this.decodeStrategy = decodeStrategy;
+        this.encodeAlgo = encodeAlgo;
     }
 
     public void setBitsPosMap(Map<String, Integer> bitsPosMap) {
@@ -81,12 +88,28 @@ public class BitCodeBook implements Serializable {
         return bitsPosMap;
     }
 
+    public Map<Object, String> getValueDict() {
+        return valueDict;
+    }
+
+    public void setValueDict(Map<Object, String> valueDict) {
+        this.valueDict = valueDict;
+    }
+
+    public Integer getBitUnit() {
+        return bitUnit;
+    }
+
+    public void setBitUnit(Integer bitUnit) {
+        this.bitUnit = bitUnit;
+    }
+
     public enum Algorithm {
         KEY_EXISTS
     }
 
     public enum DecodeStrategy {
-        BOOLEAN_YESNO
+        BOOLEAN_YESNO, NUMERIC_INT, ENUM_STRING
     }
 
     public Map<String, Object> decode(String encodedStr, List<String> decodeFields) {

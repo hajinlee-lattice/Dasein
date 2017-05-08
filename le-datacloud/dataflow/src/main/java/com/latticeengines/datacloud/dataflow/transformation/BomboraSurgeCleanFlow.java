@@ -14,21 +14,21 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BomboraSurgeParseLocFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BomboraSurgeCleanConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
 @Component(BomboraSurgeCleanFlow.DATAFLOW_BEAN_NAME)
-public class BomboraSurgeCleanFlow extends ConfigurableFlowBase<BomboraSurgeCleanConfig> {
+public class BomboraSurgeCleanFlow extends ConfigurableFlowBase<BomboraSurgeConfig> {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(BomboraSurgeCleanFlow.class);
 
     public static final String DATAFLOW_BEAN_NAME = "bomboraSurgeCleanFlow";
     public static final String TRANSFORMER_NAME = "bomboraSurgeCleanTransformer";
 
-    private BomboraSurgeCleanConfig config;
+    private BomboraSurgeConfig config;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -64,7 +64,7 @@ public class BomboraSurgeCleanFlow extends ConfigurableFlowBase<BomboraSurgeClea
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return BomboraSurgeCleanConfig.class;
+        return BomboraSurgeConfig.class;
     }
 
 }

@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class BomboraSurgeCleanConfig extends TransformerConfig {
+public class BomboraSurgeConfig extends TransformerConfig {
     @JsonProperty("MetroAreaField")
     private String metroAreaField;
 
@@ -17,6 +17,12 @@ public class BomboraSurgeCleanConfig extends TransformerConfig {
 
     @JsonProperty("CityField")
     private String cityField;
+
+    @JsonProperty("CompoScoreField")
+    private String compoScoreField;
+
+    @JsonProperty("BucketCodeField")
+    private String bucketCodeField;
 
     public String getMetroAreaField() {
         return metroAreaField;
@@ -56,6 +62,22 @@ public class BomboraSurgeCleanConfig extends TransformerConfig {
 
     public void setCityField(String cityField) {
         this.cityField = cityField;
+    }
+
+    public String getCompoScoreField() {
+        return compoScoreField;
+    }
+
+    public void setCompoScoreField(String compoScoreField) {
+        this.compoScoreField = compoScoreField;
+    }
+
+    public String getBucketCodeField() {
+        return bucketCodeField;
+    }
+
+    public void setBucketCodeField(String bucketCodeField) {
+        this.bucketCodeField = bucketCodeField;
     }
 
 }

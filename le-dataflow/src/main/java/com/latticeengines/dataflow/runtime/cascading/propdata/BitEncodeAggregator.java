@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,7 +35,6 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
     private final String encodedField;
     private final String keyField;
 
-    @SuppressWarnings("unused")
     private final String valueField;
 
     private final int encodeFieldPos;
@@ -91,9 +91,58 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
     private List<Integer> encodeKeyExists(TupleEntry arguments, BitCodeBook codeBook) {
         String key = arguments.getString(keyField);
         if (codeBook.hasKey(key)) {
-            return singletonList(codeBook.getBitPosForKey(key));
+            if (StringUtils.isEmpty(valueField)) {
+                return singletonList(codeBook.getBitPosForKey(key));
+            } else {
+                switch (codeBook.getDecodeStrategy()) {
+                case NUMERIC_INT:
+                    return encodeInt(arguments, codeBook, key);
+                case ENUM_STRING:
+                    return encodeString(arguments, codeBook, key);
+                default:
+                    break;
+                }
+            }
         }
         return emptyList();
+    }
+    
+    private List<Integer> encodeInt(TupleEntry arguments, BitCodeBook codeBook, String key) {
+        Integer value = (Integer) arguments.getObject(valueField);
+        if (value == null) {
+            return emptyList();
+        }
+        String binValue = Integer.toBinaryString(value);
+        Integer bitUnit = codeBook.getBitUnit();
+        if (binValue.length() > bitUnit) {
+            return emptyList();
+        }
+        List<Integer> trueBits = new ArrayList<>();
+        for (int i = 0; i < binValue.length(); i++) {
+            if (binValue.charAt(i) == '1') {
+                trueBits.add(codeBook.getBitPosForKey(key) + bitUnit - binValue.length() + i);
+            }
+        }
+        return trueBits;
+    }
+
+    private List<Integer> encodeString(TupleEntry arguments, BitCodeBook codeBook, String key) {
+        String value = (String) arguments.getObject(valueField);
+        if (StringUtils.isBlank(value)) {
+            return emptyList();
+        }
+        String binValue = codeBook.getValueDict().get(value.trim());
+        if (binValue == null) {
+            return emptyList();
+        }
+        List<Integer> trueBits = new ArrayList<>();
+        Integer bitUnit = codeBook.getBitUnit();
+        for (int i = 0; i < binValue.length(); i++) {
+            if (binValue.charAt(i) == '1') {
+                trueBits.add(codeBook.getBitPosForKey(key) + bitUnit - binValue.length() + i);
+            }
+        }
+        return trueBits;
     }
 
 }

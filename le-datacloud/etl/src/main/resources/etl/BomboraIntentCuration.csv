@@ -1,0 +1,16 @@
+CompositeScoreMin,CompositeScoreMax,BucketCode,Intent
+60,100,A,Very High
+60,100,B,Very High
+60,100,C,High
+50,59,A,High
+50,59,B,High
+50,59,C,Medium
+40,49,A,Medium
+40,49,B,Medium
+40,49,C,Low
+20,39,A,Low
+20,39,B,Low
+20,39,C,Very Low
+0,19,A,Very Low
+0,19,B,Very Low
+0,19,C,Very Low

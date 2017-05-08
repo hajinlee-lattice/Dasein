@@ -24,7 +24,7 @@ import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BomboraSurgeCleanConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
@@ -89,7 +89,7 @@ public class BomboraSurgeCleanServiceTestNG
     }
 
     private String getTransformerConfig() throws JsonProcessingException {
-        BomboraSurgeCleanConfig config = new BomboraSurgeCleanConfig();
+        BomboraSurgeConfig config = new BomboraSurgeConfig();
         config.setMetroAreaField("MetroArea");
         config.setDomainOriginField("DomainOrigin");
         config.setCountryField("Country");
