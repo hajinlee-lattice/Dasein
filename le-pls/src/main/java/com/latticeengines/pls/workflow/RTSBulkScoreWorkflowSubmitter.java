@@ -117,7 +117,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .dataCloudVersion(dataCloudVersion) //
                 .excludeDataCloudAttrs(skipIdMatch) //
                 .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //
-                .matchDebugEnabled(!skipIdMatch && plsFeatureFlagService.isMatchDebugEnabled()) //
+                .matchDebugEnabled(!skipIdMatch && !ModelType.PMML.getModelType().equals(modelType) && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.ENRICHMENT) //
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //
