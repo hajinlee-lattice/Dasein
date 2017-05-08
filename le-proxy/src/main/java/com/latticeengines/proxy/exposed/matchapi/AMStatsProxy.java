@@ -21,8 +21,8 @@ public class AMStatsProxy extends BaseRestApiProxy implements AMStatsInterface {
         return get("top_attr_tree", url, TopNAttributeTree.class);
     }
 
-    public AccountMasterCube getCube(AccountMasterFactQuery query) {
-        String url = constructUrl("/cubes");
+    public AccountMasterCube getCube(AccountMasterFactQuery query, boolean considerOnlyEnrichments) {
+        String url = constructUrl("/cubes?considerOnlyEnrichments={considerOnlyEnrichments}", considerOnlyEnrichments);
         return post("am_cube", url, query, AccountMasterCube.class);
     }
 

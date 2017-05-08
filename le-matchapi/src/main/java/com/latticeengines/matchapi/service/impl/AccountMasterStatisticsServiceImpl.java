@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
+import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
@@ -53,6 +55,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("accountMasterStatisticsService")
 public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisticsService {
+    private static final String ACCOUNT_MASTER_SOURCE_FOR_DIMENSION = "AccountMaster";
     private static final String YES = "Yes";
     private static final String NO = "No";
 
@@ -86,7 +89,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Override
-    public AccountMasterCube query(AccountMasterFactQuery query) {
+    public AccountMasterCube query(AccountMasterFactQuery query, boolean considerOnlyEnrichments) {
         if (query.getLocationQry() == null) {
             query.setLocationQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER, AccountMasterFact.DIM_LOCATION,
                     DataCloudConstants.ATTR_COUNTRY));
@@ -124,12 +127,13 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             return null;
         }
         try {
-            AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
-                    AccountMasterCube.class);
-            expandEncodedAttributes(cube);
+            AccountMasterCube cube = expandAMStats(accountMasterFact);
 
             cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
-                    query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
+                    query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY),
+                    considerOnlyEnrichments);
+
+            addDimensionFieldStats(cube);
 
             if (!isNumericbucketEnabled) {
                 cleanupNumericBuckets(cube);
@@ -138,6 +142,29 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Fail to parse json object %s", accountMasterFact.getEncodedCube()));
+        }
+    }
+
+    private void addDimensionFieldStats(AccountMasterCube cube) {
+        for (CategoricalDimension dimension : dimensionalQueryService.getAllDimensions()) {
+            if (ACCOUNT_MASTER_SOURCE_FOR_DIMENSION.equalsIgnoreCase(dimension.getSource())) {
+                List<CategoricalAttribute> dimensionAttrDetails = //
+                        dimensionalQueryService.getAllAttributes(dimension.getRootAttrId());
+                String dimensionField = dimensionAttrDetails.get(0).getAttrName();
+                if (!cube.getStatistics().containsKey(dimensionField)) {
+                    AttributeStatistics value = new AttributeStatistics();
+                    AttributeStatsDetails stats = new AttributeStatsDetails();
+
+                    stats.setNonNullCount(cube.getNonNullCount());
+
+                    if (isLocationBased) {
+                        value.setUniqueLocationBasedStatistics(stats);
+                    } else {
+                        value.setRowBasedStatistics(stats);
+                    }
+                    cube.getStatistics().put(dimensionField, value);
+                }
+            }
         }
     }
 
@@ -157,14 +184,23 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         }
         AccountMasterCube cube;
         try {
-            cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(), AccountMasterCube.class);
-            expandEncodedAttributes(cube);
-            cube = filterAttributes(cube, null, null);
+            cube = expandAMStats(accountMasterFact);
+            cube = filterAttributes(cube, null, null, true);
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Fail to parse json object %s", accountMasterFact.getEncodedCube()));
         }
         return createTopAttrTree(cube);
+    }
+
+    private AccountMasterCube expandAMStats(AccountMasterFact accountMasterFact) throws IOException {
+        AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
+                AccountMasterCube.class);
+        expandEncodedAttributes(cube);
+
+        addDimensionFieldStats(cube);
+
+        return cube;
     }
 
     private TopNAttributeTree createTopAttrTree(AccountMasterCube cube) {
@@ -250,20 +286,30 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     }
 
     // UI only shows attributes for enrichment
-    private AccountMasterCube filterAttributes(AccountMasterCube cube, String category, String subCategory) {
+    private AccountMasterCube filterAttributes(AccountMasterCube cube, String category, String subCategory,
+            boolean considerOnlyEnrichments) {
         Map<String, ColumnMetadata> columnsMetadata = getColumnMetadata();
         Map<String, AttributeStatistics> statistics = cube.getStatistics();
         Iterator<Entry<String, AttributeStatistics>> iter = statistics.entrySet().iterator();
         long nonNullCount = 0;
         while (iter.hasNext()) {
             Entry<String, AttributeStatistics> entry = iter.next();
-            if ((!columnsMetadata.containsKey(entry.getKey()))
+            boolean isRemoved = false;
+
+            if (considerOnlyEnrichments && ((!columnsMetadata.containsKey(entry.getKey()))
                     || (category != null && !category.equals(CategoricalAttribute.ALL)
                             && !columnsMetadata.get(entry.getKey()).getCategory().name().equals(category))
                     || (subCategory != null && !subCategory.equals(CategoricalAttribute.ALL)
-                            && !columnsMetadata.get(entry.getKey()).getSubcategory().equals(subCategory))) {
+                            && !columnsMetadata.get(entry.getKey()).getSubcategory().equals(subCategory)))) {
+                iter.remove();
+                isRemoved = true;
+            }
+
+            if (containsEncodedBuckets(entry.getValue()) && !isRemoved) {
+                // always remove field stats with encoded buckets
                 iter.remove();
             }
+
             if (isLocationBased
                     && entry.getValue().getUniqueLocationBasedStatistics().getNonNullCount() > nonNullCount) {
                 nonNullCount = entry.getValue().getUniqueLocationBasedStatistics().getNonNullCount();
@@ -275,6 +321,27 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         }
         cube.setNonNullCount(nonNullCount);
         return cube;
+    }
+
+    private boolean containsEncodedBuckets(AttributeStatistics fieldStats) {
+        if (containsEncodedBuckets(fieldStats.getRowBasedStatistics())
+                || containsEncodedBuckets(fieldStats.getUniqueLocationBasedStatistics())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean containsEncodedBuckets(AttributeStatsDetails statistics) {
+        if (statistics != null && statistics.getBuckets() != null
+                && !CollectionUtils.isEmpty(statistics.getBuckets().getBucketList())) {
+            for (Bucket bkt : statistics.getBuckets().getBucketList()) {
+                if (bkt.getEncodedCountList() != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void standardizeAttrStatsLbl(AttributeStatistics stats) {
@@ -420,6 +487,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                         }
                     }
                 }
+
                 loopId++;
             }
 

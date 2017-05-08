@@ -23,7 +23,10 @@ import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 
 public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
+    private static final String LE_INDUSTRY = "LE_INDUSTRY";
+    private static final String LDC_COUNTRY = "LDC_Country";
     private static final Log log = LogFactory.getLog(AMStatisticsResourceDeploymentTestNG.class);
+    private int enrichmentOnlyCubeFieldsCount = 0;
 
     @Test(groups = { "deployment" }, enabled = true)
     public void testGetTopAttrTree() {
@@ -46,7 +49,62 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
     @Test(groups = { "deployment" }, enabled = true)
     public void testGetTopCube() {
         AccountMasterFactQuery query = createQuery(CategoricalAttribute.ALL, CategoricalAttribute.ALL);
-        AccountMasterCube cube = amStatsProxy.getCube(query);
+        AccountMasterCube cube = amStatsProxy.getCube(query, true);
+        Assert.assertNotNull(cube);
+        Assert.assertNotNull(cube.getStatistics());
+        Assert.assertTrue(cube.getStatistics().size() > 0);
+
+        for (String attribute : cube.getStatistics().keySet()) {
+            Assert.assertNotNull(cube.getStatistics().get(attribute));
+            Assert.assertTrue(cube.getStatistics().get(attribute).getRowBasedStatistics() != null
+                    || cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics() != null);
+
+            if (cube.getStatistics().get(attribute).getRowBasedStatistics() != null
+                    && cube.getStatistics().get(attribute).getRowBasedStatistics().getBuckets() != null) {
+                checkBuckets(cube.getStatistics().get(attribute).getRowBasedStatistics().getBuckets().getBucketList());
+            }
+            if (cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics() != null
+                    && cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics().getBuckets() != null) {
+                checkBuckets(cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics().getBuckets()
+                        .getBucketList());
+            }
+        }
+
+        cube = amStatsProxy.getCube(createQuery(CategoricalAttribute.ALL, null), true);
+        Assert.assertNotNull(cube);
+        Assert.assertNotNull(cube.getStatistics());
+        Assert.assertTrue(cube.getStatistics().size() > 0);
+
+        boolean foundLdcCountry = false;
+        boolean foundLeIndustry = false;
+
+        for (String attribute : cube.getStatistics().keySet()) {
+            Assert.assertNotNull(cube.getStatistics().get(attribute));
+            if (attribute.equalsIgnoreCase(LDC_COUNTRY)) {
+                foundLdcCountry = true;
+            } else if (attribute.equalsIgnoreCase(LE_INDUSTRY)) {
+                foundLeIndustry = true;
+            }
+        }
+
+        cube = amStatsProxy.getCube(createQuery(Category.WEBSITE_PROFILE.name(), null), true);
+        Assert.assertNotNull(cube);
+        Assert.assertNotNull(cube.getStatistics());
+        Assert.assertTrue(cube.getStatistics().size() > 0);
+        for (String attribute : cube.getStatistics().keySet()) {
+            Assert.assertNotNull(cube.getStatistics().get(attribute));
+        }
+
+        enrichmentOnlyCubeFieldsCount = cube.getStatistics().size();
+
+        Assert.assertTrue(foundLdcCountry);
+        Assert.assertTrue(foundLeIndustry);
+    }
+
+    @Test(groups = { "deployment" }, dependsOnMethods = { "testGetTopCube" }, enabled = true)
+    public void testGetTopCubeOfAllFields() {
+        AccountMasterFactQuery query = createQuery(CategoricalAttribute.ALL, CategoricalAttribute.ALL);
+        AccountMasterCube cube = amStatsProxy.getCube(query, false);
         Assert.assertNotNull(cube);
         Assert.assertNotNull(cube.getStatistics());
         Assert.assertTrue(cube.getStatistics().size() > 0);
@@ -66,7 +124,24 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
             }
         }
 
-        cube = amStatsProxy.getCube(createQuery(CategoricalAttribute.ALL, null));
+        cube = amStatsProxy.getCube(createQuery(CategoricalAttribute.ALL, null), false);
+        Assert.assertNotNull(cube);
+        Assert.assertNotNull(cube.getStatistics());
+        Assert.assertTrue(cube.getStatistics().size() > 0);
+
+        boolean foundLdcCountry = false;
+        boolean foundLeIndustry = false;
+
+        for (String attribute : cube.getStatistics().keySet()) {
+            Assert.assertNotNull(cube.getStatistics().get(attribute));
+            if (attribute.equalsIgnoreCase(LDC_COUNTRY)) {
+                foundLdcCountry = true;
+            } else if (attribute.equalsIgnoreCase(LE_INDUSTRY)) {
+                foundLeIndustry = true;
+            }
+        }
+
+        cube = amStatsProxy.getCube(createQuery(Category.WEBSITE_PROFILE.name(), null), false);
         Assert.assertNotNull(cube);
         Assert.assertNotNull(cube.getStatistics());
         Assert.assertTrue(cube.getStatistics().size() > 0);
@@ -74,13 +149,10 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
             Assert.assertNotNull(cube.getStatistics().get(attribute));
         }
 
-        cube = amStatsProxy.getCube(createQuery(Category.WEBSITE_PROFILE.name(), null));
-        Assert.assertNotNull(cube);
-        Assert.assertNotNull(cube.getStatistics());
-        Assert.assertTrue(cube.getStatistics().size() > 0);
-        for (String attribute : cube.getStatistics().keySet()) {
-            Assert.assertNotNull(cube.getStatistics().get(attribute));
-        }
+        Assert.assertTrue(enrichmentOnlyCubeFieldsCount < cube.getStatistics().size());
+
+        Assert.assertTrue(foundLdcCountry);
+        Assert.assertTrue(foundLeIndustry);
     }
 
     private void checkBuckets(List<Bucket> bucketList) {

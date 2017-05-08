@@ -81,7 +81,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
 
     @Override
     public AccountMasterCube getCube(AccountMasterFactQuery query) {
-        AccountMasterCube cube = amStatsProxy.getCube(query);
+        AccountMasterCube cube = amStatsProxy.getCube(query, true);
         if (cube == null) {
             cube = new AccountMasterCube();
         }

@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 
 public interface AccountMasterStatisticsService {
 
-    AccountMasterCube query(AccountMasterFactQuery query);
+    AccountMasterCube query(AccountMasterFactQuery query, boolean considerOnlyEnrichments);
 
     TopNAttributeTree getTopAttrTree();
 
@@ -17,6 +17,6 @@ public interface AccountMasterStatisticsService {
 
     Map<String, Long> getSubCategories(Category category);
 
-    Long getAttrId (String columnName, String categoricalValue);
+    Long getAttrId(String columnName, String categoricalValue);
 
 }

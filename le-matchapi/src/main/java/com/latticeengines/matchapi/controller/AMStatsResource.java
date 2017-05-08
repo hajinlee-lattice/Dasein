@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,8 +39,11 @@ public class AMStatsResource {
     @RequestMapping(value = "/cubes", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account master statistics cube", response = AccountMasterCube.class)
-    private void getCube(@RequestBody AccountMasterFactQuery query, HttpServletResponse response) {
-        AccountMasterCube cube = accountMasterStatisticsService.query(query);
+    private void getCube(@RequestBody AccountMasterFactQuery query,
+            @RequestParam(value = "considerOnlyEnrichments", required = false, //
+                    defaultValue = "true") boolean considerOnlyEnrichments, //
+            HttpServletResponse response) {
+        AccountMasterCube cube = accountMasterStatisticsService.query(query, considerOnlyEnrichments);
         try {
             GzipUtils.writeToGzipStream(response, cube);
         } catch (IOException e) {
