@@ -3,8 +3,8 @@ package com.latticeengines.leadprioritization.workflow;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.htrace.commons.logging.Log;
-import org.apache.htrace.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
