@@ -37,6 +37,9 @@ public class MatchHistory implements HasId<String> {
     @AvroName("TenantId")
     String tenantId;
     @Nullable
+    @AvroName("RootOperationUid")
+    String rootOperationUid;
+    @Nullable
     @AvroName("RequestTimestamp")
     String requestTimestamp;
     @Nullable
@@ -325,6 +328,17 @@ public class MatchHistory implements HasId<String> {
     @Union({})
     public MatchHistory setTenantId(String tenantId) {
         this.tenantId = tenantId;
+        return this;
+    }
+
+    @Union({})
+    public String getRootOperationUid() {
+        return rootOperationUid;
+    }
+
+    @Union({})
+    public MatchHistory setRootOperationUid(String rootOperationUid) {
+        this.rootOperationUid = rootOperationUid;
         return this;
     }
 

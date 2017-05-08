@@ -120,9 +120,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .withStandardisedNameLocation(record.getParsedNameLocation());
             matchHistory.setIsPublicDomain(record.isPublicDomain()).setLatticeAccountId(record.getLatticeAccountId());
 
-            matchHistory.setMatchedDomain(record.getMatchedDomain())
-                    .setMatchedEmail(record.getMatchedEmail()).setMatchedDUNS(record.getMatchedDuns())
-                    .withMatchedNameLocation(record.getMatchedNameLocation());
+            matchHistory.setMatchedDomain(record.getMatchedDomain()).setMatchedEmail(record.getMatchedEmail())
+                    .setMatchedDUNS(record.getMatchedDuns()).withMatchedNameLocation(record.getMatchedNameLocation());
             matchHistory.setMatchedEmployeeRange(record.getMatchedEmployeeRange())
                     .setMatchedRevenueRange(record.getMatchedRevenueRange())
                     .setMatchedPrimaryIndustry(record.getMatchedPrimaryIndustry())
@@ -133,7 +132,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             MatchInput matchInput = matchContext.getInput();
             if (matchInput != null) {
                 if (matchInput.getTenant() != null) {
-                    matchHistory.setTenantId(matchInput.getTenant().getName());
+                    matchHistory.setTenantId(matchInput.getTenant().getId()).setRootOperationUid(
+                            matchInput.getRootOperationUid());
                 }
                 if (matchInput.getRequestSource() != null)
                     matchHistory.setRequestSource(matchInput.getRequestSource().toString());
