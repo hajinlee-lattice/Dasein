@@ -413,12 +413,13 @@
             }
             .lattice-ratings {
                 position: relative;
+                margin-top: 15px;
                 .lattice-rating-list {
                     font-size: 11px;
                     &:nth-child(even){
-                        background: #eff3f4;
+                        background: rgba(0,0,0,.06);
                     }
-                    padding: 1px 0;
+                    padding: 5px 0;
                     .rating-item {
                         @include flex-container;
                         & > li {
@@ -473,7 +474,10 @@
                         }
                     }
                     &:nth-child(1) {
-                        color: #aaa;
+                        font-size: 9px;
+                        color: #1a1a1a;
+                        padding-top: 5px;
+                        text-transform: uppercase;
                     }
                     /*
                     &:nth-child(2) .rating-bar > div {
@@ -498,10 +502,10 @@
                 }
                 .rating-slices {
                     position: absolute;
-                    top: 20px;
+                    top: 25px;
                     right: 90px;
                     left: 50px;
-                    bottom: 0;
+                    bottom: 5px;
                     font-size: 10px;
                     pointer-events: none;
                     @include flex-container;

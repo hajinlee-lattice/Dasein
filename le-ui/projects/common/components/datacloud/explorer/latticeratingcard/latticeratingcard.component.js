@@ -46,7 +46,7 @@ angular
                     data.slice_size = top_lift.toFixed(1) / 4;
                     data.top_lift = top_lift;
                     for (var i = 0; i < 4; i++) { 
-                        data.slices.push(i * data.slice_size);
+                        data.slices.push(i * data.slice_size.toFixed(2));
                     }
                     return data;
                 }
