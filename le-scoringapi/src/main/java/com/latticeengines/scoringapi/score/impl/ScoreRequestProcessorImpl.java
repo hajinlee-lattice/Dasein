@@ -889,8 +889,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         EnumSet<FieldInterpretation> expectedDomainFields = EnumSet.of(FieldInterpretation.Domain,
                 FieldInterpretation.Email, FieldInterpretation.Website);
-        EnumSet<FieldInterpretation> expectedMatchFields = EnumSet.of(FieldInterpretation.Country,
-                FieldInterpretation.CompanyName, FieldInterpretation.State, FieldInterpretation.DUNS);
+        EnumSet<FieldInterpretation> expectedMatchFields = EnumSet.of(FieldInterpretation.CompanyName,
+                FieldInterpretation.DUNS);
         expectedMatchFields.addAll(expectedDomainFields);
         boolean hasOneOfDomain = false;
         // PropData does not use City and will default Country to US
