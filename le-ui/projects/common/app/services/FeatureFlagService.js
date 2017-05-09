@@ -6,7 +6,6 @@ var mod = angular.module('mainApp.core.services.FeatureFlagService', [
 mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, RightsUtility) {
 
     this.GetAllFlags = function(ApiHost) {
-        console.log('!! GetAllFlags()', ApiHost);
         var deferred = $q.defer();
         GetAllFlagsAsync(deferred, ApiHost);
         return deferred.promise;
@@ -19,9 +18,10 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             levels = levels || '',
             levelsAr = levels.split(',');
 
-        if(levelsAr.includes(sessionDoc.AccessLevel)) {
+        if (levelsAr.includes(sessionDoc.AccessLevel)) {
             return true;
         }
+
         return false;
     }
 
@@ -76,10 +76,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
     var flagValues = {};
 
     function GetAllFlagsAsync(promise, ApiHost) {
-        console.log('!! GetAllFlagsAsync();', promise, ApiHost);
         // feature flag cached
         if (Object.keys(flagValues).length > 0) {
-            console.log('!! GetAllFlagsAsync(); A', Object.keys(flagValues).length, Object.keys(flagValues).length > 0, flagValues);
             promise.resolve(flagValues);
             return;
         }
@@ -91,7 +89,6 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             var sessionDoc = BrowserStorageUtility.getClientSession();
             
             if (sessionDoc === null || !sessionDoc.hasOwnProperty("Tenant")) {
-                console.log('!! GetAllFlagsAsync(); B', sessionDoc.hasOwnProperty("Tenant"), sessionDoc);
                 promise.resolve({}); // should not attempt to get flags before logging in a tenant
                 return;
             }
@@ -100,14 +97,11 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             url += '?tenantId=' + tenantId;
         }
 
-        console.log('!! GetAllFlagsAsync(); C', url, tenantId);
         $http({
             method: 'GET',
             url: url
         }).success(function(data) {
-            console.log('!! GetAllFlagsAsync(); D SUCCESS', data);
             for(var key in data) {
-                console.log('!! GetAllFlagsAsync(); E', key, data[key]);
                 flagValues[key] = data[key];
             }
 
@@ -116,10 +110,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
                 UpdateFlagsBasedOnRights();
             }
 
-            console.log('!! GetAllFlagsAsync(); F', flagValues);
             promise.resolve(flagValues);
         }).error(function() {
-            console.log('!! GetAllFlagsAsync(); G ERROR');
             // if cannot get feature flags from backend
             SetFlag(flags.ADMIN_ALERTS_TAB, false);
             SetFlag(flags.ALLOW_PIVOT_FILE, false);
@@ -136,10 +128,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
                 UpdateFlagsBasedOnRights();
             }
 
-            console.log('!! GetAllFlagsAsync(); H ERROR', flagValues);
             promise.resolve(flagValues);
         });
-        console.log('!! GetAllFlagsAsync(); I END');
     }
 
     function SetFlag(flag, value) { flagValues[flag] = value; }

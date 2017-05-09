@@ -110,7 +110,7 @@ angular
                                 return vm.categoryCounts[value] > 0;
                             });
 
-                            if (categories.indexOf(vm.category) < 0 || categories.length == 1/* && !vm.lookupMode*/) {
+                            if (vm.category && (categories.indexOf(vm.category) < 0 || categories.length == 1)/* && !vm.lookupMode*/) {
                                 vm.setCategory(categories[0]);
                                 vm.filterEmptySubcategories();
                             }

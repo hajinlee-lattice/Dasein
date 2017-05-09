@@ -97,7 +97,6 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
     /* some rules that might hide the page */
     vm.hidePage = function() {
-        console.log('-!- hidePage()', vm.lookupMode, vm.lookupFiltered, vm.section, vm.show_lattice_insights);
         if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
             return true;
         }
