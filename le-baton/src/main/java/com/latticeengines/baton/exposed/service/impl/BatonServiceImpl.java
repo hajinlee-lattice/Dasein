@@ -72,7 +72,8 @@ public class BatonServiceImpl implements BatonService {
             }
             // XXX For now
             if (TenantLifecycleManager.exists(contractId, tenantId)) {
-                TenantLifecycleManager.delete(contractId, tenantId);
+                log.error(String.format("Error! tenant %s already exists in Zookeeper", tenantId));
+                return false;
             }
             // Timestamp
             tenantInfo.properties.created = new DateTime().getMillis();

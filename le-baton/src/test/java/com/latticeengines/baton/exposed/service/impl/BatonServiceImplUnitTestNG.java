@@ -70,4 +70,13 @@ public class BatonServiceImplUnitTestNG {
         assertEquals(tenant.getTenantInfo().properties.description, "Test tenant");
         assertEquals(tenant.getTenantInfo().properties.displayName, "Tenant for testing");
     }
+
+    @Test(groups = "unit" )
+    public void assertDoubleCreateTenant() {
+        CustomerSpaceProperties props = new CustomerSpaceProperties();
+        props.description = "Test tenant";
+        props.displayName = "Tenant for testing";
+        CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
+        assertFalse(batonService.createTenant("CONTRACT1", "TENANT1", CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, info));
+    }
 }
