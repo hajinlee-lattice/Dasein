@@ -582,7 +582,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                         lookupRequestId, batchContext.getServiceBatchId(),
                         batchContext.getRetryForServiceBatchId() == null ? ""
                                 : " (retry for " + batchContext.getRetryForServiceBatchId() + ")"));
-                return;
+                continue;
             }
             DnBMatchContext context = batchContext.getContexts().get(lookupRequestId);
             context.setCalledRemoteDnB(true);
@@ -600,6 +600,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             dnBMatchHistories.add(new DnBMatchHistory(context));
         }
         writeDnBMatchHistory(dnBMatchHistories);
+        log.info(String.format(
+                "Finished processing DnB batch %s (StartTime: %s, FinishTime: %s, Size: %d, Duration: %d mins)",
+                batchContext.getServiceBatchId(), batchContext.getTimestamp(), finishTime,
+                batchContext.getContexts().size(),
+                (finishTime.getTime() - batchContext.getTimestamp().getTime()) / 60 / 1000));
     }
 
     /**
