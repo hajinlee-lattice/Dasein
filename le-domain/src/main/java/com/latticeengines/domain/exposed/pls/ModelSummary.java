@@ -662,7 +662,7 @@ public class ModelSummary
     }
 
     @JsonProperty("HasBucketMetadata")
-    @Column(name = "HasBucketMetadata", nullable = false)
+    @Column(name = "HAS_BUCKET_METADATA", nullable = false)
     public Boolean getHasBucketMetadata() {
         return hasBucketMetadata;
     }
