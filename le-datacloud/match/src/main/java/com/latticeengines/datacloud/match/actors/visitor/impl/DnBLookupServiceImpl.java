@@ -371,6 +371,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                                 .size() == maximumBatchSize) {
                     DnBBatchMatchContext batchContext = new DnBBatchMatchContext();
                     batchContext.setLogDnBBulkResult(context.getLogDnBBulkResult());
+                    batchContext.setRootOperationUid(context.getRootOperationUid());
                     unsubmittedBatches.add(batchContext);
                 }
                 unsubmittedBatches.get(unsubmittedBatches.size() - 1).getContexts().put(context.getLookupRequestId(),
