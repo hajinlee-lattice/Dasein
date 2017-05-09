@@ -112,7 +112,9 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             }
 
             // update user-level flags
-            UpdateFlagsBasedOnRights();
+            if (ApiHost != '/ulysses') {
+                UpdateFlagsBasedOnRights();
+            }
 
             console.log('!! GetAllFlagsAsync(); F', flagValues);
             promise.resolve(flagValues);
@@ -130,7 +132,9 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             SetFlag(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
 
             // update user-level flags
-            UpdateFlagsBasedOnRights();
+            if (ApiHost != '/ulysses') {
+                UpdateFlagsBasedOnRights();
+            }
 
             console.log('!! GetAllFlagsAsync(); H ERROR', flagValues);
             promise.resolve(flagValues);
