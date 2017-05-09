@@ -104,23 +104,23 @@ angular
                             vm.updateStateParams();
                         }
 
-                        // maybe this will fix the issues where they dont trill down??
+                        // maybe this will fix the issues where they dont drill down??
                         $timeout(function() {
                             var categories = Object.keys(vm.categoryCounts).filter(function(value, index) {
                                 return vm.categoryCounts[value] > 0;
                             });
 
-                            if (categories.length == 1 && !vm.lookupMode) {
+                            if (categories.indexOf(vm.category) < 0 || categories.length == 1/* && !vm.lookupMode*/) {
                                 vm.setCategory(categories[0]);
                                 vm.filterEmptySubcategories();
                             }
 
                             vm.queryInProgress = false;
-                        }, 1);
+                        }, 100);
 
                         vm.filterEmptySubcategories();
                         vm.TileTableItems = {};
-                    }, 500);
+                    }, 666);
                 });
 
                 var find_dropdown_buttons = $interval(dropdown_buttons, 300),
