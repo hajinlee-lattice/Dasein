@@ -83,17 +83,19 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             promise.resolve(flagValues);
             return;
         }
-        var sessionDoc = BrowserStorageUtility.getClientSession();
-        // retrieve feature flag
-        if (sessionDoc === null || !sessionDoc.hasOwnProperty("Tenant")) {
-            console.log('!! GetAllFlagsAsync(); B', sessionDoc.hasOwnProperty("Tenant"), sessionDoc);
-            promise.resolve({}); // should not attempt to get flags before logging in a tenant
-            return;
-        }
         
         var url = (ApiHost == '/ulysses' ? ApiHost + '/tenant' : '/pls' + '/config') + '/featureflags';
         
+        // retrieve feature flag
         if (ApiHost != '/ulysses') {
+            var sessionDoc = BrowserStorageUtility.getClientSession();
+            
+            if (sessionDoc === null || !sessionDoc.hasOwnProperty("Tenant")) {
+                console.log('!! GetAllFlagsAsync(); B', sessionDoc.hasOwnProperty("Tenant"), sessionDoc);
+                promise.resolve({}); // should not attempt to get flags before logging in a tenant
+                return;
+            }
+        
             var tenantId = sessionDoc.Tenant.Identifier;
             url += '?tenantId=' + tenantId;
         }
