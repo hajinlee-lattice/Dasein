@@ -2,13 +2,14 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 @JsonIgnoreType
-public class LeadEnrichmentAttribute {
+public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
 
     @JsonProperty("DisplayName")
     private String displayName;
@@ -57,7 +58,7 @@ public class LeadEnrichmentAttribute {
 
     @JsonProperty("ImportanceOrdering")
     private int importanceOrdering;
-    
+
     public String getDisplayName() {
         return displayName;
     }
@@ -184,5 +185,17 @@ public class LeadEnrichmentAttribute {
 
     public void setImportanceOrdering(int importanceOrdering) {
         this.importanceOrdering = importanceOrdering;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getCategoryAsString() {
+        return category;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getColumnId() {
+        return fieldName;
     }
 }

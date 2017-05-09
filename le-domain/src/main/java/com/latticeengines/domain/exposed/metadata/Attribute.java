@@ -868,8 +868,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public List<BucketRange> getBucketRangeList() {
         Object obj = properties.get("BucketRangeList");
-        return obj == null ? null
-                : JsonUtils.getObjectMapper().convertValue(obj, new TypeReference<List<BucketRange>>() {
+        return obj == null ? null : JsonUtils.getObjectMapper().convertValue(obj,
+                new TypeReference<List<BucketRange>>() {
                 });
     }
 

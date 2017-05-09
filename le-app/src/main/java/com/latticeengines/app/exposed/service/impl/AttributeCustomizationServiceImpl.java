@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeCustomizationProperty;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CategoryCustomizationProperty;
+import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -111,7 +112,7 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
     }
 
     @Override
-    public void addFlags(List<LeadEnrichmentAttribute> attributes) {
+    public void addFlags(List<HasAttributeCustomizations> attributes) {
         List<AttributeCustomizationProperty> allAttrCustomizations = attributeCustomizationPropertyEntityMgr.findAll();
         List<CategoryCustomizationProperty> allCategoryCustomizations = categoryCustomizationPropertyEntityMgr
                 .findAll();
@@ -135,24 +136,24 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
             categoryCustomizationMap.put(customization.getCategoryName(), list);
         }
 
-        for (LeadEnrichmentAttribute attribute : attributes) {
+        for (HasAttributeCustomizations attribute : attributes) {
             for (AttributeUseCase useCase : AttributeUseCase.values()) {
                 if (setAttributePropertyMap(attrCustomizationMap, useCase, attribute)) {
                     continue;
                 }
-                String categoryName = CategoryNameUtils.getCategoryName(attribute.getCategory(),
+                String categoryName = CategoryNameUtils.getCategoryName(attribute.getCategoryAsString(),
                         attribute.getSubcategory());
                 if (setAttributePropertyMap(categoryCustomizationMap, categoryName, useCase, attribute)) {
                     continue;
                 }
-                setAttributePropertyMap(categoryCustomizationMap, attribute.getCategory(), useCase, attribute);
+                setAttributePropertyMap(categoryCustomizationMap, attribute.getCategoryAsString(), useCase, attribute);
             }
         }
     }
 
     private boolean setAttributePropertyMap(Map<String, List<AttributeCustomizationProperty>> attrCustomizationMap,
-            AttributeUseCase useCase, LeadEnrichmentAttribute attribute) {
-        List<AttributeCustomizationProperty> attrCustomizations = attrCustomizationMap.get(attribute.getFieldName());
+            AttributeUseCase useCase, HasAttributeCustomizations attribute) {
+        List<AttributeCustomizationProperty> attrCustomizations = attrCustomizationMap.get(attribute.getColumnId());
         if (attrCustomizations == null) {
             return false;
         }
@@ -172,7 +173,7 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
     }
 
     private boolean setAttributePropertyMap(Map<String, List<CategoryCustomizationProperty>> categoryCustomizationMap,
-            String categoryName, AttributeUseCase useCase, LeadEnrichmentAttribute attribute) {
+            String categoryName, AttributeUseCase useCase, HasAttributeCustomizations attribute) {
         List<CategoryCustomizationProperty> categoryCustomizations = categoryCustomizationMap.get(categoryName);
         if (categoryCustomizations == null) {
             return false;

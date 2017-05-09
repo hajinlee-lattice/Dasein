@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -15,6 +16,7 @@ import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -137,12 +139,13 @@ public class AttributePageProcessor {
                 attributeDisplayNameFilter, category, subcategory, onlySelectedAttributes, offset, max,
                 considerInternalAttributes);
         if (!skipTenantLevelCustomization) {
-            attributeCustomizationService.addFlags(attributes);
+            attributeCustomizationService.addFlags(attributes.stream().map(c -> (HasAttributeCustomizations) c)
+                    .collect(Collectors.toList()));
         }
         addImportanceOrdering(attributes);
         return attributes;
     }
-    
+
     private void addImportanceOrdering(List<LeadEnrichmentAttribute> attributes) {
         // TODO: this is subject to change on AccountMasterColumn.
         if (attributes == null) {

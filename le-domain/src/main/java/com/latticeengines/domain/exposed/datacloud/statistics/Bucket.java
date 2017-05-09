@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.statistics;
 
-import java.util.Random;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -30,8 +28,6 @@ public class Bucket {
     private Double lift;
 
     public Bucket() {
-        // TODO TEMPORARY FOR M10
-        lift = new Random().nextDouble() * 5.0;
     }
 
     public String getBucketLabel() {

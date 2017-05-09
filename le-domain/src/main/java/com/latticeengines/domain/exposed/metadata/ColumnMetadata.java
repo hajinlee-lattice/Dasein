@@ -3,16 +3,20 @@ package com.latticeengines.domain.exposed.metadata;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.domain.exposed.pls.AttributeUseCase;
+import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ColumnMetadata {
-
+public class ColumnMetadata implements HasAttributeCustomizations {
     private String columnId;
     private String columnName;
     private String description;
@@ -29,6 +33,9 @@ public class ColumnMetadata {
     private String matchDestination;
     private boolean isPremium;
     private String decodeStrategy;
+
+    @JsonProperty("ObjectType")
+    private SchemaInterpretation objectType;
 
     @JsonProperty("BucketForSegment")
     private boolean bucketForSegment;
@@ -47,6 +54,9 @@ public class ColumnMetadata {
 
     @JsonProperty("CanBIS")
     private boolean canBis;
+
+    @JsonProperty("AttributeFlagsMap")
+    private Map<AttributeUseCase, JsonNode> attributeFlagsMap;
 
     @JsonProperty("ColumnId")
     public String getColumnId() {
@@ -367,6 +377,24 @@ public class ColumnMetadata {
 
     public void setDecodeStrategy(String decodeStrategy) {
         this.decodeStrategy = decodeStrategy;
+    }
+
+    public SchemaInterpretation getObjectType() {
+        return objectType;
+    }
+
+    public void setObjectType(SchemaInterpretation objectType) {
+        this.objectType = objectType;
+    }
+
+    @Override
+    public Map<AttributeUseCase, JsonNode> getAttributeFlagsMap() {
+        return attributeFlagsMap;
+    }
+
+    @Override
+    public void setAttributeFlagsMap(Map<AttributeUseCase, JsonNode> attributeFlagsMap) {
+        this.attributeFlagsMap = attributeFlagsMap;
     }
 
 }

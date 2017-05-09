@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
-import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 
 public interface AttributeCustomizationService {
     void save(String name, AttributeUseCase useCase, String propertyName, String value);
@@ -14,7 +14,7 @@ public interface AttributeCustomizationService {
 
     String retrieve(String name, AttributeUseCase useCase, String propertyName);
 
-    void addFlags(List<LeadEnrichmentAttribute> attributes);
+    void addFlags(List<HasAttributeCustomizations> attributes);
 
     void saveCategory(Category category, AttributeUseCase useCase, String propertyName, String value);
 
