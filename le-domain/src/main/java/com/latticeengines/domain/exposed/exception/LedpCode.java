@@ -103,11 +103,11 @@ public enum LedpCode {
     LEDP_17008("Unsupported Source Credential Check for Source Type {0}"), //
     LEDP_17009("Got NULL Value from Primary Key for Tenant {0}"), //
     LEDP_17010("Error connector configuration!"), //
-    LEDP_17011("Cannot execute DL loadgroup! Exception: {0}"),
-    LEDP_17012("Cannot get loadgroup status from DL!"),
-    LEDP_17013("Cannot get table metadata from DL! Error message: {0}"),
-    LEDP_17014("Import table metadata error! {0}"),
-    LEDP_17015("Import table data error! {0}"),
+    LEDP_17011("Cannot execute DL loadgroup! Exception: {0}"), //
+    LEDP_17012("Cannot get loadgroup status from DL!"), //
+    LEDP_17013("Cannot get table metadata from DL! Error message: {0}"), //
+    LEDP_17014("Import table metadata error! {0}"), //
+    LEDP_17015("Import table data error! {0}"), //
     LEDP_17016("Failed to get data from DL!"),
 
     // le-pls 18000-18999
@@ -250,8 +250,8 @@ public enum LedpCode {
     LEDP_18136("Same load vdb table job is already submitted."), //
     LEDP_18137("Same load vdb table job is running with application id {0}"), //
     LEDP_18138("Same load vdb table job is already succeeded."), //
-    LEDP_18140("Table {0} already exist, cannot create a new one"),
-    LEDP_18141("Table metadata is conflict with table already existed."),
+    LEDP_18140("Table {0} already exist, cannot create a new one"), //
+    LEDP_18141("Table metadata is conflict with table already existed."), //
     LEDP_18142("Table {0} not exist, cannot import table with update rule"),
 
     // le-security 19000-19100
@@ -537,8 +537,8 @@ public enum LedpCode {
             "Required field(s) are missing: {0}. In case of lead type model, " //
                     + "make sure to specify 'Email' field and for non-lead type model " //
                     + "specify either 'Website' or 'Domain' fields. If these fields " //
-                    + "are not specified then specify both 'CompanyName' " //
-                    + "and 'State' fields."), //
+                    + "are not specified then specify either 'CompanyName' " //
+                    + "or 'DUNS' field."), //
     LEDP_31200("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     // le-serviceflows
@@ -578,7 +578,8 @@ public enum LedpCode {
     LEDP_37005("Cannot find 1-to-many relationship to satisfy necessary join {0}"), //
     LEDP_37006("Unsupported relation {0}"), //
     LEDP_37007("Could not locate BusinessObject for ObjectType {0}"), //
-    LEDP_37008("Could not find a one-to-many relationship from table {0} to table of type {1} to process exists restriction {2}"), //
+    LEDP_37008(
+            "Could not find a one-to-many relationship from table {0} to table of type {1} to process exists restriction {2}"), //
     LEDP_37009("Unsupported restriction {0}"), //
     LEDP_37010("Could not find attribute with name {0} in table {1}"), //
     LEDP_37011("Unsupported lookup type {0}"), //
