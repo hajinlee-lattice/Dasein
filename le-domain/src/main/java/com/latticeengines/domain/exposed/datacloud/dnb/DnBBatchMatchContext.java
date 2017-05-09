@@ -6,6 +6,8 @@ import java.util.Map;
 
 public class DnBBatchMatchContext {
 
+    private String rootOperationUid;
+
     private String serviceBatchId;
 
     private Date timestamp;
@@ -38,6 +40,14 @@ public class DnBBatchMatchContext {
             context.copyMatchInput(batchContext.getContexts().get(lookupRequestId));
             contexts.put(lookupRequestId, context);
         }
+    }
+
+    public String getRootOperationUid() {
+        return rootOperationUid;
+    }
+
+    public void setRootOperationUid(String rootOperationUid) {
+        this.rootOperationUid = rootOperationUid;
     }
 
     public String getServiceBatchId() {
