@@ -128,6 +128,9 @@ public class GenerateDemoJsonTestNG {
         attribute.setSubcategory(subcategory);
         attribute.setDescription(description);
         attribute.setFundamentalType(FundamentalType.BOOLEAN);
+        attribute.setIsPremium(false);
+        attribute.setIsInternal(false);
+        attribute.setIsSelected(false);
         return attribute;
     }
 }
