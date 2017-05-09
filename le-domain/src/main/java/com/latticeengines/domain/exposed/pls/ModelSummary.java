@@ -661,12 +661,13 @@ public class ModelSummary
         this.isMatch = isMatch;
     }
 
+    @Transient
     @JsonProperty("HasBucketMetadata")
-    @Column(name = "HAS_BUCKET_METADATA", nullable = false)
     public Boolean getHasBucketMetadata() {
         return hasBucketMetadata;
     }
 
+    @Transient
     @JsonProperty("HasBucketMetadata")
     public void setHasBucketMetadata(Boolean hasBucketMetadata) {
         this.hasBucketMetadata = hasBucketMetadata;

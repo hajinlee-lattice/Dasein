@@ -17,8 +17,6 @@ CREATE PROCEDURE `UpdateSchema`()
 	alter table `DATAFLOW_JOB_SOURCE_TABLE` add index FKD48325738DEB5918 (FK_JOB_ID), add constraint FKD48325738DEB5918 foreign key (FK_JOB_ID) references `DATAFLOW_JOB` (`JOB_PID`);
 
         alter table METADATA_DATA_COLLECTION add unique IDX_UNIQUE (`TENANT_ID`, `TYPE`);
-        alter table `Execution_Log` add `RetryCount` int default 0 not null;
-        alter table `MODEL_SUMMARY` add `HAS_BUCKET_METADATA` boolean not null;
      COMMIT;
   END; //
 DELIMITER ;

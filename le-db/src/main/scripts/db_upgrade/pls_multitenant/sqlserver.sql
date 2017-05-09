@@ -15,7 +15,6 @@ AS
 
         -- Eai Import Job detail table
         create table [EAI_IMPORT_JOB_DETAIL] ([PID] bigint identity not null unique, [COLLECTION_IDENTIFIER] nvarchar(255) not null unique, [COLLECTION_TS] datetime2 not null, [LOAD_APPLICATION_ID] nvarchar(255), [PROCESSED_RECORDS] int not null, [SOURCE_TYPE] nvarchar(255) not null, [IMPORT_STATUS] nvarchar(255) not null, [TARGET_PATH] nvarchar(2048), primary key ([PID]));
-        alter table [MODEL_SUMMARY] add [HAS_BUCKET_METADATA] bit not null default 0;
     COMMIT
 GO
 
