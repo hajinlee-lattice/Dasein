@@ -10,7 +10,7 @@
     <bean name="redshiftDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
         <property name="driverClass" value="com.amazon.redshift.jdbc42.Driver"/>
         <property name="jdbcUrl"
-                  value="${redshift.jdbc.url}/${redshift.app.database}?user=${redshift.user}&amp;password=${redshift.password.encrypted}&amp;TCPKeepAliveMinutes=1440"/>
+                  value="${redshift.jdbc.url}/${redshift.app.database}?user=${redshift.user}&amp;password=${redshift.password.encrypted}&amp;tcpKeepAlive=true"/>
         <property name="acquireIncrement" value="4"/>
         <property name="maxPoolSize" value="32"/>
         <property name="checkoutTimeout" value="10000"/>
