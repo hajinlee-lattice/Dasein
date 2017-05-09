@@ -100,6 +100,7 @@ public class ModelSummary
     private String moduleName;
     private Double crossValidatedMean;
     private Double crossValidatedStd;
+    private Boolean hasBucketMetadata = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -658,6 +659,17 @@ public class ModelSummary
     @Transient
     public void setMatch(boolean isMatch) {
         this.isMatch = isMatch;
+    }
+
+    @JsonProperty("HasBucketMetadata")
+    @Column(name = "HasBucketMetadata", nullable = false)
+    public Boolean getHasBucketMetadata() {
+        return hasBucketMetadata;
+    }
+
+    @JsonProperty("HasBucketMetadata")
+    public void setHasBucketMetadata(Boolean hasBucketMetadata) {
+        this.hasBucketMetadata = hasBucketMetadata;
     }
 
 }

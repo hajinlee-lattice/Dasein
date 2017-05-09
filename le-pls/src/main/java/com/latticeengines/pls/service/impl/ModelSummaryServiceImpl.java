@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -67,6 +68,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Autowired
     private SourceFileEntityMgr sourceFileEntityMgr;
+
+    @Autowired
+    private BucketedScoreServiceImpl bucketedScoreService;
 
     @Override
     public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
@@ -183,6 +187,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (summary != null) {
             summary.setPredictors(new ArrayList<Predictor>());
             getModelSummaryTrainingFileState(summary);
+            getModelSummaryHasRating(summary);
             if (!summary.getModelType().equals(ModelType.PMML.getModelType())) {
                 fixBusinessAnnualSalesAbs(summary);
                 fixLATTICEGT200DiscreteValue(summary);
@@ -359,5 +364,16 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
         modelSummaryEntityMgr.updateLastUpdateTime(modelSummary);
+    }
+
+    private void getModelSummaryHasRating(ModelSummary summary)
+    {
+        List<BucketMetadata> data = bucketedScoreService.getUpToDateModelBucketMetadata(summary.getId());
+        if (data != null && data.size() != 0) {
+            summary.setHasBucketMetadata(true);
+        }
+        else {
+            summary.setHasBucketMetadata(false);
+        }
     }
 }
