@@ -269,6 +269,7 @@ public class SourceStandardizationFlow
             source = joined.retain(new FieldList(retainedFields));
             source = source.rename(new FieldList(getRenamedFieldName(domainValidation, IS_VALID_DOMAIN)),
                     new FieldList(isValidDomainField));
+            source = source.retain(new FieldList(source.getFieldNames()));
         }
         return source;
     }
@@ -279,7 +280,8 @@ public class SourceStandardizationFlow
         for (String oldName : oldNames) {
             newNames.add(node.getPipeName() + "_" + oldName);
         }
-        return node.rename(new FieldList(oldNames), new FieldList(newNames));
+        node = node.rename(new FieldList(oldNames), new FieldList(newNames));
+        return node.retain(new FieldList(node.getFieldNames()));
     }
 
     private String getRenamedFieldName(Node node, String originalName) {
