@@ -116,6 +116,8 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     private HdfsToRedshiftConfiguration getExportConfiguration() {
         HdfsToRedshiftConfiguration configuration = new HdfsToRedshiftConfiguration();
         configuration.setExportInputPath(HDFS_DIR + "/*.avro");
+        configuration.setCleanupS3(true);
+        configuration.setCreateNew(true);
         RedshiftTableConfiguration redshiftTableConfiguration = new RedshiftTableConfiguration();
         redshiftTableConfiguration.setTableName(testTable);
         redshiftTableConfiguration.setJsonPathPrefix("camel.jsonpath");

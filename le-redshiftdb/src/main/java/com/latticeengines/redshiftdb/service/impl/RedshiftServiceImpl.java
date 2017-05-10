@@ -1,5 +1,7 @@
 package com.latticeengines.redshiftdb.service.impl;
 
+import java.util.Arrays;
+
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +69,37 @@ public class RedshiftServiceImpl implements RedshiftService {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Could not drop table %s in Redshift", tableName), e);
         }
+    }
+
+    @Override
+    public void createStagingTable(String stageTableName, String targetTableName) {
+        try {
+            redshiftJdbcTemplate.execute(String.format("CREATE TABLE %s (LIKE %s)", stageTableName, targetTableName));
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Could not create stage table %s in Redshift", stageTableName), e);
+        }
+    }
+
+    @Override
+    public void updateExistingRowsFromStagingTable(String stageTableName, String targetTableName,
+            String... joinFields) {
+        try {
+            redshiftJdbcTemplate.execute("BEGIN TRANSACTION; " //
+                    + String.format("DELETE FROM %s USING %s WHERE %s; ", targetTableName, stageTableName,
+                            getJoinStatement(stageTableName, targetTableName, joinFields)) //
+                    + String.format("INSERT INTO %s SELECT * FROM %s; ", targetTableName, stageTableName) //
+                    + "END TRANSACTION;");
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Could not update table %s in Redshift", targetTableName), e);
+        }
+    }
+
+    private String getJoinStatement(String stageTableName, String targetTableName, String... joinFields) {
+        return Arrays.asList(joinFields).stream().map(f -> {
+            return String.format("%1$s.%3$s = %2$s.%3$s", stageTableName, targetTableName, f).toString();
+        }).reduce((e1, e2) -> {
+            return e1 + " AND " + e2;
+        }).orElse(null);
     }
 
     private String getS3Path(String s3bucket, String s3prefix) {

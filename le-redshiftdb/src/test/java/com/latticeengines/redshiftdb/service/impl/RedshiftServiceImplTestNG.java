@@ -28,7 +28,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
-
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
@@ -40,7 +39,7 @@ import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     private static final String TABLE_NAME = "RedshiftServiceImplTestNG_EventTable";
-
+    private static final String STAGING_TABLE_NAME = TABLE_NAME + "_staging";
     @Autowired
     private RedshiftService redshiftService;
 
@@ -82,6 +81,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
 
     private void cleanupRedshift() {
         redshiftService.dropTable(TABLE_NAME);
+        redshiftService.dropTable(STAGING_TABLE_NAME);
     }
 
     @Test(groups = "functional")
@@ -135,6 +135,20 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
 
     @Test(groups = "functional", dependsOnMethods = "queryTableSchema")
     public void queryTable() {
+        List<Map<String, Object>> result = redshiftJdbcTemplate
+                .queryForList(String.format("SELECT * FROM %s LIMIT 10", TABLE_NAME));
+        assertEquals(result.size(), 10);
+        for (Map<String, Object> row : result) {
+            assertNotNull(row.get("Id"));
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "queryTable")
+    public void updateExistingRows() {
+        redshiftService.createStagingTable(STAGING_TABLE_NAME, TABLE_NAME);
+        redshiftService.loadTableFromAvroInS3(STAGING_TABLE_NAME, s3Bucket, avroPrefix, jsonPathPrefix);
+        redshiftService.updateExistingRowsFromStagingTable(STAGING_TABLE_NAME, TABLE_NAME, "Id");
+        redshiftService.dropTable(STAGING_TABLE_NAME);
         List<Map<String, Object>> result = redshiftJdbcTemplate
                 .queryForList(String.format("SELECT * FROM %s LIMIT 10", TABLE_NAME));
         assertEquals(result.size(), 10);

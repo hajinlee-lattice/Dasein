@@ -52,9 +52,8 @@ public class HdfsToRedshiftService {
         hdfsToS3ExportService.upload(s3Configuration);
     }
 
-    public void createRedshiftTable(HdfsToRedshiftConfiguration configuration) {
+    public void uploadJsonPathSchema(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
-        redshiftService.dropTable(redshiftTableConfig.getTableName());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
             RedshiftUtils.generateJsonPathsFile(schema, outputStream);
@@ -62,12 +61,17 @@ public class HdfsToRedshiftService {
                 s3Service.uploadInputStream(redshiftTableConfig.getS3Bucket(), redshiftTableConfig.getJsonPathPrefix(),
                         inputStream, true);
             }
-            redshiftService.createTable(redshiftTableConfig, schema);
         } catch (IOException e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new RuntimeException(e);
         }
+    }
 
+    public void createRedshiftTable(HdfsToRedshiftConfiguration configuration) {
+        RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
+        Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
+        redshiftService.dropTable(redshiftTableConfig.getTableName());
+        redshiftService.createTable(redshiftTableConfig, schema);
     }
 
     public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
@@ -76,8 +80,22 @@ public class HdfsToRedshiftService {
                 s3Prefix(redshiftTableConfig), redshiftTableConfig.getJsonPathPrefix());
     }
 
+    public void updateExistingRows(HdfsToRedshiftConfiguration configuration) {
+        RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
+        String tableName = redshiftTableConfig.getTableName();
+        String stagingTableName = tableName + "_staging";
+        redshiftService.createStagingTable(stagingTableName, tableName);
+        redshiftService.loadTableFromAvroInS3(stagingTableName, redshiftTableConfig.getS3Bucket(),
+                s3Prefix(redshiftTableConfig), redshiftTableConfig.getJsonPathPrefix());
+        redshiftService.updateExistingRowsFromStagingTable(stagingTableName, tableName,
+                redshiftTableConfig.getDistKey()); // we would use dist key as
+                                                   // join field
+        redshiftService.dropTable(stagingTableName);
+
+    }
+
     public void cleanupS3(HdfsToRedshiftConfiguration configuration) {
-        if (configuration.isAppend()) {
+        if (configuration.isCleanupS3()) {
             return;
         }
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
