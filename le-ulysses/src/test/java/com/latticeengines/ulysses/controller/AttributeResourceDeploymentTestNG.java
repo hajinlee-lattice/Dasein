@@ -54,15 +54,6 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
 	}
 
     @Test(groups = "deployment")
-    public void testGetPrimaryAttributesValidationExpression() {
-        String url = getAttributeResourceUrl() + "/primary/validation-expression";
-        String expression = getOAuth2RestTemplate().getForObject(url, String.class);
-        log.info("Primary Fields Expression: " + expression);
-        Assert.assertNotNull(expression);
-        Assert.assertEquals(expression, "((Website||Email||CompanyName)&&(Id))");
-    }
-    
-    @Test(groups = "deployment")
     public void testGetPrimaryAttributeConfiguration() {
         String url = getAttributeResourceUrl() + "/primaryfield-configuration";
         PrimaryFieldConfiguration primaryFieldConfig = getOAuth2RestTemplate().getForObject(url, PrimaryFieldConfiguration.class);
