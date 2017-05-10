@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 @Component(TRANSFORMER_NAME)
 public class SourceCopier extends AbstractDataflowTransformer<TransformerConfig, TransformationFlowParameters> {
 
-    public static final String TRANSFORMER_NAME = "SourceCopier";
+    public static final String TRANSFORMER_NAME = "sourceCopier";
 
     @Override
     public String getName() {

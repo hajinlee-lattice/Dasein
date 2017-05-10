@@ -8,6 +8,7 @@
 
     <import resource="classpath:test-dataflow-cascading-context.xml" />
     <import resource="classpath:proxy-context.xml" />
+    <import resource="classpath:datacloud-core-context.xml" />
     <import resource="classpath:datacloud-dataflow-context.xml" />
     <import resource="classpath:common-properties-context.xml" />
 

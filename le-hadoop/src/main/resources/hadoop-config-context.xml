@@ -11,6 +11,7 @@
         dfs.ha.namenodes.${hadoop.dfs.nameservices}=nn1,nn2
         dfs.namenode.rpc-address.${hadoop.dfs.nameservices}.nn1=${dfs.namenode.rpc-address.nn1}
         dfs.namenode.rpc-address.${hadoop.dfs.nameservices}.nn2=${dfs.namenode.rpc-address.nn2}
+        dfs.client.block.write.replace-datanode-on-failure.policy=${hadoop.dfs.replace-datanode-on-failure.policy}
         fs.defaultFS=${hadoop.fs.defaultFS}
         hadoop.security.key.provider.path=${hadoop.hadoop.security.key.provider.path}
         dfs.encryption.key.provider.uri=${hadoop.dfs.encryption.key.provider.uri}

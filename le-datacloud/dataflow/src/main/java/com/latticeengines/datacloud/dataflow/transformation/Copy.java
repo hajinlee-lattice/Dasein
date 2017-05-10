@@ -9,7 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.dataflow.bucket.BucketEncode;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -21,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 public class Copy extends TypesafeDataFlowBuilder<TransformationFlowParameters> {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(BucketEncode.class);
+    private static final Log log = LogFactory.getLog(Copy.class);
 
     public static final String BEAN_NAME = "copy";
 

@@ -8,6 +8,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import org.apache.avro.Schema;
 
 public interface HdfsSourceEntityMgr {
 
@@ -26,6 +27,8 @@ public interface HdfsSourceEntityMgr {
     Table getTableAtVersion(Source source, String version);
 
     Table getTableAtVersions(Source source, List<String> versions);
+
+    Schema getAvscSchemaAtVersion(String sourceName, String version);
 
     /**
      * This is to fill in more detail about the table, after generating avros

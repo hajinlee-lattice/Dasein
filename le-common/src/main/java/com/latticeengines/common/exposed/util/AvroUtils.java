@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -119,6 +120,21 @@ public class AvroUtils {
 
         shuffledJson.set("fields", newFields);
         return new Schema.Parser().parse(JsonUtils.serialize(shuffledJson));
+    }
+
+    public static Schema removeFields(Schema schema, String... fields) {
+        ObjectNode json = JsonUtils.deserialize(schema.toString(), ObjectNode.class);
+        ArrayNode oldFields = (ArrayNode) json.get("fields");
+        ArrayNode newFields = new ObjectMapper().createArrayNode();
+        Set<String> toRemove = new HashSet<>(Arrays.asList(fields));
+        for (JsonNode field : oldFields) {
+            String fieldName = field.get("name").asText();
+            if (!toRemove.contains(fieldName)) {
+                newFields.add(field);
+            }
+        }
+        json.set("fields", newFields);
+        return new Schema.Parser().parse(JsonUtils.serialize(json));
     }
 
     public static Schema getSchema(Configuration config, Path path) {

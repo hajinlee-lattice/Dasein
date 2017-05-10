@@ -18,11 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.impl.SimpleTransformationDataFlowService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -41,6 +43,9 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
     @Autowired
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
+
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     protected abstract String getDataFlowBeanName();
 
@@ -95,12 +100,12 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         parameters.setBaseTables(baseTables);
         String[] primaryKey = targetTemplate.getPrimaryKey();
         if (primaryKey == null) {
-            parameters.setPrimaryKeys(new ArrayList<String>());
+            parameters.setPrimaryKeys(new ArrayList<>());
         } else {
             parameters.setPrimaryKeys(Arrays.asList(targetTemplate.getPrimaryKey()));
         }
 
-        Map<String, String> templateSourceMap = new HashMap<String, String>();
+        Map<String, String> templateSourceMap = new HashMap<>();
 
         for (int i = 0; i < baseTemplates.length; i++) {
             templateSourceMap.put(baseTemplates[i].getSourceName(), baseSources[i].getSourceName());
@@ -140,7 +145,9 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);
             step.setCount(result.getCount());
-            step.setTargetSchema(getTargetSchema(result, parameters));
+            List<Schema> baseAvscSchemas = getBasesourceSchemas(step);
+            step.setTargetSchema(getTargetSchema(result, parameters, baseAvscSchemas));
+            postDataFlowProcessing(workflowDir, parameters, configuration);
         } catch (Exception e) {
             log.error("Failed to transform data", e);
             return false;
@@ -149,10 +156,38 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return true;
     }
 
-    protected Schema getTargetSchema(Table result, P parameters) {
+    private List<Schema> getBasesourceSchemas(TransformStep step) {
+        Transformer transformer = step.getTransformer();
+        if (!(transformer instanceof AbstractDataflowTransformer)) {
+            return null;
+        }
+        boolean needAvsc = ((AbstractDataflowTransformer) transformer).needBaseAvsc();
+        if (needAvsc) {
+            Source[] baseSources = step.getBaseSources();
+            List<String> baseSourceVersions = step.getBaseVersions();
+            List<Schema> schemas = new ArrayList<>();
+            for (int i = 0; i < baseSources.length; i++) {
+                Source source = baseSources[i];
+                String version = baseSourceVersions.get(i);
+                Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source.getSourceName(), version);
+                schemas.add(schema);
+            }
+            return schemas;
+        } else {
+            return null;
+        }
+    }
+
+    protected boolean needBaseAvsc() {
+        return false;
+    }
+
+    protected Schema getTargetSchema(Table result, P parameters, List<Schema> baseAvscSchemas) {
         return null;
     }
 
     protected void preDataFlowProcessing(String workflowDir, P paramters, T configuration) {}
+
+    protected void postDataFlowProcessing(String workflowDir, P paramters, T configuration) {}
 
 }

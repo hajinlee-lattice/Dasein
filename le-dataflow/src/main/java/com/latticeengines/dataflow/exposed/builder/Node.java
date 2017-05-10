@@ -207,6 +207,15 @@ public class Node {
     }
 
     @SuppressWarnings("rawtypes")
+    public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
+            List<FieldMetadata> fieldMetadatas) {
+        return new Node(
+                builder.register(
+                        new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer, fieldMetadatas)),
+                builder);
+    }
+
+    @SuppressWarnings("rawtypes")
     public Node groupByAndAggregate(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
             boolean descending) {
         return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);
@@ -369,6 +378,12 @@ public class Node {
 
     public Node retain(String... outputFields) {
         return new Node(builder.register(new RetainOperation(opInput(identifier), new FieldList(outputFields))),
+                builder);
+    }
+
+    public Node groupByAndRetain(FieldList outputFields, FieldList groupByFields, FieldList sortingFields) {
+        return new Node(
+                builder.register(new RetainOperation(opInput(identifier), outputFields, groupByFields, sortingFields)),
                 builder);
     }
 

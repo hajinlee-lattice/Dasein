@@ -252,11 +252,15 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
         ctx.setProperty(DataFlowProperty.CUSTOMER, "customer");
         ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
         ctx.setProperty(DataFlowProperty.DEBUG, false);
+        return updateDataFlowContext(ctx);
+    }
+
+    protected DataFlowContext updateDataFlowContext(DataFlowContext ctx) {
         return ctx;
     }
 
-    private String getTargetDirectory() {
-        return "/tmp/ServiceFlowsFunctionalTest/" + getDirectory();
+    protected String getTargetDirectory() {
+        return "/tmp/DataFlowsFunctionalTest/" + getDirectory();
     }
 
     protected List<GenericRecord> readTable(String avroFile) {

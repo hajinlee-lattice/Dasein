@@ -88,7 +88,7 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     }
 
     @Override
-    protected Schema getTargetSchema(Table result, BucketEncodeParameters parameters) {
+    protected Schema getTargetSchema(Table result, BucketEncodeParameters parameters, List<Schema> baseAvscSchemas) {
         String extractPath = result.getExtracts().get(0).getPath();
         String glob;
         if (extractPath.endsWith(".avro")) {

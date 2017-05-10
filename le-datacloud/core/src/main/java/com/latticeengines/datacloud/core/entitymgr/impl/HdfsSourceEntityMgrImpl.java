@@ -1,9 +1,12 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -216,6 +219,31 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } else {
             return TableUtils.createTable(yarnConfiguration, source.getSourceName(), paths.toArray(new String[paths.size()]),
                     source.getPrimaryKey());
+        }
+    }
+
+    @Override
+    public Schema getAvscSchemaAtVersion(String sourceName, String version) {
+        String path = hdfsPathBuilder.constructSchemaFile(sourceName, version).toString();
+        boolean avscExists;
+        try {
+            avscExists = HdfsUtils.fileExists(yarnConfiguration, path);
+        } catch (IOException e) {
+            log.error("Failed to check existence of avsc file.", e);
+            return null;
+        }
+        if (avscExists) {
+            Schema.Parser parser = new Schema.Parser();
+            try {
+                InputStream is = HdfsUtils.getInputStream(yarnConfiguration, path);
+                return parser.parse(is);
+            } catch (Exception e) {
+                log.error("Failed to extract schema from avsc file " + path, e);
+                return null;
+            }
+        } else {
+            log.warn("AVSC for source " + sourceName + " at version " + version + " does not exist.");
+            return null;
         }
     }
 
