@@ -223,4 +223,31 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(category, Category.ACCOUNT_INFORMATION.getName());
     }
 
+    @Test(groups = "functional")
+    private void createRatingForModel()
+    {
+        ModelSummary testSummary = modelSummaryService.getModelSummary(summary1.getId());
+        assertEquals(summary1.getId(), testSummary.getId());
+        assertEquals(testSummary.getHasBucketMetadata(), Boolean.FALSE);
+
+        BucketMetadata BUCKET_METADATA_A = new BucketMetadata();
+        final Double LIFT_1 = 3.4;
+        final int NUM_LEADS_BUCKET_1 = 28588;
+        BUCKET_METADATA_A.setBucket(BucketName.A);
+        BUCKET_METADATA_A.setNumLeads(NUM_LEADS_BUCKET_1);
+        BUCKET_METADATA_A.setLeftBoundScore(95);
+        BUCKET_METADATA_A.setRightBoundScore(99);
+        BUCKET_METADATA_A.setLift(LIFT_1);
+        final Double LIFT_2 = 2.4;
+        final int NUM_LEADS_BUCKET_2 = 14534;
+        BucketMetadata BUCKET_METADATA_B = new BucketMetadata();
+        BUCKET_METADATA_B.setBucket(BucketName.B);
+        BUCKET_METADATA_B.setNumLeads(NUM_LEADS_BUCKET_2);
+        BUCKET_METADATA_B.setLeftBoundScore(85);
+        BUCKET_METADATA_B.setRightBoundScore(95);
+        BUCKET_METADATA_B.setLift(LIFT_2);
+        bucketedScoreService.createBucketMetadatas(summary1.getId(), Arrays.asList(BUCKET_METADATA_A, BUCKET_METADATA_B));
+        ModelSummary newSummary = modelSummaryService.getModelSummary(summary1.getId());
+        assertTrue(newSummary.getHasBucketMetadata());
+    }
 }
