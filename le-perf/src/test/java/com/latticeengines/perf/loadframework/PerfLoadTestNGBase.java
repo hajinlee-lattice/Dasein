@@ -90,8 +90,12 @@ public class PerfLoadTestNGBase {
             inputStream = new FileInputStream(new File(propertyPath));
             String props = IOUtils.toString(inputStream);
             String apiTomcat = System.getenv("API_TOMCAT");
-            if (StringUtils.isNoneEmpty(apiTomcat)) {
-                props = props.replace("${API_TOMCAT}", System.getenv("API_TOMCAT"));
+            if (StringUtils.isNotBlank(apiTomcat)) {
+                props = props.replace("${API_TOMCAT}", apiTomcat);
+            }
+            String privateLb = System.getenv("AWS_PRIVATE_LB");
+            if (StringUtils.isNotBlank(apiTomcat)) {
+                props = props.replace("${AWS_PRIVATE_LB}", privateLb);
             }
             prop.load(IOUtils.toInputStream(props));
         } catch (FileNotFoundException e) {
