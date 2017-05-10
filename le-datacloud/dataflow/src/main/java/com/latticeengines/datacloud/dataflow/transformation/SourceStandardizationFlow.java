@@ -329,6 +329,7 @@ public class SourceStandardizationFlow
         if (renameFields != null && renameFields.length > 0) {
             for (String[] renameFieldMap : renameFields) {
                 source = source.rename(new FieldList(renameFieldMap[0]), new FieldList(renameFieldMap[1]));
+                source = source.retain(new FieldList(source.getFieldNames()));
             }
         }
         return source;
