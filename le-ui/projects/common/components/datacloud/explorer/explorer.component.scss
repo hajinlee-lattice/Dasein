@@ -21,18 +21,29 @@
         background-color: rgba($color, $opacity);
     }
     .enrichment-wizard-category-pagination {
-        opacity: 0;
         .pd-pagination {
-            position: absolute;
-            left: 0.9em;
-            right: 1.9em;
-            margin-top: 3.75em;
-            z-index: 1;
+            text-align: right;
+            padding-right: 1em;
         }
         .pd-pagination-center,
         .pd-pagination-start,
         .pd-pagination-end {
             display: none;
+        }
+        .button {
+            padding: 0.1em 1em;
+        }
+    }
+    :not(.section-insights) .enrichment-wizard-category-pagination {
+        opacity: 0;
+        .pd-pagination {
+            text-align: none;
+            margin: 0;
+            position: absolute;
+            left: -1em;
+            right: -1em;
+            margin-top: 3.75em;
+            z-index: 1;
         }
         .pd-pagination-prev {
             float: left;
@@ -44,8 +55,10 @@
             padding: 0.25em 0.75em;
         }
     }
-    .carousel-container:hover {
-        .enrichment-wizard-category-pagination {
+    .carousel-container {
+        position: relative;
+        
+        &:hover .enrichment-wizard-category-pagination {
             opacity: 1;
         }
     }
