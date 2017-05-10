@@ -94,7 +94,7 @@ public class PerfLoadTestNGBase {
                 props = props.replace("${API_TOMCAT}", apiTomcat);
             }
             String privateLb = System.getenv("AWS_PRIVATE_LB");
-            if (StringUtils.isNotBlank(apiTomcat)) {
+            if (StringUtils.isNotBlank(privateLb)) {
                 props = props.replace("${AWS_PRIVATE_LB}", privateLb);
             }
             prop.load(IOUtils.toInputStream(props));
