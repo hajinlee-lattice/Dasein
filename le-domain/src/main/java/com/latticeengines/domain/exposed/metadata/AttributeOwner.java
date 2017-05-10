@@ -31,18 +31,18 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @MappedSuperclass
 @EntityListeners(AttributeOwnerListener.class)
 public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     protected Long pid;
-    
+
     @Column(name = "NAME", unique = false, nullable = false)
     @JsonProperty("name")
     protected String name;
-    
+
     @Column(name = "DISPLAY_NAME", nullable = false)
     @JsonProperty("display_name")
     protected String displayName;
@@ -50,7 +50,7 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
     @JsonProperty("attributes")
     @Transient
     private List<String> attributes = new ArrayList<>();
-    
+
     @Column(name = "ATTRIBUTES", nullable = false, length = 2048)
     @JsonIgnore
     private String attributesAsString;
@@ -94,13 +94,12 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
     public Table getTable() {
         return table;
     }
-    
+
     @JsonIgnore
     public void setTable(Table table) {
         this.table = table;
     }
 
-    
     public List<String> getAttributes() {
         return attributes;
     }
@@ -140,12 +139,12 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
     public void addAttribute(String attribute) {
         attributes.add(attribute);
     }
-    
+
     @JsonIgnore
     public String getAttributesAsStr() {
         return attributesAsString;
     }
-    
+
     @JsonIgnore
     public void setAttributesAsStr(String attributesAsString) {
         this.attributesAsString = attributesAsString;
