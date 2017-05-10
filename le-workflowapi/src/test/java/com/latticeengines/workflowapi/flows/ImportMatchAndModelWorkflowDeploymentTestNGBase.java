@@ -81,6 +81,12 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         setupHdfs(DEMO_CUSTOMERSPACE);
     }
 
+    protected void cleanUpAfterWorkflow() throws Exception {
+        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
+        cleanCamille(DEMO_CUSTOMERSPACE);
+        cleanHdfs(DEMO_CUSTOMERSPACE);
+    }
+
     protected SourceFile uploadFile(String resourcePath, SchemaInterpretation schema) {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();

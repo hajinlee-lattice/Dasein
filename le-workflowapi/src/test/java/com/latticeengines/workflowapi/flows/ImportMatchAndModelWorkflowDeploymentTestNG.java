@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertNotEquals;
 
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -19,6 +20,11 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupForWorkflow();
+    }
+
+    @AfterClass(groups = "deployment")
+    public void cleanup() throws Exception {
+        cleanUpAfterWorkflow();
     }
 
     @Test(groups = "deployment", enabled = true)

@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -53,6 +54,11 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupForPMMLModel();
+    }
+
+    @AfterClass(groups = "deployment")
+    public void cleanup() throws Exception {
+        cleanUpAfterPMMLModel();
     }
 
     @Test(groups = "deployment", dataProvider = "pmmlFileNameProvider", enabled = true)

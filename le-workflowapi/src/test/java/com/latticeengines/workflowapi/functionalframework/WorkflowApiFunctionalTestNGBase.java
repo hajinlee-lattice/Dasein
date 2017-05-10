@@ -269,6 +269,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
         spaceInfo.properties.displayName = "";
         spaceInfo.properties.description = "";
         spaceInfo.featureFlags = "";
+        baton.deleteTenant(customerSpace.getContractId(), customerSpace.getTenantId());
         baton.createTenant(customerSpace.getContractId(), //
                 customerSpace.getTenantId(), //
                 customerSpace.getSpaceId(), //
@@ -297,6 +298,17 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
         String podId = CamilleEnvironment.getPodId();
         HdfsUtils.rmdir(yarnConfiguration, "/Pods/" + podId + "/Contracts/" + customerSpace.getContractId());
         HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/" + customerSpace.toString());
+    }
+
+    protected void cleanHdfs(CustomerSpace customerSpace) throws Exception {
+        String podId = CamilleEnvironment.getPodId();
+        HdfsUtils.rmdir(yarnConfiguration, "/Pods/" + podId + "/Contracts/" + customerSpace.getContractId());
+        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/" + customerSpace.toString());
+    }
+
+    protected void cleanCamille(CustomerSpace customerSpace) throws Exception {
+        BatonService baton = new BatonServiceImpl();
+        baton.deleteTenant(customerSpace.getContractId(), customerSpace.getTenantId());
     }
 
     protected void waitForCompletion(WorkflowExecutionId workflowId) throws Exception {

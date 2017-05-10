@@ -35,6 +35,12 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
         setupHdfs(PMML_CUSTOMERSPACE);
     }
 
+    protected void cleanUpAfterPMMLModel() throws Exception {
+        deleteTenantByRestCall(PMML_CUSTOMERSPACE.toString());
+        cleanCamille(PMML_CUSTOMERSPACE);
+        cleanHdfs(PMML_CUSTOMERSPACE);
+    }
+
     protected void setupFiles(CustomerSpace customerSpace, String pmmlFileName, String pivotFileName) throws Exception {
         URL pmmlFile = ClassLoader
                 .getSystemResource("com/latticeengines/workflowapi/flows/leadprioritization/pmmlfiles/" + pmmlFileName);

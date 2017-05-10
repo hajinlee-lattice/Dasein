@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -79,6 +80,11 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         setupForWorkflow();
         setupTables();
         setupModels();
+    }
+
+    @AfterClass(groups = "deployment")
+    public void cleanup() throws Exception {
+        cleanUpAfterWorkflow();
     }
 
     private void setupTables() throws IOException {
