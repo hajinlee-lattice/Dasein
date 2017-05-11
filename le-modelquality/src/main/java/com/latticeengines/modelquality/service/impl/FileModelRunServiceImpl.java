@@ -95,7 +95,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
             schemaInterpretation = SchemaInterpretation.SalesforceLead;
         }
 
-        Resource resource = null;
+        Resource resource;
         try (HdfsResourceLoader resourceLoader = new HdfsResourceLoader(FileSystem.newInstance(yarnConfiguration))) {
             resource = resourceLoader.getResource(dataSet.getTrainingSetHdfsPath());
         } catch (IOException ex) {
@@ -111,7 +111,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         String fileName = StringUtils.substringAfterLast(dataSet.getTrainingSetHdfsPath(), "/");
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         @SuppressWarnings("rawtypes")
-        ResponseDocument response = restTemplate.postForObject(String
+        ResponseDocument response = getRestTemplate().postForObject(String
                 .format("%s/pls/models/uploadfile/unnamed?displayName=%s", getDeployedRestAPIHostPort(), fileName),
                 requestEntity, ResponseDocument.class);
         SourceFile sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
@@ -125,7 +125,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     public void resolveMetadata(ModelingParameters parameters, SourceFile sourceFile) {
 
         @SuppressWarnings("rawtypes")
-        ResponseDocument response = restTemplate.postForObject(
+        ResponseDocument response = getRestTemplate().postForObject(
                 String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getDeployedRestAPIHostPort(),
                         sourceFile.getName(), sourceFile.getSchemaInterpretation().name()),
                 parameters, ResponseDocument.class);
@@ -140,7 +140,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         }
         log.info("the fieldmappings are: " + mappings.getFieldMappings());
 
-        restTemplate.postForObject(String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s",
+        getRestTemplate().postForObject(String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s",
                 getDeployedRestAPIHostPort(), sourceFile.getName()), mappings, Void.class);
     }
 
@@ -159,7 +159,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     @SuppressWarnings("rawtypes")
     private void createModel(ModelingParameters parameters) {
         ResponseDocument response;
-        response = restTemplate.postForObject(
+        response = getRestTemplate().postForObject(
                 String.format("%s/pls/models/%s", getDeployedRestAPIHostPort(), parameters.getName()), parameters,
                 ResponseDocument.class);
         String modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
@@ -189,7 +189,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         // Wait for model downloader
         while (true) {
             @SuppressWarnings("unchecked")
-            List<Object> summaries = restTemplate.getForObject( //
+            List<Object> summaries = getRestTemplate().getForObject( //
                     String.format("%s/pls/modelsummaries", getDeployedRestAPIHostPort()), List.class);
             for (Object rawSummary : summaries) {
                 ModelSummary summary = new ObjectMapper().convertValue(rawSummary, ModelSummary.class);
@@ -203,7 +203,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
             Thread.sleep(1000);
         }
 
-        Object rawSummary = restTemplate.getForObject(
+        Object rawSummary = getRestTemplate().getForObject(
                 String.format("%s/pls/modelsummaries/%s", getDeployedRestAPIHostPort(), found.getId()), Object.class);
         return JsonUtils.convertValue(rawSummary, ModelSummary.class);
     }
@@ -211,7 +211,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     private JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
 
         int retryOnException = 10;
-        Job job = null;
+        Job job;
         while (true) {
             try {
                 job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);

@@ -45,9 +45,8 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
     protected MetricService metricService;
 
     protected Environment env;
-    protected RestTemplate restTemplate;
-    protected AuthorizationHeaderHttpRequestInterceptor authHeaderInterceptor = new AuthorizationHeaderHttpRequestInterceptor(
-            "");
+    private static final ThreadLocal<RestTemplate> restTemplateContext = new ThreadLocal<>();
+    private static final ThreadLocal<AuthorizationHeaderHttpRequestInterceptor> authHeaderContext = new ThreadLocal<>();
 
     @Override
     public void setEnvironment(Environment env) {
@@ -87,12 +86,22 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
                 : deployedHostPort;
     }
 
-    private void setup() throws Exception {
-        restTemplate = HttpClientUtils.newRestTemplate();
+    protected RestTemplate getRestTemplate() {
+        return restTemplateContext.get();
+    }
+
+    protected AuthorizationHeaderHttpRequestInterceptor getAuthHeaderInterceptor() {
+        return authHeaderContext.get();
+    }
+
+    private UserDocument setup() throws Exception {
+        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+        restTemplateContext.set(restTemplate);
+        authHeaderContext.set(new AuthorizationHeaderHttpRequestInterceptor(""));
         Tenant tenant = new Tenant();
         tenant.setId(env.tenant);
         tenant.setName(CustomerSpace.parse(env.tenant).getTenantId());
-        loginAndAttach(env.username, env.password, tenant);
+        return loginAndAttach(env.username, env.password, tenant);
     }
 
     protected UserDocument loginAndAttach(String username, String password, Tenant tenant) {
@@ -101,11 +110,14 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
         creds.setPassword(DigestUtils.sha256Hex(password));
         String deployedHostPort = getDeployedRestAPIHostPort();
 
-        LoginDocument doc = restTemplate.postForObject(deployedHostPort + "/pls/login", creds, LoginDocument.class);
-        authHeaderInterceptor.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { authHeaderInterceptor }));
+        LoginDocument doc = getRestTemplate().postForObject(deployedHostPort + "/pls/login", creds,
+                LoginDocument.class);
 
-        UserDocument userDocument = restTemplate.postForObject(deployedHostPort + "/pls/attach", tenant,
+        getAuthHeaderInterceptor().setAuthValue(doc.getData());
+        getRestTemplate()
+                .setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { getAuthHeaderInterceptor() }));
+
+        UserDocument userDocument = getRestTemplate().postForObject(deployedHostPort + "/pls/attach", tenant,
                 UserDocument.class);
         log.info("Log in user " + username + " to tenant " + tenant.getId() + " through REST call.");
         return userDocument;
@@ -114,7 +126,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
     protected void cleanup() {
         try {
             String deployedHostPort = getDeployedRestAPIHostPort();
-            restTemplate.getForObject(deployedHostPort + "/pls/logout", Object.class);
+            getRestTemplate().getForObject(deployedHostPort + "/pls/logout", Object.class);
         } catch (Exception ex) {
             log.warn("Failed to logout!");
         }
@@ -134,13 +146,11 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
                 runModel(modelRun);
                 modelRun.setStatus(ModelRunStatus.COMPLETED);
                 modelRunEntityMgr.update(modelRun);
-
             } catch (Exception ex) {
                 modelRun.setStatus(ModelRunStatus.FAILED);
                 modelRun.setErrorMessage(ex.getMessage());
                 modelRunEntityMgr.update(modelRun);
                 log.error("Failed!", ex);
-
             } finally {
                 cleanup();
             }
