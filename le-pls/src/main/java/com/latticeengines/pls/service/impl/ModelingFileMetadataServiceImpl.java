@@ -4,6 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
+import com.latticeengines.domain.exposed.modeling.ModelingReservedField;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
@@ -131,6 +134,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName, headerFields, true);
         ValidateFileHeaderUtils.checkForDuplicateHeaders(attributes, fileDisplayName, headerFields);
+        Collection<String> reservedWords = Arrays.asList(new String[]{ModelingReservedField.Rating.displayName});
+        ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords);
         return stream;
     }
 

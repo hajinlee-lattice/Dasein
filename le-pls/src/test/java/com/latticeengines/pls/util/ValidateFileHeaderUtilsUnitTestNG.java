@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingReservedField;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 
 public class ValidateFileHeaderUtilsUnitTestNG {
@@ -151,7 +152,8 @@ public class ValidateFileHeaderUtilsUnitTestNG {
     @DataProvider(name = "reservedNames")
     public Object[][] reservedNames() {
         return new Object[][] { new Object[] { ScoreResultField.Percentile.displayName },
-                new Object[] { ScoreResultField.Rating.displayName } };
+                new Object[] { ScoreResultField.Rating.displayName },
+                new Object[] { ModelingReservedField.Rating.displayName } };
     }
 
 }
