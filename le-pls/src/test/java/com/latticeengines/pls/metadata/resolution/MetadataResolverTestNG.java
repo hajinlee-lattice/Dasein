@@ -98,6 +98,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(table.getAttribute(InterfaceName.Country).getDisplayName(), "Billing Country");
         assertEquals(table.getAttribute(InterfaceName.CompanyName).getDisplayName(), "ACCOUNT Name");
         assertEquals(table.getAttribute(InterfaceName.LastModifiedDate).getDisplayName(), "Last Modified Date");
+        assertEquals(table.getAttribute(InterfaceName.IsClosed).getDisplayName(), "Is Closed");
+        assertEquals(table.getAttribute(InterfaceName.StageName).getDisplayName(), "Stage");
         assertNull(table.getAttribute(InterfaceName.AnnualRevenue));
 
         Attribute attribute = table.getAttribute("Some_Column");
@@ -124,6 +126,12 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(attribute.getPhysicalDataType(), UserDefinedType.DATE.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getLogicalDataType(), LogicalDataType.Date);
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_YEAR);
+        attribute = table.getAttribute("IsClosed");
+        assertEquals(attribute.getApprovedUsage(), Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE));
+        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_BOOLEAN);
+        attribute = table.getAttribute("StageName");
+        assertEquals(attribute.getApprovedUsage(), Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE));
+        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_ALPHA);
 
         for (Attribute a : table.getAttributes()) {
             assertNotEquals(a.getTags(), 0);

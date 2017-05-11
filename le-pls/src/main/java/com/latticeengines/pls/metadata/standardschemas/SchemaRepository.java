@@ -367,6 +367,24 @@ public class SchemaRepository {
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
+        table.addAttribute(attr("IsClosed") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ISCLOSED", "IS CLOSED", "CLOSED" })) //
+                .type(Schema.Type.BOOLEAN) //
+                .interfaceName(InterfaceName.IsClosed) //
+                .logicalType(LogicalDataType.Opportunity) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr("StageName") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "STAGE NAME", "STAGE" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.StageName) //
+                .logicalType(LogicalDataType.Opportunity) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
         table.addAttribute(attr("PhoneNumber") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
                 .type(Schema.Type.STRING) //
