@@ -92,7 +92,7 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
                 ClassLoader.getSystemResource(RESOURCE_BASE + "/pivotvalues.csv").getPath(), hdfsPath);
         hdfsPath += "/pivotvalues.csv";
 
-        Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
+        Tenant t1 = tenantEntityMgr.findByTenantId(customerSpace1);
         Module module = new Module();
         module.setName("M1");
         module.setTenant(t1);
@@ -108,13 +108,13 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
 
         Boolean res = restTemplate.postForObject( //
                 String.format("%s/metadata/customerspaces/%s/modules/%s/artifacts/%s", getRestAPIHostPort(),
-                        CUSTOMERSPACE1, "module11", "pivotfile"), //
+                        customerSpace1, "module11", "pivotfile"), //
                 pivotMappingFile, Boolean.class);
         assertTrue(res);
 
         Artifact artifact = restTemplate.getForObject( //
                 String.format("%s/metadata/customerspaces/%s/artifactpath?file=%s", getRestAPIHostPort(),
-                        CUSTOMERSPACE1, hdfsPath), Artifact.class);
+                        customerSpace1, hdfsPath), Artifact.class);
         assertEquals(artifact.getPath(), hdfsPath);
     }
 

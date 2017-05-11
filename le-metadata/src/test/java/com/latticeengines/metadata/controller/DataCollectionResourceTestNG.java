@@ -45,16 +45,16 @@ public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
         DATA_COLLECTION.setTables(Collections.singletonList(TABLE_1));
 
         System.out.println("Data collection is: " + JsonUtils.serialize(DATA_COLLECTION));
-        dataCollectionProxy.createDataCollection(CUSTOMERSPACE1, DATA_COLLECTION);
+        dataCollectionProxy.createDataCollection(customerSpace1, DATA_COLLECTION);
 
-        DataCollection retrieved = dataCollectionProxy.getDataCollectionByType(CUSTOMERSPACE1,
+        DataCollection retrieved = dataCollectionProxy.getDataCollectionByType(customerSpace1,
                 DATA_COLLECTION.getType());
         assertNotNull(retrieved);
         assertEquals(retrieved.getTables().size(), 2);
         assertNotNull(retrieved.getTable(SchemaInterpretation.BucketedAccountMaster));
         assertEquals(retrieved.getType(), DataCollectionType.Segmentation);
 
-        retrieved = dataCollectionProxy.getDataCollectionByType(CUSTOMERSPACE1, DATA_COLLECTION.getType());
+        retrieved = dataCollectionProxy.getDataCollectionByType(customerSpace1, DATA_COLLECTION.getType());
         assertNotNull(retrieved);
         assertEquals(retrieved.getTables().size(), 2);
         assertNotNull(retrieved.getTable(SchemaInterpretation.BucketedAccountMaster));

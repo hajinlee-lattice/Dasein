@@ -43,11 +43,11 @@ public class ModuleResourceTestNG extends MetadataFunctionalTestNGBase {
         @SuppressWarnings("rawtypes")
         ResponseDocument response = restTemplate.postForObject( //
                 String.format("%s/metadata/customerspaces/%s/artifacttype/%s?file=%s", getRestAPIHostPort(),
-                        CUSTOMERSPACE1, ArtifactType.PivotMapping, hdfsPath), //
+                        customerSpace1, ArtifactType.PivotMapping, hdfsPath), //
                 null, ResponseDocument.class);
         assertTrue(response.isSuccess());
 
-        Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
+        Tenant t1 = tenantEntityMgr.findByTenantId(customerSpace1);
         Module module = new Module();
         module.setName("M1");
         module.setTenant(t1);
@@ -60,12 +60,12 @@ public class ModuleResourceTestNG extends MetadataFunctionalTestNGBase {
 
         Boolean res = restTemplate.postForObject( //
                 String.format("%s/metadata/customerspaces/%s/modules/%s/artifacts/%s",
-                        getRestAPIHostPort(), CUSTOMERSPACE1, "module11", "pivotfile"), //
+                        getRestAPIHostPort(), customerSpace1, "module11", "pivotfile"), //
                         pivotMappingFile, Boolean.class);
         assertTrue(res);
 
         Module m = restTemplate.getForObject(String.format("%s/metadata/customerspaces/%s/modules/%s",
-                        getRestAPIHostPort(), CUSTOMERSPACE1, "module11"), Module.class);
+                        getRestAPIHostPort(), customerSpace1, "module11"), Module.class);
         System.out.println(m);
         assertEquals(m.getArtifacts().size(), 1);
 

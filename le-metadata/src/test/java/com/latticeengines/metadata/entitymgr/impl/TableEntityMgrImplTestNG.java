@@ -37,8 +37,8 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void tearDown() {
-        metadataService.deleteTable(CustomerSpace.parse(CUSTOMERSPACE2), TABLE2);
-        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE2));
+        metadataService.deleteTable(CustomerSpace.parse(customerSpace2), TABLE2);
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace2));
         Table t = tableEntityMgr.findByName(TABLE2);
         assertNull(t);
     }
@@ -46,10 +46,10 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCreateRetry() {
         try {
-            Table table = createTable(tenantEntityMgr.findByTenantId(CUSTOMERSPACE2), TABLE2,
+            Table table = createTable(tenantEntityMgr.findByTenantId(customerSpace2), TABLE2,
                     tableLocation2.append(TABLE2).toString());
             table.setDisplayName(null); // this will fail a NOT NULL constraint
-            metadataService.createTable(CustomerSpace.parse(CUSTOMERSPACE1), table);
+            metadataService.createTable(CustomerSpace.parse(customerSpace1), table);
         } catch (Exception e) {
             Throwable inner = e.getCause();
             assertTrue(inner.getMessage().contains("DISPLAY_NAME"));
@@ -70,7 +70,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
         Table table = tableEntityMgr.findByName(tableName);
         addDataRules(table);
-        metadataService.updateTable(CustomerSpace.parse(CUSTOMERSPACE1), table);
+        metadataService.updateTable(CustomerSpace.parse(customerSpace1), table);
         validateTable(table);
 
         Table retrievedTable = tableEntityMgr.findByName(table.getName());
@@ -125,7 +125,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @DataProvider(name = "tableProvider")
     public Object[][] tableProvider() {
-        return new Object[][] { { CUSTOMERSPACE1, TABLE1 }, { CUSTOMERSPACE2, TABLE1 }, };
+        return new Object[][] { {customerSpace1, TABLE1 }, {customerSpace2, TABLE1 }, };
     }
 
 }

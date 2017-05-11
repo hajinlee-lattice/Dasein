@@ -22,7 +22,7 @@ import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGB
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
-@Component("registerAccountMasterMetadataTableTestNG")
+@Component
 public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(RegisterAccountMasterMetadataTableTestNG.class);

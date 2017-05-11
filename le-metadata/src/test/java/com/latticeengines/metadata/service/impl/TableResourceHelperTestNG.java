@@ -4,8 +4,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
 
-@Component
 public class TableResourceHelperTestNG extends MetadataFunctionalTestNGBase {
 
     @Autowired

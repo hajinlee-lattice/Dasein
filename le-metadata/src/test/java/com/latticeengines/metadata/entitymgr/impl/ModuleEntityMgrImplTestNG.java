@@ -31,7 +31,7 @@ public class ModuleEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void getByModuleName() {
-        Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
+        Tenant t1 = tenantEntityMgr.findByTenantId(customerSpace1);
         MultiTenantContext.setTenant(t1);
         Module module = new Module();
         module.setName("M1");
@@ -49,19 +49,19 @@ public class ModuleEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         pivotFile.setName("PivotFile.txt");
         module.addArtifact(pivotFile);
 
-        artifactService.createArtifact(CUSTOMERSPACE1, "M1", pmmlFile.getName(), pmmlFile);
-        module = moduleService.getModuleByName(CUSTOMERSPACE1, "M1");
+        artifactService.createArtifact(customerSpace1, "M1", pmmlFile.getName(), pmmlFile);
+        module = moduleService.getModuleByName(customerSpace1, "M1");
         assertNotNull(module);
         assertEquals(module.getArtifacts().size(), 1);
 
-        artifactService.createArtifact(CUSTOMERSPACE1, "M1", pivotFile.getName(), pivotFile);
-        module = moduleService.getModuleByName(CUSTOMERSPACE1, "M1");
+        artifactService.createArtifact(customerSpace1, "M1", pivotFile.getName(), pivotFile);
+        module = moduleService.getModuleByName(customerSpace1, "M1");
         assertNotNull(module);
         assertEquals(module.getArtifacts().size(), 2);
 
-        Tenant t2 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE2);
+        Tenant t2 = tenantEntityMgr.findByTenantId(customerSpace2);
         MultiTenantContext.setTenant(t2);
-        module = moduleService.getModuleByName(CUSTOMERSPACE2, "M1");
+        module = moduleService.getModuleByName(customerSpace2, "M1");
         assertNull(module);
     }
 }

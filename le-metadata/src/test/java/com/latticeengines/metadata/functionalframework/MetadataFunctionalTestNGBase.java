@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.functionalframework;
 
-import com.latticeengines.metadata.service.TenantPurgeService;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,13 +14,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
+import org.testng.annotations.Listeners;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -33,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Cardinality;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRelationship;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -40,20 +40,24 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.hive.util.HiveUtils;
-import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.metadata.service.MetadataService;
+import com.latticeengines.metadata.service.TenantPurgeService;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
+import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:metadata-aspects-context.xml" })
+@Listeners({ GlobalAuthCleanupTestListener.class })
 public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private static final Logger log = Logger.getLogger(MetadataFunctionalTestNGBase.class);
 
-    protected static final String CUSTOMERSPACE1 = "T1.T1.T1";
-    protected static final String CUSTOMERSPACE2 = "T2.T2.T2";
+    protected String customerSpace1;
+    protected String customerSpace2;
     protected static final String TABLE1 = "Account1";
     protected static final String TABLE2 = "Account2";
     protected static final String TABLE_RESOURCE1 = "com/latticeengines/metadata/controller/Account1";
@@ -88,6 +92,12 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Autowired
     protected TableTypeHolder tableTypeHolder;
 
+    @Autowired
+    private GlobalAuthFunctionalTestBed globalAuthFunctionalTestBed;
+
+    @Autowired
+    private MetadataService metadataService;
+
     protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
 
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
@@ -100,16 +110,20 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     }
 
     public void setup() {
+        globalAuthFunctionalTestBed.bootstrap(2);
+        customerSpace1 = globalAuthFunctionalTestBed.getTestTenants().get(0).getId();
+        customerSpace2 = globalAuthFunctionalTestBed.getTestTenants().get(1).getId();
+
         tableLocation1 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(CUSTOMERSPACE1), "x.y.z");
+                CustomerSpace.parse(customerSpace1), "x.y.z");
         tableLocation2 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(CUSTOMERSPACE2), "x.y.z");
+                CustomerSpace.parse(customerSpace2), "x.y.z");
 
         if (hiveEnabled) {
             dropAllHiveTables();
         }
         copyExtractsToHdfs();
-        setupTenantsAndTables();
+        setupTables();
     }
 
     private void copyExtractsToHdfs() {
@@ -131,37 +145,23 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         }
     }
 
-    private void setupTenantsAndTables() {
-        log.info("setupTenantsAndTables");
+    private void setupTables() {
+        log.info("setupTables");
 
-        Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
-        if (t1 != null) {
-            tenantPurgeService.purge(t1);
-            tenantEntityMgr.delete(t1);
-        }
-        Tenant t2 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE2);
-        if (t2 != null) {
-            tenantPurgeService.purge(t2);
-            tenantEntityMgr.delete(t2);
-        }
-
-        Tenant tenant1 = createTenant(CUSTOMERSPACE1);
-        tenantEntityMgr.create(tenant1);
-
-        Tenant tenant2 = createTenant(CUSTOMERSPACE2);
-        tenantEntityMgr.create(tenant2);
+        Tenant tenant1 = tenantEntityMgr.findByTenantId(customerSpace1);
+        Tenant tenant2 = tenantEntityMgr.findByTenantId(customerSpace2);
 
         // Tenant1, Type=DATATABLE
         Table tbl = createTable(tenant1, TABLE1, tableLocation1.append(TABLE1).toString());
-        createTableByRestCall(tenant1, tbl, false);
+        createTable(tenant1, tbl, false);
         // Tenant1, Type=IMPORTTABLE
-        createTableByRestCall(tenant1, tbl, true);
+        createTable(tenant1, tbl, true);
 
         tbl = createTable(tenant2, TABLE1, tableLocation1.append(TABLE1).toString());
         // Tenant2, Type=DATATABLE
-        createTableByRestCall(tenant2, tbl, false);
+        createTable(tenant2, tbl, false);
         // Tenant2, Type=IMPORTTABLE
-        createTableByRestCall(tenant2, tbl, true);
+        createTable(tenant2, tbl, true);
     }
 
     private void dropAllHiveTables() {
@@ -195,17 +195,13 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         }
     }
 
-    private void createTableByRestCall(Tenant tenant, Table table, boolean isImport) {
-        String urlType = "tables";
+    private void createTable(Tenant tenant, Table table, boolean isImport) {
         if (isImport) {
-            urlType = "importtables";
+            table.setTableType(TableType.IMPORTTABLE);
+        } else {
+            table.setTableType(TableType.DATATABLE);
         }
-
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        String url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), table.getTenant()
-                .getId(), urlType, table.getName());
-        restTemplate.postForLocation(url, table);
+        metadataService.createTable(CustomerSpace.parse(tenant.getId()), table);
     }
 
     protected Tenant createTenant(String customerSpace) {

@@ -18,6 +18,8 @@
         <le.network.version>3.6.0-SNAPSHOT</le.network.version>
         <le.dataplatform.version>3.6.0-SNAPSHOT</le.dataplatform.version>
         <le.proxy.version>3.6.0-SNAPSHOT</le.proxy.version>
+        <le.testfwk.version>3.6.0-SNAPSHOT</le.testfwk.version>
+        <le.remote.version>3.6.0-SNAPSHOT</le.remote.version>
     </properties>
 
     <parent>
@@ -211,6 +213,25 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${le.remote.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
             <version>${le.baton.version}</version>
             <classifier>intf</classifier>
@@ -251,6 +272,7 @@
             <artifactId>avro</artifactId>
             <version>${avro.version}</version>
         </dependency>
+
     </dependencies>
 
 </project>

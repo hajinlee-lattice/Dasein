@@ -31,7 +31,7 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
-        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE1));
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace1));
     }
 
     @Test(groups = "functional")

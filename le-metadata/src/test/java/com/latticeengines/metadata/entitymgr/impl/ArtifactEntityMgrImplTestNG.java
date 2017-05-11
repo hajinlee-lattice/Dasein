@@ -32,7 +32,7 @@ public class ArtifactEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void create() {
-        Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
+        Tenant t1 = tenantEntityMgr.findByTenantId(customerSpace1);
         MultiTenantContext.setTenant(t1);
         Module module = new Module();
         module.setName("M1");
@@ -50,13 +50,13 @@ public class ArtifactEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         pivotFile.setName("PivotFile.txt");
         module.addArtifact(pivotFile);
         
-        artifactService.createArtifact(CUSTOMERSPACE1, "M1", pmmlFile.getName(), pmmlFile);
-        artifactService.createArtifact(CUSTOMERSPACE1, "M1", pivotFile.getName(), pivotFile);
+        artifactService.createArtifact(customerSpace1, "M1", pmmlFile.getName(), pmmlFile);
+        artifactService.createArtifact(customerSpace1, "M1", pivotFile.getName(), pivotFile);
 
         List<Artifact> artifacts = artifactEntityMgr.findAll();
         assertEquals(artifacts.size(), 2);
 
-        Tenant t2 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE2);
+        Tenant t2 = tenantEntityMgr.findByTenantId(customerSpace2);
         MultiTenantContext.setTenant(t2);
         artifacts = artifactEntityMgr.findAll();
         assertEquals(artifacts.size(), 0);

@@ -37,7 +37,7 @@ public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testColumnResults() {
         String modelId = "test123";
-        Tenant tenant1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
+        Tenant tenant1 = tenantEntityMgr.findByTenantId(customerSpace1);
 
         List<ColumnRuleResult> results = new ArrayList<>();
         results.add(generateColumnResult(modelId, tenant1));
@@ -67,7 +67,7 @@ public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testRowResults() {
         String modelId = "test123";
-        Tenant tenant1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
+        Tenant tenant1 = tenantEntityMgr.findByTenantId(customerSpace1);
 
         List<RowRuleResult> results = new ArrayList<>();
         results.add(generateRowResult(modelId, tenant1));

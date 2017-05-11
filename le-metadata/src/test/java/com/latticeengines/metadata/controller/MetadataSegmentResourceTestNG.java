@@ -43,7 +43,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
     public void setup() {
         super.setup();
         DATA_COLLECTION.setType(DataCollectionType.Segmentation);
-        restTemplate.postForObject(String.format(getRestAPIHostPort() + BASE_URL_DATA_COLLECTION, CUSTOMERSPACE1),
+        restTemplate.postForObject(String.format(getRestAPIHostPort() + BASE_URL_DATA_COLLECTION, customerSpace1),
                 DATA_COLLECTION, DataCollection.class);
         METADATA_SEGMENT_PROPERTY_1.setOption(MetadataSegmentPropertyName.NumAccounts.getName());
         METADATA_SEGMENT_PROPERTY_1.setValue(Integer.toString(NUM_ACCOUNTS));
@@ -64,11 +64,11 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void createMetadataSegment_assertCreated() {
-        restTemplate.postForObject(String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS, CUSTOMERSPACE1),
+        restTemplate.postForObject(String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS, customerSpace1),
                 METADATA_SEGMENT, MetadataSegment.class);
 
         MetadataSegment retrieved = restTemplate.getForObject(String.format(getRestAPIHostPort()
-                + BASE_URL_METADATA_SEGMENTS + "/name/%s", CUSTOMERSPACE1, METADATA_SEGMENT_NAME),
+                + BASE_URL_METADATA_SEGMENTS + "/name/%s", customerSpace1, METADATA_SEGMENT_NAME),
                 MetadataSegment.class);
         assertNotNull(retrieved);
         assertEquals(retrieved.getName(), METADATA_SEGMENT_NAME);
@@ -82,11 +82,11 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
     @SuppressWarnings("unchecked")
     @Test(groups = "functional", dependsOnMethods = "createMetadataSegment_assertCreated")
     public void deleteMetadataSegment_assertDeleted() {
-        restTemplate.delete(String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS + "/%s", CUSTOMERSPACE1,
+        restTemplate.delete(String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS + "/%s", customerSpace1,
                 METADATA_SEGMENT_NAME));
 
         List<MetadataSegment> retrieved = restTemplate.getForObject(
-                String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS + "/all", CUSTOMERSPACE1), List.class);
+                String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS + "/all", customerSpace1), List.class);
         assertEquals(retrieved.size(), 0);
     }
 }

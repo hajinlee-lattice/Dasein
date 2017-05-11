@@ -21,7 +21,7 @@ public class HiveTableDaoImplTestNG extends MetadataFunctionalTestNGBase {
     @BeforeClass(groups = "manual")
     public void setup() {
         super.setup();
-        tenant = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
+        tenant = tenantEntityMgr.findByTenantId(customerSpace1);
         MultiTenantContext.setTenant(tenant);
     }
 

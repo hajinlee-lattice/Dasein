@@ -39,25 +39,25 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void getTables() {
-        List<Table> tables = mdService.getTables(CustomerSpace.parse(CUSTOMERSPACE1));
+        List<Table> tables = mdService.getTables(CustomerSpace.parse(customerSpace1));
         assertEquals(tables.size(), 1);
     }
     
     @Test(groups = "functional", dependsOnMethods = { "getTables" })
     public void addStorageMechanism() {
-        Table table = mdService.getTables(CustomerSpace.parse(CUSTOMERSPACE1)).get(0);
+        Table table = mdService.getTables(CustomerSpace.parse(customerSpace1)).get(0);
         JdbcStorage jdbcStorage = new JdbcStorage();
         jdbcStorage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
         jdbcStorage.setTableNameInStorage("TABLE1_IN_REDSHIFT");
-        mdService.setStorageMechanism(CustomerSpace.parse(CUSTOMERSPACE1), table.getName(), jdbcStorage);
+        mdService.setStorageMechanism(CustomerSpace.parse(customerSpace1), table.getName(), jdbcStorage);
         
-        Table retrievedTable = mdService.getTables(CustomerSpace.parse(CUSTOMERSPACE1)).get(0);
+        Table retrievedTable = mdService.getTables(CustomerSpace.parse(customerSpace1)).get(0);
         JdbcStorage storageMechanism = (JdbcStorage) retrievedTable.getStorageMechanism();
         assertEquals(storageMechanism.getDatabaseName(), JdbcStorage.DatabaseName.REDSHIFT);
     }
 
     @DataProvider(name = "tableProvider")
     public Object[][] tableProvider() {
-        return new Object[][] { { CUSTOMERSPACE1, TABLE1 }, { CUSTOMERSPACE2, TABLE1 }, };
+        return new Object[][] { {customerSpace1, TABLE1 }, {customerSpace2, TABLE1 }, };
     }
 }

@@ -24,7 +24,7 @@ public class TableTagEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
-        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE2));
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace2));
     }
 
     @Test(groups = "functional")
