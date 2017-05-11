@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -124,7 +125,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
             dataFileWriter.create(schema, new File(avroFileName));
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(csvFileName)))) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(csvFileName), StandardCharsets.UTF_8))) {
                 CSVFormat format = LECSVFormat.format.withHeader(headers);
                 String line = reader.readLine(); // skip header
                 for (; (line = reader.readLine()) != null; lineNum++) {
