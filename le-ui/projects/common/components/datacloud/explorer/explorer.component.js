@@ -860,7 +860,8 @@ angular.module('common.datacloud.explorer', [
             } else {
                 var removeCategories = [
                     'Product',
-                    'Contact'
+                    'Contact',
+                    'Engagement'
                 ];
 
                 removeCategories.forEach(function(category) {
@@ -926,8 +927,8 @@ angular.module('common.datacloud.explorer', [
                             'SegmentChecked'
                         ];
 
-                    if (enrichment) { 
-                        if(vm.lookupMode) {
+                    if (enrichment) {
+                        if(!vm.lookupMode) {
                             map.forEach(function(key){
                                 item[key] = enrichment[key];
                             });
@@ -935,9 +936,10 @@ angular.module('common.datacloud.explorer', [
                             enrichment.NonNullCount = item.NonNullCount;
                         }
                         item.Hide = false;
-                    }
-                    if(!vm.searchFields(enrichment)) {
-                        item.Hide = true;
+                        if(!vm.searchFields(enrichment)) {
+                            item.Hide = true;
+                        }
+                        enrichment.Hide = item.Hide;
                     }
                 });
             }
