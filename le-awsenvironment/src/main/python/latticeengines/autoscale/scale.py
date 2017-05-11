@@ -26,7 +26,7 @@ def hookgroup_internal(app, stack):
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
         elif 'ScaleBack' in policy_name:
-            alarm = alarms[group + '-few-requests']
+            alarm = alarms[group + '-low-latency']
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
 
@@ -48,7 +48,7 @@ def hookecs_internal(app, stack):
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
         elif 'ScaleBack' in policy_name:
-            alarm = alarms[cluster + '-few-requests']
+            alarm = alarms[cluster + '-low-latency-2']
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
 
