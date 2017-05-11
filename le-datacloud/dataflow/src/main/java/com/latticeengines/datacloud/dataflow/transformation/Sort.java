@@ -45,7 +45,7 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
             source = source.addColumnWithFixedValue(DUMMY_GROUP, UUID.randomUUID().toString(), String.class);
             // find partition boundaries
             Node boundaries = sortAndDivide(source, parameters).renamePipe("boundaries").checkpoint("boundaries");
-            source = source.leftHashJoin(new FieldList(DUMMY_GROUP), boundaries, new FieldList(DUMMY_GROUP));
+            source = source.leftJoin(new FieldList(DUMMY_GROUP), boundaries, new FieldList(DUMMY_GROUP));
             // mark partition
             FieldMetadata sortingFm = source.getSchema(parameters.getSortingField());
             source = markPartition(source, parameters.getSortingField(), parameters.getPartitionField(),
@@ -58,8 +58,8 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
         }
     }
 
-    private Node sortAndDivide(Node node, SorterParameters parameters) {
-        node = node.retain(new FieldList(parameters.getSortingField(), DUMMY_GROUP));
+    private Node sortAndDivide(Node source, SorterParameters parameters) {
+        Node node = source.retain(new FieldList(parameters.getSortingField(), DUMMY_GROUP));
         String sortField = parameters.getSortingField();
         Buffer buffer = new SortPartitionBuffer(sortField, DUMMY_GROUP, SORTED_GROUPS, parameters.getPartitions());
         List<FieldMetadata> fms = new ArrayList<>();
