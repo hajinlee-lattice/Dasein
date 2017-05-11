@@ -22,7 +22,7 @@
             </li>
             <li ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
                     | filter: vm.enrichmentsFilter
-                    | filter: {Hide: false}
+                    | filter: vm.filterHideTrue
                     | orderBy: vm.categoryOrderBy()
                     | limitTo: 5))"
                     ng-class="{'ignore-ngclick': vm.section !== 'segment.analysis'}"

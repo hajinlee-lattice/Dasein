@@ -907,7 +907,7 @@ angular.module('common.datacloud.explorer', [
             
             var timestamp_b = new Date().getTime();
 
-            if (!vm.lookupMode && items) {
+            if (items) {
                 items.forEach(function(item, itemKey) {
                     var index = vm.enrichmentsMap[item.Attribute],
                         enrichment = vm.enrichments[index],
@@ -927,11 +927,13 @@ angular.module('common.datacloud.explorer', [
                         ];
 
                     if (enrichment) { 
-                        map.forEach(function(key){
-                            item[key] = enrichment[key];
-                        });
+                        if(vm.lookupMode) {
+                            map.forEach(function(key){
+                                item[key] = enrichment[key];
+                            });
 
-                        enrichment.NonNullCount = item.NonNullCount;
+                            enrichment.NonNullCount = item.NonNullCount;
+                        }
                         item.Hide = false;
                     }
                     if(!vm.searchFields(enrichment)) {
@@ -1004,6 +1006,15 @@ angular.module('common.datacloud.explorer', [
         );
 
         return items;
+    }
+
+    vm.filterHideTrue = function(item) {
+        if (item.Hide === true) {
+            return false;
+        } else {
+            return true;
+        }
+
     }
 
     vm.generateTileTableLabel = function(items) {
