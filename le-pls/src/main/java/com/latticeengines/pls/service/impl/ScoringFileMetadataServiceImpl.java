@@ -256,8 +256,9 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                         && fieldMapping.getMappedField().equals(attribute.getName())) {
                     attribute.setDisplayName(fieldMapping.getUserField());
                     break;
-                } else if (!fieldMapping.isMappedToLatticeField()
-                        && fieldMapping.getMappedField().equals(attribute.getName())
+                } else if (!fieldMapping.isMappedToLatticeField() //
+                        && fieldMapping.getMappedField() != null //
+                        && fieldMapping.getMappedField().equals(attribute.getName()) //
                         && LogicalDataType.isExcludedFromScoringFileMapping(attribute.getLogicalDataType())) {
                     attribute.setDisplayName(fieldMapping.getUserField());
                     fieldMappingIterator.remove();
