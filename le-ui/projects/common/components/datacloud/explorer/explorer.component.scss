@@ -24,6 +24,7 @@
         .pd-pagination {
             text-align: right;
             padding-right: 1em;
+            pointer-events: none;
         }
         .pd-pagination-center,
         .pd-pagination-start,
@@ -32,6 +33,7 @@
         }
         .button {
             padding: 0.1em 1em;
+            pointer-events: auto;
         }
     }
     :not(.section-insights) .enrichment-wizard-category-pagination {
