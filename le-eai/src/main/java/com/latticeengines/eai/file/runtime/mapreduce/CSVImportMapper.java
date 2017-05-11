@@ -118,7 +118,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         String[] headers;
-        try (CSVParser parser = new CSVParser(new InputStreamReader((new FileInputStream(csvFileName))),
+        try (CSVParser parser = new CSVParser(
+                new InputStreamReader((new FileInputStream(csvFileName)), StandardCharsets.UTF_8),
                 LECSVFormat.format)) {
             headers = new ArrayList<String>(parser.getHeaderMap().keySet()).toArray(new String[] {});
         }
