@@ -43,9 +43,10 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
 
             // add dummy group to put all in one group
             source = source.addColumnWithFixedValue(DUMMY_GROUP, UUID.randomUUID().toString(), String.class);
+            Node check = source.checkpoint("source");
             // find partition boundaries
-            Node boundaries = sortAndDivide(source, parameters).renamePipe("boundaries").checkpoint("boundaries");
-            source = source.leftJoin(new FieldList(DUMMY_GROUP), boundaries, new FieldList(DUMMY_GROUP));
+            Node boundaries = sortAndDivide(source, parameters).renamePipe("boundaries");
+            source = check.leftJoin(new FieldList(DUMMY_GROUP), boundaries, new FieldList(DUMMY_GROUP));
             // mark partition
             FieldMetadata sortingFm = source.getSchema(parameters.getSortingField());
             source = markPartition(source, parameters.getSortingField(), parameters.getPartitionField(),
