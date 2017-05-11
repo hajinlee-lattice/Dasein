@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.SortPartitionBuffer;
 import com.latticeengines.dataflow.runtime.cascading.SortPartitionFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SorterParameters;
@@ -45,8 +44,8 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
             // add dummy group to put all in one group
             source = source.addColumnWithFixedValue(DUMMY_GROUP, UUID.randomUUID().toString(), String.class);
             // find partition boundaries
-            Node boundaries = sortAndDivide(source, parameters).renamePipe("boundaries");
-            source = source.hashJoin(new FieldList(DUMMY_GROUP), boundaries, new FieldList(DUMMY_GROUP), JoinType.LEFT);
+            Node boundaries = sortAndDivide(source, parameters).renamePipe("boundaries").checkpoint("boundaries");
+            source = source.leftHashJoin(new FieldList(DUMMY_GROUP), boundaries, new FieldList(DUMMY_GROUP));
             // mark partition
             FieldMetadata sortingFm = source.getSchema(parameters.getSortingField());
             source = markPartition(source, parameters.getSortingField(), parameters.getPartitionField(),
