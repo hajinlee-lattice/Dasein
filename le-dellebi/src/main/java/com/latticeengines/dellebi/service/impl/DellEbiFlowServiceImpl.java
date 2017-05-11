@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import com.latticeengines.dellebi.util.LoggingUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +18,10 @@ import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileFlowService;
+import com.latticeengines.dellebi.util.LoggingUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
-import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 
 @Component("dellEbiFlowService")
 public class DellEbiFlowServiceImpl implements DellEbiFlowService {
@@ -170,10 +169,11 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
     @Override
     public boolean runStoredProcedure(DataFlowContext context) {
         String type = context.getProperty(FILE_TYPE, String.class);
+        String fileName = context.getProperty(TXT_FILE_NAME, String.class);
         String spName = dellEbiConfigEntityMgr.getPostStoreProcedure(type);
         if (isSmb(context) && spName != null) {
-            String sqlStr = "exec " + spName;
-            log.info("Begin to execute the Store Procedure= " + spName);
+            String sqlStr = String.format("exec %s '%s'", spName, fileName);
+            log.info("Begin to execute the Store Procedure= " + spName + " FileName=" + fileName);
             dellEbiTargetJDBCTemplate.execute(sqlStr);
             log.info("Finished executing the Store Procedure= " + spName);
             return true;
