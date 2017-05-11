@@ -1,5 +1,8 @@
 package com.latticeengines.common.exposed.util;
 
+import java.util.Arrays;
+
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -9,6 +12,7 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -43,6 +47,10 @@ public class HttpClientUtils {
     static HttpClient newHttpClient() {
         return HttpClientBuilder.create() //
                 .setConnectionManager(SSL_BLIND_CONNECTION_MGR) //
+                .setDefaultHeaders(Arrays.asList( //
+                        new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json"), //
+                        new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "gzip") //
+                ))//
                 .build();
     }
 

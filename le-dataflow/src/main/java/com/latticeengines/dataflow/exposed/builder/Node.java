@@ -142,6 +142,11 @@ public class Node {
         return leftJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
     }
 
+    public Node hashJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {
+        return new Node(builder.addHashJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType),
+                builder);
+    }
+
     public Node groupBy(FieldList groupByFieldList, List<Aggregation> aggregations) {
         return new Node(builder.addGroupBy(identifier, groupByFieldList, aggregations), builder);
     }
@@ -544,11 +549,6 @@ public class Node {
         Map.Entry<Pipe, List<FieldMetadata>> pipeAndMetadata = builder.getPipeAndMetadata(identifier);
         // Make a copy of the fieldmetadata so that consumers don't have to
         return new Operation.Input(pipeAndMetadata.getKey(), Lists.newArrayList(pipeAndMetadata.getValue()));
-    }
-
-    public Node hashJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {
-        return new Node(builder.addHashJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType),
-                builder);
     }
 
 }
