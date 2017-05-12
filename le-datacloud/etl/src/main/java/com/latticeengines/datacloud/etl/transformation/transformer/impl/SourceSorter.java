@@ -49,7 +49,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     public static final String TRANSFORMER_NAME = "sourceSorter";
     private static final String SORTED_PARTITION = "_DC_Sorted_Partition_";
 
-    private static final int BUFFER_SIZE = 2000;
+    private static final int BUFFER_SIZE = 5000;
 
     private String wd;
     private String out;
@@ -275,7 +275,8 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
                 } else {
                     AvroUtils.appendToHdfsFile(yarnConfiguration, outputFile, buffer, true);
                 }
-                log.info("Dumped " + buffer.size() + " records to the output file " + outputFile);
+                String fileName = outputFile.substring(outputFile.lastIndexOf("/") + 1);
+                log.info("Dumped " + buffer.size() + " records to the output file " + fileName + " in " + outputFile.replace(fileName, ""));
             } catch (Exception e) {
                 throw new RuntimeException("Failed to dump " + buffer.size() + " records to the output file " + outputFile, e);
             }
