@@ -21,7 +21,7 @@ public class FileBackedOrderedListUnitTestNG {
     @Test
     public void test() {
         LogManager.getLogger(FileBackedOrderedList.class).setLevel(Level.DEBUG);
-        FileBackedOrderedList<Integer> list = new FileBackedOrderedList<>(10, Integer::valueOf);
+        FileBackedOrderedList<Integer> list = new FileBackedOrderedList<>(100, Integer::valueOf);
         for (Integer n: data()) {
             list.add(n);
         }
@@ -34,7 +34,7 @@ public class FileBackedOrderedListUnitTestNG {
 
     private Collection<Integer> data() {
         List<Integer> ints = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10000; i++) {
             ints.add(i);
         }
         Collections.shuffle(ints);
