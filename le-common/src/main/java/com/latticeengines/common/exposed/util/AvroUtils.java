@@ -29,6 +29,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.file.DataFileWriter;
@@ -646,8 +647,12 @@ public class AvroUtils {
         }
         return assembler.endRecord();
     }
-
     public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data)
+            throws IOException {
+        appendToHdfsFile(configuration, filePath, data, false);
+    }
+
+    public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data, boolean snappy)
             throws IOException {
         FileSystem fs = FileSystem.get(configuration);
         Path path = new Path(filePath);
@@ -658,6 +663,9 @@ public class AvroUtils {
 
         try (OutputStream out = fs.append(path)) {
             try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())) {
+                if (snappy) {
+                    writer.setCodec(CodecFactory.snappyCodec());
+                }
                 try (DataFileWriter<GenericRecord> appender = writer.appendTo(new FsInput(path, configuration), out)) {
                     for (GenericRecord datum : data) {
                         try {
@@ -673,7 +681,12 @@ public class AvroUtils {
     }
 
     public static void writeToHdfsFile(Configuration configuration, Schema schema, String filePath,
-            List<GenericRecord> data) throws IOException {
+                                       List<GenericRecord> data) throws IOException {
+        writeToHdfsFile(configuration, schema, filePath, data, false);
+    }
+
+    public static void writeToHdfsFile(Configuration configuration, Schema schema, String filePath,
+                                       List<GenericRecord> data, boolean snappy) throws IOException {
         FileSystem fs = FileSystem.get(configuration);
         Path path = new Path(filePath);
 
@@ -683,6 +696,9 @@ public class AvroUtils {
 
         try (OutputStream out = fs.create(path)) {
             try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())) {
+                if (snappy) {
+                    writer.setCodec(CodecFactory.snappyCodec());
+                }
                 try (DataFileWriter<GenericRecord> creator = writer.create(schema, out)) {
                     for (GenericRecord datum : data) {
                         try {

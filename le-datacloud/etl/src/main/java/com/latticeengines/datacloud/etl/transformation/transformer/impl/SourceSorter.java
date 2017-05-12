@@ -162,7 +162,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     private void splitAvros() throws IOException {
         String avroGlob = out + (out.endsWith("/") ? "*.avro" : "/*.avro");
         List<String> avroFiles = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
-        ExecutorService executors = Executors.newFixedThreadPool(8);
+        ExecutorService executors = Executors.newFixedThreadPool(4);
         Map<String, Future<Boolean>> futures = new HashMap<>();
         for (String avroFile : avroFiles) {
             Future<Boolean> future = executors.submit(new AvroSplitCallable(avroFile));
@@ -271,9 +271,9 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             String outputFile = outputFile(partition);
             try {
                 if (!HdfsUtils.fileExists(yarnConfiguration, outputFile)) {
-                    AvroUtils.writeToHdfsFile(yarnConfiguration, targetSchema, outputFile, buffer);
+                    AvroUtils.writeToHdfsFile(yarnConfiguration, targetSchema, outputFile, buffer, true);
                 } else {
-                    AvroUtils.appendToHdfsFile(yarnConfiguration, outputFile, buffer);
+                    AvroUtils.appendToHdfsFile(yarnConfiguration, outputFile, buffer, true);
                 }
                 log.info("Dumped " + buffer.size() + " records to the output file " + outputFile);
             } catch (Exception e) {

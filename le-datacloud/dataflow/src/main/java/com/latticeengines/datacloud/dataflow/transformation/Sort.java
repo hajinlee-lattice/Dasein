@@ -30,7 +30,10 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
     public static final String BEAN_NAME = "sort";
 
     private static final String DUMMY_GROUP = "_Sort_Dummy_Group_";
+    private static final String DUMMY_JOIN_KEY = "_Sort_Dummy_Join_Key_";
     private static final String SORTED_GROUPS = "_Sorted_Groups_";
+
+    private int numJoinKeys;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -41,12 +44,15 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
         } else {
             List<String> fieldsToRetain = new ArrayList<>(source.getFieldNames());
 
+            numJoinKeys = Math.min(Math.max(parameters.getPartitions() * 2, 72), 1024);
+
             // add dummy group to put all in one group
             source = source.addColumnWithFixedValue(DUMMY_GROUP, UUID.randomUUID().toString(), String.class);
-            Node check = source.checkpoint("source");
+            source = source.apply(String.format("System.currentTimeMillis() %% %d", numJoinKeys), new FieldList(parameters.getSortingField()),
+                    new FieldMetadata(DUMMY_JOIN_KEY, Long.class));
             // find partition boundaries
-            Node boundaries = sortAndDivide(source, parameters).renamePipe("boundaries");
-            source = check.leftJoin(new FieldList(DUMMY_GROUP), boundaries, new FieldList(DUMMY_GROUP));
+            Node boundaries = profile(source, parameters).renamePipe("boundaries");
+            source = source.leftJoin(new FieldList(DUMMY_JOIN_KEY), boundaries, new FieldList(DUMMY_JOIN_KEY));
             // mark partition
             FieldMetadata sortingFm = source.getSchema(parameters.getSortingField());
             source = markPartition(source, parameters.getSortingField(), parameters.getPartitionField(),
@@ -59,12 +65,12 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
         }
     }
 
-    private Node sortAndDivide(Node source, SorterParameters parameters) {
-        Node node = source.retain(new FieldList(parameters.getSortingField(), DUMMY_GROUP));
+    private Node profile(Node source, SorterParameters parameters) {
+        Node node = source.retain(new FieldList(parameters.getSortingField(), DUMMY_GROUP, DUMMY_JOIN_KEY));
         String sortField = parameters.getSortingField();
-        Buffer buffer = new SortPartitionBuffer(sortField, DUMMY_GROUP, SORTED_GROUPS, parameters.getPartitions());
+        Buffer buffer = new SortPartitionBuffer(sortField, DUMMY_JOIN_KEY, SORTED_GROUPS, parameters.getPartitions());
         List<FieldMetadata> fms = new ArrayList<>();
-        fms.add(new FieldMetadata(DUMMY_GROUP, String.class));
+        fms.add(new FieldMetadata(DUMMY_JOIN_KEY, String.class));
         fms.add(new FieldMetadata(SORTED_GROUPS, String.class));
         return node.groupByAndBuffer(new FieldList(DUMMY_GROUP), new FieldList(sortField), buffer, fms);
     }
