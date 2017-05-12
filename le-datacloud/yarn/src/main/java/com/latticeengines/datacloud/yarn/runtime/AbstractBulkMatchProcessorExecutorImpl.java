@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,6 +77,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @Autowired
     private DomainCollectService domainCollectService;
+
+    @Value("${datacloud.match.bulk.snappy.compress}")
+    private boolean useSnappy;
 
     @Override
     public void finalize(ProcessorContext processorContext) throws Exception {
@@ -182,9 +186,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         }
         if (!HdfsUtils.fileExists(yarnConfiguration, processorContext.getOutputAvro())) {
             AvroUtils.writeToHdfsFile(yarnConfiguration, processorContext.getOutputSchema(),
-                    processorContext.getOutputAvro(), records);
+                    processorContext.getOutputAvro(), records, useSnappy);
         } else {
-            AvroUtils.appendToHdfsFile(yarnConfiguration, processorContext.getOutputAvro(), records);
+            AvroUtils.appendToHdfsFile(yarnConfiguration, processorContext.getOutputAvro(), records, useSnappy);
         }
         log.info("Write " + records.size() + " generic records to " + processorContext.getOutputAvro());
     }
