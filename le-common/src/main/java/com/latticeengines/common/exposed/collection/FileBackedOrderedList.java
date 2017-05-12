@@ -54,6 +54,7 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
         if (buffer.isEmpty()) {
             return;
         }
+        log.debug("Dumping a buffer of size " + buffer.size());
         Map<String, List<T>> segments = new HashMap<>();
         List<String> fileNames = new ArrayList<>(maxiums.keySet());
         Collections.sort(fileNames);

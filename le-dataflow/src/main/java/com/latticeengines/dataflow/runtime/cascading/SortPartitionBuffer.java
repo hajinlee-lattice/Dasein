@@ -28,7 +28,7 @@ import cascading.tuple.TupleEntry;
 public class SortPartitionBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = 1423189753525474796L;
-    private static final long ID_BUFFER_SIZE = 1000_000L;
+    private static final long ID_BUFFER_SIZE = 10000_000L;
 
     private final String sortField;
     private final int partitions;
