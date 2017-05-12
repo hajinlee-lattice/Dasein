@@ -117,7 +117,7 @@
                     class="box enrichment"
                     ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category]
                         | filter: vm.searchFields
-                        | filter: vm.enrichmentsFilter()
+                        | filter: vm.enrichmentsFilter
                         | orderBy: vm.sortOrder()))
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize
                         | limitTo: vm.pagesize

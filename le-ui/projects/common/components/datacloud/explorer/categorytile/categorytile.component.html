@@ -19,7 +19,7 @@
                     <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
                 </li>
                 <li ng-repeat="attribute in (highlightAttributes = ((TileTableItems = vm.getTileTableItems(category, false, 'HighlightHighlighted', 5)).HighlightHighlighted 
-                        | filter: vm.enrichmentsFilter() 
+                        | filter: vm.enrichmentsFilter
                         | orderBy: vm.categoryOrderBy()
                         | limitTo: (vm.showHighlighting() ? 5 : 0)))"
                         class="attribute"

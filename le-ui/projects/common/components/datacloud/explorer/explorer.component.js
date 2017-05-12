@@ -97,7 +97,7 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
     /* some rules that might hide the page */
     vm.hidePage = function() {
-        if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
+        if (vm.lookupMode && typeof vm.lookupMode === 'object' && Object.keys(vm.lookupFiltered).length < 1) {
             return true;
         }
 
@@ -161,7 +161,7 @@ angular.module('common.datacloud.explorer', [
 
         vm.statusMessageBox = angular.element('.status-alert');
 
-        if (vm.lookupMode && Object.keys(vm.lookupFiltered).length < 1) {
+        if (vm.lookupMode && typeof vm.lookupMode === 'object' && Object.keys(vm.lookupFiltered).length < 1) {
             //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
             vm.no_lookup_results_message = true;
         }
@@ -260,7 +260,7 @@ angular.module('common.datacloud.explorer', [
         if (result != null && result.status === 200) {
             if (vm.lookupFiltered !== null) {
                 for (var i=0, data=[]; i<result.data.length; i++) {
-                    if (vm.lookupFiltered[result.data[i].FieldName]) {
+                    if (vm.lookupFiltered && vm.lookupFiltered[result.data[i].FieldName]) {
                         data.push(result.data[i]);
                     }
                 }
