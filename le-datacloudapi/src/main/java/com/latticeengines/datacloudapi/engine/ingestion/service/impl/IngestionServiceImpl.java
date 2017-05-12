@@ -3,6 +3,7 @@ package com.latticeengines.datacloudapi.engine.ingestion.service.impl;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -48,6 +50,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("ingestionService")
@@ -80,6 +83,15 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Autowired
     private IngestionApiProviderService apiProviderService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${propdata.ingestion.notify.email.enabled}")
+    private boolean notifyEmailEnabled;
+
+    @Value("${propdata.ingestion.notify.email}")
+    private String notifyEmail;
 
     @Override
     public List<IngestionProgress> scan(String hdfsPod) {
@@ -221,6 +233,12 @@ public class IngestionServiceImpl implements IngestionService {
 
         try {
             HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
+            if (notifyEmailEnabled) {
+                String subject = String.format("Ingestion %s for version %s is finished", ingestionName, version);
+                String content = String.format("Files are accessible at the following HDFS folder: %s",
+                        hdfsDir.toString());
+                emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(notifyEmail));
+            }
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to create %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
                     hdfsDir.toString()), e);
@@ -244,6 +262,12 @@ public class IngestionServiceImpl implements IngestionService {
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, file.toString())) {
                 HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
+                if (notifyEmailEnabled) {
+                    String subject = String.format("Ingestion %s for version %s is finished", ingestionName, version);
+                    String content = String.format("Files are accessible at the following HDFS folder: %s",
+                            hdfsDir.toString());
+                    emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(notifyEmail));
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to check %s in HDFS or create %s in HDFS dir %s",
