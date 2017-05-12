@@ -8,9 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
@@ -31,7 +28,6 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
     private int size = 0;
     private List<T> buffer;
     private Map<String, T> maxiums = new HashMap<>();
-    private ExecutorService executorService = Executors.newFixedThreadPool(4);
 
     public FileBackedOrderedList(long bufferSize, Function<String, T> deserializeFunc) {
         this.bufferSize = bufferSize;
@@ -69,17 +65,9 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
             }
             segments.get(insertingFile).add(item);
         }
-        List<Future<?>> futures = new ArrayList<>();
+        log.debug(segments.size() + " segments to be inserted.");
         for (Map.Entry<String, List<T>> segment : segments.entrySet()) {
-            Future<?> future = executorService.submit(() -> dumpListToFile(segment.getValue(), segment.getKey()));
-            futures.add(future);
-        }
-        for (Future future: futures) {
-            try {
-                future.get();
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to wait for the list dumping future to return.", e);
-            }
+            dumpListToFile(segment.getValue(), segment.getKey());
         }
         buffer.clear();
     }
