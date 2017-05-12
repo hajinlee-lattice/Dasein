@@ -31,7 +31,7 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
     private int size = 0;
     private List<T> buffer;
     private Map<String, T> maxiums = new HashMap<>();
-    private ExecutorService executorService = Executors.newFixedThreadPool(16);
+    private ExecutorService executorService = Executors.newFixedThreadPool(4);
 
     public FileBackedOrderedList(long bufferSize, Function<String, T> deserializeFunc) {
         this.bufferSize = bufferSize;
