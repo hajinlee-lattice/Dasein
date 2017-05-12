@@ -49,7 +49,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     public static final String TRANSFORMER_NAME = "sourceSorter";
     private static final String SORTED_PARTITION = "_DC_Sorted_Partition_";
 
-    private static final int BUFFER_SIZE = 5000;
+    private static final int BUFFER_SIZE = 2000;
 
     private String wd;
     private String out;
