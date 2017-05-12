@@ -18,6 +18,7 @@
     <import resource="classpath:hadoop-config-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
     <import resource="classpath:datacloud-match-context.xml" />
+    <import resource="classpath:datacloud-match-monitor-context.xml" />
     <import resource="classpath:datacloud-yarn-client-context.xml" />
 
     <mvc:annotation-driven/>

@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DnBCacheEntityMgr;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
@@ -31,7 +30,6 @@ import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 
-@Component("matchMonitorService")
 public class MatchMonitorServiceImpl implements MatchMonitorService {
     private static final Log log = LogFactory.getLog(MatchMonitorServiceImpl.class);
 
@@ -70,12 +68,8 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
 
     @PostConstruct
     private void postConstruct() {
-        scheduler.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                monitor();
-            }
-        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(2)), TimeUnit.MINUTES.toMillis(2));
+        scheduler.scheduleWithFixedDelay(this::monitor,
+                new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(2)), TimeUnit.MINUTES.toMillis(2));
     }
 
     @Override

@@ -22,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,10 +81,11 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
 
     @Override
     protected void updateParameters(SorterParameters parameters, Source[] baseTemplates, Source targetTemplate,
-                                    SorterConfig config) {
+            SorterConfig config) {
         String field = config.getSortingField();
         if (StringUtils.isBlank(field)) {
-            throw new IllegalArgumentException("Must specify a sorting field, which is a unique, not-null field with complete ordering.");
+            throw new IllegalArgumentException(
+                    "Must specify a sorting field, which is a unique, not-null field with complete ordering.");
         }
         parameters.setSortingField(field);
         parameters.setPartitions(config.getPartitions());
@@ -135,7 +137,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             splitAvros();
             cleanupOutputDir();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to process avro files result from cascading flow.",  e);
+            throw new RuntimeException("Failed to process avro files result from cascading flow.", e);
         }
     }
 
@@ -185,11 +187,11 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     private Set<String> consumeFutures(Map<String, Future<Boolean>> futures) {
         Set<String> toDelete = new HashSet<>();
 
-        for (Map.Entry<String, Future<Boolean>> entry: futures.entrySet()) {
+        for (Map.Entry<String, Future<Boolean>> entry : futures.entrySet()) {
             boolean success = false;
             try {
                 success = entry.getValue().get(1, TimeUnit.SECONDS);
-            } catch (InterruptedException|TimeoutException e) {
+            } catch (InterruptedException | TimeoutException e) {
                 // ignore
             } catch (ExecutionException e) {
                 throw new RuntimeException("The thread processing " + entry.getKey() + " throws an exception.", e);
@@ -206,6 +208,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     private class AvroSplitCallable implements Callable<Boolean> {
 
         private final String avroFile;
+        private String localDir;
         private int attempt = 0;
 
         AvroSplitCallable(String avroFile) {
@@ -221,44 +224,42 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
         @Retryable(backoff = @Backoff(delay = 1000L, multiplier = 2.0))
         private void split() {
             log.info(String.format("(Attempt = %d) Trying to split file %s", attempt++, avroFile));
-            Set<String> createdFiles = new HashSet<>();
+            cleanupLocalDir();
             Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, avroFile);
             List<GenericRecord> buffer = new ArrayList<>();
             int bufferedPartition = -1;
             while (iterator.hasNext()) {
                 GenericRecord record = iterator.next();
                 int partition = (int) record.get(SORTED_PARTITION);
-                String outputFile = outputFile(partition);
-                cleanupOutputFile(outputFile, createdFiles);
-
                 if (partition != bufferedPartition || buffer.size() >= BUFFER_SIZE) {
                     // should dump when switching partition or buffer is full
                     dumpBuffer(buffer, bufferedPartition);
                     buffer.clear();
-                    bufferedPartition = partition;
+                    if (partition != bufferedPartition) {
+                        uploadLocalFile(bufferedPartition);
+                        bufferedPartition = partition;
+                        log.info("Starting spilling out partition " + bufferedPartition);
+                    }
                 }
-
                 buffer.add(stripTempField(record));
             }
             dumpBuffer(buffer, bufferedPartition);
+            uploadLocalFile(bufferedPartition);
         }
 
-        private void cleanupOutputFile(String outputFile, Set<String> createdFiles) {
-            if (!createdFiles.contains(outputFile)) {
-                try {
-                    if (HdfsUtils.fileExists(yarnConfiguration, outputFile)) {
-                        HdfsUtils.rmdir(yarnConfiguration, outputFile);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to clean up output file " + outputFile);
-                }
-                createdFiles.add(outputFile);
+        private void cleanupLocalDir() {
+            localDir = Thread.currentThread().getName();
+            FileUtils.deleteQuietly(new File(localDir));
+            try {
+                FileUtils.forceMkdir(new File(localDir));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create local dir " + localDir);
             }
         }
 
         private GenericRecord stripTempField(GenericRecord record) {
             GenericRecordBuilder builder = new GenericRecordBuilder(targetSchema);
-            for (Schema.Field field: targetSchema.getFields()) {
+            for (Schema.Field field : targetSchema.getFields()) {
                 builder.set(field, record.get(field.name()));
             }
             return builder.build();
@@ -268,22 +269,44 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             if (buffer.isEmpty()) {
                 return;
             }
-            String outputFile = outputFile(partition);
+            String outputFileName = localOutputFile(partition);
             try {
-                if (!HdfsUtils.fileExists(yarnConfiguration, outputFile)) {
-                    AvroUtils.writeToHdfsFile(yarnConfiguration, targetSchema, outputFile, buffer, true);
+                if (!new File(outputFileName).exists()) {
+                    AvroUtils.writeToLocalFile(targetSchema, buffer, outputFileName, true);
                 } else {
-                    AvroUtils.appendToHdfsFile(yarnConfiguration, outputFile, buffer, true);
+                    AvroUtils.appendToLocalFile(buffer, outputFileName, true);
                 }
-                String fileName = outputFile.substring(outputFile.lastIndexOf("/") + 1);
-                log.info("Dumped " + buffer.size() + " records to the output file " + fileName + " in " + outputFile.replace(fileName, ""));
+                log.info("Dumped " + buffer.size() + " records to the output file " + outputFileName.split("/")[1]);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to dump " + buffer.size() + " records to the output file " + outputFile, e);
+                throw new RuntimeException(
+                        "Failed to dump " + buffer.size() + " records to the output file " + outputFileName, e);
             }
+        }
+
+        @Retryable(backoff = @Backoff(delay = 1000L, multiplier = 2.0))
+        private void uploadLocalFile(int partition) {
+            String localFile = localOutputFile(partition);
+            String hdfsFile = outputFile(partition);
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, hdfsFile)) {
+                    HdfsUtils.rmdir(yarnConfiguration, hdfsFile);
+                }
+                if (partition > -1) {
+                    HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile, hdfsFile);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload local buffer file " + localFile, e);
+            }
+            FileUtils.deleteQuietly(new File(localFile));
+            log.info("Uploaded local file " + localFile + " to hdfs " + hdfsFile);
         }
 
         private String outputFile(int partition) {
             return wd + (wd.endsWith("/") ? "" : "/") + String.format("part-s-%05d.avro", partition);
+        }
+
+        private String localOutputFile(int partition) {
+            return localDir + "/" + String.format("part-s-%05d.avro", partition);
         }
     }
 

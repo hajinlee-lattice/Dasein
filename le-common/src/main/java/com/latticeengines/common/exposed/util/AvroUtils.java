@@ -715,8 +715,15 @@ public class AvroUtils {
     }
 
     public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {
+        writeToLocalFile(schema, data, path, false);
+    }
+
+    public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path, boolean snappy) throws IOException {
         File avroFile = new File(path);
         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());) {
+            if (snappy) {
+                writer.setCodec(CodecFactory.snappyCodec());
+            }
             writer.create(schema, avroFile);
             for (GenericRecord datum : data) {
                 writer.append(datum);
@@ -725,8 +732,15 @@ public class AvroUtils {
     }
 
     public static void appendToLocalFile(List<GenericRecord> data, String path) throws IOException {
+        appendToLocalFile(data, path, false);
+    }
+
+    public static void appendToLocalFile(List<GenericRecord> data, String path, boolean snappy) throws IOException {
         File avroFile = new File(path);
         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());) {
+            if (snappy) {
+                writer.setCodec(CodecFactory.snappyCodec());
+            }
             writer.appendTo(avroFile);
             for (GenericRecord datum : data) {
                 writer.append(datum);

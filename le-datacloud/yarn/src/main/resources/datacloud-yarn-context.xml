@@ -10,5 +10,6 @@
     <context:component-scan base-package="com.latticeengines.datacloud.yarn" />
 
     <import resource="classpath:datacloud-match-context.xml" />
+    <import resource="classpath:datacloud-match-monitor-context.xml" />
 
 </beans>

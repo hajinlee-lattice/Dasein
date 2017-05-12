@@ -6,7 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+
+import com.latticeengines.common.exposed.collection.FileBackedOrderedList;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -15,7 +20,6 @@ import cascading.operation.BufferCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Find partition boundaries of sorted ids.
@@ -24,12 +28,13 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class SortPartitionBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = 1423189753525474796L;
+    private static final long ID_BUFFER_SIZE = 1000_000L;
 
     private final String sortField;
     private final int partitions;
     private final String dummyJoinKeyField;
 
-    private List<Object> ids  = new ArrayList<>();
+    private FileBackedOrderedList<?> ids;
 
     // output fields (dummyJoinKey, grpBdriesField)
     @SuppressWarnings("unchecked")
@@ -51,14 +56,29 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
             TupleEntry entry = arguments.next();
             Object id = entry.getObject(sortField);
             dummyJoinKeys.add(entry.getLong(dummyJoinKeyField));
+            if (ids == null) {
+                bootstrapIdList(id);
+            }
+            if (id instanceof Utf8) {
+                id = id.toString();
+            }
             ids.add(id);
         }
-
-        Collections.sort(ids);
         List<String> boundaries = partitionIds();
         for (Long key: dummyJoinKeys) {
             Tuple result = new Tuple(key, StringUtils.join(boundaries, "|"));
             bufferCall.getOutputCollector().add(result);
+        }
+    }
+
+    private void bootstrapIdList(Object id) {
+        LogManager.getLogger(FileBackedOrderedList.class).setLevel(Level.DEBUG);
+        if (id instanceof Integer) {
+            ids = new FileBackedOrderedList<>(ID_BUFFER_SIZE, Integer::valueOf);
+        } else if (id instanceof Long) {
+            ids = new FileBackedOrderedList<>(ID_BUFFER_SIZE, Long::valueOf);
+        } else if (id instanceof String || id instanceof Utf8) {
+            ids = new FileBackedOrderedList<>(ID_BUFFER_SIZE, String::valueOf);
         }
     }
 
