@@ -20,6 +20,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class FileBackedOrderedList<T> implements Iterable<T> {
 
     private static final Log log = LogFactory.getLog(FileBackedOrderedList.class);
+    private static final int NUM_FORKS = 10;
 
     private final long bufferSize;
     private final String tempDir;
@@ -27,7 +28,6 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
     private int size = 0;
     private List<T> buffer;
     private Map<String, T> maxiums = new HashMap<>();
-    private int rootFileId = 0;
 
     public FileBackedOrderedList(long bufferSize, Function<String, T> deserializeFunc) {
         this.bufferSize = bufferSize;
@@ -54,8 +54,6 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
         if (buffer.isEmpty()) {
             return;
         }
-
-        log.debug("Dumping a buffer of " + buffer.size() + " items.");
         Map<String, List<T>> segments = new HashMap<>();
         List<String> fileNames = new ArrayList<>(maxiums.keySet());
         Collections.sort(fileNames);
@@ -73,8 +71,8 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
     }
 
     private void dumpListToFile(List<T> sortedList, String fileName) {
-        if (StringUtils.isBlank(fileName)) {
-            fileName = String.valueOf(rootFileId++);
+        if (sortedList.isEmpty()) {
+            return;
         }
         File file = new File(tempDir + File.separator + fileName);
         if (!file.exists()) {
@@ -86,8 +84,8 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
                 throw new RuntimeException("Failed to dump buffer to local file " + file, e);
             }
             maxiums.put(fileName, max);
-            log.debug("Dumping " + sortedList.size() + " items with maximum " + max + " to file "
-                    + fileName);
+            //log.debug("Dumping " + sortedList.size() + " items with maximum " + max + " to file "
+            //        + fileName);
         } else {
             insertAndSplit(sortedList, fileName);
         }
@@ -109,23 +107,28 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
         }
         Collections.sort(sortedList);
         if (sortedList.size() > bufferSize) {
-            int halfSize = Math.max(sortedList.size() / 2, 1);
+            int chunkSize = Math.max(sortedList.size() / NUM_FORKS, 1);
             Iterator<T> iterator = sortedList.listIterator();
-            List<T> firstHalf = new ArrayList<>();
-            for (int i = 0; i < halfSize; i++) {
-                if (iterator.hasNext()) {
-                    firstHalf.add(iterator.next());
+            List<String> descriptions = new ArrayList<>();
+            for (int i = 0; i < NUM_FORKS; i++) {
+                List<T> chunk = new ArrayList<>();
+                if (i == NUM_FORKS - 1) {
+                    while (iterator.hasNext()) {
+                        chunk.add(iterator.next());
+                    }
+                } else {
+                    for (int j = 0; j < chunkSize; j++) {
+                        if (iterator.hasNext()) {
+                            chunk.add(iterator.next());
+                        }
+                    }
                 }
+                String child = parent + String.valueOf(i);
+                descriptions.add(String.format("%s [%d]", child, chunk.size()));
+                dumpListToFile(chunk, child);
             }
-            List<T> secondHalf = new ArrayList<>();
-            while (iterator.hasNext()) {
-                secondHalf.add(iterator.next());
-            }
-            dumpListToFile(firstHalf, parent + "0");
-            dumpListToFile(secondHalf, parent + "1");
             if (log.isDebugEnabled()) {
-                log.debug(String.format("Split %s into %d items in %s and %d items in %s", parent, firstHalf.size(),
-                        parent + "0", secondHalf.size(), parent + "1"));
+                log.debug(String.format("Split %s into %s", parent, StringUtils.join(descriptions, " ")));
             }
         } else {
             log.debug("Extend " + parent + " to " + sortedList.size() + " items.");
@@ -141,8 +144,7 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
                 return fileName;
             }
         }
-        // means a new file
-        return "";
+        return fileNames.isEmpty() ? "0" : fileNames.get(fileNames.size() - 1);
     }
 
     public Iterator<T> iterator() {
