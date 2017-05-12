@@ -54,7 +54,7 @@ public class YarnServiceImpl implements YarnService {
 
     @Override
     public List<ApplicationReport> getApplications(GetApplicationsRequest request) {
-         return yarnClient.listApplications(request);
+        return yarnClient.listApplications(request);
     }
 
     @Override
@@ -103,12 +103,14 @@ public class YarnServiceImpl implements YarnService {
 
     @Override
     public SchedulerTypeInfo getSchedulerInfo() {
-        try {
-            String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
-        } catch (Exception e) {
-            String rmRestEndpointBaseUrl = performFailover();
-            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
+        String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
+        synchronized (yarnConfiguration) {
+            try {
+                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
+            } catch (Exception e) {
+                rmRestEndpointBaseUrl = performFailover();
+                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
+            }
         }
     }
 
@@ -131,7 +133,7 @@ public class YarnServiceImpl implements YarnService {
     public ApplicationReport getApplication(String appId) {
         return yarnClient.getApplicationReport(ConverterUtils.toApplicationId(appId));
     }
-    
+
     private String performFailover() {
         Collection<String> rmIds = HAUtil.getRMHAIds(yarnConfiguration);
         String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
