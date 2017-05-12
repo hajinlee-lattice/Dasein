@@ -150,6 +150,7 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
 
     public Iterator<T> iterator() {
         if (maxiums.isEmpty()) {
+            Collections.sort(buffer);
             return buffer.listIterator();
         } else {
             dumpBuffer();
