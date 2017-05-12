@@ -149,8 +149,12 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
     }
 
     public Iterator<T> iterator() {
-        dumpBuffer();
-        return new FileBackedIterator();
+        if (maxiums.isEmpty()) {
+            return buffer.listIterator();
+        } else {
+            dumpBuffer();
+            return new FileBackedIterator();
+        }
     }
 
     private void shutdownHook() {
