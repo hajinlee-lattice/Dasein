@@ -1219,9 +1219,20 @@ angular.module('common.datacloud.explorer', [
         return DataCloudStore.getCube();
     }
 
+    var ObjectValues = function(obj) {
+        var ar = [];
+        if(obj && typeof obj ==='object') {
+            for(var i in obj) {
+                ar.push(obj[i]);
+            }
+        }
+        return ar;
+    }
+
     vm.makeSegmentsRangeKey = function(enrichment, range){
         var fieldName = enrichment.Attribute || enrichment.FieldName,
-            key = fieldName + (range ? Object.values(range).join('') : '');
+            values = ObjectValues(range),
+            key = fieldName + (range ? values.join('') : '');
         return key;
     }
 
