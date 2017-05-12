@@ -33,8 +33,6 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
     private static final String DUMMY_JOIN_KEY = "_Sort_Dummy_Join_Key_";
     private static final String SORTED_GROUPS = "_Sorted_Groups_";
 
-    private int numJoinKeys;
-
     @SuppressWarnings("unchecked")
     @Override
     public Node construct(SorterParameters parameters) {
@@ -43,9 +41,7 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
             return source.sort(parameters.getSortingField());
         } else {
             List<String> fieldsToRetain = new ArrayList<>(source.getFieldNames());
-
-            numJoinKeys = Math.min(Math.max(parameters.getPartitions() * 2, 72), 1024);
-
+            int numJoinKeys = Math.min(Math.max(parameters.getPartitions() * 10, 256), 10240);
             // add dummy group to put all in one group
             source = source.addColumnWithFixedValue(DUMMY_GROUP, UUID.randomUUID().toString(), String.class);
             source = source.apply(String.format("System.currentTimeMillis() %% %d", numJoinKeys), new FieldList(parameters.getSortingField()),
