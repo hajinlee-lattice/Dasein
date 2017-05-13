@@ -47,7 +47,7 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
             source = source.apply(String.format("System.currentTimeMillis() %% %d", numJoinKeys), new FieldList(parameters.getSortingField()),
                     new FieldMetadata(DUMMY_JOIN_KEY, Long.class));
             // find partition boundaries
-            Node boundaries = profile(source, parameters).renamePipe("boundaries");
+            Node boundaries = profile(source, parameters).renamePipe("boundaries").checkpoint("boundaries");
             source = source.leftJoin(new FieldList(DUMMY_JOIN_KEY), boundaries, new FieldList(DUMMY_JOIN_KEY));
             // mark partition
             FieldMetadata sortingFm = source.getSchema(parameters.getSortingField());
