@@ -29,6 +29,9 @@ public class PipelineTransformationRequest {
     @JsonProperty("EnableSlack")
     private boolean enableSlack;
 
+    @JsonProperty("ContainerMemMB")
+    private Integer containerMemMB;
+
     public String getSubmitter() {
         return submitter;
     }
@@ -75,5 +78,13 @@ public class PipelineTransformationRequest {
 
     public void setEnableSlack(boolean enableSlack) {
         this.enableSlack = enableSlack;
+    }
+
+    public Integer getContainerMemMB() {
+        return containerMemMB;
+    }
+
+    public void setContainerMemMB(Integer containerMemMB) {
+        this.containerMemMB = containerMemMB;
     }
 }

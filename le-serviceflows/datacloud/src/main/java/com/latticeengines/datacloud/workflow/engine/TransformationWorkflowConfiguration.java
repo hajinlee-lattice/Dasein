@@ -1,11 +1,11 @@
 package com.latticeengines.datacloud.workflow.engine;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.workflow.engine.steps.PrepareTransformationStepInputConfiguration;
+import com.latticeengines.datacloud.workflow.engine.steps.TransformationStepExecutionConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.datacloud.workflow.engine.steps.PrepareTransformationStepInputConfiguration;
-import com.latticeengines.datacloud.workflow.engine.steps.TransformationStepExecutionConfiguration;
 
 public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
 
@@ -21,9 +21,11 @@ public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
         private TransformationConfiguration transformationConfiguration;
         private String internalResourceHostPort;
         private String serviceBeanName;
+        private Integer mem;
 
         public TransformationWorkflowConfiguration build() {
             configuration.setContainerConfiguration(workflowName, customerSpace, payloadName);
+            configuration.setContainerMemoryMB(mem);
             prepareConfig.setCustomerSpace(customerSpace);
             prepareConfig.setRootOperationUid(rootOperationUid);
             prepareConfig.setHdfsPodId(hdfsPodId);
@@ -76,6 +78,11 @@ public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder serviceBeanName(String serviceBeanName) {
             this.serviceBeanName = serviceBeanName;
+            return this;
+        }
+
+        public Builder containerMemMB(Integer mem) {
+            this.mem = mem;
             return this;
         }
 

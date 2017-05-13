@@ -50,7 +50,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     public static final String TRANSFORMER_NAME = "sourceSorter";
     private static final String SORTED_PARTITION = "_DC_Sorted_Partition_";
 
-    private static final int BUFFER_SIZE = 5000;
+    private static final int BUFFER_SIZE = 10_000;
 
     private String wd;
     private String out;
@@ -164,7 +164,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     private void splitAvros() throws IOException {
         String avroGlob = out + (out.endsWith("/") ? "*.avro" : "/*.avro");
         List<String> avroFiles = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
-        ExecutorService executors = Executors.newFixedThreadPool(4);
+        ExecutorService executors = Executors.newFixedThreadPool(8);
         Map<String, Future<Boolean>> futures = new HashMap<>();
         for (String avroFile : avroFiles) {
             Future<Boolean> future = executors.submit(new AvroSplitCallable(avroFile));
@@ -245,6 +245,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             }
             dumpBuffer(buffer, bufferedPartition);
             uploadLocalFile(bufferedPartition);
+            cleanupLocalDir();
         }
 
         private void cleanupLocalDir() {
@@ -276,7 +277,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
                 } else {
                     AvroUtils.appendToLocalFile(buffer, outputFileName, true);
                 }
-                log.info("Dumped " + buffer.size() + " records to the output file " + outputFileName.split("/")[1]);
+                log.debug("Dumped " + buffer.size() + " records to the output file " + outputFileName.split("/")[1]);
             } catch (Exception e) {
                 throw new RuntimeException(
                         "Failed to dump " + buffer.size() + " records to the output file " + outputFileName, e);

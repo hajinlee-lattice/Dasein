@@ -16,6 +16,8 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
     private String version;
     private String serviceBeanName;
 
+    private Integer containerMemMB;
+
     private Map<String, String> sourceConfigurations;
     private String rootOperationId;
     private List<SourceColumn> sourceColumns = new ArrayList<SourceColumn>();
@@ -120,5 +122,13 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
 
     public void setEnableSlack(boolean enableSlack) {
         this.enableSlack = enableSlack;
+    }
+
+    public Integer getContainerMemMB() {
+        return containerMemMB;
+    }
+
+    public void setContainerMemMB(Integer containerMemMB) {
+        this.containerMemMB = containerMemMB;
     }
 }

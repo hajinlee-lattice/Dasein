@@ -17,6 +17,9 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("internalResourceHostPort")
     private String internalResourceHostPort;
 
+    @JsonProperty("containerMemMB")
+    private Integer containerMemoryMB;
+
     @JsonProperty
     private boolean restart;
 
@@ -90,5 +93,13 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void setInternalResourceHostPort(String internalResourceHostPort) {
         this.internalResourceHostPort = internalResourceHostPort;
+    }
+
+    public Integer getContainerMemoryMB() {
+        return containerMemoryMB;
+    }
+
+    public void setContainerMemoryMB(Integer containerMemoryMB) {
+        this.containerMemoryMB = containerMemoryMB;
     }
 }

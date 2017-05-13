@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -43,8 +42,6 @@ import com.latticeengines.workflowapi.service.WorkflowContainerService;
 public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     private static final Log log = LogFactory.getLog(WorkflowContainerService.class);
-    private static final String DATACLOUD_SERVICE_ACCOUNT = "PropDataService.PropDataService.Production";
-    private static final String DATACLOUD_JOB_KEYWORD = "Transformation";
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
@@ -66,21 +63,6 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     @Autowired
     private JobProxy jobProxy;
-
-    @Value("${datacloud.etl.cascading.platform}")
-    private String datacloudCascadingEngine;
-
-    @Value("${datacloud.etl.workflow.mem.mb}")
-    private String datacloudWorkflowMem;
-
-    @Value("${dataflowapi.flink.local.vcores}")
-    private Integer flinkVcores;
-
-    @Value("${dataflowapi.flink.local.mem}")
-    private Integer flinkMemory;
-
-    @Value("${datacloud.etl.cascading.flink.mode}")
-    private String etlFlinkMode;
 
     @Override
     public ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfig) {
@@ -126,23 +108,18 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         Properties containerProperties = new Properties();
         containerProperties.put(WorkflowProperty.WORKFLOWCONFIG, workflowConfig.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
-        if (isDataCloudEtlJob(workflowConfig)) {
-            if ("local".equals(etlFlinkMode) && "FLINK".equalsIgnoreCase(datacloudCascadingEngine)) {
-                appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
-                appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkVcores));
-                containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
-                containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkVcores));
-            } else {
-                appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), "1");
-                appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(datacloudWorkflowMem));
-                containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-                containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(datacloudWorkflowMem));
-            }
+        Integer mem = workflowConfig.getContainerMemoryMB();
+        if (mem == null) {
+            mem = 2048;
         }
+        log.info("Set container memory to " + mem + " mb.");
+
+        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), "1");
+        appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(mem));
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(mem));
 
         job.setAppMasterPropertiesObject(appMasterProperties);
         job.setContainerPropertiesObject(containerProperties);
@@ -253,12 +230,6 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @VisibleForTesting
     void setJobProxy(JobProxy jobProxy) {
         this.jobProxy = jobProxy;
-    }
-
-    private boolean isDataCloudEtlJob(WorkflowConfiguration workflowConfig) {
-        String customer = workflowConfig.getCustomerSpace().toString();
-        String flowName = workflowConfig.getWorkflowName();
-        return DATACLOUD_SERVICE_ACCOUNT.equals(customer) && flowName.contains(DATACLOUD_JOB_KEYWORD);
     }
 
 }

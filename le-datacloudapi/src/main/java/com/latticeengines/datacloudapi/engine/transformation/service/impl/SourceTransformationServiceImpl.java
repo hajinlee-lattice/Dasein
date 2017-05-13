@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,9 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
     @Autowired
     private TransformationProgressEntityMgr transformationProgressEntityMgr;
 
+    @Value("${datacloud.etl.workflow.mem.mb}")
+    private Integer workflowMem;
+
     private ApplicationContext applicationContext;
 
     @Override
@@ -74,6 +78,10 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
     public TransformationProgress pipelineTransform(PipelineTransformationRequest request, String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
+        }
+
+        if (request.getContainerMemMB() == null) {
+            request.setContainerMemMB(workflowMem);
         }
 
         TransformationService<?> transformationService = (TransformationService<?>) applicationContext

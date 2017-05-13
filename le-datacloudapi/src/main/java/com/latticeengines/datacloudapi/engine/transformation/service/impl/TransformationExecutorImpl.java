@@ -2,6 +2,7 @@ package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
@@ -78,7 +79,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
         Integer retries = 0;
         while (retries++ < MAX_RETRY) {
             try {
-                PipelineTransformationService service = (PipelineTransformationService)transformationService;
+                PipelineTransformationService service = (PipelineTransformationService) transformationService;
                 TransformationConfiguration transformationConfiguration = service.createTransformationConfiguration(request);
 
                 if (transformationConfiguration != null) {
@@ -105,15 +106,21 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             TransformationProgress progress, TransformationProgressEntityMgr transformationProgressEntityMgr) {
         log.info("Kick off workflow for progress " + progress + " in pod " + HdfsPodContext.getHdfsPodId());
 
-        TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow") //
+        builder = builder.workflowName("propdataTransformationWorkflow") //
                 .payloadName("Transformation") //
                 .customerSpace(customerSpace) //
                 .hdfsPodId(HdfsPodContext.getHdfsPodId()) //
                 .transformationConfiguration(transformationConfiguration) //
                 .rootOperationUid(progress.getRootOperationUID()) //
                 .serviceBeanName(transformationConfiguration.getServiceBeanName()) //
-                .internalResourceHostPort("propdata") //
-                .build();
+                .internalResourceHostPort("propdata");
+
+        if (transformationConfiguration instanceof PipelineTransformationConfiguration) {
+            PipelineTransformationConfiguration ppConf = (PipelineTransformationConfiguration) transformationConfiguration;
+            builder.containerMemMB(ppConf.getContainerMemMB());
+        }
+
+        TransformationWorkflowConfiguration configuration = builder.build();
 
         AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
         progress.setYarnAppId(appSubmission.getApplicationIds().get(0));
