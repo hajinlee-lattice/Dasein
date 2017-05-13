@@ -8,8 +8,6 @@ import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
@@ -22,37 +20,10 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
 
     private static final Logger log = Logger.getLogger(AttributeResourceDeploymentTestNG.class);
 
-    private static final ObjectMapper OM = new ObjectMapper();
-
     private String getAttributeResourceUrl() {
         return ulyssesHostPort + "/ulysses/attributes";
     }
-
-    @Test(groups = "deployment")
-    public void testGetPrimaryAttributes() {
-        String url = getAttributeResourceUrl() + "/primary";
-        List<?> genericList = getOAuth2RestTemplate().getForObject(url, List.class);
-        List<PrimaryField> primaryFields = OM.convertValue(genericList, new TypeReference<List<PrimaryField>>() {
-        });
-        log.info("Converted Primary Fields: " + primaryFields);
-        verifyPrimaryFields(primaryFields);
-    }
-
-	private void verifyPrimaryFields(List<PrimaryField> primaryFields) {
-		Assert.assertNotNull(primaryFields);
-        Assert.assertTrue(primaryFields.size() > 0);
-        Assert.assertEquals(FieldInterpretationCollections.PrimaryMatchingFields.size(), primaryFields.size());
-        // Create a temporary set with Primary Field Names
-        Set<String> fieldNames = new HashSet<>();
-        for (PrimaryField field : primaryFields) {
-            fieldNames.add(field.getFieldName());
-        }
-        // Make sure that all the values from EnumSet are returned in response
-        for (FieldInterpretation field : FieldInterpretationCollections.PrimaryMatchingFields) {
-            Assert.assertTrue(fieldNames.contains(field.getFieldName()));
-        }
-	}
-
+    
     @Test(groups = "deployment")
     public void testGetPrimaryAttributeConfiguration() {
         String url = getAttributeResourceUrl() + "/primaryfield-configuration";
@@ -68,8 +39,22 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
         } else {
         	Assert.assertEquals(primaryFieldConfig.getValidationExpression().getExpression(), FieldInterpretationCollections.NON_FUZZY_MATCH_VALIDATION_EXPRESSION);
         }
-        
     }
+    
+	private void verifyPrimaryFields(List<PrimaryField> primaryFields) {
+		Assert.assertNotNull(primaryFields);
+        Assert.assertTrue(primaryFields.size() > 0);
+        Assert.assertEquals(FieldInterpretationCollections.PrimaryMatchingFields.size(), primaryFields.size());
+        // Create a temporary set with Primary Field Names
+        Set<String> fieldNames = new HashSet<>();
+        for (PrimaryField field : primaryFields) {
+            fieldNames.add(field.getFieldName());
+        }
+        // Make sure that all the values from EnumSet are returned in response
+        for (FieldInterpretation field : FieldInterpretationCollections.PrimaryMatchingFields) {
+            Assert.assertTrue(fieldNames.contains(field.getFieldName()));
+        }
+	}
     
     private FeatureFlagValueMap getFeatureFlags() {
         FeatureFlagValueMap map = getOAuth2RestTemplate().getForObject(
