@@ -38,4 +38,8 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="dnbMatchCommandDao" class="com.latticeengines.datacloud.match.dao.impl.DnbMatchCommandDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>
