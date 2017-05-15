@@ -7,7 +7,7 @@ from sklearn import ensemble
 
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
-
+import random
 
 logger = get_logger("pipeline")
 
@@ -23,8 +23,10 @@ class FeatureSelectionStep(PipelineStep):
     def transform(self, dataFrame, configMetadata, test):
         if test:
             return dataFrame
-        
         logger.info("Doing feature selection.")
+        if dataFrame.shape[0] <= 100000:
+            logger.info("There's no feature selection due to record# is less than or equal to 100000, record#=" + dataFrame.shape[0])
+            return dataFrame
         clf = ensemble.RandomForestClassifier(criterion="gini",
                                           n_estimators=100,
                                           min_samples_split=25,
@@ -43,9 +45,11 @@ class FeatureSelectionStep(PipelineStep):
         
         if "ADDEDCOLUMNS" in mediator:
             features.extend([x["ColumnName"] for x in mediator["ADDEDCOLUMNS"]])
-        
-        X_train = dataFrame[features]
-        Y_train = dataFrame[self.params["schema"]["target"]]
+            
+        rows = random.sample(dataFrame.index, int(dataFrame.shape[0] * 0.1))
+        sampleFrame = dataFrame.iloc[rows]
+        X_train = sampleFrame[features]
+        Y_train = sampleFrame[self.params["schema"]["target"]]
         clf.fit(X_train, Y_train)
         importances = clf.feature_importances_
         numInputs = len(importances)

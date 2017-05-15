@@ -93,6 +93,7 @@ def setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColum
                                 continue
                             if tokens[1] == 'enabled' and value.lower() == 'true':
                                 enabledSteps.append(step)
+                                continue
                             currentValue = getattr(step, tokens[1])
                             if type(currentValue) not in [type(list()), type(dict())]:
                                 setattr(step, tokens[1], (type(currentValue))(value))
@@ -108,9 +109,9 @@ def setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColum
         except Exception as e:
             logger.error(str(e))
 
-        for disabledStep in reversed(disabledSteps):
-            logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
-            steps.remove(disabledStep)
+    for disabledStep in reversed(disabledSteps):
+        logger.info('Remove disabled step ' + disabledStep.__class__.__name__)
+        steps.remove(disabledStep)
 
     for disabledStep in reversed(defaultDisabledSteps):
         if disabledStep in steps and disabledStep not in enabledSteps:
