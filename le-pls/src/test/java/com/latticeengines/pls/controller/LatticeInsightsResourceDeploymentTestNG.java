@@ -25,6 +25,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
+import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
+import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -60,6 +62,44 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertTrue(cube != null);
         assertTrue(cube.getNonNullCount() != null);
         assertTrue(cube.getStatistics() != null);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testStatsTopnAll()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+
+        String url = getRestAPIHostPort() + "/pls/latticeinsights/stats/topn/all?loadEnrichmentMetadata=false&max=9999";
+
+        Map<?, ?> topnallTemp = restTemplate.getForObject(url, Map.class);
+        assertNotNull(topnallTemp);
+        assertTrue(topnallTemp.size() > 0);
+
+        Map<String, TopNAttributes> topnall = JsonUtils.convertMap(topnallTemp, String.class, TopNAttributes.class);
+
+        for (String categoryStr : topnall.keySet()) {
+            Assert.assertNotNull(categoryStr);
+            Category category = Category.fromName(categoryStr);
+            Assert.assertNotNull(category);
+
+            TopNAttributes value = topnall.get(categoryStr);
+            Assert.assertNotNull(value);
+
+            Assert.assertNull(value.getEnrichmentAttributes());
+            Assert.assertNotNull(value.getTopAttributes());
+            Assert.assertTrue(value.getTopAttributes().size() > 0);
+
+            for (String subCategory : value.getTopAttributes().keySet()) {
+                List<TopAttribute> attrs = value.getTopAttributes().get(subCategory);
+                assertNotNull(attrs);
+                assertTrue(attrs.size() > 0);
+
+                for (TopAttribute attr : attrs) {
+                    assertNotNull(attr);
+                    assertNotNull(attr.getAttribute());
+                    assertNotNull(attr.getNonNullCount());
+                }
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
