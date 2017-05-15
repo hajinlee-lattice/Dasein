@@ -16,13 +16,9 @@ import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
-import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.metadata.service.RuleResultService;
 
 public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
-
-    @Autowired
-    private MetadataService mdService;
 
     @Autowired
     private RuleResultService ruleResultService;
@@ -48,7 +44,9 @@ public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
         assertEquals(retrievedResults.size(), results.size());
         assertEquals(retrievedResults, results);
-        JsonUtils.serialize(retrievedResults); // Confirm this works without exception
+        JsonUtils.serialize(retrievedResults); // Confirm this works without
+                                               // exception
+        ruleResultService.deleteColumnResults(results);
     }
 
     private ColumnRuleResult generateColumnResult(String modelId, Tenant tenant) {
@@ -78,7 +76,9 @@ public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
         assertEquals(retrievedResults.size(), results.size());
         assertEquals(retrievedResults, results);
-        JsonUtils.serialize(retrievedResults); // Confirm this works without exception
+        JsonUtils.serialize(retrievedResults); // Confirm this works without
+                                               // exception
+        ruleResultService.deleteRowResults(results);
     }
 
     private RowRuleResult generateRowResult(String modelId, Tenant tenant) {
@@ -103,6 +103,5 @@ public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
         result.setTenant(tenant);
         return result;
     }
-
 
 }

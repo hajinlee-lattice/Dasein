@@ -11,6 +11,10 @@ public interface RuleResultService {
 
     void createRowResults(List<RowRuleResult> rowResults);
 
+    void deleteColumnResults(List<ColumnRuleResult> columnResults);
+
+    void deleteRowResults(List<RowRuleResult> rowResults);
+
     List<ColumnRuleResult> findColumnResults(String modelId);
 
     List<RowRuleResult> findRowResults(String modelId);

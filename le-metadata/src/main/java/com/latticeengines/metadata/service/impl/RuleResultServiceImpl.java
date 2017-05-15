@@ -78,4 +78,18 @@ public class RuleResultServiceImpl implements RuleResultService {
         return rowResults;
     }
 
+    @Override
+    public void deleteColumnResults(List<ColumnRuleResult> columnResults) {
+        for (ColumnRuleResult columnRuleResult : columnResults) {
+            columnRuleResultEntityMgr.delete(columnRuleResult);
+        }
+    }
+
+    @Override
+    public void deleteRowResults(List<RowRuleResult> rowResults) {
+        for (RowRuleResult rowRuleResult : rowResults) {
+            rowRuleResultEntityMgr.delete(rowRuleResult);
+        }
+    }
+
 }
