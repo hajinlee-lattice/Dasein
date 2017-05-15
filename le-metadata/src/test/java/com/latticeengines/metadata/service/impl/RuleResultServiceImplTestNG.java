@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.RuleResultService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
@@ -28,6 +29,7 @@ public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace1));
     }
 
     @Test(groups = "functional")

@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @MappedSuperclass
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public abstract class BaseRuleResult implements HasPid, HasTenant {
 
     @JsonIgnore

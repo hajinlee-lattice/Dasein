@@ -57,4 +57,15 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     public void allDataCollectionMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
+
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.ColumnRuleResultEntityMgrImpl.*(..))")
+    public void allColumnRuleMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.RowRuleResultEntityMgrImpl.*(..))")
+    public void allRowRuleMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
 }
