@@ -50,8 +50,6 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     public static final String TRANSFORMER_NAME = "sourceSorter";
     private static final String SORTED_PARTITION = "_DC_Sorted_Partition_";
 
-    private static final int BUFFER_SIZE = 10_000;
-
     private String wd;
     private String out;
     private Schema targetSchema;
@@ -132,12 +130,14 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     }
 
     protected void postDataFlowProcessing(String workflowDir, SorterParameters paramters, SorterConfig configuration) {
-        try {
-            moveAvrosToOutput(workflowDir);
-            splitAvros();
-            cleanupOutputDir();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to process avro files result from cascading flow.", e);
+        if (paramters.getPartitions() > 1) {
+            try {
+                moveAvrosToOutput(workflowDir);
+                splitAvros(configuration.getSplittingThreads(), configuration.getSplittingChunkSize());
+                cleanupOutputDir();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to process avro files result from cascading flow.", e);
+            }
         }
     }
 
@@ -161,13 +161,13 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
         }
     }
 
-    private void splitAvros() throws IOException {
+    private void splitAvros(int numThreads, long chunkSize) throws IOException {
         String avroGlob = out + (out.endsWith("/") ? "*.avro" : "/*.avro");
         List<String> avroFiles = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
-        ExecutorService executors = Executors.newFixedThreadPool(8);
+        ExecutorService executors = Executors.newFixedThreadPool(numThreads);
         Map<String, Future<Boolean>> futures = new HashMap<>();
         for (String avroFile : avroFiles) {
-            Future<Boolean> future = executors.submit(new AvroSplitCallable(avroFile));
+            Future<Boolean> future = executors.submit(new AvroSplitCallable(avroFile, chunkSize));
             futures.put(avroFile, future);
         }
         long startTime = System.currentTimeMillis();
@@ -208,11 +208,13 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     private class AvroSplitCallable implements Callable<Boolean> {
 
         private final String avroFile;
+        private final long bufferSize;
         private String localDir;
         private int attempt = 0;
 
-        AvroSplitCallable(String avroFile) {
+        AvroSplitCallable(String avroFile, long bufferSize) {
             this.avroFile = avroFile;
+            this.bufferSize = bufferSize < 0 ? Integer.MAX_VALUE : bufferSize;
         }
 
         @Override
@@ -231,7 +233,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             while (iterator.hasNext()) {
                 GenericRecord record = iterator.next();
                 int partition = (int) record.get(SORTED_PARTITION);
-                if (partition != bufferedPartition || buffer.size() >= BUFFER_SIZE) {
+                if (partition != bufferedPartition || buffer.size() >= bufferSize) {
                     // should dump when switching partition or buffer is full
                     dumpBuffer(buffer, bufferedPartition);
                     buffer.clear();
@@ -294,12 +296,12 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
                 }
                 if (partition > -1) {
                     HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile, hdfsFile);
+                    log.info("Uploaded local file " + localFile + " to hdfs " + hdfsFile);
                 }
             } catch (IOException e) {
                 throw new RuntimeException("Failed to upload local buffer file " + localFile, e);
             }
             FileUtils.deleteQuietly(new File(localFile));
-            log.info("Uploaded local file " + localFile + " to hdfs " + hdfsFile);
         }
 
         private String outputFile(int partition) {

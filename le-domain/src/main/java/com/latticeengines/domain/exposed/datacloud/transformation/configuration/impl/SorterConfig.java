@@ -10,6 +10,12 @@ public class SorterConfig extends TransformerConfig {
     @JsonProperty("Partitions")
     private int partitions = 1;
 
+    @JsonProperty("SplittingThreads")
+    private int splittingThreads = 2;
+
+    @JsonProperty("SplittingChunkSize")
+    private long splittingChunkSize = -1;
+
     public String getSortingField() {
         return sortingField;
     }
@@ -26,4 +32,19 @@ public class SorterConfig extends TransformerConfig {
         this.partitions = partitions;
     }
 
+    public int getSplittingThreads() {
+        return splittingThreads;
+    }
+
+    public void setSplittingThreads(int splittingThreads) {
+        this.splittingThreads = splittingThreads;
+    }
+
+    public long getSplittingChunkSize() {
+        return splittingChunkSize;
+    }
+
+    public void setSplittingChunkSize(long splittingChunkSize) {
+        this.splittingChunkSize = splittingChunkSize;
+    }
 }
