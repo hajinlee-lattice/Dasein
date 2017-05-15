@@ -95,6 +95,15 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
+    public void setModelSummaryDownloadFlag(String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/modelsummarydownloadflag", tenantId);
+            restTemplate.postForObject(url, null, Void.class);
+        } catch (Exception e) {
+            log.error(String.format("Cannot set model summary download flag for tenant: %s", tenantId));
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public List<ModelSummary> getModelSummariesCrossTenantFromApplicationId(String applicationId,
             String tenantId) {

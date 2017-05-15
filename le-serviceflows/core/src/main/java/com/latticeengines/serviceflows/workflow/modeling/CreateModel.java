@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 @Component("createModel")
@@ -20,9 +21,14 @@ public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CreateModel.class);
 
+    private InternalResourceRestApiProxy proxy = null;
+
     @Override
     public void execute() {
         log.info("Inside CreateModel execute()");
+        if (proxy == null) {
+            proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
+        }
 
         Table eventTable = getEventTable();
         Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
@@ -33,6 +39,9 @@ public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
         } else {
             log.info("Found " + events.size() + " from event table");
         }
+        String tenantId = configuration.getCustomerSpace().toString();
+        log.info(String.format("Set model summary download flag for tenant: %s", tenantId));
+        proxy.setModelSummaryDownloadFlag(tenantId);
 
         for (Attribute event : events) {
             try {
