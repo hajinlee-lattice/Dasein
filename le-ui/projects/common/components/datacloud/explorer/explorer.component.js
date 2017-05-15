@@ -233,7 +233,7 @@ angular.module('common.datacloud.explorer', [
         if (DataCloudStore.enrichments) {
             vm.xhrResult(DataCloudStore.enrichments, true);
         } else {
-            if (DemoData) {
+            if (DemoData && vm.show_segmentation) {
                 vm.xhrResult({
                     data: DemoData.enrichments,
                     status: 200,
@@ -309,7 +309,9 @@ angular.module('common.datacloud.explorer', [
 
             if(vm.enrichments_completed) {
                 getEnrichmentCube().then(function(result){
-                    result.data.Stats = angular.extend({}, result.data.Stats, DemoData.cube.Stats);
+                    if (vm.show_segmentation) {
+                        result.data.Stats = angular.extend({}, result.data.Stats, DemoData.cube.Stats);
+                    }
                     vm.cube = result.data;
                 });
             }

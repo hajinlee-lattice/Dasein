@@ -1,6 +1,8 @@
 angular.module('common.datacloud')
-.service('DataCloudStore', function($q, DataCloudService){
-    var DataCloudStore = this;
+.service('DataCloudStore', function($q, DataCloudService, FeatureFlagService){
+    var DataCloudStore = this,
+        flags = FeatureFlagService.Flags(),
+        show_segmentation = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
 
     this.init = function() {
         this.enrichments = null;
@@ -208,8 +210,11 @@ angular.module('common.datacloud')
             var vm = this;
 
             DataCloudService.getAllTopAttributes(opts).then(function(response) {
-                response.data = angular.extend({}, response.data, DemoData.topn)
-                //Object.assign(response.data, DemoData.topn); - didn't work on IE
+                // fixme:DemoData:remove
+                if (show_segmentation) {
+                    response.data = angular.extend({}, response.data, DemoData.topn)
+                }
+
                 vm.topAttributes = response.data; // ben
                 deferred.resolve(vm.topAttributes);
             });
