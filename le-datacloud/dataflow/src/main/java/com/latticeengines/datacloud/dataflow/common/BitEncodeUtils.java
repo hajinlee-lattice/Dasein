@@ -210,6 +210,14 @@ public class BitEncodeUtils {
             }
         }
 
+        // If encode attr is in ValueColumn, DecodeStrategy and BitUnit are required
+        if (StringUtils.isNotEmpty(valueColumn)) {
+            if (decodeStrategy == null || bitUnit == null) {
+                throw new RuntimeException(
+                        "DecodeStrategy, ValueDict or BitUnit is empty for ValueColumn " + valueColumn);
+            }
+        }
+
         EnrichedBitCodeBook codeBook = new EnrichedBitCodeBook();
         codeBook.setKeyColumn(keyColumn);
         codeBook.setValueColumn(valueColumn);

@@ -78,7 +78,7 @@ public class AccountMasterSeedPrimaryDomainAggregator
             return context;
         }
         res = checkRuleExpectedString(arguments.getString(domainSourceField), context.domainSource,
-                AccountMasterSeedMergeWithDunsBuffer.LE);
+                AMSeedMergeWithDunsBuffer.LE);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {

@@ -15,10 +15,10 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AccountMasterSeedMergeWithoutDunsFunction extends BaseOperation implements Function {
+public class AMSeedMergeWithoutDunsFunction extends BaseOperation implements Function {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(AccountMasterSeedMergeWithoutDunsFunction.class);
+    private static final Log log = LogFactory.getLog(AMSeedMergeWithoutDunsFunction.class);
 
     private static final long serialVersionUID = -4930114585520783490L;
     private Map<String, Integer> namePositionMap;
@@ -29,15 +29,16 @@ public class AccountMasterSeedMergeWithoutDunsFunction extends BaseOperation imp
     private int amsIsPrimaryLocationLoc;
     private int amsNumberOfLocationLoc;
     private int amsDomainSourceLoc;
+    private String leDomainSourceCol;
 
-    private AccountMasterSeedMergeWithoutDunsFunction(Fields fieldDeclaration) {
+    private AMSeedMergeWithoutDunsFunction(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    public AccountMasterSeedMergeWithoutDunsFunction(Fields fieldDeclaration, Map<String, String> attrsFromLe,
+    public AMSeedMergeWithoutDunsFunction(Fields fieldDeclaration, Map<String, String> attrsFromLe,
             String amsDunsColumn, String amsIsPrimaryDomainColumn, String amsIsPrimaryLocationColumn,
-            String amsNumberOfLocationColumn, String amsDomainSourceColumn) {
+            String amsNumberOfLocationColumn, String amsDomainSourceColumn, String leDomainSourceCol) {
         this(fieldDeclaration);
         this.attrsFromLe = attrsFromLe;
         this.amsDunsLoc = namePositionMap.get(amsDunsColumn);
@@ -45,6 +46,7 @@ public class AccountMasterSeedMergeWithoutDunsFunction extends BaseOperation imp
         this.amsIsPrimaryLocationLoc = namePositionMap.get(amsIsPrimaryLocationColumn);
         this.amsNumberOfLocationLoc = namePositionMap.get(amsNumberOfLocationColumn);
         this.amsDomainSourceLoc = namePositionMap.get(amsDomainSourceColumn);
+        this.leDomainSourceCol = leDomainSourceCol;
     }
 
     @Override
@@ -59,7 +61,8 @@ public class AccountMasterSeedMergeWithoutDunsFunction extends BaseOperation imp
             }
         }
         result.set(amsDunsLoc, null);
-        result.set(amsDomainSourceLoc, "LE");
+        String domainSource = arguments.getString(leDomainSourceCol);
+        result.set(amsDomainSourceLoc, domainSource);
         result.set(amsIsPrimaryDomainLoc, "Y");
         result.set(amsIsPrimaryLocationLoc, "Y");
         result.set(amsNumberOfLocationLoc, 1);
