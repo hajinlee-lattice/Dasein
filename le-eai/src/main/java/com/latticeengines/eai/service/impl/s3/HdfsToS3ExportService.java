@@ -163,8 +163,7 @@ public class HdfsToS3ExportService {
                     Long recordsInFile = 0L;
                     while (iterator.hasNext()) {
                         String fileName = new Path(filePath).getName();
-                        if (config.getSplitSize() != null
-                                && config.getSplitSize() < HdfsUtils.getFileSize(yarnConfiguration, filePath)) {
+                        if (config.getSplitSize() != null) {
                             fileName = new Path(filePath).getName().replace(".avro", "-" + splitIdx + ".avro");
                         }
 
@@ -172,14 +171,18 @@ public class HdfsToS3ExportService {
                         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
                                 new GenericDatumWriter<GenericRecord>())) {
                             FileUtils.touch(avroFile);
-                            writer.create(schema, avroFile);
                             Long fileSize = FileUtils.sizeOf(avroFile);
-                            while (fileSize < splitSize && iterator.hasNext()) {
+                            if (fileSize == 0) {
+                                writer.create(schema, avroFile);
+                            }
+                            Long fileSizeIncrement = 0L;
+                            while (fileSizeIncrement < splitSize && iterator.hasNext()) {
                                 GenericRecord datum = iterator.next();
                                 writer.append(datum);
                                 recordsInFile++;
-                                fileSize = FileUtils.sizeOf(avroFile);
+                                fileSizeIncrement = FileUtils.sizeOf(avroFile) - fileSize;
                             }
+                            fileSize = FileUtils.sizeOf(avroFile);
                             log.info("Downloaded " + recordsInFile + " records to " + fileName
                                     + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
                         } catch (IOException e) {
