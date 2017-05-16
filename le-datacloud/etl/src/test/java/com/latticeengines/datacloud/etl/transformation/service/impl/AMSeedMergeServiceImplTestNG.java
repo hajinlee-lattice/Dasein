@@ -240,6 +240,15 @@ public class AMSeedMergeServiceImplTestNG
             { "y.com", "Y", "N", 20, "DunsTestIsPriDom333", null, "DnBNameTestIsPriDom333", "CA", "United States",
                     "England", 1000000L, 1000, "DnBPITestIsPriDom333", null, null, null, null, null, null, null, null,
                     null }, //
+            { "zz.com", "Y", "Y", 21, "DunsTestPartialMissDom", null, "DnBNameTestPartialMissDom", "CA",
+                    "United States", "England", 1000000L, 1000, "DnBPITestPartialMissDom", null, null, null, null,
+                    null, null, null, null, null }, //
+            { "yy.com", "Y", "Y", 21, "DunsTestPartialMissDom", null, "DnBNameTestPartialMissDom", "CA",
+                    "United States", "England", 1000000L, 1000, "DnBPITestPartialMissDom", null, null, null, null,
+                    null, null, null, null, null }, //
+            { null, "Y", "Y", 21, "DunsTestPartialMissDom", null, "DnBNameTestPartialMissDom", "CA", "United States",
+                    "England", 1000000L, 1000, "DnBPITestPartialMissDom", null, null, null, null,
+                    null, null, null, null, null }, //
     };
 
     private void prepareDnBSeed() {
@@ -379,6 +388,10 @@ public class AMSeedMergeServiceImplTestNG
                         "DnBPITestIsPriDom333", "DnB", 1000, 1000000L, "USA", "UNITED KINGDOM", "CALIFORNIA" },
                 { "y.com", "DunsTestIsPriDom333", "null", "N", "Y", 20, "DnBNameTestIsPriDom333",
                         "DnBPITestIsPriDom333", "DnB", 1000, 1000000L, "USA", "UNITED KINGDOM", "CALIFORNIA" },
+                { "zz.com", "DunsTestPartialMissDom", "null", "Y", "Y", 21, "DnBNameTestPartialMissDom",
+                        "DnBPITestPartialMissDom", "DnB", 1000, 1000000L, "USA", "UNITED KINGDOM", "CALIFORNIA" },
+                { "yy.com", "DunsTestPartialMissDom", "null", "Y", "Y", 21, "DnBNameTestPartialMissDom",
+                        "DnBPITestPartialMissDom", "DnB", 1000, 1000000L, "USA", "UNITED KINGDOM", "CALIFORNIA" },
 
         };
         int rowNum = 0;
@@ -425,7 +438,7 @@ public class AMSeedMergeServiceImplTestNG
             Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 30);
+        Assert.assertEquals(rowNum, 32);
         Assert.assertEquals(ids.size(), rowNum);
     }
 

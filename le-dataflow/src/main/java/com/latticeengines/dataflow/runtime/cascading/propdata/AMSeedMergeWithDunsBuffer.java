@@ -108,7 +108,7 @@ public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
         }
         // Clean up domains from DnB
         dnbDomToIsPri.entrySet().removeIf(dnbDomEnt -> leDomToSrc.containsKey(dnbDomEnt.getKey())
-                || (StringUtils.isBlank(dnbDomEnt.getKey()) && leDomToSrc.size() > 0));
+                || (StringUtils.isBlank(dnbDomEnt.getKey()) && (leDomToSrc.size() > 0 || dnbDomToIsPri.size() > 1)));
         // Domains from DnB
         for (Map.Entry<String, String> dnbDomEnt : dnbDomToIsPri.entrySet()) {
             Tuple result = Tuple.size(getFieldDeclaration().size());
