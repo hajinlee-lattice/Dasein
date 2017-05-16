@@ -1,8 +1,6 @@
 angular.module('common.datacloud')
-.service('DataCloudStore', function($q, DataCloudService, FeatureFlagService){
-    var DataCloudStore = this,
-        flags = FeatureFlagService.Flags(),
-        show_segmentation = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+.service('DataCloudStore', function($q, DataCloudService){
+    var DataCloudStore = this;
 
     this.init = function() {
         this.enrichments = null;
@@ -210,11 +208,6 @@ angular.module('common.datacloud')
             var vm = this;
 
             DataCloudService.getAllTopAttributes(opts).then(function(response) {
-                // fixme:DemoData:remove
-                if (show_segmentation) {
-                    response.data = angular.extend({}, response.data, DemoData.topn)
-                }
-
                 vm.topAttributes = response.data; // ben
                 deferred.resolve(vm.topAttributes);
             });
