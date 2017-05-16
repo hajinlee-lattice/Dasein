@@ -95,7 +95,7 @@ public class HdfsToRedshiftService {
     }
 
     public void cleanupS3(HdfsToRedshiftConfiguration configuration) {
-        if (configuration.isCleanupS3()) {
+        if (!configuration.isCleanupS3()) {
             return;
         }
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
