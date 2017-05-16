@@ -123,7 +123,7 @@ alias replacePropertyTokens='python $WSHOME/le-config/updateProperty.py'
 
 alias uibld='pushd $WSHOME/le-ui && npm install && popd'
 alias uirunlpi='cd $WSHOME/le-ui && npm run local'
-alias uirunadmin='cd $WSHOME/le-ui && npm run local'
+alias uirunadmin='cd $WSHOME/le-ui && npm run local_admin'
 
 alias dpltc='python $WSHOME/le-dev/scripts/tcdpl.py'
 alias runtc='bash $WSHOME/le-dev/scripts/run-tomcat.sh'
