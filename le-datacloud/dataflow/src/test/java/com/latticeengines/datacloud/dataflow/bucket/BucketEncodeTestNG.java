@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
+import com.latticeengines.datacloud.dataflow.transformation.BucketEncode;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;

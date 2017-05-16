@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
+import com.latticeengines.datacloud.dataflow.transformation.BucketEncode;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
