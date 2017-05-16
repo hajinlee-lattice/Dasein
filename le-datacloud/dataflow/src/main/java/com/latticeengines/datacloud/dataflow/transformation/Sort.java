@@ -49,12 +49,12 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
             // find partition boundaries
             Node boundaries = profile(source, parameters).renamePipe("boundaries").checkpoint("boundaries");
             source = source.leftJoin(new FieldList(DUMMY_JOIN_KEY), boundaries, new FieldList(DUMMY_JOIN_KEY));
-            // mark partition
+            // mark partition id
             FieldMetadata sortingFm = source.getSchema(parameters.getSortingField());
             source = markPartition(source, parameters.getSortingField(), parameters.getPartitionField(),
                     (Class<Comparable<?>>) sortingFm.getJavaType());
             fieldsToRetain.add(parameters.getPartitionField());
-            // group by and retain
+            // group by partition id and retain original fields + partition id
             source = source.groupByAndRetain(new FieldList(fieldsToRetain),
                     new FieldList(parameters.getPartitionField()), new FieldList(parameters.getSortingField()));
             return source;

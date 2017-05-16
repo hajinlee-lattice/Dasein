@@ -1,6 +1,6 @@
-package com.latticeengines.datacloud.dataflow.bucket;
+package com.latticeengines.datacloud.dataflow.transformation;
 
-import static com.latticeengines.datacloud.dataflow.bucket.BucketEncode.BEAN_NAME;
+import static com.latticeengines.datacloud.dataflow.transformation.BucketEncode.BEAN_NAME;
 
 import java.util.ArrayList;
 import java.util.HashMap;
