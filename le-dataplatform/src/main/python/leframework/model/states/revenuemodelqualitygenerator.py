@@ -29,16 +29,32 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
 
             # eventRanking is "predictedEvent"
             eventRanking = self.replaceNullsWithZero(list(mediator.data[schema["reserved"]["score"]]))
-            eventScores = self.calculateEventScore(event, eventRanking)
-            self.modelquality["eventScores"] = {"allPeriods": eventScores}
+            try:
+                eventScores = self.calculateEventScore(event, eventRanking)
+                self.logger.info("Finished calculating EventScores in ModelQualityGenerator for All Periods")
+                self.modelquality["eventScores"] = {"allPeriods": eventScores}
+            except:
+                self.logger.info("Caught error in EventScore for All Periods")
+                self.modelquality["eventScores"] = {"allPeriods": {}}
+
+
+
             if self.usePeriodOffset:
                 for k in periodOffsetMapping.keys():
                     ind = periodOffsetMapping[k]
                     periodOffsetName = "Period_" + str(k)
                     newEvent = [event[i] for i in ind]
                     newRanking = [eventRanking[i] for i in ind]
-                    eventScores = self.calculateEventScore(newEvent, newRanking)
-                    self.modelquality["eventScores"][periodOffsetName] = eventScores
+                    try:
+                        eventScores = self.calculateEventScore(newEvent, newRanking)
+                        self.modelquality["eventScores"][periodOffsetName] = eventScores
+                        self.logger.info("Finished calculating EventScores in ModelQualityGenerator for Period " + str(k))
+                    except Exception as e:
+                        self.logger.error("Caught error in EventScore for Period "+str(k))
+                        self.logger.error(e)
+                        self.modelquality["eventScores"][periodOffsetName] = {}
+
+
 
             mediator.modelquality = self.modelquality
             self.logger.info("Finished calculating EventScores in ModelQualityGenerator")
@@ -51,31 +67,68 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
                 valueSpent = self.replaceNullsWithZero(list(mediator.data[mediator.revenueColumn]))
                 valueRanking = self.replaceNullsWithZero(
                         list(mediator.data[mediator.schema["reserved"]["predictedrevenue"]]))
-
                 expectedValueRanking = [valueRanking[i] * eventRanking[i] for i in range(len(valueRanking))]
-                expectedValueScores = self.calculateValueScore(valueSpent, expectedValueRanking, eventRanking,
-                                                               valueRanking, expectedValueRanking)
-                self.modelquality["expectedValueScores"] = {"allPeriods": expectedValueScores}
-                self.logger.info("Finished Calculating ExpectedValueScores in ModelQualityGenerator")
 
-                propensityValueScores = self.calculateValueScore(valueSpent, eventRanking, eventRanking, valueRanking,
-                                                                 expectedValueRanking)
-                self.modelquality["propensityValueScores"] = {"allPeriods": propensityValueScores}
-                self.logger.info("Finished Calculating PropensityValueScores in ModelQualityGenerator")
+                try:
+                    expectedValueScores = self.calculateValueScore(valueSpent, expectedValueRanking, eventRanking,valueRanking, expectedValueRanking)
+                    self.modelquality["expectedValueScores"] = {"allPeriods": expectedValueScores}
+                    self.logger.info("Finished Calculating ExpectedValueScores in ModelQualityGenerator for All Periods")
+                except Exception as e:
+                    self.logger.error("Error Calculating ExpectedValueScores for All Periods")
+                    self.logger.error(e)
+                    self.modelquality["expectedValueScores"] = {"allPeriods": {}}
 
-                predictedValueValueScores = self.calculateValueScore(valueSpent, valueRanking, eventRanking,
-                                                                     valueRanking, expectedValueRanking)
-                self.modelquality["predictedValueValueScores"] = {"allPeriods": predictedValueValueScores}
-                self.logger.info("Finished Calculating PredictedValueValueScores in ModelQualityGenerator")
 
-                precisionRecallValueMatrix = self.precisionRecallMatrix(valueRanking, valueSpent)
-                precisionRecallEVMatrix = self.precisionRecallMatrix(expectedValueRanking, valueSpent)
-                simplifiedPrecisionRecallEVMatrix = self.simplifyPrecisionRecallResults(precisionRecallEVMatrix)
-                self.modelquality["precisionRecallValueMatrix"] = {"allPeriods": precisionRecallValueMatrix}
-                self.modelquality["precisionRecallEVMatrix"] = {"allPeriods": precisionRecallEVMatrix}
-                self.modelquality["simplifiedPrecisionRecallEVMatrix"] = {
-                    "allPeriods": simplifiedPrecisionRecallEVMatrix}
-                self.logger.info("Finished Calculating Precision Recall Matricies in ModelQualityGenerator")
+                try:
+                    propensityValueScores = self.calculateValueScore(valueSpent, eventRanking, eventRanking, valueRanking,
+                                                                     expectedValueRanking)
+                    self.modelquality["propensityValueScores"] = {"allPeriods": propensityValueScores}
+                    self.logger.info("Finished Calculating PropensityValueScores in ModelQualityGenerator for All Periods")
+                except Exception as e:
+                    self.logger.error("Error Calculating PropensityValueScores for All Periods")
+                    self.logger.error(e)
+                    self.modelquality["propensityValueScores"] = {"allPeriods": {}}
+
+                try:
+                    predictedValueValueScores = self.calculateValueScore(valueSpent, valueRanking, eventRanking,
+                                                                         valueRanking, expectedValueRanking)
+                    self.modelquality["predictedValueValueScores"] = {"allPeriods": predictedValueValueScores}
+                    self.logger.info("Finished Calculating PredictedValueValueScores in ModelQualityGenerator for All Periods")
+                except Exception as e:
+                    self.logger.info("Error Calculating PredictedValueValueScores for All Periods")
+                    self.logger.error(e)
+                    self.modelquality["predictedValueValueScores"] = {"allPeriods": {}}
+
+
+
+
+                try:
+                    precisionRecallValueMatrix = self.precisionRecallMatrix(valueRanking, valueSpent)
+                    self.logger.info("Finished Calculating precision recall value matrix for all Periods")
+                    self.modelquality["precisionRecallValueMatrix"] = {"allPeriods": precisionRecallValueMatrix}
+                except Exception as e:
+                    self.logger.info("Error Calculating precision recall value matrix for all Periods")
+                    self.logger.error(e)
+                    self.modelquality["precisionRecallValueMatrix"] = {"allPeriods": {}}
+
+                try:
+                    precisionRecallEVMatrix = self.precisionRecallMatrix(expectedValueRanking, valueSpent)
+                    self.logger.info("Finished Calculating precision recall ev matrix for all Periods")
+                    self.modelquality["precisionRecallEVMatrix"] = {"allPeriods": precisionRecallEVMatrix}
+                except Exception as e:
+                    self.logger.info("Error Calculating precision recall ev matrix for all Periods")
+                    self.logger.error(e)
+                    self.modelquality["precisionRecallEVMatrix"] = {"allPeriods": {}}
+
+                try:
+                    simplifiedPrecisionRecallEVMatrix = self.simplifyPrecisionRecallResults(precisionRecallEVMatrix)
+                    self.logger.info("Finished Calculating simpliefied precision recall ev matrix for all Periods")
+                    self.modelquality["simplifiedPrecisionRecallEVMatrix"] = {"allPeriods": simplifiedPrecisionRecallEVMatrix}
+                except Exception as e:
+                    self.logger.info("Error Calculating simpliefied precision recall ev matrix for all Periods")
+                    self.logger.error(e)
+                    self.modelquality["simplifiedPrecisionRecallEVMatrix"] = {"allPeriods": {}}
+
 
                 if self.usePeriodOffset:
                     for k in periodOffsetMapping.keys():
@@ -85,20 +138,41 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
                         expectedValueRanking_Period = [expectedValueRanking[i] for i in ind]
                         valueRanking_Period = [valueRanking[i] for i in ind]
                         eventRanking_Period = [eventRanking[i] for i in ind]
+                        #print k, len(ind)
 
-                        expectedValueScores = self.calculateValueScore(valueSpent_Period, expectedValueRanking_Period,
-                                                                       eventRanking_Period, valueRanking_Period,
-                                                                       expectedValueRanking_Period)
-                        propensityValueScores = self.calculateValueScore(valueSpent_Period, eventRanking_Period,
-                                                                         eventRanking_Period, valueRanking_Period,
-                                                                         expectedValueRanking_Period)
+                        try:
+                            expectedValueScores = self.calculateValueScore(valueSpent_Period, expectedValueRanking_Period,
+                                                                           eventRanking_Period, valueRanking_Period,
+                                                                           expectedValueRanking_Period)
+                            self.logger.info("Finished Calculating ExpectedValueScores in ModelQualityGenerator for Period " +str(k))
+                            self.modelquality["expectedValueScores"][periodOffsetName] = expectedValueScores
+                        except Exception as e:
+                            self.logger.info("Error Calculating ExpectedValueScores in ModelQualityGenerator for Period " +str(k))
+                            self.logger.error(e)
+                            self.modelquality["expectedValueScores"][periodOffsetName] = {}
 
-                        predictedValueValueScores = self.calculateValueScore(valueSpent_Period, valueRanking_Period,
+                        try:
+                            propensityValueScores = self.calculateValueScore(valueSpent_Period, eventRanking_Period,
                                                                              eventRanking_Period, valueRanking_Period,
                                                                              expectedValueRanking_Period)
-                        self.modelquality["expectedValueScores"][periodOffsetName] = expectedValueScores
-                        self.modelquality["propensityValueScores"][periodOffsetName] = propensityValueScores
-                        self.modelquality["predictedValueValueScores"][periodOffsetName] = predictedValueValueScores
+                            self.logger.info("Finished Calculating PropensityValueScores in ModelQualityGenerator for Period " +str(k))
+                            self.modelquality["propensityValueScores"][periodOffsetName] = propensityValueScores
+                        except Exception as e:
+                            self.logger.info("Error Calculating PropensityValueScores in ModelQualityGenerator for Period " +str(k))
+                            self.logger.error(e)
+                            sself.modelquality["propensityValueScores"][periodOffsetName] = {}
+
+
+                        try:
+                            predictedValueValueScores = self.calculateValueScore(valueSpent_Period, valueRanking_Period,
+                                                                                 eventRanking_Period, valueRanking_Period,
+                                                                                 expectedValueRanking_Period)
+                            self.logger.info("Finished Calculating PredictedValueValueScores in ModelQualityGenerator for Period " + str(k))
+                            self.modelquality["predictedValueValueScores"][periodOffsetName] = predictedValueValueScores
+                        except Exception as e:
+                            self.logger.info("Error Calculating PredictedValueValueScores in ModelQualityGenerator for Period " + str(k))
+                            self.logger.error(e)
+                            sself.modelquality["predictedValueValueScores"][periodOffsetName] = {}
 
             mediator.modelquality = self.modelquality
         except Exception as e:
@@ -131,7 +205,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
     def calculateValueScore(self, valSpent, ranking, eventRanking=None, valueRanking=None, expectedValueRanking=None):
         length = len(valSpent)
         bucketNumber = int(min(100.0,float(length)/10))
-        if bucketNumber<4: return {}
+        if bucketNumber<3: return {"not enough data to bucket":length}
         if length != len(ranking): return None
         # sort by rank and by value spent to see how well it works
         indR = self.sortedInd(ranking)
@@ -216,7 +290,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
     def precisionRecallMatrix(self, ranking, valSpent):
         length = len(valSpent)
         bucketNumber = int(min(100.0,float(length)/10))
-        if bucketNumber<4: return {}
+        if bucketNumber<3: {"not enough data to bucket":length}
         if length != len(ranking): return None
         indR = self.sortedInd(ranking, False)
         indV = self.sortedInd(valSpent, False)
@@ -240,9 +314,9 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
     def calculateEventScore(self, event, ranking):
         length = len(event)
         numBuckets = int(min(100.0,float(length)/10))
-        if numBuckets < 4: return {}
+        if numBuckets<3: return {"not enough data to bucket":length}
         if length != len(ranking):
-            return None
+            return {}
         indR = self.sortedInd(ranking)
         totalEvents = float(sum(event))
         if totalEvents == 0:
@@ -250,6 +324,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
         percentEvents = np.cumsum([event[i] / totalEvents for i in indR])
         auc = np.mean(percentEvents)
         liftCurve = [percentEvents[i] * len(percentEvents) / float(i + 1) for i in range(len(percentEvents))]
+
         bucketIncr = 1.0 / numBuckets
         liftBuckets = [int(i * bucketIncr * len(liftCurve)) for i in range(1, numBuckets + 1)]
         liftBuckets[len(liftBuckets) - 1] = len(liftCurve) - 1
