@@ -19,6 +19,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AMSeedMergeWithDunsBuffer.class);
 
     private static final long serialVersionUID = -5435451652686146347L;
@@ -27,49 +28,48 @@ public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
     public static final String DNB = "DnB";
 
     private Map<String, Integer> namePositionMap;
-    private Map<String, String> dnbToAms;
 
-    private String dnbDunsCol;
-    private String dnbDomainCol;
-    private String leDomainCol;
-    private int amsDomainLoc;
-    private String dnbIsPrimaryDomainCol;
-    private int amsIsPrimaryDomainLoc;
-    private int amsDomainSourceLoc;
-    private String leDomainSourceCol;
+    private String dnbDomCol;
+    private String leDomCol;
+    private int amsDomLoc;
+    private String dnbIsPriDomCol;
+    private int amsIsPriDomLoc;
+    private int amsDomSrcLoc;
+    private String leDomSrcCol;
 
     // le domain -> le domain source
-    private Map<String, String> leDomainToSource;
-    // Duns -> Firmographic attributes (ams attribute -> dnb value)
-    private Map<String, Map<String, Object>> dunsToDnBFirmAttrs;
-    // Duns -> <dnb domain -> dnb isPrimaryDomain>
-    private Map<String, Map<String, String>> dunsToDnBDomains;
+    private Map<String, String> leDomToSrc;
+    // dnb attr -> ams attr
+    private Map<String, String> amsToDnB;
+    // ams attr -> dnb firmographic attributes
+    private Map<String, Object> amsToDnBFirmo;
+    // dnb domain -> dnb isPrimaryDomain
+    private Map<String, String> dnbDomToIsPri;
 
     private AMSeedMergeWithDunsBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    public AMSeedMergeWithDunsBuffer(Fields fieldDeclaration, Map<String, String> dnbToAms, String dnbDunsCol,
-            String dnbDomainCol, String leDomainCol, String dnbIsPrimaryDomainCol,
-            String amsIsPrimaryDomainCol, String amsDomainCol, String amsDomainSourceCol, String leDomainSourceCol) {
+    public AMSeedMergeWithDunsBuffer(Fields fieldDeclaration, Map<String, String> amsToDnB, 
+            String dnbDomCol, String leDomCol, String dnbIsPriDomCol, String amsIsPriDomCol, String amsDomCol,
+            String amsDomainSourceCol, String leDomSrcCol) {
         this(fieldDeclaration);
-        this.dnbToAms = dnbToAms;
-        this.dnbDunsCol = dnbDunsCol;
-        this.dnbDomainCol = dnbDomainCol;
-        this.leDomainCol = leDomainCol;
-        this.amsDomainLoc = namePositionMap.get(amsDomainCol);
-        this.dnbIsPrimaryDomainCol = dnbIsPrimaryDomainCol;
-        this.amsIsPrimaryDomainLoc = namePositionMap.get(amsIsPrimaryDomainCol);
-        this.amsDomainSourceLoc = namePositionMap.get(amsDomainSourceCol);
-        this.leDomainSourceCol = leDomainSourceCol;
+        this.amsToDnB = amsToDnB;
+        this.dnbDomCol = dnbDomCol;
+        this.leDomCol = leDomCol;
+        this.amsDomLoc = namePositionMap.get(amsDomCol);
+        this.dnbIsPriDomCol = dnbIsPriDomCol;
+        this.amsIsPriDomLoc = namePositionMap.get(amsIsPriDomCol);
+        this.amsDomSrcLoc = namePositionMap.get(amsDomainSourceCol);
+        this.leDomSrcCol = leDomSrcCol;
     }
 
     @SuppressWarnings("unchecked")
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
-        leDomainToSource = new HashMap<>();
-        dunsToDnBFirmAttrs = new HashMap<>();
-        dunsToDnBDomains = new HashMap<>();
+        leDomToSrc = new HashMap<>();
+        amsToDnBFirmo = new HashMap<>();
+        dnbDomToIsPri = new HashMap<>();
         TupleEntry group = bufferCall.getGroup();
         Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
         setupTupleForArgument(bufferCall, arguments, group);
@@ -78,63 +78,53 @@ public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
     private void setupTupleForArgument(BufferCall bufferCall, Iterator<TupleEntry> argumentsInGroup, TupleEntry group) {
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
-            String leDomain = arguments.getString(leDomainCol);
-            String domainSource = arguments.getString(leDomainSourceCol);
-            if (StringUtils.isNotEmpty(leDomain)) {
-                leDomainToSource.put(leDomain, domainSource);
+            String leDomain = arguments.getString(leDomCol);
+            String domainSource = arguments.getString(leDomSrcCol);
+            if (StringUtils.isNotBlank(leDomain)) {
+                leDomToSrc.put(leDomain, domainSource);
             }
-            String dnbDuns = arguments.getString(dnbDunsCol);
-            if (StringUtils.isEmpty(dnbDuns)) {
-                log.error("Catch empty duns with non-empty du duns");
-            } else {
-                if (!dunsToDnBFirmAttrs.containsKey(dnbDuns)) {
-                    Map<String, Object> map = new HashMap<>();
-                    for (Map.Entry<String, String> entry : dnbToAms.entrySet()) {
-                        if (StringUtils.isNotEmpty(entry.getValue())) {
-                            map.put(entry.getKey(), arguments.getObject(entry.getValue()));
-                        }
+            if (amsToDnBFirmo.size() == 0) {
+                for (Map.Entry<String, String> entry : amsToDnB.entrySet()) {
+                    if (StringUtils.isNotEmpty(entry.getValue())) {
+                        amsToDnBFirmo.put(entry.getKey(), arguments.getObject(entry.getValue()));
                     }
-                    dunsToDnBFirmAttrs.put(dnbDuns, map);
                 }
-                String dnbDomain = arguments.getString(dnbDomainCol);
-                String dnbIsPrimaryDomain = arguments.getString(dnbIsPrimaryDomainCol);
-                if (!dunsToDnBDomains.containsKey(dnbDuns)) {
-                    dunsToDnBDomains.put(dnbDuns, new HashMap<>());
-                }
-                dunsToDnBDomains.get(dnbDuns).put(dnbDomain, dnbIsPrimaryDomain);
             }
-
+            String dnbDomain = arguments.getString(dnbDomCol);
+            String dnbIsPrimaryDomain = arguments.getString(dnbIsPriDomCol);
+            dnbDomToIsPri.put(dnbDomain, dnbIsPrimaryDomain);
         }
-        // Duns -> Firmographic attributes (ams attribute -> dnb value)
-        for (Map.Entry<String, Map<String, Object>> entry : dunsToDnBFirmAttrs.entrySet()) {
-            for (Map.Entry<String, String> leDomEnt : leDomainToSource.entrySet()) { // leDomainToSource could be empty
-                Tuple result = Tuple.size(getFieldDeclaration().size());
-                // Copy firmographic attribute values from dnb
-                for (String attr : dnbToAms.keySet()) {
-                    result.set(namePositionMap.get(attr), entry.getValue().get(attr));
-                }
-                result.set(amsDomainSourceLoc, leDomEnt.getValue());
-                result.set(amsDomainLoc, leDomEnt.getKey());
-                result.set(amsIsPrimaryDomainLoc, "Y");
-                bufferCall.getOutputCollector().add(result);
+        // Domains from le
+        for (Map.Entry<String, String> leDomEnt : leDomToSrc.entrySet()) {
+            Tuple result = Tuple.size(getFieldDeclaration().size());
+            // Copy firmographic attribute values from dnb
+            for (String attr : amsToDnB.keySet()) {
+                result.set(namePositionMap.get(attr), amsToDnBFirmo.get(attr));
             }
-            for (Map.Entry<String, String> dnbDomEnt : dunsToDnBDomains.get(entry.getKey()).entrySet()) {
-                if (!leDomainToSource.containsKey(dnbDomEnt.getKey())
-                        && !(dnbDomEnt.getKey() == null && leDomainToSource.size() > 0)) {
-                    Tuple result = Tuple.size(getFieldDeclaration().size());
-                    for (String attr : dnbToAms.keySet()) {
-                        result.set(namePositionMap.get(attr), entry.getValue().get(attr));
-                    }
-                    result.set(amsDomainSourceLoc, DNB);
-                    result.set(amsDomainLoc, dnbDomEnt.getKey());
-                    if (leDomainToSource.size() > 0) {
-                        result.set(amsIsPrimaryDomainLoc, "N");
-                    } else {
-                        result.set(amsIsPrimaryDomainLoc, dnbDomEnt.getValue());
-                    }
-                    bufferCall.getOutputCollector().add(result);
-                }
+            result.set(amsDomSrcLoc, leDomEnt.getValue());
+            result.set(amsDomLoc, leDomEnt.getKey());
+            result.set(amsIsPriDomLoc, "Y");
+            bufferCall.getOutputCollector().add(result);
+        }
+        // Clean up domains from DnB
+        dnbDomToIsPri.entrySet().removeIf(dnbDomEnt -> leDomToSrc.containsKey(dnbDomEnt.getKey())
+                || (StringUtils.isBlank(dnbDomEnt.getKey()) && leDomToSrc.size() > 0));
+        // Domains from DnB
+        for (Map.Entry<String, String> dnbDomEnt : dnbDomToIsPri.entrySet()) {
+            Tuple result = Tuple.size(getFieldDeclaration().size());
+            for (String attr : amsToDnB.keySet()) {
+                result.set(namePositionMap.get(attr), amsToDnBFirmo.get(attr));
             }
+            result.set(amsDomSrcLoc, DNB);
+            result.set(amsDomLoc, dnbDomEnt.getKey());
+            if (leDomToSrc.size() > 0 || StringUtils.isBlank(dnbDomEnt.getKey())) {
+                result.set(amsIsPriDomLoc, "N");
+            } else if (dnbDomToIsPri.size() == 1) {
+                result.set(amsIsPriDomLoc, "Y");
+            } else {
+                result.set(amsIsPriDomLoc, dnbDomEnt.getValue());
+            }
+            bufferCall.getOutputCollector().add(result);
         }
     }
 

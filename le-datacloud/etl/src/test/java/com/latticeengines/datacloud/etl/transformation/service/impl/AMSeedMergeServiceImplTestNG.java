@@ -228,6 +228,18 @@ public class AMSeedMergeServiceImplTestNG
                     "DnBPINoDu555", null, null, null, null, null, null, null, null, null }, //
             { null, "Y", "Y", 17, "NoDu666", null, "DnBNameNoDu666", "CA", "United States", "England", 1000000L, 1000,
                     "DnBPINoDu666", null, null, null, null, null, null, null, null, null }, //
+            { "z.com", "Y", "N", 18, "DunsTestIsPriDom111", null, "DnBNameTestIsPriDom111", "CA", "United States",
+                    "England", 1000000L, 1000, "DnBPITestIsPriDom111", null, null, null, null, null, null, null, null,
+                    null }, //
+            { null, "Y", "Y", 19, "DunsTestIsPriDom222", null, "DnBNameTestIsPriDom222", "CA", "United States",
+                    "England", 1000000L, 1000, "DnBPITestIsPriDom222", null, null, null, null, null, null, null, null,
+                    null }, //
+            { "x.com", "Y", "Y", 20, "DunsTestIsPriDom333", null, "DnBNameTestIsPriDom333", "CA", "United States",
+                    "England", 1000000L, 1000, "DnBPITestIsPriDom333", null, null, null, null, null, null, null, null,
+                    null }, //
+            { "y.com", "Y", "N", 20, "DunsTestIsPriDom333", null, "DnBNameTestIsPriDom333", "CA", "United States",
+                    "England", 1000000L, 1000, "DnBPITestIsPriDom333", null, null, null, null, null, null, null, null,
+                    null }, //
     };
 
     private void prepareDnBSeed() {
@@ -347,18 +359,28 @@ public class AMSeedMergeServiceImplTestNG
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
                 { "b.com", "NoDu333", "null", "Y", "Y", 17, "DnBNameNoDu333", "DnBPINoDu333", "DnB", 1000, 1000000L,
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
-                { "c.com", "NoDu444", "null", "N", "Y", 17, "DnBNameNoDu444", "DnBPINoDu444", "DnB", 1000, 1000000L,
+                { "c.com", "NoDu444", "null", "Y", "Y", 17, "DnBNameNoDu444", "DnBPINoDu444", "DnB", 1000, 1000000L,
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
                 { "null", "NoDu555", "null", "N", "Y", 17, "DnBNameNoDu555", "DnBPINoDu555", "DnB", 1000, 1000000L,
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
-                { "null", "NoDu666", "null", "Y", "Y", 17, "DnBNameNoDu666", "DnBPINoDu666", "DnB", 1000, 1000000L,
+                { "null", "NoDu666", "null", "N", "Y", 17, "DnBNameNoDu666", "DnBPINoDu666", "DnB", 1000, 1000000L,
                         "USA", "UNITED KINGDOM", "CALIFORNIA" },
                 { "j.com", "null", "null", "Y", "Y", 1, "LeNamej.com", "LePIj", "RTS", null, null, "null", "null",
                         "null" },
                 { "k.com", "null", "null", "Y", "Y", 1, "LeNamek.com", "LePIk", "Orb", null, null, "null", "null",
                         "null" },
                 { "l.com", "null", "null", "Y", "Y", 1, "LeNamel.com", "LePIl", "HG", null, null, "null", "null",
-                        "null" } };
+                        "null" },
+                { "z.com", "DunsTestIsPriDom111", "null", "Y", "Y", 18, "DnBNameTestIsPriDom111",
+                        "DnBPITestIsPriDom111", "DnB", 1000, 1000000L, "USA", "UNITED KINGDOM", "CALIFORNIA" },
+                { "null", "DunsTestIsPriDom222", "null", "N", "Y", 19, "DnBNameTestIsPriDom222", "DnBPITestIsPriDom222",
+                        "DnB", 1000, 1000000L, "USA", "UNITED KINGDOM", "CALIFORNIA" },
+                { "x.com", "DunsTestIsPriDom333", "null", "Y", "Y", 20, "DnBNameTestIsPriDom333",
+                        "DnBPITestIsPriDom333", "DnB", 1000, 1000000L, "USA", "UNITED KINGDOM", "CALIFORNIA" },
+                { "y.com", "DunsTestIsPriDom333", "null", "N", "Y", 20, "DnBNameTestIsPriDom333",
+                        "DnBPITestIsPriDom333", "DnB", 1000, 1000000L, "USA", "UNITED KINGDOM", "CALIFORNIA" },
+
+        };
         int rowNum = 0;
         Set<String> set = new HashSet<>();
         Set<Long> ids = new HashSet<>();
@@ -403,7 +425,7 @@ public class AMSeedMergeServiceImplTestNG
             Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 26);
+        Assert.assertEquals(rowNum, 30);
         Assert.assertEquals(ids.size(), rowNum);
     }
 

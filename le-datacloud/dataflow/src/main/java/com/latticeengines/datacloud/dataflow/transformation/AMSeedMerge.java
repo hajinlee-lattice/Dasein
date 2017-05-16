@@ -104,8 +104,8 @@ public class AMSeedMerge extends ConfigurableFlowBase<TransformerConfig> {
         List<FieldMetadata> fieldMetadata = prepareAmsFieldMetadata();
         source = source.groupByAndBuffer(new FieldList(dnbDunsCol),
                 new AMSeedMergeWithDunsBuffer(new Fields(amsAttrs.toArray(new String[amsAttrs.size()])), amsToDnB,
-                        dnbDunsCol, dnbDomainCol, leDomainCol, dnbIsPrimaryDomainCol, 
-                        amsIsPrimaryDomainCol, amsDomainCol, amsDomainSourceCol, leDomainSourceCol),
+                        dnbDomainCol, leDomainCol, dnbIsPrimaryDomainCol, amsIsPrimaryDomainCol, amsDomainCol,
+                        amsDomainSourceCol, leDomainSourceCol),
                 fieldMetadata);
         return source;
     }
