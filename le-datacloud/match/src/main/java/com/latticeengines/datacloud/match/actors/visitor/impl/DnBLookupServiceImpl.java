@@ -40,7 +40,7 @@ import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupStatusChecker;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
-import com.latticeengines.datacloud.match.service.impl.DnbMatchCommandServiceImpl;
+import com.latticeengines.datacloud.match.service.DnbMatchCommandService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
@@ -124,7 +124,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     private NameLocationService nameLocationService;
 
     @Autowired
-    private DnbMatchCommandServiceImpl dnbMatchCommandService;
+    private DnbMatchCommandService dnbMatchCommandService;
 
     private ExecutorService dnbDataSourceServiceExecutor;
 

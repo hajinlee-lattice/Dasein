@@ -3,6 +3,8 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,50 +17,59 @@ import com.latticeengines.domain.exposed.datacloud.manage.DnBMatchCommand;
 
 @Component("dnbMatchCommandService")
 public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
+    private static final Log log = LogFactory.getLog(DnbMatchCommandServiceImpl.class);
 
     @Autowired
     private DnbMatchCommandEntityMgr dnbMatchEntityMgr;
 
     @Override
     public void dnbMatchCommandCreate(DnBBatchMatchContext dnbMatchContext) {
-        DnBMatchCommand dnbMatchCommand = new DnBMatchCommand();
-        dnbMatchCommand.copyContextData(dnbMatchContext);
-        dnbMatchEntityMgr.createCommand(dnbMatchCommand);
+        try {
+            DnBMatchCommand dnbMatchCommand = new DnBMatchCommand();
+            dnbMatchCommand.copyContextData(dnbMatchContext);
+            dnbMatchEntityMgr.createCommand(dnbMatchCommand);
+        } catch (Exception e) {
+            log.error("Fail to create DnB match command in db: " + dnbMatchContext.getServiceBatchId(), e);
+        }
     }
 
     @Override
     public void dnbMatchCommandUpdate(DnBBatchMatchContext dnbMatchContext) {
-        DnBMatchCommand dnbMatchCommand = dnbMatchEntityMgr.findRecordByField("BatchID",
-                dnbMatchContext.getServiceBatchId());
-        // Initialization
-        int size = dnbMatchContext.getContexts().values().size();
-        Integer acceptedRecords = 0;
-        Integer discardedRecords = 0;
-        Integer unmatchedRecords = size;
-        DnBReturnCode batchStatus = dnbMatchContext.getDnbCode();
-        // DnB batch request is finished successfully
-        if (batchStatus == DnBReturnCode.OK) {
-            // checking all the contexts
-            for (DnBMatchContext dnbContext : dnbMatchContext.getContexts().values()) {
-                DnBReturnCode status = dnbContext.getDnbCode();
-                if (status == DnBReturnCode.OK) {
-                    acceptedRecords += 1;
-                } else if (status == DnBReturnCode.DISCARD) {
-                    discardedRecords += 1;
+        try {
+            DnBMatchCommand dnbMatchCommand = dnbMatchEntityMgr.findRecordByField("BatchID",
+                    dnbMatchContext.getServiceBatchId());
+            // Initialization
+            int size = dnbMatchContext.getContexts().values().size();
+            Integer acceptedRecords = 0;
+            Integer discardedRecords = 0;
+            Integer unmatchedRecords = size;
+            DnBReturnCode batchStatus = dnbMatchContext.getDnbCode();
+            // DnB batch request is finished successfully
+            if (batchStatus == DnBReturnCode.OK) {
+                // checking all the contexts
+                for (DnBMatchContext dnbContext : dnbMatchContext.getContexts().values()) {
+                    DnBReturnCode status = dnbContext.getDnbCode();
+                    if (status == DnBReturnCode.OK) {
+                        acceptedRecords += 1;
+                    } else if (status == DnBReturnCode.DISCARD) {
+                        discardedRecords += 1;
+                    }
                 }
+                unmatchedRecords = size - acceptedRecords - discardedRecords;
             }
-            unmatchedRecords = size - acceptedRecords - discardedRecords;
+            // Common fields for failed and successful DnB batch requests
+            dnbMatchCommand.setDnbCode(batchStatus);
+            dnbMatchCommand.setUnmatchedRecords(unmatchedRecords);
+            dnbMatchCommand.setAcceptedRecords(acceptedRecords);
+            dnbMatchCommand.setDiscardedRecords(discardedRecords);
+            dnbMatchCommand.setFinishTime(new Date());
+            if (dnbMatchCommand.getStartTime() != null && dnbMatchCommand.getFinishTime() != null)
+                dnbMatchCommand.setDuration((int) (TimeUnit.MILLISECONDS.toMinutes(
+                        dnbMatchCommand.getFinishTime().getTime() - dnbMatchCommand.getStartTime().getTime())));
+            dnbMatchEntityMgr.updateCommand(dnbMatchCommand);
+        } catch (Exception e) {
+            log.error("Fail to update DnB match command in db: " + dnbMatchContext.getServiceBatchId(), e);
         }
-        // Common fields for failed and successful DnB batch requests
-        dnbMatchCommand.setDnbCode(batchStatus);
-        dnbMatchCommand.setUnmatchedRecords(unmatchedRecords);
-        dnbMatchCommand.setAcceptedRecords(acceptedRecords);
-        dnbMatchCommand.setDiscardedRecords(discardedRecords);
-        dnbMatchCommand.setFinishTime(new Date());
-        if (dnbMatchCommand.getStartTime() != null && dnbMatchCommand.getFinishTime() != null)
-            dnbMatchCommand.setDuration((int) (TimeUnit.MILLISECONDS
-                    .toMinutes(dnbMatchCommand.getFinishTime().getTime() - dnbMatchCommand.getStartTime().getTime())));
-        dnbMatchEntityMgr.updateCommand(dnbMatchCommand);
     }
 
     @Override

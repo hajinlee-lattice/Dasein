@@ -353,9 +353,6 @@ public class ProcessorContext {
 
         matchDebugEnabled = zkConfigurationService.isMatchDebugEnabled(space)
                 || jobConfiguration.getMatchInput().isMatchDebugEnabled();
-        log.info(String.format("Match Debug Enabled in zk: %b, Match Debug Enabled in input: %b",
-                zkConfigurationService.isMatchDebugEnabled(space),
-                jobConfiguration.getMatchInput().isMatchDebugEnabled()));
         jobConfiguration.getMatchInput().setMatchDebugEnabled(matchDebugEnabled);
         log.info("Match Debug Enabled=" + matchDebugEnabled);
         if (matchDebugEnabled) {
