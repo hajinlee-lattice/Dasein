@@ -308,6 +308,10 @@ class ECSStack(Stack):
             ],
             Tags=[
                 {
+                    'Key': 'le-env',
+                    'Value': environment.replace("cluster", "")
+                },
+                {
                     'Key': 'le-product',
                     'Value': 'lpi'
                 },

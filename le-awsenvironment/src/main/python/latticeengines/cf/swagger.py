@@ -111,8 +111,20 @@ def provision(environment, stackname, apps, tgrp, public=False, le_stack=None):
         ],
         Tags=[
             {
-                'Key': 'product',
+                'Key': 'le-env',
+                'Value': environment.replace("cluster", "")
+            },
+            {
+                'Key': 'le-product',
                 'Value': 'lpi'
+            },
+            {
+                'Key': 'le-service',
+                'Value': 'swagger'
+            },
+            {
+                'Key': 'le-stack',
+                'Value': le_stack
             }
         ]
     )
