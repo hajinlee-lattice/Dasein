@@ -697,7 +697,7 @@ Media Queries
                         width: auto;
                         padding: 0.3em;
                         &:first-child {
-                            min-width: 180px;
+                            width: 100%;
                         }
                     }
                 }
