@@ -20,6 +20,7 @@ import cascading.tuple.Fields;
 
 @Component("sourceDomainCleanupByDuFlow")
 public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDomainCleanupByDuTransformerConfig> {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(SourceDomainCleanupByDuFlow.class);
 
     @Override
@@ -40,8 +41,8 @@ public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDoma
 
         Node join = source.leftJoin(config.getDuField(), duDomain, config.getDuField());
         Fields joinNodeFields = new Fields(join.getFieldNames().toArray(new String[join.getFieldNames().size()]));
-        Node domainFilled = join.groupByAndBuffer(new FieldList(config.getDuField()), new FillBlankDomainBuffer(
-                joinNodeFields, config.getDomainField()));
+        Node domainFilled = join.groupByAndBuffer(new FieldList(config.getDuField()),
+                new FillBlankDomainBuffer(joinNodeFields, config.getDomainField(), config.getIsPriDomField()));
         domainFilled = domainFilled.retain(new FieldList(source.getFieldNames()));
 
         return domainFilled;

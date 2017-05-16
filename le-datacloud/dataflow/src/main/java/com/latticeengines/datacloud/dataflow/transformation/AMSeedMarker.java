@@ -142,8 +142,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         node = node.leftJoin(DUNS, primaryDomain, DUNS);
         node = node.discard(LE_IS_PRIMARY_DOMAIN);
         // No domain || domain != primary domain: IsPrimaryDomain = N
-        // Has domain, no primary domain || domain = primary domain:
-        // IsPrimaryDomain = Y
+        // Has domain, no primary domain || domain = primary domain: IsPrimaryDomain = Y
         node = node.apply(
                 String.format("%s == null ? \"N\" : ((%s == null || %s.equals(%s)) ? \"Y\" : \"N\")", DOMAIN,
                         FLAG_DROP_LESS_POPULAR_DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN), //

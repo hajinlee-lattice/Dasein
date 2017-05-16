@@ -12,6 +12,8 @@ public class SourceDomainCleanupByDuTransformerConfig extends TransformerConfig 
     private String duField;
     @JsonProperty("alexaRankField")
     private String alexaRankField;
+    @JsonProperty("IsPriDomField")
+    private String isPriDomField;
     
     public String getDomainField() {
         return domainField;
@@ -36,6 +38,14 @@ public class SourceDomainCleanupByDuTransformerConfig extends TransformerConfig 
     }
     public void setAlexaRankField(String alexaRankField) {
         this.alexaRankField = alexaRankField;
+    }
+
+    public String getIsPriDomField() {
+        return isPriDomField;
+    }
+
+    public void setIsPriDomField(String isPriDomField) {
+        this.isPriDomField = isPriDomField;
     }
     
 }

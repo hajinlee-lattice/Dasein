@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +30,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceDomainCleanupByDuTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG extends
+public class AMSeedFixDomainInDUTreeTestNG extends
         TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
     private static final String ACCOUNT_MASTER_SEED_CLEANED = "AccountMasterSeedCleaned";
 
     private static final Log log = LogFactory
-            .getLog(PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG.class);
+            .getLog(AMSeedFixDomainInDUTreeTestNG.class);
 
     @Autowired
     PipelineSource source;
@@ -55,9 +56,10 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
     String targetSourceName = "MatchResult";
     String targetVersion;
 
-    @Test(groups = "deployment")
+    @Test(groups = "functional")
     public void testTransformation() throws IOException {
-        uploadBaseSourceFile(baseAccountMasterSeedSource, "AccountMasterSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
+        //uploadBaseSourceFile(baseAccountMasterSeedSource, "AccountMasterSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
+        prepareAMSeed();
         String targetSourcePath = hdfsPathBuilder.podDir().append(ACCOUNT_MASTER_SEED_CLEANED).toString();
         HdfsUtils.rmdir(yarnConfiguration, targetSourcePath);
 
@@ -113,7 +115,8 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
         config.setDuField("LE_PRIMARY_DUNS");
         config.setDunsField("DUNS");
         config.setDomainField("Domain");
-        config.setAlexaRankField("AlexaRank");;
+        config.setAlexaRankField("AlexaRank");
+        config.setIsPriDomField("LE_IS_PRIMARY_DOMAIN");
         return JsonUtils.serialize(config);
     }
 
@@ -125,26 +128,75 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
+    private void prepareAMSeed() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        columns.add(Pair.of("LatticeID", Long.class));
+        columns.add(Pair.of("Domain", String.class));
+        columns.add(Pair.of("DUNS", String.class));
+        columns.add(Pair.of("LE_IS_PRIMARY_DOMAIN", String.class));
+        columns.add(Pair.of("LE_IS_PRIMARY_LOCATION", String.class));
+        columns.add(Pair.of("LE_PRIMARY_DUNS", String.class));
+        columns.add(Pair.of("AlexaRank", Integer.class));
+        uploadBaseSourceData(baseAccountMasterSeedSource.getSourceName(), "2017-01-09_19-12-43_UTC", columns, amsData);
+    }
+
+    private Object[][] amsData = new Object[][] { //
+            { 1L, "google.com", "01", "Y", "Y", "01", null }, //
+            { 2L, null, "02", "N", "N", "01", null }, //
+            { 3L, null, "03", "N", "Y", "01", null }, //
+            { 4L, "facebook.com", "001", "N", "Y", "002", null }, //
+            { 5L, null, "002", "N", "Y", "002", null }, //
+            { 6L, "lattice.com", null, "N", "Y", "002", null }, //
+            { 7L, "lattice.com", "004", "N", null, "002", null }, //
+            { 8L, "lattice.com", "005", "Y", "Y", null, null }, //
+            { 9L, null, "0003", "N", "Y", null, null }, //
+            { 10L, "oracle.com", "07", "Y", "Y", "10", 19 }, //
+            { 11L, "oracle1.com", "08", "Y", "Y", "10", 1 }, //
+            { 12L, "oracle2.com", "09", "Y", "Y", "10", 8 }, //
+            { 13L, "oracle2.com", "11", "Y", "Y", "10", 9 }, //
+            { 14L, null, "11", "N", "Y", "10", 9 }, //
+    };
+
+    private Object[][] expectedData = new Object[][] { //
+            { 1L, "google.com", "01", "Y", "Y", "01", null }, //
+            { 2L, "google.com", "02", "Y", "N", "01", null }, // Populate domain = google.com, isPriDom = Y
+            { 3L, "google.com", "03", "Y", "Y", "01", null }, // Populate domain = google.com, isPriDom = Y
+            { 4L, "facebook.com", "001", "N", "Y", "002", null }, //
+            { 5L, "lattice.com", "002", "Y", "Y", "002", null }, // Populate domain = lattice.com, isPriDom = Y
+            { 6L, "lattice.com", null, "N", "Y", "002", null }, //
+            { 7L, "lattice.com", "004", "N", null, "002", null }, //
+            { 8L, "lattice.com", "005", "Y", "Y", null, null }, //
+            { 9L, null, "0003", "N", "Y", null, null }, //
+            { 10L, "oracle.com", "07", "Y", "Y", "10", 19 }, //
+            { 11L, "oracle1.com", "08", "Y", "Y", "10", 1 }, //
+            { 12L, "oracle2.com", "09", "Y", "Y", "10", 8 }, //
+            { 13L, "oracle2.com", "11", "Y", "Y", "10", 9 }, //
+            { 14L, "oracle1.com", "11", "Y", "Y", "10", 9 }, // Populate domain = oracle1.com, isPriDom = Y
+    };
+
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
-        Map<String, GenericRecord> recordMap = new HashMap<>();
+        Map<Long, GenericRecord> recordMap = new HashMap<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            String id = String.valueOf(record.get("LatticeID"));
+            Long id = (Long) record.get("LatticeID");
             recordMap.put(id, record);
             rowNum++;
         }
         
         log.info("Total result records " + rowNum);
         Assert.assertEquals(rowNum, 14);
-        
-        GenericRecord record = recordMap.get("3");
-        Assert.assertEquals(record.get("Domain").toString(), "google.com");
-        record = recordMap.get("5");
-        Assert.assertEquals(record.get("Domain").toString(), "lattice.com");
-        record = recordMap.get("14");
-        Assert.assertEquals(record.get("Domain").toString(), "oracle1.com");
+        for (Object[] data : expectedData) {
+            GenericRecord record = recordMap.get((Long) data[0]);
+            log.info(record);
+            Assert.assertEquals(record.get("Domain") == null ? null : record.get("Domain").toString(),
+                    (String) data[1]);
+            Assert.assertEquals(record.get("DUNS") == null ? null : record.get("DUNS").toString(), (String) data[2]);
+            Assert.assertEquals(
+                    record.get("LE_IS_PRIMARY_DOMAIN") == null ? null : record.get("LE_IS_PRIMARY_DOMAIN").toString(),
+                    (String) data[3]);
+        }
     }
 }

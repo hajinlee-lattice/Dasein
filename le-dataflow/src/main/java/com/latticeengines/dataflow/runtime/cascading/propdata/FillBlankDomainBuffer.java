@@ -18,14 +18,17 @@ public class FillBlankDomainBuffer extends BaseOperation implements Buffer {
     private static final long serialVersionUID = 1L;
 
     private String domainField;
+    private String isPriDomField;
 
     private int primaryDomainArgIdx = -1;
     private int domainArgIdx = -1;
+    private int isPriDomArgIdx = -1;
 
     // output all input fields
-    public FillBlankDomainBuffer(Fields fieldDeclaration, String domainField) {
+    public FillBlankDomainBuffer(Fields fieldDeclaration, String domainField, String isPriDomField) {
         super(fieldDeclaration);
         this.domainField = domainField;
+        this.isPriDomField = isPriDomField;
     }
 
     @Override
@@ -56,6 +59,7 @@ public class FillBlankDomainBuffer extends BaseOperation implements Buffer {
             String domain = getStringAt(arguments, domainArgIdx);
             if (StringUtils.isBlank(domain)) {
                 tupleEntry.setString(domainField, enrichingDomain);
+                tupleEntry.setString(isPriDomField, "Y");
             }
 
             bufferCall.getOutputCollector().add(tupleEntry);
@@ -81,13 +85,16 @@ public class FillBlankDomainBuffer extends BaseOperation implements Buffer {
     }
 
     private void setArgPosMap(TupleEntry arguments) {
-        if (primaryDomainArgIdx == -1 || domainArgIdx == -1) {
+        if (primaryDomainArgIdx == -1 || domainArgIdx == -1 || isPriDomArgIdx == -1) {
             Fields fields = arguments.getFields();
             if (primaryDomainArgIdx == -1) {
                 primaryDomainArgIdx = fields.getPos(DomainCleanupByDuBuffer.DU_PRIMARY_DOMAIN);
             }
             if (domainArgIdx == -1) {
                 domainArgIdx = fields.getPos(domainField);
+            }
+            if (isPriDomArgIdx == -1) {
+                isPriDomArgIdx = fields.getPos(isPriDomField);
             }
         }
     }
