@@ -50,6 +50,10 @@ angular.module('lp.marketo.enrichment', [
             label: 'Country',
             data: vm.marketoEnrichments.marketo_match_fields[3],
             options: vm.marketoMatchFields
+        },DUNS: {
+            label: 'DUNS',
+            data: vm.marketoEnrichments.marketo_match_fields[4],
+            options: vm.marketoMatchFields
         }
     }
 

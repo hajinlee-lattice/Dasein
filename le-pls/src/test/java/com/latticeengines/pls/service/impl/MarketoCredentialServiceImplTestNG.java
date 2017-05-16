@@ -53,7 +53,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
             TEST_STATE_FIELD, TEST_COUNTRY_FIELD);
     private static final List<MarketoMatchFieldName> MARKETO_MATCH_FIELD_NAMES = Arrays.asList(
             MarketoMatchFieldName.Domain, MarketoMatchFieldName.Company, MarketoMatchFieldName.State,
-            MarketoMatchFieldName.Country, MarketoMatchFieldName.Duns);
+            MarketoMatchFieldName.Country, MarketoMatchFieldName.DUNS);
     private static final MarketoMatchField MARKETO_MATCH_FIELD_1 = new MarketoMatchField();
     private static final MarketoMatchField MARKETO_MATCH_FIELD_2 = new MarketoMatchField();
     private static final MarketoMatchField MARKETO_MATCH_FIELD_3 = new MarketoMatchField();
@@ -227,7 +227,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         MARKETO_MATCH_FIELD_2.setMarketoMatchFieldName(MarketoMatchFieldName.Company);
         MARKETO_MATCH_FIELD_3.setMarketoMatchFieldName(MarketoMatchFieldName.State);
         MARKETO_MATCH_FIELD_4.setMarketoMatchFieldName(MarketoMatchFieldName.Country);
-        MARKETO_MATCH_FIELD_5.setMarketoMatchFieldName(MarketoMatchFieldName.Duns);
+        MARKETO_MATCH_FIELD_5.setMarketoMatchFieldName(MarketoMatchFieldName.DUNS);
         MARKETO_MATCH_FIELD_1.setMarketoFieldName(TEST_DOMAIN_FIELD);
         MARKETO_MATCH_FIELD_2.setMarketoFieldName(TEST_COMPANY_FIELD);
         MARKETO_MATCH_FIELD_3.setMarketoFieldName(TEST_STATE_FIELD);

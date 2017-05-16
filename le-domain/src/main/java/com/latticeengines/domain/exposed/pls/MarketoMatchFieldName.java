@@ -5,5 +5,5 @@ public enum MarketoMatchFieldName {
     Company, //
     State, //
     Country, //
-    Duns
+    DUNS
 }

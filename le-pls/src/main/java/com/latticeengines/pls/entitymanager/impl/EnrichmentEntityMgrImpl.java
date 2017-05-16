@@ -51,7 +51,7 @@ public class EnrichmentEntityMgrImpl extends BaseEntityMgrImpl<Enrichment>
         MarketoMatchField countryMatchField = marketoMatchFieldEntityMgr
                 .createMatchFieldWithNameValueAndEnrichment(MarketoMatchFieldName.Country, null, enrichment);
         MarketoMatchField dunsMatchField = marketoMatchFieldEntityMgr
-                .createMatchFieldWithNameValueAndEnrichment(MarketoMatchFieldName.Duns, null, enrichment);
+                .createMatchFieldWithNameValueAndEnrichment(MarketoMatchFieldName.DUNS, null, enrichment);
         enrichment.addMarketoMatchField(domainMatchField);
         enrichment.addMarketoMatchField(companyMatchField);
         enrichment.addMarketoMatchField(stateMatchField);
