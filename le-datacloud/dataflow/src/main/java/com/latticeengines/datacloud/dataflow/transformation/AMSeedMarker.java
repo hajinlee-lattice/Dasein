@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AMSeedPriDomAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedOrphanRecordSmallCompaniesBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedOrphanRecordWithDomainBuffer;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedPrimaryDomainAggregator;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
@@ -23,15 +23,19 @@ import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
 @Component(AMSeedMarker.DATAFLOW_BEAN_NAME)
-public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfig> {
+public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AMSeedMarker.class);
 
     public static final String DATAFLOW_BEAN_NAME = "AMSeedMarker";
     public static final String TRANSFORMER_NAME = "AMSeedMarkerTransformer";
 
+    private AMSeedMarkerConfig config;
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
+        config = getTransformerConfig(parameters);
+
         Node am = addSource(parameters.getBaseTables().get(0));
         Node alexa = addSource(parameters.getBaseTables().get(1));
 
@@ -135,8 +139,9 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(DUNS, String.class));
         fms.add(new FieldMetadata(FLAG_DROP_LESS_POPULAR_DOMAIN, String.class));
-        Aggregator agg = new AccountMasterSeedPrimaryDomainAggregator(new Fields(DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN),
-                DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN, ALEXA_RANK_AMSEED, DOMAIN_SOURCE, LE_IS_PRIMARY_DOMAIN);
+        Aggregator agg = new AMSeedPriDomAggregator(new Fields(DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN), DUNS,
+                FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN, ALEXA_RANK_AMSEED, DOMAIN_SOURCE, LE_IS_PRIMARY_DOMAIN,
+                config.getSrcPriorityToMrkPriDom());
         Node primaryDomain = node.groupByAndAggregate(new FieldList(DUNS), agg, fms).renamePipe("PrimaryDomain");
 
         node = node.leftJoin(DUNS, primaryDomain, DUNS);
@@ -177,7 +182,7 @@ public class AMSeedMarker extends AccountMasterBase<AccountMasterSeedMarkerConfi
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return AccountMasterSeedMarkerConfig.class;
+        return AMSeedMarkerConfig.class;
     }
 
     @Override

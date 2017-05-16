@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 @Component(AMSeedCleanup.DATAFLOW_BEAN_NAME)
-public class AMSeedCleanup extends AccountMasterBase<AccountMasterSeedMarkerConfig> {
+public class AMSeedCleanup extends AccountMasterBase<AMSeedMarkerConfig> {
 
     public static final String DATAFLOW_BEAN_NAME = "AMSeedCleanup";
     public static final String TRANSFORMER_NAME = "AMSeedCleanupTransformer";
@@ -30,7 +30,7 @@ public class AMSeedCleanup extends AccountMasterBase<AccountMasterSeedMarkerConf
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return AccountMasterSeedMarkerConfig.class;
+        return AMSeedMarkerConfig.class;
     }
 
     @Override

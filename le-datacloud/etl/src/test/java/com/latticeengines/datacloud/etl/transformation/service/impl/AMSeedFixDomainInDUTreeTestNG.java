@@ -58,7 +58,6 @@ public class AMSeedFixDomainInDUTreeTestNG extends
 
     @Test(groups = "functional")
     public void testTransformation() throws IOException {
-        //uploadBaseSourceFile(baseAccountMasterSeedSource, "AccountMasterSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
         prepareAMSeed();
         String targetSourcePath = hdfsPathBuilder.podDir().append(ACCOUNT_MASTER_SEED_CLEANED).toString();
         HdfsUtils.rmdir(yarnConfiguration, targetSourcePath);
