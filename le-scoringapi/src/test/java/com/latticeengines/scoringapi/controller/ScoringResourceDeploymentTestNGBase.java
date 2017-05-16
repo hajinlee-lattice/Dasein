@@ -40,6 +40,10 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected static final String SALESFORCE = "SALESFORCE";
     protected static final String MISSING_FIELD_COUNTRY = "Country";
     protected static final String MISSING_FIELD_FIRSTNAME = "FirstName";
+    protected static final String MISSING_FIELD_COMPANYNAME = "CompanyName";
+    protected static final String MISSING_FIELD_DUNS = "DUNS";
+    protected static final String MISSING_FIELD_EMAIL = "Email";
+    protected static final String MISSING_FIELD_WEBSITE = "Website";
     protected static final int MAX_FOLD_FOR_TIME_TAKEN = 10;
     // allow atleast 80 seconds of upper bound for bulk scoring api to make sure
     // that this testcase can work if performance is fine. If performance
@@ -515,6 +519,24 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         if (exception != null) {
             Assert.assertNull(exception, "Got exception in one of the thread: " + getExceptionTrace(exception));
         }
+    }
+
+    protected Record cloneRecord(Record record) {
+        Record cloneRecord = new Record();
+        cloneRecord.setIdType(record.getIdType());
+        cloneRecord.setPerformEnrichment(record.isPerformEnrichment());
+        cloneRecord.setRecordId(record.getRecordId());
+        cloneRecord.setRequestTimestamp(record.getRequestTimestamp());
+        cloneRecord.setRootOperationId(record.getRootOperationId());
+        cloneRecord.setRule(record.getRule());
+        cloneRecord.setModelAttributeValuesMap(new HashMap<String, Map<String, Object>>());
+        for (Entry<String, Map<String, Object>> entry : record.getModelAttributeValuesMap().entrySet()) {
+            cloneRecord.getModelAttributeValuesMap().put(entry.getKey(), new HashMap<String, Object>());
+            for(Entry<String, Object> attr : entry.getValue().entrySet()) {
+                cloneRecord.getModelAttributeValuesMap().get(entry.getKey()).put(attr.getKey(), attr.getValue());
+            }
+        }
+        return cloneRecord;
     }
 
 }

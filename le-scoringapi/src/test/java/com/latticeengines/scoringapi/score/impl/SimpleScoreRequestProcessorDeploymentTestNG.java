@@ -96,6 +96,36 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         overwritePredifinedSelection();
     }
 
+    @Test(groups = "deployment", dependsOnMethods = { "testFetchModelArtifacts" })
+    public void testCheckForDUNSField() throws IOException {
+        BulkRecordScoreRequest bulkRequest = new BulkRecordScoreRequest();
+        bulkRequest.setSource("Dummy Source");
+        List<Record> records = request.getRecords();
+        if (records != null && records.size() > 0) {
+            Record record = records.get(records.size() - 1);
+            List<Record> dunsRecords = new ArrayList<>();
+            Record dunsRecord = cloneRecord(record);
+            Record missingDUNSRecord = cloneRecord(record);
+            for (Entry<String, Map<String, Object>> entry : dunsRecord.getModelAttributeValuesMap().entrySet()) {
+                entry.getValue().remove(MISSING_FIELD_COMPANYNAME);
+                entry.getValue().remove(MISSING_FIELD_EMAIL);
+                entry.getValue().remove(MISSING_FIELD_WEBSITE);
+            }
+            for (Entry<String, Map<String, Object>> entry : missingDUNSRecord.getModelAttributeValuesMap().entrySet()) {
+                entry.getValue().remove(MISSING_FIELD_DUNS);
+            }
+            dunsRecords.add(dunsRecord);
+            dunsRecords.add(missingDUNSRecord);
+            bulkRequest.setRecords(dunsRecords);
+            originalOrderParsedTupleList = scoreRequestProcessorImpl.checkForMissingFields(uniqueScoringArtifactsMap,
+                    uniqueFieldSchemasMap, bulkRequest, false);
+
+            for (RecordModelTuple tuple : originalOrderParsedTupleList) {
+                Assert.assertNull(tuple.getException());
+            }
+        }
+    }
+
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testFetchModelArtifacts" })
     public void testCheckForMissingFields() throws IOException {
         originalOrderParsedTupleList = scoreRequestProcessorImpl.checkForMissingFields(uniqueScoringArtifactsMap,
@@ -104,6 +134,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
 
         int idx = 0;
         for (RecordModelTuple tuple : originalOrderParsedTupleList) {
+            Assert.assertNull(tuple.getException());
             Record record = request.getRecords().get(idx / RECORD_MODEL_CARDINALITY);
             Assert.assertEquals(record, tuple.getRecord());
 

@@ -16,6 +16,7 @@
         "Activity_Count_Open_Email": 2,
         "Activity_Count_Unsubscribe_Email": 0,
         "Activity_Count_Visit_Webpage": 0,
+        "DUNS": "047133128",
         "City": null,
         "Cloud_Plan__c": null,
         "CompanyName": "Arrow Electronics",

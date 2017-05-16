@@ -1485,6 +1485,11 @@
             "type": "STRING",
             "interpretation": "Country"
         },
+        "DUNS": {
+            "interpretation": "DUNS",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
         "FeatureTermSecureOrder": {
             "source": "PROPRIETARY",
             "type": "INTEGER",
