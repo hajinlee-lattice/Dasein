@@ -25,8 +25,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-            <scope>runtime</scope>
+            <version>19.0</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
