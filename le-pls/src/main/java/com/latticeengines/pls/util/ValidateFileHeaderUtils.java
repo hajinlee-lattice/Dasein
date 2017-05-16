@@ -49,6 +49,14 @@ public class ValidateFileHeaderUtils {
                     new BOMInputStream(stream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
                             ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                     StandardCharsets.UTF_8);
+
+            int data = reader.read();
+            while (data != -1) {
+                char theChar = (char) data;
+                System.out.println(theChar);
+                data = reader.read();
+            }
+
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
             closeableResourcePool.addCloseable(parser);

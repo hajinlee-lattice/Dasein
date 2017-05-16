@@ -1,20 +1,27 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.python.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.Enrichment;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
+import com.latticeengines.domain.exposed.pls.MarketoMatchFieldName;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr;
 import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("marketoCredentialService")
 public class MarketoCredentialServiceImpl implements MarketoCredentialService {
@@ -31,6 +38,9 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
     @Autowired
     private MarketoSoapService marketoSoapService;
 
+    @Value("${pls.marketo.enrichment.webhook.url}")
+    private String enrichmentWebhookUrl;
+
     @Override
     public void createMarketoCredential(MarketoCredential marketoCredential) {
         validateRESTAndSOAPCredentials(marketoCredential);
@@ -44,36 +54,54 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
 
     @Override
     public MarketoCredential findMarketoCredentialById(String credentialId) {
-        return marketoCredentialEntityMgr.findMarketoCredentialById(credentialId);
+        MarketoCredential marketoCredential = marketoCredentialEntityMgr.findMarketoCredentialById(credentialId);
+        Enrichment enrichment = marketoCredential.getEnrichment();
+        enrichment.setWebhookUrl(enrichmentWebhookUrl);
+        enrichment.setTenantCredentialGUID(UuidUtils.packUuid(MultiTenantContext.getTenant().getId(), credentialId));
+        List<MarketoMatchField> fields = enrichment.getMarketoMatchFields();
+        Set<MarketoMatchFieldName> fieldNameSet = Sets.newHashSet(MarketoMatchFieldName.values());
+        for (MarketoMatchField field : fields) {
+            if (fieldNameSet.contains(field.getMarketoMatchFieldName())) {
+                fieldNameSet.remove(field.getMarketoMatchFieldName());
+            }
+        }
+        for (MarketoMatchFieldName missingFieldName : fieldNameSet) {
+            MarketoMatchField newField = new MarketoMatchField();
+            newField.setMarketoMatchFieldName(missingFieldName);
+            fields.add(newField);
+        }
+        return marketoCredential;
     }
 
     @Override
     public List<MarketoCredential> findAllMarketoCredentials() {
-        return marketoCredentialEntityMgr.findAllMarketoCredentials();
+        List<MarketoCredential> marketoCredentials = marketoCredentialEntityMgr.findAllMarketoCredentials();
+        for (MarketoCredential marketoCredential : marketoCredentials) {
+            marketoCredential.getEnrichment().setWebhookUrl(enrichmentWebhookUrl);
+            marketoCredential.getEnrichment().setTenantCredentialGUID(UuidUtils
+                    .packUuid(MultiTenantContext.getTenant().getId(), Long.toString(marketoCredential.getPid())));
+        }
+        return marketoCredentials;
     }
 
     @Override
-    public void updateMarketoCredentialById(String credentialId,
-            MarketoCredential marketoCredential) {
+    public void updateMarketoCredentialById(String credentialId, MarketoCredential marketoCredential) {
         validateRESTAndSOAPCredentials(marketoCredential);
         try {
             marketoCredentialEntityMgr.updateMarketoCredentialById(credentialId, marketoCredential);
         } catch (Exception e) {
             if (e.getCause() instanceof ConstraintViolationException) {
-                throw new LedpException(LedpCode.LEDP_18119,
-                        new String[] { marketoCredential.getName() });
+                throw new LedpException(LedpCode.LEDP_18119, new String[] { marketoCredential.getName() });
             }
         }
     }
 
     @Override
-    public void updateCredentialMatchFields(String credentialId,
-            List<MarketoMatchField> marketoMatchFields) {
+    public void updateCredentialMatchFields(String credentialId, List<MarketoMatchField> marketoMatchFields) {
         MarketoCredential marketoCredential = findMarketoCredentialById(credentialId);
 
         for (MarketoMatchField marketoMatchField : marketoMatchFields) {
-            marketoMatchFieldEntityMgr.updateMarketoMatchFieldValue(
-                    marketoMatchField.getMarketoMatchFieldName(),
+            marketoMatchFieldEntityMgr.updateMarketoMatchFieldValue(marketoMatchField.getMarketoMatchFieldName(),
                     marketoMatchField.getMarketoFieldName(), marketoCredential.getEnrichment());
         }
 

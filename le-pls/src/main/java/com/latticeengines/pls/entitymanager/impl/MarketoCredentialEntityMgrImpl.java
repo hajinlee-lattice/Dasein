@@ -4,12 +4,10 @@ import java.util.List;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -25,9 +23,6 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("marketoCredentialEntityMgr")
 public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCredential>
         implements MarketoCredentialEntityMgr {
-
-    @Value("${pls.marketo.enrichment.webhook.url}")
-    private String enrichmentWebhookUrl;
 
     @Autowired
     private MarketoCredentialDao marketoCredentialDao;
@@ -51,17 +46,14 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
         try {
             marketoCredentialDao.create(marketoCredential);
         } catch (ConstraintViolationException e) {
-            throw new LedpException(LedpCode.LEDP_18119,
-                    new String[] { marketoCredential.getName() });
+            throw new LedpException(LedpCode.LEDP_18119, new String[] { marketoCredential.getName() });
         }
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void updateMarketoCredentialById(String credentialId,
-            MarketoCredential marketoCredential) {
-        MarketoCredential marketoCredential1 = marketoCredentialDao
-                .findMarketoCredentialById(credentialId);
+    public void updateMarketoCredentialById(String credentialId, MarketoCredential marketoCredential) {
+        MarketoCredential marketoCredential1 = marketoCredentialDao.findMarketoCredentialById(credentialId);
 
         marketoCredential1.setName(marketoCredential.getName());
         marketoCredential1.setRestClientId(marketoCredential.getRestClientId());
@@ -78,8 +70,7 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteMarketoCredentialById(String credentialId) {
-        MarketoCredential marketoCredential = marketoCredentialDao
-                .findMarketoCredentialById(credentialId);
+        MarketoCredential marketoCredential = marketoCredentialDao.findMarketoCredentialById(credentialId);
         marketoCredentialDao.deleteMarketoCredentialById(credentialId);
         enrichmentEntityMgr.delete(marketoCredential.getEnrichment());
     }
@@ -87,29 +78,13 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MarketoCredential findMarketoCredentialById(String credentialId) {
-        MarketoCredential marketoCredential = marketoCredentialDao
-                .findMarketoCredentialById(credentialId);
-
-        marketoCredential.getEnrichment().setWebhookUrl(enrichmentWebhookUrl);
-        marketoCredential.getEnrichment().setTenantCredentialGUID(
-                UuidUtils.packUuid(MultiTenantContext.getTenant().getId(), credentialId));
-
-        return marketoCredential;
+        return marketoCredentialDao.findMarketoCredentialById(credentialId);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<MarketoCredential> findAllMarketoCredentials() {
-        List<MarketoCredential> marketoCredentials = marketoCredentialDao.findAll();
-
-        for (MarketoCredential marketoCredential : marketoCredentials) {
-            marketoCredential.getEnrichment().setWebhookUrl(enrichmentWebhookUrl);
-            marketoCredential.getEnrichment().setTenantCredentialGUID(
-                    UuidUtils.packUuid(MultiTenantContext.getTenant().getId(),
-                            Long.toString(marketoCredential.getPid())));
-        }
-
-        return marketoCredentials;
+        return marketoCredentialDao.findAll();
     }
 
     private void populateMarketoCredentialWithTenant(MarketoCredential marketoCredential) {
