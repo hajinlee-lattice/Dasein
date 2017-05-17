@@ -1,7 +1,13 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 
@@ -14,6 +20,8 @@ public class AMSeedPriDomAggregator
         extends BaseAggregator<AMSeedPriDomAggregator.Context>
         implements Aggregator<AMSeedPriDomAggregator.Context> {
 
+    private static final Log log = LogFactory.getLog(AMSeedPriDomAggregator.class);
+
     private static final long serialVersionUID = 6298800516602499546L;
 
     private String dunsField;
@@ -22,20 +30,25 @@ public class AMSeedPriDomAggregator
     private String domSrcField;
     private String isPriDomField;
     private String[] srcPriorityToMrkPriDom;
+    private String duDomsField;
+    private String duDunsField;
 
     private int dunsLoc;
     private int priDomLoc;
 
     public static class Context extends BaseAggregator.Context {
+        String domain = null;
         String duns = null;
         String priDom = null;
         Integer alexaRank = null;
         String domSrc = null;
         String isPriDom = null;
+        Set<String> duDoms = null;
     }
 
     public AMSeedPriDomAggregator(Fields fieldDeclaration, String dunsField, String priDomField, String domField,
-            String alexaRankField, String domSrcField, String isPriDomField, String[] srcPriorityToMrkPriDom) {
+            String alexaRankField, String domSrcField, String isPriDomField, String[] srcPriorityToMrkPriDom,
+            String duDomsField, String duDunsField) {
         super(fieldDeclaration);
         this.dunsField = dunsField;
         this.domField = domField;
@@ -45,6 +58,8 @@ public class AMSeedPriDomAggregator
         this.dunsLoc = namePositionMap.get(dunsField);
         this.priDomLoc = namePositionMap.get(priDomField);
         this.srcPriorityToMrkPriDom = srcPriorityToMrkPriDom;
+        this.duDomsField = duDomsField;
+        this.duDunsField = duDunsField;
     }
 
     @Override
@@ -69,10 +84,19 @@ public class AMSeedPriDomAggregator
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        if (StringUtils.isEmpty(context.priDom) && !StringUtils.isEmpty(arguments.getString(domField))) {
+        if (context.duDoms == null) {
+            context.duDoms = parseDuDoms(arguments.getString(duDomsField));
+        }
+        if (context.priDom == null && StringUtils.isNotBlank(arguments.getString(domField))) {
             return update(context, arguments);
         }
-        int res = checkRuleSmallerInteger((Integer) arguments.getObject(alexaRankField), context.alexaRank);
+        int res = checkRuleDiffWithDuDoms(context, arguments);
+        if (res > 0) {
+            return update(context, arguments);
+        } else if (res < 0) {
+            return context;
+        }
+        res = checkRuleSmallerInteger((Integer) arguments.getObject(alexaRankField), context.alexaRank);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
@@ -95,6 +119,25 @@ public class AMSeedPriDomAggregator
         return context;
     }
 
+    private int checkRuleDiffWithDuDoms(Context context, TupleEntry arguments) {
+        String duDuns = arguments.getString(duDunsField);
+        String duns = arguments.getString(dunsField);
+        if (StringUtils.isBlank(duDuns) || StringUtils.isBlank(duns) || duDuns.equals(duns) || context.duDoms == null) {
+            return 0;
+        }
+        String checking = arguments.getString(domField);
+        String checked = context.domain;
+        if (StringUtils.isNotBlank(checking) && !context.duDoms.contains(checking)
+                && (StringUtils.isBlank(checked) || context.duDoms.contains(checked))) {
+            return 1;
+        } else if (StringUtils.isNotBlank(checked) && !context.duDoms.contains(checked)
+                && (StringUtils.isBlank(checking) || context.duDoms.contains(checking))) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
     private int checkRuleSmallerInteger(Integer checking, Integer checked) {
         if (checking != null && (checked == null || checking.intValue() < checked.intValue())) {
             return 1;
@@ -106,11 +149,11 @@ public class AMSeedPriDomAggregator
     }
 
     private int checkRuleExpectedString(String checking, String checked, String expectedValue) {
-        if (!StringUtils.isEmpty(checking) && checking.equals(expectedValue)
-                && (StringUtils.isEmpty(checked) || !checked.equals(expectedValue))) {
+        if (StringUtils.isNotBlank(checking) && checking.equals(expectedValue)
+                && (StringUtils.isBlank(checked) || !checked.equals(expectedValue))) {
             return 1;
-        } else if (!StringUtils.isEmpty(checked) && checked.equals(expectedValue)
-                && (StringUtils.isEmpty(checking) || !checking.equals(expectedValue))) {
+        } else if (StringUtils.isNotBlank(checked) && checked.equals(expectedValue)
+                && (StringUtils.isBlank(checking) || !checking.equals(expectedValue))) {
             return -1;
         } else {
             return 0;
@@ -118,12 +161,23 @@ public class AMSeedPriDomAggregator
     }
 
     private Context update(Context context, TupleEntry arguments) {
+        context.domain = arguments.getString(domField);
         context.duns = arguments.getString(dunsField);
         context.priDom = arguments.getString(domField);
         context.alexaRank = (Integer) arguments.getObject(alexaRankField);
         context.domSrc = arguments.getString(domSrcField);
         context.isPriDom = arguments.getString(isPriDomField);
         return context;
+    }
+
+    private Set<String> parseDuDoms(String duDoms) {
+        if (StringUtils.isBlank(duDoms)) {
+            return null;
+        }
+        log.info("Parsing DuDoms: " + duDoms);
+        String[] duDomArr = duDoms.split("\\|\\|");
+        Set<String> parsed = new HashSet<>(Arrays.asList(duDomArr));
+        return parsed;
     }
 
     @Override

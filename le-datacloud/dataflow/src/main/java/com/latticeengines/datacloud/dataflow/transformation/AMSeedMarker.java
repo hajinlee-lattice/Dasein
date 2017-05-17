@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AMSeedDuDomAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMSeedPriDomAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedOrphanRecordSmallCompaniesBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedOrphanRecordWithDomainBuffer;
@@ -29,6 +30,8 @@ public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
 
     public static final String DATAFLOW_BEAN_NAME = "AMSeedMarker";
     public static final String TRANSFORMER_NAME = "AMSeedMarkerTransformer";
+
+    private static final String DU_DOMAINS = "DuDomains";
 
     private AMSeedMarkerConfig config;
 
@@ -133,15 +136,16 @@ public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
     // (LID, LE_IS_PRIMARY_DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN)
     @SuppressWarnings("rawtypes")
     private Node markLessPopularDomainsForDUNS(Node node, Node alexa) {
-        node = node.retain(LATTICE_ID, DUNS, DOMAIN, LE_IS_PRIMARY_DOMAIN, DOMAIN_SOURCE);
+        node = node.retain(LATTICE_ID, DUNS, DOMAIN, LE_IS_PRIMARY_DOMAIN, DOMAIN_SOURCE, LE_PRIMARY_DUNS);
         node = addAlexaRank(node, alexa);
+        node = addDuDoms(node);
 
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(DUNS, String.class));
         fms.add(new FieldMetadata(FLAG_DROP_LESS_POPULAR_DOMAIN, String.class));
         Aggregator agg = new AMSeedPriDomAggregator(new Fields(DUNS, FLAG_DROP_LESS_POPULAR_DOMAIN), DUNS,
                 FLAG_DROP_LESS_POPULAR_DOMAIN, DOMAIN, ALEXA_RANK_AMSEED, DOMAIN_SOURCE, LE_IS_PRIMARY_DOMAIN,
-                config.getSrcPriorityToMrkPriDom());
+                config.getSrcPriorityToMrkPriDom(), DU_DOMAINS, LE_PRIMARY_DUNS);
         Node primaryDomain = node.groupByAndAggregate(new FieldList(DUNS), agg, fms).renamePipe("PrimaryDomain");
 
         node = node.leftJoin(DUNS, primaryDomain, DUNS);
@@ -155,6 +159,17 @@ public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
                 new FieldMetadata(LE_IS_PRIMARY_DOMAIN, String.class));
         node = node.retain(LATTICE_ID, LE_IS_PRIMARY_DOMAIN, ALEXA_RANK_AMSEED, FLAG_DROP_LESS_POPULAR_DOMAIN);
         return node;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private Node addDuDoms(Node ams) {
+        List<FieldMetadata> fms = new ArrayList<>();
+        fms.add(new FieldMetadata(LE_PRIMARY_DUNS, String.class));
+        fms.add(new FieldMetadata(DU_DOMAINS, String.class));
+        Aggregator agg = new AMSeedDuDomAggregator(new Fields(LE_PRIMARY_DUNS, DU_DOMAINS), DUNS, LE_PRIMARY_DUNS, DOMAIN,
+                DU_DOMAINS);
+        Node duDoms = ams.groupByAndAggregate(new FieldList(LE_PRIMARY_DUNS), agg, fms).renamePipe("DuDomains");
+        return ams.join(new FieldList(LE_PRIMARY_DUNS), duDoms, new FieldList(LE_PRIMARY_DUNS), JoinType.LEFT);
     }
 
     private Node addAlexaRank(Node ams, Node alexa) {

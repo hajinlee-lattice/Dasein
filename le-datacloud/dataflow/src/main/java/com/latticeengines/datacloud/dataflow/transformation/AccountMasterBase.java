@@ -36,5 +36,5 @@ public abstract class AccountMasterBase<T extends TransformerConfig> extends Con
     protected static final String DOMAIN_SOURCE = "DomainSource";
     protected static final String PRIMARY_DOMAIN = "PrimaryDomain";
     protected static final String SECONDARY_DOMAIN = "SecondaryDomain";
-
+    protected static final String LE_PRIMARY_DUNS = "LE_PRIMARY_DUNS";
 }
