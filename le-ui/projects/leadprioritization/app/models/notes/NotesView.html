@@ -1,0 +1,71 @@
+<section id="NotesView" class="notes-list">
+
+    <div class="container row">
+        <div class="ten columns offset-one">
+
+        	<textarea 
+                rows="4"
+                ng-model="note"
+                autofocus></textarea>
+            <button 
+                type="button" 
+                class="button orange-button"
+                ng-click="vm.addNote(note)">Add Note</button>
+
+            <ul>
+                <li ng-repeat="note in vm.notes | orderBy:'createdDateTime'">
+                    <h4 ng-if="note.inherited == true">Inherited from model {{note.inheritedFrom}}</h4>
+                    <div class="note-header">
+                        <h3><strong>{{note.origin}}</strong> by <span>{{note.createdBy}}</span> on <span>{{note.createdDateTime | date:'MMMM dd, yyyy'}}</span></h3>
+                        <button 
+                            type="button" 
+                            class="button icon-button white-button"
+                            ng-click="vm.deleteNote($event, $index)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                        <button 
+                            type="button" 
+                            class="button icon-button white-button"
+                            ng-click="editNote(note.id)"
+                            ng-if="!vm.editingNote">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                        <button 
+                            type="button" 
+                            class="button icon-button white-button"
+                            ng-click="vm.cancelEditNote($event, $index)"
+                            ng-if="vm.editingNote">
+                            <i class="fa fa-remove"></i>
+                        </button>
+                    </div>
+                    <div 
+                        class="note-body"
+                        ng-if="!vm.editingNote">
+                        <p>{{note.body}}</p>
+                    </div>
+                    <div 
+                        class="edit-note"
+                        ng-if="vm.editingNote">
+                        
+                        <textarea ng-model="note.body"></textarea>
+
+                        <button 
+                            type="button" 
+                            class="button white-button"
+                            ng-click="vm.cancelEditNote($event, $index)">
+                            Cancel Changes
+                        </button>
+                        <button 
+                            type="button"
+                            class="button orange-button pull-right"
+                            ng-click="vm.updateNote(note.body)">Save Changes</button>
+
+                    </div>
+                    <p class="author" ng-if="note.editedBy == true">Edited by <span>{{note.editedBy}}</span> on <span>{{note.editedDateTime | date:'MMMM dd, yyyy'}}</span></p>
+                </li>
+            </ul>
+
+        </div><!-- End .twelve.columns -->
+    </div><!-- End .row -->
+
+</section>

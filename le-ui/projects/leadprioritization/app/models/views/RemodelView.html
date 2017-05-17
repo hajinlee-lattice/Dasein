@@ -64,7 +64,10 @@
                     <form name="newModelname" ng-class="{'has-error': !vm.newModelName || vm.newModelName.length > 50}">
                         <label for="newModelName">New Model Name</label>
                         <input type="text" class="form-control" name="newModelName" ng-model="vm.newModelName" ng-disabled="vm.remodeling || vm.disableRemodelOnError"/>
+                        <label>Note</label>
+                        <textarea rows="2" class="form-control"></textarea>
                         <p class="help-block">* Model Name cannot be empty, must be less than 50 characters.</p>
+
                     </form>
                     <hr class="row-divider">
                     <button class="button gray-button" type="button" ng-click="vm.cancel()" ng-disabled="vm.remodeling">Cancel</button>

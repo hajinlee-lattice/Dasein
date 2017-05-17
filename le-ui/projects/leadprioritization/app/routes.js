@@ -289,6 +289,18 @@ angular
                 }
             }
         })
+        .state('home.segment.import', {
+            url: '/mydata',
+            params: {
+                pageIcon: 'ico-attributes',
+                pageTitle: 'My Data'
+            },
+            views: {
+                "main@": {
+                    templateUrl: 'app/create/mydata/UploadMyDataView.html'
+                }
+            }
+        })
         .state('home.model.attributes', {
             url: '/attributes',
             params: {
@@ -612,6 +624,54 @@ angular
                     controller: 'RemodelController',
                     controllerAs: 'vm',
                     templateUrl: 'app/models/views/RemodelView.html'
+                }
+            }
+        })
+        .state('home.model.notes', {
+            url: '/notes',
+            resolve: {
+                Notes: function() {
+                    return [
+                        { 
+                            noteId: 24322,
+                            origin: 'Note',
+                            inherited: false,
+                            inheritedFrom: '',
+                            createdBy: 'Super User',
+                            createdDateTime: '1494971062877',
+                            body: 'Bacon ipsum dolor amet doner hamburger jerky landjaeger cow, brisket prosciutto beef shoulder tongue bacon strip steak jowl tri-tip tenderloin. Pork loin kielbasa swine, beef ribs turkey landjaeger kevin. Chicken filet mignon burgdoggen tri-tip leberkas, short loin t-bone venison tongue shoulder short ribs bacon andouille tenderloin. Sausage drumstick chicken, shankle pastrami tenderloin landjaeger picanha leberkas kielbasa.',
+                            edited: true,
+                            editedBy: 'NWiggins',
+                            editedDateTime: '04/17/2017'
+                        },
+                        { 
+                            noteId: 66223,
+                            origin: 'Remodel',
+                            inherited: true,
+                            inheritedFrom: 'my_model_name',
+                            createdBy: 'Super User',
+                            createdDateTime: '1494971088561',
+                            body: 'Some other note.',
+                            edited: false,
+                            editedBy: '',
+                            editedDateTime: ''
+                        }
+                    ];
+                }
+            },
+            params: {
+                pageIcon: 'ico-remodel',
+                pageTitle: 'Notes'
+            },
+            views: {
+                "summary@": {
+                    controller: '',
+                    template: ''
+                },
+                "main@": {
+                    controller: 'NotesController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/models/notes/NotesView.html'
                 }
             }
         })
