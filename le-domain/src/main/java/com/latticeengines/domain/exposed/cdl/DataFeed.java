@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -61,23 +62,25 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
 
     @Column(name = "STATUS", nullable = false)
     @JsonProperty("status")
-    Status status;
+    private Status status;
 
     @Column(name = "ACTIVE_EXECUTION", nullable = false)
     @JsonProperty("activeExecution")
-    Long activeExecution;
+    private Long activeExecution;
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("executions")
-    List<DataFeedExecution> executions;
+    private List<DataFeedExecution> executions;
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("tasks")
-    List<DataFeedTask> tasks;
+    private List<DataFeedTask> tasks;
 
-    Map<String, Map<String, DataFeedTask>> taskMap = new HashMap<String, Map<String, DataFeedTask>>();
+    @Transient
+    @JsonIgnore
+    private Map<String, Map<String, DataFeedTask>> taskMap = new HashMap<>();
 
     @Override
     public Long getPid() {
@@ -177,7 +180,7 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
     public Status getStatus() {
         return status;
     }
-  
+
     public void setStatus(Status status) {
         this.status = status;
     }
@@ -193,7 +196,7 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
 
         static {
             nameMap = new HashMap<>();
-            for (Status status: Status.values()) {
+            for (Status status : Status.values()) {
                 nameMap.put(status.getName(), status);
             }
         }
@@ -202,9 +205,13 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
             this.name = name;
         }
 
-        public String getName() { return this.name; }
+        public String getName() {
+            return this.name;
+        }
 
-        public String toString() { return this.name; }
+        public String toString() {
+            return this.name;
+        }
 
         public static Status fromName(String name) {
             if (name == null) {
@@ -212,9 +219,9 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
             }
             if (nameMap.containsKey(name)) {
                 return nameMap.get(name);
-            } else  {
+            } else {
                 throw new IllegalArgumentException("Cannot find a data feed status with name " + name);
             }
         }
-   }
+    }
 }

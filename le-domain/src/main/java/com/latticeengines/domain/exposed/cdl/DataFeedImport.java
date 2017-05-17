@@ -19,8 +19,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_IMPORT", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "EXECUTION_ID", "SOURCE", "ENTITY" }))
+@javax.persistence.Table(name = "DATAFEED_IMPORT", uniqueConstraints = @UniqueConstraint(columnNames = { "EXECUTION_ID",
+        "SOURCE", "ENTITY" }))
 public class DataFeedImport implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -39,7 +39,7 @@ public class DataFeedImport implements HasPid, Serializable {
 
     @Column(name = "EXECUTION_ID", nullable = false)
     @JsonProperty("executionId")
-    private long executionId;
+    private Long executionId;
 
     @Column(name = "SOURCE", nullable = false)
     @JsonProperty("source")
@@ -56,11 +56,11 @@ public class DataFeedImport implements HasPid, Serializable {
     @JsonIgnore
     @OneToOne
     @JoinColumn(name = "FK_DATA_ID", nullable = false)
-    Table data;
+    private Table data;
 
     @Column(name = "START_TIME", nullable = false)
     @JsonProperty("StartTime")
-    long startTime;
+    private Long startTime;
 
     @Override
     public Long getPid() {
@@ -76,7 +76,7 @@ public class DataFeedImport implements HasPid, Serializable {
     public DataFeedExecution getExecution() {
         return execution;
     }
-  
+
     public void setExecution(DataFeedExecution execution) {
         this.execution = execution;
     }
@@ -116,7 +116,7 @@ public class DataFeedImport implements HasPid, Serializable {
     public long getStartTime() {
         return startTime;
     }
-   
+
     public void setStartTime(long startTime) {
         this.startTime = startTime;
     }

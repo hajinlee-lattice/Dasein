@@ -28,8 +28,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_EXECUTION", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "FEED_ID", "EXECUTION" }))
+@javax.persistence.Table(name = "DATAFEED_EXECUTION", uniqueConstraints = @UniqueConstraint(columnNames = { "FEED_ID",
+        "EXECUTION" }))
 public class DataFeedExecution implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -44,7 +44,7 @@ public class DataFeedExecution implements HasPid, Serializable {
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_FEED_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private DataFeed feed;
+    private DataFeed dataFeed;
 
     @JsonIgnore
     @Column(name = "FEED_ID", nullable = false)
@@ -56,16 +56,16 @@ public class DataFeedExecution implements HasPid, Serializable {
 
     @Column(name = "STATUS", nullable = false)
     @JsonProperty("status")
-    Status status;
+    private Status status;
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "dataFeedImport")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "execution")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("imports")
-    List<DataFeedImport> imports;
+    private List<DataFeedImport> imports;
 
-    @JsonProperty("runtimeTabless")
+    @JsonProperty("runtimeTables")
     @Transient
-    List<Table> runtimeTables;
+    private List<Table> runtimeTables;
 
     @Override
     public Long getPid() {
@@ -81,24 +81,24 @@ public class DataFeedExecution implements HasPid, Serializable {
     public Long getFeedId() {
         return feedId;
     }
-  
+
     public void setFeedId(Long feedId) {
         this.feedId = feedId;
     }
 
     public DataFeed getFeed() {
-        return feed;
+        return dataFeed;
     }
-  
+
     public void setFeed(DataFeed feed) {
         this.feedId = feed.getPid();
-        this.feed = feed;
+        this.dataFeed = feed;
     }
 
     public Long getExecution() {
         return execution;
     }
-  
+
     public void setExecution(Long execution) {
         this.execution = execution;
     }
@@ -131,7 +131,7 @@ public class DataFeedExecution implements HasPid, Serializable {
     public Status getStatus() {
         return status;
     }
-  
+
     public void setStatus(Status status) {
         this.status = status;
     }
@@ -146,7 +146,7 @@ public class DataFeedExecution implements HasPid, Serializable {
 
         static {
             nameMap = new HashMap<String, Status>();
-            for (Status status: Status.values()) {
+            for (Status status : Status.values()) {
                 nameMap.put(status.getName(), status);
             }
         }
@@ -155,9 +155,13 @@ public class DataFeedExecution implements HasPid, Serializable {
             this.name = name;
         }
 
-        public String getName() { return this.name; }
+        public String getName() {
+            return this.name;
+        }
 
-        public String toString() { return this.name; }
+        public String toString() {
+            return this.name;
+        }
 
         public static Status fromName(String name) {
             if (name == null) {
@@ -165,9 +169,9 @@ public class DataFeedExecution implements HasPid, Serializable {
             }
             if (nameMap.containsKey(name)) {
                 return nameMap.get(name);
-            } else  {
+            } else {
                 throw new IllegalArgumentException("Cannot find a data feed excution status with name " + name);
             }
         }
-   }
+    }
 }
