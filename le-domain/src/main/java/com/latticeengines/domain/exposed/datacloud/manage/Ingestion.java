@@ -52,8 +52,8 @@ public class Ingestion implements HasPid, Serializable {
     @Column(name = "IngestionName", unique = true, nullable = false, length = 100)
     private String ingestionName;
 
-    @Column(name = "Source", nullable = false, length = 1000)
-    private String source;
+    @Column(name = "Config", nullable = false, length = 1000)
+    private String config;
 
     @Column(name = "CronExpression", length = 100)
     private String cronExpression;
@@ -106,13 +106,13 @@ public class Ingestion implements HasPid, Serializable {
     }
 
     @JsonIgnore
-    private String getSource() {
-        return source;
+    private String getConfig() {
+        return config;
     }
 
     @JsonIgnore
-    private void setSource(String source) {
-        this.source = source;
+    private void setConfig(String config) {
+        this.config = config;
     }
 
     @JsonProperty("CronExpression")
@@ -180,7 +180,7 @@ public class Ingestion implements HasPid, Serializable {
         if (this.providerConfiguration == null) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                providerConfiguration = mapper.readValue(getSource(), ProviderConfiguration.class);
+                providerConfiguration = mapper.readValue(getConfig(), ProviderConfiguration.class);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25015, e, new String[] { ingestionName });
             }
@@ -193,7 +193,7 @@ public class Ingestion implements HasPid, Serializable {
         this.providerConfiguration = providerConfiguration;
         ObjectMapper mapper = new ObjectMapper();
         try {
-            setSource(mapper.writeValueAsString(providerConfiguration));
+            setConfig(mapper.writeValueAsString(providerConfiguration));
         } catch (JsonProcessingException e) {
             throw new LedpException(LedpCode.LEDP_25015, e, new String[] { ingestionName });
         }
