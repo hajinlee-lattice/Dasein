@@ -122,7 +122,8 @@ public class AMStatsLeafSubstitutionFlow extends AMStatsFlowBase {
                         dimensionFieldMetadataList, //
                         node.getFieldNames(), //
                         minMaxInfo, //
-                        new HashSet<>(parameters.getHqDunsRelatedColumns()));
+                        // specialFields);
+                        new HashSet<>(parameters.getSpecialColumns()));
 
         AMStatsLeafFieldSubstitutionFunction leafCreationFunction = //
                 new AMStatsLeafFieldSubstitutionFunction(functionParams);

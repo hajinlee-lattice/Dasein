@@ -64,7 +64,8 @@ public class AMStatsDimExpandMergeFlow extends AMStatsFlowBase {
 
             Fields allLeafFields = new Fields();
             for (FieldMetadata fieldMeta : node.getSchema()) {
-                allLeafFields = allLeafFields.append(new Fields(fieldMeta.getFieldName(), fieldMeta.getJavaType()));
+                allLeafFields = allLeafFields.append(new Fields(fieldMeta.getFieldName(), //
+                        fieldMeta.getJavaType()));
             }
 
             List<FieldMetadata> fms = new ArrayList<>();
@@ -72,8 +73,10 @@ public class AMStatsDimExpandMergeFlow extends AMStatsFlowBase {
 
             AMStatsDimensionExpandBuffer.Params functionParams = //
                     new AMStatsDimensionExpandBuffer.Params(//
-                            dimensionKey, dimensionDefinitionMap, //
-                            allLeafFields, parameters.getRequiredDimensionsValuesMap());
+                            dimensionKey, //
+                            allLeafFields, //
+                            parameters.getRequiredDimensionsValuesMap());
+
             AMStatsDimensionExpandBuffer buffer = //
                     new AMStatsDimensionExpandBuffer(functionParams);
 

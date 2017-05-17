@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.dataflow.transformation.AMStatsFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDomainBckFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsHQDunsFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 
@@ -19,9 +20,48 @@ public class AMStatsHQDunsFlow extends AMStatsFlowBase {
         Node node = addSource(parameters.getBaseTables().get(0));
 
         node = node.addColumnWithFixedValue(//
+                AccountMasterStatsParameters.DOMAIN_BCK_FIELD, null, String.class);
+
+        node = node.addColumnWithFixedValue(//
                 AccountMasterStatsParameters.HQ_DUNS, null, String.class);
 
+        node = generateDomainBckNode(node);
+
         return generateHQDunsNode(node);
+    }
+
+    private Node generateDomainBckNode(Node node) {
+        node.renamePipe("beginDomainBckFlow");
+
+        Node nodeWithoutProperDomain = node.filter(//
+                AccountMasterStatsParameters.DOMAIN + " == null ", //
+                new FieldList(AccountMasterStatsParameters.DOMAIN));
+
+        Node nodeWithProperDomain = node.filter(//
+                AccountMasterStatsParameters.DOMAIN + " != null ", //
+                new FieldList(AccountMasterStatsParameters.DOMAIN));
+
+        nodeWithProperDomain = addDomainBckValues(nodeWithProperDomain);
+
+        return nodeWithoutProperDomain.merge(nodeWithProperDomain);
+    }
+
+    private Node addDomainBckValues(Node nodeWithProperDomain) {
+        AMStatsDomainBckFunction.Params functionParams = //
+                new AMStatsDomainBckFunction.Params(//
+                        new Fields(nodeWithProperDomain.getFieldNames()
+                                .toArray(new String[nodeWithProperDomain.getFieldNames().size()])), //
+                        AccountMasterStatsParameters.DOMAIN, //
+                        AccountMasterStatsParameters.DOMAIN_BCK_FIELD);
+
+        AMStatsDomainBckFunction hqDunsCalculationFunction = //
+                new AMStatsDomainBckFunction(functionParams);
+
+        return nodeWithProperDomain.apply(hqDunsCalculationFunction, //
+                getFieldList(nodeWithProperDomain.getSchema()), //
+                nodeWithProperDomain.getSchema(), //
+                getFieldList(nodeWithProperDomain.getSchema()), //
+                Fields.REPLACE);
     }
 
     private Node generateHQDunsNode(Node node) {
@@ -45,9 +85,7 @@ public class AMStatsHQDunsFlow extends AMStatsFlowBase {
 
         nodeWithProperCodes = addHQDunsValues(nodeWithProperCodes);
 
-        Node mergedNodes = nodeWithoutProperCodes.merge(nodeWithProperCodes);
-
-        return mergedNodes;
+        return nodeWithoutProperCodes.merge(nodeWithProperCodes);
     }
 
     private Node addHQDunsValues(Node nodeWithProperCodes) {
@@ -69,7 +107,6 @@ public class AMStatsHQDunsFlow extends AMStatsFlowBase {
                 getFieldList(nodeWithProperCodes.getSchema()), //
                 nodeWithProperCodes.getSchema(), //
                 getFieldList(nodeWithProperCodes.getSchema()), //
-                Fields.REPLACE
-                );
+                Fields.REPLACE);
     }
 }

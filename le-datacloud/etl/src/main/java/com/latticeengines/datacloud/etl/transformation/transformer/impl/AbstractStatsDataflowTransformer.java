@@ -176,6 +176,7 @@ public abstract class AbstractStatsDataflowTransformer
         parameters.setRootIdsForNonRequiredDimensions(rootIdsForNonRequiredDimensions);
         parameters.setNumericalBucketsRequired(config.isNumericalBucketsRequired());
         parameters.setDataCloudVersion(dataCloudVersion);
+        parameters.setSpecialColumns(config.getSpecialColumns());
     }
 
     private void parseEncodedColumnsMetadata(Set<String> encodedColumns, //

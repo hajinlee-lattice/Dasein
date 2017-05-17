@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.statistics;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,6 +15,22 @@ public class Buckets {
 
     @JsonProperty("List")
     private List<Bucket> bucketList;
+
+    public Buckets() {
+    }
+
+    public Buckets(Buckets buckets) {
+        // used for deep copy during stats calculation
+        this();
+        this.type = buckets.type;
+        if (buckets.bucketList != null) {
+            this.bucketList = new ArrayList<>();
+            for (Bucket oBucket : buckets.bucketList) {
+                Bucket nBucket = new Bucket(oBucket);
+                this.bucketList.add(nBucket);
+            }
+        }
+    }
 
     public BucketType getType() {
         return type;

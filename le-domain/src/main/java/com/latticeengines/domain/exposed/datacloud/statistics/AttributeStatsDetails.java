@@ -13,6 +13,18 @@ public class AttributeStatsDetails {
     @JsonProperty("Bkts")
     private Buckets buckets;
 
+    public AttributeStatsDetails() {
+    }
+
+    public AttributeStatsDetails(AttributeStatsDetails stats) {
+        // used for deep copy during stats calculation
+        this();
+        this.nonNullCount = new Long(stats.nonNullCount);
+        if (stats.buckets != null) {
+            this.buckets = new Buckets(stats.buckets);
+        }
+    }
+
     public Long getNonNullCount() {
         return nonNullCount;
     }

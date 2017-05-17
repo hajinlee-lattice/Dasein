@@ -32,6 +32,8 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String DDUNS = "DOMESTIC_ULTIMATE_DUNS_NUMBER";
     public static final String GDUNS = "GLOBAL_ULTIMATE_DUNS_NUMBER";
     public static final String HQ_DUNS = "HQ_DUNS";
+    public static final String DOMAIN = "LDC_Domain";
+    public static final String DOMAIN_BCK_FIELD = "DOMAIN_BCK_FIELD";
     public static final String STATUS_CODE = "STATUS_CODE";
     public static final String SUBSIDIARY_INDICATOR = "SUBSIDIARY_INDICATOR";
     public static final Integer DEFAULT_MAX_BUCKET_COUNT = 5;
@@ -66,7 +68,7 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     private String dataCloudVersion;
 
-    private List<String> hqDunsRelatedColumns;
+    private List<String> specialColumns;
 
     public Map<String, List<String>> getDimensionDefinitionMap() {
         return dimensionDefinitionMap;
@@ -189,12 +191,12 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
         this.dataCloudVersion = dataCloudVersion;
     }
 
-    public List<String> getHqDunsRelatedColumns() {
-        return hqDunsRelatedColumns == null ? new ArrayList<>() : hqDunsRelatedColumns;
+    public List<String> getSpecialColumns() {
+        return specialColumns == null ? new ArrayList<>() : specialColumns;
     }
 
-    public void setHqDunsRelatedColumns(List<String> hqDunsRelatedColumns) {
-        this.hqDunsRelatedColumns = hqDunsRelatedColumns;
+    public void setSpecialColumns(List<String> specialColumns) {
+        this.specialColumns = specialColumns;
     }
 
 }

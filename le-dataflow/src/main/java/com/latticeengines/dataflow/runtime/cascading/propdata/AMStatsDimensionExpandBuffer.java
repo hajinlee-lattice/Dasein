@@ -3,9 +3,11 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionUtil.ExpandedTuple;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
@@ -134,6 +136,8 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
 
     private void calculateAncestorPathTillRoot(Long rootAncestorId, Long pid) {
         List<Long> ancestorPath = dimensionValueAncestorPathMap.get(pid);
+        Set<Long> ancestorPathSet = new HashSet<Long>(ancestorPath);
+
         int depth = 0;
         while (depth < MAX_DEPTH) {
             // traverse tree till reach root
@@ -141,7 +145,12 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
             if (rootAncestorId.equals(topMostKnownAncestor)) {
                 break;
             } else {
-                ancestorPath.addAll(dimensionValueAncestorPathMap.get(topMostKnownAncestor));
+                for (Long parent : dimensionValueAncestorPathMap.get(topMostKnownAncestor)) {
+                    if (!ancestorPathSet.contains(parent)) {
+                        ancestorPathSet.add(parent);
+                        ancestorPath.add(parent);
+                    }
+                }
             }
 
             depth++;
@@ -172,17 +181,14 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
 
     public static class Params {
         public String expandField;
-        public Map<String, List<String>> hierarchicalDimensionTraversalMap;
         public Fields fieldDeclaration;
         public Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
         public String dimensionColumnPrepostfix;
 
         public Params(String expandField, //
-                Map<String, List<String>> hierarchicalDimensionTraversalMap, //
                 Fields fieldDeclaration, //
                 Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap) {
             this.expandField = expandField;
-            this.hierarchicalDimensionTraversalMap = hierarchicalDimensionTraversalMap;
             this.fieldDeclaration = fieldDeclaration;
             this.requiredDimensionsValuesMap = requiredDimensionsValuesMap;
             this.dimensionColumnPrepostfix = AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX;

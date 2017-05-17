@@ -52,10 +52,10 @@ public class AMStatsDimAggregateFlow extends AMStatsFlowBase {
         fms.addAll(node.getSchema());
 
         node = node.retain(new FieldList(allFields));
+
         AMStatsDimensionAggregator aggregator = //
                 new AMStatsDimensionAggregator(fields);
-        node = node.groupByAndAggregate(new FieldList(groupBy), aggregator, fms);
 
-        return node;
+        return node.groupByAndAggregate(new FieldList(groupBy), aggregator, fms);
     }
 }

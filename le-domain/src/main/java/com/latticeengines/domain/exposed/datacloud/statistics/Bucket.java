@@ -30,14 +30,32 @@ public class Bucket {
     public Bucket() {
     }
 
+    public Bucket(Bucket bucket) {
+        // used for deep copy during stats calculation
+        this();
+        this.bucketLabel = bucket.bucketLabel;
+        if (bucket.count != null) {
+            this.count = new Long(bucket.count);
+        }
+        this.id = bucket.id;
+        if (bucket.encodedCountList != null) {
+            this.encodedCountList = new Long[bucket.encodedCountList.length];
+            int idx = 0;
+            for (Long cnt : bucket.encodedCountList) {
+                this.encodedCountList[idx++] = new Long(cnt);
+            }
+        }
+        if (bucket.range != null || bucket.lift != null) {
+            // ignore
+        }
+    }
+
     public String getBucketLabel() {
         return bucketLabel;
     }
 
     public void setBucketLabel(String bucketLabel) {
         this.bucketLabel = bucketLabel;
-        // TODO TEMPORARY FOR M10
-        this.range = BucketRange.value(bucketLabel);
     }
 
     public Long getCount() {

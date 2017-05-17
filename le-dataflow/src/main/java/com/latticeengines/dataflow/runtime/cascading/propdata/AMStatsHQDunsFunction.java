@@ -57,21 +57,6 @@ public class AMStatsHQDunsFunction extends BaseOperation<Map> //
 
         Tuple result = entry.getTupleCopy();
 
-        Fields fields = entry.getFields();
-
-        int idx = 0;
-        String[] fieldNames = new String[] { subIndicatorField, statusCodeField, //
-                dunsField, ddunsField, gdunsField, hqDunsField };
-        Integer[] fieldLocs = new Integer[] { subIndicatorFieldLoc, statusCodeFieldLoc, //
-                dunsFieldLoc, ddunsFieldLoc, gdunsFieldLoc, hqDunsFieldLoc };
-
-        for (String field : fieldNames) {
-            int loc = fieldLocs[idx++];
-            if (!field.equalsIgnoreCase((String) fields.get(loc))) {
-                throw new RuntimeException("Field index mismatch: " + field);
-            }
-        }
-
         String subIndicator = (String) entry.getObject(subIndicatorFieldLoc);
         String statusCode = (String) entry.getObject(statusCodeFieldLoc);
 
@@ -93,6 +78,7 @@ public class AMStatsHQDunsFunction extends BaseOperation<Map> //
                     + " should both be valid numbers: " + e.getMessage());
         }
         result.set(hqDunsFieldLoc, hqDuns);
+
         functionCall.getOutputCollector().add(result);
     }
 

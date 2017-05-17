@@ -11,9 +11,11 @@ public class AccountMasterStatisticsConfig extends TransformerConfig {
     private String cubeColumnName;
 
     private List<String> dimensions;
-    
+
+    private List<String> specialColumns;
+
     private boolean numericalBucketsRequired;
-    
+
     private String dataCloudVersion;
 
     public Map<String, String> getAttributeCategoryMap() {
@@ -46,6 +48,14 @@ public class AccountMasterStatisticsConfig extends TransformerConfig {
 
     public void setDimensions(List<String> dimensions) {
         this.dimensions = dimensions;
+    }
+
+    public List<String> getSpecialColumns() {
+        return specialColumns;
+    }
+
+    public void setSpecialColumns(List<String> specialColumns) {
+        this.specialColumns = specialColumns;
     }
 
     public boolean isNumericalBucketsRequired() {
