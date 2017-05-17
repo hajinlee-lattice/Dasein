@@ -27,8 +27,13 @@ public class GroupByAndAggOperation extends Operation {
 
     @SuppressWarnings("rawtypes")
     public GroupByAndAggOperation(Operation.Input prior, FieldList groupByFields, Aggregator aggregator, List<FieldMetadata> fms) {
+        this(prior, groupByFields, aggregator, fms, Fields.RESULTS);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public GroupByAndAggOperation(Operation.Input prior, FieldList groupByFields, Aggregator aggregator, List<FieldMetadata> fms, Fields fieldSelectStrategy) {
         Pipe groupby = new GroupBy(prior.pipe, new Fields(groupByFields.getFields()));
-        groupby = new Every(groupby, aggregator, Fields.RESULTS);
+        groupby = new Every(groupby, aggregator, fieldSelectStrategy);
 
         this.pipe = groupby;
         this.metadata = Lists.newArrayList(fms);

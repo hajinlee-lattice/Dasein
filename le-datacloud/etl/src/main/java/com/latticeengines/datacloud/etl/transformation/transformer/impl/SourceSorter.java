@@ -220,6 +220,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
         @Override
         public Boolean call() {
             split();
+            FileUtils.deleteQuietly(new File(localDir));
             return true;
         }
 

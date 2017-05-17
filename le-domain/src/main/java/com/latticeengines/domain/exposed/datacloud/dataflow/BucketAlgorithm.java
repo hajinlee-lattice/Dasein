@@ -5,7 +5,9 @@ import static com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorit
 import static com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm.INTEVAL;
 
 import java.io.Serializable;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,7 +28,20 @@ public abstract class BucketAlgorithm implements Serializable {
     public static final String INTEVAL = "Interval";
     public static final String BOOLEAN = "Boolean";
 
+    private List<String> generatedLabels;
+
     @JsonProperty("algorithm")
     public abstract String getAlgorithm();
+
+    @JsonIgnore
+    public List<String> generateLabels() {
+        if (generatedLabels == null) {
+            generatedLabels = generateLabelsInternal();
+        }
+        return generatedLabels;
+    }
+
+    @JsonIgnore
+    public abstract List<String> generateLabelsInternal();
 
 }

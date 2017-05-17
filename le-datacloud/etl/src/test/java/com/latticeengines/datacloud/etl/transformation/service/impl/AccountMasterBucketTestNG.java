@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -42,6 +45,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         finish(progress);
         verifyFileSplitting();
         confirmResultFile(progress);
+        verifyAvsc();
         cleanupProgressTables();
     }
 
@@ -72,8 +76,8 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             step2.setInputSteps(Collections.singletonList(0));
             step2.setTransformer(SourceSorter.TRANSFORMER_NAME);
             step2.setConfiguration(sortStepConfiguration());
-            // -----------
             step2.setTargetSource(getTargetSourceName());
+            // -----------
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(step1);
             steps.add(step2);
@@ -130,8 +134,24 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             }
             String fileName = file.substring(file.lastIndexOf("/") + 1);
             System.out.println(String.format("[%s] Min: %d -- Max: %d", fileName, minInFile, maxInFile));
-            Assert.assertTrue(minInFile > maxInLastFile);
+            Assert.assertTrue(minInFile > maxInLastFile, String.format(
+                    "Min in current file %d is not greater than the max in last file %d", minInFile, maxInLastFile));
             maxInLastFile = maxInFile;
+        }
+    }
+
+    private void verifyAvsc() throws IOException {
+        String avroDir = getPathForResult();
+        String avscDir = avroDir.replace("Snapshot", "Schema");
+        String avsc = HdfsUtils.getFilesByGlob(yarnConfiguration, avscDir + "/*.avsc").get(0);
+        ObjectMapper om = new ObjectMapper();
+        JsonNode json = om.readTree(HdfsUtils.getInputStream(yarnConfiguration, avsc));
+        ArrayNode attrs = (ArrayNode) json.get("fields");
+        for (JsonNode attr : attrs) {
+            if (attr.get("name").asText().equals("EAttr001")) {
+                System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(attr));
+                return;
+            }
         }
     }
 

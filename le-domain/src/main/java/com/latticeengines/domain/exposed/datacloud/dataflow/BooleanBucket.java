@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -35,5 +38,10 @@ public class BooleanBucket extends BucketAlgorithm {
 
     public void setFalseLabel(String falseLabel) {
         this.falseLabel = falseLabel;
+    }
+
+    @Override
+    public List<String> generateLabelsInternal () {
+        return Arrays.asList(null, getTrueLabel(), getFalseLabel());
     }
 }

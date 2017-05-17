@@ -45,7 +45,7 @@ public class BucketedAttribute implements Serializable {
         return buckets;
     }
 
-    private void setBuckets(List<String> buckets) {
+    public void setBuckets(List<String> buckets) {
         this.buckets = buckets;
     }
 

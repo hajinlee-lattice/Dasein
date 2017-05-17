@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,5 +27,53 @@ public class IntervalBucket extends BucketAlgorithm {
 
     public void setBoundaries(List<Number> boundaries) {
         this.boundaries = boundaries;
+    }
+
+    @Override
+    public List<String> generateLabelsInternal() {
+        Number firstBoundary = boundaries.get(0);
+        String firstLabel = String.format("< %s", formatBoundary(firstBoundary));
+        List<String> middleLabels = new ArrayList<>();
+        if (boundaries.size() > 1) {
+            for (int i = 0; i < boundaries.size() - 1; i++) {
+                Number lowerBound = boundaries.get(i);
+                Number upperBound = boundaries.get(i + 1);
+                middleLabels.add(String.format("%s - %s", formatBoundary(lowerBound), formatBoundary(upperBound)));
+            }
+        }
+        Number lastBoundary = boundaries.get(boundaries.size() - 1);
+        String lastLabel = String.format("> %s", formatBoundary(lastBoundary));
+
+        List<String> labels = new ArrayList<>();
+        labels.add(null);
+        labels.add(firstLabel);
+        labels.addAll(middleLabels);
+        labels.add(lastLabel);
+        return labels;
+    }
+
+    private String formatBoundary(Number number) {
+        long longValue;
+        if (number instanceof Long || number instanceof Integer) {
+            longValue = Long.valueOf(number.toString());
+        } else if (Double.valueOf(number.toString()) == Double.valueOf(number.toString()).intValue()) {
+            // convert to integer
+            longValue = Double.valueOf(number.toString()).intValue();
+            number = longValue;
+        } else {
+            throw new IllegalArgumentException(
+                    "Cannot support a boundary of type " + number.getClass().getSimpleName());
+        }
+        String formatted = number.toString();
+        if (longValue != 0 && longValue % 1000 == 0) {
+            formatted = String.format("%dK", Long.valueOf(number.toString()) / 1000);
+        }
+        if (longValue != 0 && longValue % 1000_000 == 0) {
+            formatted = String.format("%dM", Long.valueOf(number.toString()) / 1000000);
+        }
+        if (longValue != 0 && longValue % 1000_000_000 == 0) {
+            formatted = String.format("%dB", Long.valueOf(number.toString()) / 1000_000_000);
+        }
+        return formatted;
     }
 }

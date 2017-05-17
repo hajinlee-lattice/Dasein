@@ -107,17 +107,6 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
 
     protected void initialize() {
         try {
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        try {
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             Resource[] sourceResources = new Resource[] {};
             try {

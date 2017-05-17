@@ -248,6 +248,13 @@ public class Node {
                 builder);
     }
 
+    @SuppressWarnings("rawtypes")
+    public Node groupByAndAggregate(FieldList groupByFieldList, Aggregator aggregator,
+            List<FieldMetadata> fieldMetadatas, Fields fieldSelectStrategy) {
+        return new Node(builder.register(new GroupByAndAggOperation(opInput(identifier), groupByFieldList, aggregator,
+                fieldMetadatas, fieldSelectStrategy)), builder);
+    }
+
     public Node groupByAndExpand(FieldList groupByFieldList, String expandField, List<String> expandFormats, //
             FieldList argumentsFieldList, FieldList declaredFieldList) {
         return new Node(builder.addGroupByAndExpand(identifier, groupByFieldList, expandField, //

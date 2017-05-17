@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,5 +39,13 @@ public class CategoricalBucket extends BucketAlgorithm {
 
     public void setMapping(Map<String, List<String>> mapping) {
         this.mapping = mapping;
+    }
+
+    @Override
+    public List<String> generateLabelsInternal () {
+        List<String> labels = new ArrayList<>();
+        labels.add(null);
+        labels.addAll(categories);
+        return labels;
     }
 }

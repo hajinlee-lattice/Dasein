@@ -15,14 +15,12 @@
     "matchapi": {
         "cpu": 512,
         "mem": 4096,
-        "port": 8076,
-        "capacity": 1
+        "port": 8076
     },
     "scoringapi": {
         "cpu": 1024,
         "mem": 3096,
-        "port": 8073,
-        "capacity": 1
+        "port": 8073
     },
     "oauth2": {
         "mem": 1024,

@@ -15,7 +15,8 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
     private static final long serialVersionUID = -1L;
 
     // for jackson
-    private DCBucketedAttr() {}
+    private DCBucketedAttr() {
+    }
 
     public DCBucketedAttr(String nominalAttr, int lowestBit, int numBits) {
         super(nominalAttr, new ArrayList<>(), lowestBit, numBits);
@@ -41,6 +42,10 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
 
     public void setBucketAlgo(BucketAlgorithm bucketAlgo) {
         this.bucketAlgo = bucketAlgo;
+        if ((getBuckets() == null || getBuckets().isEmpty())
+                && (bucketAlgo != null && bucketAlgo.generateLabels() != null)) {
+            setBuckets(bucketAlgo.generateLabels());
+        }
     }
 
 }
