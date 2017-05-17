@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -21,15 +22,19 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.security.HasTenantId;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "PLAY")
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class Play implements HasName, HasPid {
+public class Play implements HasName, HasPid, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,6 +74,15 @@ public class Play implements HasName, HasPid {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "play")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Launch> launches;
+
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Tenant tenant;
+
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
+    private Long tenantId;
 
     @Override
     public Long getPid() {
@@ -145,4 +159,30 @@ public class Play implements HasName, HasPid {
     public void setLaunches(List<Launch> launches) {
         this.launches = launches;
     }
+
+    @JsonIgnore
+    public Tenant getTenant() {
+        return this.tenant;
+    }
+
+    @JsonIgnore
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
+    }
+
+    @Override
+    @JsonIgnore
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    @Override
+    @JsonIgnore
+    public Long getTenantId() {
+        return this.tenantId;
+    }
+
 }

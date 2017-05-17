@@ -252,8 +252,9 @@ public enum LedpCode {
     LEDP_18138("Same load vdb table job is already succeeded."), //
     LEDP_18140("Table {0} already exist, cannot create a new one"), //
     LEDP_18141("Table metadata is conflict with table already existed."), //
-    LEDP_18142("Table {0} not exist, cannot import table with update rule"),
+    LEDP_18142("Table {0} not exist, cannot import table with update rule"), //
     LEDP_18143("Invalid max or offset specified"), //
+    LEDP_18144("Play with name {0} not found."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
