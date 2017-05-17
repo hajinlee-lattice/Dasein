@@ -58,7 +58,7 @@ public class DataFeedExecution implements HasPid, Serializable {
     @JsonProperty("status")
     private Status status;
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "execution")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "execution")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("imports")
     private List<DataFeedImport> imports;

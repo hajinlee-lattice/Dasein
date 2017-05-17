@@ -73,7 +73,7 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
     @JsonProperty("executions")
     private List<DataFeedExecution> executions;
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "dataFeed")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("tasks")
     private List<DataFeedTask> tasks;
