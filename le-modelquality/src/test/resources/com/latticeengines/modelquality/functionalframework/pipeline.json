@@ -78,6 +78,21 @@
       "RTSFilePath": null
     },
     {
+      "KeyWhenSortingByAscending": 12, 
+      "Name": "featureselectionstep", 
+      "ColumnTransformFilePath": "featureselectionstep.py", 
+      "OperatesOnColumns": [], 
+      "UniqueColumnTransformName": null, 
+      "NamedParameterListToInit": {
+        "params": "params", 
+        "enabled": "false", 
+        "numFeatures": 50
+      }, 
+      "LoadFromHdfs": false, 
+      "MainClassName": "FeatureSelectionStep", 
+      "RTSFilePath": null
+    }, 
+    {
       "KeyWhenSortingByAscending": 13,
       "Name": "exportdfstep",
       "ColumnTransformFilePath": "exportdfstep.py",

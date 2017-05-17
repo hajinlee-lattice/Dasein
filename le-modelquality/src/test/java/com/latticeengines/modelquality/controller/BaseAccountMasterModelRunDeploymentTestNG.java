@@ -53,7 +53,7 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
 
             PropData thisPropData = modelQualityProxy.getPropDataConfigByName(propData.getName());
             thisPropData.setName("ModelQualityDeploymentTest-AccountMaster");
-            thisPropData.setDataCloudVersion("2.0.1");
+            thisPropData.setDataCloudVersion("2.0.3");
             thisPropData.setExcludePublicDomains(true);
             PropData propDataAlreadyExists = propDataEntityMgr.findByName(thisPropData.getName());
             if (propDataAlreadyExists != null)
