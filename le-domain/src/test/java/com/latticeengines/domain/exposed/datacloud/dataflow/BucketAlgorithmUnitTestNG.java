@@ -30,9 +30,11 @@ public class BucketAlgorithmUnitTestNG {
         bucket.setBoundaries(Arrays.asList(0, 10, 100));
         Assert.assertEquals(bucket.generateLabels(), Arrays.asList(null, "< 0", "0 - 10", "10 - 100", "> 100"));
 
+        bucket = new IntervalBucket();
         bucket.setBoundaries(Arrays.asList(0.0, 10.0, 100.0));
         Assert.assertEquals(bucket.generateLabels(), Arrays.asList(null, "< 0", "0 - 10", "10 - 100", "> 100"));
 
+        bucket = new IntervalBucket();
         bucket.setBoundaries(Arrays.asList(0L, 1000L, 2000_000L, 3000_000_000L));
         Assert.assertEquals(bucket.generateLabels(), Arrays.asList(null, "< 0", "0 - 1K", "1K - 2M", "2M - 3B", "> 3B"));
     }
@@ -49,6 +51,7 @@ public class BucketAlgorithmUnitTestNG {
         BooleanBucket bucket = new BooleanBucket();
         Assert.assertEquals(bucket.generateLabels(), Arrays.asList(null, "Yes", "No"));
 
+        bucket = new BooleanBucket();
         bucket.setTrueLabel("T");
         bucket.setFalseLabel("F");
         Assert.assertEquals(bucket.generateLabels(), Arrays.asList(null, "T", "F"));
