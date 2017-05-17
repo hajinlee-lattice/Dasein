@@ -3,6 +3,9 @@
     @media (max-width: 1300px) {
         padding: 0 2.12766%;
     }
+    .loading {
+        background: none; // override _progress.scss
+    }
 }
 .open-nav .enrichment-wizard-container {
     @media (max-width: 1491px) {
@@ -59,7 +62,7 @@
     }
     .carousel-container {
         position: relative;
-        
+
         &:hover .enrichment-wizard-category-pagination {
             opacity: 1;
         }
@@ -208,7 +211,7 @@
                             height: 2em;
                             white-space: initial;
                             .category-label-span {
-                                
+
                             }
                         }
                     }
@@ -475,13 +478,13 @@
                                     &.B {
                                         background-color: #4188CD;
                                     }
-                                    &.C { 
+                                    &.C {
                                         background-color: #337ABF;
                                     }
-                                    &.D { 
+                                    &.D {
                                         background-color: #2067AC;
                                     }
-                                    &.F { 
+                                    &.F {
                                         background-color: #0D5499;
                                     }
                                 }
