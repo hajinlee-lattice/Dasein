@@ -9,10 +9,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
-import com.latticeengines.datacloud.dataflow.transformation.BucketAnalyze;
-import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAnalyzeParameter;
+import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CalculateStatsParameter;
 
-public class AnalyzerTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
     private static final int ENC_ATTR_1 = 4;
     private static final int ENC_ATTR_2 = 5;
@@ -20,12 +20,12 @@ public class AnalyzerTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
     @Override
     protected String getFlowBeanName() {
-        return BucketAnalyze.BEAN_NAME;
+        return CalculateStats.BEAN_NAME;
     }
 
     @Test(groups = "functional")
     public void test() throws Exception {
-        BucketAnalyzeParameter parameters = prepareInput();
+        CalculateStatsParameter parameters = prepareInput();
         executeDataFlow(parameters);
         verifyResult();
     }
@@ -37,7 +37,7 @@ public class AnalyzerTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         }
     }
 
-    private BucketAnalyzeParameter prepareInput() {
+    private CalculateStatsParameter prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("RowID", Long.class), //
                 Pair.of("RelayString", String.class), //
@@ -63,7 +63,7 @@ public class AnalyzerTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         populateYesBits(data);
         uploadDataToSharedAvroInput(data, fields);
 
-        BucketAnalyzeParameter parameters = new BucketAnalyzeParameter();
+        CalculateStatsParameter parameters = new CalculateStatsParameter();
         parameters.encAttrs = BucketTestUtils.EncodedAttributes();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
         parameters.ignoreAttrs = Arrays.asList("RowID", "IgnoreField");

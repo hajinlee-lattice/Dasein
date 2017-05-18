@@ -8,18 +8,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import com.latticeengines.datacloud.dataflow.transformation.BucketEncode;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang.StringUtils;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
+import com.latticeengines.datacloud.dataflow.transformation.BucketEncode;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 
 public class BucketEncodeAccountMasterTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+
+    private final String ENC_ATTR = "EAttr280";
+    private final int LOWEST_BIT = 40;
+    private final int NUM_BITS = 2;
+    private final long TEST_LATTICE_ID = 18599;
+    private final int EXPECTED_BKT = 2;
 
     @Override
     protected String getFlowBeanName() {
@@ -87,7 +95,12 @@ public class BucketEncodeAccountMasterTestNG extends DataCloudDataFlowFunctional
         List<GenericRecord> records = readOutput();
         int numRows = 0;
         for (GenericRecord record : records) {
-            System.out.println(record);
+             long latticeId = (long) record.get("LatticeAccountId");
+             if (latticeId == TEST_LATTICE_ID) {
+                 long eattr = (long) record.get(ENC_ATTR);
+                 int bkt = BitCodecUtils.getBits(eattr, LOWEST_BIT, NUM_BITS);
+                 Assert.assertEquals(bkt, EXPECTED_BKT, String.format("id = %d, bkt = %d", (long) record.get("LatticeAccountId"), bkt));
+             }
             numRows++;
         }
         // Assert.assertEquals(numRows, 3);

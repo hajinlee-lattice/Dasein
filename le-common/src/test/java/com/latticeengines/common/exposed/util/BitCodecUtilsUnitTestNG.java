@@ -64,7 +64,31 @@ public class BitCodecUtilsUnitTestNG {
         expected = BitCodecUtils.setBits(expected, lowestBit2, numBits2, value2);
         // query
         Assert.assertEquals(result & mask, expected);
+    }
 
+    @Test(groups = "unit")
+    public void randomTest() {
+        Random random = new Random(System.currentTimeMillis());
+        for (int i = 1; i < 10; i++) {
+            int lowestBit = random.nextInt(50);
+            int numBits = random.nextInt(10);
+            int value = random.nextInt((int) Math.pow(2, numBits));
+            long result = random.nextLong();
+            result = BitCodecUtils.setBits(result, lowestBit, numBits, value);
+            Assert.assertEquals(BitCodecUtils.getBits(result, lowestBit, numBits), value);
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testAll2Bits() {
+        Random random = new Random(System.currentTimeMillis());
+        int numBits = 2;
+        int value = 2;
+        for (int lowestBit = 0; lowestBit < 63; lowestBit++) {
+            long result = 0;
+            result = BitCodecUtils.setBits(result, lowestBit, numBits, value);
+            Assert.assertEquals(BitCodecUtils.getBits(result, lowestBit, numBits), value, String.format("%d, %d", result, lowestBit));
+        }
     }
 
 }

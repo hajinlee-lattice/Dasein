@@ -25,6 +25,7 @@ import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceBucketer;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceSorter;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.StatsCalculator;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
@@ -43,8 +44,9 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
-        verifyFileSplitting();
         confirmResultFile(progress);
+        verifyFileSplitting();
+        verifyStats();
         verifyAvsc();
         cleanupProgressTables();
     }
@@ -74,13 +76,20 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             // -----------
             TransformationStepConfig step2 = new TransformationStepConfig();
             step2.setInputSteps(Collections.singletonList(0));
-            step2.setTransformer(SourceSorter.TRANSFORMER_NAME);
-            step2.setConfiguration(sortStepConfiguration());
-            step2.setTargetSource(getTargetSourceName());
+            step2.setTransformer(StatsCalculator.TRANSFORMER_NAME);
+            step2.setConfiguration("{}");
+            step2.setTargetSource("AccountMasterBucketedStats");
+            // -----------
+            TransformationStepConfig step3 = new TransformationStepConfig();
+            step3.setInputSteps(Collections.singletonList(0));
+            step3.setTransformer(SourceSorter.TRANSFORMER_NAME);
+            step3.setConfiguration(sortStepConfiguration());
+            step3.setTargetSource(getTargetSourceName());
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(step1);
             steps.add(step2);
+            steps.add(step3);
             // -----------
             configuration.setSteps(steps);
             configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
@@ -155,4 +164,19 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
+    private void verifyStats() throws IOException {
+        Iterator<GenericRecord> records = iterateSource("AccountMasterBucketedStats");
+        while(records.hasNext()) {
+            GenericRecord record = records.next();
+            String attrName = record.get("AttrName").toString();
+            if (attrName.startsWith("TechIndicator")) {
+                String[] bkts = record.get("BktCounts").toString().split("\\|");
+                for(String bkt: bkts) {
+                    String[] tokens = bkt.split(":");
+                    int bktId = Integer.valueOf(tokens[0]);
+                    Assert.assertTrue(bktId >= 0 && bktId < 3, "Found an invalid bkt id " + bktId);
+                }
+            }
+        }
+    }
 }

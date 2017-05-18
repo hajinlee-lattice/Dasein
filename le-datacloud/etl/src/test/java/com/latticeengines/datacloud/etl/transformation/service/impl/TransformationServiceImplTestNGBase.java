@@ -198,6 +198,33 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         verifyResultAvroRecords(records);
     }
 
+    protected Iterator<GenericRecord> iterateSource(String sourceName) {
+        String path = getPathForSource(sourceName);
+        System.out.println("Checking for result file: " + path);
+        List<String> files;
+        try {
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Assert.assertTrue(files.size() >= 2);
+        for (String file : files) {
+            if (!file.endsWith(SUCCESS_FLAG)) {
+                Assert.assertTrue(file.endsWith(".avro"));
+                continue;
+            }
+            Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
+        }
+
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        return records;
+    }
+
+    protected String getPathForSource(String sourceName) {
+        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(sourceName);
+        return hdfsPathBuilder.constructSnapshotDir(sourceName, targetVersion).toString();
+    }
+
     protected void cleanupProgressTables() {
         for (TransformationProgress progress : progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());

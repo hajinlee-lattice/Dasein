@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class BucketAnalyzeParameter extends TransformationFlowParameters {
+public class CalculateStatsParameter extends TransformationFlowParameters {
 
     @JsonProperty("enc_attrs")
     public List<DCEncodedAttr> encAttrs;

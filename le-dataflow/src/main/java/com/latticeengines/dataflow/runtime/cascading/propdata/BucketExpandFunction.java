@@ -1,12 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
@@ -46,12 +42,10 @@ public class BucketExpandFunction extends BaseOperation implements Function {
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         initArgPosMap(arguments);
-        List<Tuple> records = expandArguments(arguments);
-        records.forEach(r -> functionCall.getOutputCollector().add(r));
+        expandArguments(arguments, functionCall);
     }
 
-    private List<Tuple> expandArguments(TupleEntry arguments) {
-        List<Tuple> tuples = new ArrayList<>();
+    private void expandArguments(TupleEntry arguments, FunctionCall functionCall) {
         for (int i = 0; i < arguments.size(); i++) {
             Object value = arguments.getObject(i);
             if (argIdToAttrIdMap.containsKey(i)) {
@@ -59,7 +53,7 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                 int attrId = argIdToAttrIdMap.get(i);
                 int bktId = value == null ? 0 : 1;
                 Tuple tuple = new Tuple(attrId, bktId);
-                tuples.add(tuple);
+                functionCall.getOutputCollector().add(tuple);
             } else if (encAttrArgPos.containsKey(i)) {
                 // encoded field
                 DCEncodedAttr encAttr = encAttrArgPos.get(i);
@@ -67,11 +61,10 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                     int attrId = attrIdMap.get(bktAttr.getNominalAttr());
                     int bktId = BitCodecUtils.getBits((long) value, bktAttr.getLowestBit(), bktAttr.getNumBits());
                     Tuple tuple = new Tuple(attrId, bktId);
-                    tuples.add(tuple);
+                    functionCall.getOutputCollector().add(tuple);
                 }
             }
         }
-        return tuples;
     }
 
     private void initArgPosMap(TupleEntry arguments) {
