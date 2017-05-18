@@ -48,6 +48,7 @@ public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerD
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.getRecord().put(InterfaceName.Email.name(), null);
         scoreRequest.getRecord().put(InterfaceName.CompanyName.name(), null);
+        scoreRequest.getRecord().put(InterfaceName.DUNS.name(), null);
 
         AbstractMap.SimpleEntry<LedpResponseErrorHandler, ExceptionHandlerErrors> handlerAndErrors = post(url,
                 scoreRequest);
