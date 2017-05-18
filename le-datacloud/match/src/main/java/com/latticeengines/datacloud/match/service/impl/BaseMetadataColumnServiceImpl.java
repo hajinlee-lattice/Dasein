@@ -35,7 +35,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     private long refreshInterval;
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

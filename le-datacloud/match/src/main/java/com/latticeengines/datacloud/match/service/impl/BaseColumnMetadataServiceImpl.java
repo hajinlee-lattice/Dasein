@@ -42,7 +42,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     private ConcurrentMap<Predefined, List<ColumnMetadata>> predefinedMetaDataCache = new ConcurrentHashMap<>();
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     // Not used for now, will use when figured out logic

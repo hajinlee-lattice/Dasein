@@ -63,7 +63,7 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
     private ConcurrentMap<String, String> externalMetrics = new ConcurrentHashMap<>();
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

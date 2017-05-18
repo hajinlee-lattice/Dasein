@@ -109,7 +109,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private int scoreArtifactCacheRefreshTime;
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler taskScheduler;
 
     @Autowired

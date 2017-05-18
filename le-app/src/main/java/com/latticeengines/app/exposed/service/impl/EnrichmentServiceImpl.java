@@ -50,7 +50,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     private AttributeService attributeService;
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

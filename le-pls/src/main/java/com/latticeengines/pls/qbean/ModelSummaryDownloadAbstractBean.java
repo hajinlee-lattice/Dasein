@@ -57,7 +57,7 @@ public abstract class ModelSummaryDownloadAbstractBean implements QuartzJobBean 
     private int queueCapacity;
 
     @Autowired
-    @Qualifier("taskExecutor")
+    @Qualifier("commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     private boolean incremental;

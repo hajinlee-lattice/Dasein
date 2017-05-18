@@ -27,7 +27,7 @@ import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 public class DLOrchestrationJobBean implements QuartzJobBean {
 
     @Autowired
-    @Qualifier("taskExecutor")
+    @Qualifier("commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired

@@ -37,7 +37,7 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
     private ConcurrentMap<String, DataCloudVersion> latestApprovedMajorVersions = new ConcurrentHashMap<>();
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

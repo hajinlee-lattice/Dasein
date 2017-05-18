@@ -25,7 +25,7 @@ public class StatsServiceImpl implements StatsService {
     private MetricService metricService;
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Value("${monitor.health.inspection.enabled}")

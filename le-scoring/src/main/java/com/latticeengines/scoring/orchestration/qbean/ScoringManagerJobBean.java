@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,6 +21,7 @@ import com.latticeengines.scoring.orchestration.service.impl.ScoringManagerCalla
 public class ScoringManagerJobBean implements QuartzJobBean {
 
     @Autowired
+    @Qualifier("commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired

@@ -56,7 +56,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     private static final String CODEBOOK_LOOKUP = "CodeBookLookup";
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Autowired

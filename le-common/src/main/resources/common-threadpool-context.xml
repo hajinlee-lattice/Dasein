@@ -3,8 +3,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
-    <task:scheduler id="taskScheduler" pool-size="4"/>
-    <task:executor id="taskExecutor"
+    <task:scheduler id="commonTaskScheduler" pool-size="4"/>
+    <task:executor id="commonTaskExecutor"
                    pool-size="4-8"
                    queue-capacity="1000"
                    keep-alive="100"

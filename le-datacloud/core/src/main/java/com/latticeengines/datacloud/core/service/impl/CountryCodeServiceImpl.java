@@ -37,7 +37,7 @@ public class CountryCodeServiceImpl implements CountryCodeService {
     private final ConcurrentSkipListSet<String> countryBlackCache = new ConcurrentSkipListSet<>();
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     public String getCountryCode(String country) {

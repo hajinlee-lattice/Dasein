@@ -78,7 +78,7 @@ public class SqlServerHelper implements DbHelper {
     private boolean enableFetchers;
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Autowired

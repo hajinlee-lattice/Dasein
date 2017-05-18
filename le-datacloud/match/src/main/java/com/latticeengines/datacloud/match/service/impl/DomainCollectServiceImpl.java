@@ -51,7 +51,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     }
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Autowired

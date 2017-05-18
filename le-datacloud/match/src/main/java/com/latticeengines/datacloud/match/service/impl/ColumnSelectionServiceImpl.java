@@ -51,7 +51,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private String latstRtsCache;
 
     @Autowired
-    @Qualifier("taskScheduler")
+    @Qualifier("commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct
