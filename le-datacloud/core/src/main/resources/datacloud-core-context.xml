@@ -13,6 +13,7 @@
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:datafabric-context.xml" />
+    <import resource="common-threadpool-context.xml"/>
 
     <import resource="classpath:datacloud-core-persistence-context.xml" />
     
