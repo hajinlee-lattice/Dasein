@@ -51,9 +51,9 @@ public class BitCodecUtils {
         for (int i = 0; i < numBits; i++) {
             int offset = lowestBitPos + i;
             if ((value >> i & 1) == 1) {
-                result = result | (1 << offset);
+                result = result | (1L << offset);
             } else {
-                result = result & ~(1 << offset);
+                result = result & ~(1L << offset);
             }
         }
         return result;
@@ -62,7 +62,7 @@ public class BitCodecUtils {
     public static long bitMask(long result, int lowestBitPos, int numBits) {
         for (int i = 0; i < numBits; i++) {
             int offset = lowestBitPos + i;
-            result = result | (1 << offset);
+            result = result | (1L << offset);
         }
         return result;
     }
@@ -72,7 +72,6 @@ public class BitCodecUtils {
         long masked = result & mask;
         return (int) masked >> lowestBitPos;
     }
-
 
     /**
      * This is command line tool to decode an encoded base64 string
