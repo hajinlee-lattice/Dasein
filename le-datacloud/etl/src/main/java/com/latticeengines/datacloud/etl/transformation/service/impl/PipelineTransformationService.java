@@ -258,7 +258,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                             IngestedFileToSourceTransformerConfig ingestedFileToSourceTransformerConfig = new ObjectMapper()
                                     .readValue(config.getConfiguration(), IngestedFileToSourceTransformerConfig.class);
                             ((IngestionSource) source)
-                                    .setIngetionName(ingestedFileToSourceTransformerConfig.getIngetionName());
+                                    .setIngestionName(ingestedFileToSourceTransformerConfig.getIngestionName());
                         } catch (IOException e) {
                             updateStatusToFailed(progress, "Failed to parse IngestedFileToSourceTransformerConfig "
                                     + config.getConfiguration(), null);

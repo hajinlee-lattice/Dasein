@@ -56,7 +56,7 @@ public class DnBFileToSourceServiceTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        baseSource.setIngetionName(IngestionNames.DNB_CASHESEED);
+        baseSource.setIngestionName(IngestionNames.DNB_CASHESEED);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_052.OUT.gz", baseSourceVersion);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_053.OUT.gz", baseSourceVersion);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_054.OUT.gz", baseSourceVersion);
@@ -114,7 +114,7 @@ public class DnBFileToSourceServiceTestNG
 
     private String getIngestedFileToSourceTransformerConfig() throws JsonProcessingException {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
-        conf.setIngetionName(IngestionNames.DNB_CASHESEED);
+        conf.setIngestionName(IngestionNames.DNB_CASHESEED);
         conf.setFileNameOrExtension(".OUT");
         conf.setCompressedFileNameOrExtension(".OUT.gz");
         conf.setCompressType(CompressType.GZ);
