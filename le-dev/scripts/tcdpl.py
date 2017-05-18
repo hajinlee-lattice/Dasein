@@ -31,6 +31,9 @@ MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring
 # ms modules for pre check in
 COMMON_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop', 'objectapi']
 
+# apps for pre check in
+COMMON_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi']
+
 def cleanupWars():
     print 'clean up existing wars ...'
     for dirName, subdirList, fileList in os.walk(os.path.join(CATALINA_HOME, "webapps")):
@@ -129,10 +132,10 @@ def printWars():
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Deploy wars to local tomcat')
     parser.add_argument('command', type=str, help='command: deploy, cleanup, check, run')
-    parser.add_argument('-a', dest='apps', type=str, default='microservice',
-                        help='comma separated list of apps to be deployed. default is microservice. Avaiable choices are ' + ', '.join(LE_APPS))
+    parser.add_argument('-a', dest='apps', type=str, default=','.join(COMMON_APPS),
+                        help='comma separated list of apps to be deployed. default is ' + ','.join(COMMON_APPS) + '. Avaiable choices are ' + ', '.join(LE_APPS))
     parser.add_argument('-m', dest='modules', type=str, default=','.join(COMMON_MODULES),
-                        help='comma separated list of microservice modules to be deployed. core is implicitly included. default is all modules. Avaiable choices are ' + ', '.join(MS_MODULES))
+                        help='comma separated list of microservice modules to be deployed. core is implicitly included. default is ' + ','.join(COMMON_MODULES) + '. Avaiable choices are ' + ', '.join(MS_MODULES))
     args = parser.parse_args()
 
     return args
