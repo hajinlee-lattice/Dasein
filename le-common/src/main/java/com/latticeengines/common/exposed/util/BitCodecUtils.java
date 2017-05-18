@@ -50,7 +50,7 @@ public class BitCodecUtils {
     public static long setBits(long result, int lowestBitPos, int numBits, int value) {
         for (int i = 0; i < numBits; i++) {
             int offset = lowestBitPos + i;
-            if ((value >> i & 1) == 1) {
+            if ((value >> i & 1L) == 1) {
                 result = result | (1L << offset);
             } else {
                 result = result & ~(1L << offset);
