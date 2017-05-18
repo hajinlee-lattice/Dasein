@@ -224,7 +224,8 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
             indRankInBin = [indR[i] for i in ix]
             indValueInBin = [indV[i] for i in ix]
             # Make sure all values are non-zero
-            if sum(indValueInBin) == 0:
+            if len(indValueBin)==0:
+                #if sum(indValueInBin) == 0:
                 return (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
             lenOverlap = len(set(indRankInBin) & set(indValueInBin))
             totalRevenue = float(sum([valSpent[i] for i in indRankInBin]))
@@ -253,12 +254,14 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
             else:
                 sumEVPred = float(sum([expectedValueRanking[i] for i in indRankInBin]))
 
-            if MaxTotalRevenue > 0 and len(ix) > 0:
+            if len(ix)>0:
+                #            if MaxTotalRevenue > 0 and len(ix) > 0:
+                maxTR=max(1.0,MaxTotalRevenue)
                 returnTuple = (float(lenOverlap) / len(ix),
                                popSize,
                                totalRevenue / popSize,
                                totalConversions / popSize,
-                               totalRevenue / MaxTotalRevenue,
+                               totalRevenue / maxTR,
                                sumRanking / len(ix),
                                sumEventPred / len(ix),
                                sumValuePred / len(ix),
