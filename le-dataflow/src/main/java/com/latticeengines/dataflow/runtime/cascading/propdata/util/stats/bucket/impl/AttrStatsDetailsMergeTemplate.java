@@ -13,7 +13,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.AttrStatsDetailsMergeTool;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 
@@ -27,8 +27,8 @@ public abstract class AttrStatsDetailsMergeTemplate implements AttrStatsDetailsM
             Buckets secondBucketsObj) //
             throws IOException, JsonParseException, JsonMappingException, JsonProcessingException;
 
-    public AttributeStatsDetails merge(AttributeStatsDetails firstStatsDetails,
-            AttributeStatsDetails secondStatsDetails, boolean printTop) {
+    public AttributeStats merge(AttributeStats firstStatsDetails,
+                                AttributeStats secondStatsDetails, boolean printTop) {
         if (firstStatsDetails == null || secondStatsDetails == null) {
             if (firstStatsDetails != null) {
                 return firstStatsDetails;
@@ -39,7 +39,7 @@ public abstract class AttrStatsDetailsMergeTemplate implements AttrStatsDetailsM
             }
         }
 
-        AttributeStatsDetails resultAttributeStatsDetails = new AttributeStatsDetails();
+        AttributeStats resultAttributeStatsDetails = new AttributeStats();
         if (printTop) {
             System.out.println("First count " //
                     + firstStatsDetails.getNonNullCount() + "Second count "//
@@ -55,9 +55,9 @@ public abstract class AttrStatsDetailsMergeTemplate implements AttrStatsDetailsM
         return resultAttributeStatsDetails;
     }
 
-    protected void setNonNullCount(AttributeStatsDetails firstStatsDetails, //
-            AttributeStatsDetails secondStatsDetails, //
-            AttributeStatsDetails resultAttributeStatsDetails) {
+    protected void setNonNullCount(AttributeStats firstStatsDetails, //
+                                   AttributeStats secondStatsDetails, //
+                                   AttributeStats resultAttributeStatsDetails) {
         resultAttributeStatsDetails.setNonNullCount(firstStatsDetails.getNonNullCount() //
                 + secondStatsDetails.getNonNullCount());
     }

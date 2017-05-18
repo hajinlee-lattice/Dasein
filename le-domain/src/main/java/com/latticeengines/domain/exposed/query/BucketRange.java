@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -15,7 +17,9 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @ApiModel("Represents a range of values, or a single value, either categorical or numerical.  "
         + "All ranges are inclusive, like SQL between statements.")
-public class BucketRange {
+public class BucketRange implements Serializable {
+
+    private static final long serialVersionUID = 7984184598020826719L;
 
     @ApiModelProperty("Whether this range only includes null values.  Otherwise nulls aren't allowed in a BucketRange.")
     @JsonProperty("is_null_only")

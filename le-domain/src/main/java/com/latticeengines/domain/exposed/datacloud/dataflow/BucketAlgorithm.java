@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "algorithm")
 @JsonSubTypes({
@@ -43,5 +44,8 @@ public abstract class BucketAlgorithm implements Serializable {
 
     @JsonIgnore
     public abstract List<String> generateLabelsInternal();
+
+    @JsonIgnore
+    public abstract BucketType getBucketType();
 
 }

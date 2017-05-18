@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -79,9 +79,9 @@ public class AttrStatsDetailsDedupMergeUtil extends AttrStatsDetailsMergeTemplat
     }
 
     @Override
-    protected void setNonNullCount(AttributeStatsDetails firstStatsDetails, //
-            AttributeStatsDetails secondStatsDetails, //
-            AttributeStatsDetails resultAttributeStatsDetails) {
+    protected void setNonNullCount(AttributeStats firstStatsDetails, //
+                                   AttributeStats secondStatsDetails, //
+                                   AttributeStats resultAttributeStatsDetails) {
         long maxCount = Math.max(firstStatsDetails.getNonNullCount(), //
                 secondStatsDetails.getNonNullCount());
         resultAttributeStatsDetails.setNonNullCount(maxCount);

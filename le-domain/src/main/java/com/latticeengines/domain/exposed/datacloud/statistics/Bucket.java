@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.statistics;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -7,7 +9,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.query.BucketRange;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Bucket {
+@JsonInclude(Include.NON_NULL)
+public class Bucket implements Serializable {
+
+    private static final long serialVersionUID = -8550825595883518157L;
+
     @JsonProperty("Lbl")
     private String bucketLabel;
 
@@ -18,7 +24,6 @@ public class Bucket {
     private Long id;
 
     @JsonProperty("En")
-    @JsonInclude(Include.NON_NULL)
     private Long[] encodedCountList;
 
     @JsonProperty("Range")

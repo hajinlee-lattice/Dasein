@@ -7,7 +7,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.AttrStatsDetailsMergeFactory.MergeType;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -22,20 +22,20 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
 
     @Test
     public void testRegularNullBucketDedup() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         firstStatsDetails.setNonNullCount(0L);
         secondStatsDetails.setNonNullCount(1L);
 
-        AttributeStatsDetails resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(1));
         Assert.assertNull(resultStatsDetails.getBuckets());
     }
 
     @Test
     public void testRegularBucketDedup1() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
 
         Buckets firstBuckets = new Buckets();
         firstBuckets.setType(BucketType.Boolean);
@@ -49,7 +49,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
         firstStatsDetails.setBuckets(firstBuckets);
         firstStatsDetails.setNonNullCount(1L);
 
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         Buckets secondBuckets = new Buckets();
         secondBuckets.setType(BucketType.Boolean);
@@ -63,7 +63,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
         secondStatsDetails.setBuckets(secondBuckets);
         secondStatsDetails.setNonNullCount(1L);
 
-        AttributeStatsDetails resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(1));
         Assert.assertNotNull(resultStatsDetails.getBuckets());
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);
@@ -77,7 +77,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
 
     @Test
     public void testRegularBucketDedup2() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
 
         Buckets firstBuckets = new Buckets();
         firstBuckets.setType(BucketType.Boolean);
@@ -91,7 +91,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
         firstStatsDetails.setBuckets(firstBuckets);
         firstStatsDetails.setNonNullCount(1L);
 
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         Buckets secondBuckets = new Buckets();
         secondBuckets.setType(BucketType.Boolean);
@@ -105,7 +105,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
         secondStatsDetails.setBuckets(secondBuckets);
         secondStatsDetails.setNonNullCount(1L);
 
-        AttributeStatsDetails resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(1));
         Assert.assertNotNull(resultStatsDetails.getBuckets());
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);
@@ -119,7 +119,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
 
     @Test
     public void testEncodedBucketDedup1() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
 
         Buckets firstBuckets = new Buckets();
         firstBuckets.setType(BucketType.Boolean);
@@ -140,7 +140,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
         firstStatsDetails.setBuckets(firstBuckets);
         firstStatsDetails.setNonNullCount(1L);
 
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         Buckets secondBuckets = new Buckets();
         secondBuckets.setType(BucketType.Boolean);
@@ -161,7 +161,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
         secondStatsDetails.setBuckets(secondBuckets);
         secondStatsDetails.setNonNullCount(1L);
 
-        AttributeStatsDetails resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(1));
         Assert.assertNotNull(resultStatsDetails.getBuckets());
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);
@@ -193,7 +193,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
 
     @Test
     public void testEncodedBucketDedup2() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
 
         Buckets firstBuckets = new Buckets();
         firstBuckets.setType(BucketType.Boolean);
@@ -214,7 +214,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
         firstStatsDetails.setBuckets(firstBuckets);
         firstStatsDetails.setNonNullCount(1L);
 
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         Buckets secondBuckets = new Buckets();
         secondBuckets.setType(BucketType.Boolean);
@@ -238,7 +238,7 @@ public class AttrStatsDetailsDedupMergeUnitTestNG {
         Long[] expectedTrueCountList = new Long[] { 1L, 0L, 1L, 1L };
         Long[] expectedFalseCountList = new Long[] { 0L, 1L, 0L, 0L };
 
-        AttributeStatsDetails resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = dedupUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(1));
         Assert.assertNotNull(resultStatsDetails.getBuckets());
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);

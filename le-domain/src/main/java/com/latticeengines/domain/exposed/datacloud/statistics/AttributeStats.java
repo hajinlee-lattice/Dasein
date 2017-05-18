@@ -6,17 +6,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AttributeStatsDetails {
+public class AttributeStats {
     @JsonProperty("Cnt")
     private Long nonNullCount;
 
     @JsonProperty("Bkts")
     private Buckets buckets;
 
-    public AttributeStatsDetails() {
+    public AttributeStats() {
     }
 
-    public AttributeStatsDetails(AttributeStatsDetails stats) {
+    public AttributeStats(AttributeStats stats) {
         // used for deep copy during stats calculation
         this();
         this.nonNullCount = new Long(stats.nonNullCount);

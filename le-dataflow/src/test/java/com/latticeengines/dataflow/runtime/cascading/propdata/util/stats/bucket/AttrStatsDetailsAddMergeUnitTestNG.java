@@ -7,7 +7,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.AttrStatsDetailsMergeFactory.MergeType;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -22,20 +22,20 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
 
     @Test
     public void testRegularNullBucketAdd() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         firstStatsDetails.setNonNullCount(20L);
         secondStatsDetails.setNonNullCount(30L);
 
-        AttributeStatsDetails resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(50));
         Assert.assertNull(resultStatsDetails.getBuckets());
     }
 
     @Test
     public void testRegularBucketAdd1() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
 
         Buckets firstBuckets = new Buckets();
         firstBuckets.setType(BucketType.Boolean);
@@ -49,7 +49,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         firstStatsDetails.setBuckets(firstBuckets);
         firstStatsDetails.setNonNullCount(20L);
 
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         Buckets secondBuckets = new Buckets();
         secondBuckets.setType(BucketType.Boolean);
@@ -63,7 +63,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         secondStatsDetails.setBuckets(secondBuckets);
         secondStatsDetails.setNonNullCount(30L);
 
-        AttributeStatsDetails resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(50));
         Assert.assertNotNull(resultStatsDetails.getBuckets());
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);
@@ -81,7 +81,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
 
     @Test
     public void testRegularBucketAdd2() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
 
         Buckets firstBuckets = new Buckets();
         firstBuckets.setType(BucketType.Numerical);
@@ -100,7 +100,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         firstStatsDetails.setBuckets(firstBuckets);
         firstStatsDetails.setNonNullCount(20L);
 
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         Buckets secondBuckets = new Buckets();
         secondBuckets.setType(BucketType.Numerical);
@@ -124,7 +124,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         secondStatsDetails.setBuckets(secondBuckets);
         secondStatsDetails.setNonNullCount(30L);
 
-        AttributeStatsDetails resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(50));
         Assert.assertNotNull(resultStatsDetails.getBuckets());
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Numerical);
@@ -143,7 +143,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
 
     @Test
     public void testEncodedBucketAdd1() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
 
         Buckets firstBuckets = new Buckets();
         firstBuckets.setType(BucketType.Boolean);
@@ -158,7 +158,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         firstStatsDetails.setBuckets(firstBuckets);
         firstStatsDetails.setNonNullCount(20L);
 
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         Buckets secondBuckets = new Buckets();
         secondBuckets.setType(BucketType.Boolean);
@@ -173,7 +173,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         secondStatsDetails.setBuckets(secondBuckets);
         secondStatsDetails.setNonNullCount(30L);
 
-        AttributeStatsDetails resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(50));
         Assert.assertNotNull(resultStatsDetails.getBuckets());
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);
@@ -206,7 +206,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
 
     @Test
     public void testEncodedBucketAdd2() {
-        AttributeStatsDetails firstStatsDetails = new AttributeStatsDetails();
+        AttributeStats firstStatsDetails = new AttributeStats();
 
         Buckets firstBuckets = new Buckets();
         firstBuckets.setType(BucketType.Boolean);
@@ -227,7 +227,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         firstStatsDetails.setBuckets(firstBuckets);
         firstStatsDetails.setNonNullCount(20L);
 
-        AttributeStatsDetails secondStatsDetails = new AttributeStatsDetails();
+        AttributeStats secondStatsDetails = new AttributeStats();
 
         Buckets secondBuckets = new Buckets();
         secondBuckets.setType(BucketType.Boolean);
@@ -251,7 +251,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         Long[] expectedTrueCountList = new Long[] { 23L, 10L, 15L, 35L };
         Long[] expectedFalseCountList = new Long[] { 27L, 40L, 35L, 15L };
 
-        AttributeStatsDetails resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
+        AttributeStats resultStatsDetails = addUtil.merge(firstStatsDetails, secondStatsDetails, true);
         Assert.assertEquals(resultStatsDetails.getNonNullCount(), new Long(50));
         Assert.assertNotNull(resultStatsDetails.getBuckets());
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);

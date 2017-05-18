@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -30,6 +31,7 @@ public class IntervalBucket extends BucketAlgorithm {
     }
 
     @Override
+    @JsonIgnore
     public List<String> generateLabelsInternal() {
         Number firstBoundary = boundaries.get(0);
         String firstLabel = String.format("< %s", formatBoundary(firstBoundary));
@@ -75,5 +77,11 @@ public class IntervalBucket extends BucketAlgorithm {
             formatted = String.format("%dB", Long.valueOf(number.toString()) / 1000_000_000);
         }
         return formatted;
+    }
+
+    @JsonIgnore
+    @Override
+    public BucketType getBucketType() {
+        return BucketType.Numerical;
     }
 }

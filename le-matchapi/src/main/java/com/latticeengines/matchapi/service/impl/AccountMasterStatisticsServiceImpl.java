@@ -34,8 +34,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AMAttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -152,8 +152,8 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                         dimensionalQueryService.getAllAttributes(dimension.getRootAttrId());
                 String dimensionField = dimensionAttrDetails.get(0).getAttrName();
                 if (!cube.getStatistics().containsKey(dimensionField)) {
-                    AttributeStatistics value = new AttributeStatistics();
-                    AttributeStatsDetails stats = new AttributeStatsDetails();
+                    AMAttributeStats value = new AMAttributeStats();
+                    AttributeStats stats = new AttributeStats();
 
                     stats.setNonNullCount(cube.getNonNullCount());
 
@@ -205,12 +205,12 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
     private TopNAttributeTree createTopAttrTree(AccountMasterCube cube) {
         Map<String, ColumnMetadata> columnsMetadata = getColumnMetadata();
-        Map<String, AttributeStatistics> statistics = cube.getStatistics();
-        List<Entry<String, AttributeStatistics>> sortedStatistics = new ArrayList<Entry<String, AttributeStatistics>>(
+        Map<String, AMAttributeStats> statistics = cube.getStatistics();
+        List<Entry<String, AMAttributeStats>> sortedStatistics = new ArrayList<Entry<String, AMAttributeStats>>(
                 statistics.entrySet());
-        Collections.sort(sortedStatistics, new Comparator<Entry<String, AttributeStatistics>>() {
+        Collections.sort(sortedStatistics, new Comparator<Entry<String, AMAttributeStats>>() {
             // Descending order
-            public int compare(Entry<String, AttributeStatistics> s1, Entry<String, AttributeStatistics> s2) {
+            public int compare(Entry<String, AMAttributeStats> s1, Entry<String, AMAttributeStats> s2) {
                 long valueS1, valueS2;
                 if (isLocationBased) {
                     valueS1 = s1.getValue().getUniqueLocationBasedStatistics().getNonNullCount();
@@ -229,7 +229,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             }
         });
         TopNAttributeTree tree = new TopNAttributeTree();
-        for (Entry<String, AttributeStatistics> statistic : sortedStatistics) {
+        for (Entry<String, AMAttributeStats> statistic : sortedStatistics) {
             Category category = columnsMetadata.get(statistic.getKey()).getCategory();
             String subCategory = columnsMetadata.get(statistic.getKey()).getSubcategory();
             TopNAttributes topNAttributes = tree.get(category);
@@ -289,11 +289,11 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     private AccountMasterCube filterAttributes(AccountMasterCube cube, String category, String subCategory,
             boolean considerOnlyEnrichments) {
         Map<String, ColumnMetadata> columnsMetadata = getColumnMetadata();
-        Map<String, AttributeStatistics> statistics = cube.getStatistics();
-        Iterator<Entry<String, AttributeStatistics>> iter = statistics.entrySet().iterator();
+        Map<String, AMAttributeStats> statistics = cube.getStatistics();
+        Iterator<Entry<String, AMAttributeStats>> iter = statistics.entrySet().iterator();
         long nonNullCount = 0;
         while (iter.hasNext()) {
-            Entry<String, AttributeStatistics> entry = iter.next();
+            Entry<String, AMAttributeStats> entry = iter.next();
             boolean isRemoved = false;
 
             if (considerOnlyEnrichments && ((!columnsMetadata.containsKey(entry.getKey()))
@@ -323,7 +323,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         return cube;
     }
 
-    private boolean containsEncodedBuckets(AttributeStatistics fieldStats) {
+    private boolean containsEncodedBuckets(AMAttributeStats fieldStats) {
         if (containsEncodedBuckets(fieldStats.getRowBasedStatistics())
                 || containsEncodedBuckets(fieldStats.getUniqueLocationBasedStatistics())) {
             return true;
@@ -332,7 +332,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         return false;
     }
 
-    private boolean containsEncodedBuckets(AttributeStatsDetails statistics) {
+    private boolean containsEncodedBuckets(AttributeStats statistics) {
         if (statistics != null && statistics.getBuckets() != null
                 && !CollectionUtils.isEmpty(statistics.getBuckets().getBucketList())) {
             for (Bucket bkt : statistics.getBuckets().getBucketList()) {
@@ -344,8 +344,8 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         return false;
     }
 
-    private void standardizeAttrStatsLbl(AttributeStatistics stats) {
-        AttributeStatsDetails rowBasedStats = stats.getRowBasedStatistics();
+    private void standardizeAttrStatsLbl(AMAttributeStats stats) {
+        AttributeStats rowBasedStats = stats.getRowBasedStatistics();
         if (rowBasedStats == null || rowBasedStats.getBuckets() == null
                 || rowBasedStats.getBuckets().getBucketList() == null) {
             return;
@@ -431,36 +431,36 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
     private void parseEncodedColumnStats(AccountMasterCube cube, Map<String, Integer> decodeAttrIdxMap,
             String encodedColumnName) {
-        AttributeStatistics encodedValueCountInfo = cube.getStatistics().get(encodedColumnName);
+        AMAttributeStats encodedValueCountInfo = cube.getStatistics().get(encodedColumnName);
         String serializedTemplate = createTemplateInfoWithoutCodedInfo(encodedValueCountInfo);
 
         MutableLong rowBasedTotalSum = new MutableLong();
         MutableLong uniqueLocationBasedTotalSum = new MutableLong();
         for (String attrName : decodeAttrIdxMap.keySet()) {
-            AttributeStatistics decodedInfo = JsonUtils.deserialize(serializedTemplate, AttributeStatistics.class);
+            AMAttributeStats decodedInfo = JsonUtils.deserialize(serializedTemplate, AMAttributeStats.class);
             populateDecodedBucketInfo(decodedInfo, encodedValueCountInfo, decodeAttrIdxMap.get(attrName),
                     rowBasedTotalSum, uniqueLocationBasedTotalSum);
             cube.getStatistics().put(attrName, decodedInfo);
         }
     }
 
-    private void populateDecodedBucketInfo(AttributeStatistics decodedInfo, AttributeStatistics encodedValueCountInfo,
-            int idx, MutableLong rowBasedTotalSum, MutableLong uniqueLocationBasedTotalSum) {
+    private void populateDecodedBucketInfo(AMAttributeStats decodedInfo, AMAttributeStats encodedValueCountInfo,
+                                           int idx, MutableLong rowBasedTotalSum, MutableLong uniqueLocationBasedTotalSum) {
         if (encodedValueCountInfo.getRowBasedStatistics() != null) {
-            AttributeStatsDetails st = encodedValueCountInfo.getRowBasedStatistics();
+            AttributeStats st = encodedValueCountInfo.getRowBasedStatistics();
             populateDecodedBuckets(decodedInfo.getRowBasedStatistics(),
                     decodedInfo.getRowBasedStatistics().getBuckets(), st.getBuckets(), idx, rowBasedTotalSum);
         }
         if (encodedValueCountInfo.getUniqueLocationBasedStatistics() != null) {
-            AttributeStatsDetails st = encodedValueCountInfo.getUniqueLocationBasedStatistics();
+            AttributeStats st = encodedValueCountInfo.getUniqueLocationBasedStatistics();
             populateDecodedBuckets(decodedInfo.getUniqueLocationBasedStatistics(),
                     decodedInfo.getUniqueLocationBasedStatistics().getBuckets(), st.getBuckets(), idx,
                     uniqueLocationBasedTotalSum);
         }
     }
 
-    private void populateDecodedBuckets(AttributeStatsDetails attributeStatsDetails, Buckets decodedBuckets,
-            Buckets encodedBuckets, int idx, MutableLong totalSum) {
+    private void populateDecodedBuckets(AttributeStats attributeStatsDetails, Buckets decodedBuckets,
+                                        Buckets encodedBuckets, int idx, MutableLong totalSum) {
         if (encodedBuckets != null && encodedBuckets.getBucketList() != null
                 && encodedBuckets.getBucketList().size() > 0) {
             int loopId = 0;
@@ -503,21 +503,21 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         }
     }
 
-    private String createTemplateInfoWithoutCodedInfo(AttributeStatistics encodedValueCountInfo) {
-        AttributeStatistics templateInfoWithoutCodedInfo = JsonUtils
-                .deserialize(JsonUtils.serialize(encodedValueCountInfo), AttributeStatistics.class);
+    private String createTemplateInfoWithoutCodedInfo(AMAttributeStats encodedValueCountInfo) {
+        AMAttributeStats templateInfoWithoutCodedInfo = JsonUtils
+                .deserialize(JsonUtils.serialize(encodedValueCountInfo), AMAttributeStats.class);
         if (templateInfoWithoutCodedInfo.getRowBasedStatistics() != null) {
-            AttributeStatsDetails st = templateInfoWithoutCodedInfo.getRowBasedStatistics();
+            AttributeStats st = templateInfoWithoutCodedInfo.getRowBasedStatistics();
             cleanEncodedDataFromBuckets(st);
         }
         if (templateInfoWithoutCodedInfo.getUniqueLocationBasedStatistics() != null) {
-            AttributeStatsDetails st = templateInfoWithoutCodedInfo.getUniqueLocationBasedStatistics();
+            AttributeStats st = templateInfoWithoutCodedInfo.getUniqueLocationBasedStatistics();
             cleanEncodedDataFromBuckets(st);
         }
         return JsonUtils.serialize(templateInfoWithoutCodedInfo);
     }
 
-    private void cleanEncodedDataFromBuckets(AttributeStatsDetails st) {
+    private void cleanEncodedDataFromBuckets(AttributeStats st) {
         if (st.getBuckets() != null && st.getBuckets().getBucketList() != null
                 && st.getBuckets().getBucketList().size() > 0) {
             for (Bucket bucket : st.getBuckets().getBucketList()) {
@@ -534,20 +534,20 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         List<Bucket> emptyBucket = new ArrayList<Bucket>();
 
         for (String attr : cube.getStatistics().keySet()) {
-            AttributeStatistics attrStats = cube.getStatistics().get(attr);
+            AMAttributeStats attrStats = cube.getStatistics().get(attr);
             if (attrStats.getRowBasedStatistics() != null) {
-                AttributeStatsDetails st = attrStats.getRowBasedStatistics();
+                AttributeStats st = attrStats.getRowBasedStatistics();
                 setEmptyBucketList(emptyBucket, st);
             }
             if (attrStats.getUniqueLocationBasedStatistics() != null) {
-                AttributeStatsDetails st = attrStats.getUniqueLocationBasedStatistics();
+                AttributeStats st = attrStats.getUniqueLocationBasedStatistics();
                 setEmptyBucketList(emptyBucket, st);
             }
         }
 
     }
 
-    private void setEmptyBucketList(List<Bucket> emptyBucket, AttributeStatsDetails st) {
+    private void setEmptyBucketList(List<Bucket> emptyBucket, AttributeStats st) {
         if (st.getBuckets() != null && st.getBuckets().getType() == BucketType.Numerical) {
             st.getBuckets().setBucketList(emptyBucket);
         }

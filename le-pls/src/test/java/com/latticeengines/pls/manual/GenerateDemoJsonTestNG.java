@@ -18,8 +18,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AMAttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -53,9 +53,9 @@ public class GenerateDemoJsonTestNG {
             if (!attributes.stream().anyMatch(a -> a.getFieldName().equals(fieldName))) {
                 attributes.add(createLeadEnrichmentAttribute(category, subcategory, attribute, fieldName, description));
             }
-            AttributeStatistics statistics = cube.getStatistics().get(fieldName);
+            AMAttributeStats statistics = cube.getStatistics().get(fieldName);
             if (statistics == null) {
-                statistics = new AttributeStatistics();
+                statistics = new AMAttributeStats();
                 cube.getStatistics().put(fieldName, statistics);
             }
             addBucket(statistics, value, frequency);
@@ -98,9 +98,9 @@ public class GenerateDemoJsonTestNG {
         return topAttribute;
     }
 
-    private void addBucket(AttributeStatistics statistics, String value, long frequency) {
+    private void addBucket(AMAttributeStats statistics, String value, long frequency) {
         if (statistics.getRowBasedStatistics() == null) {
-            statistics.setRowBasedStatistics(new AttributeStatsDetails());
+            statistics.setRowBasedStatistics(new AttributeStats());
         }
         if (statistics.getRowBasedStatistics().getBuckets() == null) {
             statistics.getRowBasedStatistics().setBuckets(new Buckets());

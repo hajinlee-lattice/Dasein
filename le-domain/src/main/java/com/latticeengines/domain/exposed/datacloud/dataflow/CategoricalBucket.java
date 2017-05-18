@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -42,10 +43,17 @@ public class CategoricalBucket extends BucketAlgorithm {
     }
 
     @Override
+    @JsonIgnore
     public List<String> generateLabelsInternal () {
         List<String> labels = new ArrayList<>();
         labels.add(null);
         labels.addAll(categories);
         return labels;
+    }
+
+    @JsonIgnore
+    @Override
+    public BucketType getBucketType() {
+        return BucketType.Enum;
     }
 }

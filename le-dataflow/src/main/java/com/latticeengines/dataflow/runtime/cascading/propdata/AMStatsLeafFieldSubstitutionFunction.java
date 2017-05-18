@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.StatsAttributeParser;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.handlers.BooleanTextHandler;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
@@ -156,7 +156,7 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
     private void parseBooleanField(Tuple result, int pos, StatsAttributeParser attributeParser,
             Map<String, List<Object>> minMaxInfo, String fieldName, Object val, boolean isEncodedAttr) {
 
-        AttributeStatsDetails attrStatsDetails = new AttributeStatsDetails();
+        AttributeStats attrStatsDetails = new AttributeStats();
         Buckets buckets = new Buckets();
         List<Bucket> bucketList = new ArrayList<>();
         Long count = 0L;
@@ -205,7 +205,7 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
                 fieldName, maxBucketCount, encodedNo, //
                 encodedYes, numericalBucketsRequired, nAttributeBucketIds);
 
-        AttributeStatsDetails attrStatsDetails = new AttributeStatsDetails();
+        AttributeStats attrStatsDetails = new AttributeStats();
         Buckets buckets = new Buckets();
         List<Bucket> bucketList = new ArrayList<>();
         Long count = 0L;
@@ -232,7 +232,7 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
 
     private void setDefaultStats(Tuple result, int pos, String fieldName, Object val) {
 
-        AttributeStatsDetails attrStatsDetails = new AttributeStatsDetails();
+        AttributeStats attrStatsDetails = new AttributeStats();
         Long count = 0L;
         if (val != null) {
             count = 1L;
@@ -286,7 +286,7 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
     }
 
     private void setStatsForField(Tuple result, int pos, String fieldName, //
-            AttributeStatsDetails attrStatsDetails) {
+            AttributeStats attrStatsDetails) {
 
         try {
             result.set(pos, OM.writeValueAsString(attrStatsDetails));

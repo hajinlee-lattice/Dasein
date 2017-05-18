@@ -32,7 +32,7 @@ import com.latticeengines.datacloud.etl.transformation.service.TransformationSer
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterStatisticsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -445,7 +445,7 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
                 continue;
             }
             System.out.println("Attribute " + attr);
-            AttributeStatsDetails actualRowBasedAttrStats = actualCube.getStatistics().get(attr)
+            AttributeStats actualRowBasedAttrStats = actualCube.getStatistics().get(attr)
                     .getRowBasedStatistics();
             if (actualRowBasedAttrStats.getNonNullCount() != 0) {
                 System.out.println("Null count " + actualRowBasedAttrStats.getNonNullCount());
@@ -481,9 +481,9 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
         Assert.assertEquals(actualCube.getNonNullCount(), expectedCube.getNonNullCount());
         for (String attr : actualCube.getStatistics().keySet()) {
             System.out.println("Compare attribute " + attr);
-            AttributeStatsDetails actualRowBasedAttrStats = actualCube.getStatistics().get(attr)
+            AttributeStats actualRowBasedAttrStats = actualCube.getStatistics().get(attr)
                     .getRowBasedStatistics();
-            AttributeStatsDetails expectedRowBasedAttrStats = null;
+            AttributeStats expectedRowBasedAttrStats = null;
 
             if (attr.equals(AccountMasterStatsParameters.HQ_DUNS) //
                     || attr.equals(AccountMasterStatsParameters.DOMAIN_BCK_FIELD)) {

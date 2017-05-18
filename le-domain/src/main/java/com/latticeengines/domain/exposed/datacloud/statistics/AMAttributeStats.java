@@ -6,26 +6,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AttributeStatistics {
+public class AMAttributeStats {
+
     @JsonProperty("UniqStats")
-    private AttributeStatsDetails uniqueLocationBasedStatistics;
+    private AttributeStats uniqueLocationBasedStatistics;
 
     @JsonProperty("RowStats")
-    private AttributeStatsDetails rowBasedStatistics;
+    private AttributeStats rowBasedStatistics;
 
-    public AttributeStatsDetails getUniqueLocationBasedStatistics() {
+    public AttributeStats getUniqueLocationBasedStatistics() {
         return uniqueLocationBasedStatistics;
     }
 
-    public void setUniqueLocationBasedStatistics(AttributeStatsDetails uniqueLocationBasedStatistics) {
+    public void setUniqueLocationBasedStatistics(AttributeStats uniqueLocationBasedStatistics) {
         this.uniqueLocationBasedStatistics = uniqueLocationBasedStatistics;
     }
 
-    public AttributeStatsDetails getRowBasedStatistics() {
+    public AttributeStats getRowBasedStatistics() {
         return rowBasedStatistics;
     }
 
-    public void setRowBasedStatistics(AttributeStatsDetails rowBasedStatistics) {
+    public void setRowBasedStatistics(AttributeStats rowBasedStatistics) {
         this.rowBasedStatistics = rowBasedStatistics;
     }
 }

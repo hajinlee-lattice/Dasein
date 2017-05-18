@@ -1,10 +1,10 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket;
 
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 
 public interface AttrStatsDetailsMergeTool {
 
-    AttributeStatsDetails merge(AttributeStatsDetails firstStatsDetails, AttributeStatsDetails secondStatsDetails,
-            boolean printTop);
+    AttributeStats merge(AttributeStats firstStatsDetails, AttributeStats secondStatsDetails,
+                         boolean printTop);
 
 }

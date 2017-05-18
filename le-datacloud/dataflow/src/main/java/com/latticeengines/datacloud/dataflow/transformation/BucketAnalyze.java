@@ -44,8 +44,6 @@ public class BucketAnalyze extends TypesafeDataFlowBuilder<BucketAnalyzeParamete
     private static final String BKT_LABEL = "_Bkt_Label_";
     private static final String ATTR_NAME = "_Attr_Name_";
 
-    private static final String BKT_FLAG = "_Is_Bkted_";
-
     @Override
     public Node construct(BucketAnalyzeParameter parameters) {
         Node am = addSource(parameters.getBaseTables().get(0));
@@ -65,13 +63,11 @@ public class BucketAnalyze extends TypesafeDataFlowBuilder<BucketAnalyzeParamete
         Node count = expanded.groupByAndAggregate(new FieldList(ATTR_ID, BKT_ID),
                 new Count(new Fields(BKT_COUNT, Long.class)), countFields, Fields.ALL);
 
-        // substitute bucket label
-        count = substituteBucketLabel(count, attrIdMap, parameters.encAttrs);
+//        // substitute bucket label
+//        count = substituteBucketLabel(count, attrIdMap, parameters.encAttrs);
 
         // resume attr name
-        Node resumed = markBucktedFlag(count, attrIdMap, parameters.encAttrs);
-        resumed = resumeAttrName(resumed, attrIdMap);
-        return resumed;
+        return resumeAttrName(count, attrIdMap);
     }
 
     private Node substituteBucketLabel(Node node, Map<String, Integer> attrIdMap, List<DCEncodedAttr> encAttrs) {
@@ -86,21 +82,6 @@ public class BucketAnalyze extends TypesafeDataFlowBuilder<BucketAnalyzeParamete
         Function function = new MappingFunction(ATTR_ID, ATTR_NAME, attrNameMap);
         node = node.apply(function, new FieldList(ATTR_ID), new FieldMetadata(ATTR_NAME, String.class));
         return node.discard(ATTR_ID);
-    }
-
-    private Node markBucktedFlag(Node node, Map<String, Integer> attrIdMap, List<DCEncodedAttr> encAttrs) {
-        Set<String> bktAttrNames = new HashSet<>();
-        for (DCEncodedAttr encAttr: encAttrs) {
-            for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
-                bktAttrNames.add(bktAttr.getNominalAttr());
-            }
-        }
-        Map<Serializable, Serializable> bktFlagMap = new HashMap<>();
-        attrIdMap.forEach((attrName, attrId) -> {
-            bktFlagMap.put(attrId, bktAttrNames.contains(attrName));
-        });
-        Function function = new MappingFunction(ATTR_ID, BKT_FLAG, bktFlagMap);
-        return node.apply(function, new FieldList(ATTR_ID), new FieldMetadata(BKT_FLAG, Boolean.class));
     }
 
     private Map<String, Integer> getAttrIdMap(BucketAnalyzeParameter parameters, List<String> srcFields) {

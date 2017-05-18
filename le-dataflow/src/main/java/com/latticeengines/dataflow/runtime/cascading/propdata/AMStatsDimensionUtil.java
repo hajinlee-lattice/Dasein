@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.AttrStatsDetailsMergeFactory;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.AttrStatsDetailsMergeFactory.MergeType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.AttrStatsDetailsMergeTool;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 
 import cascading.tuple.Tuple;
 
@@ -38,13 +38,13 @@ public class AMStatsDimensionUtil implements Serializable {
                 existingMergedTuple.set(idx, objInOriginalTuple);
             } else if (objInOriginalTuple == null) {
                 existingMergedTuple.set(idx, objInExistingMergedTuple);
-            } else if (objInExistingMergedTuple instanceof AttributeStatsDetails) {
+            } else if (objInExistingMergedTuple instanceof AttributeStats) {
                 Object finalObj = objInExistingMergedTuple;
-                if (objInExistingMergedTuple instanceof AttributeStatsDetails
-                        && objInOriginalTuple instanceof AttributeStatsDetails) {
+                if (objInExistingMergedTuple instanceof AttributeStats
+                        && objInOriginalTuple instanceof AttributeStats) {
                     finalObj = dedupMergeUtil.merge(//
-                            (AttributeStatsDetails) objInExistingMergedTuple,
-                            (AttributeStatsDetails) objInOriginalTuple, isPrint);
+                            (AttributeStats) objInExistingMergedTuple,
+                            (AttributeStats) objInOriginalTuple, isPrint);
                 }
                 existingMergedTuple.set(idx, finalObj);
             }
@@ -65,13 +65,13 @@ public class AMStatsDimensionUtil implements Serializable {
                 existingMergedTuple.set(idx, objInOriginalTuple);
             } else if (objInOriginalTuple == null) {
                 existingMergedTuple.set(idx, objInExistingMergedTuple);
-            } else if (objInExistingMergedTuple instanceof AttributeStatsDetails) {
+            } else if (objInExistingMergedTuple instanceof AttributeStats) {
                 Object finalObj = objInExistingMergedTuple;
-                if (objInExistingMergedTuple instanceof AttributeStatsDetails
-                        && objInOriginalTuple instanceof AttributeStatsDetails) {
+                if (objInExistingMergedTuple instanceof AttributeStats
+                        && objInOriginalTuple instanceof AttributeStats) {
                     finalObj = addMergeUtil.merge(//
-                            (AttributeStatsDetails) objInExistingMergedTuple,
-                            (AttributeStatsDetails) objInOriginalTuple, isPrint);
+                            (AttributeStats) objInExistingMergedTuple,
+                            (AttributeStats) objInOriginalTuple, isPrint);
                 }
                 existingMergedTuple.set(idx, finalObj);
             }
@@ -91,19 +91,19 @@ public class AMStatsDimensionUtil implements Serializable {
                 Object objInOriginalTuple = expandedTuple.get(idx);
 
                 if (objInOriginalTuple != null) {
-                    if (objInOriginalTuple instanceof AttributeStatsDetails) {
-                        attrValuesArr[idx] = new AttributeStatsDetails(//
-                                (AttributeStatsDetails) objInOriginalTuple);
+                    if (objInOriginalTuple instanceof AttributeStats) {
+                        attrValuesArr[idx] = new AttributeStats(//
+                                (AttributeStats) objInOriginalTuple);
                     } else if (objInOriginalTuple instanceof Long) {
                         attrValuesArr[idx] = new Long((Long) objInOriginalTuple);
                     } else if (objInOriginalTuple instanceof String) {
 
-                        AttributeStatsDetails statsInOriginalTuple = null;
+                        AttributeStats statsInOriginalTuple = null;
 
                         try {
                             statsInOriginalTuple = //
                                     OM.readValue((String) objInOriginalTuple, //
-                                            AttributeStatsDetails.class);
+                                            AttributeStats.class);
                             attrValuesArr[idx] = statsInOriginalTuple;
                         } catch (IOException e) {
                             // ignore if type of serialized obj is not
@@ -126,12 +126,12 @@ public class AMStatsDimensionUtil implements Serializable {
                 Object objInOriginalTuple = tuple.getObject(idx);
 
                 if (objInOriginalTuple != null && objInOriginalTuple instanceof String) {
-                    AttributeStatsDetails statsInOriginalTuple = null;
+                    AttributeStats statsInOriginalTuple = null;
 
                     try {
                         statsInOriginalTuple = //
                                 OM.readValue((String) objInOriginalTuple, //
-                                        AttributeStatsDetails.class);
+                                        AttributeStats.class);
                         attrValuesArr[idx] = statsInOriginalTuple;
                     } catch (IOException e) {
                         // ignore if type of serialized obj is not
@@ -158,7 +158,7 @@ public class AMStatsDimensionUtil implements Serializable {
 
             for (int idx = 0; idx < attrValuesArr.length; idx++) {
                 Object value = attrValuesArr[idx];
-                if (value != null && value instanceof AttributeStatsDetails) {
+                if (value != null && value instanceof AttributeStats) {
                     try {
                         value = OM.writeValueAsString(value);
                     } catch (JsonProcessingException e) {

@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccountMasterCube {
     @JsonProperty("Stats")
-    private Map<String, AttributeStatistics> statistics;
+    private Map<String, AMAttributeStats> statistics;
 
     @JsonProperty("Cnt")
     private Long nonNullCount;
@@ -20,11 +20,11 @@ public class AccountMasterCube {
     @JsonProperty("EnrichmentAttributes")
     private List<LeadEnrichmentAttribute> enrichmentAttributes;
 
-    public Map<String, AttributeStatistics> getStatistics() {
+    public Map<String, AMAttributeStats> getStatistics() {
         return statistics;
     }
 
-    public void setStatistics(Map<String, AttributeStatistics> statistics) {
+    public void setStatistics(Map<String, AMAttributeStats> statistics) {
         this.statistics = statistics;
     }
 
