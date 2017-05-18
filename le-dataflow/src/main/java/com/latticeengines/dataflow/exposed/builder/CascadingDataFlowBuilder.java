@@ -60,8 +60,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.flink.FlinkYarnCluster;
 
 import cascading.avro.AvroScheme;
-import cascading.cascade.Cascade;
-import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
@@ -1031,11 +1029,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             flow.writeDOT("dot/wcr.dot");
             flow.addListener(dataFlowListener);
             flow.addStepListener(dataFlowStepListener);
-            // flow.complete();
+            flow.complete();
 
-            CascadeConnector connector = new CascadeConnector();
-            Cascade cascade = connector.connect(flow);
-            cascade.complete();
+            // CascadeConnector connector = new CascadeConnector();
+            // Cascade cascade = connector.connect(flow);
+            // cascade.complete();
 
             List steps = flow.getFlowSteps();
             Long tuplesWritten = null;
