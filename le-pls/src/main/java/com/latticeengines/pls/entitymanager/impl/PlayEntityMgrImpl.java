@@ -45,12 +45,6 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Play> findAllVisible() {
-        return playDao.findAllVisible();
-    }
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByName(String name) {
         Play play = findByName(name);

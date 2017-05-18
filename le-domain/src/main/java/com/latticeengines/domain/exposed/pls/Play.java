@@ -54,10 +54,6 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
-    @JsonProperty("is_visible")
-    @Column(name = "IS_VISIBLE", nullable = false)
-    private boolean isVisible;
-
     @JsonIgnore
     @Column(name = "SEGMENT_NAME", nullable = true)
     private String segmentName;
@@ -118,14 +114,6 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public boolean isVisible() {
-        return isVisible;
-    }
-
-    public void setVisible(boolean visible) {
-        isVisible = visible;
     }
 
     public String getSegmentName() {

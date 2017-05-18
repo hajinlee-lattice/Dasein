@@ -32,7 +32,6 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
     @Autowired
     private MatchMonitorService matchMonitorService;
-    
 
     @Override
     public void execute(ProcessorContext processorContext) {
@@ -184,9 +183,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
     private void checkMatchCode(ProcessorContext processorContext, MatchContext combinedContext) {
         for (InternalOutputRecord outputRecord : combinedContext.getInternalResults()) {
             if (DnBReturnCode.UNMATCH_TIMEOUT.equals(outputRecord.getDnbCode())) {
-                throw new RuntimeException(String.format(
-                        "Did not finish matching in %.2f minutes due to DnB limits, please try later!",
-                        processorContext.getRecordTimeOut() / 60000.0));
+                throw new RuntimeException(
+                        String.format("Did not finish matching in %.2f minutes due to DnB limits, please try later!",
+                                processorContext.getRecordTimeOut() / 60000.0));
             }
         }
     }
@@ -227,9 +226,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 return;
             }
             try {
-                log.info(String
-                        .format("DnB bulk match quota is not available. Wait for 4 mins. Have waited for %d mins up to now. Plan to wait for %d mins for total.",
-                                (System.currentTimeMillis() - startTime) / 60000, timeout / 60000));
+                log.info(String.format(
+                        "DnB bulk match quota is not available. Wait for 4 mins. Have waited for %d mins up to now. Plan to wait for %d mins for total.",
+                        (System.currentTimeMillis() - startTime) / 60000, timeout / 60000));
                 Thread.sleep(240_000L);
             } catch (Exception ex) {
                 log.warn("Failed to sleep!");
@@ -249,8 +248,8 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 return true;
             }
             try {
-                log.info(String.format(
-                        "Wait for 15 seconds to ensure DnB bulk match quota is available. Try times: %d", i + 1));
+                log.info(String.format("Wait for 15 seconds to ensure DnB bulk match quota is available. Try times: %d",
+                        i + 1));
                 Thread.sleep(15_000L);
             } catch (Exception ex) {
                 log.warn("Failed to sleep!");

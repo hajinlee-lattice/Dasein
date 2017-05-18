@@ -12,8 +12,6 @@ public interface PlayEntityMgr {
 
     Play findByName(String name);
 
-    List<Play> findAllVisible();
-
     void deleteByName(String name);
 
 }

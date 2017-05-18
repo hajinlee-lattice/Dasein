@@ -11,20 +11,16 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private PlayEntityMgr playEntityMgr;
 
     @Autowired
     private TenantService tenantService;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
 
     private Play play;
 
@@ -33,20 +29,14 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
-        tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
-        tenantEntityMgr.create(tenant1);
+
+        setupTestEnvironmentWithGATenants(1);
+        Tenant tenant1 = testBed.getTestTenants().get(0);
         setupSecurityContext(tenant1);
 
         play = new Play();
         play.setName(NAME);
         play.setDisplayName(DISPLAY_NAME);
-        play.setVisible(true);
         play.setTenant(tenant1);
     }
 
@@ -66,10 +56,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Assert.assertEquals(retreivedPlay.getName(), NAME);
         Assert.assertEquals(retreivedPlay.getDisplayName(), DISPLAY_NAME);
         Assert.assertNotNull(retreivedPlay);
-        List<Play> playList = playEntityMgr.findAllVisible();
-        Assert.assertNotNull(playList);
-        Assert.assertEquals(playList.size(), 1);
-        playList = playEntityMgr.findAll();
+        List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
         playEntityMgr.deleteByName(NAME);

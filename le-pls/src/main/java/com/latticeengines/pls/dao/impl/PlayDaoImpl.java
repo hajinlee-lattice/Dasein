@@ -33,14 +33,4 @@ public class PlayDaoImpl extends BaseDaoImpl<Play> implements PlayDao {
         return (Play) list.get(0);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Play> findAllVisible() {
-        Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format("from %s where isVisible = :visible", getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setBoolean("visible", true);
-        return query.list();
-    }
-
 }
