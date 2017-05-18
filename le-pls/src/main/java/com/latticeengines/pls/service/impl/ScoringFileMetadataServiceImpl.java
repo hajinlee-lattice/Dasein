@@ -19,6 +19,7 @@ import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -96,14 +98,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     @Override
     public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId) {
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        if (modelSummary == null) {
-            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
-        }
-        String schemaInterpretationStr = modelSummary.getSourceSchemaInterpretation();
-        if (schemaInterpretationStr == null) {
-            throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
-        }
-        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
+        SchemaInterpretation schemaInterpretation = getSchemaInterpretation(modelId);
 
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
@@ -179,14 +174,30 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         return fieldMappingDocument;
     }
 
+    private SchemaInterpretation getSchemaInterpretation(String modelId) {
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        if (modelSummary == null) {
+            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
+        }
+        String schemaInterpretationStr = modelSummary.getSourceSchemaInterpretation();
+        if (schemaInterpretationStr == null) {
+            throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
+        }
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
+        return schemaInterpretation;
+    }
+
     @Override
     public Table saveFieldMappingDocument(String csvFileName, String modelId,
             FieldMappingDocument fieldMappingDocument) {
+        SchemaInterpretation schemaInterpretation = getSchemaInterpretation(modelId);
+        List<Attribute> schemaFields = SchemaRepository.instance().getSchema(schemaInterpretation).getAttributes();
+
         List<Attribute> modelAttributes = modelMetadataService.getRequiredColumns(modelId);
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
 
         SourceFile sourceFile = sourceFileService.findByName(csvFileName);
-        resolveModelAttributeBasedOnFieldMapping(modelAttributes, fieldMappingDocument);
+        resolveModelAttributeBasedOnFieldMapping(modelAttributes, schemaFields, fieldMappingDocument);
         Table table = createTableFromMetadata(modelAttributes, sourceFile);
         table.deduplicateAttributeNames(modelMetadataService.getLatticeAttributeNames(modelId));
 
@@ -242,10 +253,17 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
     }
 
-    private void resolveModelAttributeBasedOnFieldMapping(List<Attribute> modelAttributes,
+    @VisibleForTesting
+    void resolveModelAttributeBasedOnFieldMapping(List<Attribute> modelAttributes, List<Attribute> schemaFields,
             FieldMappingDocument fieldMappingDocument) {
+        log.info(String.format("Before resolving attributes, the model attributes are: %s",
+                Arrays.toString(modelAttributes.toArray())));
+        log.info(String.format("The field mapping list is: %s",
+                Arrays.toString(fieldMappingDocument.getFieldMappings().toArray())));
+
         Set<String> modelAttributeNames = modelAttributes.stream().map(modelAttribute -> modelAttribute.getName())
                 .collect(Collectors.toSet());
+        // Overwrite attributes that can be mapped to fields in required columns
         Iterator<Attribute> attrIterator = modelAttributes.iterator();
         while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
@@ -255,6 +273,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 if (fieldMapping.isMappedToLatticeField()
                         && fieldMapping.getMappedField().equals(attribute.getName())) {
                     attribute.setDisplayName(fieldMapping.getUserField());
+                    fieldMappingIterator.remove();
                     break;
                 } else if (!fieldMapping.isMappedToLatticeField() //
                         && fieldMapping.getMappedField() != null //
@@ -262,10 +281,31 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                         && LogicalDataType.isExcludedFromScoringFileMapping(attribute.getLogicalDataType())) {
                     attribute.setDisplayName(fieldMapping.getUserField());
                     fieldMappingIterator.remove();
+                    break;
                 }
             }
         }
 
+        // Create attributes that can be mapped to fields in schema columns
+        attrIterator = schemaFields.iterator();
+        while (attrIterator.hasNext()) {
+            Attribute attribute = attrIterator.next();
+            Iterator<FieldMapping> fieldMappingIterator = fieldMappingDocument.getFieldMappings().iterator();
+            while (fieldMappingIterator.hasNext()) {
+                FieldMapping fieldMapping = fieldMappingIterator.next();
+                if (fieldMapping.isMappedToLatticeField()
+                        && fieldMapping.getMappedField().equals(attribute.getName())) {
+                    Attribute attr = new Attribute();
+                    AttributeUtils.copyPropertiesFromAttribute(attribute, attr, false);
+                    attr.setDisplayName(fieldMapping.getUserField());
+                    modelAttributes.add(attr);
+                    fieldMappingIterator.remove();
+                    break;
+                }
+            }
+        }
+
+        // Create attributes based on fieldNames for those unmapped fields
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()
                     || !modelAttributeNames.contains(fieldMapping.getMappedField())) {
@@ -288,6 +328,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 modelAttributes.add(getAttributeFromFieldName(unmappedScoringHeader, fieldMapping.getMappedField()));
             }
         }
+        log.info(String.format("After resolving attributes, the model attributes are: %s",
+                Arrays.toString(modelAttributes.toArray())));
     }
 
     private Attribute getAttributeFromFieldName(String scoringHeaderName, String fieldName) {
