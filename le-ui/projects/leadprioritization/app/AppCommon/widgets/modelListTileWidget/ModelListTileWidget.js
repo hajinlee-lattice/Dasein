@@ -29,6 +29,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             var data = $scope.data;
             var flags = FeatureFlagService.Flags();
 
+            $scope.hasRatingsAvailable = $scope.data.HasBucketMetadata;
             $scope.mayChangeModelNames = FeatureFlagService.FlagIsEnabled(flags.CHANGE_MODEL_NAME);
             $scope.mayDeleteModels = FeatureFlagService.FlagIsEnabled(flags.DELETE_MODEL);
             $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
@@ -46,14 +47,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $scope.isNotPmmlModel = $scope.data.ModelFileType !== 'PmmlModel';
             $scope.canRemodel = ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
             $scope.modelRecommendation = !!$scope.data.ConflictWithOptionalRules;
-            
-            ModelRatingsService.HistoricalABCDBuckets($scope.data.Id).then(function(result) {
-                if(JSON.stringify(result) != "{}") {
-                   $scope.hasRatingsAvailable = true;
-               } else {
-                    $scope.hasRatingsAvailable = false;
-               }
-            });
+
             
 
             //TODO:pierce Field names subject to change

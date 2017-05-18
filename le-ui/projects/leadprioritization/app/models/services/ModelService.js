@@ -132,15 +132,16 @@ angular.module('mainApp.models.services.ModelService', [
                     result.resultObj = _.map(data, function(rawObj) {
 
                         return {
-                            Id          : rawObj.Id,
-                            DisplayName : rawObj.DisplayName == null || rawObj.DisplayName == "" ? rawObj.Name : rawObj.DisplayName,
-                            CreatedDate : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
-                            ModelFileType: rawObj.ModelType,
-                            Status      : rawObj.Status,
-                            Incomplete  : rawObj.Incomplete,
-                            ModelType   : rawObj.SourceSchemaInterpretation,
-                            Uploaded    : rawObj.Uploaded,
-                            ConflictWithOptionalRules : ModelServiceUtility.getModelSummaryProvenanceProperties(rawObj.ModelSummaryProvenanceProperties, 'ConflictWithOptionalRules')
+                            Id                          : rawObj.Id,
+                            DisplayName                 : rawObj.DisplayName == null || rawObj.DisplayName == "" ? rawObj.Name : rawObj.DisplayName,
+                            CreatedDate                 : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
+                            ModelFileType               : rawObj.ModelType,
+                            Status                      : rawObj.Status,
+                            Incomplete                  : rawObj.Incomplete,
+                            ModelType                   : rawObj.SourceSchemaInterpretation,
+                            HasBucketMetadata           : rawObj.HasBucketMetadata,
+                            Uploaded                    : rawObj.Uploaded,
+                            ConflictWithOptionalRules   : ModelServiceUtility.getModelSummaryProvenanceProperties(rawObj.ModelSummaryProvenanceProperties, 'ConflictWithOptionalRules')
                         };
                     });
 
