@@ -68,14 +68,9 @@ public class BitCodecUtils {
     }
 
     public static int getBits(long result, int lowestBitPos, int numBits) {
-        int value = 0;
-        for (int i = 0; i < numBits; i++) {
-            int offset = lowestBitPos + i;
-            if ((result >> offset & 1) == 1) {
-                value = value | (1 << i);
-            }
-        }
-        return value;
+        long mask = bitMask(0, lowestBitPos, numBits);
+        long masked = result & mask;
+        return (int) masked >> lowestBitPos;
     }
 
 
