@@ -1,6 +1,5 @@
 package com.latticeengines.serviceflows.dataflow;
 
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.LID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.SOURCE_PREFIX;
 
@@ -39,13 +38,12 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
                 Pair.of("State", String.class), //
                 Pair.of("Country", String.class), //
                 Pair.of(LID_FIELD, Long.class), //
-                Pair.of("Domain", String.class), //
-                Pair.of(INT_LDC_LOC_CHECKSUM, String.class) //
+                Pair.of("Domain", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1, "Name1", "City1", "State1", "Country1", 1L, "d.com", "a" }, //
-                { 2, "Name2", "City2", "State2", "Country2", 2L, "d.com", "b" }, //
-                { 3, "Name3", "City3", "State3", "Country3", 3L, "d.com", "c" }
+                { 1, "Name1", "City1", "State1", "Country1", 1L, "d.com"}, //
+                { 2, "Name2", "City2", "State2", "Country2", 2L, "d.com" }, //
+                { 3, "Name3", "City3", "State3", "Country3", 3L, "d.com" }
         };
         uploadDataToSharedAvroInput(data, fields);
 
@@ -68,8 +66,6 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
         int numRows = 0;
         for (GenericRecord record : records) {
             System.out.println(record);
-            Assert.assertNull(record.get(INT_LDC_LOC_CHECKSUM),
-                    "Internal attribute " + INT_LDC_LOC_CHECKSUM + " should be removed.");
             Assert.assertFalse("d.com".equals(record.get("Domain")));
             Assert.assertTrue(record.get("Domain") instanceof Integer);
             Assert.assertNull(record.get(LID_FIELD));

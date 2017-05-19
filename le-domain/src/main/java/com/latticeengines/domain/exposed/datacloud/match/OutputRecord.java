@@ -46,6 +46,9 @@ public class OutputRecord {
     @JsonProperty("MatchedEmail")
     private String matchedEmail;
 
+    @JsonProperty("MatchedDDUNS")
+    private String matchedDduns;
+
     @JsonProperty("MatcheEmployeeRange")
     private String matchedEmployeeRange;
     @JsonProperty("MatchedRevenueRange")
@@ -158,6 +161,15 @@ public class OutputRecord {
 
     public void setMatchedDuns(String matchedDuns) {
         this.matchedDuns = matchedDuns;
+    }
+
+    
+    public String getMatchedDduns() {
+        return matchedDduns;
+    }
+
+    public void setMatchedDduns(String matchedDduns) {
+        this.matchedDduns = matchedDduns;
     }
 
     public String getMatchedEmail() {

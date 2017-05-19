@@ -2,18 +2,13 @@ package com.latticeengines.serviceflows.dataflow;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_REMOVED;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.SOURCE_PREFIX;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TMP_BEST_DEDUPE_ID;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -23,14 +18,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.MatchDedupeIdAggregator;
 import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-
-import cascading.operation.Aggregator;
-import cascading.operation.Function;
-import cascading.operation.expression.ExpressionFunction;
-import cascading.tuple.Fields;
 
 @Component("parseMatchResult")
 public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultParameters> {
@@ -45,21 +34,12 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
 
         source = resolveConflictingFields(source);
 
-        if (needToDedupe(source)) {
-            source = generateDedupeId(source);
-        }
-
         if (parameters.excludeDataCloudAttrs) {
             List<String> fieldFilter = new ArrayList<>(sourceCols);
-            fieldFilter.add(INT_LDC_DEDUPE_ID);
+            addDedupeAttrs(fieldFilter, source);
             List<String> fieldsToRetain = new ArrayList<>(source.getFieldNames());
             fieldsToRetain.retainAll(fieldFilter);
             source = source.retain(new FieldList(fieldsToRetain));
-            // There are other possible internal attributes, like DnB Match grade
-            // I believe those are only used in scoring, and this flag is only for modeling
-            // so it is safe assume, we never need to retain those debug internal attrs here.
-        } else {
-            source = removeInternalAttrs(source);
         }
 
         return source;
@@ -104,89 +84,14 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         return new FieldList[] { fieldsWithPrefix, fieldsWithOutPrefix };
     }
 
-    private boolean needToDedupe(Node source) {
-        return source.getFieldNames().contains(INT_LDC_PREMATCH_DOMAIN)
-                && source.getFieldNames().contains(INT_LDC_LOC_CHECKSUM)
-                && source.getFieldNames().contains(INT_LDC_POPULATED_ATTRS);
-    }
-
-    private Node generateDedupeId(Node node) {
-        node = initializeDedupeId(node);
-        Node matched = node.filter(INT_LDC_LID + " != null", new FieldList(INT_LDC_LID)).renamePipe("matched");
-
-        // find best dedupe id for each matched domain
-        Node unmatchedDomain = node.filter(INT_LDC_LID + " == null && " + INT_LDC_PREMATCH_DOMAIN + " != null",
-                new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN));
-        unmatchedDomain = updateByBestIdInGroup(unmatchedDomain, matched, INT_LDC_PREMATCH_DOMAIN);
-
-        // find best dedupe id for each match location, without domain
-        Node unmatchedLocOnly = node.filter(INT_LDC_LID + " == null && " + INT_LDC_PREMATCH_DOMAIN + " == null",
-                new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN));
-        unmatchedLocOnly = updateByBestIdInGroup(unmatchedLocOnly, matched, INT_LDC_LOC_CHECKSUM);
-
-        unmatchedDomain = unmatchedDomain.renamePipe("p1");
-        unmatchedLocOnly = unmatchedLocOnly.renamePipe("p2");
-
-        return matched.merge(Arrays.asList(unmatchedDomain, unmatchedLocOnly));
-    }
-
-    private Node initializeDedupeId(Node node) {
-        String expression = String.format(
-                "%s == null ? " + //
-                        "(%s == null ? \"\" : %s) + \"\" + (%s == null ? \"\" : %s) : " + //
-                        "String.valueOf(%s)",
-                INT_LDC_LID, //
-                INT_LDC_PREMATCH_DOMAIN, INT_LDC_PREMATCH_DOMAIN, //
-                INT_LDC_LOC_CHECKSUM, INT_LDC_LOC_CHECKSUM, //
-                INT_LDC_LID);
-        Function function = new ExpressionFunction(new Fields(INT_LDC_DEDUPE_ID), //
-                expression, //
-                new String[] { INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN, INT_LDC_LOC_CHECKSUM }, //
-                new Class<?>[] { Long.class, String.class, String.class });
-        return node.apply(function, new FieldList(INT_LDC_LID, INT_LDC_PREMATCH_DOMAIN, INT_LDC_LOC_CHECKSUM),
-                new FieldMetadata(INT_LDC_DEDUPE_ID, String.class));
-    }
-
-    private Node updateByBestIdInGroup(Node unmatched, Node matched, String grpField) {
-        Aggregator aggregator = new MatchDedupeIdAggregator(grpField, TMP_BEST_DEDUPE_ID);
-        List<FieldMetadata> bufferFms = new ArrayList<>();
-        bufferFms.add(new FieldMetadata(INT_LDC_PREMATCH_DOMAIN, String.class));
-        bufferFms.add(new FieldMetadata(TMP_BEST_DEDUPE_ID, String.class));
-        Node bestIdInGroup = matched.groupByAndAggregate(new FieldList(grpField), aggregator, bufferFms)
-                .renamePipe("bestidfor" + grpField);
-        unmatched = unmatched.leftJoin(grpField, bestIdInGroup, grpField);
-
-        String tmpField = "tmp" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
-        Function updateIdByDomain = new ExpressionFunction(new Fields(tmpField), //
-                String.format("%s == null ? %s : %s", TMP_BEST_DEDUPE_ID, INT_LDC_DEDUPE_ID, TMP_BEST_DEDUPE_ID), //
-                new String[] { TMP_BEST_DEDUPE_ID, INT_LDC_DEDUPE_ID }, //
-                new Class<?>[] { String.class, String.class });
-        unmatched = unmatched.apply(updateIdByDomain, new FieldList(TMP_BEST_DEDUPE_ID, INT_LDC_DEDUPE_ID),
-                new FieldMetadata(tmpField, String.class));
-        unmatched = unmatched.discard(new FieldList(INT_LDC_DEDUPE_ID)) //
-                .rename(new FieldList(tmpField), new FieldList(INT_LDC_DEDUPE_ID)) //
-                .retain(new FieldList(matched.getFieldNames())).renamePipe("unmatched" + grpField);
-        return unmatched;
-    }
-
-    private Node removeInternalAttrs(Node node) {
-        List<String> internalAttrs = new ArrayList<>();
-        if (node.getFieldNames().contains(INT_LDC_LID)) {
-            internalAttrs.add(INT_LDC_LID);
+    private void addDedupeAttrs(List<String> fieldFilter, Node node) {
+        // Only modeling has these dedupe fields
+        List<String> fieldNames = node.getFieldNames();
+        if (fieldNames.contains(INT_LDC_DEDUPE_ID)) {
+            fieldFilter.add(INT_LDC_LID);
+            fieldFilter.add(INT_LDC_DEDUPE_ID);
+            fieldFilter.add(INT_LDC_REMOVED);
         }
-        if (node.getFieldNames().contains(INT_LDC_POPULATED_ATTRS)) {
-            internalAttrs.add(INT_LDC_POPULATED_ATTRS);
-        }
-        if (node.getFieldNames().contains(INT_LDC_LOC_CHECKSUM)) {
-            internalAttrs.add(INT_LDC_LOC_CHECKSUM);
-        }
-        if (node.getFieldNames().contains(INT_LDC_PREMATCH_DOMAIN)) {
-            internalAttrs.add(INT_LDC_PREMATCH_DOMAIN);
-        }
-        if (!internalAttrs.isEmpty()) {
-            node = node.discard(new FieldList(internalAttrs));
-        }
-        return node;
     }
 
 }

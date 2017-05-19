@@ -34,6 +34,7 @@ public final class MatchConstants {
     public static final String AM_ZIPCODE_FIELD = "LDC_ZipCode";
     public static final String AM_PHONE_NUM_FIELD = "LE_COMPANY_PHONE";
     public static final String AM_DUNS_FIELD = "LDC_DUNS";
+    public static final String AM_DDUNS_FIELD = "LE_PRIMARY_DUNS";
     public static final String AM_COUNTRY_CODE_FIELD = "CURRENCY_CODE";
     public static final String AM_EMPLOYEE_RANGE_FIELD = "LE_EMPLOYEE_RANGE";
     public static final String AM_REVENUE_RANGE_FIELD = "LE_REVENUE_RANGE";
@@ -43,10 +44,8 @@ public final class MatchConstants {
 
     // those are the internal avro attributes
     public static final String INT_LDC_LID = "__LDC_LID__";
-    public static final String INT_LDC_PREMATCH_DOMAIN = "__LDC_PrematchDomain__";
-    public static final String INT_LDC_LOC_CHECKSUM = "__LDC_LocChecksum__";
-    public static final String INT_LDC_POPULATED_ATTRS = "__LDC_PopulatedAttrs__";
     public static final String INT_LDC_DEDUPE_ID = "__LDC_DedupeId__";
+    public static final String INT_LDC_REMOVED = "__LDC_Removed__";
 
     public static final String TMP_BEST_DEDUPE_ID = "__Best_DedupeId__";
 

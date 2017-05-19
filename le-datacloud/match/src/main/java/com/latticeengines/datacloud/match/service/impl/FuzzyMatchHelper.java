@@ -323,6 +323,7 @@ public class FuzzyMatchHelper implements DbHelper {
         nameLocation.setPhoneNumber(phone);
         record.setMatchedNameLocation(nameLocation);
         record.setMatchedDuns((String) amAttributes.get(MatchConstants.AM_DUNS_FIELD));
+        record.setMatchedDduns((String) amAttributes.get(MatchConstants.AM_DDUNS_FIELD));
     }
 
 }

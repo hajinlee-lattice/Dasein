@@ -11,10 +11,8 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
@@ -33,10 +30,10 @@ import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
-import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -67,9 +64,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     protected MatchExecutor matchExecutor;
 
     @Autowired
-    private PublicDomainService publicDomainService;
-
-    @Autowired
     protected MatchProxy matchProxy;
 
     @Autowired
@@ -77,6 +71,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @Autowired
     private DomainCollectService domainCollectService;
+    
+    @Autowired
+    private DedupeHelper dedupeHelper;
 
     @Value("${datacloud.match.bulk.snappy.compress}")
     private boolean useSnappy;
@@ -162,8 +159,10 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             // the sequence is the same as constructing the output schema
             List<Object> allValues = new ArrayList<>(outputRecord.getInput());
             allValues.addAll(outputRecord.getOutput());
-            if (processorContext.getOriginalInput().isPrepareForDedupe()) {
-                appendDedupeHelpers(processorContext, allValues, outputRecord);
+            MatchInput originalInput = processorContext.getOriginalInput();
+            if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource())
+                    && originalInput.isPrepareForDedupe()) {
+                dedupeHelper.appendDedupeValues(processorContext, allValues, outputRecord);
             }
             if (processorContext.isMatchDebugEnabled()) {
                 appendDebugValues(allValues, outputRecord);
@@ -200,54 +199,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             String[] values = new String[11];
             Arrays.fill(values, "");
             allValues.addAll(Arrays.asList(values));
-        }
-    }
-
-    private void appendDedupeHelpers(ProcessorContext processorContext, List<Object> allValues, OutputRecord outputRecord) {
-        allValues.add(outputRecord.getMatchedLatticeAccountId());
-
-        String domain = null;
-        try {
-            domain = outputRecord.getPreMatchDomain();
-            if (!processorContext.getOriginalInput().isPublicDomainAsNormalDomain()
-                    && publicDomainService.isPublicDomain(domain)) {
-                domain = null;
-            }
-        } catch (Exception e) {
-            log.error("Failed to parse pre match domain", e);
-        } finally {
-            allValues.add(domain);
-        }
-
-        String checkSum = null;
-        try {
-            domain = StringUtils.isBlank(domain) ? "" : domain;
-            String duns = outputRecord.getPreMatchDuns();
-            String nl = outputRecord.getPreMatchNameLocation().toString();
-            if (StringUtils.isNotBlank(duns)) {
-                // use domain + duns for checksum
-                checkSum = Base64Utils.encodeBase64(DigestUtils.md5(domain + duns));
-            } else {
-                // use domain + nl for checksum
-                checkSum = Base64Utils.encodeBase64(DigestUtils.md5(domain + nl));
-            }
-        } catch (Exception e) {
-            log.error("Failed to generate location checksum", e);
-        } finally {
-            allValues.add(checkSum);
-        }
-
-        Integer notNullAttrs = 0;
-        try {
-            if (outputRecord.getOutput() != null) {
-                for (Object obj : outputRecord.getOutput()) {
-                    notNullAttrs += (obj == null ? 0 : 1);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Failed to count populated attributes", e);
-        } finally {
-            allValues.add(notNullAttrs);
         }
     }
 
@@ -307,9 +258,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         if (processorContext.getReturnUnmatched()) {
             if (!processorContext.getExcludeUnmatchedWithPublicDomain()
                     && !processorContext.getBlockSize().equals(count.intValue())) {
-                throw new RuntimeException(
-                        String.format("Block size [%d] does not equal to the count of the avro [%d].",
-                                processorContext.getBlockSize(), count));
+                throw new RuntimeException(String.format(
+                        "Block size [%d] does not equal to the count of the avro [%d].",
+                        processorContext.getBlockSize(), count));
             }
         } else {
             // check matched rows
@@ -351,8 +302,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             blockOutput.setFinishedAt(finishedAt);
             blockOutput.setReceivedAt(processorContext.getReceivedAt());
             blockOutput.getStatistics().setRowsRequested(processorContext.getBlockSize());
-            blockOutput.getStatistics()
-                    .setTimeElapsedInMsec(finishedAt.getTime() - processorContext.getReceivedAt().getTime());
+            blockOutput.getStatistics().setTimeElapsedInMsec(
+                    finishedAt.getTime() - processorContext.getReceivedAt().getTime());
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(new File(MATCHOUTPUT_BUFFER_FILE), blockOutput);
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, MATCHOUTPUT_BUFFER_FILE, processorContext.getOutputJson());

@@ -1,9 +1,8 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LOC_CHECKSUM;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_POPULATED_ATTRS;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_PREMATCH_DOMAIN;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_REMOVED;
 
 import java.io.IOException;
 import java.util.Date;
@@ -43,6 +42,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -347,7 +347,7 @@ public class ProcessorContext {
         // am output attr -> dedupe -> debug
         // the same sequence will be used in writeDataToAvro
         log.info("Need to prepare for dedupe: " + originalInput.isPrepareForDedupe());
-        if (originalInput.isPrepareForDedupe()) {
+        if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource()) && originalInput.isPrepareForDedupe()) {
             outputSchema = appendDedupeHelpers(outputSchema);
         }
 
@@ -388,10 +388,11 @@ public class ProcessorContext {
     private Schema appendDedupeHelpers(Schema schema) {
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
         fieldMap.put(INT_LDC_LID, String.class);
-        fieldMap.put(INT_LDC_PREMATCH_DOMAIN, String.class);
-        fieldMap.put(INT_LDC_LOC_CHECKSUM, String.class);
-        fieldMap.put(INT_LDC_POPULATED_ATTRS, Integer.class);
-        Schema dedupeSchema = AvroUtils.constructSchema(schema.getName(), fieldMap);
+        fieldMap.put(INT_LDC_DEDUPE_ID, String.class);
+        fieldMap.put(INT_LDC_REMOVED, Integer.class);
+
+        Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
+        Schema dedupeSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
         return (Schema) AvroUtils.combineSchemas(schema, dedupeSchema)[0];
     }
 

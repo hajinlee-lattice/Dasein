@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -65,6 +66,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
 
         DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
         jobConfiguration.getMatchInput().setPrepareForDedupe(true);
+        jobConfiguration.getMatchInput().setRequestSource(MatchRequestSource.MODELING);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
@@ -119,15 +121,13 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         String blockUid = jobConfiguration.getBlockOperationUid();
         String blockDir = hdfsPathBuilder.constructMatchBlockDir(rootUid, blockUid).toString();
         AvroUtils.iterator(yarnConfiguration, blockDir + "/*.avro").forEachRemaining(record -> {
-            Object dom = record.get(MatchConstants.INT_LDC_PREMATCH_DOMAIN);
-            Object loc = record.get(MatchConstants.INT_LDC_LOC_CHECKSUM);
-            Object pop = record.get(MatchConstants.INT_LDC_POPULATED_ATTRS);
-            System.out.println(record.get("ID") + " : " + dom + " - " + loc + " - " + pop);
-            Assert.assertNotNull(loc);
-            String checksum = loc.toString();
-            Assert.assertNotNull(checksum);
-            Assert.assertNotNull(pop);
-            Assert.assertTrue(pop instanceof Integer);
+            Object id = record.get(MatchConstants.INT_LDC_LID);
+            Object dedupeId = record.get(MatchConstants.INT_LDC_DEDUPE_ID);
+            Object isRemoved = record.get(MatchConstants.INT_LDC_REMOVED);
+            System.out.println(record.get("ID") + " : " + id + " - " + dedupeId + " - " + isRemoved);
+            Assert.assertTrue(id != null || dedupeId != null);
+            Assert.assertTrue(isRemoved instanceof Integer);
+            Assert.assertEquals(isRemoved, 0);
         });
     }
 
@@ -146,7 +146,6 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         matchInput.setPredefinedSelection(Predefined.RTS);
         matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         matchInput.setKeyMap(keyMap);
-
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);
         jobConfiguration.setName("DataCloudMatchBlock");

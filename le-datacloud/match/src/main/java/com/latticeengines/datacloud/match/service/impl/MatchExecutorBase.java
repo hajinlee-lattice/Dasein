@@ -287,6 +287,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setMatchedDomain(internalRecord.getMatchedDomain());
             outputRecord.setMatchedNameLocation(internalRecord.getMatchedNameLocation());
             outputRecord.setMatchedDuns(internalRecord.getMatchedDuns());
+            outputRecord.setMatchedDduns(internalRecord.getMatchedDduns());
             outputRecord.setDnbCacheIds(internalRecord.getDnbCacheIds());
             outputRecord.setMatchedEmail(internalRecord.getMatchedEmail());
             outputRecord.setMatchedLatticeAccountId(internalRecord.getLatticeAccountId());
