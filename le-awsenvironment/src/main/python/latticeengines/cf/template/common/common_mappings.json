@@ -32,6 +32,7 @@
     "c4.4xlarge": { "EBSOptimized" : "true" },
     "r3.large"  : { "EBSOptimized" : "false" },
     "r3.xlarge" : { "EBSOptimized" : "true" },
-    "r4.large" : { "EBSOptimized" : "true" }
+    "r4.large" : { "EBSOptimized" : "true" },
+    "r4.xlarge" : { "EBSOptimized" : "true" }
   }
 }
