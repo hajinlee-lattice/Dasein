@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,8 +57,13 @@ public class CharacterizationDataFlowService extends AbstractTransformationDataF
 
         Table baseSourceTable = null;
         String baseSourceVersion = null;
-        try {
+        if (CollectionUtils.isNotEmpty(transformationConfiguration.getBaseVersions())) {
+            baseSourceVersion = transformationConfiguration.getBaseVersions().get(0);
+        } else {
             baseSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSource);
+        }
+
+        try {
             baseSourceTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, baseSourceVersion);
             log.info("Select base source " + baseSourceName + "@version " + baseSourceVersion);
         } catch (Exception e) {

@@ -78,6 +78,7 @@ public class AccountMasterReportService extends AbstractFixedIntervalTransformat
         AccountMasterReportConfiguration configuration = new AccountMasterReportConfiguration();
 
         setAdditionalDetails(newLatestVersion, sourceColumns, configuration);
+        configuration.setBaseVersions(latestBaseVersion);
 
         return configuration;
     }
