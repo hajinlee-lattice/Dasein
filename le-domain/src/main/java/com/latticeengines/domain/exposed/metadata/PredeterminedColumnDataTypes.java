@@ -34,7 +34,7 @@ public enum PredeterminedColumnDataTypes {
     public static UserDefinedType returnUserDefinedType(String preColDateTypeStr)
     {
         if (preColDateTypeStr.startsWith("Activity_Count_")) {
-            return UserDefinedType.TEXT;
+            return UserDefinedType.NUMBER;
         }
         PredeterminedColumnDataTypes preColDateType = null;
         try {
@@ -53,13 +53,13 @@ public enum PredeterminedColumnDataTypes {
             case HasAnypointLogin:
             case HasCEDownload:
             case HasEEDownload:
-                return UserDefinedType.NUMBER;
+                return UserDefinedType.BOOLEAN;
             case Lead_Source_Asset__c:
             case kickboxStatus:
             case SICCode:
             case Source_Detail__c:
             case Cloud_Plan__c:
-                return UserDefinedType.BOOLEAN;
+                return UserDefinedType.TEXT;
         }
         return null;
     }
