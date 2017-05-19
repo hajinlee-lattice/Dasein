@@ -38,4 +38,4 @@ class RevenueModelQualityGeneratorTest(ScoreTargetBase):
         self.assertTrue(calculatedAUC > aucTarget - 0.2 and
                          calculatedAUC < aucTarget + 0.2
                         , "AUC doesn't seem correct in ModelQuality")
-        self.assertEquals(len(modelQuality["expectedValueScores"]["allPeriods"]["percTotalRev"]), 100)
+        #self.assertEquals(len(modelQuality["expectedValueScores"]["allPeriods"]["percTotalRev"]), 100)

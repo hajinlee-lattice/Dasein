@@ -160,7 +160,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
                         except Exception as e:
                             self.logger.info("Error Calculating PropensityValueScores in ModelQualityGenerator for Period " +str(k))
                             self.logger.error(e)
-                            sself.modelquality["propensityValueScores"][periodOffsetName] = {}
+                            self.modelquality["propensityValueScores"][periodOffsetName] = {}
 
 
                         try:
@@ -172,7 +172,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
                         except Exception as e:
                             self.logger.info("Error Calculating PredictedValueValueScores in ModelQualityGenerator for Period " + str(k))
                             self.logger.error(e)
-                            sself.modelquality["predictedValueValueScores"][periodOffsetName] = {}
+                            self.modelquality["predictedValueValueScores"][periodOffsetName] = {}
 
             mediator.modelquality = self.modelquality
         except Exception as e:
@@ -224,7 +224,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
             indRankInBin = [indR[i] for i in ix]
             indValueInBin = [indV[i] for i in ix]
             # Make sure all values are non-zero
-            if len(indValueBin)==0:
+            if len(indValueInBin)==0:
                 #if sum(indValueInBin) == 0:
                 return (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
             lenOverlap = len(set(indRankInBin) & set(indValueInBin))
