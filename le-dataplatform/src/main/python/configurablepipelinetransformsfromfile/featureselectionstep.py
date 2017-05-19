@@ -25,7 +25,7 @@ class FeatureSelectionStep(PipelineStep):
             return dataFrame
         logger.info("Doing feature selection.")
         if dataFrame.shape[0] <= 100000:
-            logger.info("There's no feature selection due to record# is less than or equal to 100000, record#=" + dataFrame.shape[0])
+            logger.info("There's no feature selection due to record# is less than or equal to 100000, record#=" + str(dataFrame.shape[0]))
             return dataFrame
         clf = ensemble.RandomForestClassifier(criterion="gini",
                                           n_estimators=100,
