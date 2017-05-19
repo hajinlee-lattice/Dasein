@@ -56,7 +56,11 @@ angular
                     defaultMessage: $scope.defaultMessage || 'Example: us-enterprise-model.csv',
                     message: ''
                 },
-                element = this.element = $element[0];
+                element = this.element = $element[0],
+                GB = 1073741824,
+                GBLimit = 2;
+
+            vm.file = {};
 
             vm.init = function() {
                 vm.params.scope = vm;
@@ -68,6 +72,10 @@ angular
             vm.startUpload = function() {
                 if (!vm.selectedFile) {
                     return false;
+                }
+                if(vm.selectedFile.size > (GB * GBLimit)) {
+                    ServiceErrorUtility.showBanner({data: {errorMsg: 'Your file is too large.  Please try again with a file that is smaller then ' + GBLimit + 'GB.'}});
+                    return;
                 }
 
                 ServiceErrorUtility.hideBanner();
@@ -359,7 +367,7 @@ angular
             }
 
             vm.isCompressed = function(file) {
-                console.log('file',file)
+                //console.log('file',file)
                 if (!vm.params) {
                     vm.params = {};
                 }
@@ -401,7 +409,7 @@ angular
 
             vm.uploadProgress = function(e) {
                 if (e.total / 1024 > 4194304) {
-                    vm.message = 'ERROR: Over ~4GB file size limit.';
+                    vm.message = 'ERROR: Over ~' + GBLimit + 'GB file size limit.';
 
                     var xhr = ImportStore.Get('cancelXHR', true);
 
