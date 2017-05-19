@@ -42,8 +42,9 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
             tenant.setId(DataCloudConstants.SERVICE_CUSTOMERSPACE);
             tenantEntityMgr.create(tenant);
         }
-        File file = new File(
-                System.getenv("WSHOME") + "/le-dev/testartifacts/AccountMaster/AccountMasterBucketed.avsc");
+        File currPath = new File(System.getProperty("user.dir"));
+        File file = new File(currPath.getParentFile().getAbsolutePath()
+                + "/le-dev/testartifacts/AccountMaster/AccountMasterBucketed.avsc");
         Configuration config = new Configuration();
         config.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
         Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(config, file.getPath(), null, null);
