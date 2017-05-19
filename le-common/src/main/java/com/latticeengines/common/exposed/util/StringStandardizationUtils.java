@@ -31,6 +31,20 @@ public class StringStandardizationUtils {
         return singletonUtil.getStandardStringInternal(str);
     }
 
+    public static String getStandardDuns(String duns) {
+        if (StringUtils.isBlank(duns)) {
+            return null;
+        }
+        duns = duns.replaceAll("[^\\d]", "");
+        if (duns.length() > 9) {
+            return null;
+        }
+        if (duns.length() < 9) {
+            duns = ("000000000" + duns).substring(duns.length());
+        }
+        return duns;
+    }
+
     protected String getStandardStringInternal(String str) {
         try {
             if (StringUtils.isEmpty(str)) {
@@ -53,11 +67,6 @@ public class StringStandardizationUtils {
                 res = res.replaceAll(entry.getKey(), " " + entry.getValue() + " ");
             }
             res = res.trim().replaceAll("( )+", " "); // Remove leading and trailing spaces; Replace multiple connected spaces with single space
-            /*
-            while (res.indexOf("  ") >= 0) {    
-                res = res.replace("  ", " ");
-            }
-            */
             return res;
         } catch (Exception ex) {
             ex.printStackTrace();

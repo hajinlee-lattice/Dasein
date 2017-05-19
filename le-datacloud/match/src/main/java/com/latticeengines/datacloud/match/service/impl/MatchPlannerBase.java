@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
@@ -290,7 +291,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     String originalDuns = String.valueOf(inputRecord.get(dunsPos));
                     record.setOrigDuns(originalDuns);
                     if (StringUtils.isNotEmpty(originalDuns)) {
-                        cleanDuns = originalDuns;
+                        cleanDuns = StringStandardizationUtils.getStandardDuns(originalDuns);
                         break;
                     }
                 }
