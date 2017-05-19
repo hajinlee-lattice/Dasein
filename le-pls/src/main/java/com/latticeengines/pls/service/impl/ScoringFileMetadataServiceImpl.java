@@ -37,10 +37,10 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInter
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
+import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -90,7 +90,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
         Collection<String> reservedWords = Arrays
-                .asList(new String[] { ScoreResultField.Percentile.displayName, ScoreResultField.Rating.displayName });
+                .asList(new String[] { ReservedField.Percentile.displayName, ReservedField.Rating.displayName });
         ValidateFileHeaderUtils.checkForReservedHeaders(displayName, headerFields, reservedWords);
         return stream;
     }

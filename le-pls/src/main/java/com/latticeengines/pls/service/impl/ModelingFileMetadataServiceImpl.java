@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
-import com.latticeengines.domain.exposed.modeling.ModelingReservedField;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
@@ -33,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
+import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
@@ -134,7 +134,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName, headerFields, true);
         ValidateFileHeaderUtils.checkForDuplicateHeaders(attributes, fileDisplayName, headerFields);
-        Collection<String> reservedWords = Arrays.asList(new String[]{ModelingReservedField.Rating.displayName});
+        Collection<String> reservedWords = Arrays.asList(new String[]{ReservedField.Rating.displayName});
         ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords);
         return stream;
     }
