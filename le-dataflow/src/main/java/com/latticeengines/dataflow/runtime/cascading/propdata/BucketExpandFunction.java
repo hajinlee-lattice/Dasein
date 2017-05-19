@@ -22,8 +22,6 @@ public class BucketExpandFunction extends BaseOperation implements Function {
 
     private final Map<String, Integer> attrIdMap;
     private final List<DCEncodedAttr> encodedAttrs;
-    private final String attrIdField;
-    private final String bktIdField;
 
     private final Map<Integer, Integer> argIdToAttrIdMap = new HashMap<>();
     private final Map<Integer, DCEncodedAttr> encAttrArgPos = new HashMap<>();
@@ -34,8 +32,6 @@ public class BucketExpandFunction extends BaseOperation implements Function {
         super(new Fields(attrIdField, bktIdField));
         this.encodedAttrs = encodedAttrs;
         this.attrIdMap = attrIdMap;
-        this.attrIdField = attrIdField;
-        this.bktIdField = bktIdField;
     }
 
     @Override
@@ -51,17 +47,20 @@ public class BucketExpandFunction extends BaseOperation implements Function {
             if (argIdToAttrIdMap.containsKey(i)) {
                 // normal field
                 int attrId = argIdToAttrIdMap.get(i);
-                int bktId = value == null ? 0 : 1;
-                Tuple tuple = new Tuple(attrId, bktId);
-                functionCall.getOutputCollector().add(tuple);
+                if (value != null) {
+                    Tuple tuple = new Tuple(attrId, 1);
+                    functionCall.getOutputCollector().add(tuple);
+                }
             } else if (encAttrArgPos.containsKey(i)) {
                 // encoded field
                 DCEncodedAttr encAttr = encAttrArgPos.get(i);
-                for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
+                for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
                     int attrId = attrIdMap.get(bktAttr.getNominalAttr());
                     int bktId = BitCodecUtils.getBits((long) value, bktAttr.getLowestBit(), bktAttr.getNumBits());
-                    Tuple tuple = new Tuple(attrId, bktId);
-                    functionCall.getOutputCollector().add(tuple);
+                    if (bktId > 0) {
+                        Tuple tuple = new Tuple(attrId, bktId);
+                        functionCall.getOutputCollector().add(tuple);
+                    }
                 }
             }
         }
@@ -84,7 +83,7 @@ public class BucketExpandFunction extends BaseOperation implements Function {
             Map<Integer, DCEncodedAttr> map2 = new HashMap<>();
             for (int i = 0; i < arguments.size(); i++) {
                 String fieldName = (String) arguments.getFields().get(i);
-                for (DCEncodedAttr encAttr: encodedAttrs) {
+                for (DCEncodedAttr encAttr : encodedAttrs) {
                     if (encAttr.getEncAttr().equals(fieldName)) {
                         map2.put(i, encAttr);
                     }
