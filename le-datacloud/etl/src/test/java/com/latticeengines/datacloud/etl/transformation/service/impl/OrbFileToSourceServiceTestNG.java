@@ -54,7 +54,7 @@ public class OrbFileToSourceServiceTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         baseSource.setIngestionName(IngestionNames.ORB_INTELLIGENCE);
         uploadBaseSourceFile(baseSource, "orb-db2-export-sample.zip", baseSourceVersion);

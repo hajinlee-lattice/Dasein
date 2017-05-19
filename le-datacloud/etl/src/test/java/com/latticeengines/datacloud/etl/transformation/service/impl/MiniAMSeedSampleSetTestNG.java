@@ -49,7 +49,7 @@ public class MiniAMSeedSampleSetTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         prepareMiniAmDataSet();
         prepareSeedDataSet();

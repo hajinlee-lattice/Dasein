@@ -70,7 +70,7 @@ public class AMSeedCleanPipelineTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
         prepareAlexa();
         prepareAMSeedMerged();

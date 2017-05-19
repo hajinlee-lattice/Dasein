@@ -49,7 +49,7 @@ public class HGDataFileToSourceServiceTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         baseSource.setIngestionName(IngestionNames.HGDATA);
         uploadBaseSourceFile(baseSource, "Lattice_Engines_2017-02-14.zip", baseSourceVersion);

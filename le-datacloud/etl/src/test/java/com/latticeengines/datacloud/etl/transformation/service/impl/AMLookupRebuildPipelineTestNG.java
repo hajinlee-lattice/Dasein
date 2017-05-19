@@ -56,7 +56,7 @@ public class AMLookupRebuildPipelineTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline1")
     public void testTransformation() {
         prepareAMSeed();
         prepareOrbSeed();

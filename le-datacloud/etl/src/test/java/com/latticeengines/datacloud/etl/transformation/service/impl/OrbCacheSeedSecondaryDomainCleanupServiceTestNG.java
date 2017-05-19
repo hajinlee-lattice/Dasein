@@ -57,7 +57,7 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         uploadBaseSourceFile(baseSource, "OrbCacheSeed_Test", "2017-01-09_19-12-43_UTC");
         TransformationProgress progress = createNewProgress();

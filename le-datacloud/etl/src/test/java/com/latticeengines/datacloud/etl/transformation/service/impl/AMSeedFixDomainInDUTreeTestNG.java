@@ -56,7 +56,7 @@ public class AMSeedFixDomainInDUTreeTestNG extends
     String targetSourceName = "MatchResult";
     String targetVersion;
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline1")
     public void testTransformation() throws IOException {
         prepareAMSeed();
         String targetSourcePath = hdfsPathBuilder.podDir().append(ACCOUNT_MASTER_SEED_CLEANED).toString();

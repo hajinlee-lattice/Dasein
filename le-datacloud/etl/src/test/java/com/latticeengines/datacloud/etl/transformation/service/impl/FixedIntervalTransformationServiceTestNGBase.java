@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 public abstract class FixedIntervalTransformationServiceTestNGBase<T extends TransformationConfiguration>
         extends TransformationServiceImplTestNGBase<T> {
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline2")
     public void testWholeProgress() {
         uploadBaseAvroFile();
         TransformationProgress progress = createNewProgress();

@@ -31,7 +31,7 @@ public class HGDataCleanServiceImplTestNG extends TransformationServiceImplTestN
     @Autowired
     private HGDataCleanService hgDataCleanService;
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline2")
     public void testTransformation() {
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();

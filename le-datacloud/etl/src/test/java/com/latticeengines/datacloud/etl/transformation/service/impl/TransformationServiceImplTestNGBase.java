@@ -76,7 +76,7 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     abstract void verifyResultAvroRecords(Iterator<GenericRecord> records);
 
-    @BeforeMethod(groups = { "functional", "deployment" })
+    @BeforeMethod(groups = { "functional", "deployment", "pipeline1", "pipeline2" })
     public void setUp() throws Exception {
         source = getSource();
         prepareCleanPod(source.getSourceName());

@@ -48,7 +48,7 @@ public class IndustryConsolidationServiceTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         uploadBaseSourceFile(baseSource, "ConsolidateIndustry_Test", baseSourceVersion);
         TransformationProgress progress = createNewProgress();

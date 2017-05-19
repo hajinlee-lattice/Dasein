@@ -95,7 +95,7 @@ public class AMSeedMergeServiceImplTestNG
     private static final String DOMAIN_SOURCE = "DomainSource";
     private static final String OUT_OF_BUSINESS_INDICATOR = "OUT_OF_BUSINESS_INDICATOR";
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
         prepareDnBSeed();
         prepareLeSeed();
