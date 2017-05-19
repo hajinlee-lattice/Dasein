@@ -11,6 +11,6 @@
   "r3.large":   { "core": 2, "mem_gb": 15,    "on_demand": 0.166 },
   "r3.xlarge":  { "core": 4, "mem_gb": 30.5,  "on_demand": 0.333 },
   "r3.2xlarge": { "core": 8, "mem_gb": 61,    "on_demand": 0.665 },
-  "r4.large":   { "core": 2, "mem_gb": 15.25, "on_demand": 0.133 },
-  "r4.xlarge":  { "core": 4, "mem_gb": 30.5, "on_demand": 0.366 }
+  "r4.large":   { "core": 2, "mem_gb": 15, "on_demand": 0.133 },
+  "r4.xlarge":  { "core": 4, "mem_gb": 30, "on_demand": 0.266 }
 }
