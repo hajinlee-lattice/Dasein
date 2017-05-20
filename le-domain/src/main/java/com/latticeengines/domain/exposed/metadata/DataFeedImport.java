@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
 
@@ -16,7 +16,6 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_IMPORT", uniqueConstraints = @UniqueConstraint(columnNames = { "EXECUTION_ID",

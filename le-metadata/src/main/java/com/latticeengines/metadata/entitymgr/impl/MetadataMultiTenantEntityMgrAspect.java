@@ -68,4 +68,9 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.DataFeedEntityMgrImpl.*(..))")
+    public void allDataFeedMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
 }

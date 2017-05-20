@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,7 +20,6 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_TASK", uniqueConstraints = @UniqueConstraint(columnNames = { "FEED_ID",
@@ -75,6 +76,7 @@ public class DataFeedTask implements HasPid, Serializable {
 
     @Column(name = "STATUS", nullable = false)
     @JsonProperty("status")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @Column(name = "LAST_CONSOLIDATED", nullable = false)

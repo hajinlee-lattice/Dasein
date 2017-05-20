@@ -1,13 +1,8 @@
 package com.latticeengines.leadprioritization.workflow;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.VdbCreateTableRule;
-import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.importvdbtable.ImportVdbTableStepConfiguration;
-
-import java.util.List;
 
 public class ImportVdbTableAndPublishWorkflowConfiguration extends WorkflowConfiguration {
 
@@ -15,8 +10,7 @@ public class ImportVdbTableAndPublishWorkflowConfiguration extends WorkflowConfi
     }
 
     public static class Builder {
-        private ImportVdbTableAndPublishWorkflowConfiguration configuration = new
-                ImportVdbTableAndPublishWorkflowConfiguration();
+        private ImportVdbTableAndPublishWorkflowConfiguration configuration = new ImportVdbTableAndPublishWorkflowConfiguration();
 
         private ImportVdbTableStepConfiguration importVdbTableConfiguration = new ImportVdbTableStepConfiguration();
 

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -9,6 +9,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,7 +27,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_EXECUTION", uniqueConstraints = @UniqueConstraint(columnNames = { "FEED_ID",
@@ -56,6 +57,7 @@ public class DataFeedExecution implements HasPid, Serializable {
 
     @Column(name = "STATUS", nullable = false)
     @JsonProperty("status")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "execution")

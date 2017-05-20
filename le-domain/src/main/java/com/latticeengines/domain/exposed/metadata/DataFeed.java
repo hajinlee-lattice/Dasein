@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -9,6 +9,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,7 +19,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -25,13 +30,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED")
-public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
+@javax.persistence.Table(name = "DATAFEED", uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID",
+        "NAME" }))
+@Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
+public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
 
@@ -54,7 +61,7 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
-    private DataCollection collection;
+    private DataCollection dataCollection;
 
     @Column(name = "NAME", nullable = false)
     @JsonProperty("name")
@@ -62,6 +69,7 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
 
     @Column(name = "STATUS", nullable = false)
     @JsonProperty("status")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @Column(name = "ACTIVE_EXECUTION", nullable = false)
@@ -126,6 +134,14 @@ public class DataFeed implements HasName, HasPid, HasTenantId, Serializable {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    public DataCollection getDataCollection() {
+        return dataCollection;
+    }
+
+    public void setDataCollection(DataCollection dataCollection) {
+        this.dataCollection = dataCollection;
     }
 
     public List<DataFeedExecution> getExecutions() {

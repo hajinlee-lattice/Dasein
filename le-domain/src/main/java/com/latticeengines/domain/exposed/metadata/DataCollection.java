@@ -78,6 +78,11 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @JsonProperty("properties")
     private List<DataCollectionProperty> properties = new ArrayList<>();
 
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataCollection")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("datafeeds")
+    private List<DataFeed> datafeeds = new ArrayList<>();
+
     @JsonProperty("tables")
     @Transient
     private List<Table> tables = new ArrayList<>();
@@ -170,5 +175,17 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
 
     public void addTable(Table table) {
         tables.add(table);
+    }
+
+    public List<DataFeed> getDataFeeds() {
+        return datafeeds;
+    }
+
+    public void setDataFeeds(List<DataFeed> datafeeds) {
+        this.datafeeds = datafeeds;
+    }
+
+    public void addDataFeed(DataFeed datafeed) {
+        datafeeds.add(datafeed);
     }
 }
