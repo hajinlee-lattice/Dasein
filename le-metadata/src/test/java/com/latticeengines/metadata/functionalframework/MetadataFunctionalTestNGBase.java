@@ -109,7 +109,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 
-    public void setup() {
+    protected void setup() {
         globalAuthFunctionalTestBed.bootstrap(2);
         customerSpace1 = globalAuthFunctionalTestBed.getTestTenants().get(0).getId();
         customerSpace2 = globalAuthFunctionalTestBed.getTestTenants().get(1).getId();
@@ -126,12 +126,15 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         setupTables();
     }
 
+    protected void cleanup() {
+        tenantEntityMgr.delete(tenantEntityMgr.findByTenantId(customerSpace1));
+        tenantEntityMgr.delete(tenantEntityMgr.findByTenantId(customerSpace2));
+    }
+
     private void copyExtractsToHdfs() {
         log.info("copyExtractsToHdfs");
         try {
-            Assert.assertNotEquals(
-                    yarnConfiguration.get("fs.defaultFS"),
-                    "file:///",
+            Assert.assertNotEquals(yarnConfiguration.get("fs.defaultFS"), "file:///",
                     "$HADOOP_HOME/etc/hadoop must be on the classpath, and configured to use a hadoop cluster in order for this test to run");
 
             HdfsUtils.rmdir(yarnConfiguration, tableLocation1.toString());

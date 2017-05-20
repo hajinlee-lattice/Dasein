@@ -5,6 +5,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,6 +36,11 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanup() {
+        super.cleanup();
     }
 
     @BeforeMethod(groups = "functional")
