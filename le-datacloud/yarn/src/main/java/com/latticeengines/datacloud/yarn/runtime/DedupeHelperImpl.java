@@ -20,7 +20,7 @@ public class DedupeHelperImpl implements DedupeHelper {
     private static final Log log = LogFactory.getLog(DedupeHelperImpl.class);
 
     @Autowired
-    private PublicDomainService publicDomainService;
+    PublicDomainService publicDomainService;
 
     @Override
     public void appendDedupeValues(ProcessorContext processorContext, List<Object> allValues, OutputRecord outputRecord) {
@@ -54,10 +54,10 @@ public class DedupeHelperImpl implements DedupeHelper {
         NameLocation nameLocation = outputRecord.getPreMatchNameLocation();
         String name = nameLocation != null ? nameLocation.getName() : null;
         String country = nameLocation != null ? nameLocation.getCountry() : null;
-        boolean hasNameLocation = StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(country);
+        boolean hasNoNameLocation = StringUtils.isEmpty(name) && StringUtils.isEmpty(country);
 
         // removed
-        if (isPublicDomain && !hasNameLocation) {
+        if (isPublicDomain && hasNoNameLocation) {
             isRemoved = 1;
             addDedupeValues(allValues, dedupeId, isRemoved);
             return;

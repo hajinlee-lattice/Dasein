@@ -255,6 +255,10 @@ public class ProcessorContext {
     public MatchInput getOriginalInput() {
         return originalInput;
     }
+    
+    public void setOriginalInput(MatchInput originalInput) {
+        this.originalInput = originalInput;
+    }
 
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
             throws Exception {
