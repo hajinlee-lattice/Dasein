@@ -40,6 +40,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void cleanup() {
+        datafeedEntityMgr.delete(datafeed);
         super.cleanup();
     }
 
@@ -62,6 +63,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         datafeed.setStatus(Status.Active);
         datafeed.setActiveExecution(0L);
         datafeed.setDataCollection(dataCollection);
+        dataCollection.addDataFeed(datafeed);
         datafeedEntityMgr.create(datafeed);
     }
 
