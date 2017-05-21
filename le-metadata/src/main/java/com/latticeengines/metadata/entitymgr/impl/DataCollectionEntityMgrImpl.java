@@ -91,6 +91,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
         DataCollection dataCollection = candidates.get(0);
         HibernateUtils.inflateDetails(dataCollection.getProperties());
+        HibernateUtils.inflateDetails(dataCollection.getDataFeeds());
         return dataCollection;
     }
 
@@ -100,6 +101,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         DataCollection collection = findByField("type", type);
         if (collection != null) {
             HibernateUtils.inflateDetails(collection.getProperties());
+            HibernateUtils.inflateDetails(collection.getDataFeeds());
         } else {
             collection = registerDefault(type);
         }
