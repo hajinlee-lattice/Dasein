@@ -709,6 +709,20 @@
                         display: inline-block;
                     }
                 }
+                .stats-boolean {
+                    h3 {
+                        color: inherit;
+                    }
+                    h4 {
+                        color: #1a1a1a;
+                        font-size: 14px;
+                    }
+                    p {
+                        color: #1a1a1a;
+                        font-size: 10px;
+                        font-weight: bold;
+                    }
+                }
                 .stats {
                     font-size: 11px;
                     h5 {
