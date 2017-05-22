@@ -40,7 +40,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() throws Exception {
-        uploadBaseSourceFile(accountMaster, "AM_TestAMBucket", baseSourceVersion);
+        uploadBaseSourceFile(accountMaster, "AMBucketTest_AM", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
