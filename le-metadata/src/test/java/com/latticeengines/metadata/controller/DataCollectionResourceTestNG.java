@@ -12,11 +12,14 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.impl.RegisterAccountMasterMetadataTableTestNG;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.StatisticsContainerProxy;
 
 public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
 
@@ -30,6 +33,8 @@ public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
 
     @Autowired
     private RegisterAccountMasterMetadataTableTestNG registerAccountMasterMetadataTableTestNG;
+    @Autowired
+    private StatisticsContainerProxy statisticsContaineProxy;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -45,7 +50,7 @@ public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
         DATA_COLLECTION.setTables(Collections.singletonList(TABLE_1));
 
         System.out.println("Data collection is: " + JsonUtils.serialize(DATA_COLLECTION));
-        dataCollectionProxy.createDataCollection(customerSpace1, DATA_COLLECTION);
+        dataCollectionProxy.createOrUpdateDataCollection(customerSpace1, DATA_COLLECTION);
 
         DataCollection retrieved = dataCollectionProxy.getDataCollectionByType(customerSpace1,
                 DATA_COLLECTION.getType());
@@ -61,4 +66,19 @@ public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(retrieved.getType(), DataCollectionType.Segmentation);
     }
 
+    @Test(groups = "functional", dependsOnMethods = "createDataCollection_assertCreated")
+    public void createStatistics() {
+        DataCollection retrieved = dataCollectionProxy.getDataCollectionByType(customerSpace1,
+                DATA_COLLECTION.getType());
+        Statistics statistics = new Statistics();
+        StatisticsContainer container = new StatisticsContainer();
+        container.setStatistics(statistics);
+        container = statisticsContaineProxy.createOrUpdateStatistics(customerSpace1, container);
+
+        retrieved.setStatisticsContainer(container);
+        dataCollectionProxy.createOrUpdateDataCollection(customerSpace1, retrieved);
+
+        retrieved = dataCollectionProxy.getDataCollectionByType(customerSpace1, DATA_COLLECTION.getType());
+        assertNotNull(retrieved.getStatisticsContainer());
+    }
 }

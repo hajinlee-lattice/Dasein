@@ -6,4 +6,6 @@ public interface SegmentationDataCollectionService {
     DataCollection getDefaultDataCollection();
 
     void fillInDefaultTables(DataCollection dataCollection);
+
+    void removeDefaultTables(DataCollection dataCollection);
 }

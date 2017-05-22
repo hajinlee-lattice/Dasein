@@ -41,9 +41,9 @@ public class DataCollectionResource {
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create data collection")
-    public DataCollection createDataCollection(@PathVariable String customerSpace, //
+    @ApiOperation(value = "Create or update data collection")
+    public DataCollection createOrUpdateDataCollection(@PathVariable String customerSpace, //
             @RequestBody DataCollection dataCollection) {
-        return dataCollectionService.createDataCollection(customerSpace, dataCollection);
+        return dataCollectionService.createOrUpdateDataCollection(customerSpace, dataCollection);
     }
 }

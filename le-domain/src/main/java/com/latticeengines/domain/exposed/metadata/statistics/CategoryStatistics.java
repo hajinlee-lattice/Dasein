@@ -11,6 +11,11 @@ public class CategoryStatistics {
     @JsonProperty("Subcategories")
     private Map<String, SubcategoryStatistics> subcategories = new HashMap<>();
 
-    @JsonProperty("Cnt")
-    private Long nonNullCount;
+    public Map<String, SubcategoryStatistics> getSubcategories() {
+        return subcategories;
+    }
+
+    public void setSubcategories(Map<String, SubcategoryStatistics> subcategories) {
+        this.subcategories = subcategories;
+    }
 }

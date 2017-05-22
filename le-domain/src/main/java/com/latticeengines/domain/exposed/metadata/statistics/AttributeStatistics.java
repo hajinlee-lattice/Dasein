@@ -12,6 +12,11 @@ public class AttributeStatistics {
     @JsonProperty("Buckets")
     private List<Bucket> buckets = new ArrayList<>();
 
-    @JsonProperty("Cnt")
-    private Long nonNullCount;
+    public List<Bucket> getBuckets() {
+        return buckets;
+    }
+
+    public void setBuckets(List<Bucket> buckets) {
+        this.buckets = buckets;
+    }
 }

@@ -79,8 +79,8 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy implements Dat
     }
 
     @Override
-    public DataCollection createDataCollection(String customerSpace, DataCollection dataCollection) {
+    public DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollections", customerSpace);
-        return post("createDataCollection", url, dataCollection, DataCollection.class);
+        return post("createOrUpdateDataCollection", url, dataCollection, DataCollection.class);
     }
 }

@@ -14,10 +14,10 @@
 
     <aop:aspectj-autoproxy/>
 
-    <bean id="metadataMultiTenancyAspect" class="com.latticeengines.metadata.entitymgr.impl.MetadataMultiTenantEntityMgrAspect" />
+    <bean id="metadataMultiTenancyAspect" class="com.latticeengines.metadata.infrastructure.MetadataMultiTenantEntityMgrAspect" />
     
-    <bean id="metadataSetTenantAspect" class="com.latticeengines.metadata.service.impl.SetTenantAspect" />
+    <bean id="metadataSetTenantAspect" class="com.latticeengines.metadata.infrastructure.SetTenantAspect" />
     
-    <bean id="resourceAspect" class="com.latticeengines.metadata.service.impl.ResourceAspect" />
+    <bean id="resourceAspect" class="com.latticeengines.metadata.infrastructure.ResourceAspect" />
 
 </beans>

@@ -1,4 +1,4 @@
-package com.latticeengines.metadata.service.impl;
+package com.latticeengines.metadata.infrastructure;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -49,6 +49,11 @@ public class ResourceAspect {
 
     @Before("execution(* com.latticeengines.metadata.controller.DataCollectionResource.*(..))")
     public void allMethodsForDataCollectionResource(JoinPoint joinPoint) {
+        checkHeader(joinPoint);
+    }
+
+    @Before("execution(* com.latticeengines.metadata.controller.StatisticsContainerResource.*(..))")
+    public void allMethodsStatisticsContainerResource(JoinPoint joinPoint) {
         checkHeader(joinPoint);
     }
 

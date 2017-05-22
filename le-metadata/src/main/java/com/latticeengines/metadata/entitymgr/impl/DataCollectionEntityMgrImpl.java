@@ -1,7 +1,6 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.metadata.dao.DataCollectionDao;
 import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
 import com.latticeengines.metadata.service.SegmentationDataCollectionService;
@@ -48,6 +48,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Autowired
     private TableTypeHolder tableTypeHolder;
 
+    @Autowired
+    private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
+
     @Override
     public DataCollectionDao getDao() {
         return dataCollectionDao;
@@ -55,16 +58,21 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public DataCollection createDataCollection(DataCollection dataCollection) {
+    public void createOrUpdateDataCollection(DataCollection dataCollection) {
+        removeDefaultTables(dataCollection);
+
         List<String> tableNames = dataCollection.getTables().stream() //
                 .map(Table::getName).collect(Collectors.toList());
         List<Table> tables = tableNames.stream() //
                 .map(name -> tableEntityMgr.findByName(name)) //
                 .collect(Collectors.toList());
         if (tables.stream().anyMatch(table -> table == null)) {
-            throw new LedpException(LedpCode.LEDP_11006, new String[] { String.join(",", tableNames) });
+            throw new LedpException(LedpCode.LEDP_11006, new String[]{String.join(",", tableNames)});
         }
-        dataCollection.setName("DataCollection_" + UUID.randomUUID());
+
+        if (dataCollection.getStatisticsContainer() != null) {
+            dataCollection.setStatisticsContainer(statisticsContainerEntityMgr.findStatisticsByName(dataCollection.getStatisticsContainer().getName()));
+        }
 
         for (Table table : tables) {
             TableTag tableTag = new TableTag();
@@ -76,10 +84,15 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         dataCollection.setTenant(MultiTenantContext.getTenant());
         create(dataCollection);
         for (DataCollectionProperty dataCollectionProperty : dataCollection.getProperties()) {
+            dataCollectionProperty.setDataCollection(dataCollection);
             dataCollectionPropertyDao.create(dataCollectionProperty);
         }
+    }
 
-        return getDataCollection(dataCollection.getName());
+    private void removeDefaultTables(DataCollection dataCollection) {
+        if (dataCollection.getType() == DataCollectionType.Segmentation) {
+            segmentationDataCollectionService.removeDefaultTables(dataCollection);
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -103,7 +116,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             HibernateUtils.inflateDetails(collection.getProperties());
             HibernateUtils.inflateDetails(collection.getDataFeeds());
         } else {
-            collection = registerDefault(type);
+            if (registerDefault(type)) {
+                collection = getDataCollection(type);
+            }
         }
 
         return collection;
@@ -136,12 +151,14 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         dataCollectionDao.delete(dataCollection);
     }
 
-    private DataCollection registerDefault(DataCollectionType type) {
+    private boolean registerDefault(DataCollectionType type) {
         if (type == DataCollectionType.Segmentation) {
             DataCollection collection = segmentationDataCollectionService.getDefaultDataCollection();
-            return createDataCollection(collection);
+            createOrUpdateDataCollection(collection);
+            return true;
         }
-        return null;
+
+        return false;
     }
 
 }

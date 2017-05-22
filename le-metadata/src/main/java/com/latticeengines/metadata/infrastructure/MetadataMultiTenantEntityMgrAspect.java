@@ -1,5 +1,6 @@
-package com.latticeengines.metadata.entitymgr.impl;
+package com.latticeengines.metadata.infrastructure;
 
+import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.JoinPoint;
@@ -65,6 +66,11 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.RowRuleResultEntityMgrImpl.*(..))")
     public void allRowRuleMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.StatisticsContainerEntityMgrImpl.*(..))")
+    public void allStatisticsContainerMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 

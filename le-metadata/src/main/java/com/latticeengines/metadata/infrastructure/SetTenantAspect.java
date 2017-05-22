@@ -1,4 +1,4 @@
-package com.latticeengines.metadata.service.impl;
+package com.latticeengines.metadata.infrastructure;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -44,6 +44,12 @@ public class SetTenantAspect {
 
     @Before("execution(* com.latticeengines.metadata.service.impl.DataCollectionServiceImpl.*(..))")
     public void allMethodsDataCollectionService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setSecurityContext(customerSpace);
+    }
+
+    @Before("execution(* com.latticeengines.metadata.service.impl.StatisticsContainerServiceImpl.*(..))")
+    public void allMethodsStatisticsContainerService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setSecurityContext(customerSpace);
     }

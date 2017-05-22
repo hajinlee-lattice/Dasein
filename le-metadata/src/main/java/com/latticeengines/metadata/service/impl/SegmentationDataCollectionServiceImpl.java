@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.stream.Collectors;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,5 +57,15 @@ public class SegmentationDataCollectionServiceImpl implements SegmentationDataCo
                 MultiTenantContext.setTenant(tenant);
             }
         }
+    }
+
+    @Override
+    public void removeDefaultTables(DataCollection dataCollection) {
+        dataCollection.setTables(dataCollection //
+                .getTables() //
+                .stream() //
+                .filter(t -> t.getInterpretation() == null //
+                        || !t.getInterpretation().equals(SchemaInterpretation.BucketedAccountMaster.toString())) //
+                .collect(Collectors.toList()));
     }
 }

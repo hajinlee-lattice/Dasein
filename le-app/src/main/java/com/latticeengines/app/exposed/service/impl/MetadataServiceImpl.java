@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
@@ -30,8 +31,7 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
-        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(MultiTenantContext.getTenant()
-                .getId(), DataCollectionType.Segmentation);
+        DataCollection dataCollection = getDataCollection();
         List<Table> tables = dataCollection.getTables();
         Stream<ColumnMetadata> stream = tables.stream() //
                 .flatMap(t -> t.getAttributes().stream()) //
@@ -60,6 +60,18 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public Statistics getStatistics() {
+        DataCollection dataCollection = getDataCollection();
+        if (dataCollection != null) {
+            StatisticsContainer container = dataCollection.getStatisticsContainer();
+            if (container != null) {
+                return container.getStatistics();
+            }
+        }
         return null;
+    }
+
+    private DataCollection getDataCollection() {
+        return dataCollectionProxy.getDataCollectionByType(MultiTenantContext.getTenant().getId(),
+                DataCollectionType.Segmentation);
     }
 }

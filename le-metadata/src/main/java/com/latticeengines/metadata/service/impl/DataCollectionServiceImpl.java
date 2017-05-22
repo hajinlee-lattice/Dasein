@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,10 +35,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public DataCollection createDataCollection(String customerSpace, DataCollection dataCollection) {
-        DataCollection collection = dataCollectionEntityMgr.createDataCollection(dataCollection);
-        dataCollectionEntityMgr.fillInTables(collection);
-        dataCollectionCache.invalidate(collection.getType());
-        return collection;
+    public DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection) {
+        DataCollection existing = dataCollectionEntityMgr.getDataCollection(dataCollection.getName());
+        if (existing != null) {
+            dataCollectionEntityMgr.removeDataCollection(existing.getName());
+        } else {
+            dataCollection.setName("DataCollection_" + UUID.randomUUID());
+        }
+
+        dataCollectionEntityMgr.createOrUpdateDataCollection(dataCollection);
+        dataCollectionCache.invalidate(dataCollection.getType());
+        return dataCollectionCache.get(dataCollection.getType());
     }
 }

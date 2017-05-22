@@ -10,4 +10,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Statistics {
     @JsonProperty("Categories")
     private Map<String, CategoryStatistics> categories = new HashMap<>();
+
+    public Map<String, CategoryStatistics> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Map<String, CategoryStatistics> categories) {
+        this.categories = categories;
+    }
 }

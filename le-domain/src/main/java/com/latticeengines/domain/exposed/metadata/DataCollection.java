@@ -17,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -82,6 +83,12 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("datafeeds")
     private List<DataFeed> datafeeds = new ArrayList<>();
+
+    @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "FK_STATISTICS_CONTAINER_ID")
+    @JsonProperty("statistics_container")
+    private StatisticsContainer statisticsContainer;
 
     @JsonProperty("tables")
     @Transient
@@ -177,6 +184,12 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         tables.add(table);
     }
 
+    @JsonIgnore
+    @Transient
+    public DataCollectionPropertyBag getDataCollectionPropertyBag() {
+        return new DataCollectionPropertyBag(properties);
+    }
+
     public List<DataFeed> getDataFeeds() {
         return datafeeds;
     }
@@ -187,5 +200,13 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
 
     public void addDataFeed(DataFeed datafeed) {
         datafeeds.add(datafeed);
+    }
+
+    public StatisticsContainer getStatisticsContainer() {
+        return statisticsContainer;
+    }
+
+    public void setStatisticsContainer(StatisticsContainer statisticsContainer) {
+        this.statisticsContainer = statisticsContainer;
     }
 }
