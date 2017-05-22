@@ -4,8 +4,8 @@
             <h2 ng-click="vm.open({event: $event})"><strong>Step 1:</strong> Matching Fields<span ng-if="vm.step == 1">: <em>Email or Website</em></span></h2>
             <div class="body">
                 <h3>
-                    Please select Marketo fields that will be used to match to companies in the Lattice Data Cloud.<br /> 
-                    <strong>*Either Email or Website is required.</strong> Company name, State and Country are optional.
+                    Please select Marketo fields that will be used to match to companies in the Lattice Data Cloud.<br />
+                    <strong>*Either Email or Website is required.</strong> Company name, State, Country, and DUNS are optional.
                 </h3>
                 <form class="match-fields">
                     <div class="field">
@@ -130,12 +130,12 @@
                         </p>
 
                         <ul class="enrichments">
-                            <li class="box" 
+                            <li class="box"
                                 ng-repeat="enrichment in (filteredList = (vm.enrichments
                                 | orderBy: 'FieldName'
-                                | filter: { 'IsSelected': true, IsInternal: false})) 
-                                | startFrom: (vm.current - 1) * vm.pagesize 
-                                | limitTo: vm.pagesize" 
+                                | filter: { 'IsSelected': true, IsInternal: false}))
+                                | startFrom: (vm.current - 1) * vm.pagesize
+                                | limitTo: vm.pagesize"
                                 ng-class="{'active': enrichment.IsSelected}">
                                 <div class="box-inner">
                                     <h6>
@@ -151,8 +151,8 @@
                         </ul>
                         <div class="row required-fields-pagination" ng-init="vm.current = 1" ng-show="vm.max > 1">
                             <div class="twelve columns">
-                                <pd-pagination-controls 
-                                        current="vm.current" 
+                                <pd-pagination-controls
+                                        current="vm.current"
                                         max="vm.max = filteredList.length / vm.pagesize">
                                 </pd-pagination-controls>
                             </div>
@@ -165,7 +165,7 @@
                             You can edit response mappings by going to Admin > Webhooks &gt;  Response Mappings &gt; Edit
                         </p>
                         <p>
-                            Select ‘Add’ and in ‘Response Attribute’ write an attribute provided to you in Attributes section (left section of this window). Under ‘Marketo Field’ map the added attribute to a provided matching Marketo field.  
+                            Select ‘Add’ and in ‘Response Attribute’ write an attribute provided to you in Attributes section (left section of this window). Under ‘Marketo Field’ map the added attribute to a provided matching Marketo field.
                         </p>
                         <div class="instructions-image step-3-1"></div>
                     </div>
