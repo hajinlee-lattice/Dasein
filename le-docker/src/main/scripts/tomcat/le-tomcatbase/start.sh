@@ -14,10 +14,10 @@ if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
 fi
 
 # mail config
-if [ "${LE_ENVIRONMENT}" = "prodcluster" ]; then
+if [ "${LE_ENVIRONMENT}" = "prodcluster" ] && [ -f "/root/postfix/main.cf.production" ]; then
     echo "use production cf"
     cp -f /root/postfix/main.cf.production /etc/postfix/main.cf
-else
+elif [ -f "/root/postfix/main.cf.dev" ]; then
     echo "use dev cf"
     cp -f /root/postfix/main.cf.dev /etc/postfix/main.cf
 fi
@@ -32,9 +32,16 @@ if [ -f "/etc/internaladdr.txt" ]; then
     echo "METRIC_ADVERTISE_NAME=${METRIC_ADVERTISE_NAME}"
 fi
 
-export JAVA_OPTS="-Duser.timezone=US/Eastern -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
+export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
+export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
-export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099 -Dfile.encoding=UTF8"
+export JAVA_OPTS="${JAVA_OPTS} -Dfile.encoding=UTF8"
+
+export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote"
+export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
+export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.authenticate=false"
+export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.port=1099"
+
 if [ ! -z "${CATALINA_OPTS}" ]; then
     export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
 fi
