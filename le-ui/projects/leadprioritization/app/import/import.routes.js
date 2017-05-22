@@ -1,7 +1,12 @@
 angular
 .module('lp.import', [
+    'common.wizard',
     'lp.import.entry',
-    'lp.import.wizard'
+    'lp.import.wizard.thirdpartyids',
+    'lp.import.wizard.latticefields',
+    'lp.import.wizard.jobstatus',
+    'lp.import.wizard.customfields',
+    'lp.import.wizard.accountids'
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -63,7 +68,7 @@ angular
             url: '/wizard',
             views: {
                 'main@': {
-                    templateUrl: 'app/import/wizard/wizard.component.html'
+                    templateUrl: '/components/wizard/wizard.component.html'
                 }
             }
         })
@@ -84,12 +89,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/progress/progress.component.html'
+                    templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/controls/controls.component.html'
+                    templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             }
         })
@@ -99,7 +104,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardAccountIDs',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/accountids/accountids.component.html'
+                    templateUrl: 'app/import/content/accountids/accountids.component.html'
                 }
             }
         })
@@ -117,7 +122,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardThirdPartyIDs',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/thirdpartyids/thirdpartyids.component.html'
+                    templateUrl: 'app/import/content/thirdpartyids/thirdpartyids.component.html'
                 }
             }
         })
@@ -152,7 +157,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardLatticeFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/latticefields/latticefields.component.html'
+                    templateUrl: 'app/import/content/latticefields/latticefields.component.html'
                 }
             }
         })
@@ -162,7 +167,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/customfields/customfields.component.html'
+                    templateUrl: 'app/import/content/customfields/customfields.component.html'
                 }
             }
         })
@@ -170,7 +175,7 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/wizard/jobstatus/jobstatus.component.html'
+                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
         })
@@ -192,12 +197,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/progress/progress.component.html'
+                    templateUrl: 'app/import/content/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/controls/controls.component.html'
+                    templateUrl: 'app/import/content/controls/controls.component.html'
                 }
             }
         })
@@ -207,7 +212,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardAccountIDs',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/accountids/accountids.component.html'
+                    templateUrl: 'app/import/content/accountids/accountids.component.html'
                 }
             }
         })
@@ -215,7 +220,7 @@ angular
             url: '/thirdpartyids',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/wizard/thirdpartyids/thirdpartyids.component.html'
+                    templateUrl: 'app/import/content/thirdpartyids/thirdpartyids.component.html'
                 }
             }
         })
@@ -225,7 +230,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/customfields/customfields.component.html'
+                    templateUrl: 'app/import/content/customfields/customfields.component.html'
                 }
             }
         })
@@ -233,7 +238,7 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/wizard/jobstatus/jobstatus.component.html'
+                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
         })
@@ -254,12 +259,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/progress/progress.component.html'
+                    templateUrl: 'app/import/content/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/controls/controls.component.html'
+                    templateUrl: 'app/import/content/controls/controls.component.html'
                 }
             }
         })
@@ -298,7 +303,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardLatticeFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/latticefields/latticefields.component.html'
+                    templateUrl: 'app/import/content/latticefields/latticefields.component.html'
                 }
             }
         })
@@ -308,7 +313,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/customfields/customfields.component.html'
+                    templateUrl: 'app/import/content/customfields/customfields.component.html'
                 }
             }
         })
@@ -316,7 +321,7 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/wizard/jobstatus/jobstatus.component.html'
+                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
         })
@@ -337,12 +342,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/progress/progress.component.html'
+                    templateUrl: 'app/import/content/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/controls/controls.component.html'
+                    templateUrl: 'app/import/content/controls/controls.component.html'
                 }
             }
         })
@@ -350,7 +355,7 @@ angular
             url: '/latticefields',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/wizard/latticefields/latticefields.component.html'
+                    templateUrl: 'app/import/content/latticefields/latticefields.component.html'
                 }
             }
         })
@@ -360,7 +365,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/customfields/customfields.component.html'
+                    templateUrl: 'app/import/content/customfields/customfields.component.html'
                 }
             }
         })
@@ -368,7 +373,7 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/wizard/jobstatus/jobstatus.component.html'
+                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
         })
@@ -389,12 +394,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/progress/progress.component.html'
+                    templateUrl: 'app/import/content/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/controls/controls.component.html'
+                    templateUrl: 'app/import/content/controls/controls.component.html'
                 }
             },
             redirectTo: 'home.import.wizard.eloquoa.one'
@@ -403,7 +408,7 @@ angular
             url: '/latticefields',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/wizard/latticefields/latticefields.component.html'
+                    templateUrl: 'app/import/content/latticefields/latticefields.component.html'
                 }
             }
         })
@@ -413,7 +418,7 @@ angular
                 'wizard_content@home.import.wizard': {
                     controller: 'ImportWizardCustomFields',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/wizard/customfields/customfields.component.html'
+                    templateUrl: 'app/import/content/customfields/customfields.component.html'
                 }
             }
         })
@@ -421,7 +426,7 @@ angular
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.wizard': {
-                    templateUrl: 'app/import/wizard/jobstatus/jobstatus.component.html'
+                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
                 }
             }
         });

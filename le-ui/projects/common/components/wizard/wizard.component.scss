@@ -1,5 +1,7 @@
-.wizard-content {
+@import "controls/controls.component.scss";
+@import "progress/progress.component.scss";
 
+.wizard-content {
 	padding-bottom: 30px;
 
 	h2 {

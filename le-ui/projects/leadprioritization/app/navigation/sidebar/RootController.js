@@ -9,7 +9,6 @@ angular
     ) {
         $scope.$state = $state;
         $scope.ResourceUtility = ResourceUtility;
-        $scope.jobs = JobsStore.data.jobs;
 
         $scope.handleSidebarToggle = function ($event) {
             var target = angular.element($event.target),
@@ -33,17 +32,12 @@ angular
             $scope.showMarketoSettings = FeatureFlagService.FlagIsEnabled(flags.USE_MARKETO_SETTINGS);
             $scope.showEloquaSettings = FeatureFlagService.FlagIsEnabled(flags.USE_ELOQUA_SETTINGS);
             $scope.showSalesforceSettings = FeatureFlagService.FlagIsEnabled(flags.USE_SALESFORCE_SETTINGS);
-            $scope.showJobsPage = FeatureFlagService.FlagIsEnabled(flags.JOBS_PAGE);
             $scope.showCampaignsPage = FeatureFlagService.FlagIsEnabled(flags.CAMPAIGNS_PAGE);
             $scope.showAnalysisPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showSegmentationPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showLatticeInsightsPage = FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS);
             $scope.showContactUs = false;
         });
-
-        $scope.statusFilter = function (item) {
-            return item.jobStatus === 'Running' || item.jobStatus === 'Pending';
-        };
 
         angular.extend($scope, {
             init: function(){

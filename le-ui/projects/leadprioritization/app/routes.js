@@ -10,8 +10,18 @@ angular
             window.open("/login", "_self");
         }
 
-        //var LoadingString = ResourceUtility.getString("");
-        ShowSpinner(/*fromState.name + " -> " + toState.name*/);
+        var views = toState.views || {},
+            split, view, hasMain;
+
+        for (view in views) {
+            split = view.split('@');
+            hasMain = split[0] == 'main';
+        }
+
+        if (hasMain) {
+            //var LoadingString = ResourceUtility.getString("");
+            ShowSpinner(/*fromState.name + " -> " + toState.name*/);
+        }
 
         if (toState.redirectTo) {
             event.preventDefault();

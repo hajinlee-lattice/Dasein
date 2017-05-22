@@ -41,16 +41,6 @@
                 </span>
             </a>
         </li>
-        <li ng-if="showUserManagement" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.users" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}">
-                <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}">
-                    <span class="ico ico-user ico-light-gray"></span>
-                </span>
-                <span class="label">
-                    {{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}
-                </span>
-            </a>
-        </li>
         <li role="presentation" ng-class="{active: $state.includes('home.datacloud.explorer') || $state.includes('home.datacloud.lookup')}">
             <a ui-sref="home.datacloud.explorer({section:'edit',category:'',subcategory:''})" ui-sref-opts="{reload:true}" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DATA_CLOUD')}}">
                 <span class="ico-container tool-tip" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DATA_CLOUD')}}">
@@ -58,20 +48,6 @@
                 </span>
                 <span class="label">
                     {{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DATA_CLOUD')}}
-                </span>
-            </a>
-        </li>
-        <li ng-if="showJobsPage" role="presentation" ng-class="{active: $state.includes('home.jobs')}">
-            <a ui-sref="home.jobs.status" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}} [{{RunningJobs.length}}/{{jobs.length}}]">
-                <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0}" class="ico-container">
-                    <span class="ico ico-cog ico-light-gray">
-                    </span>
-                </span>
-                <span class="label">
-                    {{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}
-                    <i class="badge blue-badge pull-right" ng-if="RunningJobs.length > 0">
-                        {{ RunningJobs.length }}
-                    </i>
                 </span>
             </a>
         </li>

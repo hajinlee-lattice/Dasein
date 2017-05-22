@@ -1,4 +1,4 @@
-angular.module('lp.import.wizard.progress', [])
+angular.module('common.wizard.progress', [])
 .controller('ImportWizardProgress', function(
     $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, WizardProgressItems
 ) {

@@ -14,6 +14,26 @@
             <li class="page-name-container">
                 <span ng-if="pageDisplayName" class="page-name">{{ pageDisplayName }}</span>
             </li>
+            
+            <!--li ng-if="showJobsPage" role="presentation" ng-class="{active: $state.includes('home.jobs')}">
+                <a ui-sref="home.jobs.status" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}} [{{RunningJobs.length}}/{{jobs.length}}]">
+                    <span class="label">
+                        {{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_JOBS')}}
+                    </span>
+                </a>
+            </li-->
+            <li class="jobs-nav-container">
+                <a class="jobs-nav-gear" ui-sref="home.jobs.status">
+                    <span ng-class="{'fa fa-running': (RunningJobs = (jobs | filter: statusFilter)).length > 0}" class="ico-container">
+                        <span ng-if="!RunningJobs || RunningJobs.length == 0" class="ico ico-cog ico-light-gray">
+                            
+                        </span>
+                        <span ng-if="RunningJobs.length > 0">
+                            {{ RunningJobs.length }}
+                        </span>
+                    </span>
+                </a>
+            </li>
             <li class="profile-nav-container">
                 <div class="pull-right">
 
@@ -27,6 +47,11 @@
                             <span class="fa fa-chevron-down"></span>
                         </a>
                         <ul ng-show="showProfileNav" ng-click="headerClicked($event)">
+                            <li ng-if="showUserManagement">
+                                <a ui-sref="home.users" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}">
+                                    {{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}
+                                </a>
+                            </li>
                             <li ng-if="tenants.length > 1">
                                 <a href="/login/#/tenants" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_SWITCH_TENANT')}}">
                                     {{ResourceUtility.getString('HEADER_SWITCH_TENANT')}}

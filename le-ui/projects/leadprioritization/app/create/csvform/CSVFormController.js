@@ -65,6 +65,7 @@ angular
             nonDuplicatedColumns = [],
             duplicatedColumns = [],
             schemaSuggestion;
+        
         vm.params.importError = false;
         vm.showImportError = false;
 

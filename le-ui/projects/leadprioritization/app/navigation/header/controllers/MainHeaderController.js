@@ -14,9 +14,21 @@ angular.module('pd.navigation.header', [
 ])
 .controller('HeaderController', function (
     $scope, $rootScope, $state, ResourceUtility, BrowserStorageUtility, FeatureFlagService,
-    LoginService, NavUtility
+    LoginService, NavUtility, JobsStore
 ) {
     $scope.ResourceUtility = ResourceUtility;
+    $scope.jobs = JobsStore.data.jobs;
+
+    $scope.statusFilter = function (item) {
+        return item.jobStatus === 'Running' || item.jobStatus === 'Pending';
+    };
+
+
+    FeatureFlagService.GetAllFlags().then(function(result) {
+        var flags = FeatureFlagService.Flags();
+        $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
+        $scope.showJobsPage = FeatureFlagService.FlagIsEnabled(flags.JOBS_PAGE);
+    });
 
     var ClientSession = BrowserStorageUtility.getClientSession();
     

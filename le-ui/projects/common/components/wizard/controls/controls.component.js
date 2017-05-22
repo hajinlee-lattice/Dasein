@@ -1,4 +1,4 @@
-angular.module('lp.import.wizard.controls', [])
+angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
     $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, WizardProgressItems
 ) {

@@ -1,12 +1,4 @@
-angular.module('lp.import.wizard', [
-    'lp.import.wizard.controls',
-    'lp.import.wizard.progress',
-    'lp.import.wizard.accountids',
-    'lp.import.wizard.thirdpartyids',
-    'lp.import.wizard.latticefields',
-    'lp.import.wizard.customfields',
-    'lp.import.wizard.jobstatus'
-])
+angular.module('common.wizard')
 .controller('ImportWizard', function(
     $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore
 ) {

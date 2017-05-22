@@ -509,6 +509,29 @@ html.no-cssmask {
             &:nth-last-child(2) {
                 @include flex-item(1 1 auto);
             }
+            .jobs-nav-gear {
+                float: right;
+                border: 2px #b2b2b2;
+                border-radius: 5px;
+                border-style: solid;
+                margin: 1.4em .2em 0;
+                padding: 0px 6px 0 6px;
+                height: 2.4em;
+                
+                > span {
+                    position: relative;
+                    top: -0.2em;
+                    height: 36px;
+                    background-color: white;
+                    border-radius: 0px;
+                    padding: 11px 0;
+                    width: 22px;
+                    font-size: 1.3em;
+                    font-family: lucida console;
+                    font-weight: bold;
+                    color: #ef6a30;
+                }
+            }
         }
     }
     .page-icon,
