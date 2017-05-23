@@ -214,7 +214,13 @@ public class ModelingServiceExecutor {
             if (!algorithm.getPipelineProperties().isEmpty()) {
                 algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " ");
             }
-            algorithm.setPipelineProperties("featureselectionstep.enabled=true");
+            String[] pipelineProperties = new String[] { //
+                    "featureselectionstep.enabled=true", //
+                    "assignconversionratetoallcategoricalvalues.enabled=true", //
+                    "enumeratedcolumntransformstep.enabled=false", //
+                    "categoricalgroupingstep.enabled=true" //
+            };
+            algorithm.setPipelineProperties(StringUtils.join(pipelineProperties, " "));
         }
     }
 
