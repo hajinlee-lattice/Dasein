@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EngineProgress {
     private Engine engine;
-    private String name;
+    private String name;    // Ingestion name/Transformation pipeline name/Publication name
     private String version;
     private ProgressStatus status;
     private Float progress;
