@@ -22,63 +22,123 @@ Engagement,,Anonymous Engagement Rating,Medium,The level of anonymous engagement
 Engagement,,Anonymous Engagement Rating,High,The level of anonymous engagement.,8937
 Engagement,,Has Opportunity,Yes,Defines an account in terms of the opportunity.,48657
 Engagement,,Has Opportunity,No,Defines an account in terms of the opportunity.,397200
-Product,GN Platinum,GN Platinum: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,9930
-Product,GN Platinum,GN Platinum: Has Purchased,No,A flag that describes whether an account has purchased the product.,28797
-Product,GN Platinum,GN Platinum: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,6951
-Product,GN Platinum,GN Platinum: Total Amt,40000-80000,The total amount (in USD) an account spend on the product.,993
-Product,GN Platinum,GN Platinum: Total Amt,80000-160000,The total amount (in USD) an account spend on the product.,993
-Product,GN Platinum,GN Platinum: Total Amt,160000+,The total amount (in USD) an account spend on the product.,993
-Product,GN Platinum,GN Platinum: Last Mo Trend (%),< 10-20,The spending trend for the product for the last month as compared to the average of the previous 3 months.,6951
-Product,GN Platinum,GN Platinum: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,993
-Product,GN Platinum,GN Platinum: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,993
-Product,GN Platinum,GN Platinum: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,993
-Product,GN Platinum,GN Platinum: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,6951
-Product,GN Platinum,GN Platinum: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
-Product,GN Platinum,GN Platinum: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
-Product,GN Platinum,GN Platinum: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
-Product,GN Platinum,GN Platinum: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,6951
-Product,GN Platinum,GN Platinum: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,993
-Product,GN Platinum,GN Platinum: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,993
-Product,GN Platinum,GN Platinum: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,993
-Product,GN Platinum,GN Platinum: Last Mo Trend ($),< 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",6951
-Product,GN Platinum,GN Platinum: Last Mo Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
-Product,GN Platinum,GN Platinum: Last Mo Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
-Product,GN Platinum,GN Platinum: Last Mo Trend ($),> 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
-Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 80000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1986
-Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
-Product,GN Platinum,GN Platinum: Last Qtr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
-Product,GN Platinum,GN Platinum: Last Qtr Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
-Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 160000+ ,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",993
-Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 80000-160000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
-Product,GN Platinum,GN Platinum: Last Yr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4965
-Product,GN Platinum,GN Platinum: Last Yr Trend ($),> 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",993
-Product,GN Cloud,GN Cloud: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,11916
-Product,GN Cloud,GN Cloud: Has Purchased,No,A flag that describes whether an account has purchased the product.,26811
-Product,GN Cloud,GN Cloud: Total Amt,10000-20000,The total amount (in USD) an account spend on the product.,2979
-Product,GN Cloud,GN Cloud: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,2979
-Product,GN Cloud,GN Cloud: Total Amt,40000-60000,The total amount (in USD) an account spend on the product.,2979
-Product,GN Cloud,GN Cloud: Total Amt,60000+,The total amount (in USD) an account spend on the product.,2979
-Product,GN Cloud,GN Cloud: Last Mo Trend (%),< 10-20 ,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3972
-Product,GN Cloud,GN Cloud: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3972
-Product,GN Cloud,GN Cloud: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,2979
-Product,GN Cloud,GN Cloud: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,993
-Product,GN Cloud,GN Cloud: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3972
-Product,GN Cloud,GN Cloud: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3972
-Product,GN Cloud,GN Cloud: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,2979
-Product,GN Cloud,GN Cloud: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
-Product,GN Cloud,GN Cloud: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,1986
-Product,GN Cloud,GN Cloud: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,1986
-Product,GN Cloud,GN Cloud: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,3972
-Product,GN Cloud,GN Cloud: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,3972
-Product,GN Cloud,GN Cloud: Last Mo Trend ($),< 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3972
-Product,GN Cloud,GN Cloud: Last Mo Trend ($),< 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3972
-Product,GN Cloud,GN Cloud: Last Mo Trend ($),> 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",2979
-Product,GN Cloud,GN Cloud: Last Mo Trend ($),> 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
-Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 20000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
-Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
-Product,GN Cloud,GN Cloud: Last Qtr Trend ($),< 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",2979
-Product,GN Cloud,GN Cloud: Last Qtr Trend ($),> 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
-Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 40000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
-Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
-Product,GN Cloud,GN Cloud: Last Yr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",3972
-Product,GN Cloud,GN Cloud: Last Yr Trend ($),> 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",3972
+Product,Abrasives,Abrasives: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,9930
+Product,Abrasives,Abrasives: Has Purchased,No,A flag that describes whether an account has purchased the product.,28797
+Product,Abrasives,Abrasives: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,6951
+Product,Abrasives,Abrasives: Total Amt,40000-80000,The total amount (in USD) an account spend on the product.,993
+Product,Abrasives,Abrasives: Total Amt,80000-160000,The total amount (in USD) an account spend on the product.,993
+Product,Abrasives,Abrasives: Total Amt,160000+,The total amount (in USD) an account spend on the product.,993
+Product,Abrasives,Abrasives: Last Mo Trend (%),< 10-20,The spending trend for the product for the last month as compared to the average of the previous 3 months.,6951
+Product,Abrasives,Abrasives: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,993
+Product,Abrasives,Abrasives: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,993
+Product,Abrasives,Abrasives: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,993
+Product,Abrasives,Abrasives: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,6951
+Product,Abrasives,Abrasives: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,Abrasives,Abrasives: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,Abrasives,Abrasives: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,Abrasives,Abrasives: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,6951
+Product,Abrasives,Abrasives: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,Abrasives,Abrasives: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,Abrasives,Abrasives: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,Abrasives,Abrasives: Last Mo Trend ($),< 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",6951
+Product,Abrasives,Abrasives: Last Mo Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,Abrasives,Abrasives: Last Mo Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,Abrasives,Abrasives: Last Mo Trend ($),> 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,Abrasives,Abrasives: Last Qtr Trend ($),< 80000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1986
+Product,Abrasives,Abrasives: Last Qtr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,Abrasives,Abrasives: Last Qtr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,Abrasives,Abrasives: Last Qtr Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,Abrasives,Abrasives: Last Yr Trend ($),< 160000+ ,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",993
+Product,Abrasives,Abrasives: Last Yr Trend ($),< 80000-160000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,Abrasives,Abrasives: Last Yr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4965
+Product,Abrasives,Abrasives: Last Yr Trend ($),> 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",993
+Product,Material Handling & Storage,Material Handling & Storage: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,11916
+Product,Material Handling & Storage,Material Handling & Storage: Has Purchased,No,A flag that describes whether an account has purchased the product.,26811
+Product,Material Handling & Storage,Material Handling & Storage: Total Amt,10000-20000,The total amount (in USD) an account spend on the product.,2979
+Product,Material Handling & Storage,Material Handling & Storage: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,2979
+Product,Material Handling & Storage,Material Handling & Storage: Total Amt,40000-60000,The total amount (in USD) an account spend on the product.,2979
+Product,Material Handling & Storage,Material Handling & Storage: Total Amt,60000+,The total amount (in USD) an account spend on the product.,2979
+Product,Material Handling & Storage,Material Handling & Storage: Last Mo Trend (%),< 10-20 ,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,2979
+Product,Material Handling & Storage,Material Handling & Storage: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,993
+Product,Material Handling & Storage,Material Handling & Storage: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,2979
+Product,Material Handling & Storage,Material Handling & Storage: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,Material Handling & Storage,Material Handling & Storage: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,1986
+Product,Material Handling & Storage,Material Handling & Storage: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,1986
+Product,Material Handling & Storage,Material Handling & Storage: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Mo Trend ($),< 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Mo Trend ($),< 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Mo Trend ($),> 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",2979
+Product,Material Handling & Storage,Material Handling & Storage: Last Mo Trend ($),> 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,Material Handling & Storage,Material Handling & Storage: Last Qtr Trend ($),< 20000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Qtr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Qtr Trend ($),< 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",2979
+Product,Material Handling & Storage,Material Handling & Storage: Last Qtr Trend ($),> 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,Material Handling & Storage,Material Handling & Storage: Last Yr Trend ($),< 40000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,Material Handling & Storage,Material Handling & Storage: Last Yr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,Material Handling & Storage,Material Handling & Storage: Last Yr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",3972
+Product,Material Handling & Storage,Material Handling & Storage: Last Yr Trend ($),> 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",3972
+Product,Threading,Threading: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,9930
+Product,Threading,Threading: Has Purchased,No,A flag that describes whether an account has purchased the product.,28797
+Product,Threading,Threading: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,6951
+Product,Threading,Threading: Total Amt,40000-80000,The total amount (in USD) an account spend on the product.,993
+Product,Threading,Threading: Total Amt,80000-160000,The total amount (in USD) an account spend on the product.,993
+Product,Threading,Threading: Total Amt,160000+,The total amount (in USD) an account spend on the product.,993
+Product,Threading,Threading: Last Mo Trend (%),< 10-20,The spending trend for the product for the last month as compared to the average of the previous 3 months.,6951
+Product,Threading,Threading: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,993
+Product,Threading,Threading: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,993
+Product,Threading,Threading: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,993
+Product,Threading,Threading: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,6951
+Product,Threading,Threading: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,Threading,Threading: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,Threading,Threading: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,Threading,Threading: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,6951
+Product,Threading,Threading: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,Threading,Threading: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,Threading,Threading: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,993
+Product,Threading,Threading: Last Mo Trend ($),< 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",6951
+Product,Threading,Threading: Last Mo Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,Threading,Threading: Last Mo Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,Threading,Threading: Last Mo Trend ($),> 40000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,Threading,Threading: Last Qtr Trend ($),< 80000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",1986
+Product,Threading,Threading: Last Qtr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,Threading,Threading: Last Qtr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,Threading,Threading: Last Qtr Trend ($),> 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,Threading,Threading: Last Yr Trend ($),< 160000+ ,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",993
+Product,Threading,Threading: Last Yr Trend ($),< 80000-160000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,Threading,Threading: Last Yr Trend ($),< 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",4965
+Product,Threading,Threading: Last Yr Trend ($),> 40000-80000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",993
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Has Purchased,Yes,A flag that describes whether an account has purchased the product.,11916
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Has Purchased,No,A flag that describes whether an account has purchased the product.,26811
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Total Amt,10000-20000,The total amount (in USD) an account spend on the product.,2979
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Total Amt,20000-40000,The total amount (in USD) an account spend on the product.,2979
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Total Amt,40000-60000,The total amount (in USD) an account spend on the product.,2979
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Total Amt,60000+,The total amount (in USD) an account spend on the product.,2979
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Mo Trend (%),< 10-20 ,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Mo Trend (%),< 10-0,The spending trend for the product for the last month as compared to the average of the previous 3 months.,3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Mo Trend (%),> 0-10,The spending trend for the product for the last month as compared to the average of the previous 3 months.,2979
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Mo Trend (%),> 10-20,The spending trend for the product for the last  month as compared to the average of the previous 3 months.,993
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Qtr Trend (%),< 10-20 ,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Qtr Trend (%),< 10-0,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Qtr Trend (%),> 0-10,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,2979
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Qtr Trend (%),> 10-20,The spending trend for the product for the last quarter as compared to the average of the previous 3 quarters.,993
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Yr Trend (%),< 10-20 ,The spending trend for the product for the last year as compared to the average of the previous three years.,1986
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Yr Trend (%),< 10-0,The spending trend for the product for the last year as compared to the average of the previous three years.,1986
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Yr Trend (%),> 0-10,The spending trend for the product for the last year as compared to the average of the previous three years.,3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Yr Trend (%),> 10-20,The spending trend for the product for the last year as compared to the average of the previous three years.,3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Mo Trend ($),< 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Mo Trend ($),< 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Mo Trend ($),> 1000-5000,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",2979
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Mo Trend ($),> 5000+,"The spending trend, in USD, for the product for the last month as compared to the average of the previous 3 months.",993
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Qtr Trend ($),< 20000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Qtr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Qtr Trend ($),< 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",2979
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Qtr Trend ($),> 1000-10000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 months.",993
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Yr Trend ($),< 40000+,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Yr Trend ($),< 20000-40000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",1986
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Yr Trend ($),< 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",3972
+Product,Indexable Cutting Tools,Indexable Cutting Tools: Last Yr Trend ($),> 10000-20000,"The spending trend, in USD, for the product for the last quarter as compared to the average of the previous 3 years.",3972
