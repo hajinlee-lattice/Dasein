@@ -57,8 +57,8 @@
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-exec</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
