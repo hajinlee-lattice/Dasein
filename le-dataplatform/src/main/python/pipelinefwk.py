@@ -44,7 +44,7 @@ class Pipeline(object):
                 start = t.time()
                 transformed = step.transform(transformed, configMetadata, test)
                 end = t.time()
-                logger.info("Step took %f s." % (end - start))
+                logger.info("Step %s took %f s." % (str(step), (end - start)))
                 modifiedCols = [c[0]['name'] for c in step.getOutputColumns() if c[0]['name'] in transformed.columns.values]
                 if len(modifiedCols) > 0:
                     transformed[modifiedCols] = transformed[modifiedCols].apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))

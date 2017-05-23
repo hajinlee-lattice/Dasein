@@ -1,7 +1,30 @@
 {
   "columnTransformFiles": {
+    "CategoricalGroupingStep": {
+      "KeyWhenSortingByAscending": 6,
+      "Name": "categoricalgroupingstep",
+      "MainClassName": "CategoricalGroupingStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [
+        "Categorical"
+      ],
+      "NamedParameterListToInit": {
+        "groupedFeatures": [],
+        "ldcFeatures": [ "HPAEmailSuffix", "LE_COUNTRY", "LE_INDUSTRY", "LDC_State", "LDC_PrimaryIndustry", "AlexaCategories", "AlexaLanguage" ],
+        "dsCategVarGroupingInfo": "emptyDictionary",
+        "maxNumberUniqueValues": 10,
+        "targetCol": "targetColumn",
+        "categoricalColumns": "categoricalColumns",
+        "params": "params",
+        "thresholdError": 3,
+        "thresholdSigSize": 0.01,
+        "thresholdBinSize": 0.05,
+        "enabled": "false"
+      },
+      "ColumnTransformFilePath": "categoricalgroupingstep.py"
+    },
     "HighNumberUniqueValuesRemovalStep": {
-      "KeyWhenSortingByAscending": 1,
+      "KeyWhenSortingByAscending": 7,
       "Name": "highnumberuniquevaluesremovalstep",
       "MainClassName": "HighNumberUniqueValuesRemovalStep",
       "UniqueColumnTransformName": "",
@@ -15,7 +38,7 @@
       "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
     },
     "PivotStep": {
-      "KeyWhenSortingByAscending": 2,
+      "KeyWhenSortingByAscending": 8,
       "Name": "pivotstep",
       "MainClassName": "PivotStep",
       "UniqueColumnTransformName": "",
@@ -31,7 +54,7 @@
       "ColumnTransformFilePath": "pivotstep.py"
     },
     "EnumeratedColumnTransformStep": {
-      "KeyWhenSortingByAscending": 3,
+      "KeyWhenSortingByAscending": 9,
       "Name": "enumeratedcolumntransformstep",
       "MainClassName": "EnumeratedColumnTransformStep",
       "UniqueColumnTransformName": "",
@@ -42,9 +65,24 @@
         "columns": "categoricalColumns"
       },
       "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
+    },    
+    "AssignConversionRateToAllCategoricalValues":{
+        "KeyWhenSortingByAscending": 9,
+        "Name": "assignconversionratetoallcategoricalvalues",
+        "MainClassName": "AssignConversionRateToAllCategoricalValues",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Categorical"],
+        "NamedParameterListToInit": {
+            "categoricalColumns": "categoricalColumns", 
+            "targetColumn": "targetColumn",
+            "totalPositiveThreshold": 12,
+            "categoricalColumnMapping": "emptyDictionary",
+            "enabled": "false"
+        },
+        "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
     },
     "ColumnTypeConversionStep": {
-      "KeyWhenSortingByAscending": 4,
+      "KeyWhenSortingByAscending": 10,
       "Name": "columntypeconversionstep",
       "MainClassName": "ColumnTypeConversionStep",
       "UniqueColumnTransformName": "",
@@ -55,7 +93,7 @@
       "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "ImputationStep": {
-      "KeyWhenSortingByAscending": 5,
+      "KeyWhenSortingByAscending": 11,
       "Name": "imputationstep",
       "MainClassName": "ImputationStep",
       "UniqueColumnTransformName": "",
@@ -70,7 +108,7 @@
       "ColumnTransformFilePath": "imputationstep.py"
     },
     "FeatureSelectionStep": {
-      "KeyWhenSortingByAscending": 6,
+      "KeyWhenSortingByAscending": 12,
       "Name": "featureselectionstep",
       "MainClassName": "FeatureSelectionStep",
       "UniqueColumnTransformName": "",
@@ -83,7 +121,7 @@
       "ColumnTransformFilePath": "featureselectionstep.py"
     },
     "ExportDataFrameStep": {
-      "KeyWhenSortingByAscending": 7,
+      "KeyWhenSortingByAscending": 13,
       "Name": "exportdfstep",
       "MainClassName": "ExportDataFrameStep",
       "UniqueColumnTransformName": "",
