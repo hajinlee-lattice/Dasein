@@ -101,7 +101,7 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         segment.setSimpleRestriction(getArbitraryRestriction());
         segment = restTemplate.postForObject(String.format("%s/pls/metadatasegments/", getRestAPIHostPort()), segment,
                 MetadataSegment.class);
-//        assertEquals(segment.getAttributeDependencies().size(), 1);
+        assertEquals(segment.getAttributeDependencies().size(), 1);
     }
 
     @SuppressWarnings("unchecked")

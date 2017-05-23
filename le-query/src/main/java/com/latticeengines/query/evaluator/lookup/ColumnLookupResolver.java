@@ -38,7 +38,6 @@ public class ColumnLookupResolver extends LookupResolver {
             }
             Integer numBits = attribute.getNumOfBits();
             if (numBits == null) {
-                // TODO warn
                 return Collections.singletonList(QueryUtils.getColumnPath(table, attribute));
             }
             return Collections.singletonList(Expressions.stringTemplate("({0}>>{1})&{2}",

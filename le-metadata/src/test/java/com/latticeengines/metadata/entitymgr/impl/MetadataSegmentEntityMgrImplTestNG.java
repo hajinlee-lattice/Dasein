@@ -101,8 +101,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
         assertEquals(retrieved.getMetadataSegmentProperties().size(), 2);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumAccounts), 100);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumContacts), 200);
-        // TODO temporary
-        // assertEquals(retrieved.getAttributeDependencies().size(), 1);
+        assertEquals(retrieved.getAttributeDependencies().size(), 1);
     }
 
     @Test(groups = "functional", dependsOnMethods = "createSegment")
