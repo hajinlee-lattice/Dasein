@@ -20,10 +20,11 @@ public class CategoricalBucket extends BucketAlgorithm {
         return CATEGORICAL;
     }
 
-    @JsonProperty("categories")
+    @JsonProperty("cats")
     private List<String> categories;
 
-    @JsonProperty("mapping")
+    // optional
+    @JsonProperty("map")
     private Map<String, List<String>> mapping;
 
     public List<String> getCategories() {

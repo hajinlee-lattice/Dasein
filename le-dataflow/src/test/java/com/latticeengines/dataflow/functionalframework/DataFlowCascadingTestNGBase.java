@@ -1,11 +1,13 @@
 package com.latticeengines.dataflow.functionalframework;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,6 +138,10 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
             if (HdfsUtils.fileExists(yarnConfiguration, AVRO_DIR + "/" + AVRO_INPUT + ".avro")) {
                 sourcePaths.put(AVRO_INPUT, AVRO_DIR + "/" + AVRO_INPUT + ".avro");
             }
+            Map<String, String> extraSourcePaths = extraSourcePaths();
+            extraSourcePaths.forEach((n, p) -> {
+                sourcePaths.put(n, p);
+            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -158,6 +164,10 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected Map<String, String> extraSourcePaths() {
+        return Collections.emptyMap();
     }
 
     protected Table executeDataFlow() {
@@ -276,11 +286,15 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
     }
 
     protected void uploadDataToSharedAvroInput(Object[][] data, List<Pair<String, Class<?>>> columns) {
+        uploadAvro(data, columns, AVRO_INPUT, AVRO_DIR);
+    }
+
+    protected void uploadAvro(Object[][] data, List<Pair<String, Class<?>>> columns, String recordName, String dirPath) {
         Map<String, Class<?>> schemaMap = new HashMap<>();
         for (int i = 0; i < columns.size(); i++) {
             schemaMap.put(columns.get(i).getKey(), columns.get(i).getValue());
         }
-        Schema schema = AvroUtils.constructSchema(AVRO_INPUT, schemaMap);
+        Schema schema = AvroUtils.constructSchema(recordName, schemaMap);
         List<GenericRecord> records = new ArrayList<>();
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         for (Object[] tuple : data) {
@@ -289,12 +303,12 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
             }
             records.add(builder.build());
         }
-        String fileName = AVRO_INPUT + ".avro";
+        String fileName = recordName + ".avro";
         try {
-            if (HdfsUtils.fileExists(yarnConfiguration, AVRO_DIR + "/" + fileName)) {
-                HdfsUtils.rmdir(yarnConfiguration, AVRO_DIR + "/" + fileName);
+            if (HdfsUtils.fileExists(yarnConfiguration, dirPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, dirPath);
             }
-            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, AVRO_DIR + "/" + fileName, records);
+            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records);
         } catch (Exception e) {
             Assert.fail("Failed to upload " + fileName, e);
         }

@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.util.ArrayList;
 import java.util.List;
 
+import cascading.pipe.assembly.MaxBy;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
@@ -31,6 +32,13 @@ public class AggregationOperation extends Operation {
                     new Fields(aggregation.getAggregatedFieldName()), //
                     new Fields(aggregation.getTargetFieldName()));
             targetFieldClass = Long.class;
+            break;
+        case MAX:
+                aggregationPipe = new MaxBy(aggregationPipe, //
+                        Fields.NONE, //
+                        new Fields(aggregation.getAggregatedFieldName()), //
+                        new Fields(aggregation.getTargetFieldName()));
+                targetFieldClass = Long.class;
         default:
             break;
         }

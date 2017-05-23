@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.dataflow.common.BitEncodeUtils;
+import com.latticeengines.datacloud.dataflow.utils.BitEncodeUtils;
 import com.latticeengines.datacloud.dataflow.utils.FileParser;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;

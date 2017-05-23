@@ -19,7 +19,7 @@ public class IntervalBucket extends BucketAlgorithm {
         return INTEVAL;
     }
 
-    @JsonProperty("boundaries")
+    @JsonProperty("bnds")
     private List<Number> boundaries;
 
     public List<Number> getBoundaries() {

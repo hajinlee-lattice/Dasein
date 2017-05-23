@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
+
 import com.google.common.collect.Lists;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -508,6 +510,10 @@ public class Node {
 
     public Table getSourceSchema() {
         return builder.getSourceMetadata(identifier);
+    }
+
+    public Configuration getHadoopConfig() {
+        return builder.getConfig();
     }
 
     public Attribute getSourceAttribute(final InterfaceName interfaceName) {

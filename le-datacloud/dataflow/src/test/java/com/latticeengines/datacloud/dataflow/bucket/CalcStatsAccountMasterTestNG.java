@@ -1,21 +1,15 @@
 package com.latticeengines.datacloud.dataflow.bucket;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
-import com.latticeengines.domain.exposed.datacloud.dataflow.CalculateStatsParameter;
-import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
@@ -31,7 +25,7 @@ public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTes
 
     @Test(groups = "functional")
     public void test() throws Exception {
-        CalculateStatsParameter parameters = getParameters();
+        TransformationFlowParameters parameters = getParameters();
         executeDataFlow(parameters);
         verifyResult();
     }
@@ -43,7 +37,7 @@ public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTes
             String attrName = record.get("AttrName").toString();
             if (attrName.startsWith("TechIndicator")) {
                 String[] bkts = record.get("BktCounts").toString().split("\\|");
-                for(String bkt: bkts) {
+                for (String bkt : bkts) {
                     String[] tokens = bkt.split(":");
                     int bktId = Integer.valueOf(tokens[0]);
                     Assert.assertTrue(bktId >= 0 && bktId < 3, "Found an invalid bkt id " + bktId);
@@ -52,27 +46,9 @@ public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTes
         }
     }
 
-    private CalculateStatsParameter getParameters() {
-        // read encoded attrs
-        InputStream encAttrsIs = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(getDirectory() + File.separator + "config.json");
-        if (encAttrsIs == null) {
-            throw new RuntimeException("Failed ot find resource config.json");
-        }
-        ObjectMapper objectMapper = new ObjectMapper();
-        TypeReference<List<DCEncodedAttr>> typeRef = new TypeReference<List<DCEncodedAttr>>() { };
-        List<DCEncodedAttr> encAttrs;
-        try {
-            encAttrs = objectMapper.readValue(encAttrsIs, typeRef);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse json config.", e);
-        }
-
-        CalculateStatsParameter parameters = new CalculateStatsParameter();
-        parameters.encAttrs = encAttrs;
-        parameters.setBaseTables(Collections.singletonList("AccountMasterBucketed"));
-        parameters.ignoreAttrs = Collections.singletonList("LatticeAccountId");
-
+    private TransformationFlowParameters getParameters() {
+        TransformationFlowParameters parameters = new TransformationFlowParameters();
+        parameters.setBaseTables(Arrays.asList("AccountMasterBucketed", "AccountMasterProfile"));
         return parameters;
     }
 

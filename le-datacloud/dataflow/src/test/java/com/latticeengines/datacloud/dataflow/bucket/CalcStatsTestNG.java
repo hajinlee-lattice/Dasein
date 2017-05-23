@@ -1,22 +1,39 @@
 package com.latticeengines.datacloud.dataflow.bucket;
 
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_BOOLEAN_4;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_CAT_STR;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED_1;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED_2;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_RELAY_INT;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_RELAY_STR;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_RENAMED_ROW_ID;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_BKTS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
-import com.latticeengines.domain.exposed.datacloud.dataflow.CalculateStatsParameter;
+import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
     private static final int ENC_ATTR_1 = 4;
     private static final int ENC_ATTR_2 = 5;
     private static final int ENC_ATTR_3 = 6;
+
+    private static final String PROFILE = "profile";
 
     @Override
     protected String getFlowBeanName() {
@@ -25,7 +42,7 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() throws Exception {
-        CalculateStatsParameter parameters = prepareInput();
+        TransformationFlowParameters parameters = prepareInput();
         executeDataFlow(parameters);
         verifyResult();
     }
@@ -34,14 +51,33 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         List<GenericRecord> records = readOutput();
         for (GenericRecord record : records) {
             System.out.println(record);
+            String attrName = record.get(STATS_ATTR_NAME).toString();
+            long attrCnt = (long) record.get(STATS_ATTR_COUNT);
+            Object attrBktsRaw = record.get(STATS_ATTR_BKTS);
+            String attrBkts = attrBktsRaw == null ? null : attrBktsRaw.toString();
+            if (Arrays.asList(ATTR_ENCODED_1, ATTR_ENCODED_2).contains(attrName)) {
+                Assert.assertEquals(attrCnt, 2L);
+                Assert.assertEquals(attrBkts, "1:2");
+            }
+            if (ATTR_CAT_STR.equals(attrName)) {
+                Assert.assertEquals(attrCnt, 3L);
+                Assert.assertEquals(attrBkts, "1:1|2:1|3:1");
+            }
+            if (ATTR_BOOLEAN_4.equals(attrName)) {
+                Assert.assertEquals(attrCnt, 0);
+                Assert.assertTrue(StringUtils.isBlank(attrBkts));
+            }
+            Assert.assertTrue(attrCnt >= 0);
+            Assert.assertTrue(attrCnt <= 5);
+            Assert.assertNotEquals(attrName, "IgnoreField");
         }
     }
 
-    private CalculateStatsParameter prepareInput() {
+    private TransformationFlowParameters prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
-                Pair.of("RowID", Long.class), //
-                Pair.of("RelayString", String.class), //
-                Pair.of("RelayInteger", Integer.class), //
+                Pair.of(ATTR_RENAMED_ROW_ID, Long.class), //
+                Pair.of(ATTR_RELAY_STR, String.class), //
+                Pair.of(ATTR_RELAY_INT, Integer.class), //
                 Pair.of("IgnoreField", String.class), //
                 Pair.of("EAttr1", Long.class), //
                 Pair.of("EAttr2", Long.class), //
@@ -63,12 +99,18 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         populateYesBits(data);
         uploadDataToSharedAvroInput(data, fields);
 
-        CalculateStatsParameter parameters = new CalculateStatsParameter();
-        parameters.encAttrs = BucketTestUtils.EncodedAttributes();
-        parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
-        parameters.ignoreAttrs = Arrays.asList("RowID", "IgnoreField");
+        List<Pair<String, Class<?>>> fields2 = BucketEncodeUtils.profileCols();
+        Object[][] data2 = BucketTestUtils.profileData();
+        uploadAvro(data2, fields2, PROFILE, "/tmp/profile");
 
+        TransformationFlowParameters parameters = new TransformationFlowParameters();
+        parameters.setBaseTables(Arrays.asList(AVRO_INPUT, PROFILE));
         return parameters;
+    }
+
+    @Override
+    protected Map<String, String> extraSourcePaths() {
+        return Collections.singletonMap(PROFILE, "/tmp/profile/" + PROFILE + ".avro");
     }
 
     private void populateIntervalInt(Object[][] data) {

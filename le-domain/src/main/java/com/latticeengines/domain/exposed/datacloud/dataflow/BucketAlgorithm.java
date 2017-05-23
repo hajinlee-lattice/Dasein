@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 import static com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm.BOOLEAN;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm.CATEGORICAL;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm.CATEGORIZED_INTERVAL;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm.INTEVAL;
 
 import java.io.Serializable;
@@ -15,10 +16,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "algorithm")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "algo")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = CategoricalBucket.class, name = CATEGORICAL),
         @JsonSubTypes.Type(value = IntervalBucket.class, name = INTEVAL),
+        @JsonSubTypes.Type(value = CategorizedIntervalBucket.class, name = CATEGORIZED_INTERVAL),
         @JsonSubTypes.Type(value = BooleanBucket.class, name = BOOLEAN)
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,9 +31,11 @@ public abstract class BucketAlgorithm implements Serializable {
     public static final String INTEVAL = "Interval";
     public static final String BOOLEAN = "Boolean";
 
+    public static final String CATEGORIZED_INTERVAL = "CatInterval";
+
     private List<String> generatedLabels;
 
-    @JsonProperty("algorithm")
+    @JsonProperty("algo")
     public abstract String getAlgorithm();
 
     @JsonIgnore

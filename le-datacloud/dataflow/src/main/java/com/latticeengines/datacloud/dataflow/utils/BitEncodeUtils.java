@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.common;
+package com.latticeengines.datacloud.dataflow.utils;
 
 import java.io.IOException;
 import java.util.ArrayList;

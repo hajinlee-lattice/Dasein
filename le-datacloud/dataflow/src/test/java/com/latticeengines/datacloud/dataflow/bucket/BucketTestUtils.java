@@ -10,8 +10,10 @@ import java.util.Map;
 import org.apache.avro.generic.GenericRecord;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
@@ -19,90 +21,205 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 
 public class BucketTestUtils {
 
-    private static final List<Integer> booleanLowestBits = Arrays.asList(10, 13, 16, 19);
+    static final String ATTR_INTERVAL_INT = "IntervalInt";
+    static final String ATTR_INTERVAL_DBL = "IntervalDouble";
+    static final String ATTR_CAT_STR = "CatString";
+    static final String ATTR_CAT_MAP_STR = "CatMapString";
+
+    static final String ATTR_BOOLEAN_1 = "Boolean1";
+    static final String ATTR_BOOLEAN_2 = "Boolean2";
+    static final String ATTR_BOOLEAN_3 = "Boolean3";
+    static final String ATTR_BOOLEAN_4 = "Boolean4";
+
+    static final String ATTR_ENCODED_1 = "BitEncodeYes";
+    static final String ATTR_ENCODED_2 = "BitEncodeNo";
+
+    static final String ATTR_ENCODED = "Encoded";
+    static final String ATTR_RELAY_STR = "RelayString";
+    static final String ATTR_RELAY_INT = "RelayInteger";
+    static final String ATTR_ROW_ID = "RowID";
+    static final String ATTR_RENAMED_ROW_ID = "RenamedRowId";
+
+    private static final int BOOLEAN_NUM_BITS = 2;
+
+    private static final Map<String, Integer> lowestBit = new HashMap<>();
+    private static final Map<String, Integer> numBits = new HashMap<>();
+    private static final Map<String, Integer> encodeBitPos = new HashMap<>();
+    private static final Map<String, String> encAttrs = new HashMap<>();
+    private static final Map<String, BucketAlgorithm> bktAlgos = new HashMap<>();
+
+    static {
+        lowestBit.put(ATTR_INTERVAL_INT, 0);
+        lowestBit.put(ATTR_INTERVAL_DBL, 10);
+        lowestBit.put(ATTR_CAT_STR, 3);
+        lowestBit.put(ATTR_CAT_MAP_STR, 6);
+        lowestBit.put(ATTR_BOOLEAN_1, 10);
+        lowestBit.put(ATTR_BOOLEAN_2, 13);
+        lowestBit.put(ATTR_BOOLEAN_3, 16);
+        lowestBit.put(ATTR_BOOLEAN_4, 19);
+        lowestBit.put(ATTR_ENCODED_1, 4);
+        lowestBit.put(ATTR_ENCODED_2, 14);
+
+        numBits.put(ATTR_INTERVAL_INT, 3);
+        numBits.put(ATTR_INTERVAL_DBL, 3);
+        numBits.put(ATTR_CAT_STR, 3);
+        numBits.put(ATTR_CAT_MAP_STR, 3);
+        numBits.put(ATTR_BOOLEAN_1, BOOLEAN_NUM_BITS);
+        numBits.put(ATTR_BOOLEAN_2, BOOLEAN_NUM_BITS);
+        numBits.put(ATTR_BOOLEAN_3, BOOLEAN_NUM_BITS);
+        numBits.put(ATTR_BOOLEAN_4, BOOLEAN_NUM_BITS);
+        numBits.put(ATTR_ENCODED_1, BOOLEAN_NUM_BITS);
+        numBits.put(ATTR_ENCODED_2, BOOLEAN_NUM_BITS);
+
+        encodeBitPos.put(ATTR_ENCODED_1, 3);
+        encodeBitPos.put(ATTR_ENCODED_2, 1026);
+
+        encAttrs.put(ATTR_INTERVAL_INT, "EAttr1");
+        encAttrs.put(ATTR_INTERVAL_DBL, "EAttr1");
+        encAttrs.put(ATTR_CAT_STR, "EAttr2");
+        encAttrs.put(ATTR_CAT_MAP_STR, "EAttr2");
+        encAttrs.put(ATTR_BOOLEAN_1, "EAttr2");
+        encAttrs.put(ATTR_BOOLEAN_2, "EAttr2");
+        encAttrs.put(ATTR_BOOLEAN_3, "EAttr2");
+        encAttrs.put(ATTR_BOOLEAN_4, "EAttr3");
+        encAttrs.put(ATTR_ENCODED_1, "EAttr3");
+        encAttrs.put(ATTR_ENCODED_2, "EAttr3");
+
+        bktAlgos.put(ATTR_INTERVAL_INT, intervalBucket());
+        bktAlgos.put(ATTR_INTERVAL_DBL, intervalBucket());
+        bktAlgos.put(ATTR_CAT_STR, categoricalBucket());
+        bktAlgos.put(ATTR_CAT_MAP_STR, mapCateforicalBucket());
+        bktAlgos.put(ATTR_BOOLEAN_1, new BooleanBucket());
+        bktAlgos.put(ATTR_BOOLEAN_2, new BooleanBucket());
+        bktAlgos.put(ATTR_BOOLEAN_3, new BooleanBucket());
+        bktAlgos.put(ATTR_BOOLEAN_4, new BooleanBucket());
+        bktAlgos.put(ATTR_ENCODED_1, new BooleanBucket());
+        bktAlgos.put(ATTR_ENCODED_2, new BooleanBucket());
+    }
+
+    static Object[][] profileData() {
+        return new Object[][] { //
+                relayAttr(ATTR_RENAMED_ROW_ID, ATTR_ROW_ID), //
+                relayAttr(ATTR_RELAY_STR, ATTR_RELAY_STR), //
+                relayAttr(ATTR_RELAY_INT, ATTR_RELAY_INT), //
+                bktAttr(ATTR_INTERVAL_INT), //
+                bktAttr(ATTR_INTERVAL_DBL), //
+                bktAttr(ATTR_CAT_STR), //
+                bktAttr(ATTR_CAT_MAP_STR), //
+                bktAttr(ATTR_BOOLEAN_1), //
+                bktAttr(ATTR_BOOLEAN_2), //
+                bktAttr(ATTR_BOOLEAN_3), //
+                bktAttr(ATTR_BOOLEAN_4), //
+                bktAttr(ATTR_ENCODED_1), //
+                bktAttr(ATTR_ENCODED_2) //
+        };
+    }
+
+    private static Object[] relayAttr(String attrName, String srcAttr) {
+        Object[] data = new Object[7];
+        data[0] = attrName;
+        data[1] = srcAttr;
+        if (ATTR_RELAY_INT.equals(attrName)) {
+            data[6] = JsonUtils.serialize(intervalBucket());
+        }
+        return data;
+    }
+
+    private static Object[] bktAttr(String attrName) {
+        Object[] data = new Object[7];
+        data[0] = attrName;
+        data[1] = attrName;
+        data[2] = attrName.startsWith("BitEncode") ? JsonUtils.serialize(bitDecodeStrategy(encodeBitPos.get(attrName)))
+                : null;
+        data[3] = encAttrs.get(attrName);
+        data[4] = lowestBit.get(attrName);
+        data[5] = numBits.get(attrName);
+        data[6] = JsonUtils.serialize(bktAlgos.get(attrName));
+        return data;
+    }
 
     static List<DCEncodedAttr> EncodedAttributes() {
         // construct encoded attrs
         DCEncodedAttr attr1 = new DCEncodedAttr("EAttr1");
-
-        DCBucketedAttr bktAttr11 = new DCBucketedAttr("IntervalInt", 0, 3);
-        IntervalBucket intervalBucket = new IntervalBucket();
-        intervalBucket.setBoundaries(Arrays.asList(0, 10, 100));
-        bktAttr11.setBucketAlgo(intervalBucket);
+        DCBucketedAttr bktAttr11 = newBktAttr(ATTR_INTERVAL_INT);
         attr1.addBktAttr(bktAttr11);
-
-        DCBucketedAttr bktAttr12 = new DCBucketedAttr("IntervalDouble", 10, 3);
-        bktAttr12.setBucketAlgo(intervalBucket);
+        DCBucketedAttr bktAttr12 = newBktAttr(ATTR_INTERVAL_DBL);
         attr1.addBktAttr(bktAttr12);
 
         DCEncodedAttr attr2 = new DCEncodedAttr("EAttr2");
 
-        DCBucketedAttr bktAttr21 = new DCBucketedAttr("CatString", 3, 3);
-        CategoricalBucket categoricalBucket1 = new CategoricalBucket();
-        categoricalBucket1.setCategories(Arrays.asList("Value1", "Value2", "Value3"));
-        bktAttr21.setBucketAlgo(categoricalBucket1);
+        DCBucketedAttr bktAttr21 = newBktAttr(ATTR_CAT_STR);
         attr2.addBktAttr(bktAttr21);
-
-        DCBucketedAttr bktAttr22 = new DCBucketedAttr("CatMapString", 6, 3);
-        CategoricalBucket categoricalBucket2 = new CategoricalBucket();
-        categoricalBucket2.setCategories(Arrays.asList("Group1", "Group2", "Group3"));
-        Map<String, List<String>> mapping = new HashMap<>();
-        mapping.put("Group1", Arrays.asList("Group1A", "Group1B"));
-        mapping.put("Group2", Arrays.asList("Group2A", "Group2B"));
-        mapping.put("Group3", Arrays.asList("Group3A", "Group3B"));
-        categoricalBucket2.setMapping(mapping);
-        bktAttr22.setBucketAlgo(categoricalBucket2);
+        DCBucketedAttr bktAttr22 = newBktAttr(ATTR_CAT_MAP_STR);
         attr2.addBktAttr(bktAttr22);
-
-        DCBucketedAttr bktAttr23 = new DCBucketedAttr("Boolean1", booleanLowestBits.get(0), 3);
-        BooleanBucket booleanBucket = new BooleanBucket();
-        bktAttr23.setBucketAlgo(booleanBucket);
+        DCBucketedAttr bktAttr23 = newBktAttr(ATTR_BOOLEAN_1);
         attr2.addBktAttr(bktAttr23);
-
-        DCBucketedAttr bktAttr24 = new DCBucketedAttr("Boolean2", booleanLowestBits.get(1), 3);
-        bktAttr24.setBucketAlgo(booleanBucket);
+        DCBucketedAttr bktAttr24 = newBktAttr(ATTR_BOOLEAN_2);
         attr2.addBktAttr(bktAttr24);
-
-        DCBucketedAttr bktAttr25 = new DCBucketedAttr("Boolean3", booleanLowestBits.get(2), 3);
-        bktAttr25.setBucketAlgo(booleanBucket);
+        DCBucketedAttr bktAttr25 = newBktAttr(ATTR_BOOLEAN_3);
         attr2.addBktAttr(bktAttr25);
-
-        DCBucketedAttr bktAttr26 = new DCBucketedAttr("Boolean4", booleanLowestBits.get(3), 3);
-        bktAttr26.setBucketAlgo(booleanBucket);
+        DCBucketedAttr bktAttr26 = newBktAttr(ATTR_BOOLEAN_4);
         attr2.addBktAttr(bktAttr26);
 
         DCEncodedAttr attr3 = new DCEncodedAttr("EAttr3");
-
-        DCBucketedAttr bktAttr31 = new DCBucketedAttr("BitEncodeYes", 4, 2);
-        bktAttr31.setBucketAlgo(booleanBucket);
-        BitDecodeStrategy decodeStrategy1 = new BitDecodeStrategy();
-        decodeStrategy1.setBitInterpretation(BOOLEAN_YESNO);
-        decodeStrategy1.setBitPosition(3);
-        decodeStrategy1.setEncodedColumn("Encoded");
+        DCBucketedAttr bktAttr31 = newBktAttr(ATTR_ENCODED_1);
+        BitDecodeStrategy decodeStrategy1 = bitDecodeStrategy(3);
         bktAttr31.setDecodedStrategy(decodeStrategy1);
         attr3.addBktAttr(bktAttr31);
-
-        DCBucketedAttr bktAttr32 = new DCBucketedAttr("BitEncodeNo", 14, 2);
-        bktAttr32.setBucketAlgo(booleanBucket);
-        BitDecodeStrategy decodeStrategy2 = new BitDecodeStrategy();
-        decodeStrategy2.setBitInterpretation(BOOLEAN_YESNO);
-        decodeStrategy2.setBitPosition(1026);
-        decodeStrategy2.setEncodedColumn("Encoded");
+        DCBucketedAttr bktAttr32 = newBktAttr(ATTR_ENCODED_2);
+        BitDecodeStrategy decodeStrategy2 = bitDecodeStrategy(1026);
         bktAttr32.setDecodedStrategy(decodeStrategy2);
         attr3.addBktAttr(bktAttr32);
 
         return Arrays.asList(attr1, attr2, attr3);
     }
 
+    private static DCBucketedAttr newBktAttr(String attrName) {
+        DCBucketedAttr bktAttr = new DCBucketedAttr(attrName, attrName, lowestBit.get(attrName), numBits.get(attrName));
+        bktAttr.setBucketAlgo(bktAlgos.get(attrName));
+        return bktAttr;
+    }
+
+    private static IntervalBucket intervalBucket() {
+        IntervalBucket intervalBucket = new IntervalBucket();
+        intervalBucket.setBoundaries(Arrays.asList(0, 10, 100));
+        return intervalBucket;
+    }
+
+    private static CategoricalBucket categoricalBucket() {
+        CategoricalBucket categoricalBucket = new CategoricalBucket();
+        categoricalBucket.setCategories(Arrays.asList("Value1", "Value2", "Value3"));
+        return categoricalBucket;
+    }
+
+    private static CategoricalBucket mapCateforicalBucket() {
+        CategoricalBucket categoricalBucket = new CategoricalBucket();
+        categoricalBucket.setCategories(Arrays.asList("Group1", "Group2", "Group3"));
+        Map<String, List<String>> mapping = new HashMap<>();
+        mapping.put("Group1", Arrays.asList("Group1A", "Group1B"));
+        mapping.put("Group2", Arrays.asList("Group2A", "Group2B"));
+        mapping.put("Group3", Arrays.asList("Group3A", "Group3B"));
+        categoricalBucket.setMapping(mapping);
+        return categoricalBucket;
+    }
+
+    private static BitDecodeStrategy bitDecodeStrategy(int bitPos) {
+        BitDecodeStrategy decodeStrategy = new BitDecodeStrategy();
+        decodeStrategy.setBitInterpretation(BOOLEAN_YESNO);
+        decodeStrategy.setBitPosition(bitPos);
+        decodeStrategy.setEncodedColumn(ATTR_ENCODED);
+        return decodeStrategy;
+    }
+
     static long setIntervalInt(long result, Integer value) {
-        return setInternval(result, value, 0 ,3);
+        return setInterval(result, value, lowestBit.get(ATTR_INTERVAL_INT), numBits.get(ATTR_INTERVAL_INT));
     }
 
     static long setIntervalDouble(long result, Double value) {
-        return setInternval(result, value, 10, 3);
+        return setInterval(result, value, lowestBit.get(ATTR_INTERVAL_DBL), numBits.get(ATTR_INTERVAL_DBL));
     }
 
-    private static <T> long setInternval(long result, T value, int lowestBit, int numBits) {
+    private static <T> long setInterval(long result, T value, int lowestBit, int numBits) {
         int bucket = 0;
         if (value != null) {
             double number = Double.valueOf(value.toString());
@@ -126,39 +243,44 @@ public class BucketTestUtils {
         int bucket = 0;
         if (value != null) {
             switch (value) {
-                case "Value1":
-                    bucket = 1;
-                    break;
-                case "Value2":
-                    bucket = 2;
-                    break;
-                case "Value3":
-                    bucket = 3;
-                    break;
+            case "Value1":
+                bucket = 1;
+                break;
+            case "Value2":
+                bucket = 2;
+                break;
+            case "Value3":
+                bucket = 3;
+                break;
             }
         }
-        return BitCodecUtils.setBits(result, 3, 3, bucket);
+        return BitCodecUtils.setBits(result, lowestBit.get(ATTR_CAT_STR), numBits.get(ATTR_CAT_STR), bucket);
     }
 
     static long setCatMapString(long result, String value) {
         int bucket = 0;
         if (value != null) {
             switch (value.charAt(5)) {
-                case '1':
-                    bucket = 1;
-                    break;
-                case '2':
-                    bucket = 2;
-                    break;
-                case '3':
-                    bucket = 3;
-                    break;
+            case '1':
+                bucket = 1;
+                break;
+            case '2':
+                bucket = 2;
+                break;
+            case '3':
+                bucket = 3;
+                break;
             }
         }
-        return BitCodecUtils.setBits(result, 6, 3, bucket);
+        return BitCodecUtils.setBits(result, lowestBit.get(ATTR_CAT_MAP_STR), numBits.get(ATTR_CAT_MAP_STR), bucket);
     }
 
     static long setBooleans(long result, Boolean[] booleans) {
+        List<Integer> booleanLowestBits = Arrays.asList( //
+                lowestBit.get(ATTR_BOOLEAN_1), //
+                lowestBit.get(ATTR_BOOLEAN_2), //
+                lowestBit.get(ATTR_BOOLEAN_3), //
+                lowestBit.get(ATTR_BOOLEAN_4));
         for (int i = 0; i < booleanLowestBits.size(); i++) {
             Boolean value = booleans[i];
             result = setBooleanBit(result, booleanLowestBits.get(i), value);
@@ -169,72 +291,26 @@ public class BucketTestUtils {
     private static long setBooleanBit(long result, int lowestBit, Boolean value) {
         int bucket = 0;
         if (value != null) {
-            bucket = value ? 1: 2;
+            bucket = value ? 1 : 2;
         }
-        return BitCodecUtils.setBits(result, lowestBit, 2, bucket);
+        return BitCodecUtils.setBits(result, lowestBit, BOOLEAN_NUM_BITS, bucket);
     }
 
     static long setYesBits(long result, int[] bits) {
-        for (int b: bits) {
-            switch (b) {
-                case 3:
-                    result = setBooleanBit(result, 4, true);
-                    break;
-                case 1026:
-                    result = setBooleanBit(result, 14, true);
+        for (int b : bits) {
+            if (b == encodeBitPos.get(ATTR_ENCODED_1)) {
+                result = setBooleanBit(result, lowestBit.get(ATTR_ENCODED_1), true);
+            }
+            if (b == encodeBitPos.get(ATTR_ENCODED_2)) {
+                result = setBooleanBit(result, lowestBit.get(ATTR_ENCODED_2), true);
             }
         }
         return result;
     }
 
-    static int getIntervalIntBkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr1");
-        return BitCodecUtils.getBits(encoded, 0, 3);
-    }
-
-    static int getIntervalDlbBkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr1");
-        return BitCodecUtils.getBits(encoded, 10, 3);
-    }
-
-    static int getCatStringBkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr2");
-        return BitCodecUtils.getBits(encoded, 3, 3);
-    }
-
-    static int getCatMapStringBkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr2");
-        return BitCodecUtils.getBits(encoded, 6, 3);
-    }
-
-    static int getBoolean1Bkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr2");
-        return BitCodecUtils.getBits(encoded, 10, 3);
-    }
-
-    static int getBoolean2Bkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr2");
-        return BitCodecUtils.getBits(encoded, 13, 3);
-    }
-
-    static int getBoolean3Bkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr2");
-        return BitCodecUtils.getBits(encoded, 16, 3);
-    }
-
-    static int getBoolean4Bkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr2");
-        return BitCodecUtils.getBits(encoded, 19, 3);
-    }
-
-    static int getBitEncodeYesBkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr3");
-        return BitCodecUtils.getBits(encoded, 4, 2);
-    }
-
-    static int getBitEncodeNoBkt(GenericRecord record) {
-        long encoded = (Long) record.get("EAttr3");
-        return BitCodecUtils.getBits(encoded, 14, 2);
+    static int getBkt(GenericRecord record, String attrName) {
+        long encoded = (long) record.get(encAttrs.get(attrName));
+        return BitCodecUtils.getBits(encoded, lowestBit.get(attrName), numBits.get(attrName));
     }
 
 }

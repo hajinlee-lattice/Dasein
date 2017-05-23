@@ -18,4 +18,16 @@ public final class DataCloudConstants {
     public static final String ATTR_REV_RANGE = "LE_REVENUE_RANGE";
     public static final String ATTR_NUM_LOC_RANGE = "LE_NUMBER_OF_LOCATIONS";
     public static final String BUCKETED_ACCOUNT_MASTER_TABLE_NAME = "AccountMasterBucketed";
+
+    public static final String PROFILE_ATTR_ATTRNAME = "AttrName";
+    public static final String PROFILE_ATTR_STCATTR = "SrcAttr";
+    public static final String PROFILE_ATTR_DECSTRAT = "DecodeStrategy";
+    public static final String PROFILE_ATTR_ENCATTR = "EncAttr";
+    public static final String PROFILE_ATTR_LOWESTBIT = "LowestBit";
+    public static final String PROFILE_ATTR_NUMBITS = "NumBits";
+    public static final String PROFILE_ATTR_BKTALGO = "BktAlgo";
+
+    public static final String STATS_ATTR_NAME = "AttrName";
+    public static final String STATS_ATTR_COUNT = "AttrCount";
+    public static final String STATS_ATTR_BKTS = "BktCounts";
 }

@@ -27,8 +27,6 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
 
     private final String bktIdField;
     private final String bktCntField;
-    private final String bktsField;
-    private final String cntField;
     private final List<String> grpByFields;
 
     private Integer bktIdArgPos;
@@ -41,8 +39,6 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
         this.grpByFields = grpByFields;
         this.bktIdField = bktIdField;
         this.bktCntField = bktCntField;
-        this.bktsField = bktsField;
-        this.cntField = cntField;
     }
 
     private static Fields generateFieldDeclaration(List<String> grpByFields, String cntField, String bktsField) {

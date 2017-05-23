@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -31,21 +32,25 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
+
 public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase {
 
     private static final Log log = LogFactory.getLog(AccountMasterBucketTestNG.class);
+
+    private static final String AM_PROFILE = "AccountMasterProfile";
 
     @Autowired
     private AccountMaster accountMaster;
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() throws Exception {
-        uploadBaseSourceFile(accountMaster, "AMBucketTest_AM", baseSourceVersion);
+        uploadBaseSourceFile(accountMaster.getSourceName(), "AMBucketTest_AM", baseSourceVersion);
+        uploadBaseSourceFile(AM_PROFILE, "AMBucketTest_AMProfile", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
         confirmResultFile(progress);
-        verifyFileSplitting();
+        verifySort();
         verifyStats();
         verifyAvsc();
         cleanupProgressTables();
@@ -69,13 +74,15 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             configuration.setVersion(targetVersion);
             // -----------
             TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = Collections.singletonList(accountMaster.getSourceName());
+            List<String> baseSources = Arrays.asList(accountMaster.getSourceName(), AM_PROFILE);
             step1.setBaseSources(baseSources);
             step1.setTransformer(SourceBucketer.TRANSFORMER_NAME);
             step1.setConfiguration("{}");
+//            step1.setTargetSource(getTargetSourceName());
             // -----------
             TransformationStepConfig step2 = new TransformationStepConfig();
             step2.setInputSteps(Collections.singletonList(0));
+            step2.setBaseSources(Collections.singletonList(AM_PROFILE));
             step2.setTransformer(StatsCalculator.TRANSFORMER_NAME);
             step2.setConfiguration("{}");
             step2.setTargetSource("AccountMasterBucketedStats");
@@ -128,7 +135,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         return JsonUtils.serialize(config);
     }
 
-    private void verifyFileSplitting() throws IOException {
+    private void verifySort() throws IOException {
         String resultDir = getPathForResult();
         List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, resultDir + "/*.avro");
         long maxInLastFile = Integer.MIN_VALUE;
@@ -159,7 +166,9 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         for (JsonNode attr : attrs) {
             if (attr.get("name").asText().equals("EAttr001")) {
                 System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(attr));
-                return;
+            }
+            if (attr.get("name").asText().equals("EAttr100")) {
+                System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(attr));
             }
         }
     }

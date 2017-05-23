@@ -85,7 +85,7 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
                 if (!colsToDecode.containsKey(codeBookKey)) {
                     colsToDecode.put(codeBookKey, new ArrayList<>());
                 }
-                colsToDecode.get(codeBookKey).add(bktAttr.getNominalAttr());
+                colsToDecode.get(codeBookKey).add(bktAttr.resolveSourceAttr());
             }
         }
         return colsToDecode;
@@ -126,11 +126,10 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
             int bktIdx;
             if (decodeStrategy == null) {
                 // simple field
-                String srcArg = bktAttr.getNominalAttr();
-                Object value = arguments.getObject(argPosMap.get(srcArg));
+                Object value = arguments.getObject(argPosMap.get(bktAttr.resolveSourceAttr()));
                 bktIdx = bucket(value, algo);
             } else {
-                bktIdx = bucket(decodedValues.get(bktAttr.getNominalAttr()), algo);
+                bktIdx = bucket(decodedValues.get(bktAttr.resolveSourceAttr()), algo);
             }
             encoded = BitCodecUtils.setBits(encoded, lowestBit, numBits, bktIdx);
         }

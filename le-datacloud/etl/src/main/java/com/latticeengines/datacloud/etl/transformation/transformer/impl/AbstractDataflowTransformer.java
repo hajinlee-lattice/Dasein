@@ -47,6 +47,9 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
+    @Autowired
+    protected HdfsPathBuilder hdfsPathBuilder;
+
     protected abstract String getDataFlowBeanName();
 
     @SuppressWarnings("unchecked")
@@ -141,7 +144,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
                 }
                 versionList.add(baseSourceVersions.get(i));
             }
-            preDataFlowProcessing(workflowDir, parameters, configuration);
+            preDataFlowProcessing(step, workflowDir, parameters, configuration);
             Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);
             step.setCount(result.getCount());
@@ -178,6 +181,11 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         }
     }
 
+    @Override
+    protected boolean validateConfig(T config, List<String> sourceNames) {
+        return true;
+    }
+
     protected boolean needBaseAvsc() {
         return false;
     }
@@ -186,8 +194,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return null;
     }
 
-    protected void preDataFlowProcessing(String workflowDir, P paramters, T configuration) {}
+    protected void preDataFlowProcessing(TransformStep step, String workflowDir, P parameters, T configuration) {}
 
-    protected void postDataFlowProcessing(String workflowDir, P paramters, T configuration) {}
+    protected void postDataFlowProcessing(String workflowDir, P parameters, T configuration) {}
 
 }

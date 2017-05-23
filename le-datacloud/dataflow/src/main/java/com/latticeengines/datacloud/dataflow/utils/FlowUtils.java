@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.common;
+package com.latticeengines.datacloud.dataflow.utils;
 
 import java.util.HashSet;
 import java.util.List;

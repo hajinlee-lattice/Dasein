@@ -130,6 +130,28 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 
+    protected void uploadBaseSourceFile(String baseSource, String baseSourceFile, String baseSourceVersion) {
+        InputStream baseSourceStream = null;
+        String targetPath = null;
+        String successPath = null;
+        baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile + ".avro");
+        targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro")
+                .toString();
+        successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
+                .toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetPath);
+            }
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseSourceStream, targetPath);
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
+
     protected void uploadBaseSourceData(String baseSource, String baseSourceVersion,
                                         List<Pair<String, Class<?>>> schema, Object[][] data) {
         String targetDir = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion)

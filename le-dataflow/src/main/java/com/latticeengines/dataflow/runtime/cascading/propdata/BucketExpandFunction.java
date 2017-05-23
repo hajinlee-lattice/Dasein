@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
@@ -20,18 +21,17 @@ public class BucketExpandFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 2798963376075410999L;
 
-    private final Map<String, Integer> attrIdMap;
     private final List<DCEncodedAttr> encodedAttrs;
+    private final Set<String> excludedAttrs;
 
-    private final Map<Integer, Integer> argIdToAttrIdMap = new HashMap<>();
     private final Map<Integer, DCEncodedAttr> encAttrArgPos = new HashMap<>();
 
-    // expand a row into multiple records of (attrId, bktId)
-    public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Map<String, Integer> attrIdMap, String attrIdField,
+    // expand a row into multiple records of (attrName, bktId)
+    public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Set<String> excludedAttrs, String attrNameField,
             String bktIdField) {
-        super(new Fields(attrIdField, bktIdField));
+        super(new Fields(attrNameField, bktIdField));
         this.encodedAttrs = encodedAttrs;
-        this.attrIdMap = attrIdMap;
+        this.excludedAttrs = excludedAttrs;
     }
 
     @Override
@@ -42,43 +42,31 @@ public class BucketExpandFunction extends BaseOperation implements Function {
     }
 
     private void expandArguments(TupleEntry arguments, FunctionCall functionCall) {
+        Fields fields = arguments.getFields();
         for (int i = 0; i < arguments.size(); i++) {
             Object value = arguments.getObject(i);
-            if (argIdToAttrIdMap.containsKey(i)) {
-                // normal field
-                int attrId = argIdToAttrIdMap.get(i);
-                if (value != null) {
-                    Tuple tuple = new Tuple(attrId, 1);
-                    functionCall.getOutputCollector().add(tuple);
-                }
-            } else if (encAttrArgPos.containsKey(i)) {
+            String attrName = (String) fields.get(i);
+            if (encAttrArgPos.containsKey(i)) {
                 // encoded field
                 DCEncodedAttr encAttr = encAttrArgPos.get(i);
                 for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
-                    int attrId = attrIdMap.get(bktAttr.getNominalAttr());
                     int bktId = BitCodecUtils.getBits((long) value, bktAttr.getLowestBit(), bktAttr.getNumBits());
                     if (bktId > 0) {
-                        Tuple tuple = new Tuple(attrId, bktId);
+                        Tuple tuple = new Tuple(bktAttr.getNominalAttr(), bktId);
                         functionCall.getOutputCollector().add(tuple);
                     }
+                }
+            } else if (!excludedAttrs.contains(attrName)) {
+                // normal field
+                if (value != null) {
+                    Tuple tuple = new Tuple(attrName, 1);
+                    functionCall.getOutputCollector().add(tuple);
                 }
             }
         }
     }
 
     private void initArgPosMap(TupleEntry arguments) {
-        if (argIdToAttrIdMap.isEmpty()) {
-            Map<Integer, Integer> map = new HashMap<>();
-            for (int i = 0; i < arguments.size(); i++) {
-                String fieldName = (String) arguments.getFields().get(i);
-                if (attrIdMap.containsKey(fieldName)) {
-                    map.put(i, attrIdMap.get(fieldName));
-                }
-            }
-            synchronized (argIdToAttrIdMap) {
-                argIdToAttrIdMap.putAll(map);
-            }
-        }
         if (encAttrArgPos.isEmpty()) {
             Map<Integer, DCEncodedAttr> map2 = new HashMap<>();
             for (int i = 0; i < arguments.size(); i++) {

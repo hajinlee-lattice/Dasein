@@ -4,30 +4,28 @@ import static com.latticeengines.datacloud.etl.transformation.transformer.impl.S
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang.StringUtils;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.BucketEncode;
+import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
@@ -43,9 +41,6 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     private static final Log log = LogFactory.getLog(SourceBucketer.class);
 
     public static final String TRANSFORMER_NAME = "sourceBucketer";
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -71,20 +66,15 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     }
 
     @Override
-    protected void updateParameters(BucketEncodeParameters parameters, Source[] baseTemplates, Source targetTemplate,
-            BucketEncodeConfig config) {
-        // TODO: hook up with API configurations, for now hard coded
-        // AccountMaster fake bucketing
-        parameters.encAttrs = readConfigJson();
-        parameters.excludeAttrs = excludeAttrs();
-        // legacy code just to rename LatticeID to LatticeAccountId
-        parameters.rowIdField = "LatticeID";
-        parameters.renameRowIdField = "LatticeAccountId";
-    }
-
-    @Override
-    protected boolean validateConfig(BucketEncodeConfig config, List<String> sourceNames) {
-        return true;
+    protected void preDataFlowProcessing(TransformStep step, String workflowDir, BucketEncodeParameters parameters,
+            BucketEncodeConfig configuration) {
+        Source profileSource = step.getBaseSources()[1];
+        String profileVersion = step.getBaseVersions().get(1);
+        String avroDir = hdfsPathBuilder.constructSnapshotDir(profileSource.getSourceName(), profileVersion).toString();
+        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
+        parameters.encAttrs = BucketEncodeUtils.encodedAttrs(records);
+        parameters.retainAttrs = BucketEncodeUtils.retainFields(records);
+        parameters.renameFields = BucketEncodeUtils.renameFields(records);
     }
 
     @Override
@@ -130,52 +120,15 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
             String encAttrName = encAtr.getEncAttr();
             List<BucketedAttribute> bktAttrList = new ArrayList<>();
             for (DCBucketedAttr bktAttr : encAtr.getBktAttrs()) {
+                bktAttr.setBuckets(bktAttr.getBucketAlgo().generateLabels());
                 bktAttr.setDecodedStrategy(null);
                 bktAttr.setBucketAlgo(null);
+                bktAttr.setSourceAttr(null);
                 bktAttrList.add(bktAttr);
             }
             map.put(encAttrName, bktAttrList);
         }
         return map;
-    }
-
-    // TODO: to be removed and replaced by avro table driven configuration
-    private List<DCEncodedAttr> readConfigJson() {
-        // read encoded attrs
-        InputStream encAttrsIs = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.json");
-        if (encAttrsIs == null) {
-            throw new RuntimeException("Failed ot find resource config.json");
-        }
-        ObjectMapper objectMapper = new ObjectMapper();
-        TypeReference<List<DCEncodedAttr>> typeRef = new TypeReference<List<DCEncodedAttr>>() {};
-        List<DCEncodedAttr> encAttrs;
-        try {
-            encAttrs = objectMapper.readValue(encAttrsIs, typeRef);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse json config.", e);
-        }
-        return encAttrs;
-    }
-
-
-    private List<String> excludeAttrs() {
-        // exclude fields
-        List<String> excludeAttrs = new ArrayList<>();
-
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("exclude.txt");
-        if (is == null) {
-            throw new RuntimeException("Cannot find resource PublicDomains.txt");
-        }
-        Scanner scanner = new Scanner(is);
-
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            if (StringUtils.isNotEmpty(line)) {
-                excludeAttrs.add(line);
-            }
-        }
-        scanner.close();
-        return excludeAttrs;
     }
 
 }

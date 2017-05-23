@@ -4,12 +4,9 @@ import static com.latticeengines.datacloud.dataflow.transformation.BucketEncode.
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -38,57 +35,21 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
 
     @Override
     public Node construct(BucketEncodeParameters parameters) {
-        Node am = addSource(parameters.getBaseTables().get(0));
+        Node source = addSource(parameters.getBaseTables().get(0));
 
-        // rename row id column
-        // this is legacy code, just to rename LatticeId to LatticeAccountId
-        if (StringUtils.isNotBlank(parameters.rowIdField) && StringUtils.isNotBlank(parameters.renameRowIdField)) {
-            am = am.rename(new FieldList(parameters.rowIdField), new FieldList(parameters.renameRowIdField));
-        }
+        // handle exclude and rename fields
+        List<String> toDiscard = new ArrayList<>(source.getFieldNames());
+        toDiscard.removeAll(parameters.retainAttrs);
+        source = source.discard(new FieldList(toDiscard));
 
-        // handle exclude fields
-        List<String> excludeFields = parameters.excludeAttrs;
-        if (excludeFields != null) {
-            excludeFields.retainAll(am.getFieldNames());
-            if (!excludeFields.isEmpty()){
-                am = am.discard(new FieldList(excludeFields));
-                am = am.retain(new FieldList(am.getFieldNames()));
-            }
-        }
+        List<String> oldFields = new ArrayList<>(parameters.renameFields.keySet());
+        List<String> newFields = new ArrayList<>();
+        oldFields.forEach(f -> newFields.add(parameters.renameFields.get(f)));
+        source = source.rename(new FieldList(oldFields), new FieldList(newFields));
 
         // handle encoded fields
-        Node encoded = processEncodedFields(am, parameters.encAttrs);
-        List<String> discardFields = findDiscardFields(am.getFieldNames(), parameters.encAttrs);
-        encoded = encoded.discard(new FieldList(discardFields));
+        Node encoded = processEncodedFields(source, parameters.encAttrs);
         return encoded;
-    }
-
-    private List<String> findDiscardFields(List<String> originalFields, List<DCEncodedAttr> encAttrs) {
-        List<String> discardFields = new ArrayList<>(originalFields);
-        List<String> relayFields = findRelayFields(originalFields, encAttrs);
-        relayFields.removeIf(s -> s.length() > 64);
-        discardFields.removeAll(relayFields);
-        return discardFields;
-    }
-
-    private List<String> findRelayFields(List<String> originalFields, List<DCEncodedAttr> encAttrs) {
-        Set<String> encodedFields = new HashSet<>();
-        for (DCEncodedAttr encAttr : encAttrs) {
-            for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
-                if (bktAttr.getDecodedStrategy() == null) {
-                    encodedFields.add(bktAttr.getNominalAttr());
-                } else {
-                    encodedFields.add(bktAttr.getDecodedStrategy().getEncodedColumn());
-                }
-            }
-        }
-        List<String> fieldsToRelay = new ArrayList<>();
-        for (String originalField : originalFields) {
-            if (!encodedFields.contains(originalField)) {
-                fieldsToRelay.add(originalField);
-            }
-        }
-        return fieldsToRelay;
     }
 
     private Node processEncodedFields(Node am, List<DCEncodedAttr> encAttrs) {
@@ -117,7 +78,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                     if (!posMap.containsKey(key)) {
                         posMap.put(key, new HashMap<>());
                     }
-                    posMap.get(key).put(bktAttr.getNominalAttr(), decodeStrategy.getBitPosition());
+                    posMap.get(key).put(bktAttr.resolveSourceAttr(), decodeStrategy.getBitPosition());
                 }
             }
         }

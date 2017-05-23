@@ -461,7 +461,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return lookup.getKey().getName().replaceAll("\\*|-", "__") + "__" + fieldName;
     }
 
-    private Configuration getConfig() {
+    protected Configuration getConfig() {
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
         if (config == null) {

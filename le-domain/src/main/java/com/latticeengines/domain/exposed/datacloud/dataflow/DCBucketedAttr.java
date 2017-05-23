@@ -3,6 +3,9 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,15 +21,21 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
     private DCBucketedAttr() {
     }
 
-    public DCBucketedAttr(String nominalAttr, int lowestBit, int numBits) {
+    public DCBucketedAttr(String nominalAttr, String sourceAttr, int lowestBit, int numBits) {
         super(nominalAttr, new ArrayList<>(), lowestBit, numBits);
+        if (!nominalAttr.equals(sourceAttr)) {
+            this.sourceAttr = sourceAttr;
+        }
     }
 
-    @JsonProperty("decode_strategy")
+    @JsonProperty("dec_strat")
     private BitDecodeStrategy decodedStrategy;
 
-    @JsonProperty("bucket_algo")
+    @JsonProperty("bkt_algo")
     private BucketAlgorithm bucketAlgo;
+
+    @JsonProperty("src_attr")
+    private String sourceAttr;
 
     public BitDecodeStrategy getDecodedStrategy() {
         return decodedStrategy;
@@ -42,10 +51,18 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
 
     public void setBucketAlgo(BucketAlgorithm bucketAlgo) {
         this.bucketAlgo = bucketAlgo;
-        if ((getBuckets() == null || getBuckets().isEmpty())
-                && (bucketAlgo != null && bucketAlgo.generateLabels() != null)) {
-            setBuckets(bucketAlgo.generateLabels());
-        }
     }
 
+    public String getSourceAttr() {
+        return sourceAttr;
+    }
+
+    public void setSourceAttr(String sourceAttr) {
+        this.sourceAttr = sourceAttr;
+    }
+
+    @JsonIgnore
+    public String resolveSourceAttr() {
+        return StringUtils.isBlank(sourceAttr) ? getNominalAttr() : sourceAttr;
+    }
 }
