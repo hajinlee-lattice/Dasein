@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
-import com.latticeengines.domain.exposed.metadata.PredeterminedColumnDataTypes;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -401,11 +400,7 @@ public class MetadataResolver {
     }
 
     private UserDefinedType getFieldTypeFromColumnContent(String columnHeaderName) {
-        String mappedFieldName = ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(columnHeaderName);
-        UserDefinedType fundamentalType = PredeterminedColumnDataTypes.returnUserDefinedType(mappedFieldName);
-        if (fundamentalType != null) {
-            return fundamentalType;
-        }
+        UserDefinedType fundamentalType = null;
 
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         List<String> columnFields = null;
