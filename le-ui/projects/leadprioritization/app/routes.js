@@ -11,16 +11,20 @@ angular
         }
 
         var views = toState.views || {},
-            split, view, hasMain;
+            params = toState.params,
+            LoadingText = params ? (params.LoadingText || '') : '',
+            split, view, hasMain = false;
 
         for (view in views) {
             split = view.split('@');
-            hasMain = split[0] == 'main';
+
+            if (split[0] == 'main') {
+                hasMain = true;
+            }
         }
 
-        if (hasMain) {
-            //var LoadingString = ResourceUtility.getString("");
-            ShowSpinner(/*fromState.name + " -> " + toState.name*/);
+        if (hasMain && params.LoadingSpinner !== false) {
+            ShowSpinner(LoadingText);
         }
 
         if (toState.redirectTo) {

@@ -179,6 +179,7 @@ angular
             params: {
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Data Cloud Explorer',
+                LoadingText: 'Loading DataCloud Attributes',
                 section: 'edit',
                 category: {value: null, squash: true},
                 subcategory: {value: null, squash: true}

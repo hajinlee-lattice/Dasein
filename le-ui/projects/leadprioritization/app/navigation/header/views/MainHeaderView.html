@@ -23,14 +23,14 @@
                 </a>
             </li-->
             <li class="jobs-nav-container">
-                <a class="jobs-nav-gear" ui-sref="home.jobs.status">
-                    <span ng-class="{'fa fa-running': (RunningJobs = (jobs | filter: statusFilter)).length > 0}" class="ico-container">
-                        <span ng-if="!RunningJobs || RunningJobs.length == 0" class="ico ico-cog ico-light-gray">
+                <a class="jobs-nav-gear" ui-sref="home.jobs.status" title="Jobs [{{RunningJobs.length}} Running]">
+                    <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0}" class="ico-container">
+                        <span class="ico ico-cog ico-light-gray">
                             
                         </span>
-                        <span ng-if="RunningJobs.length > 0">
-                            {{ RunningJobs.length }}
-                        </span>
+                    </span>
+                    <span class="jobs-nav-number badge green-badge" ng-if="RunningJobs.length">
+                        {{ RunningJobs.length }}
                     </span>
                 </a>
             </li>
