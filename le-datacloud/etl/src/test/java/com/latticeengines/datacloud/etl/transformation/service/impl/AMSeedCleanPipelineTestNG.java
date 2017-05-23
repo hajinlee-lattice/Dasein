@@ -232,12 +232,14 @@ public class AMSeedCleanPipelineTestNG
             { 33L, "m.com", "06", "Name6", "Country6", null, "Y", "Y", "0", ">10,000", 100, 100000000L, "06" }, //
             // If 1 duns has a domain same as some domain of corresponding duduns,
             // this domain has lower priority to be marked as primary domain
+            /*
             { 34L, "n.com", "07", "Name7", "Country7", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
             { 35L, "o.com", "07", "Name7", "Country7", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
             { 36L, "n.com", "08", "Name8", "Country8", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
             { 37L, "p.com", "08", "Name8", "Country8", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
             { 38L, "n.com", "09", "Name9", "Country9", "DnB", "N", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
             { 39L, "o.com", "09", "Name9", "Country9", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "07" }, //
+            */
             /* Test markOOBEntries */
             // LatticeID = 12 will be removed
             { 12L, null, "46", "Name46", "Country46", "DnB", "N", "Y", "1", ">10,000", 100, 100000000L, "46" }, //
@@ -314,6 +316,7 @@ public class AMSeedCleanPipelineTestNG
                         "06" }, //
                 { 33L, "m.com", "06", "Name6", "Country6", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
                         "06" }, //
+                /*
                 { 34L, "n.com", "07", "Name7", "Country7", "DnB", "Y", "Y", "0", ">10,000", 100, 1000, 100000000L,
                         "07" }, //
                 { 35L, "o.com", "07", "Name7", "Country7", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
@@ -326,6 +329,7 @@ public class AMSeedCleanPipelineTestNG
                         "07" }, //
                 { 39L, "o.com", "09", "Name9", "Country9", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
                         "07" }, //
+                */
                 { 13L, null, "47", "Name47", "Country47", "DnB", "N", "Y", null, ">10,000", 100, null, 100000000L,
                         "47" },
                 { 14L, "aa.com", "11", "Name11", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
@@ -408,8 +412,8 @@ public class AMSeedCleanPipelineTestNG
             numRows++;
         }
 
-        Assert.assertEquals(numRows, 32, "There should be 32 rows in the result.");
-        Assert.assertEquals(distinctIds.size(), 32, "There should be 32 distinct lattice ids.");
+        Assert.assertEquals(numRows, 26, "There should be 26 rows in the result.");
+        Assert.assertEquals(distinctIds.size(), 26, "There should be 26 distinct lattice ids.");
         Assert.assertFalse(hasFieldMismatchInRecord, "There are incorrect results, see logs above.");
 
     }

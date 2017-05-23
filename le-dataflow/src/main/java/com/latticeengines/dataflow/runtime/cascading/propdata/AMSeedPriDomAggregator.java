@@ -90,13 +90,15 @@ public class AMSeedPriDomAggregator
         if (context.priDom == null && StringUtils.isNotBlank(arguments.getString(domField))) {
             return update(context, arguments);
         }
+        /* Temporarily revert the implementation for PD-1694
         int res = checkRuleDiffWithDuDoms(context, arguments);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
             return context;
         }
-        res = checkRuleSmallerInteger((Integer) arguments.getObject(alexaRankField), context.alexaRank);
+        */
+        int res = checkRuleSmallerInteger((Integer) arguments.getObject(alexaRankField), context.alexaRank);
         if (res > 0) {
             return update(context, arguments);
         } else if (res < 0) {
