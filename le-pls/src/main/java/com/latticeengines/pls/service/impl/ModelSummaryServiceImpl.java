@@ -325,6 +325,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         for (ModelSummary summary : summaries) {
             summary.setPredictors(new ArrayList<Predictor>());
             summary.setDetails(null);
+            getModelSummaryHasRating(summary);
             getModelSummaryTrainingFileState(summary);
         }
         return summaries;
