@@ -38,7 +38,7 @@ public class Dimensions {
                     && secObj.dimensions.size() == dimensions.size()) {
                 int idx = 0;
                 for (Long odim : dimensions) {
-                    Long sdim = secObj.dimensions.get(idx);
+                    Long sdim = secObj.dimensions.get(idx++);
                     if (!odim.equals(sdim)) {
                         return false;
                     }
