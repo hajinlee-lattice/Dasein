@@ -3,7 +3,6 @@ package com.latticeengines.pls.controller;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.ModelNotes;
 import com.latticeengines.domain.exposed.pls.NoteParams;
-import com.latticeengines.pls.service.ModelNotesService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -45,7 +43,7 @@ public class ModelNotesResource {
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams) {
         log.debug(String.format("ModelSummary %s's ModelNotes created by %s", modelSummaryId, noteParams.getUserName()));
-//        modelNotesService.create(modelSummaryId, noteParams);
+        //modelNotesService.create(modelSummaryId, noteParams);
         return true;
     }
 
@@ -54,7 +52,7 @@ public class ModelNotesResource {
     @ApiOperation(value = "Delete one note from certain model summary.")
     public boolean deleteNote(@PathVariable String modelSummaryId, @PathVariable String noteId) {
         log.debug(String.format("ModelNotes %s deleted by user %s", noteId, MultiTenantContext.getEmailAddress()));
-//        modelNotesService.deleteByNoteId(noteId);
+        //modelNotesService.deleteByNoteId(noteId);
         return true;
     }
 
@@ -64,7 +62,7 @@ public class ModelNotesResource {
     public boolean updateNote(@PathVariable String modelSummaryId, @PathVariable String noteId,
                               @RequestBody NoteParams noteParams) {
         log.debug(String.format("ModelNotes %s update by %s", noteId, noteParams.getUserName()));
-//        modelNotesService.updateByNoteId(noteId, noteParams);
+        //modelNotesService.updateByNoteId(noteId, noteParams);
         return true;
     }
 
@@ -73,7 +71,7 @@ public class ModelNotesResource {
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId) {
         log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNotes", fromModelSummaryId, toModelSummaryId));
-//        modelNotesService.copyNotes(fromModelSummaryId, toModelSummaryId);
+        //modelNotesService.copyNotes(fromModelSummaryId, toModelSummaryId);
         return true;
     }
 }
