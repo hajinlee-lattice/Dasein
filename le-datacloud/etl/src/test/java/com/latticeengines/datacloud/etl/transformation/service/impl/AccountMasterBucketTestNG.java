@@ -45,7 +45,10 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() throws Exception {
         uploadBaseSourceFile(accountMaster.getSourceName(), "AMBucketTest_AM", baseSourceVersion);
+
+        //TODO: will be changed to a profile step, instead of manual upload
         uploadBaseSourceFile(AM_PROFILE, "AMBucketTest_AMProfile", baseSourceVersion);
+
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);

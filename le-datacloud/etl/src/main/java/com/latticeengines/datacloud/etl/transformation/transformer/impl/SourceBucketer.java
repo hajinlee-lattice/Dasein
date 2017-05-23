@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,11 +71,32 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
             BucketEncodeConfig configuration) {
         Source profileSource = step.getBaseSources()[1];
         String profileVersion = step.getBaseVersions().get(1);
+        if (!isProfileSource(profileSource.getSourceName(), profileVersion)) {
+            profileSource = step.getBaseSources()[0];
+            profileVersion = step.getBaseVersions().get(0);
+            if (!isProfileSource(profileSource.getSourceName(), profileVersion)) {
+                throw new RuntimeException("Neither base source has the profile schema");
+            } else {
+                log.info("Resolved the first base source as profile.");
+            }
+        } else {
+            log.info("Resolved the second base source as profile.");
+        }
         String avroDir = hdfsPathBuilder.constructSnapshotDir(profileSource.getSourceName(), profileVersion).toString();
         List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
         parameters.encAttrs = BucketEncodeUtils.encodedAttrs(records);
         parameters.retainAttrs = BucketEncodeUtils.retainFields(records);
         parameters.renameFields = BucketEncodeUtils.renameFields(records);
+    }
+
+    private boolean isProfileSource(String sourceName, String version) {
+        String avroDir = hdfsPathBuilder.constructSnapshotDir(sourceName, version).toString();
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroDir + "/*.avro");
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            return BucketEncodeUtils.isProfile(record);
+        }
+        return false;
     }
 
     @Override
