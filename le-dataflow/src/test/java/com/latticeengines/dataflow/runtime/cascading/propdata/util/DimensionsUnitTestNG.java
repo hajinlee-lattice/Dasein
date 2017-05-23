@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 
 public class DimensionsUnitTestNG {
 
-    @Test
+    @Test(groups = "unit")
     public void testEquals() {
         List<Long> dimensions1 = new ArrayList<>();
         dimensions1.add(5L);

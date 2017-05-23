@@ -20,7 +20,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
                 .getUtil(MergeType.ADD);
     }
 
-    @Test
+    @Test(groups = "unit")
     public void testRegularNullBucketAdd() {
         AttributeStats firstStatsDetails = new AttributeStats();
         AttributeStats secondStatsDetails = new AttributeStats();
@@ -33,7 +33,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         Assert.assertNull(resultStatsDetails.getBuckets());
     }
 
-    @Test
+    @Test(groups = "unit")
     public void testRegularBucketAdd1() {
         AttributeStats firstStatsDetails = new AttributeStats();
 
@@ -79,7 +79,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getCount(), new Long(20));
     }
 
-    @Test
+    @Test(groups = "unit")
     public void testRegularBucketAdd2() {
         AttributeStats firstStatsDetails = new AttributeStats();
 
@@ -141,7 +141,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(2).getCount(), new Long(15));
     }
 
-    @Test
+    @Test(groups = "unit")
     public void testEncodedBucketAdd1() {
         AttributeStats firstStatsDetails = new AttributeStats();
 
@@ -204,7 +204,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
 
     }
 
-    @Test
+    @Test(groups = "unit")
     public void testEncodedBucketAdd2() {
         AttributeStats firstStatsDetails = new AttributeStats();
 

@@ -14,7 +14,7 @@ public class MultiListCrossProductUnitTestNG {
         crossUtil = new MultiListCrossProductUtil();
     }
 
-    @Test
+    @Test(groups = "unit")
     public void testCrossProductWithTwoDimensions() {
         List<List<Long>> inputLists = new ArrayList<>();
         inputLists.add(Arrays.asList(5L, 2L));
@@ -43,7 +43,7 @@ public class MultiListCrossProductUnitTestNG {
         }
     }
 
-    @Test
+    @Test(groups = "unit")
     public void testCrossProductWithThreeDimensions() {
         List<List<Long>> inputLists = new ArrayList<>();
         inputLists.add(Arrays.asList(5L, 2L, 1L));
@@ -81,7 +81,7 @@ public class MultiListCrossProductUnitTestNG {
         }
     }
 
-    @Test(expectedExceptions = RuntimeException.class)
+    @Test(groups = "unit", expectedExceptions = RuntimeException.class)
     public void testCrossProductWithTwoDimensionsWithDuplicateVal() {
         List<List<Long>> inputLists = new ArrayList<>();
         inputLists.add(Arrays.asList(5L, 2L));
