@@ -122,7 +122,14 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
             dedupAndPut(fieldLength, expandedTupleMap, new Dimensions(dimValues), expandedTuple);
         }
 
+        Set<Dimensions> dimSet = new HashSet<>();
+        // to avoid ConcurrentModificationException copy key set in separate set
+        // to use in for loop which tries to update this map
         for (Dimensions dim : expandedTupleMap.keySet()) {
+            dimSet.add(dim);
+        }
+
+        for (Dimensions dim : dimSet) {
             ExpandedTuple expandedTuple = expandedTupleMap.get(dim);
             Map<Long, List<Long>> dimAncestorMap = new HashMap<>();
             for (Long dimId : dim.getDimensions()) {
@@ -141,7 +148,6 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
                 }
                 dedupAndPut(fieldLength, expandedTupleMap, new Dimensions(ancestorTuple), rollupExpandedTuple);
             }
-
         }
 
         for (Dimensions dim : expandedTupleMap.keySet()) {
