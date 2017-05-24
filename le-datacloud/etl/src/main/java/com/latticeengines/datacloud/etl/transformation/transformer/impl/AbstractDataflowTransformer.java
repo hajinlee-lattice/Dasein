@@ -13,10 +13,12 @@ import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
@@ -49,6 +51,9 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    protected Configuration yarnConfiguration;
 
     protected abstract String getDataFlowBeanName();
 
@@ -148,8 +153,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);
             step.setCount(result.getCount());
-            List<Schema> baseAvscSchemas = getBasesourceSchemas(step);
-            step.setTargetSchema(getTargetSchema(result, parameters, baseAvscSchemas));
+            List<Schema> baseSchemas = getBaseSourceSchemas(step);
+            step.setTargetSchema(getTargetSchema(result, parameters, baseSchemas));
             postDataFlowProcessing(workflowDir, parameters, configuration);
         } catch (Exception e) {
             log.error("Failed to transform data", e);
@@ -159,7 +164,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return true;
     }
 
-    private List<Schema> getBasesourceSchemas(TransformStep step) {
+    private List<Schema> getBaseSourceSchemas(TransformStep step) {
         Transformer transformer = step.getTransformer();
         if (!(transformer instanceof AbstractDataflowTransformer)) {
             return null;
@@ -172,7 +177,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             for (int i = 0; i < baseSources.length; i++) {
                 Source source = baseSources[i];
                 String version = baseSourceVersions.get(i);
-                Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source.getSourceName(), version);
+                String avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
+                Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroDir + "/*.avro");
                 schemas.add(schema);
             }
             return schemas;
@@ -190,7 +196,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return false;
     }
 
-    protected Schema getTargetSchema(Table result, P parameters, List<Schema> baseAvscSchemas) {
+    protected Schema getTargetSchema(Table result, P parameters, List<Schema> baseSchemas) {
         return null;
     }
 

@@ -101,9 +101,9 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     }
 
     @Override
-    protected Schema getTargetSchema(Table result, SorterParameters parameters, List<Schema> baseAvscSchemas) {
-        if (baseAvscSchemas != null) {
-            Schema schema = baseAvscSchemas.get(0);
+    protected Schema getTargetSchema(Table result, SorterParameters parameters, List<Schema> baseSchemas) {
+        if (baseSchemas != null) {
+            Schema schema = baseSchemas.get(0);
             if (schema != null) {
                 log.info("Found schema from base sources' avsc.");
                 targetSchema = schema;
