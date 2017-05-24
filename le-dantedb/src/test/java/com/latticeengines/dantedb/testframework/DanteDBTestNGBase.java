@@ -7,10 +7,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.annotation.Transactional;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dantedb.exposed.dao.DanteTalkingPointsDao;
+import com.latticeengines.dantedb.exposed.entitymgr.TalkingPointEntityMgr;
 import com.latticeengines.domain.exposed.dantetalkingpoints.DanteTalkingPoint;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -18,14 +18,16 @@ import com.latticeengines.domain.exposed.dantetalkingpoints.DanteTalkingPoint;
 public class DanteDBTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    DanteTalkingPointsDao danteTalkingPointsDao;
+    TalkingPointEntityMgr entityMgr;
 
-    @Autowired
-    org.springframework.orm.hibernate4.HibernateTransactionManager danteTransactionManager;
-
-    @Test(groups = "unit")
-    @Transactional
+    @Test(groups = "functional")
     public void create() {
+        String externalId = "testExtID";
+
+        DanteTalkingPoint existed = entityMgr.findByExternalID(externalId);
+        entityMgr.delete(existed);
+        Assert.assertNull(entityMgr.findByExternalID(externalId));
+
         System.out.println("### START ###");
         DanteTalkingPoint dtp = new DanteTalkingPoint();
         dtp.setCustomerID("test");
@@ -35,11 +37,7 @@ public class DanteDBTestNGBase extends AbstractTestNGSpringContextTests {
         dtp.setLastModificationDate(new Date());
         dtp.setValue("Some Talking Point");
 
-        if (danteTalkingPointsDao == null) {
-            System.out.println("dao aint workin");
-            return;
-        }
-
-        danteTalkingPointsDao.create(dtp);
+        entityMgr.create(dtp);
+        Assert.assertNotNull(entityMgr.findByExternalID(externalId));
     }
 }

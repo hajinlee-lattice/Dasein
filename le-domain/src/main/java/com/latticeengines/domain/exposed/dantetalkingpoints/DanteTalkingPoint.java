@@ -12,13 +12,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "TalkingPointCache", uniqueConstraints = { @UniqueConstraint(columnNames = { "External_ID" }) })
+@Table(name = "TalkingPointCache")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DanteTalkingPoint implements HasPid, Serializable {
 
@@ -28,6 +29,7 @@ public class DanteTalkingPoint implements HasPid, Serializable {
     @Column(name = "TalkingPointCache_ID", unique = true, nullable = false)
     private int talkingPointCacheID;
 
+    @Index(name = "IX_EXTERNALID")
     @Column(name = "External_ID", unique = true, nullable = false, length = 50)
     private String externalID;
 
