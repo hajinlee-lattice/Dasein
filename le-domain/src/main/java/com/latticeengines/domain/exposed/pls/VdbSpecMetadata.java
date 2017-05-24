@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,7 +49,7 @@ public class VdbSpecMetadata {
     private String displayDiscretizationStrategy;
 
     @JsonProperty("extensions")
-    private HashMap<String, String> extensions;
+    private List<VdbMetadataExtension> extensions;
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
@@ -164,11 +163,11 @@ public class VdbSpecMetadata {
         this.displayDiscretizationStrategy = displayDiscretizationStrategy;
     }
 
-    public HashMap<String, String> getExtensions() {
+    public List<VdbMetadataExtension> getExtensions() {
         return extensions;
     }
 
-    public void setExtensions(HashMap<String, String> extensions) {
+    public void setExtensions(List<VdbMetadataExtension> extensions) {
         this.extensions = extensions;
     }
 }
