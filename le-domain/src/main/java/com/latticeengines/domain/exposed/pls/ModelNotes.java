@@ -12,19 +12,21 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.IsUserModifiable;
 
 @Table(name = "MODEL_NOTES")
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ModelNotes implements HasPid, IsUserModifiable, Serializable {
+public class ModelNotes implements HasId<String>, HasPid, IsUserModifiable, Serializable {
 
 
     private static final long serialVersionUID = -863043454467222812L;
@@ -38,6 +40,7 @@ public class ModelNotes implements HasPid, IsUserModifiable, Serializable {
 
     @JsonProperty("Id")
     @Column(name = "ID", unique = true, nullable = false)
+    @Index(name = "MODEL_NOTES_ID_IDX")
     private String id;
 
     @JsonProperty("CreationTimestamp")
@@ -84,11 +87,12 @@ public class ModelNotes implements HasPid, IsUserModifiable, Serializable {
         this.pid = pid;
     }
 
-    
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }
