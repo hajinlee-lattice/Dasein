@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.dataflow.bucket;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,13 +29,13 @@ public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTes
     public void test() throws Exception {
         TransformationFlowParameters parameters = getParameters();
         executeDataFlow(parameters);
-        // verifyResult();
+        verifyResult();
     }
 
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
         for (GenericRecord record : records) {
-            System.out.println(record);
+            // System.out.println(record);
             String attrName = record.get("AttrName").toString();
             if (attrName.startsWith("TechIndicator")) {
                 String[] bkts = record.get("BktCounts").toString().split("\\|");
@@ -42,6 +44,11 @@ public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTes
                     int bktId = Integer.valueOf(tokens[0]);
                     Assert.assertTrue(bktId >= 0 && bktId < 3, "Found an invalid bkt id " + bktId);
                 }
+            }
+            long attrCount = (long) record.get(STATS_ATTR_COUNT);
+            Assert.assertTrue(attrCount <= 1000);
+            if (attrName.equals("OUT_OF_BUSINESS_INDICATOR")) {
+                System.out.print(record);
             }
         }
     }

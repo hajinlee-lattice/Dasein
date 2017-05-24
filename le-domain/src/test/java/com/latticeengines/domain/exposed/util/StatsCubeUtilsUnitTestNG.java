@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 
 public class StatsCubeUtilsUnitTestNG {
@@ -23,7 +24,22 @@ public class StatsCubeUtilsUnitTestNG {
         StatsCube cube = StatsCubeUtils.parseAvro(records);
         Assert.assertNotNull(cube);
         ObjectMapper om = new ObjectMapper();
-        System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(cube));
+        // System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(cube));
+
+        Assert.assertEquals(cube.getCount(), new Long(389538152L));
+        AttributeStats stats = cube.getStatistics().get("LatticeAccountId");
+        System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(stats));
+
+        cube.getStatistics().forEach((attrName, attrStats) -> {
+            if (attrStats.getNonNullCount() > 194769076L) {
+                try {
+                    System.out.println(attrName);
+                    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(attrStats));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
 
@@ -31,7 +47,7 @@ public class StatsCubeUtilsUnitTestNG {
         InputStream avroIs = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(RESOURCE_ROOT + "amstats.avro");
         List<GenericRecord> records = AvroUtils.readFromInputStream(avroIs);
-        return records.subList(0, 10).iterator();
+        return records.iterator();
     }
 
 

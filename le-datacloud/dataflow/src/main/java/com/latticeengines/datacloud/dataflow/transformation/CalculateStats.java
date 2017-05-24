@@ -120,7 +120,7 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
         stats = stats.retain(new FieldList(toRetain));
 
         // sort and merge to single file
-        return stats.sort(ATTR_NAME);
+        return stats;
     }
 
     private Node consolidateCnts(Node node) {

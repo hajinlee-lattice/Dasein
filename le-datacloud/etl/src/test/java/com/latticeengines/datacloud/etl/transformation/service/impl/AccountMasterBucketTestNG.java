@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -188,6 +190,11 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
                     int bktId = Integer.valueOf(tokens[0]);
                     Assert.assertTrue(bktId >= 0 && bktId < 3, "Found an invalid bkt id " + bktId);
                 }
+            }
+            long attrCount = (long) record.get(STATS_ATTR_COUNT);
+            Assert.assertTrue(attrCount <= 1000);
+            if (attrName.equals("OUT_OF_BUSINESS_INDICATOR")) {
+                System.out.print(record);
             }
         }
     }

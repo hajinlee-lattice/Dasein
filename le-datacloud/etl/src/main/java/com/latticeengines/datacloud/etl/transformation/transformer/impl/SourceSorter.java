@@ -141,6 +141,36 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             } catch (Exception e) {
                 throw new RuntimeException("Failed to process avro files result from cascading flow.", e);
             }
+        } else {
+            keepOnlyBiggestAvro(workflowDir);
+        }
+    }
+
+    private void keepOnlyBiggestAvro(String workflowDir) {
+        wd = new Path(workflowDir).toString();
+        String avroGlob = wd + (wd.endsWith("/") ? "*.avro" : "/*.avro");
+        try {
+            List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
+            String biggestFile = "";
+            long maxFileSize = Integer.MIN_VALUE;
+            for (String file: files) {
+                long fileSize = HdfsUtils.getFileSize(yarnConfiguration, file);
+                if (fileSize > maxFileSize) {
+                    maxFileSize = fileSize;
+                    biggestFile = file;
+                }
+            }
+            if (StringUtils.isBlank(biggestFile)) {
+                throw new RuntimeException("Cannot determine the biggest file in " + avroGlob);
+            } else {
+                for (String file: files) {
+                    if (!file.equals(biggestFile)) {
+                        HdfsUtils.rmdir(yarnConfiguration, file);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to remove empty files", e);
         }
     }
 

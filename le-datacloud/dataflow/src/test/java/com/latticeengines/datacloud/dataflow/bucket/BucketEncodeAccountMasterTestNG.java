@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.dataflow.bucket;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -67,6 +68,7 @@ public class BucketEncodeAccountMasterTestNG extends DataCloudDataFlowFunctional
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
         int numRows = 0;
+        boolean checkNonEncodedAttrs = true;
         for (GenericRecord record : records) {
              long latticeId = (long) record.get("LatticeAccountId");
              if (latticeId == TEST_LATTICE_ID) {
@@ -76,6 +78,18 @@ public class BucketEncodeAccountMasterTestNG extends DataCloudDataFlowFunctional
                  Assert.assertEquals(bkt, EXPECTED_BKT, String.format("id = %d, bkt = %d", (long) record.get("LatticeAccountId"), bkt));
              }
             numRows++;
+            if (checkNonEncodedAttrs) {
+                List<String> nonEncodedAttrs = new ArrayList<>();
+                record.getSchema().getFields().forEach(field -> {
+                    String attrName = field.name();
+                    if (!attrName.startsWith("EAttr")) {
+                        nonEncodedAttrs.add(attrName);
+                    }
+                });
+                Assert.assertFalse(nonEncodedAttrs.contains("OUT_OF_BUSINESS_INDICATOR"));
+                Assert.assertFalse(nonEncodedAttrs.contains("LE_IS_PRIMARY_DOMAIN"));
+                checkNonEncodedAttrs = false;
+            }
         }
         Assert.assertEquals(numRows, 1000);
     }

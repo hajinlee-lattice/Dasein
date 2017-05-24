@@ -4,8 +4,10 @@ import static com.latticeengines.datacloud.dataflow.transformation.BucketEncode.
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +42,8 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         // handle exclude and rename fields
         List<String> toDiscard = new ArrayList<>(source.getFieldNames());
         toDiscard.removeAll(parameters.retainAttrs);
+        List<String> fieldsNeededForEncode = fieldsNeededForEncode(parameters.encAttrs);
+        toDiscard.removeAll(fieldsNeededForEncode);
         source = source.discard(new FieldList(toDiscard));
 
         List<String> oldFields = new ArrayList<>(parameters.renameFields.keySet());
@@ -49,7 +53,10 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
 
         // handle encoded fields
         Node encoded = processEncodedFields(source, parameters.encAttrs);
-        return encoded;
+        Set<String> fieldsToKeep = new HashSet<>(parameters.retainAttrs);
+        newFields.forEach(fieldsToKeep::add);
+        fieldsNeededForEncode.removeAll(fieldsToKeep);
+        return encoded.discard(new FieldList(fieldsNeededForEncode));
     }
 
     private Node processEncodedFields(Node am, List<DCEncodedAttr> encAttrs) {
@@ -92,6 +99,22 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         List<FieldMetadata> fms = new ArrayList<>();
         encAttrs.forEach(encAttr -> fms.add(new FieldMetadata(encAttr.getEncAttr(), Long.class)));
         return fms;
+    }
+
+    private List<String> fieldsNeededForEncode(List<DCEncodedAttr> encAttrs) {
+        Set<String> neededFields = new HashSet<>();
+        for (DCEncodedAttr encAttr: encAttrs) {
+            for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
+                String srcAttr;
+                if (bktAttr.getDecodedStrategy() != null) {
+                    srcAttr = bktAttr.getDecodedStrategy().getEncodedColumn();
+                } else {
+                    srcAttr = bktAttr.resolveSourceAttr();
+                }
+                neededFields.add(srcAttr);
+            }
+        }
+        return new ArrayList<>(neededFields);
     }
 
 }

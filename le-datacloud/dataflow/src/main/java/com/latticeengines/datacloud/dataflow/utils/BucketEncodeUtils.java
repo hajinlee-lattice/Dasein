@@ -6,7 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PRO
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ENCATTR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_LOWESTBIT;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_NUMBITS;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_STCATTR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_SRCATTR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +34,7 @@ public class BucketEncodeUtils {
     public static List<Pair<String, Class<?>>> profileCols() {
         return Arrays.asList( //
                 Pair.of(PROFILE_ATTR_ATTRNAME, String.class), //
-                Pair.of(PROFILE_ATTR_STCATTR, String.class), //
+                Pair.of(PROFILE_ATTR_SRCATTR, String.class), //
                 Pair.of(PROFILE_ATTR_DECSTRAT, String.class), //
                 Pair.of(PROFILE_ATTR_ENCATTR, String.class), //
                 Pair.of(PROFILE_ATTR_LOWESTBIT, Integer.class), //
@@ -63,12 +63,8 @@ public class BucketEncodeUtils {
     public static List<String> retainFields(List<GenericRecord> records) {
         List<String> retainFields = new ArrayList<>();
         records.forEach(record -> {
-            if (record.get(PROFILE_ATTR_DECSTRAT) != null) {
-                BitDecodeStrategy strategy = JsonUtils.deserialize(record.get(PROFILE_ATTR_DECSTRAT).toString(),
-                        BitDecodeStrategy.class);
-                retainFields.add(strategy.getEncodedColumn());
-            } else {
-                String srcAttr = record.get(PROFILE_ATTR_STCATTR).toString();
+            if (record.get(PROFILE_ATTR_ENCATTR) == null) {
+                String srcAttr = record.get(PROFILE_ATTR_SRCATTR).toString();
                 retainFields.add(srcAttr);
             }
         });
@@ -80,10 +76,10 @@ public class BucketEncodeUtils {
         Map<String, String> attrs = new HashMap<>();
         records.forEach(record -> {
             if (record.get(PROFILE_ATTR_ENCATTR) == null) {
-                String srcAttr = record.get(PROFILE_ATTR_STCATTR).toString();
+                String srcAttr = record.get(PROFILE_ATTR_SRCATTR).toString();
                 String tgtAttr = record.get(PROFILE_ATTR_ATTRNAME).toString();
                 if (!tgtAttr.equals(srcAttr)) {
-                    attrs.put(record.get(PROFILE_ATTR_STCATTR).toString(),
+                    attrs.put(record.get(PROFILE_ATTR_SRCATTR).toString(),
                             record.get(PROFILE_ATTR_ATTRNAME).toString());
                 }
             }
@@ -112,7 +108,7 @@ public class BucketEncodeUtils {
     private static DCBucketedAttr bucketedAttr(GenericRecord record) {
         if (record.get(PROFILE_ATTR_ENCATTR) != null) {
             String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
-            String srcAttr = record.get(PROFILE_ATTR_STCATTR).toString();
+            String srcAttr = record.get(PROFILE_ATTR_SRCATTR).toString();
             int lowestBit = (int) record.get(PROFILE_ATTR_LOWESTBIT);
             int numBits = (int) record.get(PROFILE_ATTR_NUMBITS);
             DCBucketedAttr attr = new DCBucketedAttr(attrName, srcAttr, lowestBit, numBits);

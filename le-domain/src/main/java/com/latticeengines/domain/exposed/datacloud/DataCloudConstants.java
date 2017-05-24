@@ -20,7 +20,7 @@ public final class DataCloudConstants {
     public static final String BUCKETED_ACCOUNT_MASTER_TABLE_NAME = "AccountMasterBucketed";
 
     public static final String PROFILE_ATTR_ATTRNAME = "AttrName";
-    public static final String PROFILE_ATTR_STCATTR = "SrcAttr";
+    public static final String PROFILE_ATTR_SRCATTR = "SrcAttr";
     public static final String PROFILE_ATTR_DECSTRAT = "DecodeStrategy";
     public static final String PROFILE_ATTR_ENCATTR = "EncAttr";
     public static final String PROFILE_ATTR_LOWESTBIT = "LowestBit";
