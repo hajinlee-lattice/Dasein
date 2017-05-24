@@ -1,4 +1,7 @@
-angular.module('common.wizard')
+angular.module('common.wizard', [
+    'common.wizard.progress',
+    'common.wizard.controls'
+])
 .controller('ImportWizard', function(
     $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore
 ) {

@@ -23,7 +23,7 @@ angular
             }
         }
 
-        if (hasMain && params.LoadingSpinner !== false) {
+        if (hasMain && params && params.LoadingSpinner !== false) {
             ShowSpinner(LoadingText);
         }
 

@@ -1,8 +1,5 @@
 angular
-.module('common.wizard', [
-    'common.wizard.progress',
-    'common.wizard.controls'
-])
+.module('common.wizard')
 .config(function($stateProvider) {
 
 });

@@ -197,12 +197,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/progress/progress.component.html'
+                    templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/controls/controls.component.html'
+                    templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             }
         })
@@ -259,12 +259,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/progress/progress.component.html'
+                    templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/controls/controls.component.html'
+                    templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             }
         })
@@ -342,12 +342,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/progress/progress.component.html'
+                    templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/controls/controls.component.html'
+                    templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             }
         })
@@ -394,12 +394,12 @@ angular
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/progress/progress.component.html'
+                    templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
-                    templateUrl: 'app/import/content/controls/controls.component.html'
+                    templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
             redirectTo: 'home.import.wizard.eloquoa.one'
