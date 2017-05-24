@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 
@@ -23,17 +24,20 @@ public class BucketExpandFunction extends BaseOperation implements Function {
 
     private final List<DCEncodedAttr> encodedAttrs;
     private final Set<String> excludeAttrs;
+    private final Map<String, BucketAlgorithm> bucketAttrs;
 
     private final Map<String, Integer> attrIdMap = new HashMap<>();
     private final Map<Integer, Integer> argIdToAttrIdMap = new HashMap<>();
     private final Map<Integer, DCEncodedAttr> encAttrArgPos = new HashMap<>();
+    private final Map<Integer, BucketAlgorithm> bktAttrArgPos = new HashMap<>();
 
     // expand a row into multiple records of (attrId, bktId)
-    public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Set<String> excludeAttrs, String attrIdField,
-                                String bktIdField) {
+    public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Set<String> excludeAttrs, Map<String, BucketAlgorithm> bucketAttrs,
+            String attrIdField, String bktIdField) {
         super(new Fields(attrIdField, bktIdField));
         this.encodedAttrs = encodedAttrs;
         this.excludeAttrs = excludeAttrs;
+        this.bucketAttrs = bucketAttrs;
     }
 
     @Override
@@ -47,10 +51,16 @@ public class BucketExpandFunction extends BaseOperation implements Function {
         for (int i = 0; i < arguments.size(); i++) {
             Object value = arguments.getObject(i);
             if (argIdToAttrIdMap.containsKey(i)) {
-                // normal field
+                // normal field or bucket only field
                 int attrId = argIdToAttrIdMap.get(i);
-                if (value != null) {
-                    Tuple tuple = new Tuple(attrId, 1);
+                int bktId = value == null ? 0 : 1;
+                if (bktAttrArgPos.containsKey(i)) {
+                    // bucket only field
+                    BucketAlgorithm algorithm = bktAttrArgPos.get(i);
+                    bktId = BucketEncodeFunction.bucket(value, algorithm);
+                }
+                if  (bktId > 0) {
+                    Tuple tuple = new Tuple(attrId, bktId);
                     functionCall.getOutputCollector().add(tuple);
                 }
             } else if (encAttrArgPos.containsKey(i)) {
@@ -84,13 +94,26 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                 encAttrArgPos.putAll(map2);
             }
         }
+        if (bktAttrArgPos.isEmpty()) {
+            Map<Integer, BucketAlgorithm> map = new HashMap<>();
+            for (int i = 0; i < arguments.size(); i++) {
+                String fieldName = (String) arguments.getFields().get(i);
+                if (bucketAttrs.containsKey(fieldName)) {
+                    map.put(i, bucketAttrs.get(fieldName));
+                }
+            }
+            synchronized (bktAttrArgPos) {
+                bktAttrArgPos.clear();
+                bktAttrArgPos.putAll(map);
+            }
+        }
         if (attrIdMap.isEmpty()) {
             Map<String, Integer> map = new HashMap<>();
             int attrIdx = 0;
             for (int i = 0; i < arguments.size(); i++) {
                 if (encAttrArgPos.containsKey(i)) {
                     DCEncodedAttr encAttr = encAttrArgPos.get(i);
-                    for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
+                    for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
                         if (!excludeAttrs.contains(bktAttr.getNominalAttr())) {
                             map.put(bktAttr.getNominalAttr(), attrIdx++);
                         }

@@ -156,7 +156,7 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         return result;
     }
 
-    private int bucket(Object value, BucketAlgorithm algo) {
+    static int bucket(Object value, BucketAlgorithm algo) {
         if (value == null) {
             return 0;
         }
@@ -172,7 +172,7 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         return 0;
     }
 
-    private int bucketBoolean(Object value) {
+    private static int bucketBoolean(Object value) {
         String str = value.toString().toLowerCase();
         if (Arrays.asList("1", "t", "true", "y", "yes").contains(str)) {
             return 1;
@@ -184,7 +184,7 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         }
     }
 
-    private int bucketCategorical(Object value, CategoricalBucket bucket) {
+    private static int bucketCategorical(Object value, CategoricalBucket bucket) {
         List<String> categories = bucket.getCategories();
         final Map<String, String> reversedMapping = new HashMap<>();
         Map<String, List<String>> mapping = bucket.getMapping();
@@ -204,7 +204,7 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         }
     }
 
-    private int bucketInterval(Object value, IntervalBucket bucket) {
+    private static int bucketInterval(Object value, IntervalBucket bucket) {
         Number number;
         if (value instanceof Number) {
             number = (Number) value;

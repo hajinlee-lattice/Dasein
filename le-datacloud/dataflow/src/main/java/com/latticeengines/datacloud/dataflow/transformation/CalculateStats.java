@@ -33,6 +33,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BucketConsolidateAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BucketExpandFunction;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -65,6 +66,7 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
     private static final String ATTR_BKTS = STATS_ATTR_BKTS;
 
     private List<DCEncodedAttr> encAttrs;
+    private Map<String, BucketAlgorithm> bktAttrs;
     private Set<String> excludeAttrs;
     private Map<String, Integer> attrIdMap;
 
@@ -90,7 +92,7 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
         parseProfile(source, profile);
 
         // expand (depivot)
-        Function function = new BucketExpandFunction(encAttrs, excludeAttrs, ATTR_ID, BKT_ID);
+        Function function = new BucketExpandFunction(encAttrs, excludeAttrs, bktAttrs, ATTR_ID, BKT_ID);
         List<FieldMetadata> targetFields = Arrays.asList( //
                 new FieldMetadata(ATTR_ID, Integer.class), //
                 new FieldMetadata(BKT_ID, Integer.class));
@@ -158,6 +160,7 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
             records.addAll(AvroUtils.getDataFromGlob(profile.getHadoopConfig(), extract.getPath()));
         }
         encAttrs = BucketEncodeUtils.encodedAttrs(records);
+        bktAttrs = BucketEncodeUtils.bucketFields(records);
         excludeAttrs = new HashSet<>(source.getFieldNames());
         records.forEach(record -> excludeAttrs.remove(record.get(PROFILE_ATTR_ATTRNAME).toString()));
         encAttrs.forEach(attr -> excludeAttrs.remove(attr.getEncAttr()));

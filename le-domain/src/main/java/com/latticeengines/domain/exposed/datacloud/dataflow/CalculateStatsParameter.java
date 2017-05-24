@@ -9,7 +9,7 @@ public class CalculateStatsParameter extends TransformationFlowParameters {
     @JsonProperty("enc_attrs")
     public List<DCEncodedAttr> encAttrs;
 
-    @JsonProperty("ignore_attrs")
-    public List<String> ignoreAttrs;
+    @JsonProperty("bkt_attrs")
+    public List<String> bktAttrs;
 
 }

@@ -60,6 +60,7 @@ public class BucketEncodeUtils {
         return attrNames.isEmpty();
     }
 
+    // fields that are not encoded and need to be kept
     public static List<String> retainFields(List<GenericRecord> records) {
         List<String> retainFields = new ArrayList<>();
         records.forEach(record -> {
@@ -69,6 +70,21 @@ public class BucketEncodeUtils {
             }
         });
         return retainFields;
+    }
+
+    // fields that need to be bucketed but not encoded
+    public static Map<String, BucketAlgorithm> bucketFields(List<GenericRecord> records) {
+        Map<String, BucketAlgorithm> bktFields = new HashMap<>();
+        records.forEach(record -> {
+            if (record.get(PROFILE_ATTR_ENCATTR) == null && record.get(PROFILE_ATTR_BKTALGO) != null) {
+                // name in bucketed avro
+                String attrName = record.get(PROFILE_ATTR_ATTRNAME).toString();
+                String serializedAlgo = record.get(PROFILE_ATTR_BKTALGO).toString();
+                BucketAlgorithm algo = JsonUtils.deserialize(serializedAlgo, BucketAlgorithm.class);
+                bktFields.put(attrName, algo);
+            }
+        });
+        return bktFields;
     }
 
     // srcAttr -> attrName

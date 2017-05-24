@@ -42,14 +42,20 @@ public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTes
                 for (String bkt : bkts) {
                     String[] tokens = bkt.split(":");
                     int bktId = Integer.valueOf(tokens[0]);
-                    Assert.assertTrue(bktId >= 0 && bktId < 3, "Found an invalid bkt id " + bktId);
+                    Assert.assertTrue(bktId >= 0 && bktId <= 2, "Found an invalid bkt id " + bktId);
+                }
+            }
+            if (attrName.startsWith("Bmbr30_Marketing_Total")) {
+                String[] bkts = record.get("BktCounts").toString().split("\\|");
+                Assert.assertTrue(bkts.length > 1);
+                for (String bkt : bkts) {
+                    String[] tokens = bkt.split(":");
+                    int bktId = Integer.valueOf(tokens[0]);
+                    Assert.assertTrue(bktId >= 0 && bktId <= 4, "Found an invalid bkt id " + bktId);
                 }
             }
             long attrCount = (long) record.get(STATS_ATTR_COUNT);
             Assert.assertTrue(attrCount <= 1000);
-            if (attrName.equals("OUT_OF_BUSINESS_INDICATOR")) {
-                System.out.print(record);
-            }
         }
     }
 

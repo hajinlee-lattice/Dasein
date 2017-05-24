@@ -84,10 +84,10 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Pair.of("EAttr3", Long.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1L, "String1", 1, "hello", 0L, 0L, 0L }, //
-                { 2L, "String2", 2, "hello", 0L, 0L, 0L }, //
+                { 1L, "String1", 0, "hello", 0L, 0L, 0L }, //
+                { 2L, "String2", 200, "hello", 0L, 0L, 0L }, //
                 { 3L, "String3", null, "hello", 0L, 0L, 0L }, //
-                { 4L, null, 4, "hello", 0L, 0L, 0L }, //
+                { 4L, null, 10, "hello", 0L, 0L, 0L }, //
                 { 5L, "String5", 4, "hello", 0L, 0L, 0L } //
         };
 
