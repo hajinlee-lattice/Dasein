@@ -22,16 +22,18 @@ public class BucketExpandFunction extends BaseOperation implements Function {
     private static final long serialVersionUID = 2798963376075410999L;
 
     private final List<DCEncodedAttr> encodedAttrs;
-    private final Set<String> excludedAttrs;
+    private final Set<String> excludeAttrs;
 
+    private final Map<String, Integer> attrIdMap = new HashMap<>();
+    private final Map<Integer, Integer> argIdToAttrIdMap = new HashMap<>();
     private final Map<Integer, DCEncodedAttr> encAttrArgPos = new HashMap<>();
 
-    // expand a row into multiple records of (attrName, bktId)
-    public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Set<String> excludedAttrs, String attrNameField,
-            String bktIdField) {
-        super(new Fields(attrNameField, bktIdField));
+    // expand a row into multiple records of (attrId, bktId)
+    public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Set<String> excludeAttrs, String attrIdField,
+                                String bktIdField) {
+        super(new Fields(attrIdField, bktIdField));
         this.encodedAttrs = encodedAttrs;
-        this.excludedAttrs = excludedAttrs;
+        this.excludeAttrs = excludeAttrs;
     }
 
     @Override
@@ -42,25 +44,25 @@ public class BucketExpandFunction extends BaseOperation implements Function {
     }
 
     private void expandArguments(TupleEntry arguments, FunctionCall functionCall) {
-        Fields fields = arguments.getFields();
         for (int i = 0; i < arguments.size(); i++) {
             Object value = arguments.getObject(i);
-            String attrName = (String) fields.get(i);
-            if (encAttrArgPos.containsKey(i)) {
+            if (argIdToAttrIdMap.containsKey(i)) {
+                // normal field
+                int attrId = argIdToAttrIdMap.get(i);
+                if (value != null) {
+                    Tuple tuple = new Tuple(attrId, 1);
+                    functionCall.getOutputCollector().add(tuple);
+                }
+            } else if (encAttrArgPos.containsKey(i)) {
                 // encoded field
                 DCEncodedAttr encAttr = encAttrArgPos.get(i);
                 for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
+                    int attrId = attrIdMap.get(bktAttr.getNominalAttr());
                     int bktId = BitCodecUtils.getBits((long) value, bktAttr.getLowestBit(), bktAttr.getNumBits());
                     if (bktId > 0) {
-                        Tuple tuple = new Tuple(bktAttr.getNominalAttr(), bktId);
+                        Tuple tuple = new Tuple(attrId, bktId);
                         functionCall.getOutputCollector().add(tuple);
                     }
-                }
-            } else if (!excludedAttrs.contains(attrName)) {
-                // normal field
-                if (value != null) {
-                    Tuple tuple = new Tuple(attrName, 1);
-                    functionCall.getOutputCollector().add(tuple);
                 }
             }
         }
@@ -78,9 +80,47 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                 }
             }
             synchronized (encAttrArgPos) {
+                encAttrArgPos.clear();
                 encAttrArgPos.putAll(map2);
             }
         }
+        if (attrIdMap.isEmpty()) {
+            Map<String, Integer> map = new HashMap<>();
+            int attrIdx = 0;
+            for (int i = 0; i < arguments.size(); i++) {
+                if (encAttrArgPos.containsKey(i)) {
+                    DCEncodedAttr encAttr = encAttrArgPos.get(i);
+                    for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
+                        if (!excludeAttrs.contains(bktAttr.getNominalAttr())) {
+                            map.put(bktAttr.getNominalAttr(), attrIdx++);
+                        }
+                    }
+                } else {
+                    String fieldName = (String) arguments.getFields().get(i);
+                    if (!excludeAttrs.contains(fieldName)) {
+                        map.put(fieldName, attrIdx++);
+                    }
+                }
+            }
+            synchronized (attrIdMap) {
+                attrIdMap.clear();
+                attrIdMap.putAll(map);
+            }
+        }
+        if (argIdToAttrIdMap.isEmpty()) {
+            Map<Integer, Integer> map = new HashMap<>();
+            for (int i = 0; i < arguments.size(); i++) {
+                String fieldName = (String) arguments.getFields().get(i);
+                if (attrIdMap.containsKey(fieldName)) {
+                    map.put(i, attrIdMap.get(fieldName));
+                }
+            }
+            synchronized (argIdToAttrIdMap) {
+                argIdToAttrIdMap.clear();
+                argIdToAttrIdMap.putAll(map);
+            }
+        }
+
     }
 
 }

@@ -61,11 +61,22 @@ public class FunctionOperation extends Operation {
         init(prior, function, sourceFields, targetFields, outputFields, null);
     }
 
+    public FunctionOperation(Input prior, Function<?> function, List<FieldMetadata> targetFields, FieldList outputFields) {
+        init(prior, function, null, targetFields, outputFields);
+    }
+
     private void init(Input prior, Function<?> function, FieldList sourceFields, List<FieldMetadata> targetFields,
             FieldList outputFields, Fields overrideFieldStrategy) {
         Fields fieldStrategy = Fields.ALL;
 
         List<FieldMetadata> fm = Lists.newArrayList(prior.metadata);
+
+        Fields inputStrategy = null;
+        if (sourceFields == null) {
+            // by default apply to all fields
+            sourceFields = new FieldList(DataFlowUtils.getFieldNames(fm));
+            inputStrategy = Fields.ALL;
+        }
 
         if (overrideFieldStrategy == null) {
             if (sourceFields.getFields().length == 1 && targetFields.size() == 1
@@ -80,8 +91,13 @@ public class FunctionOperation extends Operation {
             fieldStrategy = overrideFieldStrategy;
         }
 
-        Pipe each = new Each(prior.pipe, DataFlowUtils.convertToFields(sourceFields.getFieldsAsList()), function,
-                fieldStrategy);
+        Pipe each;
+        if (inputStrategy == null) {
+            each = new Each(prior.pipe, DataFlowUtils.convertToFields(sourceFields.getFieldsAsList()), function,
+                    fieldStrategy);
+        } else {
+            each = new Each(prior.pipe, Fields.ALL, function, fieldStrategy);
+        }
 
         if (fieldStrategy != Fields.REPLACE) {
             for (FieldMetadata targetField : targetFields) {

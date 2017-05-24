@@ -7,14 +7,18 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,8 +29,10 @@ import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BucketConsolidateAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BucketExpandFunction;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -49,6 +55,7 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
 
     public static final String BEAN_NAME = "calculateStats";
 
+    private static final String ATTR_ID = "_Attr_ID_";
     private static final String BKT_ID = "_Bkt_ID_";
     private static final String BKT_COUNT = "_Bkt_Count_";
 
@@ -58,6 +65,7 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
 
     private List<DCEncodedAttr> encAttrs;
     private Set<String> excludeAttrs;
+    private Map<String, Integer> attrIdMap;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -81,27 +89,26 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
         parseProfile(source, profile);
 
         // expand (depivot)
-        Function function = new BucketExpandFunction(encAttrs, excludeAttrs, ATTR_NAME, BKT_ID);
+        Function function = new BucketExpandFunction(encAttrs, excludeAttrs, ATTR_ID, BKT_ID);
         List<FieldMetadata> targetFields = Arrays.asList( //
-                new FieldMetadata(ATTR_NAME, Integer.class), //
+                new FieldMetadata(ATTR_ID, Integer.class), //
                 new FieldMetadata(BKT_ID, Integer.class));
-        Node expanded = source.apply(function, new FieldList(source.getFieldNamesArray()), targetFields,
-                new FieldList(ATTR_NAME, BKT_ID));
+        Node expanded = source.applyToAllFields(function, targetFields, new FieldList(ATTR_ID, BKT_ID));
 
         // group by and count
         List<FieldMetadata> countFields = new ArrayList<>(expanded.getSchema());
         countFields.add(new FieldMetadata(BKT_COUNT, Long.class));
-        Node count = expanded.groupByAndAggregate(new FieldList(ATTR_NAME, BKT_ID),
+        Node count = expanded.groupByAndAggregate(new FieldList(ATTR_ID, BKT_ID),
                 new Count(new Fields(BKT_COUNT, Long.class)), countFields, Fields.ALL);
 
         // consolidate count
         count = consolidateCnts(count);
+        count = resumeAttrName(count);
 
         // join with profile data
         Node stats = profile.leftJoin(ATTR_NAME, count, PROFILE_ATTR_ATTRNAME);
         stats = stats.apply(String.format("%s == null ? new Long(0) : %s", ATTR_COUNT, ATTR_COUNT), //
-                new FieldList(ATTR_COUNT),
-                stats.getSchema(ATTR_COUNT));
+                new FieldList(ATTR_COUNT), stats.getSchema(ATTR_COUNT));
 
         // retain
         List<String> toRetain = new ArrayList<>(count.getFieldNames());
@@ -111,18 +118,26 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
 
     private Node consolidateCnts(Node node) {
         Aggregator aggregator = new BucketConsolidateAggregator( //
-                Collections.singletonList(ATTR_NAME), BKT_ID, BKT_COUNT, ATTR_COUNT, ATTR_BKTS);
+                Collections.singletonList(ATTR_ID), BKT_ID, BKT_COUNT, ATTR_COUNT, ATTR_BKTS);
         List<FieldMetadata> outputFms = new ArrayList<>();
-        outputFms.add(node.getSchema(ATTR_NAME));
+        outputFms.add(node.getSchema(ATTR_ID));
         outputFms.add(new FieldMetadata(ATTR_COUNT, Long.class));
         outputFms.add(new FieldMetadata(ATTR_BKTS, String.class));
-        return node.groupByAndAggregate(new FieldList(ATTR_NAME), aggregator, outputFms);
+        return node.groupByAndAggregate(new FieldList(ATTR_ID), aggregator, outputFms);
+    }
+
+    private Node resumeAttrName(Node node) {
+        Map<Serializable, Serializable> attrNameMap = new HashMap<>();
+        attrIdMap.forEach((s, i) -> attrNameMap.put(i, s));
+        Function function = new MappingFunction(ATTR_ID, ATTR_NAME, attrNameMap);
+        node = node.apply(function, new FieldList(ATTR_ID), new FieldMetadata(ATTR_NAME, String.class));
+        return node.discard(ATTR_ID);
     }
 
     private boolean isProfileNode(Node node) {
         for (Extract extract : node.getSourceSchema().getExtracts()) {
             Iterator<GenericRecord> recordIterator = AvroUtils.iterator(node.getHadoopConfig(), extract.getPath());
-            while (recordIterator.hasNext()) {
+            if (recordIterator.hasNext()) {
                 GenericRecord record = recordIterator.next();
                 return BucketEncodeUtils.isProfile(record);
             }
@@ -139,6 +154,37 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
         excludeAttrs = new HashSet<>(source.getFieldNames());
         records.forEach(record -> excludeAttrs.remove(record.get(PROFILE_ATTR_ATTRNAME).toString()));
         encAttrs.forEach(attr -> excludeAttrs.remove(attr.getEncAttr()));
+
+        Iterator<GenericRecord> iterator = AvroUtils.iterator(source.getHadoopConfig(),
+                source.getSourceSchema().getExtracts().get(0).getPath());
+        GenericRecord record = iterator.next();
+        List<Schema.Field> fields = record.getSchema().getFields();
+        Map<Integer, DCEncodedAttr> encAttrArgPos = new HashMap<>();
+        for (int i = 0; i < fields.size(); i++) {
+            String fieldName = fields.get(i).name();
+            for (DCEncodedAttr encAttr : encAttrs) {
+                if (encAttr.getEncAttr().equals(fieldName)) {
+                    encAttrArgPos.put(i, encAttr);
+                }
+            }
+        }
+        attrIdMap = new HashMap<>();
+        int attrIdx = 0;
+        for (int i = 0; i < fields.size(); i++) {
+            if (encAttrArgPos.containsKey(i)) {
+                DCEncodedAttr encAttr = encAttrArgPos.get(i);
+                for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
+                    if (!excludeAttrs.contains(bktAttr.getNominalAttr())) {
+                        attrIdMap.put(bktAttr.getNominalAttr(), attrIdx++);
+                    }
+                }
+            } else {
+                String fieldName = fields.get(i).name();
+                if (!excludeAttrs.contains(fieldName)) {
+                    attrIdMap.put(fieldName, attrIdx++);
+                }
+            }
+        }
     }
 
 }

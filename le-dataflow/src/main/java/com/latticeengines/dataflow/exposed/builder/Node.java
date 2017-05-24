@@ -342,6 +342,12 @@ public class Node {
                 targetFields, outputFields, overrideFieldStrategy)), builder);
     }
 
+    public Node applyToAllFields(Function<?> function, List<FieldMetadata> targetFields, FieldList outputFields) {
+        return new Node(
+                builder.register(new FunctionOperation(opInput(identifier), function, targetFields, outputFields)),
+                builder);
+    }
+
     @Deprecated
     public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
         return new Node(
