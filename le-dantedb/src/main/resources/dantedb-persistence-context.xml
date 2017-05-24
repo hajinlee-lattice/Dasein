@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+    <bean id="danteDataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${dantedb.datasource.driver}"/>
+        <property name="url" value="${dantedb.datasource.url}"/>
+        <property name="username" value="${dantedb.datasource.user}"/>
+        <property name="password" value="${dantedb.datasource.password.encrypted}"/>
+    </bean>
+
+    <!-- Hibernate session factory -->
+    <bean id="danteSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="danteDataSource"/>
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dantetalkingpoints"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="danteTransactionManager"
+          class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+          p:sessionFactory-ref="danteSessionFactory">
+        <qualifier value="danteDataSource"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="danteTransactionManager" mode="proxy"/>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+          p:dataSource-ref="danteDataSource"/>
+
+    <bean id="danteTalkingPointsDao" class="com.latticeengines.dantedb.exposed.dao.impl.DanteTalkingPointsDaoImpl">
+        <property name="sessionFactory" ref="danteSessionFactory"></property>
+    </bean>
+
+</beans>

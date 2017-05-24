@@ -71,5 +71,6 @@
         <module>le-actors</module>
         <module>le-sqoop</module>
         <module>le-ulysses</module>
+        <module>le-dantedb</module>
     </modules>
 </project>
