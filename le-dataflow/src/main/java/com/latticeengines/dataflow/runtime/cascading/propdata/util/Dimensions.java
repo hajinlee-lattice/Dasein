@@ -46,8 +46,19 @@ public class Dimensions {
                 return true;
             }
         }
-
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((dimensions == null) ? 0 : dimensions.hashCode());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return dimensions == null ? "{}" : dimensions.toString();
+    }
 }

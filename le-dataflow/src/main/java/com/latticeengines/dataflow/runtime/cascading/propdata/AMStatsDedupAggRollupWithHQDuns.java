@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionUtil.ExpandedTuple;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.Dimensions;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.MultiListCrossProductUtil;
@@ -24,6 +27,9 @@ import cascading.tuple.TupleEntryCollector;
 
 @SuppressWarnings("rawtypes")
 public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Buffer {
+
+    private static final Log log = LogFactory.getLog(AMStatsDedupAggRollupWithHQDuns.class);
+
     private static final long serialVersionUID = 4217950767704131475L;
     private static final int MAX_DEPTH = 5;
     private AMStatsDimensionUtil dimensionUtil;
@@ -99,6 +105,7 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
         Map<Dimensions, ExpandedTuple> expandedTupleMap = new HashMap<>();
 
         TupleEntryCollector outputCollector = bufferCall.getOutputCollector();
+        String hqDunsFieldValuesStr = "";
 
         while (argumentsInGroup.hasNext()) {
 
@@ -114,6 +121,7 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
                 hqDunsFieldValues = new ArrayList<>();
                 for (Integer hqPos : hqDunsFieldsPosList) {
                     hqDunsFieldValues.add(originalTuple.getObject(hqPos));
+                    hqDunsFieldValuesStr += " [" + originalTuple.getObject(hqPos) + "] ";
                 }
 
             }
@@ -122,10 +130,16 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
             dedupAndPut(fieldLength, expandedTupleMap, new Dimensions(dimValues), expandedTuple);
         }
 
+        log.debug("hqDunsFieldValuesStr: " + hqDunsFieldValuesStr);
+
         Set<Dimensions> dimSet = new HashSet<>();
         // to avoid ConcurrentModificationException copy key set in separate set
         // to use in for loop which tries to update this map
         for (Dimensions dim : expandedTupleMap.keySet()) {
+            if (expandedTupleMap.keySet().size() > 5000) {
+                log.debug("Printing dimensions as map contains lot of elements (" + expandedTupleMap.keySet().size()
+                        + "): " + dim.toString() + ", hqDunsFieldValuesStr: " + hqDunsFieldValuesStr);
+            }
             dimSet.add(dim);
         }
 
@@ -160,6 +174,7 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
         ExpandedTuple dedupedTuple = expandedTuple;
 
         if (expandedTupleMap.containsKey(dim)) {
+            log.debug("Dimension key already exists in map, calling dedup: " + dim.toString());
             ExpandedTuple existingExpandedTuple = expandedTupleMap.get(dim);
             dedupedTuple = dimensionUtil.dedup(existingExpandedTuple, expandedTuple, fieldLength);
         }

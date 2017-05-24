@@ -50,8 +50,14 @@ public class Bucket implements Serializable {
                 this.encodedCountList[idx++] = new Long(cnt);
             }
         }
-        if (bucket.range != null || bucket.lift != null) {
-            // ignore
+        if (bucket.range != null) {
+            // TODO - this is temporary and will be fixed once range logic is
+            // figured out properly
+            this.range = bucket.range;
+        }
+
+        if (bucket.lift != null) {
+            this.lift = new Double(bucket.lift);
         }
     }
 
@@ -61,6 +67,8 @@ public class Bucket implements Serializable {
 
     public void setBucketLabel(String bucketLabel) {
         this.bucketLabel = bucketLabel;
+        // TODO TEMPORARY FOR M10
+        this.range = BucketRange.value(bucketLabel);
     }
 
     public Long getCount() {
