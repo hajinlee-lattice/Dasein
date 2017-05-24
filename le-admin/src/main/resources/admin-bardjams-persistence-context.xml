@@ -33,7 +33,7 @@
     <bean id="sessionFactoryBardjams"
         class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourceBardJams" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.admin" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${admin.bardjams.datasource.dialect}
