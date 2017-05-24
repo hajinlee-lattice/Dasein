@@ -42,7 +42,7 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         table.setName(TABLE1);
         dataCollection.setTables(Collections.singletonList(table));
         dataCollection.setType(DataCollectionType.Segmentation);
-        dataCollectionEntityMgr.createOrUpdateDataCollection(dataCollection);
+        dataCollectionEntityMgr.createDataCollection(dataCollection);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")

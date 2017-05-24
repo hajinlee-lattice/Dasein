@@ -73,7 +73,6 @@ public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
         Statistics statistics = new Statistics();
         StatisticsContainer container = new StatisticsContainer();
         container.setStatistics(statistics);
-        container = statisticsContaineProxy.createOrUpdateStatistics(customerSpace1, container);
 
         retrieved.setStatisticsContainer(container);
         dataCollectionProxy.createOrUpdateDataCollection(customerSpace1, retrieved);

@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 
 public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
-    void createOrUpdateDataCollection(DataCollection dataCollection);
+    void createDataCollection(DataCollection dataCollection);
 
     DataCollection getDataCollection(String name);
 

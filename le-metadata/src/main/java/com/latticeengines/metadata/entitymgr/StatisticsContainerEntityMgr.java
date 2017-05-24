@@ -7,4 +7,6 @@ public interface StatisticsContainerEntityMgr extends BaseEntityMgr<StatisticsCo
     StatisticsContainer findStatisticsByName(String statisticsName);
 
     StatisticsContainer createOrUpdateStatistics(StatisticsContainer container);
+
+    StatisticsContainer createStatistics(StatisticsContainer container);
 }

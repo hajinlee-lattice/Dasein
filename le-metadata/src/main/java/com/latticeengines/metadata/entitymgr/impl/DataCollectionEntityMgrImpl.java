@@ -58,7 +58,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void createOrUpdateDataCollection(DataCollection dataCollection) {
+    public void createDataCollection(DataCollection dataCollection) {
         removeDefaultTables(dataCollection);
 
         List<String> tableNames = dataCollection.getTables().stream() //
@@ -67,11 +67,11 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
                 .map(name -> tableEntityMgr.findByName(name)) //
                 .collect(Collectors.toList());
         if (tables.stream().anyMatch(table -> table == null)) {
-            throw new LedpException(LedpCode.LEDP_11006, new String[]{String.join(",", tableNames)});
+            throw new LedpException(LedpCode.LEDP_11006, new String[] { String.join(",", tableNames) });
         }
 
         if (dataCollection.getStatisticsContainer() != null) {
-            dataCollection.setStatisticsContainer(statisticsContainerEntityMgr.findStatisticsByName(dataCollection.getStatisticsContainer().getName()));
+            statisticsContainerEntityMgr.createStatistics(dataCollection.getStatisticsContainer());
         }
 
         for (Table table : tables) {
@@ -154,7 +154,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     private boolean registerDefault(DataCollectionType type) {
         if (type == DataCollectionType.Segmentation) {
             DataCollection collection = segmentationDataCollectionService.getDefaultDataCollection();
-            createOrUpdateDataCollection(collection);
+            createDataCollection(collection);
             return true;
         }
 

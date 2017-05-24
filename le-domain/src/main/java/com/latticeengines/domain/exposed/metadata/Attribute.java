@@ -653,6 +653,18 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return getPropertyValue("Category") != null ? getPropertyValue("Category").toString() : null;
     }
 
+    @Transient
+    @JsonIgnore
+    public void setSubcategory(String subcategory) {
+        setPropertyValue("Subcategory", subcategory);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getSubcategory() {
+        return getPropertyValue("Subcategory") != null ? getPropertyValue("Subcategory").toString() : null;
+    }
+
     /**
      * Used for VisiDB/legacy systems
      */
@@ -952,10 +964,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         metadata.setColumnId(getName());
         metadata.setDescription(getDescription());
         metadata.setCategory(Category.fromName(getCategory()));
+        metadata.setSubcategory(getSubcategory());
         metadata.setDataType(getDataType());
         metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
         metadata.setStatisticalType(StatisticalType.fromName(getStatisticalType()));
         metadata.setDiscretizationStrategy(getDisplayDiscretizationStrategy());
         return metadata;
     }
+
 }

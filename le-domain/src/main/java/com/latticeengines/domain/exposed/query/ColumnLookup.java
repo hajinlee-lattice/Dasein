@@ -18,7 +18,7 @@ public class ColumnLookup extends Lookup {
     @JsonProperty("column_name")
     private String columnName;
     @JsonProperty("object_type")
-    @ApiModelProperty("This may be left unspecified if the correspondin`g query is "
+    @ApiModelProperty("This may be left unspecified if the corresponding query is "
             + "only against one logical object (e.g., Account)")
     private SchemaInterpretation objectType;
 

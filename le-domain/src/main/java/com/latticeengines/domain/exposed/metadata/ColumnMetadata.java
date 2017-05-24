@@ -17,6 +17,8 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ColumnMetadata implements HasAttributeCustomizations {
+    public static final String SUBCATEGORY_OTHER = "Other";
+
     private String columnId;
     private String columnName;
     private String description;

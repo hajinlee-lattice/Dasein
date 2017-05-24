@@ -36,12 +36,21 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Override
     public StatisticsContainer createOrUpdateStatistics(StatisticsContainer container) {
         StatisticsContainer existing = findStatisticsByName(container.getName());
-        if (existing != null) {
-            delete(existing);
+        if (existing == null) {
+            createStatistics(container);
+            return container;
         } else {
-            container.setName("Statistics_" + UUID.randomUUID());
+            existing.setStatistics(container.getStatistics());
+            update(existing);
+            return existing;
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public StatisticsContainer createStatistics(StatisticsContainer container) {
         container.setTenant(MultiTenantContext.getTenant());
+        container.setName("Statistics_" + UUID.randomUUID());
         create(container);
         return container;
     }

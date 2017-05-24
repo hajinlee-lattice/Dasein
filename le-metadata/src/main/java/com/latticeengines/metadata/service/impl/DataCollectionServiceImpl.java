@@ -43,7 +43,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             dataCollection.setName("DataCollection_" + UUID.randomUUID());
         }
 
-        dataCollectionEntityMgr.createOrUpdateDataCollection(dataCollection);
+        dataCollectionEntityMgr.createDataCollection(dataCollection);
         dataCollectionCache.invalidate(dataCollection.getType());
         return dataCollectionCache.get(dataCollection.getType());
     }
