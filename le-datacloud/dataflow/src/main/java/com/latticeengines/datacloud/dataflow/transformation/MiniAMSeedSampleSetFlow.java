@@ -47,17 +47,14 @@ public class MiniAMSeedSampleSetFlow extends ConfigurableFlowBase<MiniAMSeedSamp
         // Matching domain 
         Node miniSampledSetByDomain = seedDataSet //
                 .join(new FieldList(config.getSampledSetDomain()), miniDomainSampledSet,
-                        new FieldList(config.getMiniDataSetValue()), JoinType.INNER, true) //
+                        new FieldList(config.getMiniDataSetValue()), JoinType.INNER, false) //
                 .retain(new FieldList(seedDataSet.getFieldNames()));
 
         // Matching duns 
         Node miniSampledSetByDuns = seedDataSet //
                 .join(new FieldList(config.getSampledSetDuns()), miniDunsSampledSet,
-                        new FieldList(config.getMiniDataSetValue()), JoinType.INNER, true) //
+                        new FieldList(config.getMiniDataSetValue()), JoinType.INNER, false) //
                 .retain(new FieldList(seedDataSet.getFieldNames()));
-
-        miniSampledSetByDomain = miniSampledSetByDomain.checkpoint();
-        miniSampledSetByDuns = miniSampledSetByDuns.checkpoint();
 
         // Merge domains and duns set
         Node finalMergedSet = miniSampledSetByDomain.merge(miniSampledSetByDuns);
