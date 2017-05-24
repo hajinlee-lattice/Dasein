@@ -4,14 +4,12 @@ import static com.latticeengines.datacloud.etl.transformation.transformer.impl.S
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CalculateStatsParameter;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
@@ -46,15 +44,6 @@ public class StatsCalculator extends AbstractDataflowTransformer<BucketEncodeCon
     @Override
     protected boolean validateConfig(BucketEncodeConfig config, List<String> sourceNames) {
         return true;
-    }
-
-    @Override
-    protected void updateParameters(CalculateStatsParameter parameters, Source[] baseTemplates, Source targetTemplate,
-                                    BucketEncodeConfig config) {
-        // TODO: hook up with API configurations, for now hard coded
-        // AccountMaster fake bucketing
-        parameters.encAttrs = readConfigJson();
-        parameters.ignoreAttrs = Collections.singletonList("LatticeAccountId");
     }
 
     // TODO: to be removed and replaced by avro table driven configuration
