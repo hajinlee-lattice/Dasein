@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
@@ -177,8 +176,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             for (int i = 0; i < baseSources.length; i++) {
                 Source source = baseSources[i];
                 String version = baseSourceVersions.get(i);
-                String avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
-                Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroDir + "/*.avro");
+                Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source.getSourceName(), version);
                 schemas.add(schema);
             }
             return schemas;
