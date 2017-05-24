@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import static com.latticeengines.datacloud.dataflow.transformation.CalculateStats.BEAN_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_BKTALGO;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_ALGO;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_BKTS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
@@ -112,11 +113,14 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
 
         // retain
         List<String> toRetain = new ArrayList<>(count.getFieldNames());
-        toRetain.add(PROFILE_ATTR_BKTALGO);
+        toRetain.add(STATS_ATTR_ALGO);
+        if (!STATS_ATTR_ALGO.equals(PROFILE_ATTR_BKTALGO)) {
+            stats = stats.rename(new FieldList(PROFILE_ATTR_BKTALGO), new FieldList(STATS_ATTR_ALGO));
+        }
         stats = stats.retain(new FieldList(toRetain));
 
         // sort and merge to single file
-        return stats.sort(PROFILE_ATTR_ATTRNAME);
+        return stats.sort(ATTR_NAME);
     }
 
     private Node consolidateCnts(Node node) {

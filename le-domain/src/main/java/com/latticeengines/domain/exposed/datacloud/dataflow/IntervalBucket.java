@@ -62,9 +62,11 @@ public class IntervalBucket extends BucketAlgorithm {
             // convert to integer
             longValue = Double.valueOf(number.toString()).intValue();
             number = longValue;
+        } else if (number instanceof Double || number instanceof Float) {
+            return number.toString();
         } else {
             throw new IllegalArgumentException(
-                    "Cannot support a boundary of type " + number.getClass().getSimpleName());
+                    "Does not know how to format boundary " + number + " of type " + number.getClass().getSimpleName());
         }
         String formatted = number.toString();
         if (longValue != 0 && longValue % 1000 == 0) {

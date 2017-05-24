@@ -30,4 +30,5 @@ public final class DataCloudConstants {
     public static final String STATS_ATTR_NAME = "AttrName";
     public static final String STATS_ATTR_COUNT = "AttrCount";
     public static final String STATS_ATTR_BKTS = "BktCounts";
+    public static final String STATS_ATTR_ALGO = PROFILE_ATTR_BKTALGO;
 }

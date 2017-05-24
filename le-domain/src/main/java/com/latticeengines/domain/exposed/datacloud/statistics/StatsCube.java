@@ -14,7 +14,7 @@ public class StatsCube {
     private Map<String, AttributeStats> statistics;
 
     @JsonProperty("Cnt")
-    private Long nonNullCount;
+    private Long count;
 
     public Map<String, AttributeStats> getStatistics() {
         return statistics;
@@ -24,12 +24,12 @@ public class StatsCube {
         this.statistics = statistics;
     }
 
-    public Long getNonNullCount() {
-        return nonNullCount;
+    public Long getCount() {
+        return count;
     }
 
-    public void setNonNullCount(Long nonNullCount) {
-        this.nonNullCount = nonNullCount;
+    public void setCount(Long count) {
+        this.count = count;
     }
 
 }
