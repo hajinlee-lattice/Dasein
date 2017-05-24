@@ -1,29 +1,37 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_TASK", uniqueConstraints = @UniqueConstraint(columnNames = { "FEED_ID",
-        "SOURCE", "ENTITY" }))
+@javax.persistence.Table(name = "DATAFEED_TASK", uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE",
+        "ENTITY" }))
 public class DataFeedTask implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -40,10 +48,6 @@ public class DataFeedTask implements HasPid, Serializable {
     @JoinColumn(name = "FK_FEED_ID", nullable = false)
     private DataFeed dataFeed;
 
-    @JsonIgnore
-    @Column(name = "FEED_ID", nullable = false)
-    private Long feedId;
-
     @Column(name = "SOURCE", nullable = false)
     @JsonProperty("source")
     private String source;
@@ -52,21 +56,27 @@ public class DataFeedTask implements HasPid, Serializable {
     @JsonProperty("entity")
     private String entity;
 
-    @Column(name = "SOURCE_CONFIG", nullable = false)
+    @Column(name = "SOURCE_CONFIG", nullable = false, length = 1000)
     @JsonProperty("sourceConfig")
     private String sourceConfig;
 
+    @Column(name = "FEED_TYPE", nullable = true)
+    @JsonProperty("FeedType")
+    private String feedType;
+
     @JsonIgnore
-    @OneToOne
+    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_TEMPLATE_ID", nullable = false)
     private Table importTemplate;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_DATA_ID", nullable = false)
     private Table importData;
 
-    @Column(name = "STAGING_DIR", nullable = false)
+    @Column(name = "STAGING_DIR", nullable = false, length = 1000)
     @JsonIgnore
     private String stagingDir;
 
@@ -79,13 +89,15 @@ public class DataFeedTask implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(name = "LAST_CONSOLIDATED", nullable = false)
-    @JsonProperty("lastConsolidated")
-    private Long lastConsolidated;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "START_TIME", nullable = false)
+    @JsonProperty("StartTime")
+    private Date startTime;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LAST_IMPORTED", nullable = false)
     @JsonProperty("lastImported")
-    private Long lastImported;
+    private Date lastImported;
 
     @Override
     public Long getPid() {
@@ -98,20 +110,11 @@ public class DataFeedTask implements HasPid, Serializable {
         this.pid = pid;
     }
 
-    public Long getFeedId() {
-        return feedId;
-    }
-
-    public void setFeedId(Long feedId) {
-        this.feedId = feedId;
-    }
-
     public DataFeed getFeed() {
         return dataFeed;
     }
 
     public void setFeed(DataFeed feed) {
-        this.feedId = feed.getPid();
         this.dataFeed = feed;
     }
 
@@ -121,6 +124,14 @@ public class DataFeedTask implements HasPid, Serializable {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public String getFeedType() {
+        return feedType;
+    }
+
+    public void setFeedType(String feedType) {
+        this.feedType = feedType;
     }
 
     public String getEntity() {
@@ -171,20 +182,28 @@ public class DataFeedTask implements HasPid, Serializable {
         this.activeJob = activeJob;
     }
 
-    public long getLastConsolidated() {
-        return lastConsolidated;
+    public Date getStartTime() {
+        return startTime;
     }
 
-    public void setLastConsolidated(Long lastConsolidated) {
-        this.lastConsolidated = lastConsolidated;
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
-    public long getLastImported() {
+    public Date getLastImported() {
         return lastImported;
     }
 
-    public void setLastImported(Long lastImported) {
+    public void setLastImported(Date lastImported) {
         this.lastImported = lastImported;
+    }
+
+    public String getSourceConfig() {
+        return sourceConfig;
+    }
+
+    public void setSourceConfig(String sourceConfig) {
+        this.sourceConfig = sourceConfig;
     }
 
     public static enum Status {

@@ -73,7 +73,7 @@ public class MetadataServiceImpl implements MetadataService {
         DatabaseUtils.retry("createTable", new Closure() {
             @Override
             public void execute(Object input) {
-                tableEntityMgr.create(TableUtils.clone(table));
+                tableEntityMgr.create(TableUtils.clone(table, table.getName()));
             }
         });
     }
@@ -111,7 +111,7 @@ public class MetadataServiceImpl implements MetadataService {
                         tableEntityMgr.deleteByName(found.getName());
                     }
 
-                    tableEntityMgr.create(TableUtils.clone(table));
+                    tableEntityMgr.create(TableUtils.clone(table, table.getName()));
                 }
             });
         } finally {

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -29,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_EXECUTION", uniqueConstraints = @UniqueConstraint(columnNames = { "FEED_ID",
+@javax.persistence.Table(name = "DATAFEED_EXECUTION", uniqueConstraints = @UniqueConstraint(columnNames = {
         "EXECUTION" }))
 public class DataFeedExecution implements HasPid, Serializable {
 
@@ -45,12 +47,10 @@ public class DataFeedExecution implements HasPid, Serializable {
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_FEED_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private DataFeed dataFeed;
 
-    @JsonIgnore
-    @Column(name = "FEED_ID", nullable = false)
-    private Long feedId;
-
+    @Index(name = "IX_FEED_EXECUTION")
     @Column(name = "EXECUTION", nullable = false)
     @JsonProperty("execution")
     private Long execution;
@@ -60,14 +60,14 @@ public class DataFeedExecution implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "execution")
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "execution")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("imports")
-    private List<DataFeedImport> imports;
+    private List<DataFeedImport> imports = new ArrayList<>();
 
     @JsonProperty("runtimeTables")
     @Transient
-    private List<Table> runtimeTables;
+    private List<Table> runtimeTables = new ArrayList<>();
 
     @Override
     public Long getPid() {
@@ -80,20 +80,11 @@ public class DataFeedExecution implements HasPid, Serializable {
         this.pid = pid;
     }
 
-    public Long getFeedId() {
-        return feedId;
-    }
-
-    public void setFeedId(Long feedId) {
-        this.feedId = feedId;
-    }
-
     public DataFeed getFeed() {
         return dataFeed;
     }
 
     public void setFeed(DataFeed feed) {
-        this.feedId = feed.getPid();
         this.dataFeed = feed;
     }
 
@@ -112,6 +103,10 @@ public class DataFeedExecution implements HasPid, Serializable {
     public void addImport(DataFeedImport feedImport) {
         feedImport.setExecution(this);
         imports.add(feedImport);
+    }
+
+    public void addImports(List<DataFeedImport> imports) {
+        imports.forEach(this::addImport);
     }
 
     public void setImports(List<DataFeedImport> imports) {

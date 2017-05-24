@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -65,6 +67,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     @Column(name = "NAME", nullable = false)
     @JsonProperty("name")
+    @Index(name = "IX_FEED_NAME")
     private String name;
 
     @Column(name = "STATUS", nullable = false)
@@ -79,12 +82,12 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("executions")
-    private List<DataFeedExecution> executions;
+    private List<DataFeedExecution> executions = new ArrayList<>();
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("tasks")
-    private List<DataFeedTask> tasks;
+    private List<DataFeedTask> tasks = new ArrayList<>();
 
     @Transient
     @JsonIgnore
@@ -177,7 +180,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void addTask(DataFeedTask task) {
         Map<String, DataFeedTask> taskSrcMap = taskMap.get(task.getEntity());
-        if (tasks == null) {
+        if (taskSrcMap == null) {
             taskSrcMap = new HashMap<String, DataFeedTask>();
             taskMap.put(task.getEntity(), taskSrcMap);
         }

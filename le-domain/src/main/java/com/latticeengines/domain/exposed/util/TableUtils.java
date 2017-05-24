@@ -15,9 +15,10 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class TableUtils {
-    public static Table clone(Table source) {
+    public static Table clone(Table source, String name) {
         Table clone = JsonUtils.clone(source);
         clone.setTableType(source.getTableType());
+        clone.setName(name);
         return clone;
     }
 

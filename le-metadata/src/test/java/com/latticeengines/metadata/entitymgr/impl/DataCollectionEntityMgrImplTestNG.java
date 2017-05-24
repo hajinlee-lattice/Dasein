@@ -35,7 +35,6 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     }
 
     @Test(groups = "functional")
-    @SuppressWarnings("unchecked")
     public void create() {
         dataCollection.setName(DATA_COLLECTION_NAME);
         Table table = new Table();

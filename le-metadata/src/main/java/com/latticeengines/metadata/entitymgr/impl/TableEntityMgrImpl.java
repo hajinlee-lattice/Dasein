@@ -161,13 +161,12 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             throw new RuntimeException(String.format("No such table with name %s", name));
         }
 
-        final Table clone = TableUtils.clone(existing);
-        clone.setName("clone_" + UUID.randomUUID().toString().replace('-', '_'));
+        final Table clone = TableUtils.clone(existing, "clone_" + UUID.randomUUID().toString().replace('-', '_'));
 
         DatabaseUtils.retry("createTable", new Closure() {
             @Override
             public void execute(Object input) {
-                create(TableUtils.clone(clone));
+                create(TableUtils.clone(clone, clone.getName()));
             }
         });
 
@@ -196,8 +195,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             throw new RuntimeException(String.format("No such table with name %s", name));
         }
 
-        final Table copy = TableUtils.clone(existing);
-        copy.setName("copy_" + UUID.randomUUID().toString().replace('-', '_'));
+        final Table copy = TableUtils.clone(existing, "copy_" + UUID.randomUUID().toString().replace('-', '_'));
 
         DatabaseUtils.retry("createTable", new Closure() {
             @Override
@@ -205,7 +203,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 Tenant t = tenantEntityMgr.findByTenantId(targetCustomerSpace.toString());
                 MultiTenantContext.setTenant(t);
                 copy.setTenant(t);
-                create(TableUtils.clone(copy));
+                create(TableUtils.clone(copy, copy.getName()));
             }
         });
 
