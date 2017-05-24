@@ -113,7 +113,10 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
         // retain
         List<String> toRetain = new ArrayList<>(count.getFieldNames());
         toRetain.add(PROFILE_ATTR_BKTALGO);
-        return stats.retain(new FieldList(toRetain));
+        stats = stats.retain(new FieldList(toRetain));
+
+        // sort and merge to single file
+        return stats.sort(PROFILE_ATTR_ATTRNAME);
     }
 
     private Node consolidateCnts(Node node) {
