@@ -14,6 +14,20 @@ public class EngineProgress {
         INGESTION, TRANSFORMATION, PUBLICATION
     }
 
+    public EngineProgress() {
+
+    }
+
+    public EngineProgress(Engine engine, String name, String version, ProgressStatus status, Float progress,
+            String message) {
+        this.engine = engine;
+        this.name = name;
+        this.version = version;
+        this.status = status;
+        this.progress = progress;
+        this.message = message;
+    }
+
     @JsonProperty("Engine")
     public Engine getEngine() {
         return engine;
