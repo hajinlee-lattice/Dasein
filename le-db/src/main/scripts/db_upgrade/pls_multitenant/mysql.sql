@@ -34,7 +34,10 @@ CREATE PROCEDURE `UpdateSchema`()
         alter table `DATAFEED` add index FK9950E0487BF7C1B7 (FK_COLLECTION_ID), add constraint FK9950E0487BF7C1B7 foreign key (FK_COLLECTION_ID) references `METADATA_DATA_COLLECTION` (`PID`);
         alter table `DATAFEED` add index FK9950E04836865BC (FK_TENANT_ID), add constraint FK9950E04836865BC foreign key (FK_TENANT_ID) references `TENANT` (`TENANT_PID`);
 
-    
+        create table `MODEL_NOTES` (`PID` bigint not null auto_increment unique, `CREATED_BY_USER` varchar(255), `CREATION_TIMESTAMP` bigint, `ID` varchar(255) not null unique, `LAST_MODIFICATION_TIMESTAMP` bigint, `LAST_MODIFIED_BY_USER` varchar(255), `NOTES_CONTENTS` varchar(2048), `ORIGIN` varchar(255), `PARENT_MODEL_ID` varchar(255), MODEL_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
+        create index MODEL_NOTES_ID_IDX on `MODEL_NOTES` (`ID`);
+        alter table `MODEL_NOTES` add index FKE83891EB815935F7 (MODEL_ID), add constraint FKE83891EB815935F7 foreign key (MODEL_ID) references `MODEL_SUMMARY` (`PID`) on delete cascade;
+
 
 
 
