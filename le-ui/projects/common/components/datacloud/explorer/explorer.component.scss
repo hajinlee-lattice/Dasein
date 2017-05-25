@@ -1510,6 +1510,15 @@
                 }
             }
         }
+        &.error {
+            border-color: rgb(210, 32, 39);
+            .icon {
+                background: rgb(210, 32, 39);
+                &:after {
+                    @include font-awesome-inline("\f071");
+                }
+            }
+        }
         & > .close {
             position: absolute;
             top: 18px;

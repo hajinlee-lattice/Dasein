@@ -333,6 +333,8 @@ angular.module('common.datacloud')
             data: data
         }).then(function(response){
             deferred.resolve(response.data);
+        }, function(response) { //on error
+            deferred.resolve(response.data);
         });
         return deferred.promise;
     }

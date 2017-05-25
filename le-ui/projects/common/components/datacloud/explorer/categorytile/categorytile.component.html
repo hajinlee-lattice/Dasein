@@ -36,7 +36,7 @@
                     <div class="column data" ng-if="!highlightAttributes.length">{{ vm.lookupMode ? 'Value' : (vm.section == 'segment.analysis' && vm.inModel() ? 'Lift' : 'Records') }}</div>
                 </li>
                 <li ng-repeat="attribute in (categoryAttributes = (TileTableItems.other 
-                        | filter: vm.enrichmentsFilter
+                        | filter: vm.enrichmentsFilter()
                         | orderBy: vm.categoryOrderBy()
                         | limitTo: 5 - (highlightAttributes.length || 0)))"
                         class="attribute"

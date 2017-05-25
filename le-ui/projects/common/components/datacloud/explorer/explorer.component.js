@@ -39,6 +39,7 @@ angular.module('common.datacloud.explorer', [
             generalTotalSelectError: 'Attribute limit reached',
             no_results: 'No attributes were found',
             saved_alert: 'Your changes have been saved.',
+            saved_error: 'Your changes could not be saved.',
             saving_alert: 'Your changes are being saved. <i class="fa fa-cog fa-spin fa-fw"></i>',
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
@@ -1012,7 +1013,8 @@ angular.module('common.datacloud.explorer', [
             (timestamp4 - timestamp) + 'ms\t',
             category, '\t',
             subcategory, '\t',
-            items
+            items, '\t',
+            vm.enrichmentsFilter()
         );
 
         return items;
@@ -1154,7 +1156,11 @@ angular.module('common.datacloud.explorer', [
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
         DataCloudService.setEnrichments(data).then(function(result){
-            vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+            if(result.errorCode) {
+                vm.statusMessage(vm.label.saved_error, {type: 'error'});
+            } else {
+                vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+            }
             vm.saveDisabled = 1;
 
             if (selectedObj.length > 0 || deselectedObj.length > 0) {

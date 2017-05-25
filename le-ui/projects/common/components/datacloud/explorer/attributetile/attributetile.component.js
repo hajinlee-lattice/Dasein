@@ -1,5 +1,5 @@
 angular
-.module('common.datacloud.explorer.attributetile', [])
+.module('common.datacloud.explorer.attributetile', ['mainApp.appCommon.utilities.NumberUtility'])
 .directive('explorerAttributeTile',function() {
     return {
         restrict: 'A',
