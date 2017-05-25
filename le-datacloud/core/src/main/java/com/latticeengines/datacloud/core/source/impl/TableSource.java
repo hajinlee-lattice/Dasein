@@ -49,14 +49,22 @@ public class TableSource implements Source {
      * timestamp field for sorting
      */
     public String getTimestampField() {
-        return table.getLastModifiedKey().getAttributesAsStr();
+        if (table.getLastModifiedKey() == null) {
+            return null;
+        } else {
+            return table.getLastModifiedKey().getAttributesAsStr();
+        }
     }
 
     /*
      * primary key
      */
     public String[] getPrimaryKey() {
-        return table.getPrimaryKey().getAttributeNames();
+        if (table.getPrimaryKey() == null) {
+            return null;
+        } else {
+            return table.getPrimaryKey().getAttributeNames();
+        }
     }
 
     /*

@@ -228,6 +228,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                 baseTables = Collections.emptyMap();
             }
 
+            Map<String, TableSource> involvedTableSources = new HashMap<>();
+
             if ((baseSourceNames != null) && (baseSourceNames.size() != 0)) {
                 for (int i = 0; i < baseSourceNames.size(); i++, baseSourceIdx++) {
                     String sourceName = baseSourceNames.get(i);
@@ -246,6 +248,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                             throw new RuntimeException("There is no table named " + baseTable.getTableName() + " for customer " + baseTable.getCustomerSpace());
                         }
                         source = new TableSource(table, baseTable.getCustomerSpace());
+                        involvedTableSources.put(sourceName, (TableSource) source);
                     } else {
                         source = sourceService.findBySourceName(sourceName);
                     }
@@ -270,6 +273,9 @@ public class PipelineTransformationService extends AbstractTransformationService
 
                     String templateName = baseTemplateNames.get(i);
                     Source template = sourceService.findBySourceName(templateName);
+                    if (involvedTableSources.containsKey(templateName)) {
+                        template = involvedTableSources.get(templateName);
+                    }
                     if (template == null) {
                         updateStatusToFailed(progress, "Base source " + templateName + " not found", null);
                         return null;
