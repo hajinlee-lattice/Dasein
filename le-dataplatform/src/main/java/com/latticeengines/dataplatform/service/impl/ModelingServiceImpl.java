@@ -496,7 +496,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         // The model quality framework specifies the production version to run;
         // keep the path as-is
-        Pattern pattern_stack_and_version = Pattern.compile("^/app/[a|b|a_aws|b_aws]/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/.*");
+        Pattern pattern_stack_and_version = Pattern.compile("^/app/(a|b|a_aws|b_aws)/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/.*");
         Matcher c_stack_and_version = pattern_stack_and_version.matcher(script);
         if (c_stack_and_version.matches()) {
             return script;
