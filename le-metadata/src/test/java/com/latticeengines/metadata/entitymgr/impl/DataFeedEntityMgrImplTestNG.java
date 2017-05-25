@@ -79,7 +79,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         dataCollection.addDataFeed(datafeed);
 
         DataFeedExecution execution = new DataFeedExecution();
-        execution.setExecution(1L);
+        execution.setFeed(datafeed);
         execution.setStatus(DataFeedExecution.Status.Active);
         datafeed.addExeuction(execution);
 
@@ -94,6 +94,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         dataTable.setTenant(MultiTenantContext.getTenant());
 
         DataFeedTask task = new DataFeedTask();
+        task.setFeed(datafeed);
         task.setActiveJob(3L);
         task.setEntity(SchemaInterpretation.Account.name());
         task.setSource("SFDC");
@@ -106,25 +107,35 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         task.setLastImported(new Date());
         datafeed.addTask(task);
         datafeedEntityMgr.create(datafeed);
-        task.setFeed(datafeed);
         datafeedTaskEntityMgr.create(task);
-        execution.setFeed(datafeed);
         datafeedExecutionEntityMgr.create(execution);
-
+        datafeed.setActiveExecution(execution.getPid());
+        datafeedEntityMgr.update(datafeed);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        DataFeed retrieved = datafeedEntityMgr.findByField("name", DATA_FEED_NAME);
+        DataFeed retrieved = datafeedEntityMgr.findByName(DATA_FEED_NAME);
         assertEquals(retrieved.getName(), datafeed.getName());
         assertEquals(retrieved.getActiveExecution(), datafeed.getActiveExecution());
+        assertEquals(retrieved.getExecutions().size(), 1);
+        assertEquals(retrieved.getTasks().size(), 1);
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
     public void startExecution() {
         datafeedEntityMgr.startExecution(DATA_FEED_NAME);
-        DataFeed df = datafeedEntityMgr.findByField("name", DATA_FEED_NAME);
-        assertEquals(df.getActiveExecution(), new Long(2L));
+        DataFeed df = datafeedEntityMgr.findByName(DATA_FEED_NAME);
+        assertEquals(df.getActiveExecution(), new Long(datafeed.getActiveExecution() + 1L));
+        assertEquals(df.getExecutions().size(), 2);
+
+        DataFeedExecution exec1 = df.getExecutions().get(0);
+        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
+        assertEquals(exec1.getImports().size(), df.getTasks().size());
+
+        DataFeedExecution exec2 = df.getExecutions().get(1);
+        assertEquals(exec2.getStatus(), DataFeedExecution.Status.Active);
+        assertEquals(exec2.getImports().size(), 0);
     }
 
 }

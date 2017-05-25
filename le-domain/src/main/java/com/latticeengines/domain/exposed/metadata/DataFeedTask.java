@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_TASK", uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE",
-        "ENTITY" }))
+        "ENTITY", "FK_FEED_ID" }))
 public class DataFeedTask implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -45,7 +45,7 @@ public class DataFeedTask implements HasPid, Serializable {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "FK_FEED_ID", nullable = false)
+    @JoinColumn(name = "`FK_FEED_ID`", nullable = false)
     private DataFeed dataFeed;
 
     @Column(name = "SOURCE", nullable = false)
@@ -57,11 +57,11 @@ public class DataFeedTask implements HasPid, Serializable {
     private String entity;
 
     @Column(name = "SOURCE_CONFIG", nullable = false, length = 1000)
-    @JsonProperty("sourceConfig")
+    @JsonProperty("source_config")
     private String sourceConfig;
 
     @Column(name = "FEED_TYPE", nullable = true)
-    @JsonProperty("FeedType")
+    @JsonProperty("feed_type")
     private String feedType;
 
     @JsonIgnore
@@ -77,11 +77,11 @@ public class DataFeedTask implements HasPid, Serializable {
     private Table importData;
 
     @Column(name = "STAGING_DIR", nullable = false, length = 1000)
-    @JsonIgnore
+    @JsonProperty("staging_dir")
     private String stagingDir;
 
     @Column(name = "ACTIVE_JOB", nullable = false)
-    @JsonIgnore
+    @JsonProperty("active_job")
     private Long activeJob;
 
     @Column(name = "STATUS", nullable = false)
@@ -91,12 +91,12 @@ public class DataFeedTask implements HasPid, Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "START_TIME", nullable = false)
-    @JsonProperty("StartTime")
+    @JsonProperty("start_time")
     private Date startTime;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LAST_IMPORTED", nullable = false)
-    @JsonProperty("lastImported")
+    @JsonProperty("last_imported")
     private Date lastImported;
 
     @Override

@@ -49,6 +49,17 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public DataFeed findByName(String datafeedName) {
+        DataFeed datafeed = findByField("name", datafeedName);
+        if (datafeed != null) {
+            HibernateUtils.inflateDetails(datafeed.getTasks());
+            HibernateUtils.inflateDetails(datafeed.getExecutions());
+        }
+        return datafeed;
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void startExecution(String datafeedName) {
         DataFeed datafeed = datafeedDao.findByField("name", datafeedName);
@@ -59,20 +70,18 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
         List<DataFeedImport> imports = tasks.stream().map(DataFeedImportUtils::createImportFromTask)
                 .collect(Collectors.toList());
-        DataFeedExecution execution = datafeedExecutionEntityMgr.findByField("execution",
-                datafeed.getActiveExecution());
-        execution.setStatus(Status.Inited);
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecution());
+        execution.setStatus(Status.Started);
         execution.addImports(imports);
         datafeedExecutionEntityMgr.update(execution);
 
         DataFeedExecution newExecution = new DataFeedExecution();
-        newExecution.setExecution(datafeed.getActiveExecution() + 1);
         newExecution.setFeed(datafeed);
         newExecution.setStatus(Status.Active);
         datafeedExecutionEntityMgr.create(newExecution);
 
         datafeed.addExeuction(newExecution);
-        datafeed.setActiveExecution(newExecution.getExecution());
+        datafeed.setActiveExecution(newExecution.getPid());
         tasks.forEach(task -> {
             task.setStartTime(new Date());
             Table dataTable = task.getImportData();

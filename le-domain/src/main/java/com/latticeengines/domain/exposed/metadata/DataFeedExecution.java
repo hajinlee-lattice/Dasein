@@ -20,9 +20,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -31,8 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_EXECUTION", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "EXECUTION" }))
+@javax.persistence.Table(name = "DATAFEED_EXECUTION")
 public class DataFeedExecution implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -50,11 +47,6 @@ public class DataFeedExecution implements HasPid, Serializable {
     @JsonIgnore
     private DataFeed dataFeed;
 
-    @Index(name = "IX_FEED_EXECUTION")
-    @Column(name = "EXECUTION", nullable = false)
-    @JsonProperty("execution")
-    private Long execution;
-
     @Column(name = "STATUS", nullable = false)
     @JsonProperty("status")
     @Enumerated(EnumType.STRING)
@@ -65,7 +57,7 @@ public class DataFeedExecution implements HasPid, Serializable {
     @JsonProperty("imports")
     private List<DataFeedImport> imports = new ArrayList<>();
 
-    @JsonProperty("runtimeTables")
+    @JsonProperty("runtime_tables")
     @Transient
     private List<Table> runtimeTables = new ArrayList<>();
 
@@ -86,14 +78,6 @@ public class DataFeedExecution implements HasPid, Serializable {
 
     public void setFeed(DataFeed feed) {
         this.dataFeed = feed;
-    }
-
-    public Long getExecution() {
-        return execution;
-    }
-
-    public void setExecution(Long execution) {
-        this.execution = execution;
     }
 
     public List<DataFeedImport> getImports() {
@@ -136,6 +120,7 @@ public class DataFeedExecution implements HasPid, Serializable {
     public static enum Status {
         Inited("inited"), //
         Active("active"), //
+        Started("started"), //
         Consolidated("consolidated");
 
         private final String name;

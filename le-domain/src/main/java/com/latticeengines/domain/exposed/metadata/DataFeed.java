@@ -19,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -76,11 +77,12 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     private Status status;
 
     @Column(name = "ACTIVE_EXECUTION", nullable = false)
-    @JsonProperty("activeExecution")
+    @JsonProperty("active_execution")
     private Long activeExecution;
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @OrderBy("PID ASC")
     @JsonProperty("executions")
     private List<DataFeedExecution> executions = new ArrayList<>();
 

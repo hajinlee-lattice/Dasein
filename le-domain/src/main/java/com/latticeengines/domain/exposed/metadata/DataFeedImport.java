@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_IMPORT", uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE",
-        "ENTITY" }))
+        "ENTITY", "FK_FEED_EXEC_ID" }))
 public class DataFeedImport implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -36,7 +36,7 @@ public class DataFeedImport implements HasPid, Serializable {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "FK_FEED_EXEC_ID", nullable = false)
+    @JoinColumn(name = "`FK_FEED_EXEC_ID`", nullable = false)
     private DataFeedExecution execution;
 
     @Column(name = "SOURCE", nullable = false)
@@ -44,7 +44,7 @@ public class DataFeedImport implements HasPid, Serializable {
     private String source;
 
     @Column(name = "FEED_TYPE", nullable = true)
-    @JsonProperty("FeedType")
+    @JsonProperty("feed_type")
     private String feedType;
 
     @Column(name = "ENTITY", nullable = false)
@@ -52,7 +52,7 @@ public class DataFeedImport implements HasPid, Serializable {
     private String entity;
 
     @Column(name = "SOURCE_CONFIG", nullable = false, length = 1000)
-    @JsonProperty("sourceConfig")
+    @JsonProperty("source_config")
     private String sourceConfig;
 
     @JsonIgnore
@@ -62,7 +62,7 @@ public class DataFeedImport implements HasPid, Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "START_TIME", nullable = false)
-    @JsonProperty("StartTime")
+    @JsonProperty("start_time")
     private Date startTime;
 
     @Override
