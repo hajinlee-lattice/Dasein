@@ -36,9 +36,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
-
-public abstract class TransformationServiceImplTestNGBase<T extends TransformationConfiguration>
-        extends DataCloudEtlFunctionalTestNGBase {
+public abstract class TransformationServiceImplTestNGBase<T extends TransformationConfiguration> extends
+        DataCloudEtlFunctionalTestNGBase {
 
     private static final int MAX_LOOPS = 100;
 
@@ -105,10 +104,20 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         uploadAndRegisterTableSource(Collections.singletonList(avroFile), tableName);
     }
 
+    protected void uploadAndRegisterTableSource(String avroFile, String tableName, String primaryKeyName,
+            String lastModifiedKeyName) {
+        uploadAndRegisterTableSource(Collections.singletonList(avroFile), tableName, primaryKeyName,
+                lastModifiedKeyName);
+    }
+
     protected void uploadAndRegisterTableSource(List<String> avroFiles, String tableName) {
-        String tableDir = hdfsPathBuilder
-                .constructTablePath(tableName, CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE), "")
-                .toString();
+        uploadAndRegisterTableSource(avroFiles, tableName, null, null);
+    }
+
+    protected void uploadAndRegisterTableSource(List<String> avroFiles, String tableName, String primaryKeyName,
+            String lastModifiedKeyName) {
+        String tableDir = hdfsPathBuilder.constructTablePath(tableName,
+                CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE), "").toString();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, tableDir)) {
                 HdfsUtils.rmdir(yarnConfiguration, tableDir);
@@ -122,13 +131,19 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
             }
             InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-            String successPath = getPathToUploadBaseData() + SUCCESS_FLAG;
+            String uploadBaseDir = getPathToUploadBaseData();
+            String successPath = null;
+            if (uploadBaseDir != null) {
+                successPath = getPathToUploadBaseData() + SUCCESS_FLAG;
+            } else {
+                successPath = tableDir + SUCCESS_FLAG;
+            }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        Table table = MetadataConverter.getTable(yarnConfiguration, tableDir);
+        Table table = MetadataConverter.getTable(yarnConfiguration, tableDir, primaryKeyName, lastModifiedKeyName);
         table.setName(tableName);
         metadataProxy.updateTable(DataCloudConstants.SERVICE_CUSTOMERSPACE, tableName, table);
     }
@@ -144,13 +159,13 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
     }
 
     protected TransformationProgress transformData(TransformationProgress progress) {
-        TransformationProgress response = transformationService.transform(progress,
-                createTransformationConfiguration());
+        TransformationProgress response = transformationService
+                .transform(progress, createTransformationConfiguration());
 
         Assert.assertEquals(response.getStatus(), ProgressStatus.FINISHED);
 
-        TransformationProgress progressInDb = progressEntityMgr
-                .findProgressByRootOperationUid(progress.getRootOperationUID());
+        TransformationProgress progressInDb = progressEntityMgr.findProgressByRootOperationUid(progress
+                .getRootOperationUID());
         Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
 
         return response;
