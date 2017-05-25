@@ -105,7 +105,6 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
     @Test(groups = "deployment", enabled = true)
     public void testTableToTable() {
         targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
-        uploadBaseSourceFile(source1, avroFile, baseSourceVersion);
         uploadAndRegisterTableSource(avroFile, source1.getSourceName());
         currentConfig.set(tableToTable());
 
@@ -270,7 +269,6 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
             List<TransformationStepConfig> steps = Arrays.asList(step1, step2);
             // -----------
             configuration.setSteps(steps);
-            configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
             return configuration;
         } catch (Exception e) {
             throw new RuntimeException(e);
