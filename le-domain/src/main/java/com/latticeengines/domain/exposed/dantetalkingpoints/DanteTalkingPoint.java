@@ -16,12 +16,11 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "TalkingPointCache")
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class DanteTalkingPoint implements HasPid, Serializable {
+public class DanteTalkingPoint implements Serializable, HasDanteAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
