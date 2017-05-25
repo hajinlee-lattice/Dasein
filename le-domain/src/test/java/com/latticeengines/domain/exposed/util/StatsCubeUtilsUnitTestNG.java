@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.avro.generic.GenericRecord;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -18,27 +19,20 @@ public class StatsCubeUtilsUnitTestNG {
 
     private static final String RESOURCE_ROOT = "com/latticeengines/domain/exposed/util/statsCubeUtilsUnitTestNG/";
 
-    @Test(groups = "unit", enabled = false)
+    @Test(groups = "unit")
     public void testParseAvro() throws Exception {
         Iterator<GenericRecord> records = readAvro();
         StatsCube cube = StatsCubeUtils.parseAvro(records);
         Assert.assertNotNull(cube);
-        ObjectMapper om = new ObjectMapper();
-        System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(cube));
 
-        Assert.assertEquals(cube.getCount(), new Long(194769076L));
+        System.out.println(JsonUtils.pprint(cube));
+
         AttributeStats stats = cube.getStatistics().get("LatticeAccountId");
-        System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(stats));
+        long maxCount = stats.getNonNullCount();
+        Assert.assertEquals(cube.getCount(), new Long(maxCount));
 
         cube.getStatistics().forEach((attrName, attrStats) -> {
-            if (attrStats.getNonNullCount() > 194769076L) {
-                try {
-                    System.out.println(attrName);
-                    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(attrStats));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            Assert.assertTrue(attrStats.getNonNullCount() <= maxCount, attrName + JsonUtils.pprint(attrStats));
         });
     }
 
@@ -48,6 +42,5 @@ public class StatsCubeUtilsUnitTestNG {
         List<GenericRecord> records = AvroUtils.readFromInputStream(avroIs);
         return records.iterator();
     }
-
 
 }
