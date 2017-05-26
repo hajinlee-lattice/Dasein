@@ -83,7 +83,7 @@ public abstract class WorkflowSubmitter {
         if (transformationGroup != TransformationGroup.NONE
                 && modelingEventTable.getRealTimeTransformationMetadata().getValue().isEmpty()) {
             if (transformationGroup == TransformationGroup.STANDARD) {
-                return TransformationPipeline.getStandardTransformsV1();
+                return TransformationPipeline.getStandardTransforms();
             }
             return TransformationPipeline.getTransforms(transformationGroup);
         }

@@ -250,11 +250,7 @@ public class TransformationPipeline {
         }
     }
 
-    // getStandardTransformsV1() is the original definition that was deprecated
-    // in M10 with the introduction of replacement DS features in the modeling
-    // pipeline.
-
-    public static List<TransformDefinition> getStandardTransformsV1() {
+    public static List<TransformDefinition> getStandardTransforms() {
         List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition> builder()
                 .add(stdVisidbDsCompanynameEntropy) //
                 .add(stdLengthTitle) //
@@ -271,24 +267,6 @@ public class TransformationPipeline {
                 .add(stdVisidbDsPdFundingstageOrdered) //
                 .add(stdVisidbDsTitleIsacademic) //
                 .add(stdVisidbDsFirstnameSameasLastname) //
-                .add(stdVisidbDsIndustryGroup) //
-                .add(dnbNaicsSector) //
-                .add(dnbNaicsSubsector) //
-                .add(dnbNaicsIndustryGroup) //
-                .add(dnbSicCategory) //
-                .add(dnbRevenueRangeOrdinal) //
-                .add(dnbEmployeeRangeOrdinal) //
-                .build();
-        return stdTransformDefinitions;
-    }
-
-    public static List<TransformDefinition> getStandardTransforms() {
-        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition> builder()
-                .add(stdVisidbDsPdAlexaRelatedlinksCount) //
-                .add(stdVisidbAlexaMonthssinceonline) //
-                .add(stdVisidbDsPdModelactionOrdered) //
-                .add(stdVisidbDsPdJobstrendstringOrdered) //
-                .add(stdVisidbDsPdFundingstageOrdered) //
                 .add(stdVisidbDsIndustryGroup) //
                 .add(dnbNaicsSector) //
                 .add(dnbNaicsSubsector) //
