@@ -291,11 +291,11 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         ScoreModelTuple tuple1 = new ScoreModelTuple();
         tuple1.setModelId("model1");
         tuple1.setScore(99);
-        tuple1.setBucket(BucketName.A);
+        tuple1.setBucket(BucketName.A_PLUS.toValue());
         ScoreModelTuple tuple2 = new ScoreModelTuple();
         tuple2.setModelId("model2");
         tuple2.setScore(98);
-        tuple2.setBucket(BucketName.A);
+        tuple2.setBucket(BucketName.A.toValue());
         scores1.add(tuple1);
         scores1.add(tuple2);
 
@@ -303,7 +303,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         ScoreModelTuple tuple3 = new ScoreModelTuple();
         tuple3.setModelId("model1");
         tuple3.setScore(8);
-        tuple3.setBucket(BucketName.D);
+        tuple3.setBucket(BucketName.D.toValue());
         scores2.add(tuple3);
 
         ScoreModelTuple tuple4 = new ScoreModelTuple();

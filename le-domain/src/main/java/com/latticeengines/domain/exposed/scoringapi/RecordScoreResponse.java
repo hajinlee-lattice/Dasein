@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.BucketName;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -93,7 +92,7 @@ public class RecordScoreResponse {
 
         @JsonProperty("rating")
         @ApiModelProperty(value = "Bucket Information Based on Score")
-        private BucketName bucket;
+        private String bucket;
 
         @JsonProperty("probability")
         @ApiModelProperty(hidden = true)
@@ -151,11 +150,11 @@ public class RecordScoreResponse {
             return JsonUtils.serialize(this);
         }
 
-        public BucketName getBucket() {
+        public String getBucket() {
             return this.bucket;
         }
 
-        public void setBucket(BucketName bucket) {
+        public void setBucket(String bucket) {
             this.bucket = bucket;
         }
     }

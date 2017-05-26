@@ -1,22 +1,48 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.scoringapi.exposed.ScoreEvaluation;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class DefaultModelJsonTypeHandlerUnitTestNG {
 
+    @Spy
     private DefaultModelJsonTypeHandler defaultModelJsonTypeHandler = new DefaultModelJsonTypeHandler();
 
     @SuppressWarnings("unchecked")
+    @BeforeClass(groups = "unit")
+    public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        ScoreEvaluation scoreEvaluation = new ScoreEvaluation(0.05123, 99, BucketName.A_PLUS);
+        doReturn(scoreEvaluation).when(defaultModelJsonTypeHandler).score(any(ScoringArtifacts.class), any(Map.class));
+    }
+
+    @Test(groups = "unit", enabled = true)
+    public void testScoreResponseGetValue() {
+        ScoringArtifacts scoringArtifacts = new ScoringArtifacts(null, null, null, null, null, null, null, null, null,
+                generateDefaultBucketMetadataList());
+        Map<String, Object> transformedRecord = new HashMap<String, Object>();
+        ScoreResponse sr = defaultModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
+        Assert.assertEquals(sr.getBucket(), BucketName.A_PLUS.toValue());
+    }
+
     @Test(groups = "unit", enabled = true)
     public void testBucketPercileScore() {
         ScoringArtifacts scoringArtifacts = new ScoringArtifacts(null, null, null, null, null, null, null, null, null,

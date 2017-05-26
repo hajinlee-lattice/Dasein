@@ -467,7 +467,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 Integer score = tuple.getScore();
                 if (modelIsPythonType()) {
                     validateScore(score);
-                    String bucketName = tuple.getBucket() == null ? "" : tuple.getBucket().name();
+                    String bucketName = tuple.getBucket() == null ? "" : tuple.getBucket();
                     builder.set(ScoreResultField.Rating.displayName, bucketName);
                 }
                 if (isEnableDebug) {

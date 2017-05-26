@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.scoringapi;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.pls.BucketName;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -22,7 +21,7 @@ public class ScoreResponse extends BaseResponse {
 
     @JsonProperty("rating")
     @ApiModelProperty(value = "Bucket Information Based on Score")
-    private BucketName bucket;
+    private String bucket;
 
     @JsonProperty("classification")
     @ApiModelProperty(value = "Classification")
@@ -72,11 +71,11 @@ public class ScoreResponse extends BaseResponse {
         this.classification = classification;
     }
 
-    public BucketName getBucket() {
+    public String getBucket() {
         return this.bucket;
     }
 
-    public void setBucket(BucketName bucket) {
+    public void setBucket(String bucket) {
         this.bucket = bucket;
     }
 

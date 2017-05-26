@@ -203,7 +203,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         ScoreResponse scoreResponse = new ScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         scoreResponse.setScore(scoreEvaluation.getPercentile());
-        scoreResponse.setBucket(scoreEvaluation.getBucketName());
+        scoreResponse.setBucket(scoreEvaluation.getBucketName().toValue());
         return scoreResponse;
     }
 
@@ -215,7 +215,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         debugScoreResponse.setProbability(scoreEvaluation.getProbabilityOrValue());
         debugScoreResponse.setScore(scoreEvaluation.getPercentile());
-        debugScoreResponse.setBucket(scoreEvaluation.getBucketName());
+        debugScoreResponse.setBucket(scoreEvaluation.getBucketName().toValue());
         debugScoreResponse.setTransformedRecord(transformedRecord);
         debugScoreResponse.setMatchedRecord(matchedRecord);
         debugScoreResponse.setMatchLogs(matchLogs);

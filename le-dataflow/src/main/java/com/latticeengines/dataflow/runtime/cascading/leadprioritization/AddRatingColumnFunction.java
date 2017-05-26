@@ -41,7 +41,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         return;
     }
 
-    protected BucketName bucketPercileScore(List<BucketMetadata> bucketMetadataList, int percentile) {
+    protected String bucketPercileScore(List<BucketMetadata> bucketMetadataList, int percentile) {
         BucketName bucketName = null;
         int min = BucketName.A.getDefaultUpperBound();
         int max = BucketName.D.getDefaultLowerBound();
@@ -111,7 +111,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
                 bucketName = BucketName.A;
             }
         }
-        return bucketName;
+        return bucketName == null ? null : bucketName.toValue();
     }
 
 }

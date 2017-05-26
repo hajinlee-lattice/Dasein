@@ -3,6 +3,7 @@ package com.latticeengines.leadprioritization.dataflow;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,14 +58,14 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
         bucketMetadataList.add(BUCKET_METADATA_B);
         bucketMetadataList.add(BUCKET_METADATA_C);
         bucketMetadataList.add(BUCKET_METADATA_D);
-        BUCKET_METADATA_A.setBucket(BucketName.A);
+        BUCKET_METADATA_A.setBucket(BucketName.A_PLUS);
         BUCKET_METADATA_A.setNumLeads(NUM_LEADS_BUCKET_1);
         BUCKET_METADATA_A.setLeftBoundScore(99);
-        BUCKET_METADATA_A.setRightBoundScore(95);
+        BUCKET_METADATA_A.setRightBoundScore(91);
         BUCKET_METADATA_A.setLift(LIFT_1);
         BUCKET_METADATA_B.setBucket(BucketName.B);
         BUCKET_METADATA_B.setNumLeads(NUM_LEADS_BUCKET_2);
-        BUCKET_METADATA_B.setLeftBoundScore(94);
+        BUCKET_METADATA_B.setLeftBoundScore(90);
         BUCKET_METADATA_B.setRightBoundScore(85);
         BUCKET_METADATA_B.setLift(LIFT_2);
         BUCKET_METADATA_C.setBucket(BucketName.C);
@@ -101,11 +102,16 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
 
         List<GenericRecord> outputRecords = readOutput();
         assertEquals(outputRecords.size(), inputRecords.size());
+        boolean foundAplusScore = false;
         for (GenericRecord record : outputRecords) {
             assertNotNull(record.get(InterfaceName.Id.name()));
             assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             assertNotNull(record.get(ScoreResultField.Rating.displayName));
+            if (record.get(ScoreResultField.Rating.displayName).toString().equals(BucketName.A_PLUS.toValue())) {
+                foundAplusScore = true;
+            }
         }
+        assertTrue(foundAplusScore, "Should have found one A+ bucket.");
     }
 
     @Test(groups = "functional", dependsOnMethods = "testScoresAreCombined")
