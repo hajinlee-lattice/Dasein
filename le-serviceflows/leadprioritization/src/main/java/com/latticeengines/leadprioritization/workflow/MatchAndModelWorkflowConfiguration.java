@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration.Builder;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
@@ -145,6 +146,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder userId(String userId) {
             pivotScoreAndEvent.setUserId(userId);
+            model.setUserName(userId);
             return this;
         }
 
@@ -312,6 +314,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder enableV2Profiling(boolean v2ProfilingEnabled) {
             model.setV2ProfilingEnabled(v2ProfilingEnabled);
+            return this;
+        }
+
+        public Builder notesContent(String notesContent) {
+            model.setNotesContent(notesContent);
             return this;
         }
 

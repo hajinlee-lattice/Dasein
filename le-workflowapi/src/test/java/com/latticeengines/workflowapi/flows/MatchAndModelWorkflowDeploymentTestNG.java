@@ -31,7 +31,9 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
+import com.latticeengines.domain.exposed.pls.ModelNotes;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -40,6 +42,7 @@ import com.latticeengines.leadprioritization.workflow.MatchAndModelAndEmailWorkf
 import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
+import com.latticeengines.pls.service.ModelNotesService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -74,6 +77,9 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     @Autowired
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+
+    @Autowired
+    private ModelNotesService modelNotesService;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -144,6 +150,8 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
                 assertEquals(field.getApprovedUsage(), ApprovedUsage.NONE.toString());
             }
         }
+        List<ModelNotes> list = modelNotesService.getAllByModelSummaryId(summary.getId());
+        assertEquals(list.size(), 2);
     }
 
     protected void cloneAndRemodel(Table clone, List<Attribute> userRefinedAttributes, ModelSummary modelSummary)
@@ -154,6 +162,12 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         parameters.setDeduplicationType(DedupType.MULTIPLELEADSPERDOMAIN);
         parameters.setExcludePropDataAttributes(Boolean.FALSE);
         parameters.setEnableTransformations(new Random().nextBoolean());
+        parameters.setNotesContent("this is another test case");
+
+        NoteParams noteParams = new NoteParams();
+        noteParams.setUserName("penglong.liu@lattice-engines.com");
+        noteParams.setContent("this is a test case");
+        modelNotesService.create(modelSummary.getId(), noteParams);
         MatchAndModelWorkflowConfiguration configuration = matchAndModelWorkflowSubmitter.generateConfiguration(
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());

@@ -130,7 +130,8 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //
-                .userRefinedAttributes(userRefinedAttributes);
+                .userRefinedAttributes(userRefinedAttributes)
+                .notesContent(parameters.getNotesContent());
         return builder.build();
     }
 

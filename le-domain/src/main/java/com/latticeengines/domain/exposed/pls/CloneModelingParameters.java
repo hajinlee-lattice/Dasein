@@ -41,6 +41,9 @@ public class CloneModelingParameters {
     @JsonProperty
     private boolean enableTransformations;
 
+    @JsonProperty
+    private String notesContent;
+
     public String getName() {
         return name;
     }
@@ -127,6 +130,14 @@ public class CloneModelingParameters {
 
     public void setEnableTransformations(boolean enableTransformations) {
         this.enableTransformations = enableTransformations;
+    }
+
+    public String getNotesContent() {
+        return notesContent;
+    }
+
+    public void setNotesContent(String notesContent) {
+        this.notesContent = notesContent;
     }
 
     @Override
