@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -13,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -75,10 +73,6 @@ public class Play implements HasName, HasPid, HasTenantId {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_CALL_PREP_ID")
     private CallPrep callPrep;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "play")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<PlayLaunch> launches;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -150,14 +144,6 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     public void setCallPrep(CallPrep callPrep) {
         this.callPrep = callPrep;
-    }
-
-    public List<PlayLaunch> getLaunches() {
-        return launches;
-    }
-
-    public void setLaunches(List<PlayLaunch> launches) {
-        this.launches = launches;
     }
 
     @JsonIgnore
