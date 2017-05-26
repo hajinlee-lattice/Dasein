@@ -3,18 +3,26 @@
     <div class="container row">
         <div class="ten columns offset-one">
 
-        	<textarea 
-                rows="4"
-                ng-model="note"
-                autofocus></textarea>
+            <form name="addNote">
+                <textarea 
+                    rows="4"
+                    ng-model="note"
+                    autofocus></textarea>
+            </form>
             <button 
                 type="button" 
                 class="button orange-button"
-                ng-click="vm.addNote(note)">Add Note</button>
+                ng-click="vm.addNote(note)"
+                ng-disabled="addNote.$pristine">{{vm.ResourceUtility.getString('NOTES_ADD_NOTE')}}</button>
 
-            <ul>
-                <li ng-repeat="note in vm.notes | orderBy:'createdDateTime'">
-                    <h4 ng-if="note.inherited == true">Inherited from model {{note.inheritedFrom}}</h4>
+
+            <h3 class="no-notes" ng-if="vm.notes.length == 0">{{vm.ResourceUtility.getString('NOTES_NO_NOTES')}}</h3>
+
+
+            <ul ng-if="vm.notes.length != 0">
+                <li ng-repeat="note in vm.notes track by $index">
+
+                    <h4 ng-if="note.inherited == true">{{vm.ResourceUtility.getString('NOTES_INHERITED_FROM_MODEL')}} {{note.inheritedFrom}}</h4>
                     <div class="note-header">
                         <h3><strong>{{note.origin}}</strong> by <span>{{note.createdBy}}</span> on <span>{{note.createdDateTime | date:'MMMM dd, yyyy'}}</span></h3>
                         <button 
@@ -26,39 +34,41 @@
                         <button 
                             type="button" 
                             class="button icon-button white-button"
-                            ng-click="editNote(note.id)"
-                            ng-if="!vm.editingNote">
+                            ng-click="editingNote = !editingNote"
+                            ng-show="!editingNote">
                             <i class="fa fa-edit"></i>
                         </button>
                         <button 
                             type="button" 
                             class="button icon-button white-button"
-                            ng-click="vm.cancelEditNote($event, $index)"
-                            ng-if="vm.editingNote">
+                            ng-click="editingNote = !editingNote"
+                            ng-show="editingNote">
                             <i class="fa fa-remove"></i>
                         </button>
                     </div>
                     <div 
                         class="note-body"
-                        ng-if="!vm.editingNote">
+                        ng-show="!editingNote">
                         <p>{{note.body}}</p>
                     </div>
                     <div 
                         class="edit-note"
-                        ng-if="vm.editingNote">
-                        
-                        <textarea ng-model="note.body"></textarea>
+                        ng-show="editingNote">
+                        <form name="editNote">
+                            <textarea ng-model="note.body"></textarea>
+                        </form>
 
                         <button 
                             type="button" 
                             class="button white-button"
-                            ng-click="vm.cancelEditNote($event, $index)">
-                            Cancel Changes
+                            ng-click="editingNote = !editingNote">
+                            {{vm.ResourceUtility.getString('BUTTON_CANCEL_CHANGES_LABEL')}}
                         </button>
                         <button 
                             type="button"
                             class="button orange-button pull-right"
-                            ng-click="vm.updateNote(note.body)">Save Changes</button>
+                            ng-click="vm.updateNote(note.body)"
+                            ng-disabled="editNote.$pristine">{{vm.ResourceUtility.getString('BUTTON_SAVE_CHANGES_LABEL')}}</button>
 
                     </div>
                     <p class="author" ng-if="note.editedBy == true">Edited by <span>{{note.editedBy}}</span> on <span>{{note.editedDateTime | date:'MMMM dd, yyyy'}}</span></p>
