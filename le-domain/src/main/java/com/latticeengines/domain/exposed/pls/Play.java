@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -24,6 +25,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -35,6 +37,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Play implements HasName, HasPid, HasTenantId {
+
+    public static final String PLAY_NAME_PREFIX = "play";
+    public static final String PLAY_NAME_FORMAT = "%s__%s";
+
+    public Play() {
+        setName(generateNameStr());
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,11 +63,11 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
-    @JsonIgnore
+    @JsonProperty("segment")
     @Column(name = "SEGMENT_NAME", nullable = true)
     private String segmentName;
 
-    @JsonProperty("segment")
+    @JsonIgnore
     @Transient
     private MetadataSegment segment;
 
@@ -130,6 +139,9 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     public void setSegment(MetadataSegment segment) {
         this.segment = segment;
+        if (segment != null) {
+            setSegmentName(segment.getName());
+        }
     }
 
     public CallPrep getCallPrep() {
@@ -171,6 +183,15 @@ public class Play implements HasName, HasPid, HasTenantId {
     @JsonIgnore
     public Long getTenantId() {
         return this.tenantId;
+    }
+
+    public String generateNameStr() {
+        return String.format(PLAY_NAME_FORMAT, PLAY_NAME_PREFIX, UUID.randomUUID().toString());
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

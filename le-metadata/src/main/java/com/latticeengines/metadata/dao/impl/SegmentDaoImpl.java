@@ -19,6 +19,7 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
         return MetadataSegment.class;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public MetadataSegment findByDataCollectionAndName(String dataCollectionName, String name) {
         Session session = sessionFactory.getCurrentSession();
@@ -34,6 +35,7 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
         return (MetadataSegment) list.get(0);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public MetadataSegment findByNameWithSegmentationDataCollection(String name) {
         Session session = sessionFactory.getCurrentSession();

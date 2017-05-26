@@ -30,7 +30,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.VIEW_PLS_QUOTAS, //
-            GrantedRight.VIEW_PLS_CDL_DATA //
+            GrantedRight.VIEW_PLS_CDL_DATA, //
+            GrantedRight.VIEW_PLS_PLAYS, //
+            GrantedRight.EDIT_PLS_PLAYS //
     ) //
     ), //
     EXTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -58,7 +60,10 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL, //
             GrantedRight.VIEW_PLS_CDL_DATA, //
-            GrantedRight.EDIT_PLS_REFINE_CLONE //
+            GrantedRight.EDIT_PLS_REFINE_CLONE, //
+            GrantedRight.VIEW_PLS_PLAYS, //
+            GrantedRight.EDIT_PLS_PLAYS, //
+            GrantedRight.CREATE_PLS_PLAYS //
     ) //
     ), //
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -82,7 +87,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_REFINE_CLONE, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.VIEW_PLS_QUOTAS, //
-            GrantedRight.VIEW_PLS_CDL_DATA //
+            GrantedRight.VIEW_PLS_CDL_DATA, //
+            GrantedRight.VIEW_PLS_PLAYS, //
+            GrantedRight.EDIT_PLS_PLAYS //
     ) //
     ), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -114,7 +121,10 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL, //
-            GrantedRight.VIEW_PLS_CDL_DATA //
+            GrantedRight.VIEW_PLS_CDL_DATA, //
+            GrantedRight.VIEW_PLS_PLAYS, //
+            GrantedRight.EDIT_PLS_PLAYS, //
+            GrantedRight.CREATE_PLS_PLAYS //
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -147,7 +157,10 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL, //
-            GrantedRight.VIEW_PLS_CDL_DATA //
+            GrantedRight.VIEW_PLS_CDL_DATA, //
+            GrantedRight.VIEW_PLS_PLAYS, //
+            GrantedRight.EDIT_PLS_PLAYS, //
+            GrantedRight.CREATE_PLS_PLAYS //
     )); //
 
     private List<GrantedRight> grantedRights;

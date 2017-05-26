@@ -43,9 +43,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Autowired
     private SegmentPropertyDao segmentPropertyDao;
 
-    @Autowired
-    private DataCollectionCache dataCollectionCache;
-
     @Override
     public BaseDao<MetadataSegment> getDao() {
         return segmentDao;
@@ -89,8 +86,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         }
 
         if (segment.getDataCollection() == null) {
-            segment.setDataCollection(dataCollectionService.getDataCollectionByType(MultiTenantContext.getTenant()
-                    .getId(), DataCollectionType.Segmentation));
+            segment.setDataCollection(dataCollectionService
+                    .getDataCollectionByType(MultiTenantContext.getTenant().getId(), DataCollectionType.Segmentation));
         }
 
         addAttributeDependencies(segment);

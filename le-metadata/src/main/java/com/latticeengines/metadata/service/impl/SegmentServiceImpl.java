@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
-import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.SegmentService;
 
 @Component("segmentService")
@@ -15,9 +14,6 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
-
-    @Autowired
-    private TableEntityMgr tableEntityMgr;
 
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {

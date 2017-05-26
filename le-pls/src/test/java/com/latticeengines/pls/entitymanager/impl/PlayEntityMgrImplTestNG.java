@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -32,7 +33,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         setupTestEnvironmentWithGATenants(1);
         Tenant tenant1 = testBed.getTestTenants().get(0);
-        setupSecurityContext(tenant1);
+        MultiTenantContext.setTenant(tenant1);
 
         play = new Play();
         play.setName(NAME);

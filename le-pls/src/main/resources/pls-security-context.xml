@@ -281,6 +281,16 @@
         <security:intercept-url pattern="pls/tenant/**" access="hasRole('VIEW_PLS_DATA')"/>
     </security:http>
 
+
+    <security:http use-expressions="true"
+                   pattern="/pls/play/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+        <security:intercept-url pattern="pls/play/**" access="hasRole('VIEW_PLS_DATA')"/>
+    </security:http>
+
 </beans>
 
 

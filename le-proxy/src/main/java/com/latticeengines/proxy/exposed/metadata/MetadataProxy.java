@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
@@ -24,8 +23,8 @@ import com.latticeengines.network.exposed.metadata.RuleResultInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
-public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataInterface, ArtifactInterface,
-        RuleResultInterface, ModuleInterface {
+public class MetadataProxy extends MicroserviceRestApiProxy
+        implements MetadataInterface, ArtifactInterface, RuleResultInterface, ModuleInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -212,7 +211,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         return get("getSegment", url, MetadataSegment.class);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     @Override
     public List<MetadataSegment> getMetadataSegments(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/segments/all", customerSpace);
