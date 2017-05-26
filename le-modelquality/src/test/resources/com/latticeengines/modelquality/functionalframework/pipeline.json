@@ -1,6 +1,39 @@
 {
   "pipeline_steps": [
     {
+      "KeyWhenSortingByAscending": 6, 
+      "Name": "categoricalgroupingstep", 
+      "ColumnTransformFilePath": "categoricalgroupingstep.py", 
+      "OperatesOnColumns": [
+            "Categorical"
+      ], 
+      "UniqueColumnTransformName": null, 
+      "NamedParameterListToInit": {
+            "dsCategVarGroupingInfo": "emptyDictionary", 
+            "thresholdError": 3, 
+            "ldcFeatures": [
+                "HPAEmailSuffix", 
+                "LE_COUNTRY", 
+                "LE_INDUSTRY", 
+                "LDC_State", 
+                "LDC_PrimaryIndustry", 
+                "AlexaCategories", 
+                "AlexaLanguage"
+            ], 
+            "thresholdBinSize": 0.05, 
+            "params": "params", 
+            "targetCol": "targetColumn", 
+            "categoricalColumns": "categoricalColumns", 
+            "groupedFeatures": [], 
+            "maxNumberUniqueValues": 10, 
+            "thresholdSigSize": 0.01,
+            "enabled": "false"
+      }, 
+      "LoadFromHdfs": false, 
+      "MainClassName": "CategoricalGroupingStep", 
+      "RTSFilePath": null
+    },
+    {
       "KeyWhenSortingByAscending": 7,
       "Name": "highnumberuniquevaluesremovalstep",
       "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py",
@@ -47,6 +80,25 @@
       },
       "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
     },
+    {
+      "KeyWhenSortingByAscending": 9, 
+      "Name": "assignconversionratetoallcategoricalvalues", 
+      "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py", 
+      "OperatesOnColumns": [
+                "Categorical"
+      ], 
+      "UniqueColumnTransformName": null, 
+      "NamedParameterListToInit": {
+                "categoricalColumnMapping": "emptyDictionary", 
+                "totalPositiveThreshold": 12, 
+                "targetColumn": "targetColumn", 
+                "categoricalColumns": "categoricalColumns",
+                "enabled": "false"
+      }, 
+      "LoadFromHdfs": false, 
+      "MainClassName": "AssignConversionRateToAllCategoricalValues", 
+      "RTSFilePath": null
+    }, 
     {
       "KeyWhenSortingByAscending": 10,
       "Name": "columntypeconversionstep",
