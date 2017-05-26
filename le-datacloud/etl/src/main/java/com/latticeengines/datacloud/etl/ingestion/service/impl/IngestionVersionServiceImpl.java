@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,9 +28,15 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
+import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
+import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress.Engine;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
 @Component("ingestionVersionService")
 public class IngestionVersionServiceImpl implements IngestionVersionService {
@@ -37,6 +47,12 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    IngestionEntityMgr ingestionEntityMgr;
+
+    @Autowired
+    private IngestionProgressEntityMgr ingestionProgressEntityMgr;
 
     @Override
     public List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion) {
@@ -100,7 +116,6 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
         }
         String timestampPattern = fileTimestamp.replace("d", "\\d").replace("y", "\\d").replace("M",
                 "\\d");
-        log.info("TimestampPattern: " + timestampPattern);
         Pattern pattern = Pattern.compile(timestampPattern);
         List<String> result = new ArrayList<String>();
         for (String fileName : fileNames) {
@@ -141,24 +156,16 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
     }
 
     @Override
-    public void updateCurrentVersion(Ingestion ingestion, List<String> mostRecentVersions) {
-        if (CollectionUtils.isEmpty(mostRecentVersions)) {
-            return;
-        }
-        Collections.sort(mostRecentVersions, Collections.reverseOrder());
+    @SuppressWarnings("static-access")
+    public void updateCurrentVersion(Ingestion ingestion, String version) {
         try {
             String currentVersion = getCurrentVersion(ingestion);
-            for (String version : mostRecentVersions) {
-                if (currentVersion.compareTo(version) < 0) {
-                    com.latticeengines.domain.exposed.camille.Path versionPath = hdfsPathBuilder
-                            .constructIngestionDir(ingestion.getIngestionName(), version);
-                    Path success = new Path(versionPath.toString(), hdfsPathBuilder.SUCCESS_FILE);
-                    if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
-                        setCurrentVersion(ingestion, version);
-                        break;
-                    }
-                } else {
-                    break;
+            if (currentVersion.compareTo(version) < 0) {
+                com.latticeengines.domain.exposed.camille.Path versionPath = hdfsPathBuilder
+                        .constructIngestionDir(ingestion.getIngestionName(), version);
+                Path success = new Path(versionPath.toString(), hdfsPathBuilder.SUCCESS_FILE);
+                if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
+                    setCurrentVersion(ingestion, version);
                 }
             }
         } catch (IOException e) {
@@ -194,6 +201,36 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Could not set current version of ingestion %s", ingestion.getIngestionName()), e);
+        }
+    }
+
+    public EngineProgress status(String ingestionName, String version) {
+        Ingestion ingestion = ingestionEntityMgr.getIngestionByName(ingestionName);
+        if (ingestion == null) {
+            throw new IllegalArgumentException(String.format("Fail to find ingestion %s", ingestionName));
+        }
+        Map<String, Object> fields = new HashMap<>();
+        fields.put("IngestionId", ingestion.getPid());
+        fields.put("Version", version);
+        List<IngestionProgress> progresses = ingestionProgressEntityMgr.getProgressesByField(fields, null);
+        if (CollectionUtils.isEmpty(progresses)) {
+            return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.NOTSTARTED, null, null);
+        }
+        Set<String> allJobs = new HashSet<>();
+        Set<String> finishedJobs = new HashSet<>();
+        for (IngestionProgress progress : progresses) {
+            if (!allJobs.contains(progress.getDestination())) {
+                allJobs.add(progress.getDestination());
+            }
+            if (progress.getStatus() == ProgressStatus.FINISHED && !finishedJobs.contains(progress.getDestination())) {
+                finishedJobs.add(progress.getDestination());
+            }
+        }
+        if (allJobs.size() == finishedJobs.size()) {
+            return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.FINISHED, 1.0F, null);
+        } else {
+            return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.PROCESSING,
+                    (float) finishedJobs.size() / allJobs.size(), null);
         }
     }
 }

@@ -31,20 +31,28 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         return IngestionProgress.class;
     }
 
+    /* 
+     * Map Fields: ColumnName -> Value
+     * Requires to pass in column name in table, not variable name in IngestionProgress entity class
+     */
     @SuppressWarnings("unchecked")
     @Override
-    public List<IngestionProgress> getProgressesByField(Map<String, Object> fields) {
+    public List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         Session session = getSessionFactory().getCurrentSession();
         Class<IngestionProgress> entityClz = getEntityClass();
         StringBuilder sb = new StringBuilder();
         for (String column : fields.keySet()) {
             sb.append(column + " = :" + column + " and ");
         }
-        String queryStr = String.format("from %s where " + sb.toString().substring(0, sb.length() - 4),
-                entityClz.getSimpleName());
+        String orderStr = "";
+        if (CollectionUtils.isNotEmpty(orderFields)) {
+            orderStr = "order by " + String.join(", ", orderFields);
+        }
+        String queryStr = String.format("from %s where %s %s", entityClz.getSimpleName(),
+                sb.substring(0, sb.length() - 4), orderStr);
         Query query = session.createQuery(queryStr);
         for (String column : fields.keySet()) {
-            if (fields.get(column) instanceof ProgressStatus) {
+            if (fields.get(column).getClass().isEnum()) {
                 query.setParameter(column, fields.get(column).toString());
             } else {
                 query.setParameter(column, fields.get(column));

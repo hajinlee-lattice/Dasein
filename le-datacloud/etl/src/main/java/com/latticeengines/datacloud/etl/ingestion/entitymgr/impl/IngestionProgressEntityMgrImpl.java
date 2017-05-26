@@ -25,8 +25,8 @@ public class IngestionProgressEntityMgrImpl implements IngestionProgressEntityMg
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
-    public List<IngestionProgress> getProgressesByField(Map<String, Object> fields) {
-        return ingestionProgressDao.getProgressesByField(fields);
+    public List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields) {
+        return ingestionProgressDao.getProgressesByField(fields, orderFields);
     }
 
     @Override

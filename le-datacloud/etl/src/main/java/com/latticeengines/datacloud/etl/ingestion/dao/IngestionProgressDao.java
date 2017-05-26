@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 public interface IngestionProgressDao extends BaseDao<IngestionProgress> {
 
-    List<IngestionProgress> getProgressesByField(Map<String, Object> fields);
+    List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields);
 
     IngestionProgress saveProgress(IngestionProgress progress);
 

@@ -111,7 +111,7 @@ public class Ingestion implements HasPid, Serializable {
     }
 
     @JsonIgnore
-    private void setConfig(String config) {
+    public void setConfig(String config) {
         this.config = config;
     }
 

@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.etl.ingestion.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
+import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 
 public interface IngestionVersionService {
@@ -14,5 +15,7 @@ public interface IngestionVersionService {
     List<String> getFileNamesOfMostRecentVersions(List<String> fileNames, int checkVersion,
             FileCheckStrategy checkStrategy, String fileTimestamp);
 
-    void updateCurrentVersion(Ingestion ingestion, List<String> mostRecentVersions);
+    void updateCurrentVersion(Ingestion ingestion, String version);
+
+    EngineProgress status(String ingestionName, String version);
 }

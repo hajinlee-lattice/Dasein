@@ -3,7 +3,6 @@ package com.latticeengines.datacloudapi.engine.ingestion.service.impl;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +28,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.service.PropDataTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -99,7 +97,6 @@ public class IngestionServiceImpl implements IngestionService {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
         killFailedProgresses();
-        checkCompleteIngestions();
         ingestAll();
         return kickoffAll();
     }
@@ -140,7 +137,7 @@ public class IngestionServiceImpl implements IngestionService {
     public void killFailedProgresses() {
         Map<String, Object> fields = new HashMap<String, Object>();
         fields.put("Status", ProgressStatus.PROCESSING);
-        List<IngestionProgress> progresses = ingestionProgressService.getProgressesByField(fields);
+        List<IngestionProgress> progresses = ingestionProgressService.getProgressesByField(fields, null);
         for (IngestionProgress progress : progresses) {
             ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
             try {
@@ -169,151 +166,22 @@ public class IngestionServiceImpl implements IngestionService {
         }
     }
 
-    @Override
-    public void checkCompleteIngestions() {
-        List<Ingestion> ingestions = ingestionEntityMgr.findAll();
-        for (Ingestion ingestion : ingestions) {
-            List<String> mostRecentVersions = null;
-            switch (ingestion.getIngestionType()) {
-            case SFTP:
-                SftpConfiguration sftpConfig = (SftpConfiguration) ingestion.getProviderConfiguration();
-                mostRecentVersions = ingestionVersionService
-                        .getMostRecentVersionsFromHdfs(ingestion.getIngestionName(), sftpConfig.getCheckVersion());
-                for (String version : mostRecentVersions) {
-                    checkCompleteVersionFromSftp(ingestion.getIngestionName(), version, sftpConfig);
-                }
-                break;
-            case API:
-                ApiConfiguration apiConfig = (ApiConfiguration) ingestion.getProviderConfiguration();
-                mostRecentVersions = ingestionVersionService.getMostRecentVersionsFromHdfs(ingestion.getIngestionName(),
-                        apiConfig.getCheckVersion());
-                for (String version : mostRecentVersions) {
-                    checkCompleteVersionFromApi(ingestion.getIngestionName(), version, apiConfig);
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException(
-                        String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
-            }
-            ingestionVersionService.updateCurrentVersion(ingestion, mostRecentVersions);
-        }
-    }
-
-    @SuppressWarnings("static-access")
-    private void checkCompleteVersionFromSftp(String ingestionName, String version,
-            SftpConfiguration sftpConfig) {
-        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder.constructIngestionDir(ingestionName,
-                version);
-        Path success = new Path(hdfsDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
-                return;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to check %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
-                    hdfsDir.toString()), e);
-        }
-
-        String fileNamePattern = ingestionVersionService.getFileNamePattern(version,
-                sftpConfig.getFileNamePrefix(), sftpConfig.getFileNamePostfix(),
-                sftpConfig.getFileExtension(), sftpConfig.getFileTimestamp());
-        List<String> sftpFiles = SftpUtils.getFileNames(sftpConfig, fileNamePattern);
-
-        List<String> hdfsFiles = getHdfsFileNamesByExtension(hdfsDir.toString(),
-                sftpConfig.getFileExtension());
-        if (sftpFiles.size() > hdfsFiles.size()) {
-            return;
-        }
-        Set<String> hdfsFileSet = new HashSet<String>(hdfsFiles);
-        for (String sftpFile : sftpFiles) {
-            if (!hdfsFileSet.contains(sftpFile)) {
-                return;
-            }
-        }
-
-        try {
-            HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
-            if (notifyEmailEnabled) {
-                String subject = String.format("Ingestion %s for version %s is finished", ingestionName, version);
-                String content = String.format("Files are accessible at the following HDFS folder: %s",
-                        hdfsDir.toString());
-                emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(notifyEmail));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to create %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
-                    hdfsDir.toString()), e);
-        }
-    }
-
-    @SuppressWarnings("static-access")
-    private void checkCompleteVersionFromApi(String ingestionName, String version, ApiConfiguration apiConfig) {
-        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder.constructIngestionDir(ingestionName,
-                version);
-        Path success = new Path(hdfsDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
-                return;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to check %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
-                    hdfsDir.toString()), e);
-        }
-        Path file = new Path(hdfsDir.toString(), apiConfig.getFileName());
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, file.toString())) {
-                HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
-                if (notifyEmailEnabled) {
-                    String subject = String.format("Ingestion %s for version %s is finished", ingestionName, version);
-                    String content = String.format("Files are accessible at the following HDFS folder: %s",
-                            hdfsDir.toString());
-                    emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(notifyEmail));
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to check %s in HDFS or create %s in HDFS dir %s",
-                    file.toString(), hdfsPathBuilder.SUCCESS_FILE, hdfsDir.toString()), e);
-        }
-    }
-
-    private List<String> getHdfsFileNamesByExtension(String hdfsDir, final String fileExtension) {
-        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
-            @Override
-            public boolean accept(String filename) {
-                return filename.endsWith(fileExtension);
-            }
-        };
-        List<String> result = new ArrayList<String>();
-        try {
-            if (HdfsUtils.isDirectory(yarnConfiguration, hdfsDir.toString())) {
-                List<String> hdfsFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir,
-                        filter);
-                if (!CollectionUtils.isEmpty(hdfsFiles)) {
-                    for (String fullName : hdfsFiles) {
-                        result.add(new Path(fullName).getName());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to scan hdfs directory %s", hdfsDir.toString()), e);
-        }
-        return result;
-    }
 
     private void ingestAll() {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
-        List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
+        List<IngestionProgress> progresses = new ArrayList<>();
         for (Ingestion ingestion : ingestions) {
             if (ingestionNewProgressValidator.isIngestionTriggered(ingestion)) {
                 log.info("Triggered Ingestion: " + ingestion.toString());
                 progresses.addAll(getPreprocessProgresses(ingestion));
             }
         }
-        progresses = ingestionNewProgressValidator.checkDuplicateProgresses(progresses);
+        progresses = ingestionNewProgressValidator.cleanupDuplicateProgresses(progresses);
         ingestionProgressService.saveProgresses(progresses);
     }
 
     private List<IngestionProgress> getPreprocessProgresses(Ingestion ingestion) {
-        List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
+        List<IngestionProgress> progresses = new ArrayList<>();
         switch (ingestion.getIngestionCriteria()) {
             case ANY_MISSING_FILE:
                 List<String> missingFiles = getMissingFiles(ingestion);

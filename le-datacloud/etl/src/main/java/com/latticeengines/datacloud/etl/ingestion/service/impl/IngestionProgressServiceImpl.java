@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 @Component("ingestionProgressService")
 public class IngestionProgressServiceImpl implements IngestionProgressService {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(IngestionProgressServiceImpl.class);
 
     @Autowired
@@ -47,99 +48,84 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     private IngestionApiProviderService apiProviderService;
 
     @Override
-    public List<IngestionProgress> getProgressesByField(Map<String, Object> fields) {
-        return ingestionProgressEntityMgr.getProgressesByField(fields);
+    public List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields) {
+        return ingestionProgressEntityMgr.getProgressesByField(fields, orderFields);
     }
 
     @Override
     public IngestionProgress createPreprocessProgress(Ingestion ingestion, String triggeredBy,
             String file) {
-        String source = constructSource(ingestion, file);
-        String destination = constructDestination(ingestion, file);
-        IngestionProgress progress = createProgress(ingestion, source, destination, triggeredBy);
+        IngestionProgress progress = initProgress(ingestion, triggeredBy);
+        inflateProgress(progress, ingestion, file);
         return progress;
     }
 
-    public IngestionProgress createProgress(Ingestion ingestion, String source, String destination,
-            String triggeredBy) {
+    private IngestionProgress initProgress(Ingestion ingestion, String triggeredBy) {
         IngestionProgress progress = new IngestionProgress();
-        progress.setDestination(destination);
         progress.setHdfsPod(HdfsPodContext.getHdfsPodId());
         progress.setIngestion(ingestion);
         progress.setLatestStatusUpdate(new Date());
         progress.setRetries(0);
-        progress.setSource(source);
         progress.setStatus(ProgressStatus.NEW);
         progress.setTriggeredBy(triggeredBy);
         return progress;
     }
 
-    @Override
-    public String constructSource(Ingestion ingestion, String fileName) {
+    private void inflateProgress(IngestionProgress progress, Ingestion ingestion, String fileName) {
+        com.latticeengines.domain.exposed.camille.Path fileDest = hdfsPathBuilder
+                .constructIngestionDir(ingestion.getIngestionName());
         switch (ingestion.getIngestionType()) {
         case SFTP:
-            SftpConfiguration sftpConfiguration = (SftpConfiguration) ingestion.getProviderConfiguration();
-            Path fileSource = new Path(sftpConfiguration.getSftpDir(), fileName);
-            return fileSource.toString();
+            SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
+            Path fileSource = new Path(config.getSftpDir(), fileName);
+            progress.setSource(fileSource.toString());
+            progress.setVersion(extractVersion(config.getFileTimestamp(), fileName));
+            progress.setDestination(fileDest.append(progress.getVersion()).append(fileName).toString());
+            break;
         case SQL_TO_CSVGZ:
             SqlToTextConfiguration sqlToTextConfiguration = (SqlToTextConfiguration) ingestion
                     .getProviderConfiguration();
-            return sqlToTextConfiguration.getDbTable();
+            progress.setSource(sqlToTextConfiguration.getDbTable());
+            progress.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
+            progress.setDestination(fileDest.append(progress.getVersion()).append(fileName).toString());
+            break;
         case API:
             ApiConfiguration apiConfiguration = (ApiConfiguration) ingestion.getProviderConfiguration();
-            return apiConfiguration.getFileUrl();
+            progress.setSource(apiConfiguration.getFileUrl());
+            progress.setVersion(apiProviderService.getTargetVersion(apiConfiguration));
+            progress.setDestination(
+                    fileDest.append(progress.getVersion()).append(apiConfiguration.getFileName()).toString());
+            break;
         default:
             throw new UnsupportedOperationException(
                     String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
         }
     }
 
-    @Override
-    public String constructDestination(Ingestion ingestion, String fileName) {
-        com.latticeengines.domain.exposed.camille.Path fileDest = hdfsPathBuilder
-                .constructIngestionDir(ingestion.getIngestionName());
-        String fileVersion = null;
-        switch (ingestion.getIngestionType()) {
-        case SFTP:
-            SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
-            String timestampPattern = config.getFileTimestamp().replace("d", "\\d").replace("y", "\\d").replace("M",
-                    "\\d");
-            log.info("TimestampPattern : " + timestampPattern);
-            Pattern pattern = Pattern.compile(timestampPattern);
-            Matcher matcher = pattern.matcher(fileName);
-            if (matcher.find()) {
-                String timestampStr = matcher.group();
-                DateFormat df = new SimpleDateFormat(config.getFileTimestamp());
-                TimeZone timezone = TimeZone.getTimeZone("UTC");
-                df.setTimeZone(timezone);
-                try {
-                    fileVersion = HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
-                } catch (ParseException e) {
-                    throw new RuntimeException(String.format("Failed to parse timestamp %s", timestampStr), e);
-                }
-            } else {
-                throw new RuntimeException(String.format("Failed to parse filename %s", fileName));
-                    }
-            break;
-        case API:
-            ApiConfiguration apiConfiguration = (ApiConfiguration) ingestion.getProviderConfiguration();
-            fileVersion = apiProviderService.getTargetVersion(apiConfiguration);
-            fileName = apiConfiguration.getFileName();
-            break;
-        default:
-            fileVersion = HdfsPathBuilder.dateFormat.format(new Date());
-            break;
+    private String extractVersion(String timestampFormat, String input) {
+        String timestampPattern = timestampFormat.replace("d", "\\d").replace("y", "\\d").replace("M", "\\d");
+        Pattern pattern = Pattern.compile(timestampPattern);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            String timestampStr = matcher.group();
+            DateFormat df = new SimpleDateFormat(timestampFormat);
+            TimeZone timezone = TimeZone.getTimeZone("UTC");
+            df.setTimeZone(timezone);
+            try {
+                return HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
+            } catch (ParseException e) {
+                throw new RuntimeException(String.format("Failed to parse timestamp %s", timestampStr), e);
+            }
+        } else {
+            throw new RuntimeException(String.format("Failed to extract version from %s", input));
         }
-        fileDest = fileDest.append(fileVersion).append(fileName);
-        return fileDest.toString();
-
     }
 
     @Override
     public List<IngestionProgress> getNewIngestionProgresses() {
         Map<String, Object> fields = new HashMap<String, Object>();
         fields.put("Status", ProgressStatus.NEW);
-        return getProgressesByField(fields);
+        return getProgressesByField(fields, null);
     }
 
     @Override
@@ -151,7 +137,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     public List<IngestionProgress> getProcessingProgresses() {
         Map<String, Object> fields = new HashMap<String, Object>();
         fields.put("Status", ProgressStatus.PROCESSING);
-        return getProgressesByField(fields);
+        return getProgressesByField(fields, null);
     }
 
     @Override

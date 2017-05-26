@@ -9,14 +9,10 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 
 public interface IngestionProgressService {
-    List<IngestionProgress> getProgressesByField(Map<String, Object> fields);
+    List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields);
 
     IngestionProgress createPreprocessProgress(Ingestion ingestion, String triggeredBy,
                                                       String file);
-
-    String constructSource(Ingestion ingestion, String fileName);
-
-    String constructDestination(Ingestion ingestion, String fileName);
 
     void saveProgresses(List<IngestionProgress> progresses);
 

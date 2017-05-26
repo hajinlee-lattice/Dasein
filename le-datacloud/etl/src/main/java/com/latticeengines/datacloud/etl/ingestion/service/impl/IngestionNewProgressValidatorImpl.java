@@ -26,7 +26,7 @@ public class IngestionNewProgressValidatorImpl implements IngestionNewProgressVa
         if (!ingestion.isSchedularEnabled()) {
             return false;
         }
-        if (!StringUtils.isEmpty(ingestion.getCronExpression())) {
+        if (StringUtils.isNotBlank(ingestion.getCronExpression())) {
             return ingestionProgressEntityMgr.isIngestionTriggered(ingestion);
         }
         return true;
@@ -38,13 +38,13 @@ public class IngestionNewProgressValidatorImpl implements IngestionNewProgressVa
     }
 
     @Override
-    public List<IngestionProgress> checkDuplicateProgresses(List<IngestionProgress> progresses) {
+    public List<IngestionProgress> cleanupDuplicateProgresses(List<IngestionProgress> progresses) {
         Iterator<IngestionProgress> iter = progresses.iterator();
         while (iter.hasNext()) {
             IngestionProgress progress = iter.next();
             if (isDuplicateProgress(progress)) {
                 iter.remove();
-                log.info("Detect duplicate progress: " + progress.toString());
+                log.info("Duplicate progress is ignored: " + progress.toString());
             }
         }
         return progresses;

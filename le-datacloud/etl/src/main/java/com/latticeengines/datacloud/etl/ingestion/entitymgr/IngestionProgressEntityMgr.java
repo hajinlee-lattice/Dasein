@@ -10,7 +10,7 @@ public interface IngestionProgressEntityMgr {
 
     IngestionProgress getProgress(IngestionProgress progress);
 
-    List<IngestionProgress> getProgressesByField(Map<String, Object> fields);
+    List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields);
 
     IngestionProgress saveProgress(IngestionProgress progress);
 

@@ -8,4 +8,8 @@ public interface IngestionEntityMgr {
     Ingestion getIngestionByName(String ingestionName);
 
     List<Ingestion> findAll();
+
+    public void save(Ingestion ingestion);
+
+    public void delete(Ingestion ingestion);
 }

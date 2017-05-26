@@ -27,4 +27,16 @@ public class IngestionEntityMgrImpl implements IngestionEntityMgr {
     public List<Ingestion> findAll() {
         return ingestionDao.findAll();
     }
+
+    @Override
+    @Transactional(value = "propDataManage")
+    public void save(Ingestion ingestion) {
+        ingestionDao.createOrUpdate(ingestion);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage")
+    public void delete(Ingestion ingestion) {
+        ingestionDao.delete(ingestion);
+    }
 }

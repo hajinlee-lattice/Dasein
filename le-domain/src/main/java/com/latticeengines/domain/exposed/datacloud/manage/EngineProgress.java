@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class EngineProgress {
     private Engine engine;
@@ -86,6 +87,11 @@ public class EngineProgress {
     @JsonProperty("Message")
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

@@ -1,11 +1,14 @@
 package com.latticeengines.datacloud.workflow.engine.steps;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -24,15 +27,21 @@ import org.hsqldb.lib.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
+import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
@@ -56,12 +65,18 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     private IngestionProgressService ingestionProgressService;
 
     @Autowired
+    private IngestionVersionService ingestionVersionService;
+
+    @Autowired
     private EaiProxy eaiProxy;
 
     @Autowired
     private SqoopProxy sqoopProxy;
 
     private YarnClient yarnClient;
+
+    @Autowired
+    private HdfsPathBuilder hdfsPathBuilder;
 
     private static final long WORKFLOW_WAIT_TIME_IN_MILLIS = TimeUnit.HOURS.toMillis(6);
     private static final long MAX_MILLIS_TO_WAIT = TimeUnit.HOURS.toMillis(5);
@@ -73,7 +88,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Override
     public void execute() {
         try {
-            log.info("Entering IngestionStep execute()");
+            log.info("Entering IngestionStep execution");
             progress = getConfiguration().getIngestionProgress();
             HdfsPodContext.changeHdfsPodId(progress.getHdfsPod());
             Ingestion ingestion = getConfiguration().getIngestion();
@@ -132,11 +147,46 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                         uncompressDir.toString());
             }
             progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FINISHED).commit(true);
+            checkCompleteVersionFromApi(progress.getIngestion(), progress.getVersion());
         } catch (Exception e) {
             progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
             log.error(String.format("Ingestion failed of exception %s. Progress: %s", e.getMessage(),
                     progress.toString()));
         }
+    }
+
+    @SuppressWarnings("static-access")
+    private void checkCompleteVersionFromApi(Ingestion ingestion, String version) {
+        ApiConfiguration apiConfig = (ApiConfiguration) ingestion.getProviderConfiguration();
+        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder
+                .constructIngestionDir(ingestion.getIngestionName(), version);
+        Path success = new Path(hdfsDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
+                return;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to check %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
+                    hdfsDir.toString()), e);
+        }
+        Path file = new Path(hdfsDir.toString(), apiConfig.getFileName());
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, file.toString())) {
+                HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
+                /*
+                if (notifyEmailEnabled) {
+                    String subject = String.format("Ingestion %s for version %s is finished", ingestionName, version);
+                    String content = String.format("Files are accessible at the following HDFS folder: %s",
+                            hdfsDir.toString());
+                    emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(notifyEmail));
+                }
+                */
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to check %s in HDFS or create %s in HDFS dir %s",
+                    file.toString(), hdfsPathBuilder.SUCCESS_FILE, hdfsDir.toString()), e);
+        }
+        ingestionVersionService.updateCurrentVersion(ingestion, version);
     }
 
     private void ingestFromSftp() throws Exception {
@@ -168,6 +218,78 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                     .status(ProgressStatus.FAILED).commit(true);
             log.error("Ingestion failed. Progress: " + progress.toString());
         }
+
+        checkCompleteVersionFromSftp(progress.getIngestion(), progress.getVersion());
+    }
+
+    @SuppressWarnings("static-access")
+    private void checkCompleteVersionFromSftp(Ingestion ingestion, String version) {
+        SftpConfiguration sftpConfig = (SftpConfiguration) progress.getIngestion().getProviderConfiguration();
+        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder
+                .constructIngestionDir(ingestion.getIngestionName(), version);
+        Path success = new Path(hdfsDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
+                return;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to check %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
+                    hdfsDir.toString()), e);
+        }
+
+        String fileNamePattern = ingestionVersionService.getFileNamePattern(version, sftpConfig.getFileNamePrefix(),
+                sftpConfig.getFileNamePostfix(), sftpConfig.getFileExtension(), sftpConfig.getFileTimestamp());
+        List<String> sftpFiles = SftpUtils.getFileNames(sftpConfig, fileNamePattern);
+
+        List<String> hdfsFiles = getHdfsFileNamesByExtension(hdfsDir.toString(), sftpConfig.getFileExtension());
+        if (sftpFiles.size() > hdfsFiles.size()) {
+            return;
+        }
+        Set<String> hdfsFileSet = new HashSet<>(hdfsFiles);
+        for (String sftpFile : sftpFiles) {
+            if (!hdfsFileSet.contains(sftpFile)) {
+                return;
+            }
+        }
+
+        try {
+            HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
+            /*
+            if (notifyEmailEnabled) {
+                String subject = String.format("Ingestion %s for version %s is finished", ingestionName, version);
+                String content = String.format("Files are accessible at the following HDFS folder: %s",
+                        hdfsDir.toString());
+                emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(notifyEmail));
+            }
+            */
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to create %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
+                    hdfsDir.toString()), e);
+        }
+        ingestionVersionService.updateCurrentVersion(ingestion, version);
+    }
+    
+    private List<String> getHdfsFileNamesByExtension(String hdfsDir, final String fileExtension) {
+        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
+            @Override
+            public boolean accept(String filename) {
+                return filename.endsWith(fileExtension);
+            }
+        };
+        List<String> result = new ArrayList<String>();
+        try {
+            if (HdfsUtils.isDirectory(yarnConfiguration, hdfsDir.toString())) {
+                List<String> hdfsFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filter);
+                if (!CollectionUtils.isEmpty(hdfsFiles)) {
+                    for (String fullName : hdfsFiles) {
+                        result.add(new Path(fullName).getName());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to scan hdfs directory %s", hdfsDir.toString()), e);
+        }
+        return result;
     }
 
     private void ingestBySqoop() throws Exception {

@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.etl.ingestion.entitymgr.impl;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +57,11 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
         ingestion = ingestionEntityMgr.getIngestionByName(INGESTION_NAME);
         Assert.assertNotNull(ingestion);
         HdfsPodContext.changeHdfsPodId(HDFS_POD);
-        progress = createProgess(ingestion);
-        failedProgress = createFailedProgess(ingestion);
+        progress = ingestionProgressService.createPreprocessProgress(ingestion, TEST_SUBMITTER, FILE_NAME);
+        progress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
+        failedProgress = ingestionProgressService.createPreprocessProgress(ingestion, TEST_SUBMITTER, FAILED_FILE_NAME);
+        failedProgress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
+        failedProgress.setStatus(ProgressStatus.FAILED);
     }
 
     @AfterClass(groups = "functional")
@@ -78,8 +80,7 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
         Map<String, Object> fields = new HashMap<String, Object>();
         fields.put("PID", progress.getPid());
         fields.put("ApplicationId", progress.getApplicationId());
-        List<IngestionProgress> progresses = ingestionProgressEntityMgr
-                .getProgressesByField(fields);
+        List<IngestionProgress> progresses = ingestionProgressEntityMgr.getProgressesByField(fields, null);
         Assert.assertNotNull(progresses, "Failed to get ingestion progresses by field");
         Assert.assertNotEquals(progresses.isEmpty(), true,
                 "Failed to get ingestion progresses by field");
@@ -106,7 +107,10 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "testIngestionProgress",
             "testRetryFailedIngestionProgress" })
     public void testIsDuplicateIngestionProgress() throws JsonProcessingException {
-        IngestionProgress duplicateProgress = createProgess(ingestion);
+        // IngestionProgress duplicateProgress = createProgess(ingestion);
+        IngestionProgress duplicateProgress = ingestionProgressService.createPreprocessProgress(ingestion,
+                TEST_SUBMITTER, FILE_NAME);
+        duplicateProgress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
         Assert.assertTrue(ingestionProgressEntityMgr.isDuplicateProgress(duplicateProgress));
         progress.setStatus(ProgressStatus.FAILED);
         ingestionProgressEntityMgr.saveProgress(progress);
@@ -117,40 +121,6 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
         progress.setStatus(ProgressStatus.FINISHED);
         ingestionProgressEntityMgr.saveProgress(progress);
         Assert.assertTrue(!ingestionProgressEntityMgr.isDuplicateProgress(duplicateProgress));
-    }
-
-    private IngestionProgress createProgess(Ingestion ingestion) {
-        IngestionProgress progress = new IngestionProgress();
-        progress.setIngestion(ingestion);
-        progress.setSource(ingestionProgressService.constructSource(ingestion, FILE_NAME));
-        progress.setDestination(
-                ingestionProgressService.constructDestination(ingestion, FILE_NAME));
-        progress.setHdfsPod(HDFS_POD);
-        progress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
-        progress.setStartTime(new Date());
-        progress.setLatestStatusUpdate(new Date());
-        progress.setRetries(0);
-        progress.setSize(Long.valueOf("1000"));
-        progress.setStatus(ProgressStatus.NEW);
-        progress.setTriggeredBy(TEST_SUBMITTER);
-        return progress;
-    }
-
-    private IngestionProgress createFailedProgess(Ingestion ingestion) {
-        IngestionProgress progress = new IngestionProgress();
-        progress.setIngestion(ingestion);
-        progress.setSource(ingestionProgressService.constructSource(ingestion, FAILED_FILE_NAME));
-        progress.setDestination(
-                ingestionProgressService.constructDestination(ingestion, FAILED_FILE_NAME));
-        progress.setHdfsPod(HDFS_POD);
-        progress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
-        progress.setStartTime(new Date());
-        progress.setLatestStatusUpdate(new Date());
-        progress.setRetries(0);
-        progress.setSize(Long.valueOf("1000"));
-        progress.setStatus(ProgressStatus.FAILED);
-        progress.setTriggeredBy(TEST_SUBMITTER);
-        return progress;
     }
 
 }

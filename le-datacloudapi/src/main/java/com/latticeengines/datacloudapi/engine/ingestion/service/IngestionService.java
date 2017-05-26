@@ -14,8 +14,6 @@ public interface IngestionService {
 
     List<IngestionProgress> scan(String hdfsPod);
 
-    void checkCompleteIngestions();
-
     List<String> getMissingFiles(Ingestion ingestion);
 
     List<String> getTargetFiles(Ingestion ingestion);
