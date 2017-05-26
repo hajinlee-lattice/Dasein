@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.RateLimitingService;
 import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
+import com.latticeengines.datacloud.match.service.DnbMatchCommandService;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
@@ -32,6 +33,8 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
     @Autowired
     private MatchMonitorService matchMonitorService;
+    @Autowired
+    private DnbMatchCommandService dnbMatchCommandService;
 
     @Override
     public void execute(ProcessorContext processorContext) {
@@ -76,6 +79,8 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                     completedFutures, combinedContext, 0, 0);
         }
 
+        // added for cleanup
+        dnbMatchCommandService.finalize(processorContext.getRootOperationUid());
         log.info(String.format("Finished matching %d rows in %.2f minutes.", processorContext.getBlockSize(),
                 (System.currentTimeMillis() - startTime) / 60000.0));
 

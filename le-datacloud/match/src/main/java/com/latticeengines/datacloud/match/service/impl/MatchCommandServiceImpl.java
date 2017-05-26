@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -20,11 +21,14 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.match.entitymgr.DnbMatchCommandEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.MatchBlockEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.MatchCommandEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MatchBlockUpdater;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandUpdater;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.manage.DnBMatchCommand;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -48,6 +52,9 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private DnbMatchCommandEntityMgr dnbMatchCommandEntityMgr;
+
     @Override
     public MatchCommand start(MatchInput input, ApplicationId appId, String rootOperationUid) {
         MatchCommand command = new MatchCommand();
@@ -65,6 +72,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         command.setProgress(0f);
         command.setRootOperationUid(rootOperationUid);
 
+        command.setJobType(input.getRequestSource());
         return matchCommandEntityMgr.createCommand(command);
     }
 
@@ -240,6 +248,41 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
         public MatchCommandUpdaterImpl rowsMatched(Integer rowsMatched) {
             matchCommand.setRowsMatched(rowsMatched);
+            return this;
+        }
+
+        public MatchCommandUpdaterImpl duration(int duration) {
+            matchCommand.setDuration(duration);
+            return this;
+        }
+
+        public MatchCommandUpdaterImpl dnbCommands() {
+            // populating the list of DnBMatchCommand into MatchCommand
+            List<DnBMatchCommand> dnbMatchList = dnbMatchCommandEntityMgr.findAllByField("RootOperationUID",
+                    matchCommand.getRootOperationUid());
+            // computation from populated list
+            int rowsMatchedByDnb = 0;
+            int totalDnbDuration = 0;
+            int rowsToDnb = 0;
+            for (DnBMatchCommand command : dnbMatchList) {
+                if (!command.getDnbCode().equals(DnBReturnCode.ABANDONED)) {
+                    rowsToDnb += command.getSize();
+                    rowsMatchedByDnb += command.getAcceptedRecords();
+                    totalDnbDuration += command.getDuration();
+                }
+            }
+            // rows to dnb
+            matchCommand.setRowsToDnb(rowsToDnb);
+            int dnbDurationAvg = 0;
+            // To avoid null pointer exception when dnbMatchList.size() = 0
+            if (dnbMatchList.size() != 0) {
+                // To calculate average on request
+                dnbDurationAvg = (totalDnbDuration) / dnbMatchList.size();
+            }
+            // rows matched by dnb
+            matchCommand.setRowsMatchedByDnb(rowsMatchedByDnb);
+            // average dnb duration
+            matchCommand.setDnbDurationAvg(dnbDurationAvg);
             return this;
         }
 

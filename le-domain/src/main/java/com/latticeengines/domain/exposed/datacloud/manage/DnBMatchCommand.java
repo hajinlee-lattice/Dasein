@@ -38,6 +38,7 @@ public class DnBMatchCommand implements HasPid, Serializable {
     private Long pid;
 
     @JsonProperty("RootOperationUID")
+    @Index(name = "IX_RID")
     @Column(name = "RootOperationUID", nullable = false, length = 100)
     private String rootOperationUid;
 

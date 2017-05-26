@@ -27,6 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -51,9 +52,25 @@ public class MatchCommand implements HasPid {
     @Column(name = "RowsMatched")
     private Integer rowsMatched;
 
+    @Column(name = "RowsToDnB")
+    private Integer rowsToDnb = 0;
+
+    @Column(name = "RowsMatchedByDnB")
+    private Integer rowsMatchedByDnb = 0;
+
+    @Column(name = "Duration")
+    private Integer duration = 0;
+
+    @Column(name = "DnBDurationAvg")
+    private Integer dnbDurationAvg = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "MatchStatus", nullable = false, length = 20)
     private MatchStatus matchStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "JobType", nullable = false, length = 20)
+    private MatchRequestSource jobType;
 
     @Column(name = "Customer", length = 200)
     protected String customer;
@@ -136,6 +153,46 @@ public class MatchCommand implements HasPid {
         this.rowsMatched = rowsMatched;
     }
 
+    @JsonProperty("RowsToDnB")
+    public Integer getRowsToDnb() {
+        return rowsToDnb;
+    }
+
+    @JsonProperty("RowsToDnB")
+    public void setRowsToDnb(Integer rowsToDnb) {
+        this.rowsToDnb = rowsToDnb;
+    }
+
+    @JsonProperty("RowsMatchedByDnB")
+    public Integer getRowsMatchedByDnb() {
+        return rowsMatchedByDnb;
+    }
+
+    @JsonProperty("RowsMatchedByDnB")
+    public void setRowsMatchedByDnb(Integer rowsMatchedByDnb) {
+        this.rowsMatchedByDnb = rowsMatchedByDnb;
+    }
+
+    @JsonProperty("Duration")
+    public Integer getDuration() {
+        return duration;
+    }
+
+    @JsonProperty("Duration")
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    @JsonProperty("DnBDurationAvg")
+    public Integer getDnbDurationAvg() {
+        return dnbDurationAvg;
+    }
+
+    @JsonProperty("DnBDurationAvg")
+    public void setDnbDurationAvg(Integer dnbDurationAvg) {
+        this.dnbDurationAvg = dnbDurationAvg;
+    }
+
     @JsonProperty("MatchStatus")
     public MatchStatus getMatchStatus() {
         return matchStatus;
@@ -144,6 +201,16 @@ public class MatchCommand implements HasPid {
     @JsonProperty("MatchStatus")
     public void setMatchStatus(MatchStatus matchStatus) {
         this.matchStatus = matchStatus;
+    }
+
+    @JsonProperty("JobType")
+    public MatchRequestSource getJobType() {
+        return jobType;
+    }
+
+    @JsonProperty("JobType")
+    public void setJobType(MatchRequestSource jobType) {
+        this.jobType = jobType;
     }
 
     @JsonProperty("Customer")

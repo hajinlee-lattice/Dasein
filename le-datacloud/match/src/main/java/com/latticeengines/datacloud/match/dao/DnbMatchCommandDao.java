@@ -4,5 +4,5 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.datacloud.manage.DnBMatchCommand;
 
 public interface DnbMatchCommandDao extends BaseDao<DnBMatchCommand> {
-
+    void abandonCommands(String rootOperationUid);
 }

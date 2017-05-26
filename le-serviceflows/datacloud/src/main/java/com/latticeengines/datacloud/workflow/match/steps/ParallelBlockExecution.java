@@ -162,8 +162,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             Long count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
             log.info("Generated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
 
+            int timeElapsedInMinutes = (int) (TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime));
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
+                    .duration(timeElapsedInMinutes) //
+                    .dnbCommands() //
                     .rowsMatched(count.intValue()) //
                     .status(MatchStatus.FINISHED) //
                     .progress(1f) //

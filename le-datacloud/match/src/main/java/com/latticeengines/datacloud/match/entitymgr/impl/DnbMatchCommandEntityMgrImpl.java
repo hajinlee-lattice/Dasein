@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.entitymgr.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,5 +38,17 @@ public class DnbMatchCommandEntityMgrImpl implements DnbMatchCommandEntityMgr {
     @Transactional(value = "propDataManage")
     public DnBMatchCommand findRecordByField(String field, Object value) {
         return dnbMatchCommandDao.findByField(field, value);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage")
+    public List<DnBMatchCommand> findAllByField(String field, Object value) {
+        return dnbMatchCommandDao.findAllByField(field, value);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage")
+    public void abandonCommands(String rootOperationUid) {
+        dnbMatchCommandDao.abandonCommands(rootOperationUid);
     }
 }

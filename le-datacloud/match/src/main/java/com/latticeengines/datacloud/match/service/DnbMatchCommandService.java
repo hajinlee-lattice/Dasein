@@ -9,4 +9,5 @@ public interface DnbMatchCommandService {
     void dnbMatchCommandUpdate(DnBBatchMatchContext dnbMatchContext);
     void dnbMatchCommandDelete(DnBMatchCommand record);
     DnBMatchCommand findRecordByField(String field, Object value);
+    void finalize(String rootOperationUid);
 }

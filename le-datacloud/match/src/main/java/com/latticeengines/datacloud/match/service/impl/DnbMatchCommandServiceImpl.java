@@ -29,7 +29,7 @@ public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
             dnbMatchCommand.copyContextData(dnbMatchContext);
             dnbMatchEntityMgr.createCommand(dnbMatchCommand);
         } catch (Exception e) {
-            log.error("Fail to create DnB match command in db: " + dnbMatchContext.getServiceBatchId(), e);
+            log.error("Failed to create DnB match command in db: " + dnbMatchContext.getServiceBatchId(), e);
         }
     }
 
@@ -59,6 +59,7 @@ public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
             }
             // Common fields for failed and successful DnB batch requests
             dnbMatchCommand.setDnbCode(batchStatus);
+            dnbMatchCommand.setMessage(dnbMatchContext.getDnbCode().getMessage());
             dnbMatchCommand.setUnmatchedRecords(unmatchedRecords);
             dnbMatchCommand.setAcceptedRecords(acceptedRecords);
             dnbMatchCommand.setDiscardedRecords(discardedRecords);
@@ -68,7 +69,7 @@ public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
                         dnbMatchCommand.getFinishTime().getTime() - dnbMatchCommand.getStartTime().getTime())));
             dnbMatchEntityMgr.updateCommand(dnbMatchCommand);
         } catch (Exception e) {
-            log.error("Fail to update DnB match command in db: " + dnbMatchContext.getServiceBatchId(), e);
+            log.error("Failed to update DnB match command in db: " + dnbMatchContext.getServiceBatchId(), e);
         }
     }
 
@@ -82,4 +83,8 @@ public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
         dnbMatchEntityMgr.deleteCommand(dnbMatchCommand);
     }
 
+    @Override
+    public void finalize(String rootOperationUid) {
+        dnbMatchEntityMgr.abandonCommands(rootOperationUid);
+    }
 }
