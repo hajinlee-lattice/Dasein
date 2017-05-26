@@ -255,6 +255,7 @@ public enum LedpCode {
     LEDP_18142("Table {0} not exist, cannot import table with update rule"), //
     LEDP_18143("Invalid max or offset specified"), //
     LEDP_18144("Play with name {0} not found."), //
+    LEDP_18145("Play Launch with name {0} not found."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
