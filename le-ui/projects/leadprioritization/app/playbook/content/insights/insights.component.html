@@ -1,0 +1,18 @@
+<div class="third-party-ids container">
+    
+    <h2>3rd Party Identifiers</h2>
+    <p>3rd Party Identifiers are used to lookup accounts in other applications, such as SalesForce, Marketo and Eloqua. Please map the relevant lookup fields and, if possible, make sure your CSV file has columns with data for each account. If you are uploading an existing account, you do not need to provide it again (as it is already stored in the system).</p>
+
+    <ul>
+    	<li ng-repeat="identifier in vm.identifiers">
+    		<label>{{identifier.name}}</label>
+    		<input type="text" class="form-control" />
+    	</li>
+    </ul>
+
+	<button 
+		class="button white-button" 
+		type="button"
+		ng-click="vm.addIdentifier($event)">Add Another Identifier</button>
+
+</div>

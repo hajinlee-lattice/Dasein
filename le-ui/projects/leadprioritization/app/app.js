@@ -27,6 +27,7 @@ var mainApp = angular.module('mainApp', [
     'lp.models.ratings',
     'lp.models.notes',
     'lp.import',
+    'lp.playbook',
     'lp.create.import',
     'lp.sfdc.credentials',
     'lp.managefields',

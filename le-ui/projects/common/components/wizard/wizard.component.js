@@ -3,7 +3,7 @@ angular.module('common.wizard', [
     'common.wizard.controls'
 ])
 .controller('ImportWizard', function(
-    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore
+    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();

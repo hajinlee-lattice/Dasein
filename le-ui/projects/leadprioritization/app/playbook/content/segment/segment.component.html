@@ -1,0 +1,66 @@
+<div class="import-customfields container">
+    <div class="header">
+        <h2>Custom Fields</h2>
+        <p>
+            You can add custom fields by adding columns in your CSV file with whatever data you wish to provide.  All unmapped fields (non-ID and non-Lattice fields) are considered Custom Fields unless you choose to ignore them.  You can always add more Custom Fields later.
+        </p>
+    </div>
+    <div class="alert">7 new Custom Fields have been found.</div>
+    <ul class="customfields">
+        <li class="customfield">
+            <ul class="field">
+                <li class="field-name">
+                    Custom Field
+                    <span class="more-info">&#105;
+                        <div class="tooltip_">
+                            <div class="cover">
+                                <p>
+                                    Unmapped fields are shown here and will be treated as Custom Fields unless Ignored.
+                                </p>
+                            </div>
+                        </div>
+                    </span>
+                </li>
+                <li class="type">
+                    Type
+                    <span class="more-info">&#105;
+                        <div class="tooltip_">
+                            <div class="cover">
+                                <p>
+                                    Type is important for our databases to function correctly.  If you aren't sure what to choose just leave it as "Text".
+                                </p>
+                            </div>
+                        </div>
+                    </span>
+                </li>
+                <li class="ignore">
+                    <input type="checkbox" name="ignore_all" ng-click="vm.toggleIgnores($event)" ng-model="vm.toggleIgnore" id="toggleIgnore"/> <label for="toggleIgnore">Ignore</label>
+                    <span class="more-info">&#105;
+                        <div class="tooltip_">
+                            <div class="cover">
+                                <p>
+                                    Ignore will supress the field from appearing in the system, useful when you have excess columns in your CSV file.
+                                </p>
+                            </div>
+                        </div>
+                    </span>
+                </li>
+            </ul>
+        </li>
+        <li ng-repeat="field in vm.customFields" class="customfield">
+            <ul class="field">
+                <li class="field-name">{{field.CustomField}}</li>
+                <li class="type">
+                    <select name="" id="">
+                        <option value="" ng-selected="field.Type == 'Text'">Text</option>
+                        <option value="" ng-selected="field.Type == 'Number'">Number</option>
+                        <option value="" ng-selected="field.Type == 'Boolean'">Boolean</option>
+                        <option value="" ng-selected="field.Type == 'Date'">Date</option>
+                    </select>
+                </li>
+                <li class="ignore"><input type="checkbox" ng-model="vm.customFieldsIgnore[field.CustomField]" ng-checked="field.Ignore" ng-click="vm.toggleIgnore = false" id="customFieldsIgnore[{{field.CustomField}}]"/> <label for="customFieldsIgnore[{{field.CustomField}}]">Ignore</label></li>
+            </ul>
+        </li>
+    </ul>
+
+</div>

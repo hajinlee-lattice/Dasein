@@ -330,6 +330,9 @@ angular
         .state('home.import.wizard.contactfields', {
             url: '/accounts',
             resolve: {
+                WizardProgressContext: function() {
+                    return 'import';
+                },
                 WizardProgressItems: function() {
                     return [
                         { label: 'Lattice Fields', state: 'contactfields.one' },

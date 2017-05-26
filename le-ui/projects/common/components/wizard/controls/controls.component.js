@@ -1,14 +1,14 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, WizardProgressItems
+    $state, $stateParams, $scope, $timeout, ResourceUtility, WizardProgressContext, WizardProgressItems
 ) {
     var vm = this;
 
     angular.extend(vm, {
         items: WizardProgressItems,
         state: $state.current.name,
-        prev: 'home.import.entry',
-        next: 'home.import.wizard'
+        prev: 'home.' + WizardProgressContext + '.entry',
+        next: 'home.' + WizardProgressContext + '.wizard'
     });
 
     vm.init = function() {
@@ -34,7 +34,7 @@ angular.module('common.wizard.controls', [])
             var item = vm.items[i];
             var state = item.state;
 
-            if ('home.import.wizard.' + state == current) {
+            if ('home.' + WizardProgressContext + '.wizard.' + state == current) {
                 var split = state.split('.');
                 var last = split[split.length-1];
 
@@ -42,7 +42,7 @@ angular.module('common.wizard.controls', [])
                     var next = vm.items[i+1].state;
                     var nsplit = next.split('.');
 
-                    vm.next = 'home.import.wizard.' + nsplit.join('.');
+                    vm.next = 'home.' + WizardProgressContext + '.wizard.' + nsplit.join('.');
                 } else {
                     vm.next = '';
                 }
@@ -50,9 +50,9 @@ angular.module('common.wizard.controls', [])
                     var prev = vm.items[i-1].state;
                     var psplit = prev.split('.');
                     
-                    vm.prev = 'home.import.wizard.' + psplit.join('.');
+                    vm.prev = 'home.' + WizardProgressContext + '.wizard.' + psplit.join('.');
                 } else {
-                    vm.prev = 'home.import.entry';
+                    vm.prev = 'home.' + WizardProgressContext + '.entry';
                 }
             }
 
