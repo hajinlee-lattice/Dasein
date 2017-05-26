@@ -284,8 +284,21 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var possibleNumberofCategories = categoryList.length <= 8 ? categoryList.length : 8;
         var colorChoices = ["#4bd1bb", "#00a2d0", "#f6b300", "#a981e1", "#95cb2c", "#9a9a9a", "#3488d3", "#e55e1b"];
         categoryList = categoryList.sort(this.SortByCategoryName);
+        var categoryColors = {
+            'Firmographics': '#4bd1bb',
+            'Intent': '#f15a5a',
+            'Growth Trends': '#00a2d0',
+            'Online Presence': '#a981e1',
+            'Technology Profile': '#70bf4a',
+            'Website Keywords': '#f6b300',
+            'Website Profile': '#26649b'
+        }
         for (var i = 0; i < possibleNumberofCategories; i++) {
-            categoryList[i].color = colorChoices[i];
+            var categoryName = categoryList[i].categoryName,
+                color = categoryColors[categoryName] || colorChoices[i];
+            console.log(color, categoryName);
+            categoryList[i].color = color;
+            //categoryList[i].color = (categoryColors[i].categoryName ? categoryColors[categoryColors[i].categoryName] : colorChoices[i]);
         }
     };
 
