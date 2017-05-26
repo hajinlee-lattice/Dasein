@@ -70,6 +70,7 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
@@ -85,6 +86,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.ModelMetadataService;
+import com.latticeengines.pls.service.ModelNotesService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
@@ -179,6 +181,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private BucketedScoreService bucketedScoreService;
+
+    @Autowired
+    private ModelNotesService modelNotesService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1237,5 +1242,23 @@ public class InternalResource extends InternalResourceBase {
             }
         }
         return false;
+    }
+
+    @RequestMapping(value = "/modelnotes/{modelSummaryId}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Insert one note for certain model summary.")
+    public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams) {
+        log.debug(String.format("ModelSummary %s's ModelNotes created by %s", modelSummaryId, noteParams.getUserName()));
+        modelNotesService.create(modelSummaryId, noteParams);
+        return true;
+    }
+
+    @RequestMapping(value = "/modelnotes/{fromModelSummaryId}/{toModelSummaryId}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Insert one note for certain model summary.")
+    public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId) {
+        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNotes", fromModelSummaryId, toModelSummaryId));
+        modelNotesService.copyNotes(fromModelSummaryId, toModelSummaryId);
+        return true;
     }
 }

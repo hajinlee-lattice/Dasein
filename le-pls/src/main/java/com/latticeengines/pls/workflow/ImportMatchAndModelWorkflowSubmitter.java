@@ -173,7 +173,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .bucketMetadata(null)
                 // TODO: legacy SQL based match engine configurations
                 .matchClientDocument(matchClientDocument).matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
-                .matchDestTables("DerivedColumnsCache");
+                .matchDestTables("DerivedColumnsCache")
+                .notesContent(parameters.getNotesContent());
         return builder.build();
     }
 

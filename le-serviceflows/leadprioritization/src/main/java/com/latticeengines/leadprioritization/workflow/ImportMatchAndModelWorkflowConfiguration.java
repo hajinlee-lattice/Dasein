@@ -170,6 +170,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder userId(String userId) {
             pivotScoreAndEvent.setUserId(userId);
+            model.setUserName(userId);
             return this;
         }
 
@@ -353,6 +354,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
             combineInputWithScores.setBucketMetadata(bucketMetadata);
+            return this;
+        }
+
+        public Builder notesContent(String notesContent) {
+            model.setNotesContent(notesContent);
             return this;
         }
 

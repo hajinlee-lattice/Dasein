@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
@@ -14,6 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -281,4 +283,25 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
+    public void createNote(String modelId, NoteParams noteParams) {
+        try {
+            String url = constructUrl("pls/internal/modelnotes/", modelId);
+            log.debug(String.format("Creating model %s's note content to %s", modelId, noteParams.getContent(), url));
+            restTemplate.postForEntity(url, noteParams, Boolean.class);
+        } catch (Exception e) {
+            throw new RuntimeException("CreateNote: Remote call failure", e);
+        }
+    }
+
+    public void copyNotes(String fromModelSummaryId , String toModelSummaryId) {
+        try {
+            String url = constructUrl("pls/internal/modelnotes/", fromModelSummaryId, toModelSummaryId);
+            HttpHeaders headers = new HttpHeaders();
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            log.debug(String.format("Copy note from ModelSummary %s to ModelSummary %s, url %s", fromModelSummaryId, toModelSummaryId, url));
+            restTemplate.exchange(url, HttpMethod.POST, request, Boolean.class);
+        } catch (Exception e) {
+            throw new RuntimeException("CopyNotes: Remote call failure", e);
+        }
+    }
 }

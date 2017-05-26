@@ -9,6 +9,7 @@ import com.latticeengines.leadprioritization.workflow.steps.PersistDataRules;
 import com.latticeengines.leadprioritization.workflow.steps.RemediateDataRules;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
+import com.latticeengines.serviceflows.workflow.modeling.CreateNote;
 import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
 import com.latticeengines.serviceflows.workflow.modeling.Profile;
 import com.latticeengines.serviceflows.workflow.modeling.ReviewModel;
@@ -47,6 +48,9 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
     private DownloadAndProcessModelSummaries downloadAndProcessModelSummaries;
 
     @Autowired
+    private CreateNote createNote;
+
+    @Autowired
     private PersistDataRules persistDataRules;
 
     @Autowired
@@ -69,6 +73,7 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
                 .next(writeMetadataFiles) //
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
+                .next(createNote)
                 .next(persistDataRules) //
                 .build();
     }

@@ -59,6 +59,9 @@ public class ModelingParameters {
     @JsonProperty
     private String dataCloudVersion;
 
+    @JsonProperty
+    private String notesContent;
+
     public String getFilename() {
         return filename;
     }
@@ -177,6 +180,14 @@ public class ModelingParameters {
 
     public void setRunTimeParams(Map<String, String> runTimeParams) {
         this.runTimeParams = runTimeParams;
+    }
+
+    public String getNotesContent() {
+        return notesContent;
+    }
+
+    public void setNotesContent(String notesContent) {
+        this.notesContent = notesContent;
     }
 
     @Override
