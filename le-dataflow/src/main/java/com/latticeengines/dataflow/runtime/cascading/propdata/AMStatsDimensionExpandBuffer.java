@@ -185,8 +185,8 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
         public Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
         public String dimensionColumnPrepostfix;
 
-        public Params(String expandField, //
-                Fields fieldDeclaration, //
+        public Params(Fields fieldDeclaration, //
+                String expandField, //
                 Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap) {
             this.expandField = expandField;
             this.fieldDeclaration = fieldDeclaration;

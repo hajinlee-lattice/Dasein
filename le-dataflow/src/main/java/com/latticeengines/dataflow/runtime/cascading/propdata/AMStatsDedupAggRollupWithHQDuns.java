@@ -132,17 +132,18 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
 
         log.debug("hqDunsFieldValuesStr: " + hqDunsFieldValuesStr);
 
+        if (hqDunsFieldValuesStr == null || hqDunsFieldValues.size() == 0) {
+            log.debug("hqDunsFieldValuesStr: " + hqDunsFieldValuesStr);
+        }
+
         Set<Dimensions> dimSet = new HashSet<>();
         // to avoid ConcurrentModificationException copy key set in separate set
         // to use in for loop which tries to update this map
         for (Dimensions dim : expandedTupleMap.keySet()) {
-            if (expandedTupleMap.keySet().size() > 5000) {
-                log.debug("Printing dimensions as map contains lot of elements (" + expandedTupleMap.keySet().size()
-                        + "): " + dim.toString() + ", hqDunsFieldValuesStr: " + hqDunsFieldValuesStr);
-            }
             dimSet.add(dim);
         }
 
+        int max = 0;
         for (Dimensions dim : dimSet) {
             ExpandedTuple expandedTuple = expandedTupleMap.get(dim);
             Map<Long, List<Long>> dimAncestorMap = new HashMap<>();
@@ -153,6 +154,10 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
 
             List<List<Long>> dimensionCombinations = calculationDimensionCombinations(dimAncestorMap,
                     dim.getDimensions());
+
+            if (max < dimensionCombinations.size()) {
+                max = dimensionCombinations.size();
+            }
 
             for (List<Long> ancestorTuple : dimensionCombinations) {
                 ExpandedTuple rollupExpandedTuple = new ExpandedTuple(expandedTuple);

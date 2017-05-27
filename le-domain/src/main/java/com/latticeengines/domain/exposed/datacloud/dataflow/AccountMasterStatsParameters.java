@@ -34,6 +34,7 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String HQ_DUNS = "HQ_DUNS";
     public static final String DOMAIN = "LDC_Domain";
     public static final String DOMAIN_BCK_FIELD = "DOMAIN_BCK_FIELD";
+    public static final String HQ_DUNS_PROC_INDICATOR = "HQ_DUNS_PROC_INDICATOR";
     public static final String STATUS_CODE = "STATUS_CODE";
     public static final String SUBSIDIARY_INDICATOR = "SUBSIDIARY_INDICATOR";
     public static final Integer DEFAULT_MAX_BUCKET_COUNT = 5;
