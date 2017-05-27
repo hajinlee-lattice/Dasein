@@ -73,8 +73,8 @@ public class AMStatsDimExpandMergeFlow extends AMStatsFlowBase {
 
             AMStatsDimensionExpandBuffer.Params functionParams = //
                     new AMStatsDimensionExpandBuffer.Params(//
-                            dimensionKey, //
                             allLeafFields, //
+                            dimensionKey, //
                             parameters.getRequiredDimensionsValuesMap());
 
             AMStatsDimensionExpandBuffer buffer = //
