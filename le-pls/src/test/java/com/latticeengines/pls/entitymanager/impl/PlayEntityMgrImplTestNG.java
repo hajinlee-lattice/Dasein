@@ -1,5 +1,6 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,8 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         play = new Play();
         play.setName(NAME);
+        play.setTimeStamp(new Date(System.currentTimeMillis()));
+        play.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
         play.setDisplayName(DISPLAY_NAME);
         play.setTenant(tenant1);
     }

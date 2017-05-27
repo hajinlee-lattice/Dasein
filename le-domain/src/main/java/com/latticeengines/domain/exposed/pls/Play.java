@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -14,6 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
@@ -64,6 +67,16 @@ public class Play implements HasName, HasPid, HasTenantId {
     @JsonProperty("segment")
     @Column(name = "SEGMENT_NAME", nullable = true)
     private String segmentName;
+
+    @JsonProperty("timestamp")
+    @Column(name = "TIMESTAMP", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date timestamp;
+
+    @JsonProperty("lastupdatedtimestamp")
+    @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdatedTimeStamp;
 
     @JsonIgnore
     @Transient
@@ -173,6 +186,22 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     public String generateNameStr() {
         return String.format(PLAY_NAME_FORMAT, PLAY_NAME_PREFIX, UUID.randomUUID().toString());
+    }
+
+    public void setTimeStamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Date getTimeStamp() {
+        return this.timestamp;
+    }
+
+    public void setLastUpdatedTimestamp(Date lastUpdatedTimeStamp) {
+        this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
+    }
+
+    public Date getLastUpdatedTimeStamp() {
+        return this.lastUpdatedTimeStamp;
     }
 
     @Override

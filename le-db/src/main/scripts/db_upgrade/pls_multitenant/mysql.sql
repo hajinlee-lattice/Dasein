@@ -7,7 +7,7 @@ CREATE PROCEDURE `UpdateSchema`()
   BEGIN
      START TRANSACTION;
     create table `PLAY_LAUNCH` (`PID` bigint not null auto_increment unique, `LAUNCH_ID` varchar(255) not null unique, `LAST_UPDATED_TIMESTAMP` datetime not null, `STATE` integer not null, `NAME` varchar(255) not null, `TABLE_NAME` varchar(255), `TENANT_ID` bigint not null, `TIMESTAMP` datetime not null, FK_PLAY_ID bigint not null, FK_TENANT_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
-	create table `PLAY` (`PID` bigint not null auto_increment unique, `DESCRIPTION` varchar(255), `DISPLAY_NAME` varchar(255) not null, `NAME` varchar(255) not null, `SEGMENT_NAME` varchar(255), `TENANT_ID` bigint not null, FK_CALL_PREP_ID bigint, FK_TENANT_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
+	create table `PLAY` (`PID` bigint not null auto_increment unique, `DESCRIPTION` varchar(255), `DISPLAY_NAME` varchar(255) not null, `LAST_UPDATED_TIMESTAMP` datetime not null, `NAME` varchar(255) not null, `SEGMENT_NAME` varchar(255), `TENANT_ID` bigint not null, `TIMESTAMP` datetime not null, FK_CALL_PREP_ID bigint, FK_TENANT_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
 	create table `CALL_PREP` (`PID` bigint not null auto_increment unique, primary key (`PID`)) ENGINE=InnoDB;
 
     alter table `PLAY_LAUNCH` add index FKF6CA4F1EE57F1489 (FK_PLAY_ID), add constraint FKF6CA4F1EE57F1489 foreign key (FK_PLAY_ID) references `PLAY` (`PID`) on delete cascade;

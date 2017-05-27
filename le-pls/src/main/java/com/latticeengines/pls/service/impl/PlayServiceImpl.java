@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -31,8 +32,11 @@ public class PlayServiceImpl implements PlayService {
     public Play createPlay(Play play, String tenantId) {
         log.info(String.format("Creating play with name: %s, segment name: %s, on tenant %s", play.getName(),
                 play.getSegmentName(), tenantId));
+        Date timestamp = new Date(System.currentTimeMillis());
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         play.setTenant(tenant);
+        play.setTimeStamp(timestamp);
+        play.setLastUpdatedTimestamp(timestamp);
         playEntityMgr.create(play);
         return play;
     }
