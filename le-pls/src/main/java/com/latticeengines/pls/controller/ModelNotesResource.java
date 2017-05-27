@@ -67,12 +67,4 @@ public class ModelNotesResource {
         return true;
     }
 
-    @RequestMapping(value = "/{fromModelSummaryId}/{toModelSummaryId}", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Insert one note for certain model summary.")
-    public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId) {
-        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNotes", fromModelSummaryId, toModelSummaryId));
-        modelNotesService.copyNotes(fromModelSummaryId, toModelSummaryId);
-        return true;
-    }
 }
