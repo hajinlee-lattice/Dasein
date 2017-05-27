@@ -3,7 +3,7 @@ package com.latticeengines.dantedb.exposed.dao.impl;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dantedb.exposed.dao.DanteTalkingPointsDao;
-import com.latticeengines.domain.exposed.dantetalkingpoints.DanteTalkingPoint;
+import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
 @Component("danteTalkingPointsDao")
 public class DanteTalkingPointsDaoImpl extends BaseDanteDaoImpl<DanteTalkingPoint> implements DanteTalkingPointsDao {

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.dantetalkingpoints;
+package com.latticeengines.domain.exposed.dante;
 
 import java.io.Serializable;
 import java.util.Date;

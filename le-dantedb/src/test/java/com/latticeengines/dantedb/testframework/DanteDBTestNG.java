@@ -17,7 +17,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.dantetalkingpoints.DanteTalkingPoint;
+import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = "classpath:test-dantedb-context.xml")
@@ -38,7 +38,7 @@ public class DanteDBTestNG extends AbstractTestNGSpringContextTests {
 
         String deleteTPSql = "DELETE FROM [TalkingPointCache]\n" + "WHERE External_ID = :externalID";
 
-        PlatformTransactionManager ptm = applicationContext.getBean("danteTransactionManager",
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);
         TransactionTemplate txnTemplate = new TransactionTemplate(ptm);
 
@@ -81,4 +81,5 @@ public class DanteDBTestNG extends AbstractTestNGSpringContextTests {
         });
         Assert.assertEquals(dtps.size(), 0);
     }
+
 }

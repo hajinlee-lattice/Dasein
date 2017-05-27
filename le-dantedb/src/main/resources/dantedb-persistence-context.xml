@@ -16,9 +16,9 @@
     </bean>
 
     <!-- Hibernate session factory -->
-    <bean id="danteSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="danteDataSource"/>
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dantetalkingpoints"/>
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dante"/>
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
@@ -28,13 +28,13 @@
         </property>
     </bean>
 
-    <bean id="danteTransactionManager"
+    <bean id="transactionManager"
           class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-          p:sessionFactory-ref="danteSessionFactory">
-        <qualifier value="danteDataSource"/>
+          p:sessionFactory-ref="sessionFactory">
+        <qualifier value="danteTransactionManager"/>
     </bean>
 
-    <tx:annotation-driven transaction-manager="danteTransactionManager" mode="proxy"/>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
 
     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
           p:dataSource-ref="danteDataSource"/>

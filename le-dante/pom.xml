@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-dante</artifactId>
+    <packaging>jar</packaging>
+    <name>le-${component-name}</name>
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dantedb</artifactId>
+            <version>${le.dantedb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+        </dependency>
+    </dependencies>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>3.6.0-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
+    <properties>
+        <component-name>dante</component-name>
+        <le.common.version>3.6.0-SNAPSHOT</le.common.version>
+        <le.db.version>3.6.0-SNAPSHOT</le.db.version>
+        <le.domain.version>3.6.0-SNAPSHOT</le.domain.version>
+        <le.proxy.version>3.6.0-SNAPSHOT</le.proxy.version>
+        <le.testfwk.version>3.6.0-SNAPSHOT</le.testfwk.version>
+        <le.dantedb.version>3.6.0-SNAPSHOT</le.dantedb.version>
+    </properties>
+
+</project>
