@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.ratings', [])
 .controller('PlaybookWizardRatings', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore
+    $state, $stateParams, $scope, ResourceUtility
 ) {
     var vm = this;
 

@@ -1,11 +1,11 @@
 angular.module('lp.playbook.wizard.settings', [])
 .controller('PlaybookWizardSettings', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore
+    $state, $stateParams, $scope, ResourceUtility
 ) {
     var vm = this;
 
     angular.extend(vm, {
-        state: ImportWizardStore.getAccountIdState()
+
     });
 
     vm.init = function() {
