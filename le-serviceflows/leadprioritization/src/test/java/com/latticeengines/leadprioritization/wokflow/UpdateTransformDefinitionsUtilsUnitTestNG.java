@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
-import com.latticeengines.domain.exposed.transform.TransformationMetadata;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.leadprioritization.workflow.UpdateTransformDefinitionsUtils;
 
@@ -27,13 +26,10 @@ public class UpdateTransformDefinitionsUtilsUnitTestNG {
                 .updateTransformDefinitions(TransformationGroup.STANDARD, TransformationPipeline.PACKAGE_NAME);
         List<TransformDefinition> differentDefs = findDifferentTransformDefinition(originalTransformDefinitions,
                 udpatedTransformDefinitions);
-        Assert.assertEquals(1, differentDefs.size());
-        TransformDefinition definition = differentDefs.get(0);
-        Assert.assertEquals(definition.name, "StdVisidbDsIndustryGroup");
-        TransformationMetadata tm = definition.transformationMetadata;
-        Assert.assertNotNull(tm);
-        Assert.assertEquals(definition.transformationMetadata.getCategory(), Category.ACCOUNT_INFORMATION.toString());
-
+        Assert.assertEquals(differentDefs.size(), 11);
+        Assert.assertEquals(differentDefs.stream()
+                .filter(def -> def.transformationMetadata.getCategory().equals(Category.ACCOUNT_INFORMATION.toString()))
+                .count(), 11);
     }
 
     private List<TransformDefinition> findDifferentTransformDefinition(
@@ -47,11 +43,11 @@ public class UpdateTransformDefinitionsUtilsUnitTestNG {
     private boolean originalDefIsTheSameWithUpdated(TransformDefinition originalDef,
             List<TransformDefinition> updatedTransformDefinitions) {
         boolean foundMatch = false;
-        foundMatch = updatedTransformDefinitions.stream().anyMatch(a -> equalDeifintions(a, originalDef));
+        foundMatch = updatedTransformDefinitions.stream().anyMatch(a -> equalDefinitions(a, originalDef));
         return foundMatch;
     }
 
-    private boolean equalDeifintions(TransformDefinition d1, TransformDefinition d2) {
+    private boolean equalDefinitions(TransformDefinition d1, TransformDefinition d2) {
         return d1.equals(d2) && //
                 ((d1.transformationMetadata == null && d2.transformationMetadata == null)
                         || (d1.transformationMetadata != null && d2.transformationMetadata != null

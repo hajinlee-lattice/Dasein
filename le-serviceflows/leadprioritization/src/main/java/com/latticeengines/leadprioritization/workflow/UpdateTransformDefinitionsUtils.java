@@ -23,12 +23,12 @@ public class UpdateTransformDefinitionsUtils {
         List<TransformDefinition> transformDefinitions = TransformationPipeline.getTransforms(transformationGroup);
         transformDefinitions.stream().forEach(def -> {
             overWriteTransformDefinitionAccountCategory(def, packageName);
-            printTransformDeifitionAndCategoryInfo(def);
+            printTransformDefinitionAndCategoryInfo(def);
         });
         return transformDefinitions;
     }
 
-    private static void printTransformDeifitionAndCategoryInfo(TransformDefinition transformDefinition) {
+    private static void printTransformDefinitionAndCategoryInfo(TransformDefinition transformDefinition) {
         log.info(String.format("%s: %s", transformDefinition.name, transformDefinition.transformationMetadata == null
                 ? "null" : transformDefinition.transformationMetadata.getCategory()));
     }
