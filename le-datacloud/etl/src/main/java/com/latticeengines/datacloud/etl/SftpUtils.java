@@ -31,7 +31,7 @@ public class SftpUtils {
     public static final List<String> getFileNames(SftpConfiguration config,
             final String fileNamePattern) {
         try {
-            log.info("Connecting to SFTP...");
+            log.info(String.format("Connecting to SFTP %s... ", config.getSftpHost()));
             Pattern pattern = fileNamePattern != null ? Pattern.compile(fileNamePattern) : null;
             JSch jsch = new JSch();
             Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
@@ -54,6 +54,7 @@ public class SftpUtils {
             }
             sftpChannel.exit();
             session.disconnect();
+            log.info(String.format("Disconnected with SFTP %s... ", config.getSftpHost()));
             return fileSources;
         } catch (JSchException | SftpException e) {
             throw new RuntimeException(e);

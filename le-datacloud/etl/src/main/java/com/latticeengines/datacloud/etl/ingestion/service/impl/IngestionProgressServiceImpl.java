@@ -53,7 +53,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     }
 
     @Override
-    public IngestionProgress createPreprocessProgress(Ingestion ingestion, String triggeredBy,
+    public IngestionProgress createDraftProgress(Ingestion ingestion, String triggeredBy,
             String file) {
         IngestionProgress progress = initProgress(ingestion, triggeredBy);
         inflateProgress(progress, ingestion, file);
