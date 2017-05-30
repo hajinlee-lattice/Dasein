@@ -1,9 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +17,11 @@ import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.DataFeedDao;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("datafeedEntityMgr")
@@ -35,6 +32,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Autowired
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
+
+    @Autowired
+    private DataFeedTaskEntityMgr dataFeedTaskEntityMgr;
 
     @Override
     public BaseDao<DataFeed> getDao() {
@@ -49,12 +49,12 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByName(String datafeedName) {
         DataFeed datafeed = findByField("name", datafeedName);
         if (datafeed != null) {
-            HibernateUtils.inflateDetails(datafeed.getTasks());
             HibernateUtils.inflateDetails(datafeed.getExecutions());
+            HibernateUtils.inflateDetails(datafeed.getTasks());
         }
         return datafeed;
     }
@@ -67,7 +67,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             return;
         }
         List<DataFeedTask> tasks = HibernateUtils.inflateDetails(datafeed.getTasks());
-
+        datafeed.getTasks().forEach(task -> {
+            task.setImportData(dataFeedTaskEntityMgr.pollFirstDataTable(task.getPid()));
+        });
         List<DataFeedImport> imports = tasks.stream().map(DataFeedImportUtils::createImportFromTask)
                 .collect(Collectors.toList());
         DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecution());
@@ -84,12 +86,11 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeed.setActiveExecution(newExecution.getPid());
         tasks.forEach(task -> {
             task.setStartTime(new Date());
-            Table dataTable = task.getImportData();
-            Table newDatatTable = TableUtils.clone(dataTable,
-                    "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
-            newDatatTable.setExtracts(new ArrayList<>());
-            newDatatTable.setTenant(MultiTenantContext.getTenant());
-            task.setImportData(newDatatTable);
+            // Table dataTable = task.getImportTemplate();
+            // Table newDatatTable = TableUtils.clone(dataTable,
+            // "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
+            // newDatatTable.setTenant(MultiTenantContext.getTenant());
+            task.setImportData(null);
         });
         datafeedDao.update(datafeed);
     }

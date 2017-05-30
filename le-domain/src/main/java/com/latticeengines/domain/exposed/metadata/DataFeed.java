@@ -82,7 +82,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @OrderBy("PID ASC")
+    @OrderBy
     @JsonProperty("executions")
     private List<DataFeedExecution> executions = new ArrayList<>();
 

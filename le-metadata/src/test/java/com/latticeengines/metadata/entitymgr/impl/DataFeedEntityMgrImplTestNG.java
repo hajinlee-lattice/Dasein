@@ -99,10 +99,10 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         task.setEntity(SchemaInterpretation.Account.name());
         task.setSource("SFDC");
         task.setStatus(DataFeedTask.Status.Active);
-        task.setStagingDir("/tmp");
         task.setSourceConfig("config");
         task.setImportTemplate(importTable);
         task.setImportData(dataTable);
+        task.addTable(dataTable);
         task.setStartTime(new Date());
         task.setLastImported(new Date());
         datafeed.addTask(task);
@@ -136,6 +136,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         DataFeedExecution exec2 = df.getExecutions().get(1);
         assertEquals(exec2.getStatus(), DataFeedExecution.Status.Active);
         assertEquals(exec2.getImports().size(), 0);
+
     }
 
 }

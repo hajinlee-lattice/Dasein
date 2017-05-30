@@ -27,10 +27,9 @@ public class DataFeedImportUtilsTestNG {
         task.setEntity(SchemaInterpretation.Account.name());
         task.setSource("SFDC");
         task.setStatus(Status.Active);
-        task.setStagingDir("/tmp");
         task.setSourceConfig("config");
         task.setImportTemplate(new Table(TableType.IMPORTTABLE));
-        task.setImportData(new Table(TableType.DATATABLE));
+        task.setImportData(null);
         task.setStartTime(new Date());
         task.setLastImported(new Date());
 

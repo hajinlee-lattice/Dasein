@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Basic;
@@ -17,6 +19,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -31,7 +34,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_TASK", uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE",
-        "ENTITY", "FK_FEED_ID" }))
+        "ENTITY", "FEED_TYPE", "FK_FEED_ID" }))
 public class DataFeedTask implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -73,12 +76,8 @@ public class DataFeedTask implements HasPid, Serializable {
     @JsonIgnore
     @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "FK_DATA_ID", nullable = false)
+    @JoinColumn(name = "FK_DATA_ID", nullable = true)
     private Table importData;
-
-    @Column(name = "STAGING_DIR", nullable = false, length = 1000)
-    @JsonProperty("staging_dir")
-    private String stagingDir;
 
     @Column(name = "ACTIVE_JOB", nullable = false)
     @JsonProperty("active_job")
@@ -98,6 +97,11 @@ public class DataFeedTask implements HasPid, Serializable {
     @Column(name = "LAST_IMPORTED", nullable = false)
     @JsonProperty("last_imported")
     private Date lastImported;
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "dataFeedTask")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<DataFeedTaskTable> tables = new ArrayList<>();
 
     @Override
     public Long getPid() {
@@ -158,14 +162,6 @@ public class DataFeedTask implements HasPid, Serializable {
         this.importData = importData;
     }
 
-    public String getStagingDir() {
-        return stagingDir;
-    }
-
-    public void setStagingDir(String stagingDir) {
-        this.stagingDir = stagingDir;
-    }
-
     public Status getStatus() {
         return status;
     }
@@ -204,6 +200,21 @@ public class DataFeedTask implements HasPid, Serializable {
 
     public void setSourceConfig(String sourceConfig) {
         this.sourceConfig = sourceConfig;
+    }
+
+    public List<DataFeedTaskTable> getTables() {
+        return tables;
+    }
+
+    public void setTables(List<DataFeedTaskTable> tables) {
+        this.tables = tables;
+    }
+
+    public void addTable(Table table) {
+        DataFeedTaskTable feedTaskTable = new DataFeedTaskTable();
+        feedTaskTable.setFeedTask(this);
+        feedTaskTable.setTable(table);
+        tables.add(feedTaskTable);
     }
 
     public static enum Status {
