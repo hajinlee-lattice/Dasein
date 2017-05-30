@@ -68,6 +68,13 @@ angular
             url: '/wizard',
             views: {
                 'main@': {
+                    resolve: {
+                        WizardHeaderTitle: function() {
+                            return 'Import';
+                        }
+                    },
+                    controller: 'ImportWizard',
+                    controllerAs: 'vm',
                     templateUrl: '/components/wizard/wizard.component.html'
                 }
             }
@@ -75,6 +82,9 @@ angular
         .state('home.import.wizard.accounts', {
             url: '/accounts',
             resolve: {
+                WizardProgressContext: function() {
+                    return 'import';
+                },
                 WizardProgressItems: function() {
                     return [
                         { label: 'Account IDs', state: 'accounts.one' },
@@ -92,6 +102,11 @@ angular
                     templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
+                    resolve: {
+                        WizardControlsOptions: function() {
+                            return { backState: 'home.import.entry.accounts', nextState: 'home.segments' };
+                        }
+                    },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/controls/controls.component.html'
@@ -184,6 +199,9 @@ angular
         .state('home.import.wizard.accountfields', {
             url: '/accountfields',
             resolve: {
+                WizardProgressContext: function() {
+                    return 'import';
+                },
                 WizardProgressItems: function() {
                     return [
                         { label: 'Account IDs', state: 'accountfields.one' },
@@ -200,6 +218,11 @@ angular
                     templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
+                    resolve: {
+                        WizardControlsOptions: function() {
+                            return { backState: 'home.import.entry.accountfields', nextState: 'home.segments' };
+                        }
+                    },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/controls/controls.component.html'
@@ -247,6 +270,9 @@ angular
         .state('home.import.wizard.contacts', {
             url: '/accounts',
             resolve: {
+                WizardProgressContext: function() {
+                    return 'import';
+                },
                 WizardProgressItems: function() {
                     return [
                         { label: 'Lattice Fields', state: 'contacts.one' },
@@ -262,6 +288,11 @@ angular
                     templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
+                    resolve: {
+                        WizardControlsOptions: function() {
+                            return { backState: 'home.import.entry.contacts', nextState: 'home.segments' };
+                        }
+                    },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/controls/controls.component.html'
@@ -348,6 +379,11 @@ angular
                     templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
+                    resolve: {
+                        WizardControlsOptions: function() {
+                            return { backState: 'home.import.entry.contactfields', nextState: 'home.segments' };
+                        }
+                    },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/controls/controls.component.html'
@@ -385,6 +421,9 @@ angular
         .state('home.import.wizard.eloquoa', {
             url: '/accounts',
             resolve: {
+                WizardProgressContext: function() {
+                    return 'import';
+                },
                 WizardProgressItems: function() {
                     return [
                         { label: 'Lattice Fields', state: 'eloquoa.one' },
@@ -400,6 +439,11 @@ angular
                     templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
+                    resolve: {
+                        WizardControlsOptions: function() {
+                            return { backState: 'home.import.entry.eloquoa', nextState: 'home.segments' };
+                        }
+                    },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/controls/controls.component.html'

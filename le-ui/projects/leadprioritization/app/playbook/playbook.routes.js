@@ -13,6 +13,13 @@ angular
             url: '/playbook',
             views: {
                 'main@': {
+                    resolve: {
+                        WizardHeaderTitle: function() {
+                            return 'Play Book';
+                        }
+                    },
+                    controller: 'ImportWizard',
+                    controllerAs: 'vm',
                     templateUrl: '/components/wizard/wizard.component.html'
                 }
             },
@@ -43,6 +50,11 @@ angular
                     templateUrl: '/components/wizard/progress/progress.component.html'
                 },
                 'wizard_controls': {
+                    resolve: {
+                        WizardControlsOptions: function() {
+                            return { backState: 'home.models', nextState: 'home.models' };
+                        }
+                    },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/controls/controls.component.html'

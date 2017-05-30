@@ -1,13 +1,14 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, WizardProgressContext, WizardProgressItems
+    $state, $stateParams, $scope, $timeout, ResourceUtility, 
+    WizardProgressContext, WizardProgressItems, WizardControlsOptions
 ) {
     var vm = this;
 
     angular.extend(vm, {
         items: WizardProgressItems,
         state: $state.current.name,
-        prev: 'home.' + WizardProgressContext + '.entry',
+        prev: WizardControlsOptions.backState,
         next: 'home.' + WizardProgressContext + '.wizard'
     });
 
@@ -23,7 +24,7 @@ angular.module('common.wizard.controls', [])
         } else if (isPrev && vm.prev) {
             $state.go(vm.prev);
         } else if (!isPrev && !vm.next) {
-            $state.go('home.segment')
+            $state.go(WizardControlsOptions.nextState)
         }
     }
 
@@ -46,13 +47,14 @@ angular.module('common.wizard.controls', [])
                 } else {
                     vm.next = '';
                 }
+
                 if (i-1 >= 0) {
                     var prev = vm.items[i-1].state;
                     var psplit = prev.split('.');
                     
                     vm.prev = 'home.' + WizardProgressContext + '.wizard.' + psplit.join('.');
                 } else {
-                    vm.prev = 'home.' + WizardProgressContext + '.entry';
+                    vm.prev = WizardControlsOptions.backState;
                 }
             }
 

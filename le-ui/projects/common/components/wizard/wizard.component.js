@@ -3,18 +3,17 @@ angular.module('common.wizard', [
     'common.wizard.controls'
 ])
 .controller('ImportWizard', function(
-    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility
+    $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, WizardHeaderTitle
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
-        title: ''
+        title: WizardHeaderTitle || ''
     });
 
     vm.init = function() {
-        var name = $state.current.name.split('.')[3];
-        vm.title = name;
+        vm.title = WizardHeaderTitle || name;
     }
 
     vm.init();
