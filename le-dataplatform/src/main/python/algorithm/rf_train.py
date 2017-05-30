@@ -8,6 +8,11 @@ from pipelinefwk import get_logger
 logger = get_logger("algorithm")
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties=None, params = None):
+    logger.info("Record count:" + str(trainingData.shape[0]))
+    if '__TRAINING__' in trainingData.columns.values:
+        trainingData = trainingData[trainingData['__TRAINING__'] == 1]
+        logger.info("Record count after selection:" + str(trainingData.shape[0]))
+        
     X_train = trainingData[schema["features"]]
     Y_train = trainingData[schema["target"]]
 

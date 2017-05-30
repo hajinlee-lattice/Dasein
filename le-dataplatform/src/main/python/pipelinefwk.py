@@ -37,11 +37,13 @@ class Pipeline(object):
         transformed = dataFrame
         if len(dataFrame.index) > 0:
             transformed = dataFrame.apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
+        logger.info("Number of steps:" + str(len(self.pipelineSteps)))
         for step in self.pipelineSteps:
             step.setMediator(self.mediator)
             
             try:
                 start = t.time()
+                logger.info("Step:" + step.__class__.__name__)
                 transformed = step.transform(transformed, configMetadata, test)
                 end = t.time()
                 logger.info("Step %s took %f s." % (str(step), (end - start)))

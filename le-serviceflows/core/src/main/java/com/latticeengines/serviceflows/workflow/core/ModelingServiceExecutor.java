@@ -218,7 +218,8 @@ public class ModelingServiceExecutor {
                     "featureselectionstep.enabled=true", //
                     "assignconversionratetoallcategoricalvalues.enabled=true", //
                     "enumeratedcolumntransformstep.enabled=false", //
-                    "categoricalgroupingstep.enabled=true" //
+                    "categoricalgroupingstep.enabled=true", //
+                    "unmatchedselectionstep.enabled=true" //
             };
             algorithm.setPipelineProperties(StringUtils.join(pipelineProperties, " "));
         }

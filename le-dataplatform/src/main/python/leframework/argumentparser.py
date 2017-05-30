@@ -189,6 +189,9 @@ class ArgumentParser(object):
         scoringColumns |= set([self.revenueColumn]) if self.revenueColumn != None else set()
         nonScoringColumns = set(self.readouts) | set(self.samples.values())
         nonScoringColumns |= set([self.periodOffsetColumn]) if self.periodOffsetColumn != None else set()
+        fields = set([e["name"] for e in self.fields])
+        nonScoringColumns |= set(['__LDC_LID__']) if '__LDC_LID__' in fields else set()
+            
         specifiedColumns = scoringColumns | nonScoringColumns
 
         if postProcessClf:
