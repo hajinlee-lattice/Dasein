@@ -16,6 +16,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -58,6 +61,7 @@ public class DataFeedImport implements HasPid, Serializable {
     @JsonIgnore
     @OneToOne
     @JoinColumn(name = "FK_DATA_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Table importData;
 
     @Temporal(TemporalType.TIMESTAMP)

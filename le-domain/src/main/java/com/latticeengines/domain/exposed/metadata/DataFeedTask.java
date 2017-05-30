@@ -210,13 +210,6 @@ public class DataFeedTask implements HasPid, Serializable {
         this.tables = tables;
     }
 
-    public void addTable(Table table) {
-        DataFeedTaskTable feedTaskTable = new DataFeedTaskTable();
-        feedTaskTable.setFeedTask(this);
-        feedTaskTable.setTable(table);
-        tables.add(feedTaskTable);
-    }
-
     public static enum Status {
         Initing("inited"), //
         Active("active"), //

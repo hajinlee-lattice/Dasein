@@ -2,6 +2,8 @@ package com.latticeengines.metadata.entitymgr;
 
 import java.util.List;
 
+import org.hibernate.Hibernate;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -18,4 +20,16 @@ public interface TableEntityMgr {
     Table clone(String name);
 
     Table copy(String name, CustomerSpace targetCustomerSpace);
+
+    static void inflateTable(Table table) {
+        if (table != null) {
+            Hibernate.initialize(table.getAttributes());
+            Hibernate.initialize(table.getExtracts());
+            Hibernate.initialize(table.getPrimaryKey());
+            Hibernate.initialize(table.getLastModifiedKey());
+            Hibernate.initialize(table.getHierarchies());
+            Hibernate.initialize(table.getDataRules());
+            Hibernate.initialize(table.getRelationships());
+        }
+    }
 }

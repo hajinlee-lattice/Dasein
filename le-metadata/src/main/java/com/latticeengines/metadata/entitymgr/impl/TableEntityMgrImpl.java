@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.apache.commons.collections.Closure;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -149,7 +148,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table findByName(String name) {
         Table table = tableDao.findByName(name);
-        inflateTable(table);
+        TableEntityMgr.inflateTable(table);
         return table;
     }
 
@@ -222,18 +221,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             }
         }
         return copy;
-    }
-
-    public static void inflateTable(Table table) {
-        if (table != null) {
-            Hibernate.initialize(table.getAttributes());
-            Hibernate.initialize(table.getExtracts());
-            Hibernate.initialize(table.getPrimaryKey());
-            Hibernate.initialize(table.getLastModifiedKey());
-            Hibernate.initialize(table.getHierarchies());
-            Hibernate.initialize(table.getDataRules());
-            Hibernate.initialize(table.getRelationships());
-        }
     }
 
     private void setTenantId(Table table) {

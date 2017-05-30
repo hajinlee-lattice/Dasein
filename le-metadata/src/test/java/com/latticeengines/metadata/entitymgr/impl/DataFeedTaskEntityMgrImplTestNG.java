@@ -15,25 +15,20 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
-import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
+public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Autowired
     private DataFeedEntityMgr datafeedEntityMgr;
-
-    @Autowired
-    private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
 
     @Autowired
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
@@ -41,9 +36,11 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
-    private static final String DATA_FEED_NAME = "datafeed";
-
     private DataFeed datafeed = new DataFeed();
+
+    private DataFeedTask task = new DataFeedTask();
+
+    private Table dataTable = new Table(TableType.DATATABLE);
 
     @Override
     @BeforeClass(groups = "functional")
@@ -53,6 +50,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void cleanup() {
+        datafeedTaskEntityMgr.clearTableQueue();
         super.cleanup();
     }
 
@@ -71,28 +69,21 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollectionEntityMgr.createDataCollection(dataCollection);
 
-        datafeed.setName(DATA_FEED_NAME);
+        datafeed.setName("datafeed");
         datafeed.setStatus(Status.Active);
         datafeed.setActiveExecution(1L);
         datafeed.setDataCollection(dataCollection);
         dataCollection.addDataFeed(datafeed);
-
-        DataFeedExecution execution = new DataFeedExecution();
-        execution.setFeed(datafeed);
-        execution.setStatus(DataFeedExecution.Status.Active);
-        datafeed.addExeuction(execution);
 
         Table importTable = new Table(TableType.IMPORTTABLE);
         importTable.setName("importTable");
         importTable.setDisplayName(importTable.getName());
         importTable.setTenant(MultiTenantContext.getTenant());
 
-        Table dataTable = new Table(TableType.DATATABLE);
         dataTable.setName("dataTable");
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(MultiTenantContext.getTenant());
 
-        DataFeedTask task = new DataFeedTask();
         task.setFeed(datafeed);
         task.setActiveJob(3L);
         task.setEntity(SchemaInterpretation.Account.name());
@@ -107,35 +98,23 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         datafeedEntityMgr.create(datafeed);
         datafeedTaskEntityMgr.create(task);
         datafeedTaskEntityMgr.addImportDataTableToQueue(task);
-        datafeedExecutionEntityMgr.create(execution);
-        datafeed.setActiveExecution(execution.getPid());
-        datafeedEntityMgr.update(datafeed);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        DataFeed retrieved = datafeedEntityMgr.findByName(DATA_FEED_NAME);
-        assertEquals(retrieved.getName(), datafeed.getName());
-        assertEquals(retrieved.getActiveExecution(), datafeed.getActiveExecution());
-        assertEquals(retrieved.getExecutions().size(), 1);
-        assertEquals(retrieved.getTasks().size(), 1);
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 1);
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).toString(), dataTable.toString());
+
+        Table dataTable2 = new Table(TableType.DATATABLE);
+        dataTable2.setName("dataTable2");
+        dataTable2.setDisplayName(dataTable2.getName());
+        dataTable2.setTenant(MultiTenantContext.getTenant());
+        task.setImportData(dataTable2);
+        datafeedTaskEntityMgr.addImportDataTableToQueue(task);
+
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 2);
+        assertEquals(datafeedTaskEntityMgr.pollFirstDataTable(task.getPid()).toString(), dataTable.toString());
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 1);
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).toString(), dataTable2.toString());
     }
-
-    @Test(groups = "functional", dependsOnMethods = "retrieve")
-    public void startExecution() {
-        datafeedEntityMgr.startExecution(DATA_FEED_NAME);
-        DataFeed df = datafeedEntityMgr.findByName(DATA_FEED_NAME);
-        assertEquals(df.getActiveExecution(), new Long(datafeed.getActiveExecution() + 1L));
-        assertEquals(df.getExecutions().size(), 2);
-
-        DataFeedExecution exec1 = df.getExecutions().get(0);
-        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
-        assertEquals(exec1.getImports().size(), df.getTasks().size());
-
-        DataFeedExecution exec2 = df.getExecutions().get(1);
-        assertEquals(exec2.getStatus(), DataFeedExecution.Status.Active);
-        assertEquals(exec2.getImports().size(), 0);
-
-    }
-
 }

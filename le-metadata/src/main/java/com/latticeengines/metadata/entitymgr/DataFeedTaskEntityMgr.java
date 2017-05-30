@@ -12,4 +12,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     int getDataTableSize(Long taskPid);
 
+    void addImportDataTableToQueue(DataFeedTask task);
+
+    void clearTableQueue();
+
 }

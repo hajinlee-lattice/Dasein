@@ -14,9 +14,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -39,8 +36,7 @@ public class DataFeedTaskTable implements HasPid, Serializable {
     private DataFeedTask dataFeedTask;
 
     @JsonIgnore
-    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     private Table table;
 
