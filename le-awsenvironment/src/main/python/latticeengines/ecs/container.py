@@ -18,15 +18,21 @@ class Container(Template):
     def hostname(self, hostname):
         self._template["hostname"] = hostname
 
-    def publish_port(self, container_port, host_port, protocol='tcp'):
+    def publish_port(self, container_port, host_port=None, protocol='tcp'):
         if 'portMappings' not in self._template:
             self._template["portMappings"] = []
 
-        self._template["portMappings"].append({
-            'containerPort': container_port,
-            'hostPort': host_port,
-            'protocol': protocol
-        })
+        if host_port is None:
+            self._template["portMappings"].append({
+                'containerPort': container_port,
+                'protocol': protocol
+            })
+        else:
+            self._template["portMappings"].append({
+                'containerPort': container_port,
+                'hostPort': host_port,
+                'protocol': protocol
+            })
 
     def set_env(self, name, value):
         if 'environment' not in self._template:
