@@ -11,6 +11,8 @@
     <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener"/>
     <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener"/>
 
+    <Executor name="tomcatThreadPool" namePrefix="catalina-exec-" maxThreads="256" minSpareThreads="4"/>
+
     <GlobalNamingResources>
         <Resource name="UserDatabase" auth="Container"
                   type="org.apache.catalina.UserDatabase"

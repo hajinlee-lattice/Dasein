@@ -253,6 +253,7 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
         "awslogs-stream-prefix": app
     })
     container.publish_port(8080, alloc["port"])
+    container.publish_port(1099)
     container.hostname("%s-%s" % (stackname, app))
     container.privileged()
 

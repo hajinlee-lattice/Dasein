@@ -40,7 +40,8 @@ export JAVA_OPTS="${JAVA_OPTS} -Dfile.encoding=UTF8"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.authenticate=false"
-export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.port=1099"
+export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
+export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=127.0.0.1"
 
 if [ ! -z "${CATALINA_OPTS}" ]; then
     export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
