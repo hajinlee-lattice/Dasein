@@ -25,7 +25,7 @@ angular.module('login.form', [
             loginInProgress: false,
             showForgotPassword: false,
             forgotPasswordUsername: "",
-            copyrightString: ResourceUtility.getString('LOGIN_COPYRIGHT', [(new Date()).getFullYear()]),
+            copyrightString: ResourceUtility.getString('LOGIN_COPYRIGHT', ['2010 -' + (new Date()).getFullYear()]),
             forgotPasswordErrorMessage: ""
         })
 

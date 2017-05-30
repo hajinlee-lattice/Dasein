@@ -8,6 +8,7 @@
     <span>{{$ctrl.loginErrorMessage}}</span>
 </div>
 <form class="form form-signin" name="login-form" ng-if="$ctrl.visible">
+    <h1>{{$ctrl.ResourceUtility.getString('COMPANY_REGMARK')}}&reg;</h1>
     <div class="form-group">
         <label>{{$ctrl.ResourceUtility.getString('LOGIN_USERNAME')}}</label>
         <input  type="text"
@@ -41,13 +42,13 @@
             {{$ctrl.ResourceUtility.getString('LOGIN_LABEL')}}
         </button>
         <i ng-show="$ctrl.loginInProgress" class="fa fa-spinner fa-pulse fa-fw"></i>
-        <div class="secondary-actions">
+        <div class="secondary-actions_">
             <a href="javascript:void(0)" data-ng-click="$ctrl.forgotPasswordClick($event)">
                 {{$ctrl.ResourceUtility.getString('LOGIN_FORGOT_PASSWORD_LABEL')}}
             </a>
         </div>
     </div>
-    <p class="footer smallest login-footer">© {{$ctrl.copyrightString}}
+    <p class="footer login-footer">&copy; {{$ctrl.copyrightString}}
         <a href="http://lattice-engines.com/about-us/privacy-policy">
             {{$ctrl.ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}
         </a>

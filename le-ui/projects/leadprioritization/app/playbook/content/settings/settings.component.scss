@@ -2,4 +2,15 @@
     h2 {
         background-image: url('/assets/images/ico-cog-black.png');
     }
+    label {
+        font-size: 15px;
+        font-weight: bold;
+        margin: 5px 0;
+    }
+    input[type="text"],
+    textarea {
+        border: 2px solid #e7e8e7;
+        width: 100%;
+        padding: 5px;
+    }
 }

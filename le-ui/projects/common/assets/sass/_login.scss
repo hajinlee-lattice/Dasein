@@ -11,6 +11,9 @@
 		vertical-align: baseline;
 		margin-left: 0.6em;
 	}
+	.company-regmark {
+		margin-left: 5px;
+	}
 }
 .update-password-body {
 	@include media(">medium") {
