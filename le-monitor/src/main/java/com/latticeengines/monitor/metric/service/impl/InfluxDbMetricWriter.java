@@ -234,6 +234,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
                             String decryptedPassword = CipherUtils.decrypt(password);
                             InfluxDB influxDB = InfluxDBFactory.connect(url, username, decryptedPassword);
                             influxDB.setLogLevel(logLevel);
+                            influxDB.enableGzip();
                             return influxDB;
                         } else {
                             return null;

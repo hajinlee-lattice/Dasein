@@ -79,12 +79,15 @@ public class MetricUtils {
             if (method.isAnnotationPresent(MetricField.class)) {
                 Map.Entry<String, Object> entry = parseField(fact, method);
                 if (entry != null) {
-                    fieldMap.put(entry.getKey(), entry.getValue());
+                    if (entry.getValue() != null && !((entry.getValue() instanceof String)
+                            && StringUtils.isEmpty((String) entry.getValue()))) {
+                        fieldMap.put(entry.getKey(), entry.getValue());
+                    }
                 }
             } else if (method.isAnnotationPresent(MetricFieldGroup.class)) {
                 for (Map.Entry<String, Object> entry : parseFieldGroup(fact, method).entrySet()) {
-                    if (entry.getValue() != null
-                            && !((entry.getValue() instanceof String) && StringUtils.isEmpty((String) entry.getValue()))) {
+                    if (entry.getValue() != null && !((entry.getValue() instanceof String)
+                            && StringUtils.isEmpty((String) entry.getValue()))) {
                         fieldMap.put(entry.getKey(), entry.getValue());
                     }
                 }
@@ -108,8 +111,8 @@ public class MetricUtils {
             fieldMap = parseFields(fact);
         }
 
-        List<String> tokens = new ArrayList<>(Collections.singleton("Measurement="
-                + measurement.getClass().getSimpleName()));
+        List<String> tokens = new ArrayList<>(
+                Collections.singleton("Measurement=" + measurement.getClass().getSimpleName()));
 
         for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
             if (entry.getValue() instanceof String) {
@@ -288,8 +291,8 @@ public class MetricUtils {
                         throw new RuntimeException("Duplicated tag " + tag);
                     }
                     tagSet.add(tag);
-                    System.out.println(String.format(" Add tag [%s] in [%s] to [%s]", tag, method.getReturnType()
-                            .getSimpleName(), dimensionClass.getSimpleName()));
+                    System.out.println(String.format(" Add tag [%s] in [%s] to [%s]", tag,
+                            method.getReturnType().getSimpleName(), dimensionClass.getSimpleName()));
                 }
             }
         }
@@ -353,12 +356,12 @@ public class MetricUtils {
                 }
 
             } else {
-                throw new RuntimeException("MetricTag can only be applied to String. But this method returns "
-                        + method.getReturnType());
+                throw new RuntimeException(
+                        "MetricTag can only be applied to String. But this method returns " + method.getReturnType());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to scan " + MetricTag.class.getSimpleName() + " from method "
-                    + method.getName(), e);
+            throw new RuntimeException(
+                    "Failed to scan " + MetricTag.class.getSimpleName() + " from method " + method.getName(), e);
         }
     }
 
@@ -368,8 +371,8 @@ public class MetricUtils {
 
     private static Set<String> scanFields(Class<?> factClass, boolean topLevel) {
         if (topLevel && !factClass.isInterface()) {
-            System.out.println("Scan fields in Fact: " + factClass.getSimpleName()
-                    + "\n----------------------------------------");
+            System.out.println(
+                    "Scan fields in Fact: " + factClass.getSimpleName() + "\n----------------------------------------");
         }
         Set<String> fieldSet = new HashSet<>();
         for (Method method : factClass.getDeclaredMethods()) {
@@ -386,8 +389,8 @@ public class MetricUtils {
                         throw new RuntimeException("Duplicated field " + field);
                     }
                     fieldSet.add(field);
-                    System.out.println(String.format(" Add field [%s] in [%s] to [%s]", field, method.getReturnType()
-                            .getSimpleName(), factClass.getSimpleName()));
+                    System.out.println(String.format(" Add field [%s] in [%s] to [%s]", field,
+                            method.getReturnType().getSimpleName(), factClass.getSimpleName()));
                 }
             }
         }
@@ -444,8 +447,8 @@ public class MetricUtils {
                         + " does not match the true return type " + method.getReturnType().getSimpleName());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse " + MetricField.class.getSimpleName() + " from method "
-                    + method.getName(), e);
+            throw new RuntimeException(
+                    "Failed to parse " + MetricField.class.getSimpleName() + " from method " + method.getName(), e);
         }
     }
 

@@ -123,7 +123,7 @@ public class MetricUtilsUnitTestNG {
         Assert.assertEquals(23, entry.getValue());
 
         Map<String, Object> fieldSet = MetricUtils.parseFields(instance);
-        Assert.assertEquals(fieldSet.size(), 4);
+        Assert.assertEquals(fieldSet.size(), 1); // only 1 not null field
 
         Set<String> fields = MetricUtils.scanFields(SimpleTestClass.class);
         Assert.assertEquals(fields.size(), 4);
