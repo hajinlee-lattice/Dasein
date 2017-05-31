@@ -23,10 +23,12 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.dataflow.transformation.AMLookupRebuild;
+import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCleanup;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedSecondDomainCleanupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
@@ -52,6 +54,7 @@ public class AMLookupRebuildPipelineTestNG
 
     private String baseSourceAccountMasterSeed = "AccountMasterSeed";
     private String baseSourceOrbCacheSeedSecondaryDomain = "OrbCacheSeedSecondaryDomain";
+    private String targetSeedName = "AccountMasterSeedCleaned";
     private String targetSourceName = "AccountMasterLookup";
 
     ObjectMapper om = new ObjectMapper();
@@ -95,14 +98,26 @@ public class AMLookupRebuildPipelineTestNG
             baseSources.add(baseSourceAccountMasterSeed);
             baseSources.add(baseSourceOrbCacheSeedSecondaryDomain);
             step1.setBaseSources(baseSources);
-            step1.setTransformer(AMLookupRebuild.TRANSFORMER_NAME);
-            step1.setTargetSource(targetSourceName);
-            String confParamStr1 = getTransformerConfig();
+            step1.setTransformer(AMSeedSecondDomainCleanup.TRANSFORMER_NAME);
+            step1.setTargetSource(targetSeedName);
+            String confParamStr1 = getCleanupTransformerConfig();
             step1.setConfiguration(confParamStr1);
+
+            // -----------
+            TransformationStepConfig step2 = new TransformationStepConfig();
+            baseSources = new ArrayList<String>();
+            baseSources.add(targetSeedName);
+            baseSources.add(baseSourceOrbCacheSeedSecondaryDomain);
+            step2.setBaseSources(baseSources);
+            step2.setTransformer(AMLookupRebuild.TRANSFORMER_NAME);
+            step2.setTargetSource(targetSourceName);
+            String confParamStr2 = getTransformerConfig();
+            step2.setConfiguration(confParamStr2);
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
+            steps.add(step2);
 
             // -----------
             configuration.setSteps(steps);
@@ -111,6 +126,14 @@ public class AMLookupRebuildPipelineTestNG
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getCleanupTransformerConfig() throws JsonProcessingException {
+        AMSeedSecondDomainCleanupConfig conf = new AMSeedSecondDomainCleanupConfig();
+        conf.setDomainField("Domain");
+        conf.setSecondDomainField("SecondaryDomain");
+        conf.setDunsField("DUNS");
+        return om.writeValueAsString(conf);
     }
 
     private String getTransformerConfig() throws JsonProcessingException {
@@ -167,9 +190,13 @@ public class AMLookupRebuildPipelineTestNG
                 { 11L, "dom11.com", null, null, null, "DUNS11", "Y", "Y", "Y", "DUNS11", 10000L, 10000L },
                 { 12L, "dom12.com", null, null, null, null, "Y", "Y", "Y", "DUNS11", 10000L, 10000L },
 
-                // secondary domain exists
+                // secondary domain exists with DUNS
                 { 21L, "dom21.com", null, null, null, "DUNS21", "Y", "Y", "Y", "DUNS21", 10000L, 10000L },
-                { 22L, "dom22.com", null, null, null, "DUNS22", "Y", "Y", "Y", "DUNS22", 10000L, 10000L }
+                { 22L, "dom22.com", null, null, null, "DUNS22", "Y", "Y", "Y", "DUNS22", 10000L, 10000L },
+
+                // secondary domain exists without DUNS
+                { 31L, "dom31.com", null, null, null, "DUNS31", "Y", "Y", "Y", "DUNS31", 10000L, 10000L },
+                { 32L, "dom32.com", null, null, null, null, "Y", "Y", "Y", null, 10000L, 10000L }
         };
 
         uploadBaseSourceData(baseSourceAccountMasterSeed, baseSourceVersion, columns, data);
@@ -182,7 +209,8 @@ public class AMLookupRebuildPipelineTestNG
 
         Object[][] data = new Object[][] {
                 { "dom11.com", "dom13.com" },
-                { "dom21.com", "dom22.com" }
+                { "dom21.com", "dom22.com" },
+                { "dom31.com", "dom32.com" }
         };
 
         uploadBaseSourceData(baseSourceOrbCacheSeedSecondaryDomain, baseSourceVersion, columns, data);
@@ -227,6 +255,9 @@ public class AMLookupRebuildPipelineTestNG
 
                 { "_DOMAIN_dom12.com_DUNS_NULL", 12L }, //
 
+                { "_DOMAIN_dom13.com_DUNS_DUNS11", 11L }, //
+                { "_DOMAIN_dom13.com_DUNS_NULL", 11L }, //
+
                 { "_DOMAIN_dom21.com_DUNS_DUNS21", 21L }, //
                 { "_DOMAIN_dom21.com_DUNS_NULL", 21L }, //
                 { "_DOMAIN_NULL_DUNS_DUNS21", 21L }, //
@@ -234,6 +265,13 @@ public class AMLookupRebuildPipelineTestNG
                 { "_DOMAIN_dom22.com_DUNS_DUNS22", 22L }, //
                 { "_DOMAIN_NULL_DUNS_DUNS22", 22L }, //
                 { "_DOMAIN_dom22.com_DUNS_NULL", 22L }, //
+
+                { "_DOMAIN_dom31.com_DUNS_DUNS31", 31L }, //
+                { "_DOMAIN_dom31.com_DUNS_NULL", 31L }, //
+                { "_DOMAIN_NULL_DUNS_DUNS31", 31L }, //
+
+                { "_DOMAIN_dom32.com_DUNS_DUNS31", 31L }, //
+                { "_DOMAIN_dom32.com_DUNS_NULL", 31L } //
         };
 
         Map<String, Long> lookup = new HashMap<>();

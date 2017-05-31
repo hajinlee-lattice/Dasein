@@ -54,21 +54,25 @@ public class AMLookupRebuild extends ConfigurableFlowBase<AccountMasterLookupReb
         String amDomain = config.getDomainField();
         String orbPriDomain = config.getDomainMappingPrimaryDomainField();
         String orbSecDomain = config.getDomainMappingSecondaryDomainField();
-        String latticeId = config.getLatticeIdField();
+
+        orbSeed = orbSeed.filter(orbPriDomain + " != null", new FieldList(orbPriDomain)) //
+                .retain(new FieldList(orbPriDomain, orbSecDomain));
 
         // join find sec domain for domain == pri domain
-        orbSeed = orbSeed.filter(orbPriDomain + " != null", new FieldList(orbPriDomain));
-        Node idDomain = amSeed.retain(new FieldList(latticeId, amDomain)).renamePipe("idDomain");
-        Node hasSd = idDomain.join(new FieldList(amDomain), orbSeed, new FieldList(orbPriDomain), JoinType.INNER);
-        hasSd = hasSd.filter(orbSecDomain + " != null", new FieldList(orbSecDomain));
+        Node hasSd = amSeed.join(new FieldList(amDomain), orbSeed, new FieldList(orbPriDomain), JoinType.INNER);
+        hasSd = hasSd.filter(orbSecDomain + " != null", new FieldList(orbSecDomain)) //
+                .discard(new FieldList(amDomain));
+
+        Node domains = amSeed.retain(new FieldList(amDomain)) //
+                       .groupByAndLimit(new FieldList(amDomain), 1);
 
         hasSd = hasSd.renamePipe("hasSD") //
-                .leftJoin(new FieldList(orbSecDomain), amSeed, new FieldList(amDomain));
+                .leftJoin(new FieldList(orbSecDomain), domains, new FieldList(amDomain));
 
         // secondary not exist in am seed
         Node toAppend = hasSd
                 .filter(orbSecDomain + " != null && " + amDomain + " == null", new FieldList(orbSecDomain, amDomain)) //
-                .discard(new FieldList(amDomain)) //
+                .discard(new FieldList(amDomain, orbPriDomain)) //
                 .rename(new FieldList(orbSecDomain), new FieldList(amDomain)) //
                 .retain(new FieldList(amSeed.getFieldNames()));
 
