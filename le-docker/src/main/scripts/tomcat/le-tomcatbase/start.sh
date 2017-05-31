@@ -32,7 +32,7 @@ if [ -f "/etc/internaladdr.txt" ]; then
     echo "METRIC_ADVERTISE_NAME=${METRIC_ADVERTISE_NAME}"
 fi
 
-export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
+export JAVA_OPTS="-Duser.timezone=US/Eastern"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dfile.encoding=UTF8"
