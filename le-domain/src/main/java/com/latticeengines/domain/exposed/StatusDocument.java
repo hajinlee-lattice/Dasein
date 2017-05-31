@@ -14,7 +14,7 @@ public class StatusDocument {
     public static final String UP = "UP";
     public static final String OK = "OK";
     public static final String MATCHER_IS_BUSY = "MATCHER_IS_BUSY";
-    public static final String UNDER_MAINTAINANCE = "UNDER_MAINTAINANCE";
+    public static final String UNDER_MAINTENANCE = "UNDER_MAINTENANCE";
 
     private String status;
     private String message;
@@ -76,8 +76,8 @@ public class StatusDocument {
         return new StatusDocument(MATCHER_IS_BUSY, message);
     }
 
-    public static StatusDocument underMaintainance(String message) {
-        return new StatusDocument(UNDER_MAINTAINANCE, message);
+    public static StatusDocument underMaintenance(String message) {
+        return new StatusDocument(UNDER_MAINTENANCE, message);
     }
 
     @Override

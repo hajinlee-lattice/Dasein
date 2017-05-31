@@ -25,16 +25,16 @@ public class SystemStatusServiceImpl implements SystemStatusService {
     public static final String SYSTEM_STATUS = "/systemstatus";
     public static final String PLS = "PLS";
     public static final String OK = "OK";
-    public static final String UNDER_MAINTAINANCE = "UNDER_MAINTAINANCE";
+    public static final String UNDER_MAINTENANCE = "UNDER_MAINTENANCE";
 
-    private Boolean isUnderMaintainance() {
+    private Boolean isUnderMaintenance() {
         camille = CamilleEnvironment.getCamille();
         Path plsPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), PLS);
         plsPath = plsPath.append(SYSTEM_STATUS);
         try {
             if (camille.exists(plsPath)) {
                 String zookeeperData = camille.get(plsPath).getData();
-                if (!StringUtils.isBlank(zookeeperData) && zookeeperData.equals(UNDER_MAINTAINANCE)) {
+                if (!StringUtils.isBlank(zookeeperData) && zookeeperData.equals(UNDER_MAINTENANCE)) {
                     return true;
                 }
             }
@@ -47,9 +47,9 @@ public class SystemStatusServiceImpl implements SystemStatusService {
 
     @Override
     public StatusDocument getSystemStatus() {
-        boolean underMaintainance = isUnderMaintainance();
-        if (underMaintainance) {
-            return StatusDocument.underMaintainance("System is under maintainance");
+        boolean underMaintenance = isUnderMaintenance();
+        if (underMaintenance) {
+            return StatusDocument.underMaintenance("System is under maintenance");
         }
         String rateLimitStatus = matchHealthProxy.dnbRateLimitStatus().getStatus();
         if (rateLimitStatus.equals(StatusDocument.MATCHER_IS_BUSY)) {
