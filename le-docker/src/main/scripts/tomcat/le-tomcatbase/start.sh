@@ -25,11 +25,14 @@ fi
 
 export LE_PROPDIR="/etc/ledp"
 
+export RMI_SERVER="127.0.0.1"
 if [ -f "/etc/internaladdr.txt" ]; then
     export QUARTZ_EXECUTION_HOST=`cat /etc/internaladdr.txt`
     echo "QUARTZ_EXECUTION_HOST=${QUARTZ_EXECUTION_HOST}"
     export METRIC_ADVERTISE_NAME=${HOSTNAME}-`cat /etc/internaladdr.txt | sed 's|[.]|-|g'`
     echo "METRIC_ADVERTISE_NAME=${METRIC_ADVERTISE_NAME}"
+    export RMI_SERVER=`cat /etc/internaladdr.txt`
+    echo "RMI_SERVER=${RMI_SERVER}"
 fi
 
 export JAVA_OPTS="-Duser.timezone=US/Eastern"
@@ -41,7 +44,7 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.authenticate=false"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
-export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=127.0.0.1"
+export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 
 if [ ! -z "${CATALINA_OPTS}" ]; then
     export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
