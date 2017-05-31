@@ -1,5 +1,5 @@
-angular.module('mainApp.appCommon.utilities.SegmentUtility', [])
-.service('SegmentUtility', function () {
+angular.module('mainApp.appCommon.utilities.SegmentsUtility', [])
+.service('SegmentsUtility', function () {
 
     this.PropertyBag = function (name, segment) {
         var property = '';

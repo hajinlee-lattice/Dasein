@@ -33,7 +33,7 @@
             <li ng-repeat="segment in vm.segments | filter: {'Name': search}" class="item segment">
                 <ul>
                     <li class="name"><input type="radio" id="{{segment.name}}" name="segment" ng-model="vm.segmentSelection" value="{{segment.name}}" /><label for="{{segment.name}}">{{segment.display_name}}</label></li>
-                    <li class="accounts">{{vm.SegmentUtility.PropertyBag('NumAccounts', segment)|number}}</li>
+                    <li class="accounts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li>
                 </ul>
             </li>
         </ul>
