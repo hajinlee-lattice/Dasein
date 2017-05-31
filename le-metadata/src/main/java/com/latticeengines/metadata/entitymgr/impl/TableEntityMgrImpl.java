@@ -128,6 +128,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void addExtract(Table table, Extract extract) {
+        table.addExtract(extract);
         extractDao.create(extract);
     }
 

@@ -106,7 +106,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             createOrUpdate(dataFeedTask);
         }
         Table dataTable = dataFeedTask.getImportData();
-        dataTable.addExtract(extract);
         tableEntityMgr.addExtract(dataTable, extract);
         if (addNewImportDataTable) {
             if (templateTableChanged) {

@@ -20,17 +20,17 @@ CREATE PROCEDURE `UpdateSchema`()
         alter table `METADATA_DATA_COLLECTION` add index FKF69DFD436816190C (FK_STATISTICS_CONTAINER_ID), add constraint FKF69DFD436816190C foreign key (FK_STATISTICS_CONTAINER_ID) references `METADATA_STATISTICS` (`PID`) on delete cascade;
         alter table `METADATA_STATISTICS` add index FK5C2E043336865BC (FK_TENANT_ID), add constraint FK5C2E043336865BC foreign key (FK_TENANT_ID) references `TENANT` (`TENANT_PID`) on delete cascade;
 
-    create table `DATAFEED_EXECUTION` (`PID` bigint not null auto_increment unique, `STATUS` varchar(255) not null, FK_FEED_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
+	create table `DATAFEED_EXECUTION` (`PID` bigint not null auto_increment unique, `STATUS` varchar(255) not null, FK_FEED_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
 	create table `DATAFEED_IMPORT` (`PID` bigint not null auto_increment unique, `ENTITY` varchar(255) not null, `FEED_TYPE` varchar(255), `SOURCE` varchar(255) not null, `SOURCE_CONFIG` varchar(1000) not null, `START_TIME` datetime not null, `FK_FEED_EXEC_ID` bigint not null, FK_DATA_ID bigint not null, primary key (`PID`), unique (`SOURCE`, `ENTITY`, `FEED_TYPE`, `FK_FEED_EXEC_ID`)) ENGINE=InnoDB;
-	create table `DATAFEED_TASK_TABLE` (`PID` bigint not null auto_increment unique, FK_TASK_ID bigint not null, FK_TABLE_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;
+	create table `DATAFEED_TASK_TABLE` (`PID` bigint not null auto_increment unique, `FK_TASK_ID` bigint not null, `FK_TABLE_ID` bigint not null, primary key (`PID`), unique (`FK_TASK_ID`, `FK_TABLE_ID`)) ENGINE=InnoDB;
 	create table `DATAFEED_TASK` (`PID` bigint not null auto_increment unique, `ACTIVE_JOB` bigint not null, `ENTITY` varchar(255) not null, `FEED_TYPE` varchar(255), `LAST_IMPORTED` datetime not null, `SOURCE` varchar(255) not null, `SOURCE_CONFIG` varchar(1000) not null, `START_TIME` datetime not null, `STATUS` varchar(255) not null, `FK_FEED_ID` bigint not null, FK_DATA_ID bigint, FK_TEMPLATE_ID bigint not null, primary key (`PID`), unique (`SOURCE`, `ENTITY`, `FEED_TYPE`, `FK_FEED_ID`)) ENGINE=InnoDB;
 	create table `DATAFEED` (`PID` bigint not null auto_increment unique, `ACTIVE_EXECUTION` bigint not null, `NAME` varchar(255) not null, `STATUS` varchar(255) not null, `TENANT_ID` bigint not null, FK_COLLECTION_ID bigint not null, FK_TENANT_ID bigint not null, primary key (`PID`), unique (`TENANT_ID`, `NAME`)) ENGINE=InnoDB;
 	
 	alter table `DATAFEED_EXECUTION` add index FK3E5D3BC1679FF377 (FK_FEED_ID), add constraint FK3E5D3BC1679FF377 foreign key (FK_FEED_ID) references `DATAFEED` (`PID`) on delete cascade;
 	alter table `DATAFEED_IMPORT` add index FKADAC237C56FF4425 (`FK_FEED_EXEC_ID`), add constraint FKADAC237C56FF4425 foreign key (`FK_FEED_EXEC_ID`) references `DATAFEED_EXECUTION` (`PID`) on delete cascade;
 	alter table `DATAFEED_IMPORT` add index FKADAC237C525FEA17 (FK_DATA_ID), add constraint FKADAC237C525FEA17 foreign key (FK_DATA_ID) references `METADATA_TABLE` (`PID`) on delete cascade;
-	alter table `DATAFEED_TASK_TABLE` add index FKF200D4CBBAB51D55 (FK_TASK_ID), add constraint FKF200D4CBBAB51D55 foreign key (FK_TASK_ID) references `DATAFEED_TASK` (`PID`) on delete cascade;
-	alter table `DATAFEED_TASK_TABLE` add index FKF200D4CB5FC50F27 (FK_TABLE_ID), add constraint FKF200D4CB5FC50F27 foreign key (FK_TABLE_ID) references `METADATA_TABLE` (`PID`);
+	alter table `DATAFEED_TASK_TABLE` add index FKF200D4CBD3C51D55 (`FK_TASK_ID`), add constraint FKF200D4CBD3C51D55 foreign key (`FK_TASK_ID`) references `DATAFEED_TASK` (`PID`) on delete cascade;
+	alter table `DATAFEED_TASK_TABLE` add index FKF200D4CB68A6FB47 (`FK_TABLE_ID`), add constraint FKF200D4CB68A6FB47 foreign key (`FK_TABLE_ID`) references `METADATA_TABLE` (`PID`);
 	alter table `DATAFEED_TASK` add index FK7679F31C80AFF377 (`FK_FEED_ID`), add constraint FK7679F31C80AFF377 foreign key (`FK_FEED_ID`) references `DATAFEED` (`PID`) on delete cascade;
 	alter table `DATAFEED_TASK` add index FK7679F31C525FEA17 (FK_DATA_ID), add constraint FK7679F31C525FEA17 foreign key (FK_DATA_ID) references `METADATA_TABLE` (`PID`) on delete cascade;
 	alter table `DATAFEED_TASK` add index FK7679F31C15766847 (FK_TEMPLATE_ID), add constraint FK7679F31C15766847 foreign key (FK_TEMPLATE_ID) references `METADATA_TABLE` (`PID`) on delete cascade;
