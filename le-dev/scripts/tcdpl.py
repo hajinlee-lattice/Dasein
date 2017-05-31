@@ -26,13 +26,16 @@ else:
     print 'HADOOP_COMMON_JAR=%s' % HADOOP_COMMON_JAR
 
 LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
-MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi', 'modelquality', 'sqoop', 'datacloudapi', 'objectapi']
+MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
+              'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante']
 
 # ms modules for pre check in
-COMMON_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop', 'objectapi']
+COMMON_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop',
+                  'objectapi', 'dante']
 
 # apps for pre check in
 COMMON_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi']
+
 
 def cleanupWars():
     print 'clean up existing wars ...'
@@ -58,6 +61,7 @@ def cleanupWars():
             print 'cleaning up working directory %s ' % dir_path
             rmtree(dir_path)
     print ''
+
 
 def deployApp(app, modules):
     print 'deploying ' + app
@@ -133,9 +137,11 @@ def parseCliArgs():
     parser = argparse.ArgumentParser(description='Deploy wars to local tomcat')
     parser.add_argument('command', type=str, help='command: deploy, cleanup, check, run')
     parser.add_argument('-a', dest='apps', type=str, default=','.join(COMMON_APPS),
-                        help='comma separated list of apps to be deployed. default is ' + ','.join(COMMON_APPS) + '. Avaiable choices are ' + ', '.join(LE_APPS))
+                        help='comma separated list of apps to be deployed. default is ' + ','.join(
+                                COMMON_APPS) + '. Avaiable choices are ' + ', '.join(LE_APPS))
     parser.add_argument('-m', dest='modules', type=str, default=','.join(COMMON_MODULES),
-                        help='comma separated list of microservice modules to be deployed. core is implicitly included. default is ' + ','.join(COMMON_MODULES) + '. Avaiable choices are ' + ', '.join(MS_MODULES))
+                        help='comma separated list of microservice modules to be deployed. core is implicitly included. default is ' + ','.join(
+                                COMMON_MODULES) + '. Avaiable choices are ' + ', '.join(MS_MODULES))
     args = parser.parse_args()
 
     return args
@@ -148,20 +154,22 @@ def runTc():
         tomcatPid = proc.pid
         atexit.register(killTc)
 
+
 def waitTc():
     global tomcatPid
     proc = psutil.Process(tomcatPid)
     proc.wait()
 
+
 def killTc():
     global tomcatPid
     try:
-      proc = psutil.Process(tomcatPid)
+        proc = psutil.Process(tomcatPid)
     except psutil.NoSuchProcess:
-      return
+        return
     childPids = proc.children(recursive=True)
     for childPid in childPids:
-      os.kill(childPid.pid, signal.SIGKILL)
+        os.kill(childPid.pid, signal.SIGKILL)
     os.kill(tomcatPid, signal.SIGKILL)
 
 

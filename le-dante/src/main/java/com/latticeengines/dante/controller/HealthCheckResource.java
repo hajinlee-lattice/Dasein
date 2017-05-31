@@ -15,7 +15,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/health")
 public class HealthCheckResource {
-
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Health check")

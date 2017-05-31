@@ -248,6 +248,7 @@
         <module>modelquality</module>
         <module>sqoop</module>
         <module>objectapi</module>
+        <module>dante</module>
     </modules>
 
 </project>

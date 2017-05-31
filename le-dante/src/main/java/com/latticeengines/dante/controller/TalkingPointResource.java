@@ -25,7 +25,7 @@ import com.latticeengines.network.exposed.dante.DanteTalkingPointInterface;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "dante", description = "REST resource for Dante Talking Points CRUD operations")
+@Api(value = "dante", description = "REST resource for Dante Talking Points CRUD operationsdas")
 @RestController
 @RequestMapping("/talkingpoints")
 public class TalkingPointResource implements DanteTalkingPointInterface {
