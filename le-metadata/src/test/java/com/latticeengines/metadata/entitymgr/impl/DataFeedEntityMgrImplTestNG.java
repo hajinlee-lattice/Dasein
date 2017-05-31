@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
@@ -54,6 +55,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void cleanup() {
+        datafeedTaskEntityMgr.clearTableQueue();
         super.cleanup();
     }
 
@@ -120,6 +122,10 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(retrieved.getActiveExecution(), datafeed.getActiveExecution());
         assertEquals(retrieved.getExecutions().size(), 1);
         assertEquals(retrieved.getTasks().size(), 1);
+        assertEquals(retrieved.getTasks().get(0).getImportTemplate().getTableType(), TableType.IMPORTTABLE);
+        assertNotNull(retrieved.getTasks().get(0).getImportTemplate().getPid());
+        assertEquals(retrieved.getTasks().get(0).getImportData().getTableType(), TableType.DATATABLE);
+        assertNotNull(retrieved.getTasks().get(0).getImportData().getPid());
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")

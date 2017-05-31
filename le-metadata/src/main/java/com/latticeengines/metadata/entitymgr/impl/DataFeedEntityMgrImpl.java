@@ -89,10 +89,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeed.setActiveExecution(newExecution.getPid());
         tasks.forEach(task -> {
             task.setStartTime(new Date());
-            // Table dataTable = task.getImportTemplate();
-            // Table newDatatTable = TableUtils.clone(dataTable,
-            // "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
-            // newDatatTable.setTenant(MultiTenantContext.getTenant());
             task.setImportData(null);
         });
         datafeedDao.update(datafeed);

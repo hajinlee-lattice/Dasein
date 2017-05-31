@@ -13,12 +13,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_TASK_TABLE")
+@javax.persistence.Table(name = "DATAFEED_TASK_TABLE", uniqueConstraints = @UniqueConstraint(columnNames = {
+        "FK_TASK_ID", "FK_TABLE_ID" }))
 public class DataFeedTaskTable implements HasPid, Serializable {
 
     private static final long serialVersionUID = -278909761082585235L;
@@ -32,12 +34,12 @@ public class DataFeedTaskTable implements HasPid, Serializable {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "FK_TASK_ID", nullable = false)
+    @JoinColumn(name = "`FK_TASK_ID`", nullable = false)
     private DataFeedTask dataFeedTask;
 
     @JsonIgnore
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TABLE_ID", nullable = false)
+    @JoinColumn(name = "`FK_TABLE_ID`", nullable = false)
     private Table table;
 
     @Override

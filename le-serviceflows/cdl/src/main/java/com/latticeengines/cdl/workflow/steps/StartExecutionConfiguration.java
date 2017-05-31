@@ -4,4 +4,14 @@ import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfigurati
 
 public class StartExecutionConfiguration extends MicroserviceStepConfiguration {
 
+    private String datafeedName;
+
+    public String getDataFeedName() {
+        return datafeedName;
+    }
+
+    public void setDataFeedName(String datafeedName) {
+        this.datafeedName = datafeedName;
+    }
+
 }

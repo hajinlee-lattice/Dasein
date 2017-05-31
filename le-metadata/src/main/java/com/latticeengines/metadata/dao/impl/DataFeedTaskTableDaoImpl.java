@@ -2,8 +2,6 @@ package com.latticeengines.metadata.dao.impl;
 
 import java.util.List;
 
-import javax.persistence.JoinColumn;
-
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -23,6 +21,14 @@ public class DataFeedTaskTableDaoImpl extends BaseDaoImpl<DataFeedTaskTable> imp
 
     @Override
     public Table peekFirstDataTable(Long taskPid) {
+        DataFeedTaskTable dataFeedTaskTable = peekFirstElement(taskPid);
+        if (dataFeedTaskTable == null) {
+            return null;
+        }
+        return dataFeedTaskTable.getTable();
+    }
+
+    private DataFeedTaskTable peekFirstElement(Long taskPid) {
         Session session = getSessionFactory().getCurrentSession();
         Class<DataFeedTaskTable> entityClz = getEntityClass();
         String queryStr = String.format("from %s where dataFeedTask = :taskId", entityClz.getSimpleName());
@@ -32,47 +38,20 @@ public class DataFeedTaskTableDaoImpl extends BaseDaoImpl<DataFeedTaskTable> imp
         if (list.size() == 0) {
             return null;
         }
-        return ((DataFeedTaskTable) list.get(0)).getTable();
+        return ((DataFeedTaskTable) list.get(0));
     }
 
     @Override
     public Table pollFirstDataTable(Long taskPid) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<DataFeedTaskTable> entityClz = getEntityClass();
-        Table table = peekFirstDataTable(taskPid);
+        DataFeedTaskTable dataFeedTaskTable = peekFirstElement(taskPid);
+        if (dataFeedTaskTable == null) {
+            return null;
+        }
+        Table table = dataFeedTaskTable.getTable();
         if (table == null) {
             return null;
         }
-        String queryStr = String.format("delete from %s where dataFeedTask = :taskId AND table = :tableId",
-                entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setLong("taskId", taskPid);
-        query.setLong("tableId", table.getPid());
-        query.executeUpdate();
+        delete(dataFeedTaskTable);
         return table;
-    }
-
-    @Override
-    public void addDataTable(Long taskPid, Long tablePid) throws Exception {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<DataFeedTaskTable> entityClz = getEntityClass();
-        String queryStr = String.format("insert into %s (%s, %s) values (:taskId, :tableId)",
-                entityClz.getAnnotation(javax.persistence.Table.class).name(),
-                entityClz.getDeclaredField("dataFeedTask").getAnnotation(JoinColumn.class).name(),
-                entityClz.getDeclaredField("table").getAnnotation(JoinColumn.class).name());
-        Query query = session.createSQLQuery(queryStr);
-        query.setLong("taskId", taskPid);
-        query.setLong("tableId", tablePid);
-        query.executeUpdate();
-    }
-
-    @Override
-    public void clearTableQueue() {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<DataFeedTaskTable> entityClz = getEntityClass();
-        String queryStr = String.format("delete from %s",
-                entityClz.getAnnotation(javax.persistence.Table.class).name());
-        Query query = session.createSQLQuery(queryStr);
-        query.executeUpdate();
     }
 }

@@ -49,12 +49,12 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Seriali
     @Column(name = "EXTRACTION_TS", nullable = false)
     @JsonProperty("extraction_ts")
     private Long extractionTimestamp;
-    
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     private Table table;
-    
+
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
@@ -74,7 +74,6 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Seriali
         this.pid = pid;
     }
 
-    
     @Override
     public String getName() {
         return name;
@@ -144,7 +143,7 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Seriali
         }
 
     }
-    
+
     public Long getProcessedRecords() {
         return processedRecords;
     }

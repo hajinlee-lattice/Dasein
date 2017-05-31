@@ -8,9 +8,5 @@ public interface DataFeedTaskTableDao extends BaseDao<DataFeedTaskTable> {
 
     Table pollFirstDataTable(Long taskPid);
 
-    void addDataTable(Long taskPid, Long tablePid) throws Exception;
-
     Table peekFirstDataTable(Long taskPid);
-
-    void clearTableQueue();
 }

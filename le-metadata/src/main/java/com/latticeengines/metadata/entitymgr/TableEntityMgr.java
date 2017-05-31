@@ -5,6 +5,7 @@ import java.util.List;
 import org.hibernate.Hibernate;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface TableEntityMgr {
@@ -32,4 +33,6 @@ public interface TableEntityMgr {
             Hibernate.initialize(table.getRelationships());
         }
     }
+
+    public void addExtract(Table table, Extract extract);
 }

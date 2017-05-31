@@ -5,6 +5,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Collections;
 import java.util.Date;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,6 +17,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -116,5 +118,44 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         assertEquals(datafeedTaskEntityMgr.pollFirstDataTable(task.getPid()).toString(), dataTable.toString());
         assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 1);
         assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).toString(), dataTable2.toString());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "retrieve")
+    public void registerExtractWhenTemplateChanged() {
+        task = datafeedTaskEntityMgr.findByKey(task);
+        task.setStatus(DataFeedTask.Status.Updated);
+        Extract extract1 = new Extract();
+        extract1.setName("extract1");
+        extract1.setPath("path1");
+        extract1.setExtractionTimestamp(DateTime.now().getMillis());
+        extract1.setProcessedRecords(1L);
+        datafeedTaskEntityMgr.registerExtract(task, extract1);
+        task = datafeedTaskEntityMgr.findByKey(task);
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 2);
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).getExtracts().get(0).getPid(),
+                extract1.getPid());
+        assertEquals(task.getImportData().getDisplayName(), task.getImportTemplate().getDisplayName());
+        assertEquals(task.getStatus(), DataFeedTask.Status.Active);
+
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "registerExtractWhenTemplateChanged")
+    public void registerExtractWhenDataTableConsumed() {
+        task = datafeedTaskEntityMgr.findByKey(task);
+        task.setImportData(null);
+        task.getImportTemplate().setDisplayName("new displayname");
+        Extract extract2 = new Extract();
+        extract2.setName("extract2");
+        extract2.setPath("path2");
+        extract2.setExtractionTimestamp(DateTime.now().getMillis());
+        extract2.setProcessedRecords(2L);
+        datafeedTaskEntityMgr.clearTableQueue();
+        datafeedTaskEntityMgr.registerExtract(task, extract2);
+        task = datafeedTaskEntityMgr.findByKey(task);
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 1);
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).getPid(), task.getImportData().getPid());
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).getExtracts().get(0).getPid(),
+                extract2.getPid());
+        assertEquals(task.getImportData().getDisplayName(), task.getImportTemplate().getDisplayName());
     }
 }
