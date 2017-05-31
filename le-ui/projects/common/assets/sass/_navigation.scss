@@ -486,6 +486,10 @@ html.no-cssmask {
 }
 
 // Secondary Nav (Hamburger and Profile Nav)
+html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear span.ico-container .ico {
+    background-color: #333;
+}
+
 .secondary-nav {
 
     & > .ico {
@@ -517,10 +521,6 @@ html.no-cssmask {
                 
                 &:hover {
                     background-color: #efefef;
-                }
-
-                span.ico-container .ico {
-                    background-color: #333;
                 }
 
                 span.jobs-nav-number {

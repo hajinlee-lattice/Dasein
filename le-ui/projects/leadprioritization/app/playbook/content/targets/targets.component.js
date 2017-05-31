@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.targets', [])
 .controller('PlaybookWizardTargets', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, Type, MatchingFields, AnalysisFields
+    $state, $stateParams, $scope, ResourceUtility, PlaybookWizardStore, Type, MatchingFields, AnalysisFields
 ) {
     var vm = this;
 

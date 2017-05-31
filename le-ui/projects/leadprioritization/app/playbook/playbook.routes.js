@@ -16,6 +16,9 @@ angular
                     resolve: {
                         WizardHeaderTitle: function() {
                             return 'Play Book';
+                        },
+                        WizardContainerId: function() {
+                            return 'playbook';
                         }
                     },
                     controller: 'ImportWizard',
@@ -70,16 +73,13 @@ angular
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/settings/settings.component.html'
                 }
-            }
+            },
         })
         .state('home.playbook.wizard.one.two', {
             url: '/segment',
             resolve: {
-                Identifiers: function() {
-                    return [
-                        { name: 'CRM ID', value: '' },
-                        { name: 'MAP ID', value: '' }
-                    ];
+                Segments: function(PlaybookWizardStore) {
+                    return PlaybookWizardStore.getSegments();
                 }
             },
             views: {
@@ -93,28 +93,8 @@ angular
         .state('home.playbook.wizard.one.two.three', {
             url: '/ratings',
             resolve: {
-                Type: function(){
-                    return "Account";
-                },
-                MatchingFields: function() {
-                    return [
-                        { name: 'Website Address', options: [{ name: "Website" }, { name: "Another Value" }] },
-                        { name: 'D-U-N-S', options: [{ name: "DUNS" }, { name: "Another Value" }] },
-                        { name: 'Company Name', options: [{ name: "Name" }, { name: "Another Value" }] },
-                        { name: 'Phone', options: [{ name: "Phone Number" }, { name: "Another Value" }] },
-                        { name: 'City', options: [{ name: "CompanyCity" }, { name: "Another Value" }] },
-                        { name: 'Country', options: [{ name: "Country" }, { name: "Another Value" }] },
-                        { name: 'State', options: [{ name: "CompanyState" }, { name: "Another Value" }] },
-                        { name: 'Zip', options: [{ name: "Zipcode" }, { name: "Another Value" }] }
-                    ];
-                },
-                AnalysisFields: function() {
-                    return [
-                        { name: 'Is Customer', options: [{ name: "Customer" }, { name: "Another Value" }] },
-                        { name: 'Revenue', options: [{ name: "Revenue" }, { name: "Another Value" }] },
-                        { name: 'Industry', options: [{ name: "Industry" }, { name: "Another Value" }] },
-                        { name: 'Employees', options: [{ name: "Employees" }, { name: "Another Value" }] }
-                    ];
+                Ratings: function(PlaybookWizardStore) {
+                    return PlaybookWizardStore.getRatings();
                 }
             },
             views: {

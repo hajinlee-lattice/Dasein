@@ -71,6 +71,9 @@ angular
                     resolve: {
                         WizardHeaderTitle: function() {
                             return 'Import';
+                        },
+                        WizardContainerId: function() {
+                            return 'data-import';
                         }
                     },
                     controller: 'ImportWizard',

@@ -375,9 +375,10 @@ Icons
 		}
 		&.ico-cog {
 			background-image: url("/assets/images/ico-cog.png");
-			background-size: 16px;
+			background-size: 20px;
 			&.ico-black {
 				background-image: url("/assets/images/ico-cog-black.png");
+                background-color: transparent;
 			}
 		}
 		&.ico-step-open {

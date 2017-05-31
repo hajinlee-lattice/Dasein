@@ -1,38 +1,35 @@
-angular.module('lp.import')
-.service('ImportWizardStore', function($q, ImportWizardService){
-    var ImportWizardStore = this;
+angular.module('lp.playbook')
+.service('PlaybookWizardStore', function($q, PlaybookWizardService){
+    var PlaybookWizardStore = this;
 
-    this.accountIdState = {
-        accountDedupeField: null,
-        dedupeType: 'custom',
-        selectedField: null,
-        fields: ['Id']
-    };
-
-    this.getAccountIdState = function() {
-        return this.accountIdState;
-    };
-
-    this.setAccountIdState = function(nextState) {
-        for (var key in this.accountIdState) {
-            this.accountIdState[key] = nextState[key];
-        }
-    };
-
-    this.getCustomFields = function(type) {
+    this.getSegments = function() {
         var data = [],
-            total = 7, //Math.floor(Math.random() * 10 + 1),
-            types = ['Text', 'Number', 'Boolean', 'Date'];
+            total = Math.floor(Math.random() * 10 + 3); // 3 - 10
+
         for(var i=0;i<total;i++) {
             var tmp = {
-                CustomField: 'CustomField' + (i + 1),
-                Type: types, //[Math.floor(Math.random()*types.length)],
-                Ignore: false //Math.random() >= 0.5
+                Name: 'Segment Name ' + (i + 1),
+                Accounts: Math.floor(Math.random() * (100*1000) + 1),
+                Contacts: Math.floor(Math.random() * (100*1000) + 1),
+                Lift: Math.random() * 10 + 1
             };
             data.push(tmp);
         }
         return data;
-    }
+    };
+
+    this.getRatings = function() {
+        var data = [],
+            total = Math.floor(Math.random() * 10 + 3); // 3 - 10
+
+        for(var i=0;i<total;i++) {
+            var tmp = {
+                Name: 'Rating Name ' + (i + 1)
+            };
+            data.push(tmp);
+        }
+        return data;
+    };
 })
-.service('ImportWizardService', function($q, $http, $state) {
+.service('PlaybookWizardService', function($q, $http, $state) {
 });
