@@ -49,7 +49,7 @@ angular.module('common.datacloud.explorer', [
         lookupMode: (LookupResponse && LookupResponse.attributes !== null),
         lookupFiltered: LookupResponse.attributes,
         LookupResponse: LookupStore.response,
-        no_lookup_results_message : false,
+        no_lookup_results_message: false,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
         count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : EnrichmentCount.data),
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
@@ -165,8 +165,8 @@ angular.module('common.datacloud.explorer', [
         getEnrichmentData();
 
         vm.statusMessageBox = angular.element('.status-alert');
-
-        if (vm.lookupMode && typeof vm.lookupMode === 'object' && Object.keys(vm.lookupFiltered).length < 1) {
+        
+        if (vm.lookupMode && typeof vm.lookupFiltered === 'object' && Object.keys(vm.lookupFiltered).length < 1) {
             //vm.statusMessage('No results to show', {type: 'no_results', wait: 0});
             vm.no_lookup_results_message = true;
         }

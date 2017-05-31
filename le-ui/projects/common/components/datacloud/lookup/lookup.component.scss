@@ -31,18 +31,20 @@
         font-weight: bold;
         
         li {
+            display: inline-block;
+            background: #f1f1f1;
             padding: 0.6em 1.5em;
             margin-right: 0.5em;
             margin-bottom: -1px;
             border: 1px solid #d0d0d0;
-            display: inline-block;
-            background: #f1f1f1;
+            border-bottom: none;
             cursor: pointer;
 
             &.active {
-                background: inherit;
+                background: #fafafa;
                 border-bottom-color: #fafafa;
                 cursor: default;
+                color: #ef6a30;
             }
 
             &:hover {
