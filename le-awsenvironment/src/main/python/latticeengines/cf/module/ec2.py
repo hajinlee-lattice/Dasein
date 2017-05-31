@@ -149,9 +149,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "mkdir -p /etc/ledp",
                             "chmod 777 /etc/ledp",
                             "mkdir -p /var/log/ledp",
-                            "chmod 777 /var/log/ledp",
-                            "mkdir -p /var/cache/scoringapi",
-                            "chmod 777 /var/cache/scoringapi"
+                            "chmod 777 /var/log/ledp"
                         ] ] }
                     },
                     "04_le_yum_repo" : {
