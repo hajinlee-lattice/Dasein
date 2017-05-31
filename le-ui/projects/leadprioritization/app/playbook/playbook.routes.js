@@ -37,8 +37,8 @@ angular
                         { label: 'Segment', state: 'one.two' },
                         { label: 'Ratings', state: 'one.two.three' },
                         { label: 'Targets', state: 'one.two.three.four' },
-                        { label: 'Insights', state: 'one.two.three.four.five' },
-                        { label: 'Preview', state: 'one.two.three.four.five.six' },
+                        { label: 'Insights', state: 'one.two.three.four.cgfive' },
+                        { label: 'Preview', state: 'one.two.three.four.cgfive.cgsix' },
                         { label: 'Launch', state: 'one.two.three.four.five.six.seven' }
                     ];
                 }
@@ -135,19 +135,37 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.one.two.three.four.five', {
+        .state('home.playbook.wizard.one.two.three.four.cgfive', {
             url: '/insights',
+            resolve: {
+                TalkingPoints: function(CgTalkingPointStore) {
+                    return CgTalkingPointStore.getTalkingPoints();
+                },
+                TalkingPointAttributes: function (CgTalkingPointStore) {
+                    return CgTalkingPointStore.getAttributes();
+                },
+                loadTinyMce: function($ocLazyLoad) {
+                    return $ocLazyLoad.load('lib/js/tinymce/tinymce.min.js');
+                },
+                loadUiTinyMce: function($ocLazyLoad) {
+                    return $ocLazyLoad.load('lib/js/tinymce/uitinymce.min.js');
+                }
+            },
             views: {
                 'wizard_content@home.playbook': {
-                    templateUrl: 'app/playbook/content/insights/insights.component.html'
+                    controller: 'cgTalkingPointCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/cgtalkingpoint/cgtalkingpoint.component.html'
                 }
             }
         })
-        .state('home.playbook.wizard.one.two.three.four.five.six', {
+        .state('home.playbook.wizard.one.two.three.four.cgfive.cgsix', {
             url: '/preview',
             views: {
                 'wizard_content@home.playbook': {
-                    templateUrl: 'app/playbook/content/preview/preview.component.html'
+                    controller: 'cgTalkingPointPreviewCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/cgtalkingpoint/tppreview/tppreview.component.html'
                 }
             }
         })

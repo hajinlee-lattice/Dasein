@@ -31,7 +31,8 @@ var mainApp = angular.module('mainApp', [
     'lp.create.import',
     'lp.sfdc.credentials',
     'lp.managefields',
-    'lp.marketo.enrichment'
+    'lp.marketo.enrichment',
+    'lp.cg.talkingpoint'
 ])
 .controller('MainController', function (
     $scope, $state, $rootScope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility

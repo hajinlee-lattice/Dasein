@@ -1,0 +1,213 @@
+.talking-point-container {
+    display: flex;
+    flex-direction: row;
+
+    h2 {
+        background-image: url('/assets/images/ico-insights.png');
+    }
+
+    &>div:first-child {
+        flex: 1 1 auto;
+        margin-left: 3px;
+    }
+    &>div:last-child {
+        flex: 0 1 auto;
+    }
+
+    .section-header {
+        button {
+            padding: 8px 8px;
+        }
+    }
+
+    .tp-entry {
+        position: relative;
+    }
+
+    .tp-entry-sort {
+        position: absolute;
+        left: 340px;
+        top: 8px;
+        div {
+            height: 1em;
+            opacity: 0.7;
+            &:hover {
+                opacity: 1;
+            }
+            i {
+                cursor: pointer;
+            }
+        }
+    }
+
+    .add-tp-button {
+        margin: 0 2px;
+        margin-bottom: 5px;
+        button {
+            border-radius: 50%;
+            padding: 7px 11px;
+        }
+        span {
+            margin-left: 3px;
+            cursor: pointer;
+        }
+    }
+}
+
+*[id^='mceu_'] {
+    transition: none !important;
+}
+.talking-point-editor {
+    margin-bottom: 6px;
+    border: 1px solid #ccc;
+    padding: 3px;
+    position: relative;
+    background-color: white;
+
+    .tinymce-container {
+        margin-top: 3px;
+        display: none;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    &.expanded .tinymce-container{
+        display: inherit;
+    }
+
+    .tp-delete-confirm {
+        display: inline-block;
+        padding: 5px 5px;
+        position: absolute;
+        right: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        background-color: white;
+        z-index: 7;
+
+        button {
+            padding: 8px 10px;
+            margin-left: 6px;
+        }
+    }
+
+    button {
+        display: inline;
+        &.delete-button {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 0 10px;
+            opacity: 0;
+        }
+        &.expand-button {
+            border-radius: 50%;
+            padding: 7px 10px;
+            margin-right: 8px;
+            transition: 300ms linear all;
+            transform: rotate(-90deg);
+            &.rotate {
+                transform: rotate(0deg);
+            }
+        }
+    }
+
+    &:hover {
+        button.delete-button {
+            opacity: 1;
+        }
+    }
+
+    input {
+        display: inline;
+        width: 280px;
+        &.required {
+            border-left-width: 5px;
+            border-left-color: #EF6A30;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.075)
+        }
+    }
+}
+
+.tp-attribute-pane {
+    position: relative;
+    height: 500px;
+    min-width: 200px;
+    max-width: 400px;
+    top: 60px;
+    margin-bottom: 2em;
+    margin-left: 1.5em;
+    border: 1px solid #bbb;
+    border-radius: 12px 0 0 12px;
+    background-color: white;
+    transition: none;
+
+    h5 {
+        text-align: center;
+    }
+    ul {
+        position: absolute;
+        width: 100%;
+        overflow: auto;
+        top: 120px;
+        bottom: 0;
+        cursor: pointer;
+        padding-left: 1em;
+        li {
+            padding: 0.5em 0;
+        }
+    }
+    .control {
+        background-color: #E9E9E9;
+        padding: 8px;
+        select {
+            margin-bottom: 5px;
+        }
+    }
+
+    .resize-handle {
+        position: absolute;
+        width: 8px;
+        height: 100%;
+        left: -8px;
+        top: 0;
+        cursor: col-resize;
+        transition: none;
+        &:after{
+          content: "\f142";
+          font-family: FontAwesome;
+          font-style: normal;
+          font-weight: normal;
+          text-decoration: inherit;
+          position: absolute;
+          font-size: 1em;
+          color: #aaa;
+          top: 50%;
+          right: 4px;
+          z-index: 1;
+        }
+    }
+}
+
+.tp-preview {
+    h2 {
+        background-image: url('/assets/images/ico-preview.png');
+    }
+
+    label {
+        border-bottom: 1px solid #e5e5e5;
+        padding: 5px;
+    }
+
+    select {
+        display: inline;
+        min-width: 200px;
+    }
+}
+
+.tppreview_iframe {
+    width: 100%;
+    height: 380px;
+    transition: none;
+}
