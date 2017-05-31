@@ -126,9 +126,6 @@ public class InternalScoreResource extends BaseScoring {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         
-        //TODO - remove this line, it was added only for urgent customer demo  
-        performFetchOnlyForMatching = false;
-        
         List<RecordScoreResponse> recordScoreResponseList = scorePercentileRecords(request, scoreRequest, customerSpace,
                 enrichInternalAttributes, performFetchOnlyForMatching, requestId);
         try {
@@ -152,9 +149,6 @@ public class InternalScoreResource extends BaseScoring {
             HttpServletResponse response) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        
-        //TODO - remove this line, it was added only for urgent customer demo  
-        performFetchOnlyForMatching = false;
         
         List<RecordScoreResponse> recordScoreResponseList = scoreRecordsDebug(request, scoreRequest, customerSpace,
                 enrichInternalAttributes, performFetchOnlyForMatching, requestId);

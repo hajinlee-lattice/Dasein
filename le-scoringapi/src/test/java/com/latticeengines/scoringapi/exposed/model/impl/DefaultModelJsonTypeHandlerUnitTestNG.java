@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -61,6 +62,48 @@ public class DefaultModelJsonTypeHandlerUnitTestNG {
                 Collections.emptyList());
         Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 100), BucketName.A);
 
+    }
+
+    @Test(groups = "unit", enabled = true)
+    public void testHandleEmptyString() {
+        Map<String, Object> copiedRecord = new HashMap<>();
+        Map<String, Object> record = new HashMap<>();
+
+        populateRecord(record);
+
+        defaultModelJsonTypeHandler.handleEmptyString(record, copiedRecord);
+
+        verifyCopiedMap(record, copiedRecord);
+    }
+
+    private void verifyCopiedMap(Map<String, Object> record, Map<String, Object> copiedRecord) {
+        Assert.assertEquals(record.size(), 5);
+        Assert.assertEquals(copiedRecord.size(), 5);
+
+        for (String key : record.keySet()) {
+            Object origValue = record.get(key);
+            Assert.assertTrue(copiedRecord.containsKey(key));
+            Object copiedValue = copiedRecord.get(key);
+
+            if (origValue != null && origValue instanceof String) {
+                CharSequence value = ((String) origValue);
+                if (StringUtils.isBlank(value)) {
+                    Assert.assertNull(copiedValue);
+                } else {
+                    Assert.assertEquals(copiedValue, origValue);
+                }
+            } else {
+                Assert.assertEquals(copiedValue, origValue);
+            }
+        }
+    }
+
+    private void populateRecord(Map<String, Object> record) {
+        record.put("K1", 2L);
+        record.put("K2", "");
+        record.put("K3", "   ");
+        record.put("K4", null);
+        record.put("K5", "Value");
     }
 
     private List<BucketMetadata> generateDefaultBucketMetadataList() {

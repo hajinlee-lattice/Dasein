@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -242,7 +243,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     public AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(String recordId,
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, String modelId) {
         Map<String, Object> parsedRecord = new HashMap<String, Object>(record.size());
-        parsedRecord.putAll(record);
+
+        handleEmptyString(record, parsedRecord);
 
         InterpretedFields interpretedFields = new InterpretedFields();
 
@@ -296,6 +298,20 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         }
 
         return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord, interpretedFields);
+    }
+
+    void handleEmptyString(Map<String, Object> record, Map<String, Object> parsedRecord) {
+        // PLS-4058 - make sure to replace empty string value with null
+        for (String key : record.keySet()) {
+            Object value = record.get(key);
+            if (value != null && value instanceof String) {
+                CharSequence cs = ((String) value);
+                if (StringUtils.isBlank(cs)) {
+                    value = null;
+                }
+            }
+            parsedRecord.put(key, value);
+        }
     }
 
     @Override
