@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.SegmentsUtility'])
 .controller('PlaybookWizardSegment', function(
-    $state, $stateParams, $scope, ResourceUtility, SegmentsUtility, Segments
+    $state, $stateParams, $scope, ResourceUtility, PlaybookWizardStore, SegmentsUtility, Segments
 ) {
     var vm = this;
 
@@ -10,6 +10,10 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
     });
 
     vm.init = function() {
+    }
+
+    vm.saveSegment = function(segment) {
+        PlaybookWizardStore.saveSegment(segment);
     }
 
     vm.init();

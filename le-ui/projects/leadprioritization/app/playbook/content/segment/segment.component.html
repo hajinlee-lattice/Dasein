@@ -30,9 +30,9 @@
                     <li class="accounts">Accounts</li>
                 </ul>
             </li>
-            <li ng-repeat="segment in vm.segments | filter: {'Name': search}" class="item segment">
+            <li ng-repeat="segment in vm.segments | filter: {'display_name': search}" class="item segment">
                 <ul>
-                    <li class="name"><input type="radio" id="{{segment.name}}" name="segment" ng-model="vm.segmentSelection" value="{{segment.name}}" /><label for="{{segment.name}}">{{segment.display_name}}</label></li>
+                    <li class="name"><input type="radio" id="{{segment.name}}" name="segment" ng-model="vm.segmentSelection" value="{{segment.name}}" ng-click="vm.saveSegment(segment)" /><label for="{{segment.name}}">{{segment.display_name}}</label></li>
                     <li class="accounts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li>
                 </ul>
             </li>

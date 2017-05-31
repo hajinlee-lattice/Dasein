@@ -1,6 +1,8 @@
 .playbook-ratings {
-	h2 {
-		background-image: url('/assets/images/ico-ratings.png');
-		padding-left: 27px;
+	& > .header {
+		h2 {
+			background-image: url('/assets/images/ico-ratings.png');
+			padding-left: 27px;
+		}
 	}
 }

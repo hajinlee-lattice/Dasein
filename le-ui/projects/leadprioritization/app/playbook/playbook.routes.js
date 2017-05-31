@@ -79,7 +79,6 @@ angular
             url: '/segment',
             resolve: {
                 Segments: function(SegmentService) {
-                    //return PlaybookWizardStore.getSegments();
                     return SegmentService.GetSegments();
                 }
             },

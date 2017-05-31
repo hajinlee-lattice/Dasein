@@ -1,5 +1,7 @@
 .playbook-launch {
-	h2 {
-		background-image: url('/assets/images/ico-launch.png');
+	& > .header {
+		h2 {
+			background-image: url('/assets/images/ico-launch.png');
+		}
 	}
 }

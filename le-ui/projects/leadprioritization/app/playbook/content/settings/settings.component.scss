@@ -1,6 +1,8 @@
 .playbook-settings {
-    h2 {
-        background-image: url('/assets/images/ico-settings.png');
+    & > .header {
+        h2 {
+            background-image: url('/assets/images/ico-settings.png');
+        }
     }
     label {
         font-size: 15px;

@@ -1,29 +1,5 @@
-<div class="lattice-fields container">
-    
-    <h2>Lattice Fields</h2>
-    <p>Lattice uses several account fields that you should provide for each record, if possible. Please review the fields below to make sure everything is mapping correctly.</p>
-
-    <h3 class="{{vm.importType}}-matching">{{vm.importType}} Matching Fields</h3>
-    <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
-    <ul>
-    	<li ng-repeat="field in vm.matchingFields">
-    		<label>{{field.name}}</label>
-    		<select class="form-control">
-    			<option ng-repeat="option in field.options">{{ option.name }}</option>
-    		</select>
-    	</li>
-    </ul>
-
-
-    <h3 class="analysis">Analysis Fields</h3>
-    <p>These optional fields are used for analysis and are useful if you can provide them.</p>
-    <ul>
-    	<li ng-repeat="field in vm.analysisFields">
-    		<label>{{field.name}}</label>
-    		<select class="form-control">
-    			<option ng-repeat="option in field.options">{{ option.name }}</option>
-    		</select>
-    	</li>
-    </ul>
-
+<div class="playbook-targets container">
+    <div class="header">
+        <h2>Targets</h2>
+    </div>
 </div>

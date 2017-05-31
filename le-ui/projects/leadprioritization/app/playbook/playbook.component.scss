@@ -74,4 +74,8 @@ section.playbook.container {
             }
         }
     }
+    textarea {
+        transition: none;
+        max-width: 100%;
+    }
 }

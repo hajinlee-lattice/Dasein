@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.settings', [])
 .controller('PlaybookWizardSettings', function(
-    $state, $stateParams, $scope, ResourceUtility
+    $state, $stateParams, $scope, ResourceUtility, PlaybookWizardStore
 ) {
     var vm = this;
 
@@ -9,7 +9,6 @@ angular.module('lp.playbook.wizard.settings', [])
     });
 
     vm.init = function() {
-
     };
 
     vm.init();
