@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeed;
 
 public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
 
-    void startExecution(String datafeedName);
+    boolean startExecution(String datafeedName);
 
     DataFeed findByName(String datafeedName);
 

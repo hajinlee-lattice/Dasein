@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -27,6 +28,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("datafeedEntityMgr")
 public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implements DataFeedEntityMgr {
 
+    private static final Logger log = Logger.getLogger(DataFeedEntityMgrImpl.class);
     @Autowired
     private DataFeedDao datafeedDao;
 
@@ -61,10 +63,11 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void startExecution(String datafeedName) {
+    public boolean startExecution(String datafeedName) {
         DataFeed datafeed = datafeedDao.findByField("name", datafeedName);
         if (datafeed == null) {
-            return;
+            log.info("Can't find data feed: " + datafeedName);
+            return false;
         }
         List<DataFeedTask> tasks = HibernateUtils.inflateDetails(datafeed.getTasks());
         datafeed.getTasks().forEach(task -> {
@@ -93,6 +96,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             task.setImportData(null);
         });
         datafeedDao.update(datafeed);
+        return true;
     }
 
 }

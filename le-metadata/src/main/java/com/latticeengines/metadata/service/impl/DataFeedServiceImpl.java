@@ -11,4 +11,9 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Autowired
     private DataFeedEntityMgr datafeedEntityMgr;
+
+    @Override
+    public boolean startExecution(String customerSpace, String datafeedName) {
+        return datafeedEntityMgr.startExecution(datafeedName);
+    }
 }
