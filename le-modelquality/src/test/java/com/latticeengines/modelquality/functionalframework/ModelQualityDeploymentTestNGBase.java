@@ -203,6 +203,11 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             PipelineStepOrFile psof = new PipelineStepOrFile();
             psof.pipelineStepName = p.getName();
             pipeline1StepsOrFiles.add(psof);
+            
+            PipelineStep step = pipelineStepEntityMgr.findByName(p.getName());
+            if (step == null) {
+                pipelineStepEntityMgr.create(p);
+            }
         }
 
         pipeline1 = pipelineService.createPipeline(pipeline1.getName(), pipeline1.getDescription(),
