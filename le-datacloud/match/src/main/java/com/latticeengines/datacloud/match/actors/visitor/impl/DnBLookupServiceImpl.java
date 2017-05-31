@@ -615,28 +615,25 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     }
 
     /**
-     * Called after DnB cache lookup, but before DnB remote lookup
-     * If dunsInAM = true in cache, validate again:
-     *      If still dunsInAM = true, adopt the cache
-     *      If dunsInAM changed to false, reject the cache, go to remote DnB
-     * If dunsInAM = false in cache, adopt the cache (result will be discarded in DnBMatchResultValidator)
+     * Pre-validation before DnB remote lookup
      */
     private boolean adoptWhiteCache(DnBCache cache, String dataCloudVersion) {
-        if (Boolean.TRUE.equals(cache.isOutOfBusiness()) || Boolean.FALSE.equals(cache.isDunsInAM())) {
-            cache.setDunsInAM(Boolean.FALSE);
+        if (cache.isDunsInAM() == null) {
+            return false;
+        }
+        if (Boolean.TRUE.equals(cache.isOutOfBusiness())) {
             return true;
         }
-        if (isDunsInAM(cache.getDuns(), dataCloudVersion)) {
-            cache.setDunsInAM(Boolean.TRUE);
-            return true;
+        boolean currentIsDunsInAM = isDunsInAM(cache.getDuns(), dataCloudVersion);
+        if (currentIsDunsInAM == cache.isDunsInAM().booleanValue()) {
+            return true;    // If adopted cache has isDunsInAM == false, it will be discarded in DnBMatchResultValidator
         } else {
-            cache.setDunsInAM(Boolean.FALSE);
             return false;
         }
     }
 
     /**
-     * Called after DnB remote lookup
+     * Post-validation after DnB remote lookup
      */
     private void validateDuns(DnBMatchContext context) {
         if (StringUtils.isEmpty(context.getDuns())) {
