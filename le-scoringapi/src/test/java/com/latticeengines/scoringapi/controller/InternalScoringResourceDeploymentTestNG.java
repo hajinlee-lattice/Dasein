@@ -101,7 +101,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -116,7 +116,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -133,7 +133,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
                 + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n" + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -151,24 +151,25 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
                 + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n" + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
     public void scoreOutOfRangeRecord() throws IOException {
-        InputStream scoreRequestStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(LOCAL_MODEL_PATH + "outofrange_score_request.json");
+        InputStream scoreRequestStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(LOCAL_MODEL_PATH + "outofrange_score_request.json");
         String scoreRecordContents = IOUtils.toString(scoreRequestStream, Charset.defaultCharset());
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
 
         scoreRequest.setModelId(MODEL_ID);
 
-        DebugScoreResponse scoreResponse = internalScoringApiProxy
-                .scoreProbabilityRecord(scoreRequest, customerSpace.toString(), true, false);
+        DebugScoreResponse scoreResponse = internalScoringApiProxy.scoreProbabilityRecord(scoreRequest,
+                customerSpace.toString(), true, false);
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })

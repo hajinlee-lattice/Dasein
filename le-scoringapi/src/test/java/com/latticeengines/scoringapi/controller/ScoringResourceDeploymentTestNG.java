@@ -86,7 +86,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         ScoreResponse scoreResponse = response.getBody();
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -102,7 +102,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         double difference = Math.abs(scoreResponse.getProbability() - 0.41640343016092707d);
         Assert.assertTrue(difference < 0.1);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -122,7 +122,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
