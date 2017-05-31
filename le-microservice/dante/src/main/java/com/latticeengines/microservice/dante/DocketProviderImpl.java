@@ -17,7 +17,7 @@ public class DocketProviderImpl extends DocketProviderBase implements DocketProv
     }
 
     protected Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("com.latticeengines.microservice.dante.controller");
+        return RequestHandlerSelectors.basePackage("com.latticeengines.dante.controller");
     }
 
     protected String contextPath() {
