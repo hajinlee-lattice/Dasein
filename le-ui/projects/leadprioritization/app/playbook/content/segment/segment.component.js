@@ -1,10 +1,11 @@
-angular.module('lp.playbook.wizard.segment', [])
+angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.SegmentUtility'])
 .controller('PlaybookWizardSegment', function(
-    $state, $stateParams, $scope, ResourceUtility, Segments
+    $state, $stateParams, $scope, ResourceUtility, SegmentUtility, Segments
 ) {
     var vm = this;
 
     angular.extend(vm, {
+        SegmentUtility: SegmentUtility,
         segments: Segments
     });
 

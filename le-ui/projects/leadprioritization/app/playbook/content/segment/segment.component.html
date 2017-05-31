@@ -28,16 +28,12 @@
                 <ul>
                     <li class="name">Segment</li>
                     <li class="accounts">Accounts</li>
-                    <li class="contacts">Contacts</li>
-                    <li class="lift">Lift</li>
                 </ul>
             </li>
             <li ng-repeat="segment in vm.segments | filter: {'Name': search}" class="item segment">
                 <ul>
-                    <li class="name"><input type="radio" id="segment{{$index}}" name="segment" ng-model="vm.segmentSelection" value="{{segment.Name}}" /><label for="segment{{$index}}">{{segment.Name}}</label></li>
-                    <li class="accounts">{{segment.Accounts|number}}</li>
-                    <li class="contacts">{{segment.Contacts|number}}</li>
-                    <li class="lift">{{segment.Lift.toFixed(1)}}x</li>
+                    <li class="name"><input type="radio" id="{{segment.name}}" name="segment" ng-model="vm.segmentSelection" value="{{segment.name}}" /><label for="{{segment.name}}">{{segment.display_name}}</label></li>
+                    <li class="accounts">{{vm.SegmentUtility.PropertyBag('NumAccounts', segment)|number}}</li>
                 </ul>
             </li>
         </ul>

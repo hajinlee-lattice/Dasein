@@ -42,7 +42,7 @@ angular
                         { label: 'Targets', state: 'one.two.three.four' },
                         { label: 'Insights', state: 'one.two.three.four.cgfive' },
                         { label: 'Preview', state: 'one.two.three.four.cgfive.cgsix' },
-                        { label: 'Launch', state: 'one.two.three.four.five.six.seven' }
+                        { label: 'Launch', state: 'one.two.three.four.cgfive.cgsix.seven' }
                     ];
                 }
             },
@@ -78,8 +78,9 @@ angular
         .state('home.playbook.wizard.one.two', {
             url: '/segment',
             resolve: {
-                Segments: function(PlaybookWizardStore) {
-                    return PlaybookWizardStore.getSegments();
+                Segments: function(SegmentService) {
+                    //return PlaybookWizardStore.getSegments();
+                    return SegmentService.GetSegments();
                 }
             },
             views: {
@@ -149,7 +150,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.one.two.three.four.five.six.seven', {
+        .state('home.playbook.wizard.one.two.three.four.cgfive.cgsix.seven', {
             url: '/launch',
             views: {
                 'wizard_content@home.playbook': {
