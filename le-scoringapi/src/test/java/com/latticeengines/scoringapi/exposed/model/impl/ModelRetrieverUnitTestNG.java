@@ -80,28 +80,35 @@ public class ModelRetrieverUnitTestNG {
                 .getModelSummariesModifiedWithinTimeFrame(Matchers.anyLong());
         doReturn(bucketMetadataList).when(modelRetriever).getBucketMetadata(any(CustomerSpace.class),
                 any(String.class));
-        modelRetriever.setScoreArtifactCacheMaxSize(50);
-        modelRetriever.setScoreArtifactCacheExpirationTime(1);
-        modelRetriever.setScoreArtifactCacheRefreshTime(1);
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheMaxSize(50);
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheExpirationTime(1);
+        modelRetriever.getScoreArtifactCache().setScoreArtifactCacheRefreshTime(1);
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        modelRetriever.setTaskScheduler(taskScheduler);
+        modelRetriever.getScoreArtifactCache().setTaskScheduler(taskScheduler);
         taskScheduler.setThreadNamePrefix("poolScheduler");
         taskScheduler.setPoolSize(1);
         taskScheduler.initialize();
+
+        modelRetriever.getModelDetailsCache().setModelDetailsAndFieldsCacheMaxSize(50);
+        modelRetriever.getModelDetailsCache().setModelDetailsAndFieldsCacheExpirationTime(1);
+
+        modelRetriever.getModelFieldsCache().setModelDetailsAndFieldsCacheMaxSize(50);
+        modelRetriever.getModelFieldsCache().setModelDetailsAndFieldsCacheExpirationTime(1);
+
         modelRetriever.instantiateCache();
-        modelRetriever.scheduleRefreshJob();
+        modelRetriever.getScoreArtifactCache().scheduleRefreshJob();
     }
 
     @Test(groups = "unit")
     public void testCacheRefresh() throws InterruptedException {
         LoadingCache<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts> cache = modelRetriever
-                .getScoreArtifactCache();
+                .getScoreArtifactCache().getCache();
         Assert.assertNotNull(cache);
         Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 0);
         Thread.sleep(1200);
         // The first time when scoring cache tries to refresh, no change is
         // since there is no entry in the cache.
-        cache = modelRetriever.getScoreArtifactCache();
+        cache = modelRetriever.getScoreArtifactCache().getCache();
         Assert.assertNotNull(cache);
         Assert.assertEquals(Iterators.size(cache.asMap().entrySet().iterator()), 0);
 
