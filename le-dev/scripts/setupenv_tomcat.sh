@@ -13,10 +13,10 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo chown -R $USER ${CATALINA_HOME} || true
 
     # https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
-    TOMCAT_TGZ_URL=https://www.apache.org/dyn/closer.cgi?action=download&filename=tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz
+    TOMCAT_TGZ_URL="https://www.apache.org/dyn/closer.cgi?action=download&filename=tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
 
     if [ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]; then
-        wget "${TOMCAT_TGZ_URL}" -O $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}.tar.gz
+        wget "${TOMCAT_TGZ_URL}" -O "$ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
     fi
     rm -rf $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION} || true
     tar xzf $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C $ARTIFACT_DIR
