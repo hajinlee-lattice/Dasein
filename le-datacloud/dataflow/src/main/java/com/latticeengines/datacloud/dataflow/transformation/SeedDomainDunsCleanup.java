@@ -25,12 +25,14 @@ public class SeedDomainDunsCleanup extends ConfigurableFlowBase<SeedDomainDunsCl
         Node goldenDuns = addSource(parameters.getBaseTables().get(2));
 
         goldenDom = goldenDom.retain(new FieldList(config.getGoldenDomainField()))
-                .filter(String.format("%s != null", config.getGoldenDomainField()),
+                .filter(String.format("%s != null && !%s.equals(\"\")", config.getGoldenDomainField(),
+                        config.getGoldenDomainField()),
                         new FieldList(config.getGoldenDomainField()))
                 .rename(new FieldList(config.getGoldenDomainField()),
                         new FieldList(renameGolden(config.getGoldenDomainField())));
         goldenDuns = goldenDuns.retain(new FieldList(config.getGoldenDunsField()))
-                .filter(String.format("%s != null", config.getGoldenDunsField()),
+                .filter(String.format("%s != null && !%s.equals(\"\")", config.getGoldenDunsField(),
+                        config.getGoldenDunsField()),
                         new FieldList(config.getGoldenDunsField()))
                 .rename(new FieldList(config.getGoldenDunsField()),
                         new FieldList(renameGolden(config.getGoldenDunsField())));
