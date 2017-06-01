@@ -11,21 +11,29 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.latticeengines.common.exposed.util.PropertyUtils;
+
 public class CorsFilter extends OncePerRequestFilter {
     private static final Log log = LogFactory.getLog(CorsFilter.class);
+
+    private static final String ALLOW_CORS = PropertyUtils.getProperty("common.allow.cors");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // Enables cross-origin-resource-sharing
-        response.addHeader("Access-Control-Allow-Origin", "*");
 
-        if (request.getHeader("Access-Control-Request-Method") != null && "OPTIONS".equals(request.getMethod())) {
-            // CORS "pre-flight" request
-            log.info("Enabling CORS in response header for pre-flight request.");
-            response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-            response.addHeader("Access-Control-Allow-Headers", "Content-Type");
-            response.addHeader("Access-Control-Max-Age", "60");// 1 min
+        log.info("allow cors: " + ALLOW_CORS);
+        if (Boolean.valueOf(ALLOW_CORS)) {
+            // Enables cross-origin-resource-sharing
+            response.addHeader("Access-Control-Allow-Origin", "*");
+
+            if (request.getHeader("Access-Control-Request-Method") != null && "OPTIONS".equals(request.getMethod())) {
+                // CORS "pre-flight" request
+                log.info("Enabling CORS in response header for pre-flight request.");
+                response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+                response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+                response.addHeader("Access-Control-Max-Age", "60");// 1 min
+            }
         }
 
         filterChain.doFilter(request, response);
