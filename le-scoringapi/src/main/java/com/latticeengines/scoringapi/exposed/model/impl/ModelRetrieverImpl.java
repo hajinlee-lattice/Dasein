@@ -640,16 +640,17 @@ public class ModelRetrieverImpl implements ModelRetriever {
         log.info("Instantiating score artifact cache with max size " + scoreArtifactCacheMaxSize);
         scoreArtifactCache = CacheBuilder.newBuilder().maximumSize(scoreArtifactCacheMaxSize) //
                 .expireAfterAccess(scoreArtifactCacheExpirationTime, TimeUnit.DAYS) //
-                .refreshAfterWrite(scoreArtifactCacheRefreshTime, TimeUnit.SECONDS) //
                 .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
                     @Override
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
                         if (log.isInfoEnabled()) {
-                            log.info("Load model artifacts for: " + key.getKey());
+                            log.info(String.format("Load model artifacts for tenant %s and model %s", key.getKey(),
+                                    key.getValue()));
                         }
                         ScoringArtifacts artifact = retrieveModelArtifactsFromHdfs(key.getKey(), key.getValue());
                         if (log.isInfoEnabled()) {
-                            log.info("Load completed model artifacts for: " + key.getKey());
+                            log.info(String.format("Load completed model artifacts for tenant %s and model %s",
+                                    key.getKey(), key.getValue()));
                         }
                         return artifact;
                     };
@@ -682,7 +683,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
                     scoringArtifacts.setBucketMetadataList(bucketMetadataList);
                     scoringArtifacts.setModelSummary(modelsummay);
                     updateModelArtifacts(cs, modelId, scoringArtifacts);
-                    log.info(String.format("Refresh cache for model %s finishes.", modelId));
+                    log.info(
+                            String.format("Refresh cache for model %s in tenant %s finishes.", modelId, cs.toString()));
                 }
             });
         }
