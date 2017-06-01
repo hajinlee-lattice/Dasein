@@ -1,8 +1,9 @@
 package com.latticeengines.cdl.workflow;
 
+import java.util.List;
+
 import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class RedshiftPublishWorkflowConfiguration extends WorkflowConfiguration {
@@ -15,13 +16,18 @@ public class RedshiftPublishWorkflowConfiguration extends WorkflowConfiguration 
 
         private ExportDataToRedshiftConfiguration exportDataToRedshiftConfiguration = new ExportDataToRedshiftConfiguration();
 
-        public Builder redshiftTableConfiguration(RedshiftTableConfiguration config) {
-            exportDataToRedshiftConfiguration.setRedshiftTableConfiguration(config);
+        public Builder initialLoad(boolean initialLoad) {
+            exportDataToRedshiftConfiguration.setInitialLoad(initialLoad);
             return this;
         }
 
-        public Builder sourceTable(Table sourceTable) {
-            exportDataToRedshiftConfiguration.setSourceTable(sourceTable);
+        public Builder cleanupS3(boolean cleanupS3) {
+            exportDataToRedshiftConfiguration.setCleanupS3(cleanupS3);
+            return this;
+        }
+
+        public Builder sourceTables(List<Table> sourceTables) {
+            exportDataToRedshiftConfiguration.setSourceTables(sourceTables);
             return this;
         }
 

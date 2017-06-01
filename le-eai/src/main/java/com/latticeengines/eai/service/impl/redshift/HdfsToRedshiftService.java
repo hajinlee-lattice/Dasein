@@ -67,11 +67,15 @@ public class HdfsToRedshiftService {
         }
     }
 
-    public void createRedshiftTable(HdfsToRedshiftConfiguration configuration) {
+    public void createRedshiftTableIfNotExist(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
-        redshiftService.dropTable(redshiftTableConfig.getTableName());
         redshiftService.createTable(redshiftTableConfig, schema);
+    }
+
+    public void dropRedshiftTable(HdfsToRedshiftConfiguration configuration) {
+        RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
+        redshiftService.dropTable(redshiftTableConfig.getTableName());
     }
 
     public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {

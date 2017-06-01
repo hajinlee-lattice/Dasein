@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow;
 
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfiguration {
@@ -13,8 +12,13 @@ public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfigur
         public ConsolidateAndPublishWorkflowConfiguration configuration = new ConsolidateAndPublishWorkflowConfiguration();
         public RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
-        public Builder redshiftTableConfiguration(RedshiftTableConfiguration config) {
-            redshiftPublishWorkflowConfigurationBuilder.redshiftTableConfiguration(config);
+        public Builder initialLoad(boolean initialLoad) {
+            redshiftPublishWorkflowConfigurationBuilder.initialLoad(initialLoad);
+            return this;
+        }
+
+        public Builder cleanupS3(boolean cleanupS3) {
+            redshiftPublishWorkflowConfigurationBuilder.initialLoad(cleanupS3);
             return this;
         }
 
