@@ -67,9 +67,9 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(@PathVariable String playID) {
+    public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(@PathVariable String playExternalID) {
         try {
-            return ResponseDocument.successResponse(talkingPointService.findAllByPlayID(playID));
+            return ResponseDocument.successResponse(talkingPointService.findAllByPlayID(playExternalID));
         } catch (LedpException e) {
             return ResponseDocument.failedResponse(e);
         } catch (Exception e) {
@@ -81,9 +81,9 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @ResponseBody
     @ApiOperation(value = "Delete a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<?> delete(@PathVariable String externalID) {
+    public ResponseDocument<?> delete(@PathVariable String talkingPointExternalID) {
         try {
-            DanteTalkingPoint talkingPoint = talkingPointService.findByExternalID(externalID);
+            DanteTalkingPoint talkingPoint = talkingPointService.findByExternalID(talkingPointExternalID);
             talkingPointService.delete(talkingPoint);
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
