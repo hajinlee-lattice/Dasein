@@ -92,9 +92,9 @@ public class SeedDomainDunsCleanupTestNG
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();
+            baseSources.add(seed.getSourceName());
             baseSources.add(goldenDom.getSourceName());
             baseSources.add(goldenDuns.getSourceName());
-            baseSources.add(seed.getSourceName());
             step1.setBaseSources(baseSources);
             step1.setTransformer(SeedDomainDunsCleanup.TRANSFORMER_NAME);
             step1.setTargetSource(source.getSourceName());

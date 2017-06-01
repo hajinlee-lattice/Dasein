@@ -20,9 +20,9 @@ public class SeedDomainDunsCleanup extends ConfigurableFlowBase<SeedDomainDunsCl
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
 
-        Node goldenDom = addSource(parameters.getBaseTables().get(0));
-        Node goldenDuns = addSource(parameters.getBaseTables().get(1));
-        Node seed = addSource(parameters.getBaseTables().get(2));
+        Node seed = addSource(parameters.getBaseTables().get(0));
+        Node goldenDom = addSource(parameters.getBaseTables().get(1));
+        Node goldenDuns = addSource(parameters.getBaseTables().get(2));
 
         goldenDom = goldenDom.retain(new FieldList(config.getGoldenDomainField()))
                 .filter(String.format("%s != null", config.getGoldenDomainField()),
