@@ -162,7 +162,7 @@ def login_aws(environment):
     res = client.get_authorization_token(registryIds=[account_id])
     data = res['authorizationData'][0]
     username, password = base64.b64decode(data['authorizationToken']).split(':')
-    return 'docker login -u %s -p %s -e none %s' % (username, password, data['proxyEndpoint'])
+    return 'docker login -u %s -p %s %s' % (username, password, data['proxyEndpoint'])
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Docker image management')

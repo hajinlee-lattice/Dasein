@@ -22,13 +22,19 @@ function build_docker() {
 	mkdir -p ${WORKSPACE}/webapps/${TGT_WAR}
 	cd ${WORKSPACE}/webapps/${TGT_WAR}
 	jar xvf ${DIR}/webapps/${SRC_WAR}.war
+	# replace log4j.properties
 	if [ "${SRC_WAR}" = "scoringapi" ]; then
 	    cp -f ${DIR}/log4j_scoringapi.properties WEB-INF/classes/log4j.properties
 	else
 	    cp -f ${DIR}/log4j.properties WEB-INF/classes/log4j.properties
 	fi
 	sed -i "s|{{APP}}|${SRC_WAR}|g" WEB-INF/classes/log4j.properties
+	# add context.xml
 	cp -f ${DIR}/context.xml META-INF/context.xml
+	# replace web.xml
+	line=$(grep -n 'description' WEB-INF/web.xml | cut -d ":" -f 1)
+    { head -n $(($line-1)) WEB-INF/web.xml; cat ${DIR}/tomcat_filters.xml; tail -n +$(($line+1)) WEB-INF/web.xml; } > WEB-INF/web2.xml
+    mv -f WEB-INF/web2.xml WEB-INF/web.xml
 	cd ..
 	if [ -f "${TGT_WAR}/META-INF/MANIFEST.MF" ]; then
 	    jar cmvf ${TGT_WAR}/META-INF/MANIFEST.MF ${TGT_WAR}.war -C ${TGT_WAR}/ .
