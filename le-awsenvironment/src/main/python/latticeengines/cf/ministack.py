@@ -197,6 +197,10 @@ def provision(environment, stackname, tag, instance_type='r3.large'):
         ],
         Tags=[
             {
+                'Key': 'le-env',
+                'Value': environment.replace('cluster', '')
+            },
+            {
                 'Key': 'le-product',
                 'Value': 'lpi'
             },
