@@ -107,6 +107,22 @@ angular
         })
         .state('home.playbook.wizard.one.two.three.four', {
             url: '/targets',
+            resolve: {
+                LoadDemoData: function(QueryStore) {
+                    return QueryStore.loadData();
+                },
+                DefaultSelectedObject: function() {
+                    return 'accounts';
+                },
+                SelectedSegment: function($q, PlaybookWizardStore, QueryStore) {
+                    var deferred = $q.defer();
+                    var segment = PlaybookWizardStore.getSavedSegment()
+                    QueryStore.setupStore(segment).then(function() {
+                        deferred.resolve(segment);
+                    });
+                    return deferred.promise;
+                },
+            },
             views: {
                 'wizard_content@home.playbook': {
                     controller: 'PlaybookWizardTargets',

@@ -2,7 +2,7 @@ angular.module('lp.playbook')
 .service('PlaybookWizardStore', function($q, PlaybookWizardService){
     var PlaybookWizardStore = this;
 
-    this.savedSegment = this.savedSegment || {};
+    this.savedSegment = this.savedSegment || null;
 
     this.getRatings = function() {
         var data = [],
@@ -21,6 +21,10 @@ angular.module('lp.playbook')
         if(segment) {
             this.savedSegment = segment;
         }
+    }
+
+    this.getSavedSegment = function() {
+        return this.savedSegment;
     }
 })
 .service('PlaybookWizardService', function($q, $http, $state) {

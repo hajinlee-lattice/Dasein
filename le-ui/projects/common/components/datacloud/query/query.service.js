@@ -246,7 +246,7 @@ angular.module('common.datacloud.query.service',[
     };
 })
 // stubbed for demo
-.service('QueryServiceStub', function($http, $timeout, BucketRestriction) {
+.service('QueryServiceStub', function($http, $timeout, $q, BucketRestriction) {
 
     var uiStates = [{"name":"1","bitmask":2048,"counts":{"accounts":38727,"contacts":202572},"nodes":{"Demo - Other - Title":true}},{"name":"2","bitmask":1024,"counts":{"accounts":32769,"contacts":61566},"nodes":{"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"3","bitmask":512,"counts":{"accounts":32769,"contacts":60573},"nodes":{"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"4","bitmask":256,"counts":{"accounts":8937,"contacts":15888},"nodes":{"Demo - Abrasives - Abrasives: Has Purchased":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"5","bitmask":128,"counts":{"accounts":1986,"contacts":3972},"nodes":{"Lattice_Ratings":true,"Demo - Abrasives - Abrasives: Has Purchased":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"6","bitmask":64,"counts":{"accounts":3972,"contacts":8937},"nodes":{"Demo - Abrasives - Abrasives: Last Qtr Trend (%)":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"7","bitmask":32,"counts":{"accounts":22839,"contacts":251229},"nodes":{"TechIndicator_AmazonEC2":true}},{"name":"8","bitmask":16,"counts":{"accounts":5958,"contacts":65538},"nodes":{"Demo - Other - Cloud Security Intent":true,"TechIndicator_AmazonEC2":true}},{"name":"9","bitmask":8,"counts":{"accounts":2979,"contacts":32769},"nodes":{"Demo - Other - Anonymous Engagement Rating":true,"Demo - Other - Cloud Security Intent":true,"TechIndicator_AmazonEC2":true}},{"name":"10","bitmask":4,"counts":{"accounts":27804,"contacts":216474},"nodes":{"Demo - Other - Has Opportunity":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"11","bitmask":2,"counts":{"accounts":20853,"contacts":140013},"nodes":{"Demo - Other - Known Contact Engagement":true,"Demo - Other - Has Opportunity":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}},{"name":"12","bitmask":1,"counts":{"accounts":2979,"contacts":16881},"nodes":{"TechIndicator_AmazonEC2":true,"Demo - Other - Known Contact Engagement":true,"Demo - Other - Has Opportunity":true,"Demo - Other - Is With Company":true,"Demo - Other - Department":true,"Demo - Other - Title":true}}];
     var defaultState = { "name": "0", "bitmask": 0, "nodes":{}, "counts":{"accounts":null, "contacts":null} };
@@ -275,7 +275,15 @@ angular.module('common.datacloud.query.service',[
         return this.uiState;
     };
 
+    var demoDataLoaded = false;
     this.loadData = function() {
+        if (demoDataLoaded) {
+            var deferred = $q.defer();
+            deferred.resolve();
+            return deferred.promise;
+        }
+        demoDataLoaded = true;
+
         var self = this;
         this.validResourceTypes.forEach(function(resourceType) {
             self.setResourceTypeCount(resourceType, true);

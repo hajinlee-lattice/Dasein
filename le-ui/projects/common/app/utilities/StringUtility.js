@@ -33,4 +33,9 @@ angular.module('mainApp.appCommon.utilities.StringUtility', [])
             return c.toUpperCase();
         });
     };
+})
+.filter('title', function(StringUtility) {
+    return function(input) {
+        return StringUtility.Title(input);
+    };
 });
