@@ -26,3 +26,4 @@ RUN update-alternatives --install /usr/bin/java java /usr/java/jdk1.8.0_101/bin/
     && alternatives --set javac /usr/java/latest/bin/javac \
     && alternatives --set jar /usr/java/latest/bin/jar \
     && alternatives --set jps /usr/java/latest/bin/jps
+ENV JAVA_HOME /usr/java/default

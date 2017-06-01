@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+echo "JAVA_HOME=${JAVA_HOME}"
+echo "CATALINA_HOME=${CATALINA_HOME}"
 
 if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
     echo "copying properties file for LE_ENVIRONMENT=${LE_ENVIRONMENT}"

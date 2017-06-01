@@ -1,7 +1,5 @@
 FROM latticeengines/tomcat
 
-RUN yum -y install nfs-utils nfs-utils-lib && yum clean all
-
 RUN rm -rf $CATALINA_HOME/webapps/ROOT \
     && rm -rf $CATALINA_HOME/webapps/examples \
     && rm -rf $CATALINA_HOME/webapps/docs \
@@ -21,7 +19,7 @@ COPY META-INF/context.xml /META-INF/context.xml
 COPY conf/env/devcluster_aws/latticeengines.properties /tmp/conf/env/devcluster/latticeengines.properties
 COPY conf/env/qacluster_aws/latticeengines.properties /tmp/conf/env/qacluster/latticeengines.properties
 COPY conf/env/prodcluster_aws/latticeengines.properties /tmp/conf/env/prodcluster/latticeengines.properties
-COPY catalina.sh /opt/${$CATALINA_HOME}/bin/catalina.sh
+COPY catalina.sh $CATALINA_HOME/bin/catalina.sh
 COPY start.sh /start.sh
 
 EXPOSE 8080 8443 1099

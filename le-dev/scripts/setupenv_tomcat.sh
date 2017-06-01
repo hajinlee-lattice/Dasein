@@ -5,17 +5,22 @@ BOOTSTRAP_MODE=$1
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping tomcat ..."
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
+    TOMCAT_MAJOR=8
+    TOMCAT_VERSION=8.5.15
 
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
     sudo chown -R $USER ${CATALINA_HOME} || true
 
-    if [ ! -f "${ARTIFACT_DIR}/apache-tomcat-8.5.11.tar.gz" ]; then
-        wget http://apache.claz.org/tomcat/tomcat-8/v8.5.11/bin/apache-tomcat-8.5.11.tar.gz -O $ARTIFACT_DIR/apache-tomcat-8.5.11.tar.gz
+    # https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
+    TOMCAT_TGZ_URL=https://www.apache.org/dyn/closer.cgi?action=download&filename=tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz
+
+    if [ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]; then
+        wget TOMCAT_TGZ_URL -O $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}.tar.gz
     fi
-    rm -rf $ARTIFACT_DIR/apache-tomcat-8.5.11 || true
-    tar xzf $ARTIFACT_DIR/apache-tomcat-8.5.11.tar.gz -C $ARTIFACT_DIR
-    cp -rf $ARTIFACT_DIR/apache-tomcat-8.5.11/* $CATALINA_HOME
+    rm -rf $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION} || true
+    tar xzf $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C $ARTIFACT_DIR
+    cp -rf $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}/* $CATALINA_HOME
     rm -rf $CATALINA_HOME/webapps/examples
     rm -rf $CATALINA_HOME/webapps/host-manager
     rm -rf $CATALINA_HOME/webapps/docs
