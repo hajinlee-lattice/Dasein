@@ -16,21 +16,21 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     TOMCAT_TGZ_URL="https://www.apache.org/dyn/closer.cgi?action=download&filename=tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
 
     if [ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]; then
-        wget "${TOMCAT_TGZ_URL}" -O "$ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
+        wget "${TOMCAT_TGZ_URL}" -O "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
     fi
-    rm -rf $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION} || true
-    tar xzf $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C $ARTIFACT_DIR
-    cp -rf $ARTIFACT_DIR/apache-tomcat-${TOMCAT_VERSION}/* $CATALINA_HOME
-    rm -rf $CATALINA_HOME/webapps/examples
-    rm -rf $CATALINA_HOME/webapps/host-manager
-    rm -rf $CATALINA_HOME/webapps/docs
-    rm -rf $CATALINA_HOME/webapps/ROOT
+    rm -rf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION} || true
+    tar xzf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C ${ARTIFACT_DIR}
+    cp -rf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}/* ${CATALINA_HOME}
+    rm -rf ${CATALINA_HOME}/webapps/examples
+    rm -rf ${CATALINA_HOME}/webapps/host-manager
+    rm -rf ${CATALINA_HOME}/webapps/docs
+    rm -rf ${CATALINA_HOME}/webapps/ROOT
 fi
 
-cp $WSHOME/le-dev/tomcat/server.xml $CATALINA_HOME/conf/server.xml
-cp $WSHOME/le-dev/tomcat/catalina.sh $CATALINA_HOME/bin/catalina.sh
+cp ${WSHOME}/le-dev/tomcat/server.xml ${CATALINA_HOME}/conf/server.xml
+cp ${WSHOME}/le-dev/tomcat/catalina.sh ${CATALINA_HOME}/bin/catalina.sh
 
-mkdir -p $CATALINA_HOME/webapps/ms || true
+mkdir -p ${CATALINA_HOME}/webapps/ms || true
 
 sudo mkdir -p /var/log/ledp || true
 sudo chmod a+w /var/log/ledp
