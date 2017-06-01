@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-service rngd restart
-service snmpd restart
-service ntpd restart
-service sshd restart
-
-export CATALINA_HOME=/opt/apache-tomcat-8.5.8
+export CATALINA_HOME=/opt/apache-tomcat-8.5.15
 export JAVA_HOME=/usr/java/default
 
 if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
