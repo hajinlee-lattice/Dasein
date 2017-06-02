@@ -1014,7 +1014,10 @@ angular.module('common.datacloud.explorer', [
             category, '\t',
             subcategory, '\t',
             items, '\t',
-            vm.enrichmentsFilter()
+            {
+                'vm.enrichmentsFilter': vm.enrichmentsFilter(), 
+                'vm.metadata.toggle': vm.metadata.toggle
+            }
         );
 
         return items;
