@@ -40,7 +40,7 @@
             <ul ng-if="vm.notes.length != 0">
                 <li ng-repeat="note in vm.notes | orderBy: '-CreationTimestamp'">
 
-                    <h4 ng-if="note.ParentModelId != null">{{vm.ResourceUtility.getString('NOTES_INHERITED_FROM_MODEL')}} {{note.inheritedFrom}}</h4>
+                    <h4 ng-if="note.ParentModelId != null">{{vm.ResourceUtility.getString('NOTES_INHERITED_FROM_MODEL')}} {{vm.referModelName}}</h4>
 
                     <div class="note-header">
                         <h3><strong>{{note.Origin}}</strong> by <span>{{note.createdBy}}</span> on <span>{{note.CreationTimestamp | date:'MMMM dd, yyyy'}} at {{note.CreationTimestamp | date:'hh:mm'}}</span></h3>

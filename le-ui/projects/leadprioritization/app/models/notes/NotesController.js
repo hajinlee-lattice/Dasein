@@ -1,9 +1,10 @@
 angular.module('lp.models.notes', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.models.notes.DeleteNoteModal'
+    'mainApp.models.notes.DeleteNoteModal',
+    'mainApp.models.services.ModelService'
 ])
-.controller('NotesController', function ($scope, $state, $stateParams, $timeout, BrowserStorageUtility, ResourceUtility, Notes, NotesService, DeleteNoteModal) {
+.controller('NotesController', function ($scope, $state, $stateParams, $timeout, BrowserStorageUtility, ResourceUtility, Notes, NotesService, DeleteNoteModal, Model, ModelService) {
 
     var vm = this,
         ClientSession = BrowserStorageUtility.getClientSession();
@@ -13,13 +14,15 @@ angular.module('lp.models.notes', [
         userName: ClientSession.DisplayName,
         ResourceUtility: ResourceUtility,
         notes: Notes.data,
+        referModelName: Model.ModelDetails.Name.slice(0, -7),
         editingNote: false,
         showAddNoteError: false,
         saveInProgress: false
     });
 
-    vm.init = function() {
 
+    vm.init = function($q) {
+        
     }
     vm.init();
 
