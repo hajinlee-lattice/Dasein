@@ -2,6 +2,7 @@ package com.latticeengines.dante.service.impl;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,7 @@ import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
 @Component("talkingPointService")
 public class TalkingPointServiceImpl implements TalkingPointService {
+    private static final Logger log = Logger.getLogger(TalkingPointServiceImpl.class);
 
     @Autowired
     private TalkingPointEntityMgr talkingPointEntityMgr;

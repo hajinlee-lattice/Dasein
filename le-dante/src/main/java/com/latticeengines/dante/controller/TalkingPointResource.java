@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +31,8 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/talkingpoints")
 public class TalkingPointResource implements DanteTalkingPointInterface {
 
+    private static final Logger log = Logger.getLogger(TalkingPointResource.class);
+
     @Autowired
     TalkingPointService talkingPointService;
 
@@ -41,6 +44,7 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     public ResponseDocument<?> createOrUpdate(@RequestBody DanteTalkingPoint talkingPoint) {
         try {
             talkingPointService.createOrUpdate(talkingPoint);
+            log.info("Created a new talking point");
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
