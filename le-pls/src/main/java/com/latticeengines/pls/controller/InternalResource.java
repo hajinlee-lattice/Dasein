@@ -371,7 +371,7 @@ public class InternalResource extends InternalResourceBase {
     public void setModelSummaryDownloadFlag(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
-
+        log.info(String.format("Set model summary download flag for tenant %s", tenantId));
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenantId);
     }
 
