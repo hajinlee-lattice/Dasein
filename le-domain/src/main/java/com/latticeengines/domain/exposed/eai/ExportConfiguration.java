@@ -74,12 +74,12 @@ public class ExportConfiguration extends EaiJobConfiguration {
         this.table = table;
     }
 
-    @JsonProperty("UseDisplayName")
+    @JsonProperty("use_display_name")
     public boolean getUsingDisplayName() {
         return exportUsingDisplayName;
     }
 
-    @JsonProperty("UseDisplayName")
+    @JsonProperty("use_display_name")
     public void setUsingDisplayName(boolean exportUsingDisplayName) {
         this.exportUsingDisplayName = exportUsingDisplayName;
     }

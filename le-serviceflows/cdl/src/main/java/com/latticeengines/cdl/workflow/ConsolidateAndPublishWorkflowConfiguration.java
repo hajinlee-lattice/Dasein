@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow;
 
+import com.latticeengines.cdl.workflow.steps.StartExecutionConfiguration;
+import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfiguration {
@@ -10,19 +12,21 @@ public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfigur
     public static class Builder {
 
         public ConsolidateAndPublishWorkflowConfiguration configuration = new ConsolidateAndPublishWorkflowConfiguration();
+        public StartExecutionConfiguration startExecutionConfiguration = new StartExecutionConfiguration();
         public RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
-        public Builder initialLoad(boolean initialLoad) {
-            redshiftPublishWorkflowConfigurationBuilder.initialLoad(initialLoad);
+        public Builder datafeedName(String datafeedName) {
+            startExecutionConfiguration.setDataFeedName(datafeedName);
             return this;
         }
 
-        public Builder cleanupS3(boolean cleanupS3) {
-            redshiftPublishWorkflowConfigurationBuilder.initialLoad(cleanupS3);
+        public Builder hdfsToRedshiftConfiguration(HdfsToRedshiftConfiguration hdfsToRedshiftConfiguration) {
+            redshiftPublishWorkflowConfigurationBuilder.hdfsToRedshiftConfiguration(hdfsToRedshiftConfiguration);
             return this;
         }
 
         public ConsolidateAndPublishWorkflowConfiguration build() {
+            configuration.add(startExecutionConfiguration);
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             return configuration;
         }

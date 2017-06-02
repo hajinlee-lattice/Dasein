@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow;
 
+import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.ConsolidateData;
@@ -20,6 +22,11 @@ public class ConsolidateAndPublishWorkflow extends AbstractWorkflow<ConsolidateA
 
     @Autowired
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
+
+    @Bean
+    public Job consolidateAndPublishWorkflowJob() throws Exception {
+        return buildWorkflow();
+    }
 
     @Override
     public Workflow defineWorkflow() {
