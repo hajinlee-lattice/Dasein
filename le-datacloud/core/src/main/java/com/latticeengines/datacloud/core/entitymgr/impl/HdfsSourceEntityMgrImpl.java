@@ -78,6 +78,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         int retries = 0;
         while (retries++ < 3) {
             try {
+                if (!HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
+                    return null;
+                }
                 String version = HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
                 version = version.replace("\n", "");
                 return StringUtils.trim(version);
@@ -394,6 +397,11 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public boolean checkSourceExist(Source source) {
+        return checkSourceExist(source.getSourceName());
+    }
+
+    @Override
+    public boolean checkSourceExist(String source) {
         boolean sourceExists = false;
         String sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
         try {
@@ -401,10 +409,11 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 sourceExists = true;
             }
         } catch (Exception e) {
-            log.info("Failed to check " + source.getSourceName() + " in HDFS");
+            log.info("Failed to check " + source + " in HDFS");
         }
         return sourceExists;
     }
+
 
     @Override
     public void initiateSource(Source source) {

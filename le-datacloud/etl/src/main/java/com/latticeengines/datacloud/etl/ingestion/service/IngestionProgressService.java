@@ -11,8 +11,7 @@ import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 public interface IngestionProgressService {
     List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields);
 
-    IngestionProgress createDraftProgress(Ingestion ingestion, String triggeredBy,
-                                                      String file);
+    IngestionProgress createDraftProgress(Ingestion ingestion, String triggeredBy, String file, String version);
 
     void saveProgresses(List<IngestionProgress> progresses);
 

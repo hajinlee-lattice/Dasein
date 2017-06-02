@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,27 +59,18 @@ public class IngestionResource extends InternalResourceBase implements Ingestion
 
     @RequestMapping(value = "/internal/{ingestionName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Forcefully start an ingestion to download designated file. "
-            + "If an ingestion for same file source is going on, skip the operation")
-    public IngestionProgress ingestInternal(@PathVariable String ingestionName,
+    @ApiOperation(value = "Forcefully start an ingestion. "
+            + "If an ingestion for same file/data is going on, skip the operation. "
+            + "Only support for IngestionType: SFTP, SQL_TO_SOURCE")
+    public IngestionProgress ingest(@PathVariable String ingestionName,
             @RequestBody IngestionRequest ingestionRequest,
             @RequestParam(value = "HdfsPod", required = false, defaultValue = "") String hdfsPod,
             HttpServletRequest request) {
         checkHeader(request);
         try {
-            checkIngestionRequest(ingestionName, ingestionRequest);
-            return ingestionService.ingestInternal(ingestionName, ingestionRequest, hdfsPod);
+            return ingestionService.ingest(ingestionName, ingestionRequest, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25017, e);
-        }
-    }
-
-    private void checkIngestionRequest(String ingestionName, IngestionRequest ingestionRequest) {
-        if (!"OrbIntelligence".equals(ingestionName) && StringUtils.isEmpty(ingestionRequest.getFileName())) {
-            throw new IllegalArgumentException("Please provide file name in ingestion request");
-        }
-        if (StringUtils.isEmpty(ingestionRequest.getSubmitter())) {
-            throw new IllegalArgumentException("Please provide submitter in ingestion request");
         }
     }
 }

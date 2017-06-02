@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IngestionRequest {
     private String submitter;
-    private String fileName;
+    private String fileName; // Only for Ingestion type: SFTP
+    private String sourceVersion; // Only for Ingestion type: SQL_TO_SOURCE
 
     @JsonProperty("Submitter")
     public String getSubmitter() {
@@ -24,6 +25,16 @@ public class IngestionRequest {
     @JsonProperty("FileName")
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    @JsonProperty("SourceVersion")
+    public String getSourceVersion() {
+        return sourceVersion;
+    }
+
+    @JsonProperty("SourceVersion")
+    public void setSourceVersion(String sourceVersion) {
+        this.sourceVersion = sourceVersion;
     }
 
 }

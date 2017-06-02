@@ -3,12 +3,13 @@ package com.latticeengines.datacloud.core.entitymgr;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.avro.Schema;
+
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
-import org.apache.avro.Schema;
 
 public interface HdfsSourceEntityMgr {
 
@@ -49,6 +50,8 @@ public interface HdfsSourceEntityMgr {
     void deleteSource(Source source);
 
     boolean checkSourceExist(Source source);
+
+    boolean checkSourceExist(String sourceName);
 
     boolean checkSourceExist(Source source, String version);
 

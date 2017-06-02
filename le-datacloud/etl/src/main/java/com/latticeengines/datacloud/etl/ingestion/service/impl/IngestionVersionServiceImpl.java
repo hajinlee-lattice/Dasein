@@ -27,11 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
+import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
+import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress.Engine;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -49,10 +53,16 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
     private HdfsPathBuilder hdfsPathBuilder;
 
     @Autowired
-    IngestionEntityMgr ingestionEntityMgr;
+    private IngestionEntityMgr ingestionEntityMgr;
 
     @Autowired
     private IngestionProgressEntityMgr ingestionProgressEntityMgr;
+
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    private SourceService sourceService;
 
     @Override
     public List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion) {
@@ -157,51 +167,84 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
 
     @Override
     @SuppressWarnings("static-access")
-    public void updateCurrentVersion(Ingestion ingestion, String version) {
+    public boolean isCompleteVersion(Ingestion ingestion, String version) {
+        com.latticeengines.domain.exposed.camille.Path versionPath;
+        switch (ingestion.getIngestionType()) {
+        case SQL_TO_SOURCE:
+            SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
+                    .getProviderConfiguration();
+            Source source = sourceService.findBySourceName(sqlToSourceConfig.getSource());
+            versionPath = hdfsPathBuilder.constructTransformationSourceDir(source, version);
+            break;
+        default:
+            versionPath = hdfsPathBuilder.constructIngestionDir(ingestion.getIngestionName(), version);
+            break;
+        }
+        Path success = new Path(versionPath.toString(), hdfsPathBuilder.SUCCESS_FILE);
         try {
-            String currentVersion = getCurrentVersion(ingestion);
-            if (currentVersion.compareTo(version) < 0) {
-                com.latticeengines.domain.exposed.camille.Path versionPath = hdfsPathBuilder
-                        .constructIngestionDir(ingestion.getIngestionName(), version);
-                Path success = new Path(versionPath.toString(), hdfsPathBuilder.SUCCESS_FILE);
-                if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
-                    setCurrentVersion(ingestion, version);
-                }
-            }
+            return HdfsUtils.fileExists(yarnConfiguration, success.toString());
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Could not check/update current version of ingestion %s",
-                    ingestion.getIngestionName()), e);
+            throw new RuntimeException(String.format("Failed to check whether ingestion %s is complete for version %s",
+                    ingestion.getIngestionName(), version));
         }
     }
 
-    private String getCurrentVersion(Ingestion ingestion) {
-        String versionFile = hdfsPathBuilder.constructVersionFile(ingestion).toString();
-        String currentVersion = ""; // If no version file exists, return empty string (not null, it needs to be comparable)
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
-                currentVersion = HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
-                currentVersion = StringUtils.trim(currentVersion.replace("\n", ""));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    String.format("Could not get current version of ingestion %s", ingestion.getIngestionName()), e);
+    @Override
+    public void updateCurrentVersion(Ingestion ingestion, String version) {
+        String currentVersion = getCurrentVersion(ingestion);
+        if (currentVersion == null || currentVersion.compareTo(version) < 0) {
+            setCurrentVersion(ingestion, version);
         }
-        return currentVersion;
+    }
+
+    @Override
+    public String getCurrentVersion(Ingestion ingestion) {
+        switch (ingestion.getIngestionType()) {
+        case SQL_TO_SOURCE:
+            SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
+                    .getProviderConfiguration();
+            return hdfsSourceEntityMgr.getCurrentVersion(sqlToSourceConfig.getSource());
+        default:
+            String versionFile = hdfsPathBuilder.constructVersionFile(ingestion).toString();
+            String currentVersion = null;
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
+                    currentVersion = HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
+                    currentVersion = StringUtils.trim(currentVersion.replace("\n", ""));
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        String.format("Could not get current version of ingestion %s", ingestion.getIngestionName()),
+                        e);
+            }
+            return currentVersion;
+        }
     }
 
     private synchronized void setCurrentVersion(Ingestion ingestion, String version) {
-        String versionFile = hdfsPathBuilder.constructVersionFile(ingestion).toString();
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
-                HdfsUtils.rmdir(yarnConfiguration, versionFile);
+        switch (ingestion.getIngestionType()) {
+        case SQL_TO_SOURCE:
+            SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
+                    .getProviderConfiguration();
+            hdfsSourceEntityMgr.setCurrentVersion(sqlToSourceConfig.getSource(), version);
+            break;
+        default:
+            String versionFile = hdfsPathBuilder.constructVersionFile(ingestion).toString();
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, versionFile)) {
+                    HdfsUtils.rmdir(yarnConfiguration, versionFile);
+                }
+                HdfsUtils.writeToFile(yarnConfiguration, versionFile, version);
+                log.info(String.format("Updated current version for ingestion %s: %s", ingestion.getIngestionName(),
+                        version));
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        String.format("Could not set current version of ingestion %s", ingestion.getIngestionName()),
+                        e);
             }
-            HdfsUtils.writeToFile(yarnConfiguration, versionFile, version);
-            log.info(String.format("Updated current version for ingestion %s: %s", ingestion.getIngestionName(),
-                    version));
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    String.format("Could not set current version of ingestion %s", ingestion.getIngestionName()), e);
+            break;
         }
+
     }
 
     public EngineProgress status(String ingestionName, String version) {
@@ -218,6 +261,7 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
         }
         Set<String> allJobs = new HashSet<>();
         Set<String> finishedJobs = new HashSet<>();
+        Set<String> runningJobs = new HashSet<>();
         for (IngestionProgress progress : progresses) {
             if (!allJobs.contains(progress.getDestination())) {
                 allJobs.add(progress.getDestination());
@@ -225,11 +269,20 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
             if (progress.getStatus() == ProgressStatus.FINISHED && !finishedJobs.contains(progress.getDestination())) {
                 finishedJobs.add(progress.getDestination());
             }
+            if ((progress.getStatus() == ProgressStatus.NEW || progress.getStatus() == ProgressStatus.PROCESSING
+                    || (progress.getStatus() == ProgressStatus.FAILED
+                            && progress.getRetries() < ingestion.getNewJobMaxRetry()))
+                    && !runningJobs.contains(progress.getDestination())) {
+                runningJobs.add(progress.getDestination());
+            }
         }
         if (allJobs.size() == finishedJobs.size()) {
             return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.FINISHED, 1.0F, null);
-        } else {
+        } else if (allJobs.size() == finishedJobs.size() + runningJobs.size()) {
             return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.PROCESSING,
+                    (float) finishedJobs.size() / allJobs.size(), null);
+        } else {
+            return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.FAILED,
                     (float) finishedJobs.size() / allJobs.size(), null);
         }
     }

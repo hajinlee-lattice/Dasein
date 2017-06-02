@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,16 +34,20 @@ import org.springframework.util.CollectionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
+import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
+import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
@@ -78,12 +84,19 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    private SourceService sourceService;
+
     private static final long WORKFLOW_WAIT_TIME_IN_MILLIS = TimeUnit.HOURS.toMillis(6);
     private static final long MAX_MILLIS_TO_WAIT = TimeUnit.HOURS.toMillis(5);
     private static final Integer WORKFLOW_WAIT_TIME_IN_SECOND = (int) TimeUnit.HOURS.toSeconds(6);
 
     private static final String sqoopPrefix = "part-m-";
     private static final String UNCOMPRESSED = "Uncompressed";
+    private static final String SQOOP_OPTION_WHERE = "--where";
 
     @Override
     public void execute() {
@@ -101,14 +114,18 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             case SFTP:
                 ingestFromSftp();
                 break;
-            case SQL_TO_CSVGZ:
-                ingestBySqoop();
-                break;
             case API:
                 ingestByApi();
                 break;
-            default:
+            case SQL_TO_CSVGZ:
+                ingestBySqoopToCSVGZ();
                 break;
+            case SQL_TO_SOURCE:
+                ingestBySqoopToSource();
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
             }
 
             log.info("Exiting IngestionStep execute()");
@@ -292,50 +309,116 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         return result;
     }
 
-    private void ingestBySqoop() throws Exception {
+    private void ingestBySqoopToSource() throws Exception {
+        SqlToSourceConfiguration config = (SqlToSourceConfiguration) progress.getIngestion().getProviderConfiguration();
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        SqlToTextConfiguration sqlToTextConfig = (SqlToTextConfiguration) progress.getIngestion()
+        credsBuilder.host(config.getDbHost()).port(config.getDbPort()).db(config.getDb()).user(config.getDbUser())
+                .encryptedPassword(config.getDbPwdEncrypted());
+        Path hdfsDir = new Path(progress.getDestination());
+        if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir.toString())) {
+            HdfsUtils.rmdir(yarnConfiguration, hdfsDir.toString());
+        }
+
+        SqoopImporter.Builder builder = new SqoopImporter.Builder().setCustomer(progress.getTriggeredBy())
+                .setNumMappers(config.getMappers()).setSplitColumn(config.getTimestampColumn())
+                .setTable(config.getDbTable())
+                .setTargetDir(progress.getDestination())
+                .setDbCreds(new DbCreds(credsBuilder)).setSync(false);
+        StringBuilder whereClause = new StringBuilder();
+        switch (config.getCollectCriteria()) {
+        case NEW_DATA:
+            whereClause.append("\"");
+            String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(config.getSource());
+            Date startDate = null;
+            if (currentVersion != null) {
+                startDate = HdfsPathBuilder.dateFormat.parse(currentVersion);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                whereClause.append(
+                        String.format("%s > '%s' AND ", config.getTimestampColumn(),
+                        dateFormat.format(startDate)));
+            }
+            Date endDate = HdfsPathBuilder.dateFormat.parse(progress.getVersion());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            whereClause.append(String.format("%s <= '%s'", config.getTimestampColumn(), dateFormat.format(endDate)));
+            whereClause.append("\"");
+            log.info(String.format("Selected date range (%s, %s]", startDate, endDate));
+            break;
+        default:
+            break;
+        }
+        if (whereClause.length() > 0) {
+            builder = builder.addExtraOption(SQOOP_OPTION_WHERE).addExtraOption(whereClause.toString());
+        }
+        SqoopImporter importer = builder.build();
+
+        ApplicationId appId = ConverterUtils
+                .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
+        FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId,
+                WORKFLOW_WAIT_TIME_IN_SECOND);
+        if (finalStatus == FinalApplicationStatus.SUCCEEDED
+                && ingestionVersionService.isCompleteVersion(progress.getIngestion(), progress.getVersion())) {
+            Source source = sourceService.findBySourceName(config.getSource());
+            log.info(String.format("Counting total records in source %s for version %s...", source.getSourceName(),
+                    progress.getVersion()));
+            Long count = hdfsSourceEntityMgr.count(source, progress.getVersion());
+            log.info(String.format("Total records in source %s for version %s: %d", source.getSourceName(),
+                    progress.getVersion(), count));
+            ingestionVersionService.updateCurrentVersion(progress.getIngestion(), progress.getVersion());
+            progress = ingestionProgressService.updateProgress(progress).size(count).status(ProgressStatus.FINISHED)
+                    .commit(true);
+            log.info("Ingestion finished. Progress: " + progress.toString());
+        } else {
+            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
+                    .errorMessage("Sqoop upload failed: " + importer.toString()).commit(true);
+            log.error("Ingestion failed. Progress: " + progress.toString() + " SqoopImporter: " + importer.toString());
+        }
+
+
+    }
+
+    private void ingestBySqoopToCSVGZ() throws Exception {
+        SqlToTextConfiguration config = (SqlToTextConfiguration) progress.getIngestion()
                 .getProviderConfiguration();
-        credsBuilder.jdbcUrl(sqlToTextConfig.getDbUrl()).driverClass(sqlToTextConfig.getDbDriver())
-                .user(sqlToTextConfig.getDbUserName())
-                .encryptedPassword(sqlToTextConfig.getDbPasswordEncrypted());
+        DbCreds.Builder credsBuilder = new DbCreds.Builder();
+        credsBuilder.host(config.getDbHost()).port(config.getDbPort()).db(config.getDb()).user(config.getDbUser())
+                .encryptedPassword(config.getDbPwdEncrypted());
         Path hdfsDir = new Path(progress.getDestination()).getParent();
         if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir.toString())) {
             HdfsUtils.rmdir(yarnConfiguration, hdfsDir.toString());
         }
         SqoopImporter importer = new SqoopImporter.Builder() //
                 .setCustomer(progress.getTriggeredBy()) //
-                .setTable(sqlToTextConfig.getDbTable()) //
+                .setTable(config.getDbTable()) //
                 .setTargetDir(hdfsDir.toString()) //
                 .setDbCreds(new DbCreds(credsBuilder)) //
-                .setMode(sqlToTextConfig.getSqoopMode()) //
-                .setQuery(sqlToTextConfig.getDbQuery()) //
-                .setNumMappers(sqlToTextConfig.getMappers()) //
-                .setSplitColumn(sqlToTextConfig.getSplitColumn()) //
+                .setMode(config.getSqoopMode()) //
+                .setQuery(config.getDbQuery()) //
+                .setNumMappers(config.getMappers()) //
+                .setSplitColumn(config.getSplitColumn()) //
                 .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
                 .build();
         List<String> otherOptions = new ArrayList<>(Arrays.asList("--relaxed-isolation", "--as-textfile"));
-        if (!StringUtil.isEmpty(sqlToTextConfig.getNullString())) {
+        if (!StringUtil.isEmpty(config.getNullString())) {
             otherOptions.add("--null-string");
-            otherOptions.add(sqlToTextConfig.getNullString());
+            otherOptions.add(config.getNullString());
             otherOptions.add("--null-non-string");
-            otherOptions.add(sqlToTextConfig.getNullString());
+            otherOptions.add(config.getNullString());
         }
-        if (!StringUtil.isEmpty(sqlToTextConfig.getEnclosedBy())) {
+        if (!StringUtil.isEmpty(config.getEnclosedBy())) {
             otherOptions.add("--enclosed-by");
-            otherOptions.add(sqlToTextConfig.getEnclosedBy());
+            otherOptions.add(config.getEnclosedBy());
         }
-        if (!StringUtil.isEmpty(sqlToTextConfig.getOptionalEnclosedBy())) {
+        if (!StringUtil.isEmpty(config.getOptionalEnclosedBy())) {
             otherOptions.add("--optionally-enclosed-by");
-            otherOptions.add(sqlToTextConfig.getOptionalEnclosedBy());
+            otherOptions.add(config.getOptionalEnclosedBy());
         }
-        if (!StringUtil.isEmpty(sqlToTextConfig.getEscapedBy())) {
+        if (!StringUtil.isEmpty(config.getEscapedBy())) {
             otherOptions.add("--escaped-by");
-            otherOptions.add(sqlToTextConfig.getEscapedBy());
+            otherOptions.add(config.getEscapedBy());
         }
-        if (!StringUtil.isEmpty(sqlToTextConfig.getFieldTerminatedBy())) {
+        if (!StringUtil.isEmpty(config.getFieldTerminatedBy())) {
             otherOptions.add("--fields-terminated-by");
-            otherOptions.add(sqlToTextConfig.getFieldTerminatedBy());
+            otherOptions.add(config.getFieldTerminatedBy());
         }
         importer.setOtherOptions(otherOptions);
         ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
@@ -344,7 +427,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         if (finalStatus != FinalApplicationStatus.SUCCEEDED) {
             throw new RuntimeException("Application final status is not " + FinalApplicationStatus.SUCCEEDED.toString());
         }
-        for (int i = 0; i < sqlToTextConfig.getMappers(); i++) {
+        for (int i = 0; i < config.getMappers(); i++) {
             String sqoopPostfix = String.format("%05d", i);
             Path file = new Path(hdfsDir, sqoopPrefix + sqoopPostfix);
             if (!waitForFileToBeDownloaded(file.toString())) {
@@ -352,7 +435,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             }
         }
         renameFiles();
-        if (sqlToTextConfig.isCompressed()) {
+        if (config.isCompressed()) {
             compressGzipFiles();
         }
         progress = ingestionProgressService.updateProgress(progress)
@@ -407,7 +490,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     private void failByException(Exception e) {
         progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
                 .errorMessage(e.getMessage()).commit(true);
-        log.error("Ingestion failed: " + e.getMessage() + ". Progress: " + progress.toString());
+        log.error("Ingestion failed for progress: " + progress.toString(), e);
     }
 
     private void initializeYarnClient() {

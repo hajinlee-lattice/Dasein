@@ -20,13 +20,14 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
-import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionCriteria;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
@@ -50,62 +51,88 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     @Autowired
     private IngestionVersionService ingestionVersionService;
 
+    private static final String DNB_INGESTION = "DnBCacheSeedTest";
     private static final String DNB_VERSION = "2016-08-01_00-00-00_UTC";
+    private static final String DNB_FILE = "LE_SEED_OUTPUT_2016_08_003.OUT.gz";
+    private static final String ALEXA_INGESTION = "AlexaTest";
+    private static final String ALEXA_VERSION_OLD = "2015-10-01_00-00-00_UTC";
+    private static final String ALEXA_VERSION_NEW = "2015-11-01_00-00-00_UTC";
 
     private int timeout = 1800000;
 
-    // IngestionName, Config, SchedularEnabled, NewJobRetryInterval,
-    // NewJobMaxRetry, IngestionType, IngestionCriteria,
-    // ExpectedCreatedProgressNum
-    @DataProvider(name = "ingestions")
+    // IngestionName, Config, IngestionType
     private static Object[][] getIngestions() {
         return new Object[][] {
- { "DnBCacheSeedTest",
-                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"UncompressAfterIngestion\":0,\"SftpHost\":\"10.41.1.31\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
-                IngestionType.SFTP, IngestionCriteria.ANY_MISSING_FILE, 3 }, //
+                { DNB_INGESTION,
+                        "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"UncompressAfterIngestion\":0,\"SftpHost\":\"10.41.1.31\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                        IngestionType.SFTP }, //
+                { ALEXA_INGESTION,
+                        "{\"ClassName\":\"SqlToSourceConfiguration\",\"DbHost\":\"10.41.1.238\\\\\\\\SQL2012\",\"DbPort\":1437,\"Db\":\"CollectionDB_Dev\",\"DbUser\":\"DLTransfer\",\"DbPwdEncrypted\":\"Q1nh4HIYGkg4OnQIEbEuiw==\",\"DbTable\":\"Alexa\", \"Source\":\"Alexa\",\"TimestampColumn\":\"Creation_Date\",\"CollectCriteria\":\"NEW_DATA\",\"Mappers\":4}",
+                        IngestionType.SQL_TO_SOURCE }, //
         };
     }
+
+    // IngestionName, ExpectedCreatedProgressNum, Version
+    @DataProvider(name = "ExpectedResult")
+    private static Object[][] getExpectedResult() {
+        return new Object[][] { //
+                { DNB_INGESTION, 3, DNB_VERSION, null }, //
+                { ALEXA_INGESTION, 1, ALEXA_VERSION_NEW, 195 }, //
+        };
+    };
 
     private List<Ingestion> ingestions = new ArrayList<>();
 
     @BeforeClass(groups = "deployment")
     public void init() throws Exception {
+        prepareCleanPod(POD_ID);
         for (Object[] data : getIngestions()) {
             Ingestion ingestion = new Ingestion();
             ingestion.setIngestionName((String) data[0]);
             ingestion.setConfig((String) data[1]);
             ingestion.setSchedularEnabled(Boolean.TRUE);
             ingestion.setNewJobRetryInterval(10000L);
-            ingestion.setNewJobMaxRetry(3);
+            ingestion.setNewJobMaxRetry(1);
             ingestion.setIngestionType((IngestionType) data[2]);
-            ingestion.setIngestionCriteria((IngestionCriteria) data[3]);
             ingestionEntityMgr.save(ingestion);
             ingestions.add(ingestionEntityMgr.getIngestionByName(ingestion.getIngestionName()));
         }
+        Ingestion alexaIngestion = ingestionEntityMgr.getIngestionByName(ALEXA_INGESTION);
+        ingestionVersionService.updateCurrentVersion(alexaIngestion, ALEXA_VERSION_OLD);
     }
 
     @Test(groups = "deployment", priority = 1)
     public void testCreatePreprocessProgresses() {
-        prepareCleanPod(POD_ID);
+        IngestionRequest request = new IngestionRequest();
+        request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
+        request.setSourceVersion(ALEXA_VERSION_NEW);
+        IngestionProgress progress = ingestionProxy.ingestInternal(ALEXA_INGESTION, request, POD_ID);
+        Assert.assertNotNull(progress);
+        request = new IngestionRequest();
+        request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
+        request.setFileName(DNB_FILE);
+        progress = ingestionProxy.ingestInternal(DNB_INGESTION, request, POD_ID);
+        Assert.assertNotNull(progress);
         List<IngestionProgress> progresses = ingestionProxy.scan(POD_ID);
         Assert.assertTrue(CollectionUtils.isNotEmpty(progresses));
     }
 
-    @Test(groups = "deployment", priority = 2, dataProvider = "ingestions")
-    public void testIngest(String name, String config, IngestionType type, IngestionCriteria criteria,
-            int expectedProgresses) {
+    @Test(groups = "deployment", priority = 2, dataProvider = "ExpectedResult")
+    public void testIngest(String name, int expectedProgresses, String version, Integer size) {
         Ingestion ingestion = ingestionEntityMgr.getIngestionByName(name);
         Map<String, Object> fields = new HashMap<>();
         fields.put("IngestionId", ingestion.getPid());
+        fields.put("Version", version);
         List<IngestionProgress> progresses = ingestionProgressEntityMgr.getProgressesByField(fields, null);
         Assert.assertEquals(progresses.size(), expectedProgresses);
         Long startTime = System.currentTimeMillis();
-        EngineProgress engineProgress = ingestionVersionService.status(name, DNB_VERSION);
+        EngineProgress engineProgress = ingestionVersionService.status(name, version);
         log.info(engineProgress);
         while (engineProgress.getStatus() != ProgressStatus.FINISHED
+                && engineProgress.getStatus() != ProgressStatus.FAILED
                 && System.currentTimeMillis() - startTime <= timeout) {
             ingestionProxy.scan(POD_ID);
-            engineProgress = ingestionVersionService.status(name, DNB_VERSION);
+            engineProgress = ingestionVersionService.status(name, version);
             log.info(engineProgress);
             try {
                 Thread.sleep(60000L);
@@ -120,6 +147,11 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
             Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
             Assert.assertEquals(progress.getStatus(), ProgressStatus.FINISHED);
+            if (size != null) {
+                Assert.assertEquals(progress.getSize().intValue(), size.intValue());
+            }
+            String currentVersion = ingestionVersionService.getCurrentVersion(ingestion);
+            Assert.assertEquals(currentVersion, version);
         }
     }
 

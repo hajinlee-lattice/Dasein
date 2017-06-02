@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 public interface IngestionService {
     Ingestion getIngestionByName(String ingestionName);
 
-    IngestionProgress ingestInternal(String ingestionName, IngestionRequest ingestionRequest,
+    IngestionProgress ingest(String ingestionName, IngestionRequest ingestionRequest,
                                      String hdfsPod);
 
     List<IngestionProgress> scan(String hdfsPod);

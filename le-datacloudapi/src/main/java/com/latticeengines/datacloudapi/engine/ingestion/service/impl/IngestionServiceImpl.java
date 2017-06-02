@@ -1,9 +1,7 @@
 package com.latticeengines.datacloudapi.engine.ingestion.service.impl;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,17 +25,14 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.service.PropDataTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
-import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
-import com.latticeengines.datacloud.etl.ingestion.service.IngestionNewProgressValidator;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProviderService;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionValidator;
 import com.latticeengines.datacloudapi.engine.ingestion.service.IngestionService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
-import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
-import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.monitor.exposed.service.EmailService;
@@ -54,7 +49,7 @@ public class IngestionServiceImpl implements IngestionService {
     private IngestionProgressService ingestionProgressService;
 
     @Autowired
-    private IngestionNewProgressValidator ingestionNewProgressValidator;
+    private IngestionValidator ingestionValidator;
 
     @Autowired
     private PropDataTenantService propDataTenantService;
@@ -91,21 +86,16 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     @Override
-    public IngestionProgress ingestInternal(String ingestionName, IngestionRequest ingestionRequest,
+    public IngestionProgress ingest(String ingestionName, IngestionRequest request,
             String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
         Ingestion ingestion = getIngestionByName(ingestionName);
-        IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion,
-                ingestionRequest.getSubmitter(), ingestionRequest.getFileName());
-        if (ingestion.getIngestionType() == IngestionType.SFTP
-                && !SftpUtils.ifFileExists((SftpConfiguration) ingestion.getProviderConfiguration(),
-                        ingestionRequest.getFileName())) {
-            return ingestionProgressService.updateInvalidProgress(progress,
-                    ingestionRequest.getFileName() + " does not exist in source SFTP");
-        }
-        if (ingestionNewProgressValidator.isDuplicateProgress(progress)) {
+        ingestionValidator.validateIngestionRequest(ingestion, request);
+        IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion, request.getSubmitter(),
+                request.getFileName(), request.getSourceVersion());
+        if (ingestionValidator.isDuplicateProgress(progress)) {
             return ingestionProgressService.updateInvalidProgress(progress,
                     "There is already a progress ingesting " + progress.getSource() + " to "
                             + progress.getDestination());
@@ -160,50 +150,38 @@ public class IngestionServiceImpl implements IngestionService {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
         List<IngestionProgress> progresses = new ArrayList<>();
         for (Ingestion ingestion : ingestions) {
-            if (ingestionNewProgressValidator.isIngestionTriggered(ingestion)) {
+            if (ingestionValidator.isIngestionTriggered(ingestion)) {
                 log.info("Triggered Ingestion: " + ingestion.toString());
                 progresses.addAll(createDraftProgresses(ingestion));
             }
         }
-        progresses = ingestionNewProgressValidator.cleanupDuplicateProgresses(progresses);
+        progresses = ingestionValidator.cleanupDuplicateProgresses(progresses);
         ingestionProgressService.saveProgresses(progresses);
     }
 
     private List<IngestionProgress> createDraftProgresses(Ingestion ingestion) {
         List<IngestionProgress> progresses = new ArrayList<>();
-        switch (ingestion.getIngestionCriteria()) {
-        case ANY_MISSING_FILE:
-            List<String> missingFiles = getMissingFiles(ingestion);
+        switch (ingestion.getIngestionType()) {
+        case SFTP:
+            List<String> missingFiles = sftpProviderService.getMissingFiles(ingestion);
             for (String file : missingFiles) {
                 IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion,
-                        PropDataConstants.SCAN_SUBMITTER, file);
+                        PropDataConstants.SCAN_SUBMITTER, file, null);
                 progresses.add(progress);
             }
             break;
-        case ALL_DATA:
-            SimpleDateFormat format = new SimpleDateFormat("_yyyy_MM");
-            String fileName = format.format(new Date());
-            IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion,
-                    PropDataConstants.SCAN_SUBMITTER, fileName);
-            progresses.add(progress);
+        case API:
+            missingFiles = apiProviderService.getMissingFiles(ingestion);
+            for (String file : missingFiles) {
+                IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion,
+                        PropDataConstants.SCAN_SUBMITTER, file, null);
+                progresses.add(progress);
+            }
             break;
         default:
-            throw new UnsupportedOperationException(
-                    String.format("Ingestion criteria %s is not supported.", ingestion.getIngestionCriteria()));
+            break;
         }
         return progresses;
-    }
-
-    private List<String> getMissingFiles(Ingestion ingestion) {
-        switch (ingestion.getIngestionType()) {
-        case SFTP:
-            return sftpProviderService.getMissingFiles(ingestion);
-        case API:
-            return apiProviderService.getMissingFiles(ingestion);
-        default:
-            throw new UnsupportedOperationException(
-                    String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
-        }
     }
 
     private List<IngestionProgress> kickoffAll() {

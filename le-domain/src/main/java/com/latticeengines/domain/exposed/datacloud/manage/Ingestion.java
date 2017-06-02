@@ -71,10 +71,6 @@ public class Ingestion implements HasPid, Serializable {
     @Column(name = "IngestionType", nullable = false, length = 100)
     private IngestionType ingestionType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "IngestionCriteria", nullable = false, length = 100)
-    private IngestionCriteria ingestionCriteria;
-
     @Transient
     private ProviderConfiguration providerConfiguration;
 
@@ -165,16 +161,6 @@ public class Ingestion implements HasPid, Serializable {
         this.ingestionType = ingestionType;
     }
 
-    @JsonProperty("IngestionCriteria")
-    public IngestionCriteria getIngestionCriteria() {
-        return ingestionCriteria;
-    }
-
-    @JsonProperty("IngestionCriteria")
-    public void setIngestionCriteria(IngestionCriteria ingestionCriteria) {
-        this.ingestionCriteria = ingestionCriteria;
-    }
-
     @JsonIgnore
     public ProviderConfiguration getProviderConfiguration() {
         if (this.providerConfiguration == null) {
@@ -215,10 +201,6 @@ public class Ingestion implements HasPid, Serializable {
     }
 
     public enum IngestionType {
-        SFTP, SQL_TO_CSVGZ, API;
-    }
-
-    public enum IngestionCriteria {
-        ANY_MISSING_FILE, ALL_DATA;
+        SFTP, SQL_TO_CSVGZ, API, SQL_TO_SOURCE;
     }
 }

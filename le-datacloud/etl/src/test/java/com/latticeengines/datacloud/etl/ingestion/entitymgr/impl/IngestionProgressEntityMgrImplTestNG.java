@@ -57,9 +57,10 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
         ingestion = ingestionEntityMgr.getIngestionByName(INGESTION_NAME);
         Assert.assertNotNull(ingestion);
         HdfsPodContext.changeHdfsPodId(HDFS_POD);
-        progress = ingestionProgressService.createDraftProgress(ingestion, TEST_SUBMITTER, FILE_NAME);
+        progress = ingestionProgressService.createDraftProgress(ingestion, TEST_SUBMITTER, FILE_NAME, null);
         progress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
-        failedProgress = ingestionProgressService.createDraftProgress(ingestion, TEST_SUBMITTER, FAILED_FILE_NAME);
+        failedProgress = ingestionProgressService.createDraftProgress(ingestion, TEST_SUBMITTER, FAILED_FILE_NAME,
+                null);
         failedProgress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
         failedProgress.setStatus(ProgressStatus.FAILED);
     }
@@ -108,8 +109,8 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
             "testRetryFailedIngestionProgress" })
     public void testIsDuplicateIngestionProgress() throws JsonProcessingException {
         // IngestionProgress duplicateProgress = createProgess(ingestion);
-        IngestionProgress duplicateProgress = ingestionProgressService.createDraftProgress(ingestion,
-                TEST_SUBMITTER, FILE_NAME);
+        IngestionProgress duplicateProgress = ingestionProgressService.createDraftProgress(ingestion, TEST_SUBMITTER,
+                FILE_NAME, null);
         duplicateProgress.setApplicationId(UUID.randomUUID().toString().toUpperCase());
         Assert.assertTrue(ingestionProgressEntityMgr.isDuplicateProgress(duplicateProgress));
         progress.setStatus(ProgressStatus.FAILED);
