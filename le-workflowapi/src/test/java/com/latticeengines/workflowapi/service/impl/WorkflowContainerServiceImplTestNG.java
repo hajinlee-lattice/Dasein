@@ -62,14 +62,15 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJobEntityMgr.create(workflowJob);
 
         JobProxy jobProxy = mock(JobProxy.class);
-        when(jobProxy.getJobStatus(any(String.class))).thenAnswer(
-                new Answer<com.latticeengines.domain.exposed.dataplatform.JobStatus>() {
+        when(jobProxy.getJobStatus(any(String.class)))
+                .thenAnswer(new Answer<com.latticeengines.domain.exposed.dataplatform.JobStatus>() {
 
                     @Override
                     public com.latticeengines.domain.exposed.dataplatform.JobStatus answer(InvocationOnMock invocation)
                             throws Throwable {
                         com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus = new com.latticeengines.domain.exposed.dataplatform.JobStatus();
                         jobStatus.setState(YarnApplicationState.FINISHED);
+                        jobStatus.setStatus(FinalApplicationStatus.FAILED);
                         jobStatus.setStartTime(100000001L);
                         return jobStatus;
                     }
@@ -85,6 +86,24 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
         assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
         assertEquals(workflowJob.getStartTimeInMillis().longValue(), 100000001L);
+
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void getJobStatusForJobCantFindInYarn() {
+        Tenant t = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
+
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setTenant(t);
+        workflowJob.setApplicationId("applicationid_0001");
+        workflowJobEntityMgr.create(workflowJob);
+
+        Job job = workflowContainerService.getJobFromWorkflowJobAndYarn(workflowJob);
+
+        assertEquals(job.getJobStatus(), JobStatus.FAILED);
+
+        workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
+        assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
 
     }
 
