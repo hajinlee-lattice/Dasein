@@ -1,6 +1,8 @@
 package com.latticeengines.eai.service.impl.s3;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -190,6 +192,29 @@ public class HdfsToS3ExportService {
                         }
                         splitIdx++;
                     }
+                    return recordsInFile;
+                }
+
+                @SuppressWarnings("unused")
+                protected Long copyToLocalJson(String filePath) throws IllegalArgumentException, IOException {
+                    log.info("Downloading original file " + filePath + " to local.");
+                    Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
+                    Long recordsInFile = 0L;
+                    String fileName = new Path(filePath).getName().replace(".avro", ".json");
+                    File jsonFile = new File(LOCAL_CACHE + "/" + fileName);
+                    FileUtils.touch(jsonFile);
+                    try (BufferedWriter writer = new BufferedWriter(
+                            new FileWriter(LOCAL_CACHE + "/" + fileName, true))) {
+                        while (iterator.hasNext()) {
+                            GenericRecord datum = iterator.next();
+                            writer.write(datum.toString());
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to write to split file " + fileName, e);
+                    }
+                    Long fileSize = FileUtils.sizeOf(jsonFile);
+                    log.info("Downloaded " + recordsInFile + " records to " + fileName
+                            + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
                     return recordsInFile;
                 }
             }));
