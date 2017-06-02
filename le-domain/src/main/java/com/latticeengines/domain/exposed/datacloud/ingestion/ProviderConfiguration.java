@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public abstract class ProviderConfiguration {
     private String className;
     protected Integer concurrentNum;
-    protected boolean uncompressAfterIngestion;
     protected Integer checkVersion;
 
     public ProviderConfiguration() {
@@ -38,16 +37,6 @@ public abstract class ProviderConfiguration {
     @JsonProperty("ConcurrentNum")
     public void setConcurrentNum(Integer concurrentNum) {
         this.concurrentNum = concurrentNum;
-    }
-
-    @JsonProperty("UncompressAfterIngestion")
-    public boolean isUncompressAfterIngestion() {
-        return uncompressAfterIngestion;
-    }
-
-    @JsonProperty("UncompressAfterIngestion")
-    public void setUncompressAfterIngestion(boolean uncompressAfterIngestion) {
-        this.uncompressAfterIngestion = uncompressAfterIngestion;
     }
 
     @JsonProperty("CheckVersion")

@@ -95,7 +95,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     private static final Integer WORKFLOW_WAIT_TIME_IN_SECOND = (int) TimeUnit.HOURS.toSeconds(6);
 
     private static final String sqoopPrefix = "part-m-";
-    private static final String UNCOMPRESSED = "Uncompressed";
     private static final String SQOOP_OPTION_WHERE = "--where";
 
     @Override
@@ -147,6 +146,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                 HdfsUtils.rmdir(yarnConfiguration, ingestionDir.toString());
             }
             ApiConfiguration apiConfig = (ApiConfiguration) progress.getIngestion().getProviderConfiguration();
+            log.info(String.format("Downloading from %s ...", apiConfig.getFileUrl()));
             URL url = new URL(apiConfig.getFileUrl());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.connect();
@@ -157,13 +157,10 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             outStream.close();
             connStream.close();
             conn.disconnect();
-            if (apiConfig.isUncompressAfterIngestion()) {
-                Path uncompressDir = new Path(ingestionDir, UNCOMPRESSED);
-                HdfsUtils.mkdir(yarnConfiguration, uncompressDir.toString());
-                HdfsUtils.uncompressZipFileWithinHDFS(yarnConfiguration, progress.getDestination(),
-                        uncompressDir.toString());
-            }
-            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FINISHED).commit(true);
+            log.info("Download completed");
+            Long size = HdfsUtils.getFileSize(yarnConfiguration, progress.getDestination());
+            progress = ingestionProgressService.updateProgress(progress).size(size).status(ProgressStatus.FINISHED)
+                    .commit(true);
             checkCompleteVersionFromApi(progress.getIngestion(), progress.getVersion());
         } catch (Exception e) {
             progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
@@ -208,6 +205,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
     private void ingestFromSftp() throws Exception {
         String destFile = progress.getDestination();
+        // Multiple jobs could be running at same time to download files to same folder. 
+        // To avoid violation, download file to unique tmp folder first.
         Path tmpDestDir = new Path(new Path(progress.getDestination()).getParent(),
                 "TMP_" + UUID.randomUUID().toString());
         Path tmpDestFile = new Path(tmpDestDir, new Path(progress.getDestination()).getName());

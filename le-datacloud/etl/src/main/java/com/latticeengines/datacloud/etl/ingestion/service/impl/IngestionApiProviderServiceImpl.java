@@ -1,24 +1,25 @@
 package com.latticeengines.datacloud.etl.ingestion.service.impl;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionApiProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProviderService;
-import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.proxy.exposed.RestApiClient;
@@ -31,7 +32,10 @@ public class IngestionApiProviderServiceImpl implements IngestionProviderService
     private RestApiClient apiClient;
 
     @Autowired
-    private IngestionVersionService ingestionVersionService;
+    private HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    protected Configuration yarnConfiguration;
 
     @PostConstruct
     public void init() {
@@ -39,15 +43,23 @@ public class IngestionApiProviderServiceImpl implements IngestionProviderService
     }
 
     @Override
+    @SuppressWarnings("static-access")
     public List<String> getMissingFiles(Ingestion ingestion) {
         List<String> result = new ArrayList<String>();
         ApiConfiguration apiConfiguration = (ApiConfiguration) ingestion.getProviderConfiguration();
         String targetVersion = getTargetVersion(apiConfiguration);
-        List<String> existingVersions = ingestionVersionService
-                .getMostRecentVersionsFromHdfs(ingestion.getIngestionName(), 1);
-        Set<String> existingVersionsSet = new HashSet<String>(existingVersions);
-        if (!existingVersionsSet.contains(targetVersion)) {
-            result.add(apiConfiguration.getFileName());
+        com.latticeengines.domain.exposed.camille.Path ingestionDir = hdfsPathBuilder
+                .constructIngestionDir(ingestion.getIngestionName(), targetVersion);
+        Path success = new Path(ingestionDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
+        try {
+            if (!HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())
+                    || !HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
+                result.add(apiConfiguration.getFileName());
+            } else {
+
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to look for missing files for ingestion " + ingestion.toString(), e);
         }
         return result;
     }

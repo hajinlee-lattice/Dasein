@@ -1,15 +1,9 @@
 package com.latticeengines.datacloud.etl.ingestion.service.impl;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -24,6 +18,7 @@ import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEnt
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionApiProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressUpdater;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
@@ -52,6 +47,9 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
 
     @Autowired
     private SourceService sourceService;
+
+    @Autowired
+    private IngestionVersionService ingestionVersionService;
 
     @Override
     public List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields) {
@@ -85,7 +83,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             Path fileSource = new Path(sftpConfig.getSftpDir(), fileName);
             progress.setSource(fileSource.toString());
             // Arbitrary set version will not be respected
-            progress.setVersion(extractVersion(sftpConfig.getFileTimestamp(), fileName));
+            progress.setVersion(ingestionVersionService.extractVersion(sftpConfig.getFileTimestamp(), fileName));
             progress.setDestination(ingestionDir.append(progress.getVersion()).append(fileName).toString());
             break;
         case API:
@@ -122,25 +120,6 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         default:
             throw new UnsupportedOperationException(
                     String.format("Ingestion type %s is not supported", ingestion.getIngestionType()));
-        }
-    }
-
-    private String extractVersion(String timestampFormat, String input) {
-        String timestampPattern = timestampFormat.replace("d", "\\d").replace("y", "\\d").replace("M", "\\d");
-        Pattern pattern = Pattern.compile(timestampPattern);
-        Matcher matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            String timestampStr = matcher.group();
-            DateFormat df = new SimpleDateFormat(timestampFormat);
-            TimeZone timezone = TimeZone.getTimeZone("UTC");
-            df.setTimeZone(timezone);
-            try {
-                return HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
-            } catch (ParseException e) {
-                throw new RuntimeException(String.format("Failed to parse timestamp %s", timestampStr), e);
-            }
-        } else {
-            throw new RuntimeException(String.format("Failed to extract version from %s", input));
         }
     }
 

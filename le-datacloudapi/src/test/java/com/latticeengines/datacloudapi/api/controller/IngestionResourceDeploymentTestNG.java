@@ -23,8 +23,10 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionApiProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -51,12 +53,17 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     @Autowired
     private IngestionVersionService ingestionVersionService;
 
+    @Autowired
+    private IngestionApiProviderService apiProviderService;
+
     private static final String DNB_INGESTION = "DnBCacheSeedTest";
     private static final String DNB_VERSION = "2016-08-01_00-00-00_UTC";
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2016_08_003.OUT.gz";
     private static final String ALEXA_INGESTION = "AlexaTest";
     private static final String ALEXA_VERSION_OLD = "2015-10-01_00-00-00_UTC";
     private static final String ALEXA_VERSION_NEW = "2015-11-01_00-00-00_UTC";
+    private static final String ORB_INGESTION = "OrbTest";
+    private String ORB_VERSION;
 
     private int timeout = 1800000;
 
@@ -64,11 +71,14 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static Object[][] getIngestions() {
         return new Object[][] {
                 { DNB_INGESTION,
-                        "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"UncompressAfterIngestion\":0,\"SftpHost\":\"10.41.1.31\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                        "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.41.1.31\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
                         IngestionType.SFTP }, //
                 { ALEXA_INGESTION,
-                        "{\"ClassName\":\"SqlToSourceConfiguration\",\"DbHost\":\"10.41.1.238\\\\\\\\SQL2012\",\"DbPort\":1437,\"Db\":\"CollectionDB_Dev\",\"DbUser\":\"DLTransfer\",\"DbPwdEncrypted\":\"Q1nh4HIYGkg4OnQIEbEuiw==\",\"DbTable\":\"Alexa\", \"Source\":\"Alexa\",\"TimestampColumn\":\"Creation_Date\",\"CollectCriteria\":\"NEW_DATA\",\"Mappers\":4}",
+                        "{\"ClassName\":\"SqlToSourceConfiguration\",\"ConcurrentNum\":1,\"DbHost\":\"10.41.1.238\\\\\\\\SQL2012\",\"DbPort\":1437,\"Db\":\"CollectionDB_Dev\",\"DbUser\":\"DLTransfer\",\"DbPwdEncrypted\":\"Q1nh4HIYGkg4OnQIEbEuiw==\",\"DbTable\":\"Alexa\", \"Source\":\"Alexa\",\"TimestampColumn\":\"Creation_Date\",\"CollectCriteria\":\"NEW_DATA\",\"Mappers\":4}",
                         IngestionType.SQL_TO_SOURCE }, //
+                { ORB_INGESTION,
+                        "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=54aebe74-0c2e-46d2-a8d7-086cd1ee8994\",\"VersionFormat\":\"EEE MMM dd HH:mm:ss 'UTC' yyyy\",\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=54aebe74-0c2e-46d2-a8d7-086cd1ee8994\",\"FileName\":\"orb-db2-export-sample.zip\"}",
+                        IngestionType.API }, //
         };
     }
 
@@ -78,6 +88,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         return new Object[][] { //
                 { DNB_INGESTION, 3, DNB_VERSION, null }, //
                 { ALEXA_INGESTION, 1, ALEXA_VERSION_NEW, 195 }, //
+                { ORB_INGESTION, 1, null, null }, //
         };
     };
 
@@ -99,10 +110,13 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         }
         Ingestion alexaIngestion = ingestionEntityMgr.getIngestionByName(ALEXA_INGESTION);
         ingestionVersionService.updateCurrentVersion(alexaIngestion, ALEXA_VERSION_OLD);
+        Ingestion orbIngestion = ingestionEntityMgr.getIngestionByName(ORB_INGESTION);
+        ApiConfiguration apiConfig = (ApiConfiguration) orbIngestion.getProviderConfiguration();
+        ORB_VERSION = apiProviderService.getTargetVersion(apiConfig);
     }
 
     @Test(groups = "deployment", priority = 1)
-    public void testCreatePreprocessProgresses() {
+    public void testCreateDraftProgresses() {
         IngestionRequest request = new IngestionRequest();
         request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
         request.setSourceVersion(ALEXA_VERSION_NEW);
@@ -119,6 +133,9 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
 
     @Test(groups = "deployment", priority = 2, dataProvider = "ExpectedResult")
     public void testIngest(String name, int expectedProgresses, String version, Integer size) {
+        if (name.equals(ORB_INGESTION)) {
+            version = ORB_VERSION;
+        }
         Ingestion ingestion = ingestionEntityMgr.getIngestionByName(name);
         Map<String, Object> fields = new HashMap<>();
         fields.put("IngestionId", ingestion.getPid());

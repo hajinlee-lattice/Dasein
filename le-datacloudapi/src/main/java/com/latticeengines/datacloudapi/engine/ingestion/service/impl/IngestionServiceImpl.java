@@ -159,6 +159,9 @@ public class IngestionServiceImpl implements IngestionService {
         ingestionProgressService.saveProgresses(progresses);
     }
 
+    /**
+     * Only support ingestion type SFTP and API in scan
+     */
     private List<IngestionProgress> createDraftProgresses(Ingestion ingestion) {
         List<IngestionProgress> progresses = new ArrayList<>();
         switch (ingestion.getIngestionType()) {

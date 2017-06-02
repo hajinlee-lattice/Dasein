@@ -99,6 +99,26 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
     }
 
     @Override
+    public String extractVersion(String timestampFormat, String str) {
+        String timestampPattern = timestampFormat.replace("d", "\\d").replace("y", "\\d").replace("M", "\\d");
+        Pattern pattern = Pattern.compile(timestampPattern);
+        Matcher matcher = pattern.matcher(str);
+        if (matcher.find()) {
+            String timestampStr = matcher.group();
+            DateFormat df = new SimpleDateFormat(timestampFormat);
+            TimeZone timezone = TimeZone.getTimeZone("UTC");
+            df.setTimeZone(timezone);
+            try {
+                return HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
+            } catch (ParseException e) {
+                throw new RuntimeException(String.format("Failed to parse timestamp %s", timestampStr), e);
+            }
+        } else {
+            throw new RuntimeException(String.format("Failed to extract version from %s", str));
+        }
+    }
+
+    @Override
     public String getFileNamePattern(String version, String fileNamePrefix, String fileNamePostfix,
             String fileExtension, String fileTimestamp) {
         String fileVersion = "";
@@ -185,7 +205,7 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
             return HdfsUtils.fileExists(yarnConfiguration, success.toString());
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to check whether ingestion %s is complete for version %s",
-                    ingestion.getIngestionName(), version));
+                    ingestion.getIngestionName(), version), e);
         }
     }
 

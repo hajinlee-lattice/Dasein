@@ -9,6 +9,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 public interface IngestionVersionService {
     List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion);
 
+    String extractVersion(String timestampFormat, String str);
+
     String getFileNamePattern(String version, String fileNamePrefix, String fileNamePostfix, String fileExtension,
             String fileTimestamp);
 
