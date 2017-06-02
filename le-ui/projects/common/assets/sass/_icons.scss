@@ -98,6 +98,11 @@ Icons
 		background-image: url("/assets/images/ico-analysis-white.png");
 		background-size: 18px;
 	}
+	&.ico-notes {
+		background-color: transparent !important;
+		background-image: url("/assets/images/ico-notes.png");
+		background-size: 18px;
+	}
 	&.ico-contact-us {
 		background-color: transparent !important;
         position: relative;

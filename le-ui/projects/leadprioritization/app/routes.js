@@ -656,7 +656,7 @@ angular
                 }
             },
             params: {
-                pageIcon: 'ico-remodel',
+                pageIcon: 'ico-notes',
                 pageTitle: 'Notes'
             },
             views: {

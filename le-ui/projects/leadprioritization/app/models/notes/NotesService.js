@@ -40,16 +40,9 @@ angular
         var deferred = $q.defer(),
             id = modelId || '',
             data = {
-                name: newNote.noteId,
-                origin: newNote.origin,
-                inherited: newNote.inherited,
-                inheritedBy: newNote.inheritedBy,
-                createdBy: newNote.createdBy,
-                createdDateTime: newNote.createdDateTime,
-                body: newNote.body,
-                edited: newNote.edited,
-                editedBy: newNote.editedBy,
-                editedDateTime: newNote.editedDateTime
+                origin: newNote.Origin,
+                user_name: newNote.CreatedByUser,
+                content: newNote.NotesContents,
             };
 
         $http({
@@ -79,25 +72,21 @@ angular
         return deferred.promise;
     }
 
-    this.UpdateNote = function(noteId, note) {
+    this.UpdateNote = function(modelId, userName, note) {
         var deferred = $q.defer(),
-            id = modelId || '',
+            modelId = modelId || '',
+            noteId = note.Id || '',
+            userName = userName || '',
+            url = '/pls/modelnotes/' + modelId + '/' + noteId,
             data = {
-                name: note.noteId,
-                origin: note.origin,
-                inherited: note.inherited,
-                inheritedBy: note.inheritedBy,
-                createdBy: note.createdBy,
-                createdDateTime: note.createdDateTime,
-                body: note.body,
-                edited: note.edited,
-                editedBy: note.editedBy,
-                editedDateTime: note.editedDateTime
+                origin: note.Origin,
+                user_name: userName,
+                content: note.NotesContents
             };
 
         $http({
             method: 'POST',
-            url: '/pls/modelnotes/' + id,
+            url: url,
             data: data,
             headers: { 'Content-Type': 'application/json' }
         }).then(
@@ -123,10 +112,12 @@ angular
     }
 
 
-    this.DeleteNote = function(noteId) {
+    this.DeleteNote = function(modelId, noteId) {
         var deferred = $q.defer(),
             result = {},
-            url = '/pls/modelnotes/' + noteId;
+            modelId = modelId || '',
+            noteId = noteId || '',
+            url = '/pls/modelnotes/' + modelId + '/' + noteId;
 
         $http({
             method: 'DELETE',

@@ -5,16 +5,17 @@ angular.module('mainApp.models.notes.DeleteNoteModal', [
 ])
 .service('DeleteNoteModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, NotesService) {
     var self = this;
-    this.show = function (segment, inModel) {
+    this.show = function (modelId, noteId) {
         $http.get('app/models/notes/DeleteNoteConfirmView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
-            scope.segmentName = segment.name;
-            scope.inModel = inModel;
+            scope.noteId = noteId;
+            scope.modelId = modelId;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
-            $("#deleteModelError").hide();
+
+            scope.hasDeleteError = false;
 
             var options = {
                 backdrop: "static"
@@ -37,13 +38,13 @@ angular.module('mainApp.models.notes.DeleteNoteModal', [
             $event.preventDefault();
         }
 
-        deleteNote($scope.noteId);
+        deleteNote($scope.modelId, $scope.noteId);
     };
 
-    function deleteNote(noteId) {
-        $("#deleteNoteError").hide();
+    function deleteNote(modelId, noteId) {
+        $scope.hasDeleteError = false;
 
-        NotesService.DeleteNote(noteId).then(function(result) {
+        NotesService.DeleteNote(modelId, noteId).then(function(result) {
             if (result != null && result.success === true) {
                 $("#modalContainer").modal('hide');
                 
@@ -51,7 +52,7 @@ angular.module('mainApp.models.notes.DeleteNoteModal', [
                 
             } else {
                 $scope.deleteNoteErrorMessage = result.ResultErrors;
-                $("#deleteNoteError").fadeIn();
+                $scope.hasDeleteError = true;
             }
         });
     }

@@ -8,11 +8,11 @@
           <div class="row">
             <div class="twelve columns">
               <p>{{ResourceUtility.getString('NOTE_DELETE_LABEL1')}}</p>
-                <div class="row alert-holder">
-                  <div id="deleteNoteError" class="alert alert-danger">
-                    {{deleteNoteErrorMessage}}
-                  </div>
+              <div class="row alert-holder" ng-if="hasDeleteError">
+                <div id="deleteNoteError" class="alert alert-danger">
+                  {{deleteNoteErrorMessage}}
                 </div>
+              </div>
             </div>
           </div>
         </div>
@@ -22,7 +22,7 @@
               <button class="button gray-button block-button" type="button" data-ng-click="cancelClick()">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
             </div>
             <div class="six columns">
-              <a class="button orange-button block-button" href="#" data-ng-click="deleteNoteClick($event)">{{ResourceUtility.getString('NOTE_DELETE_TITLE')}}</a>
+              <a class="button orange-button block-button" href="#" data-ng-click="deleteNoteClick($event, note)">{{ResourceUtility.getString('NOTE_DELETE_TITLE')}}</a>
             </div>
           </div>
         </div>
