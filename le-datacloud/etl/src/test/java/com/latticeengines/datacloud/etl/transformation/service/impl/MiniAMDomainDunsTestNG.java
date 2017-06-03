@@ -136,8 +136,8 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
         Object[] expectedData = new Object[] { "yahoo.com", "234567890", "adobe.com", "citrix.com", "google.com",
-                "107465839", "145789000", "345678911", "901234567", "snapchat.com", "microsoft.com", "oracle.com",
-                "4567890123", "890123456", "987624588", "intel.com", "paypal.com", "salesforce.com", "576878992",
+                "145789000", "345678911", "901234567", "snapchat.com", "microsoft.com", "oracle.com",
+                "4567890123", "890123456", "987624588", "intel.com", "paypal.com", "salesforce.com",
                 "909090909", "kaggle.com", "krux.com", "123456789", "amazon.com", "facebook.com", "visa.com",
                 "333333333", "3456789012", "121459889", "192093993", "890898989" };
         Set<Object> expectedSet = new HashSet<Object>(Arrays.asList(expectedData));
@@ -154,7 +154,7 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
             log.info("Type : " + type + "Value : " + value);
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 31);
+        Assert.assertEquals(rowCount, 29);
     }
 
     private void prepareGoldenDataSetSeed() {
@@ -174,7 +174,7 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
                 { null, null, "Visa", "Foster city", "California", "United States" },
                 { "citrix.com", null, "Citrix", "Santa Clara", "California", "United States" },
                 { null, "987624588", "Nvedia", "Santa Clara", "California", "United States" },
-                { "krux.com", "107465839", "Krux", "San Francisco", "California", "United States" } };
+                { "krux.com", null, "Krux", "San Francisco", "California", "United States" } };
         uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data);
     }
 
@@ -194,7 +194,7 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
                 { "oracle.com", "145789000", null, "121211212" }, { "datos.com", "910329039", null, null },
                 { "microsoft.com", "890898989", "234567811", "234567811" },
                 { "data.com", "787998900", "423500012", "234567811" }, { "yahoo.com", "121459889", null, null },
-                { "citrix.com", "576878992", "345678912", null }
+                { "citrix.com", null, "345678912", null }
         };
 
         uploadBaseSourceData(baseSourceDnbSeed.getSourceName(), baseSourceVersion, columns, data);
@@ -206,8 +206,8 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
         columns.add(Pair.of("Duns", String.class));
         Object[][] data = new Object[][] { { "tesla", "111111111" }, { "yelp.com", "222222222" },
                 { "intel.com", "333333333" }, { "netapp.com", "888888888" }, { "paypal.com", "145789000" },
-                { "adobe.com", "909090909" }, { null, "191090190" }, { "zendesk.com", "799090909" },
-                { "infotech.com", "901234561" }, { "kaggle.com", "576878992" }, { "snapchat.com", "121459889" } };
+                { "adobe.com", "909090909" }, { null, "191090190" }, { null, "799090909" },
+                { "infotech.com", "901234561" }, { "kaggle.com", null }, { "snapchat.com", "121459889" } };
         uploadBaseSourceData(baseSourceAccountMasterSeed.getSourceName(), baseSourceVersion, columns, data);
     }
 

@@ -41,13 +41,13 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
             seed.renamePipe(seed.getPipeName());
             storeList.add(addSource(parameters.getBaseTables().get(i)));
         }
-       
+
         // Adding DUNS by matching with domains
         List<Node> storeDunsValues = new ArrayList<Node>();
         for (Node seedDataSet : storeList) {
             log.info("domain : " + seedsDomain.get(seedDataSet.getPipeName()) + "duns : "
                     + seedsDuns.get(seedDataSet.getPipeName()));
-            Node storeDomainsMatched = miniDomainDunsList
+            Node dunsMatchedByDomain = miniDomainDunsList
                     .join(config.getOutputDataSetValue(), seedDataSet, seedsDomain.get(seedDataSet.getPipeName()),
                             JoinType.INNER) //
                     .retain(seedsDuns.get(seedDataSet.getPipeName())) //
@@ -57,7 +57,7 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
                             String.class) //
                     .retain(new FieldList(miniDomainDunsList.getFieldNames())) //
                     .renamePipe(seedDataSet + "duns");
-            storeDunsValues.add(storeDomainsMatched);
+            storeDunsValues.add(dunsMatchedByDomain);
         }
 
         // Merge into target table
@@ -153,7 +153,7 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
         // Adding domains by matching with DUNS
         List<Node> storeDomainValues = new ArrayList<Node>();
         for (Node seedDataSet : storeList) {
-            Node storeDunsMatched = miniDomainDunsList
+            Node domainsMatchedByDuns = miniDomainDunsList
                     .join(config.getOutputDataSetValue(), seedDataSet, seedsDuns.get(seedDataSet.getPipeName()), JoinType.INNER) //
                     .retain(seedsDomain.get(seedDataSet.getPipeName())) //
                     .rename(new FieldList(seedsDomain.get(seedDataSet.getPipeName())),
@@ -162,11 +162,14 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
                             String.class) //
                     .retain(new FieldList(miniDomainDunsList.getFieldNames())) //
                     .renamePipe(seedDataSet + "domain");
-            storeDomainValues.add(storeDunsMatched);
+            storeDomainValues.add(domainsMatchedByDuns);
         }
 
         // Merge into target table
         miniDomainDunsList = miniDomainDunsList.merge(storeDomainValues);
+        // Remove Nulls
+        miniDomainDunsList = miniDomainDunsList.filter(checkNullExpression,
+                new FieldList(config.getOutputDataSetValue()));
         // De-duplication
         miniDomainDunsList = miniDomainDunsList.groupByAndLimit(new FieldList(miniTargetTableAttr), 1);
 
