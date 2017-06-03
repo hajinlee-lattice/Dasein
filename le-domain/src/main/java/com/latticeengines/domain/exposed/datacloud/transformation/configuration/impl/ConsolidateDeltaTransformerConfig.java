@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
-
-public class ConsolidateDataTransformerConfig extends TransformerConfig {
+public class ConsolidateDeltaTransformerConfig extends TransformerConfig {
 
     private String srcIdField;
 
@@ -13,5 +12,4 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
         this.srcIdField = srcIdField;
     }
 
-    
 }

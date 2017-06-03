@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
+import com.esotericsoftware.minlog.Log;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.source.Source;
@@ -146,6 +147,22 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         Table table = MetadataConverter.getTable(yarnConfiguration, tableDir, primaryKeyName, lastModifiedKeyName);
         table.setName(tableName);
         metadataProxy.updateTable(DataCloudConstants.SERVICE_CUSTOMERSPACE, tableName, table);
+    }
+
+    protected List<GenericRecord> getRecordFromTable(String tableName) {
+        String tableDir = hdfsPathBuilder.constructTablePath(tableName,
+                CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE), "").toString();
+        return AvroUtils.getDataFromGlob(yarnConfiguration, tableDir + "/*.avro");
+    }
+
+    protected void cleanRecordFromTable(String tableName) {
+        String tableDir = hdfsPathBuilder.constructTablePath(tableName,
+                CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE), "").toString();
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, tableDir);
+        } catch (Exception ex) {
+            Log.warn("can not delete table dir=" + tableDir, ex);
+        }
     }
 
     protected TransformationProgress createNewProgress() {
