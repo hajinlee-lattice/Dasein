@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeedTask.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.DataFeedTaskDao;
 import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
@@ -33,6 +34,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Autowired
     private TableEntityMgr tableEntityMgr;
+
+    @Autowired
+    private TableTypeHolder tableTypeHolder;
 
     @Override
     public BaseDao<DataFeedTask> getDao() {
@@ -73,13 +77,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             if (dataFeedTask.getImportData().getPid() == null) {
                 createOrUpdate(dataFeedTask);
             }
-            DataFeedTaskTable datafeedTaskTable = new DataFeedTaskTable();
-            datafeedTaskTable.setFeedTask(dataFeedTask);
-            datafeedTaskTable.setTable(dataFeedTask.getImportData());
-            datafeedTaskTableDao.create(datafeedTaskTable);
+            addTableToQueue(dataFeedTask, dataFeedTask.getImportData());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void addTableToQueue(DataFeedTask dataFeedTask, Table table) {
+        DataFeedTaskTable datafeedTaskTable = new DataFeedTaskTable();
+        datafeedTaskTable.setFeedTask(dataFeedTask);
+        datafeedTaskTable.setTable(table);
+        datafeedTaskTableDao.create(datafeedTaskTable);
     }
 
     @Override
@@ -93,27 +103,29 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     public void registerExtract(DataFeedTask dataFeedTask, Extract extract) {
         boolean templateTableChanged = dataFeedTask.getStatus() == Status.Updated;
         boolean dataTableConsumed = dataFeedTask.getImportData() == null;
-        boolean addNewImportDataTable = false;
-        Table newDataTable = null;
+
+        if (!dataTableConsumed) {
+            tableEntityMgr.addExtract(dataFeedTask.getImportData(), extract);
+        } else {
+            tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+            Table extractTable = tableEntityMgr.findByName(extract.getTable().getName());
+            extractTable.getExtracts().clear();
+            extractTable = TableUtils.clone(extractTable,
+                    "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
+            extractTable.setTenant(MultiTenantContext.getTenant());
+            extractTable.addExtract(extract);
+            tableTypeHolder.setTableType(TableType.DATATABLE);
+            tableEntityMgr.create(extractTable);
+            addTableToQueue(dataFeedTask, extractTable);
+        }
         if (templateTableChanged || dataTableConsumed) {
-            newDataTable = TableUtils.clone(dataFeedTask.getImportTemplate(),
+            Table newDataTable = TableUtils.clone(dataFeedTask.getImportTemplate(),
                     "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
             newDataTable.setTenant(MultiTenantContext.getTenant());
-            addNewImportDataTable = true;
-        }
-        if (dataTableConsumed) {
             dataFeedTask.setImportData(newDataTable);
+            dataFeedTask.setStatus(Status.Active);
             createOrUpdate(dataFeedTask);
-        }
-        Table dataTable = dataFeedTask.getImportData();
-        tableEntityMgr.addExtract(dataTable, extract);
-        if (addNewImportDataTable) {
-            if (templateTableChanged) {
-                dataFeedTask.setImportData(newDataTable);
-                dataFeedTask.setStatus(Status.Active);
-                createOrUpdate(dataFeedTask);
-            }
-            addImportDataTableToQueue(dataFeedTask);
+            addTableToQueue(dataFeedTask, dataFeedTask.getImportData());
         }
     }
 

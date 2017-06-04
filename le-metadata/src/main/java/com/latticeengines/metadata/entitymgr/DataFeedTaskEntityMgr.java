@@ -19,4 +19,6 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     void registerExtract(DataFeedTask dataFeedTask, Extract extract);
 
+    void addTableToQueue(DataFeedTask dataFeedTask, Table table);
+
 }
