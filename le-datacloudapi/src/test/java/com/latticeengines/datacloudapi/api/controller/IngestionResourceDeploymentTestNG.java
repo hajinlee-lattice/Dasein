@@ -65,7 +65,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static final String ORB_INGESTION = "OrbTest";
     private String ORB_VERSION;
 
-    private int timeout = 1800000;
+    private int timeout = 2700000;
 
     // IngestionName, Config, IngestionType
     private static Object[][] getIngestions() {
