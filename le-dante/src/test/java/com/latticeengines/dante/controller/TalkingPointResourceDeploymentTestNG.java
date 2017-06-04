@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.proxy.exposed.dante.DanteTalkingPointProxy;
 
@@ -45,7 +46,8 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
         dtp.setPlayExternalID("testDPlayExtID");
         dtp.setValue("Deployment Test Talking Point");
 
-        danteTalkingPointProxy.createOrUpdate(dtp);
+        ResponseDocument result = danteTalkingPointProxy.createOrUpdate(dtp);
+        Assert.assertNull(result.getErrors());
 
         dtp = talkingPointEntityMgr.findByExternalID(dtp.getExternalID());
 

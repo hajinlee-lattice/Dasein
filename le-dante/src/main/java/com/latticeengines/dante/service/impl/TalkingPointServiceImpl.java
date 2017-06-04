@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("talkingPointService")
 public class TalkingPointServiceImpl implements TalkingPointService {
@@ -23,11 +25,19 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     public DanteTalkingPoint findByExternalID(String externalID) {
-        return talkingPointEntityMgr.findByExternalID(externalID);
+        DanteTalkingPoint tp = talkingPointEntityMgr.findByExternalID(externalID);
+        if (tp != null)
+            return tp;
+        else
+            throw new LedpException(LedpCode.LEDP_38001, new String[] { externalID });
     }
 
     public List<DanteTalkingPoint> findAllByPlayID(String playExternalID) {
-        return talkingPointEntityMgr.findAllByPlayID(playExternalID);
+        List<DanteTalkingPoint> tps = talkingPointEntityMgr.findAllByPlayID(playExternalID);
+        if (tps != null && tps.size() > 0)
+            return tps;
+        else
+            throw new LedpException(LedpCode.LEDP_38002, new String[] { playExternalID });
     }
 
     public void delete(DanteTalkingPoint dtp) {

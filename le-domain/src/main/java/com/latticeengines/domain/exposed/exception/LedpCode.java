@@ -587,7 +587,11 @@ public enum LedpCode {
     LEDP_37009("Unsupported restriction {0}"), //
     LEDP_37010("Could not find attribute with name {0} in table {1}"), //
     LEDP_37011("Unsupported lookup type {0}"), //
-    LEDP_37012("Failed to retrieve data for object {0}");
+    LEDP_37012("Failed to retrieve data for object {0}"), //
+
+    // le-dante
+    LEDP_38001("Could not find Talking point with External_ID {0}"), //
+    LEDP_38002("Could not find Talking points for Play {0}");
 
     private String message;
 

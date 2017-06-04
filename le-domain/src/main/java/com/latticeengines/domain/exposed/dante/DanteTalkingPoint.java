@@ -15,6 +15,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Index;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -45,6 +46,7 @@ public class DanteTalkingPoint implements Serializable, HasDanteAuditingFields {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
 
+    @JsonIgnore
     @Column(name = "Last_Modification_Date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModificationDate;
@@ -105,6 +107,7 @@ public class DanteTalkingPoint implements Serializable, HasDanteAuditingFields {
         this.lastModificationDate = lastModificationDate;
     }
 
+    @JsonIgnore
     public Long getPid() {
         return (long) talkingPointCacheID;
     }

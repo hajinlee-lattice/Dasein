@@ -14,4 +14,7 @@ public interface DanteTalkingPointInterface {
     ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(String playID);
 
     ResponseDocument<DanteTalkingPoint> findByExternalID(String externalID);
+
+    // ResponseDocument<TalkingPointPreview> getTalkingPointPreview(String
+    // PlayID);
 }

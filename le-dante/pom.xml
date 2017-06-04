@@ -23,6 +23,12 @@
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <parent>
