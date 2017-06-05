@@ -42,8 +42,8 @@ public class LedpException extends RuntimeException {
                 // we need to escape $ from param otherwise it interfere with
                 // replace logic
                 param = param.toString().replace("$", "\\$");
+                msg = msg.replaceAll("\\{" + i + "\\}", param.toString());
             }
-            msg = msg.replaceAll("\\{" + i + "\\}", param.toString());
         }
         return msg;
     }
