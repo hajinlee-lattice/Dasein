@@ -43,9 +43,9 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             { null, "Microsoft", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
 
             // name standardization
-            //{ null, "Johnson & Johnson", null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
-            //{ null, "Johnson and Johnson", null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
-            //{ null, "Johnson Johnson", null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            { null, "Johnson & Johnson", null, null, null, null,  null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            { null, "Johnson and Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
+            { null, "Johnson Johnson", null, null, null, null, null, "jnj.com", "Johnson & Johnson", "New Jersey", "USA", ">10,000", ">10B" },
 
             { null, "Microsoft Corporation", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { null, "Microsoft Corp.", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
@@ -55,7 +55,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             // { null, "Apple", null, "CA", null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
 
             // oversea head quarter
-            // { null, "Royal Dutch Shell", null, null, "Netherlands", null, "ROYAL DUTCH SHELL plc", "ZUID-HOLLAND", "NETHERLANDS", ">10,000", "0-1M" },
+            { null, "Royal Dutch Shell", null, null, null, "Netherlands", null, "shell.com", "ROYAL DUTCH SHELL plc", "ZUID HOLLAND", "NETHERLANDS", ">10,000", "0-1M" },
 
             // us head quarter, oversea domestic ultimate
             { null, "Google UK", null, null, null, "UK", null, "google.co.uk", "GOOGLE UK LIMITED", "LONDON", "UNITED KINGDOM", "1001-2500", "1-5B" },
@@ -65,7 +65,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             //{ null, "Alphabet Inc1", null, "California", null, "US", null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
 
             { null, "Eversource Energy", "Springfield", "MA", "273608923", "US", "3368895000", "eversource.com", "Eversource Energy", "MASSACHUSETTS", "USA", "5001-10,000", "5B-10B" },
-            // { null, "Queens College", "Queens", "NY", "11367-1597", "US", "7189975000", "queensknights.com", "Department of Media Studies", "New York", "USA", "11-50", "0-1M" },
+            { null, "Queens College", "Queens", "NY", "11367-1597", "US", "7189975000", "queensknights.com", "Department of Media Studies", "New York", "USA", "11-50", "0-1M" },
             { null, "Edison47", "Port Orchard", "WA", "98367", "US", "3608746772", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
             // { null, "SS&C Advent", "San Francisco", "CA", "950142083", "US", "4089961010", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
     };
@@ -109,7 +109,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
         }
     }
 
-    @DataProvider(name = "TestData")
+    @DataProvider(name = "TestData", parallel = true)
     private Object[][] testData() {
         return TEST_DATA;
     }
