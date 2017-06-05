@@ -15,7 +15,7 @@ angular.module('lp.cg.talkingpoint', [
 
 
     vm.addTalkingPoint = function() {
-        vm.talkingPoints.push({timestamp: new Date().getTime(), Title: null, Content: null, Offset: vm.talkingPoints.length});
+        vm.talkingPoints.push({timestamp: new Date().getTime(), Title: null, Content: null, Offset: vm.talkingPoints.length, IsNew: true});
     };
 
     vm.onDelete = function(pos) {
