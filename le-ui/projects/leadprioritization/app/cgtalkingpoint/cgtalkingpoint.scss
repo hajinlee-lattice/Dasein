@@ -22,9 +22,15 @@
 
     .tp-entry {
         position: relative;
+        &:hover {
+            .tp-entry-sort {
+                opacity: 1;
+            }
+        }
     }
 
     .tp-entry-sort {
+        opacity: 0;
         position: absolute;
         left: 340px;
         top: 8px;
