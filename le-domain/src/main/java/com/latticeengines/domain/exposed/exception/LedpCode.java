@@ -257,6 +257,7 @@ public enum LedpCode {
     LEDP_18144("Play name cannot be blank."), //
     LEDP_18145("Play displayName cannot be empty."), //
     LEDP_18146("Play Launch not found for {0}"), //
+    LEDP_18147("User {0} do not have access for tenant {1}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
 
 import io.swagger.annotations.Api;
@@ -41,6 +44,11 @@ public class BISAccessTokenResource {
             @RequestParam String tenantId) {
         try {
             User user = userService.findByUsername(username);
+            AccessLevel level = userService.getAccessLevel(tenantId, username);
+            if (level == null || level.compareTo(AccessLevel.EXTERNAL_USER) < 0) {
+                throw new LedpException(LedpCode.LEDP_18147, new String[]{username, tenantId});
+            }
+
             String apiToken = oauth2RestApiProxy.createAPIToken(tenantId);
 
             log.info(
