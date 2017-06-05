@@ -63,7 +63,7 @@ public class ScoreArtifactCache {
                             log.info(String.format(
                                     "Load completed model artifacts for tenant %s and model %s. "//
                                             + "Current cache size = %d",
-                                    key.getKey(), key.getValue(), scoreArtifactCache.asMap().size()));
+                                    key.getKey(), key.getValue(), scoreArtifactCache.asMap().size() + 1));
                         }
                         return artifact;
                     };

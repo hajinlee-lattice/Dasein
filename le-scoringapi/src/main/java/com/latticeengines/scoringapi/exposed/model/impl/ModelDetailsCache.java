@@ -46,7 +46,7 @@ public class ModelDetailsCache {
                             log.info(String.format(
                                     "Load completed model details for tenant %s and model %s. "//
                                             + "Current cache size = %d",
-                                    key.getKey(), key.getValue(), modelDetailsCache.asMap().size()));
+                                    key.getKey(), key.getValue(), modelDetailsCache.asMap().size() + 1));
                         }
                         return modelDetail;
                     };

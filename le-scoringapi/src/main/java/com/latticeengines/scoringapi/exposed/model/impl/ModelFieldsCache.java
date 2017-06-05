@@ -45,7 +45,7 @@ public class ModelFieldsCache {
                             log.info(String.format(
                                     "Load completed Fields for tenant %s and model %s. "//
                                             + "Current cache size = %d",
-                                    key.getKey(), key.getValue(), modelFieldsCache.asMap().size()));
+                                    key.getKey(), key.getValue(), modelFieldsCache.asMap().size() + 1));
                         }
                         return fields;
                     };
