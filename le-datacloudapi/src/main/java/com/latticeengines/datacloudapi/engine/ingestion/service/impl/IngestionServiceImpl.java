@@ -18,7 +18,6 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -35,7 +34,6 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfigurati
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
-import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("ingestionService")
@@ -65,15 +63,6 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Resource(name = "ingestionSFTPProviderService")
     private IngestionProviderService sftpProviderService;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Value("${propdata.ingestion.notify.email.enabled}")
-    private boolean notifyEmailEnabled;
-
-    @Value("${propdata.ingestion.notify.email}")
-    private String notifyEmail;
 
     @Override
     public List<IngestionProgress> scan(String hdfsPod) {

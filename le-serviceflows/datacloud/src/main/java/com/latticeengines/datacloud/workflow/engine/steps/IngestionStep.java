@@ -7,6 +7,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.hsqldb.lib.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -55,6 +57,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -89,6 +92,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
     @Autowired
     private SourceService sourceService;
+
+    @Autowired
+    private EmailService emailService;
 
     private static final long WORKFLOW_WAIT_TIME_IN_MILLIS = TimeUnit.HOURS.toMillis(6);
     private static final long MAX_MILLIS_TO_WAIT = TimeUnit.HOURS.toMillis(5);
@@ -187,14 +193,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, file.toString())) {
                 HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
-                /*
-                if (notifyEmailEnabled) {
-                    String subject = String.format("Ingestion %s for version %s is finished", ingestionName, version);
-                    String content = String.format("Files are accessible at the following HDFS folder: %s",
-                            hdfsDir.toString());
-                    emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(notifyEmail));
-                }
-                */
+                emailNotify(apiConfig, ingestion.getIngestionName(), version, hdfsDir.toString());
             }
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to check %s in HDFS or create %s in HDFS dir %s",
@@ -270,14 +269,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
         try {
             HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
-            /*
-            if (notifyEmailEnabled) {
-                String subject = String.format("Ingestion %s for version %s is finished", ingestionName, version);
-                String content = String.format("Files are accessible at the following HDFS folder: %s",
-                        hdfsDir.toString());
-                emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(notifyEmail));
-            }
-            */
+            emailNotify(sftpConfig, ingestion.getIngestionName(), version, hdfsDir.toString());
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to create %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
                     hdfsDir.toString()), e);
@@ -322,7 +314,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                 .setNumMappers(config.getMappers()).setSplitColumn(config.getTimestampColumn())
                 .setTable(config.getDbTable())
                 .setTargetDir(progress.getDestination())
-                .setDbCreds(new DbCreds(credsBuilder)).setSync(false);
+                .setDbCreds(new DbCreds(credsBuilder)).setSync(false)
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
         StringBuilder whereClause = new StringBuilder();
         switch (config.getCollectCriteria()) {
         case NEW_DATA:
@@ -483,6 +476,20 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                     uncompressedFilePath.toString());
             HdfsUtils.rmdir(yarnConfiguration, uncompressedFilePath.toString());
         }
+    }
+
+    private void emailNotify(ProviderConfiguration config, String ingestion, String version, String destPath) {
+        if (!config.isEmailEnabled()) {
+            return;
+        }
+        if (StringUtils.isBlank(config.getNotifyEmail())) {
+            log.error("Email for notification is empty");
+            return;
+        }
+        String subject = String.format("Ingestion %s for version %s is finished", ingestion, version);
+        String content = String.format("Files are accessible at the following HDFS folder: %s", destPath);
+        emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(config.getNotifyEmail()));
+        log.info(String.format("Sent notification email to %s", config.getNotifyEmail()));
     }
 
 

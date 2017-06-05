@@ -14,6 +14,8 @@ public abstract class ProviderConfiguration {
     private String className;
     protected Integer concurrentNum;
     protected Integer checkVersion;
+    protected boolean emailEnabled;
+    protected String notifyEmail;
 
     public ProviderConfiguration() {
         setClassName(getClass().getSimpleName());
@@ -47,6 +49,26 @@ public abstract class ProviderConfiguration {
     @JsonProperty("CheckVersion")
     public void setCheckVersion(Integer checkVersion) {
         this.checkVersion = checkVersion;
+    }
+
+    @JsonProperty("EmailEnabled")
+    public boolean isEmailEnabled() {
+        return emailEnabled;
+    }
+
+    @JsonProperty("EmailEnabled")
+    public void setEmailEnabled(boolean emailEnabled) {
+        this.emailEnabled = emailEnabled;
+    }
+
+    @JsonProperty("NotifyEmail")
+    public String getNotifyEmail() {
+        return notifyEmail;
+    }
+
+    @JsonProperty("NotifyEmail")
+    public void setNotifyEmail(String notifyEmail) {
+        this.notifyEmail = notifyEmail;
     }
 
 }
