@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.pls.service.impl;
 
 import java.util.Date;
 import java.util.List;
@@ -15,17 +15,19 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
-import com.latticeengines.pls.entitymanager.PlayLaunchEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
+
+    private static long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
     @Autowired
     private PlayEntityMgr playEntityMgr;
 
     @Autowired
-    private PlayLaunchEntityMgr playLaunchEntityMgr;
+    private PlayLaunchService playLaunchService;
 
     @Autowired
     private TenantService tenantService;
@@ -33,8 +35,6 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private Play play;
 
     private PlayLaunch playLaunch;
-
-    private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
@@ -51,11 +51,12 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         cleanupPlayLunches();
 
+        Date timestamp = new Date(System.currentTimeMillis());
+
         play = new Play();
         play.setName(NAME);
         play.setDisplayName(DISPLAY_NAME);
         play.setTenant(tenant1);
-        Date timestamp = new Date(System.currentTimeMillis());
         play.setTimeStamp(timestamp);
         play.setLastUpdatedTimestamp(timestamp);
 
@@ -70,8 +71,19 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     private void cleanupPlayLunches() {
-        for (PlayLaunch launch : playLaunchEntityMgr.findByState(LaunchState.Launching)) {
-            playLaunchEntityMgr.deleteByLaunchId(launch.getLaunchId());
+        for (PlayLaunch launch : playLaunchService.findByState(LaunchState.Launching)) {
+            playLaunchService.deleteByLaunchId(launch.getLaunchId());
+        }
+    }
+
+    @AfterClass(groups = "functional")
+    public void teardown() throws Exception {
+        if (playLaunch != null) {
+            playLaunchService.deleteByLaunchId(playLaunch.getLaunchId());
+        }
+        Tenant tenant1 = tenantService.findByTenantId("testTenant1");
+        if (tenant1 != null) {
+            tenantService.discardTenant(tenant1);
         }
     }
 
@@ -82,24 +94,21 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testGetPreCreate" })
     public void testCreateLaunch() {
-        playLaunchEntityMgr.create(playLaunch);
-        Assert.assertNotNull(playLaunch.getLaunchId());
+        playLaunchService.create(playLaunch);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateLaunch" })
     public void testBasicOperations() {
-        setupSecurityContext(tenant1);
-
-        PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch.getLaunchId());
+        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch.getLaunchId());
         Assert.assertEquals(retreivedPlayLaunch.getDescription(), LAUNCH_DESCRIPTION);
         Assert.assertNotNull(retreivedPlayLaunch);
 
-        List<PlayLaunch> playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), LaunchState.Launching);
+        List<PlayLaunch> playLaunchList = playLaunchService.findByPlayId(play.getPid(), LaunchState.Launching);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 1);
         Assert.assertEquals(playLaunchList.get(0).getPid(), retreivedPlayLaunch.getPid());
 
-        playLaunchList = playLaunchEntityMgr.findByState(LaunchState.Launching);
+        playLaunchList = playLaunchService.findByState(LaunchState.Launching);
         Assert.assertNotNull(playLaunchList);
 
         Assert.assertEquals(playLaunchList.size(), 1);
@@ -110,8 +119,8 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     public void testDelete() {
         setupSecurityContext(tenant1);
 
-        playLaunchEntityMgr.deleteByLaunchId(playLaunch.getLaunchId());
-        System.out.println("deleted " + LAUNCH_DESCRIPTION);
+        playLaunchService.deleteByLaunchId(playLaunch.getLaunchId());
+        System.out.println("deleted " + playLaunch.getLaunchId());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testDelete" })
@@ -121,31 +130,20 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        checkNonExistance();
-    }
+        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch.getLaunchId());
+        Assert.assertNull(retreivedPlayLaunch);
 
-    @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
-        if (playLaunch != null && playLaunch.getLaunchId() != null) {
-            playLaunchEntityMgr.deleteByLaunchId(playLaunch.getLaunchId());
-        }
-        Tenant tenant1 = tenantService.findByTenantId("testTenant1");
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
+        checkNonExistance();
     }
 
     private void checkNonExistance() {
         setupSecurityContext(tenant1);
 
-        PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch.getLaunchId());
-        Assert.assertNull(retreivedPlayLaunch);
-
-        List<PlayLaunch> playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), LaunchState.Launching);
+        List<PlayLaunch> playLaunchList = playLaunchService.findByPlayId(play.getPid(), LaunchState.Launching);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 0);
 
-        playLaunchList = playLaunchEntityMgr.findByState(LaunchState.Launching);
+        playLaunchList = playLaunchService.findByState(LaunchState.Launching);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 0);
     }

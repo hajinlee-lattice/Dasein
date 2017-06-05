@@ -256,7 +256,7 @@ public enum LedpCode {
     LEDP_18143("Invalid max or offset specified"), //
     LEDP_18144("Play name cannot be blank."), //
     LEDP_18145("Play displayName cannot be empty."), //
-    LEDP_18146("Play Launch with name {0} not found."), //
+    LEDP_18146("Play Launch not found for {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

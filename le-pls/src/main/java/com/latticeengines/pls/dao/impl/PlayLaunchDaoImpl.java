@@ -3,6 +3,7 @@ package com.latticeengines.pls.dao.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -22,22 +23,11 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
     @SuppressWarnings("rawtypes")
     @Override
-    public PlayLaunch findByName(String name) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<PlayLaunch> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where name = :playLaunchName", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("playLaunchName", name);
-        List list = query.list();
-        if (list.size() == 0) {
+    public PlayLaunch findByLaunchId(String launchId) {
+        if (StringUtils.isBlank(launchId)) {
             return null;
         }
-        return (PlayLaunch) list.get(0);
-    }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public PlayLaunch findByLaunchId(String launchId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
         String queryStr = String.format("from %s where launch_id = :launchId", entityClz.getSimpleName());
@@ -53,11 +43,15 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     @SuppressWarnings("rawtypes")
     @Override
     public PlayLaunch findByPlayAndTimestamp(Long playId, Date timestamp) {
+        if (playId == null) {
+            return null;
+        }
+
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
         String queryStr = String.format(
                 "from %s where "//
-                        + "fk_play_id = :playId AND timestamp = :timestamp", //
+                        + "fk_play_id = :playId AND created_timestamp = :timestamp", //
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("fk_play_id", playId);
@@ -72,6 +66,10 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     @SuppressWarnings("unchecked")
     @Override
     public List<PlayLaunch> findByPlayId(Long playId, LaunchState state) {
+        if (playId == null) {
+            return null;
+        }
+
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
         String queryStr = String.format(
@@ -92,6 +90,10 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     @SuppressWarnings("unchecked")
     @Override
     public List<PlayLaunch> findByState(LaunchState state) {
+        if (state == null) {
+            throw new RuntimeException("Valid launch state is needed");
+        }
+
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where state = :state", //
                 getEntityClass().getSimpleName());

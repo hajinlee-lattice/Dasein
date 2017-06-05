@@ -22,6 +22,9 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("playLaunchEntityMgr")
 public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> implements PlayLaunchEntityMgr {
 
+    private static final String PLAY_LAUNCH_NAME_PREFIX = "launch";
+    private static final String PLAY_LAUNCH_NAME_FORMAT = "%s__%s";
+
     @Autowired
     private PlayLaunchDao playLaunchDao;
 
@@ -41,9 +44,9 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
 
         entity.setTenant(tenant);
-        entity.setTimestamp(timestamp);
+        entity.setCreatedTimestamp(timestamp);
         entity.setLastUpdatedTimestamp(timestamp);
-        entity.setId(UUID.randomUUID().toString());
+        entity.setLaunchId(generateLaunchId());
         playLaunchDao.create(entity);
     }
 
@@ -55,11 +58,6 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public PlayLaunch findByName(String name) {
-        return playLaunchDao.findByName(name);
-    }
-
-    @Override
     public PlayLaunch findByLaunchId(String launchId) {
         return playLaunchDao.findByLaunchId(launchId);
     }
@@ -84,13 +82,6 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteByName(String name) {
-        PlayLaunch playLaunch = findByName(name);
-        deletePlayLaunch(playLaunch);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByLaunchId(String launchId) {
         PlayLaunch playLaunch = findByLaunchId(launchId);
         deletePlayLaunch(playLaunch);
@@ -100,5 +91,9 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         if (playLaunch != null) {
             playLaunchDao.delete(playLaunch);
         }
+    }
+
+    private String generateLaunchId() {
+        return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX, UUID.randomUUID().toString());
     }
 }

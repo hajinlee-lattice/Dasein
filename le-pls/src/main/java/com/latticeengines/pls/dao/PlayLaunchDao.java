@@ -9,8 +9,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
 
-    PlayLaunch findByName(String name);
-
     PlayLaunch findByLaunchId(String launchId);
 
     PlayLaunch findByPlayAndTimestamp(Long playId, Date timestamp);

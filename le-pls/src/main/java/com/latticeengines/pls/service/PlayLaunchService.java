@@ -1,13 +1,12 @@
-package com.latticeengines.pls.entitymanager;
+package com.latticeengines.pls.service;
 
 import java.util.Date;
 import java.util.List;
 
-import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
-public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
+public interface PlayLaunchService {
 
     void create(PlayLaunch entity);
 
@@ -21,4 +20,5 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
 
     List<PlayLaunch> findByState(LaunchState state);
 
+    PlayLaunch update(PlayLaunch existingPlayLaunch);
 }

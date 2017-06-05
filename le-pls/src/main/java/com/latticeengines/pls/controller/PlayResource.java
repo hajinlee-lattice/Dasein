@@ -12,11 +12,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -33,6 +37,9 @@ public class PlayResource {
 
     @Autowired
     private PlayService playService;
+
+    @Autowired
+    private PlayLaunchService playLaunchService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -79,4 +86,67 @@ public class PlayResource {
         return true;
     }
 
+    @RequestMapping(value = "/{playName}/launches", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @PreAuthorize("hasRole('Create_PLS_Plays')")
+    @ApiOperation(value = "Create play launch for a given play")
+    public PlayLaunch createPlayLaunch(@PathVariable("playName") String playName, //
+            @RequestBody PlayLaunch playLaunch) {
+        Play play = playService.getPlayByName(playName);
+        playLaunch.setPlay(play);
+        playLaunchService.create(playLaunch);
+        return playLaunch;
+    }
+
+    @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)
+    @ResponseBody
+    @PreAuthorize("hasRole('Create_PLS_Plays')")
+    @ApiOperation(value = "Get list of launches for a given play")
+    public List<PlayLaunch> getPlayLaunches(@PathVariable("playName") String playName, //
+            @RequestParam(value = "launchState", required = true) LaunchState launchState) {
+        Play play = playService.getPlayByName(playName);
+        return playLaunchService.findByPlayId(play.getPid(), launchState);
+    }
+
+    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)
+    @ResponseBody
+    @PreAuthorize("hasRole('Create_PLS_Plays')")
+    @ApiOperation(value = "Get play launch for a given play and launch id")
+    public PlayLaunch getPlayLaunch(@PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId) {
+        return playLaunchService.findByLaunchId(launchId);
+    }
+
+    @RequestMapping(value = "/{playName}/launches/{launchId}/{action}", //
+            method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @PreAuthorize("hasRole('Create_PLS_Plays')")
+    @ApiOperation(value = "Update play launch for a given play and launch id with given action")
+    public PlayLaunch updatePlayLaunch(@PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @PathVariable("action") LaunchState action) {
+        PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId);
+
+        if (action != null && action != LaunchState.Launching) {
+            if (existingPlayLaunch != null) {
+                if (existingPlayLaunch.getLaunchState() == LaunchState.Launching) {
+                    existingPlayLaunch.setLaunchState(action);
+                    return playLaunchService.update(existingPlayLaunch);
+                }
+            }
+        }
+        return existingPlayLaunch;
+    }
+
+    @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    @PreAuthorize("hasRole('Create_PLS_Plays')")
+    @ApiOperation(value = "Delete play launch for a given play and launch id")
+    public void deletePlayLaunch(@PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId) {
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        if (playLaunch != null) {
+            playLaunchService.deleteByLaunchId(launchId);
+        }
+    }
 }

@@ -19,6 +19,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -26,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "PLAY_LAUNCH")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class PlayLaunch implements HasPid, HasId<String>, HasName, HasTenantId {
+public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,32 +44,37 @@ public class PlayLaunch implements HasPid, HasId<String>, HasName, HasTenantId {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "LAUNCH_ID", nullable = false, unique = true)
+    @Index(name = "PLAY_LAUNCH_ID")
+    @Column(name = "LAUNCH_ID", unique = true, nullable = false)
     @JsonProperty("launch_id")
-    private String id;
+    private String launchId;
 
-    @JsonProperty("name")
-    @Column(name = "NAME", nullable = false)
-    private String name;
+    @Column(name = "DESCRIPTION", nullable = true)
+    @JsonProperty("description")
+    private String description;
 
-    @Column(name = "TIMESTAMP", nullable = false)
+    @Index(name = "PLAY_LAUNCH_CREATED_TIME")
+    @Column(name = "CREATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonProperty("timestamp")
-    private Date timestamp;
+    @JsonProperty("createdTimestamp")
+    private Date createdTimestamp;
 
+    @Index(name = "PLAY_LAUNCH_LAST_UPD_TIME")
     @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty("lastUpdatedTimestamp")
     private Date lastUpdatedTimestamp;
 
+    @Index(name = "PLAY_LAUNCH_STATE")
     @Column(name = "STATE", nullable = false)
     @Enumerated(EnumType.ORDINAL)
     @JsonProperty("launch_state")
     private LaunchState launchState;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_ID", nullable = false)
     @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Play play;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
@@ -99,32 +104,38 @@ public class PlayLaunch implements HasPid, HasId<String>, HasName, HasTenantId {
         this.pid = pid;
     }
 
+    public String getLaunchId() {
+        return launchId;
+    }
+
+    public void setLaunchId(String id) {
+        this.launchId = id;
+    }
+
     @Override
     public String getId() {
-        return id;
+        return launchId;
     }
 
     @Override
-    public void setId(String id) {
-        this.id = id;
+    public void setId(String launchId) {
+        this.launchId = launchId;
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public String getDescription() {
+        return description;
     }
 
-    @Override
-    public void setName(String name) {
-        this.name = name;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public Date getCreatedTimestamp() {
+        return createdTimestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setCreatedTimestamp(Date createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
     }
 
     public Date getLastUpdatedTimestamp() {
