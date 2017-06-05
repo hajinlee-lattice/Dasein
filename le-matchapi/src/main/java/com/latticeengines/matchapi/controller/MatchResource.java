@@ -2,8 +2,6 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,8 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.GzipUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -62,14 +58,10 @@ public class MatchResource {
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
 
     )
-    public void matchRealTime(@RequestBody MatchInput input, HttpServletResponse response) {
+    public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         try {
             matchMonitorService.precheck(input.getDataCloudVersion());
-            MatchOutput output = realTimeMatchService.match(input);
-            log.info("match output record: " + JsonUtils.serialize(output));
-            if (output != null) {
-                GzipUtils.writeToGzipStream(response, output);
-            }
+            return realTimeMatchService.match(input);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
         }
@@ -83,7 +75,7 @@ public class MatchResource {
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
 
     )
-    public void bulkMatchRealTime(@RequestBody BulkMatchInput input, HttpServletResponse response) {
+    public BulkMatchOutput bulkMatchRealTime(@RequestBody BulkMatchInput input) {
         long time = System.currentTimeMillis();
         try {
             if (CollectionUtils.isNotEmpty(input.getInputList())) {
@@ -91,10 +83,7 @@ public class MatchResource {
                     matchMonitorService.precheck(matchInput.getDataCloudVersion());
                 }
             }
-            BulkMatchOutput output = realTimeMatchService.matchBulk(input);
-            if (output != null) {
-                GzipUtils.writeToGzipStream(response, output);
-            }
+            return realTimeMatchService.matchBulk(input);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed.", e);
         } finally {

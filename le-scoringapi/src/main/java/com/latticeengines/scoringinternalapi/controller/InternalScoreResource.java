@@ -1,6 +1,5 @@
 package com.latticeengines.scoringinternalapi.controller;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
@@ -17,10 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
-import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
@@ -91,7 +87,7 @@ public class InternalScoreResource extends BaseScoring {
 
     @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score a record")
-    public void scorePercentileRecord(HttpServletRequest request, //
+    public ScoreResponse scorePercentileRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest, //
             @RequestParam(value = "tenantIdentifier", required = true) //
             String tenantIdentifier, //
@@ -102,90 +98,67 @@ public class InternalScoreResource extends BaseScoring {
             HttpServletResponse response) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        ScoreResponse scoreResponse = scorePercentileRecord(request, scoreRequest, customerSpace,
-                enrichInternalAttributes, performFetchOnlyForMatching, requestId);
-        try {
-            GzipUtils.writeToGzipStream(response, scoreResponse);
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31024, e);
-        }
+        return scorePercentileRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
-    public void scorePercentileRecords(HttpServletRequest request, //
+    public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest, //
             @RequestParam(value = "tenantIdentifier", required = true) //
             String tenantIdentifier, //
             @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
             boolean enrichInternalAttributes, //
             @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
-            boolean performFetchOnlyForMatching, //
-            HttpServletResponse response) {
+            boolean performFetchOnlyForMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        
-        List<RecordScoreResponse> recordScoreResponseList = scorePercentileRecords(request, scoreRequest, customerSpace,
-                enrichInternalAttributes, performFetchOnlyForMatching, requestId);
-        try {
-            GzipUtils.writeToGzipStream(response, recordScoreResponseList);
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31025, e);
-        }
+
+        return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
-    public void scoreRecordsDebug(HttpServletRequest request, //
+    public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest, //
             @RequestParam(value = "tenantIdentifier", required = true) //
             String tenantIdentifier, //
             @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
             boolean enrichInternalAttributes, //
             @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
-            boolean performFetchOnlyForMatching, //
-            HttpServletResponse response) {
+            boolean performFetchOnlyForMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        
-        List<RecordScoreResponse> recordScoreResponseList = scoreRecordsDebug(request, scoreRequest, customerSpace,
-                enrichInternalAttributes, performFetchOnlyForMatching, requestId);
-        try {
-            GzipUtils.writeToGzipStream(response, recordScoreResponseList);
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31025, e);
-        }
+
+        return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiIgnore
     @ApiOperation(value = "Score a record including debug info such as probability")
-    public void scoreProbabilityRecord(HttpServletRequest request, //
+    public DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest, //
-            @RequestParam(value = "tenantIdentifier", required = true) //
+            @RequestParam(value = "tenantIdentifier") //
             String tenantIdentifier, //
             @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
             boolean enrichInternalAttributes, //
             @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
-            boolean performFetchOnlyForMatching, //
-            HttpServletResponse response) {
+            boolean performFetchOnlyForMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        DebugScoreResponse scoreResponse = scoreProbabilityRecord(request, scoreRequest, customerSpace,
-                enrichInternalAttributes, performFetchOnlyForMatching, requestId);
-        try {
-            GzipUtils.writeToGzipStream(response, scoreResponse);
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31024, e);
-        }
+        return scoreProbabilityRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     @RequestMapping(value = "/record/apiconsole/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiIgnore
     @ApiOperation(value = "Score a record including debug info such as probability via APIConsole")
-    public void scoreAndEnrichRecordApiConsole(HttpServletRequest request, //
+    public DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest, //
             @RequestParam(value = "tenantIdentifier", required = true) //
             String tenantIdentifier, //
@@ -198,17 +171,11 @@ public class InternalScoreResource extends BaseScoring {
             @ApiParam(value = "For fuzzy match, should skip DnB cache", //
                     required = false) //
             @RequestParam(value = "skipDnBCache", required = false, defaultValue = "false") //
-            boolean skipDnBCache, //
-            HttpServletResponse response) {
+            boolean skipDnBCache) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        DebugScoreResponse scoreResponse = scoreAndEnrichRecordApiConsole(request, scoreRequest, customerSpace,
-                enrichInternalAttributes, requestId, enforceFuzzyMatch, skipDnBCache);
-        try {
-            GzipUtils.writeToGzipStream(response, scoreResponse);
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31024, e);
-        }
+        return scoreAndEnrichRecordApiConsole(request, scoreRequest, customerSpace, enrichInternalAttributes, requestId,
+                enforceFuzzyMatch, skipDnBCache);
     }
 
 }

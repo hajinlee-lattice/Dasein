@@ -33,7 +33,6 @@ import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
-import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -81,8 +80,8 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getInsightsCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, null,
-                null, false, null, null);
+        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, null, null, false, null,
+                null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -101,8 +100,8 @@ public class LatticeInsightsResource {
             @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
-        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, category,
-                null, false, null, null);
+        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, category, null, false, null,
+                null);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
             subcategories.add(attr.getSubcategory());
@@ -129,8 +128,7 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag", response = List.class)
-    public void getInsightsAttributes(HttpServletRequest request, //
-            HttpServletResponse response, //
+    public List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request, //
             @ApiParam(value = "Get attributes with name containing specified " //
                     + "text for attributeDisplayNameFilter", required = false) //
             @RequestParam(value = "attributeDisplayNameFilter", required = false) //
@@ -153,30 +151,12 @@ public class LatticeInsightsResource {
             @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
             @RequestParam(value = "max", required = false) //
             Integer max) {
-        List<LeadEnrichmentAttribute> result = getInsightsAttributes(request,
-                attributeDisplayNameFilter, category, subcategory, onlySelectedAttributes, offset,
-                max);
-        try {
-            GzipUtils.writeToGzipStream(response, result);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request,
-            String attributeDisplayNameFilter, //
-            String category, //
-            String subcategory, //
-            Boolean onlySelectedAttributes, //
-            Integer offset, //
-            Integer max) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category)
-                ? null : Category.fromName(category));
-        List<LeadEnrichmentAttribute> attributes = attributeService.getAttributes(tenant,
-                attributeDisplayNameFilter, categoryEnum, subcategory, onlySelectedAttributes,
-                offset, max, considerInternalAttributes);
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
+                : Category.fromName(category));
+        List<LeadEnrichmentAttribute> attributes = attributeService.getAttributes(tenant, attributeDisplayNameFilter,
+                categoryEnum, subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
         return attributes;
     }
 
@@ -201,10 +181,10 @@ public class LatticeInsightsResource {
             Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category)
-                ? null : Category.fromName(category));
-        return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum,
-                subcategory, onlySelectedAttributes, considerInternalAttributes);
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
+                : Category.fromName(category));
+        return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
+                onlySelectedAttributes, considerInternalAttributes);
     }
 
     @RequestMapping(value = INSIGHTS_PATH
@@ -234,13 +214,12 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
     public void downloadSegmentCSV(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam(value = "state", required = true) String state)
-            throws FileNotFoundException, IOException {
+            @RequestParam(value = "state", required = true) String state) throws FileNotFoundException, IOException {
         InputStream stream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(String.format(SEGMENT_CONTACTS_FILE_LOCAL_PATH, state));
         String inputStream = IOUtils.toString(new InputStreamReader(stream));
-        DlFileHttpDownloader downloader = new DlFileHttpDownloader("application/csv",
-                "segments-contacts.csv", inputStream);
+        DlFileHttpDownloader downloader = new DlFileHttpDownloader("application/csv", "segments-contacts.csv",
+                inputStream);
         downloader.downloadFile(request, response);
     }
 
@@ -273,12 +252,11 @@ public class LatticeInsightsResource {
     public Integer getInsightsSelectedAttributePremiumCount(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        return attributeService.getSelectedAttributePremiumCount(tenant,
-                considerInternalAttributes);
+        return attributeService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
     }
 
-    private boolean containsAtleastOneAttributeForCategory(
-            List<LeadEnrichmentAttribute> allAttributes, Category category) {
+    private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
+            Category category) {
         if (!CollectionUtils.isEmpty(allAttributes)) {
             for (LeadEnrichmentAttribute attr : allAttributes) {
                 if (category.toString().equals(attr.getCategory())) {
@@ -304,7 +282,7 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
-    public void loadAMStatisticsCubeByPost(HttpServletRequest request, //
+    public AccountMasterCube loadAMStatisticsCubeByPost(HttpServletRequest request, //
             HttpServletResponse response, //
             @ApiParam(value = "Should load enrichment attribute metadata") //
             @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
@@ -313,15 +291,11 @@ public class LatticeInsightsResource {
         AccountMasterCube cube = enrichmentService.getCube(query);
 
         if (loadEnrichmentMetadata) {
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request,
-                    null, null, null, null, null, null);
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null, null,
+                    null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
-        try {
-            GzipUtils.writeToGzipStream(response, cube);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return cube;
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/cube", //
@@ -329,8 +303,7 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
-    public void loadAMStatisticsCube(HttpServletRequest request, //
-            HttpServletResponse response, //
+    public AccountMasterCube loadAMStatisticsCube(HttpServletRequest request, //
             @ApiParam(value = "Should load enrichment attribute metadata") //
             @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
@@ -338,15 +311,11 @@ public class LatticeInsightsResource {
         AccountMasterCube cube = enrichmentService.getCube(query);
 
         if (loadEnrichmentMetadata) {
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request,
-                    null, null, null, null, null, null);
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null, null,
+                    null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
-        try {
-            GzipUtils.writeToGzipStream(response, cube);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return cube;
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/topn", //
@@ -386,8 +355,8 @@ public class LatticeInsightsResource {
                     allEnrichAttrNames.add(attr.getAttribute());
                 }
             }
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request,
-                    null, categoryName, null, null, null, null);
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, categoryName,
+                    null, null, null, null);
             List<LeadEnrichmentAttribute> attrs = new ArrayList<>();
 
             for (LeadEnrichmentAttribute attr : enrichmentAttributes) {
@@ -417,8 +386,7 @@ public class LatticeInsightsResource {
         Map<String, TopNAttributes> allTopNAttributes = new HashMap<>();
 
         for (String categoryName : categories) {
-            TopNAttributes topNAttrs = getTopNAttributes(request, loadEnrichmentMetadata,
-                    categoryName, max);
+            TopNAttributes topNAttrs = getTopNAttributes(request, loadEnrichmentMetadata, categoryName, max);
             allTopNAttributes.put(categoryName, topNAttrs);
         }
 

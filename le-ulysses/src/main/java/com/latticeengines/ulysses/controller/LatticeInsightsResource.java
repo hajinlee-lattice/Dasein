@@ -1,6 +1,5 @@
 package com.latticeengines.ulysses.controller;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
-import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -101,8 +99,7 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
-    public void getInsightsAttributes(HttpServletRequest request, //
-            HttpServletResponse response, //
+    public List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request, //
             @ApiParam(value = "Get attributes with name containing specified " //
                     + "text for attributeDisplayNameFilter", required = false) //
             @RequestParam(value = "attributeDisplayNameFilter", required = false) //
@@ -124,22 +121,6 @@ public class LatticeInsightsResource {
             Integer offset, //
             @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
             @RequestParam(value = "max", required = false) //
-            Integer max) {
-        List<LeadEnrichmentAttribute> result = getInsightsAttributes(request, attributeDisplayNameFilter, category,
-                subcategory, onlySelectedAttributes, offset, max);
-        try {
-            GzipUtils.writeToGzipStream(response, result);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request,
-            String attributeDisplayNameFilter, //
-            String category, //
-            String subcategory, //
-            Boolean onlySelectedAttributes, //
-            Integer offset, //
             Integer max) {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
@@ -237,8 +218,7 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
-    public void loadAMStatisticsCubeByPost(HttpServletRequest request, //
-            HttpServletResponse response, //
+    public AccountMasterCube loadAMStatisticsCubeByPost(HttpServletRequest request, //
             @ApiParam(value = "Should load enrichment attribute metadata") //
             @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
@@ -250,11 +230,7 @@ public class LatticeInsightsResource {
                     null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
-        try {
-            GzipUtils.writeToGzipStream(response, cube);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return cube;
     }
 
     @RequestMapping(value = STATS_PATH + "/cube", //
@@ -262,24 +238,18 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
-    public void loadAMStatisticsCube(HttpServletRequest request, //
-            HttpServletResponse response, //
+    public AccountMasterCube loadAMStatisticsCube(HttpServletRequest request, //
             @ApiParam(value = "Should load enrichment attribute metadata") //
             @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
             @RequestParam(value = "q", required = false) String query) {
         AccountMasterCube cube = enrichmentService.getCube(query);
-
         if (loadEnrichmentMetadata) {
             List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null, null,
                     null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
-        try {
-            GzipUtils.writeToGzipStream(response, cube);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return cube;
     }
 
     @RequestMapping(value = STATS_PATH + "/topn", //

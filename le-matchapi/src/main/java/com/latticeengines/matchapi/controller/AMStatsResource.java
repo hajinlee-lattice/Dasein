@@ -1,11 +1,5 @@
 package com.latticeengines.matchapi.controller;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
@@ -29,37 +21,22 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/amstats")
 public class AMStatsResource {
 
-    private static final ObjectMapper OM = new ObjectMapper();
-
-    private static final Log log = LogFactory.getLog(AMStatsResource.class);
-
     @Autowired
     private AccountMasterStatisticsService accountMasterStatisticsService;
 
     @RequestMapping(value = "/cubes", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account master statistics cube", response = AccountMasterCube.class)
-    private void getCube(@RequestBody AccountMasterFactQuery query,
+    private AccountMasterCube getCube(@RequestBody AccountMasterFactQuery query,
             @RequestParam(value = "considerOnlyEnrichments", required = false, //
-                    defaultValue = "true") boolean considerOnlyEnrichments, //
-            HttpServletResponse response) {
-        AccountMasterCube cube = accountMasterStatisticsService.query(query, considerOnlyEnrichments);
-        try {
-            GzipUtils.writeToGzipStream(response, cube);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+                    defaultValue = "true") boolean considerOnlyEnrichments) {
+        return accountMasterStatisticsService.query(query, considerOnlyEnrichments);
     }
 
     @RequestMapping(value = "/topattrs", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get categorical attribute tree", response = TopNAttributeTree.class)
-    private void getTopAttrTree(HttpServletResponse response) {
-        TopNAttributeTree tree = accountMasterStatisticsService.getTopAttrTree();
-        try {
-            GzipUtils.writeToGzipStream(response, tree);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private TopNAttributeTree getTopAttrTree() {
+        return accountMasterStatisticsService.getTopAttrTree();
     }
 }
