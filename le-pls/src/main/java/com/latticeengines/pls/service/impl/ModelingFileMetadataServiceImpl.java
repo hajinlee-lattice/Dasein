@@ -158,6 +158,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
+        Collection<String> reservedWords = Arrays.asList(new String[]{ReservedField.Rating.displayName});
+        ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords);
         return stream;
     }
 
