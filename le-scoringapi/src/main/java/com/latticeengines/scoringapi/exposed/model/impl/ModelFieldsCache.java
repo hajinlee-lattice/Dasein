@@ -35,12 +35,17 @@ public class ModelFieldsCache {
                     @Override
                     public Fields load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
                         if (log.isInfoEnabled()) {
-                            log.info(String.format("Load Fields tenant %s and model %s", key.getKey(), key.getValue()));
+                            log.info(String.format(
+                                    "Load Fields tenant %s and model %s. "//
+                                            + "Current cache size = %d",
+                                    key.getKey(), key.getValue(), modelFieldsCache.asMap().size()));
                         }
                         Fields fields = modelRetrieverImpl.loadModelFieldsViaCache(key.getKey(), key.getValue());
                         if (log.isInfoEnabled()) {
-                            log.info(String.format("Load completed Fields for tenant %s and model %s", key.getKey(),
-                                    key.getValue()));
+                            log.info(String.format(
+                                    "Load completed Fields for tenant %s and model %s. "//
+                                            + "Current cache size = %d",
+                                    key.getKey(), key.getValue(), modelFieldsCache.asMap().size()));
                         }
                         return fields;
                     };

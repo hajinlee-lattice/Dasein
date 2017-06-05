@@ -35,14 +35,18 @@ public class ModelDetailsCache {
                     @Override
                     public ModelDetail load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
                         if (log.isInfoEnabled()) {
-                            log.info(String.format("Load model details for tenant %s and model %s", key.getKey(),
-                                    key.getValue()));
+                            log.info(String.format(
+                                    "Load model details for tenant %s and model %s. "//
+                                            + "Current cache size = %d",
+                                    key.getKey(), key.getValue(), modelDetailsCache.asMap().size()));
                         }
                         ModelDetail modelDetail = modelRetrieverImpl.loadModelDetailViaCache(key.getKey(),
                                 key.getValue());
                         if (log.isInfoEnabled()) {
-                            log.info(String.format("Load completed model details for tenant %s and model %s",
-                                    key.getKey(), key.getValue()));
+                            log.info(String.format(
+                                    "Load completed model details for tenant %s and model %s. "//
+                                            + "Current cache size = %d",
+                                    key.getKey(), key.getValue(), modelDetailsCache.asMap().size()));
                         }
                         return modelDetail;
                     };

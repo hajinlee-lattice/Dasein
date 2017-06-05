@@ -52,14 +52,18 @@ public class ScoreArtifactCache {
                     @Override
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
                         if (log.isInfoEnabled()) {
-                            log.info(String.format("Load model artifacts for tenant %s and model %s", key.getKey(),
-                                    key.getValue()));
+                            log.info(String.format(
+                                    "Load model artifacts for tenant %s and model %s. "//
+                                            + "Current cache size = %d",
+                                    key.getKey(), key.getValue(), scoreArtifactCache.asMap().size()));
                         }
                         ScoringArtifacts artifact = modelRetriever.retrieveModelArtifactsFromHdfs(key.getKey(),
                                 key.getValue());
                         if (log.isInfoEnabled()) {
-                            log.info(String.format("Load completed model artifacts for tenant %s and model %s",
-                                    key.getKey(), key.getValue()));
+                            log.info(String.format(
+                                    "Load completed model artifacts for tenant %s and model %s. "//
+                                            + "Current cache size = %d",
+                                    key.getKey(), key.getValue(), scoreArtifactCache.asMap().size()));
                         }
                         return artifact;
                     };
