@@ -148,66 +148,12 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
             request.setName("ConsolidatePipeline");
             request.setVersion(targetVersion);
 
-            /* Step 1: Merge */
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = inputTableNames;
-            step1.setBaseSources(baseSources);
+            TransformationStepConfig mergeStep = createMergeStep();
+            TransformationStepConfig matchStep = createMatchStep();
+            TransformationStepConfig upsertMasterStep = createUpsertMasterStep();
+            TransformationStepConfig getDeltaStep = createDeltaStep();
 
-            Map<String, SourceTable> baseTables = new HashMap<>();
-            for (String inputTableName : inputTableNames) {
-                baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
-            }
-            step1.setBaseTables(baseTables);
-            step1.setTransformer("consolidateDataTransformer");
-
-            TargetTable targetTable = new TargetTable();
-            targetTable.setCustomerSpace(customerSpace);
-            targetTable.setNamePrefix(mergedTableName);
-            step1.setTargetTable(targetTable);
-            step1.setConfiguration(getConsolidateDataConfig());
-
-            /* Step 2: Match */
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            // step 1 output
-            step2.setInputSteps(Collections.singletonList(0));
-            step2.setTransformer("bulkMatchTransformer");
-            step2.setConfiguration(getMatchConfig());
-
-            /* Step 3: Upsert to Master table */
-            TransformationStepConfig step3 = new TransformationStepConfig();
-            Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
-            if (masterTable != null) {
-                baseSources = Arrays.asList(masterTableName);
-                baseTables = new HashMap<>();
-                SourceTable sourceMasterTable = new SourceTable(masterTableName, customerSpace);
-                baseTables.put(masterTableName, sourceMasterTable);
-                step3.setBaseSources(baseSources);
-                step3.setBaseTables(baseTables);
-            }
-            // step 2 output
-            step3.setInputSteps(Collections.singletonList(1));
-            step3.setTransformer("consolidateDataTransformer");
-            step3.setConfiguration(getConsolidateDataConfig());
-
-            targetTable = new TargetTable();
-            targetTable.setCustomerSpace(customerSpace);
-            targetTable.setNamePrefix(masterTableName);
-            step3.setTargetTable(targetTable);
-
-            /* Step 4: Leftjoin for Delta */
-            TransformationStepConfig step4 = new TransformationStepConfig();
-            // step 2, 3 output
-            step4.setInputSteps(Arrays.asList(1, 2));
-            step4.setTransformer("consolidateDeltaTransformer");
-            step4.setConfiguration(getConsolidateDeltaConfig());
-
-            targetTable = new TargetTable();
-            targetTable.setCustomerSpace(customerSpace);
-            targetTable.setNamePrefix(deltaTableName);
-            step4.setTargetTable(targetTable);
-
-            /* Final */
-            List<TransformationStepConfig> steps = Arrays.asList(step1, step2, step3, step4);
+            List<TransformationStepConfig> steps = Arrays.asList(mergeStep, matchStep, upsertMasterStep, getDeltaStep);
             request.setSteps(steps);
 
             return request;
@@ -218,6 +164,77 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
         }
     }
 
+    private TransformationStepConfig createMergeStep() {
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = inputTableNames;
+        step1.setBaseSources(baseSources);
+
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        for (String inputTableName : inputTableNames) {
+            baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
+        }
+        step1.setBaseTables(baseTables);
+        step1.setTransformer("consolidateDataTransformer");
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(mergedTableName);
+        step1.setTargetTable(targetTable);
+        step1.setConfiguration(getConsolidateDataConfig());
+        return step1;
+    }
+
+    private TransformationStepConfig createMatchStep() {
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        // step 1 output
+        step2.setInputSteps(Collections.singletonList(0));
+        step2.setTransformer("bulkMatchTransformer");
+        step2.setConfiguration(getMatchConfig());
+        return step2;
+    }
+
+    private TransformationStepConfig createUpsertMasterStep() {
+        List<String> baseSources;
+        Map<String, SourceTable> baseTables;
+        TargetTable targetTable;
+        TransformationStepConfig step3 = new TransformationStepConfig();
+        Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
+        if (masterTable != null) {
+            baseSources = Arrays.asList(masterTableName);
+            baseTables = new HashMap<>();
+            SourceTable sourceMasterTable = new SourceTable(masterTableName, customerSpace);
+            baseTables.put(masterTableName, sourceMasterTable);
+            step3.setBaseSources(baseSources);
+            step3.setBaseTables(baseTables);
+        }
+        // step 2 output
+        step3.setInputSteps(Collections.singletonList(1));
+        step3.setTransformer("consolidateDataTransformer");
+        step3.setConfiguration(getConsolidateDataConfig());
+
+        targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(masterTableName);
+        step3.setTargetTable(targetTable);
+        return step3;
+    }
+    
+    private TransformationStepConfig createDeltaStep() {
+        TargetTable targetTable;
+        TransformationStepConfig step4 = new TransformationStepConfig();
+        // step 2, 3 output
+        step4.setInputSteps(Arrays.asList(1, 2));
+        step4.setTransformer("consolidateDeltaTransformer");
+        step4.setConfiguration(getConsolidateDeltaConfig());
+
+        targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(deltaTableName);
+        step4.setTargetTable(targetTable);
+        return step4;
+    }
+
+    
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(idField);
