@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -153,10 +154,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             Assert.assertTrue(outputRecord.getResult().size() > 0);
             if (!publicDomainService.isPublicDomain(outputRecord.getResult().get(0).getPreMatchDomain())) {
                 Assert.assertTrue(outputRecord.getResult().get(0).isMatched(),
-                        outputRecord.getResult().get(0) + " should match as it is not a public domain.");
+                        JsonUtils.serialize(outputRecord.getResult().get(0)) + " should match as it is not a public domain.");
             } else {
                 Assert.assertFalse(outputRecord.getResult().get(0).isMatched(),
-                        outputRecord.getResult().get(0) + " should not match as it is a public domain.");
+                        JsonUtils.serialize(outputRecord.getResult().get(0)) + " should not match as it is a public domain.");
                 Assert.assertTrue(outputRecord.getResult().get(0).getErrorMessages().size() > 0);
             }
         }
