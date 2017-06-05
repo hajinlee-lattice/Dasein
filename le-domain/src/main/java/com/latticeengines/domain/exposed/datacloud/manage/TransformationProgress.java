@@ -14,11 +14,18 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.ParamDef;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "TransformationProgress")
+@FilterDef(name = "hdfsPodFilter", parameters = { @ParamDef(name = "hdfsPod", type = "string") })
+@Filter(name = "hdfsPodFilter", condition = "HdfsPod = :hdfsPod")
 public class TransformationProgress implements Progress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +33,7 @@ public class TransformationProgress implements Progress {
     protected Long pid;
 
     @Column(name = "SourceName", nullable = false)
+    @Index(name = "IX_NAME_VERSION")
     protected String sourceName;
 
     @Column(name = "StartDate")
@@ -37,6 +45,9 @@ public class TransformationProgress implements Progress {
     @Enumerated(EnumType.STRING)
     @Column(name = "Status")
     protected ProgressStatus status;
+
+    @Column(name = "HdfsPod", nullable = false, length = 100)
+    private String hdfsPod;
 
     @Column(name = "LatestStatusUpdate")
     protected Date latestStatusUpdate;
@@ -60,6 +71,7 @@ public class TransformationProgress implements Progress {
     protected String baseSourceVersions;
 
     @Column(name = "Version")
+    @Index(name = "IX_NAME_VERSION")
     protected String version;
 
     @Column(name = "YarnAppId")
@@ -191,6 +203,14 @@ public class TransformationProgress implements Progress {
         progress.setStatus(ProgressStatus.NEW);
 
         return progress;
+    }
+
+    public String getHdfsPod() {
+        return hdfsPod;
+    }
+
+    public void setHdfsPod(String hdfsPod) {
+        this.hdfsPod = hdfsPod;
     }
 
     @Override

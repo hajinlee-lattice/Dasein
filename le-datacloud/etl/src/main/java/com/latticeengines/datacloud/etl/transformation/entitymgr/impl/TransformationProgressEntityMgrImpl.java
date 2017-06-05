@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.transformation.dao.TransformationProgressDao;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
@@ -35,6 +36,7 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
                     currentDate, endDate);
             newProgress.setCreatedBy(creator);
             newProgress.setVersion(version);
+            newProgress.setHdfsPod(HdfsPodContext.getHdfsPodId());
             progressDao.create(newProgress);
             return newProgress;
         } catch (IllegalAccessException | InstantiationException e) {

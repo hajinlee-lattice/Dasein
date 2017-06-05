@@ -81,7 +81,7 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
         Map<String, Object> fields = new HashMap<String, Object>();
         fields.put("PID", progress.getPid());
         fields.put("ApplicationId", progress.getApplicationId());
-        List<IngestionProgress> progresses = ingestionProgressEntityMgr.getProgressesByField(fields, null);
+        List<IngestionProgress> progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         Assert.assertNotNull(progresses, "Failed to get ingestion progresses by field");
         Assert.assertNotEquals(progresses.isEmpty(), true,
                 "Failed to get ingestion progresses by field");
@@ -97,7 +97,7 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
     @Test(groups = "functional", enabled = true)
     public void testRetryFailedIngestionProgress() throws JsonProcessingException {
         failedProgress = ingestionProgressEntityMgr.saveProgress(failedProgress);
-        List<IngestionProgress> progresses = ingestionProgressEntityMgr.getRetryFailedProgresses();
+        List<IngestionProgress> progresses = ingestionProgressEntityMgr.findRetryFailedProgresses();
         Assert.assertNotNull(progresses);
         Assert.assertEquals(progresses.size() > 0, true);
         for (IngestionProgress progress : progresses) {

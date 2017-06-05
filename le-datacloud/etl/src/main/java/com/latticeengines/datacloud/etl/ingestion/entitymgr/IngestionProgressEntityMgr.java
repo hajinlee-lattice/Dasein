@@ -8,9 +8,9 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 public interface IngestionProgressEntityMgr {
 
-    IngestionProgress getProgress(IngestionProgress progress);
+    IngestionProgress findProgress(IngestionProgress progress);
 
-    List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields);
+    List<IngestionProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields);
 
     IngestionProgress saveProgress(IngestionProgress progress);
 
@@ -20,7 +20,7 @@ public interface IngestionProgressEntityMgr {
 
     boolean isIngestionTriggered(Ingestion ingestion);
 
-    List<IngestionProgress> getRetryFailedProgresses();
+    List<IngestionProgress> findRetryFailedProgresses();
 
     boolean isDuplicateProgress(IngestionProgress progress);
 }

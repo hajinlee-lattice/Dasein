@@ -140,7 +140,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         Map<String, Object> fields = new HashMap<>();
         fields.put("IngestionId", ingestion.getPid());
         fields.put("Version", version);
-        List<IngestionProgress> progresses = ingestionProgressEntityMgr.getProgressesByField(fields, null);
+        List<IngestionProgress> progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         Assert.assertEquals(progresses.size(), expectedProgresses);
         Long startTime = System.currentTimeMillis();
         EngineProgress engineProgress = ingestionVersionService.status(name, version);
@@ -158,7 +158,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
             }
         }
         Assert.assertEquals(engineProgress.getStatus(), ProgressStatus.FINISHED);
-        progresses = ingestionProgressEntityMgr.getProgressesByField(fields, null);
+        progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         for (IngestionProgress progress : progresses) {
             ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);

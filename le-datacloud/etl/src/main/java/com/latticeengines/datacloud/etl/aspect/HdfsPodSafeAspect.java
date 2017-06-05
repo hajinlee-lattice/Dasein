@@ -22,6 +22,26 @@ public class HdfsPodSafeAspect {
         enableHdfsPodFilter(joinPoint);
     }
 
+    @Before("execution(* com.latticeengines.datacloud.etl.ingestion.entitymgr.impl.IngestionProgressEntityMgrImpl.find*(..))")
+    public void findIngestionProgress(JoinPoint joinPoint) {
+        enableHdfsPodFilter(joinPoint);
+    }
+
+    @Before("execution(* com.latticeengines.datacloud.etl.ingestion.entitymgr.impl.IngestionProgressEntityMgrImpl.is*(..))")
+    public void isIngestionProgress(JoinPoint joinPoint) {
+        enableHdfsPodFilter(joinPoint);
+    }
+
+    @Before("execution(* com.latticeengines.datacloud.etl.transformation.entitymgr.impl.TransformationProgressEntityMgrImpl.find*(..))")
+    public void findTransformationProgress(JoinPoint joinPoint) {
+        enableHdfsPodFilter(joinPoint);
+    }
+
+    @Before("execution(* com.latticeengines.datacloud.etl.transformation.entitymgr.impl.TransformationProgressEntityMgrImpl.has*(..))")
+    public void hasTransformationProgress(JoinPoint joinPoint) {
+        enableHdfsPodFilter(joinPoint);
+    }
+
     private void enableHdfsPodFilter(JoinPoint joinPoint) {
         Session session = sessionFactory.getCurrentSession();
         if (session == null) {

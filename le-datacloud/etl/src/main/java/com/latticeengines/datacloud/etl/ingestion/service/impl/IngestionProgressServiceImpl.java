@@ -53,7 +53,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
 
     @Override
     public List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields) {
-        return ingestionProgressEntityMgr.getProgressesByField(fields, orderFields);
+        return ingestionProgressEntityMgr.findProgressesByField(fields, orderFields);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
 
     @Override
     public List<IngestionProgress> getRetryFailedProgresses() {
-        return ingestionProgressEntityMgr.getRetryFailedProgresses();
+        return ingestionProgressEntityMgr.findRetryFailedProgresses();
     }
 
     @Override
@@ -184,7 +184,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
 
     @Override
     public IngestionProgressUpdaterImpl updateProgress(IngestionProgress progress) {
-        progress = ingestionProgressEntityMgr.getProgress(progress);
+        progress = ingestionProgressEntityMgr.findProgress(progress);
         return new IngestionProgressUpdaterImpl(progress);
     }
 

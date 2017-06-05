@@ -3,10 +3,12 @@ package com.latticeengines.datacloud.etl.ingestion.entitymgr.impl;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.dao.IngestionProgressDao;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -19,19 +21,26 @@ public class IngestionProgressEntityMgrImpl implements IngestionProgressEntityMg
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
-    public IngestionProgress getProgress(IngestionProgress progress) {
+    public IngestionProgress findProgress(IngestionProgress progress) {
         return ingestionProgressDao.findByKey(progress);
     }
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
-    public List<IngestionProgress> getProgressesByField(Map<String, Object> fields, List<String> orderFields) {
+    public List<IngestionProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         return ingestionProgressDao.getProgressesByField(fields, orderFields);
     }
 
     @Override
     @Transactional(value = "propDataManage")
     public IngestionProgress saveProgress(IngestionProgress progress) {
+        String podIdInProgress = progress.getHdfsPod();
+        String podIdInContext = HdfsPodContext.getHdfsPodId();
+        if (StringUtils.isNotBlank(podIdInProgress) && !podIdInProgress.equals(podIdInContext)) {
+            throw new IllegalArgumentException("You are in the pod " + podIdInContext + ", but you are trying to update/create a progress in the pod " + podIdInProgress);
+        } else if (StringUtils.isBlank(podIdInProgress)) {
+            progress.setHdfsPod(podIdInContext);
+        }
         return ingestionProgressDao.saveProgress(progress);
     }
 
@@ -55,7 +64,7 @@ public class IngestionProgressEntityMgrImpl implements IngestionProgressEntityMg
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
-    public List<IngestionProgress> getRetryFailedProgresses() {
+    public List<IngestionProgress> findRetryFailedProgresses() {
         return ingestionProgressDao.getRetryFailedProgresses();
     }
 

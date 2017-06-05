@@ -275,7 +275,7 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
         Map<String, Object> fields = new HashMap<>();
         fields.put("IngestionId", ingestion.getPid());
         fields.put("Version", version);
-        List<IngestionProgress> progresses = ingestionProgressEntityMgr.getProgressesByField(fields, null);
+        List<IngestionProgress> progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         if (CollectionUtils.isEmpty(progresses)) {
             return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.NOTSTARTED, null, null);
         }
