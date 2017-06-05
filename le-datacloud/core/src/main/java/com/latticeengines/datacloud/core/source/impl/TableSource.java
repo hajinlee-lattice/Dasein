@@ -4,6 +4,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.TableUtils;
 
 /*
  * This is place holder for data sources created on the fly.
@@ -39,8 +40,8 @@ public class TableSource implements Source {
     }
 
     /*
-         * name of the source
-         */
+     * name of the source
+     */
     public String getSourceName() {
         return table.getName();
     }
@@ -72,11 +73,11 @@ public class TableSource implements Source {
      * source
      */
     public String getDefaultCronExpression() {
-         return null;
+        return null;
     }
 
     public static String getFullTableName(String tableNamePrefix, String version) {
-        return tableNamePrefix + "_" + version;
+        return TableUtils.getFullTableName(tableNamePrefix, version);
     }
 
 }

@@ -12,5 +12,7 @@ public interface SourceTransformationService {
 
     TransformationProgress transform(TransformationRequest request, String hdfsPod, boolean fromScan);
 
-    TransformationProgress pipelineTransform(PipelineTransformationRequest request, String hdfsPod); 
+    TransformationProgress pipelineTransform(PipelineTransformationRequest request, String hdfsPod);
+
+    TransformationProgress getProgress(String rootOperationUid); 
 }

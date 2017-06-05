@@ -64,8 +64,8 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
 
-        TransformationService<?> transformationService = (TransformationService<?>) applicationContext
-                .getBean(request.getSourceBeanName());
+        TransformationService<?> transformationService = (TransformationService<?>) applicationContext.getBean(request
+                .getSourceBeanName());
         if (fromScan && transformationService.isManualTriggerred()) {
             return null;
         }
@@ -89,6 +89,11 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
 
         TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy);
         return executor.kickOffNewPipelineProgress(transformationProgressEntityMgr, request);
+    }
+
+    @Override
+    public TransformationProgress getProgress(String rootOperationUid) {
+        return transformationProgressEntityMgr.findProgressByRootOperationUid(rootOperationUid);
     }
 
     private List<TransformationProgress> scanForNewWorkFlow(String hdfsPod) {

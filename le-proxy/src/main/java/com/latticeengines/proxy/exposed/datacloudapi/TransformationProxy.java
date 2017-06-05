@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -39,4 +40,16 @@ public class TransformationProxy extends MicroserviceRestApiProxy implements Tra
         return post("transform", url, transformationRequest, TransformationProgress.class);
     }
 
+    @Override
+    public TransformationProgress transform(PipelineTransformationRequest transformationRequest, String hdfsPod) {
+        hdfsPod = StringUtils.isEmpty(hdfsPod) ? "" : hdfsPod;
+        String url = constructUrl("/pipeline?podid={hdfsPod}", hdfsPod);
+        return post("transform", url, transformationRequest, TransformationProgress.class);
+    }
+
+    @Override
+    public TransformationProgress getProgress(String rootOperationUid) {
+        String url = constructUrl("/progress?rootOperationUid={rootOperationUid}", rootOperationUid);
+        return get("getProgress", url, TransformationProgress.class);
+    }
 }

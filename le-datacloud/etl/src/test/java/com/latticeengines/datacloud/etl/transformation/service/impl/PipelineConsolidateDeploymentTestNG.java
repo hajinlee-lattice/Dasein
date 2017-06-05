@@ -75,11 +75,11 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         // cleanup intermediate table
         cleanupRegisteredTable(tableName1);
         cleanupRegisteredTable(tableName2);
-        String mergedTableFullName = TableSource.getFullTableName(mergedTableName, targetVersion);
-        cleanupRegisteredTable(mergedTableFullName);
-        cleanupRegisteredTable(deltaTableName);
+        cleanupRegisteredTable(TableSource.getFullTableName(mergedTableName, targetVersion));
+        cleanupRegisteredTable(TableSource.getFullTableName(masterTableName, targetVersion));
+        cleanupRegisteredTable(TableSource.getFullTableName(deltaTableName, targetVersion));
 
-//        prepareCleanPod("PipelineConsolidateDeploymentTestNG");
+        prepareCleanPod("PipelineConsolidateDeploymentTestNG");
     }
 
     @Test(groups = "deployment", enabled = true)

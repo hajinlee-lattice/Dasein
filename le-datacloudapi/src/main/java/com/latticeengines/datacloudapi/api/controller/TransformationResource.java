@@ -1,5 +1,8 @@
 package com.latticeengines.datacloudapi.api.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloudapi.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -23,10 +28,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
 import com.latticeengines.security.exposed.InternalResourceBase;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "transform", description = "REST resource for source transformation")
 @RestController
@@ -43,6 +44,16 @@ public class TransformationResource extends InternalResourceBase implements Tran
 
     @Override
     public TransformationProgress transform(TransformationRequest transformationRequest, String hdfsPod) {
+        throw new UnsupportedOperationException("This is a place holder of a proxy method.");
+    }
+
+    @Override
+    public TransformationProgress transform(PipelineTransformationRequest transformationRequest, String hdfsPod) {
+        throw new UnsupportedOperationException("This is a place holder of a proxy method.");
+    }
+
+    @Override
+    public TransformationProgress getProgress(String rootOperationUid) {
         throw new UnsupportedOperationException("This is a place holder of a proxy method.");
     }
 
@@ -120,7 +131,8 @@ public class TransformationResource extends InternalResourceBase implements Tran
                 hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
                 HdfsPodContext.changeHdfsPodId(hdfsPod);
             }
-            TransformationProgress progress = sourceTransformationService.pipelineTransform(transformationRequest, hdfsPod);
+            TransformationProgress progress = sourceTransformationService.pipelineTransform(transformationRequest,
+                    hdfsPod);
             if (progress == null) {
                 throw new IllegalStateException("Cannot start a new progress for your request");
             }
@@ -130,6 +142,25 @@ public class TransformationResource extends InternalResourceBase implements Tran
         } finally {
             hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
             HdfsPodContext.changeHdfsPodId(hdfsPod);
+        }
+    }
+
+    @RequestMapping(value = "progress", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiIgnore
+    @ApiOperation(value = "Get the TransformationProgress.")
+    public TransformationProgress getProgress(
+            @RequestParam(value = "rootOperationUid", required = true) String rootOperationUid,
+            HttpServletRequest request) {
+        checkHeader(request);
+        try {
+            TransformationProgress progress = sourceTransformationService.getProgress(rootOperationUid);
+            if (progress == null) {
+                throw new IllegalStateException("Cannot find progress for rootOperationUid=" + rootOperationUid);
+            }
+            return progress;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25041, e, new String[] { rootOperationUid });
         }
     }
 }

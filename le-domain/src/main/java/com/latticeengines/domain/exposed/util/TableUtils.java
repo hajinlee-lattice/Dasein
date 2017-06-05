@@ -9,6 +9,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -91,4 +92,13 @@ public class TableUtils {
         }
         return fieldAssembler.endRecord();
     }
+
+    public static String getFullTableName(String tableNamePrefix, String version) {
+        if (StringUtils.isNotBlank(version)) {
+            return tableNamePrefix + "_" + version;
+        } else {
+            return tableNamePrefix;
+        }
+    }
+
 }
