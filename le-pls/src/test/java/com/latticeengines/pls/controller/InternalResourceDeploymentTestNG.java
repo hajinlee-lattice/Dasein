@@ -48,9 +48,10 @@ public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDep
 
         Camille camille = CamilleEnvironment.getCamille();
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
-                customerSpace.getTenantId(), customerSpace.getSpaceId()).append(
-                new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
+        Path path = PathBuilder
+                .buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
+                        customerSpace.getTenantId(), customerSpace.getSpaceId())
+                .append(new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
         try {
             camille.delete(path);
         } catch (Exception e) {
@@ -69,8 +70,9 @@ public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDep
         headers.add("Accept", "application/json");
         headers.add("MagicAuthentication", "Security through obscurity!");
         HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
-        ResponseEntity<ResponseDocument> responseEntity = magicRestTemplate.exchange(getDeployedRestAPIHostPort()
-                + "/pls/internal/testtenants", HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        ResponseEntity<ResponseDocument> responseEntity = magicRestTemplate.exchange(
+                getDeployedRestAPIHostPort() + "/pls/internal/testtenants", HttpMethod.PUT, requestEntity,
+                ResponseDocument.class);
         ResponseDocument response = responseEntity.getBody();
         Assert.assertTrue(response.isSuccess());
 
@@ -79,13 +81,13 @@ public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDep
         Assert.assertEquals(topology, CRMTopology.ELOQUA);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testRetrieveSvnRevision() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
-        Map<?, ?> response = restTemplate.getForObject(
-                String.format("%s/pls/internal/currentstack", getDeployedRestAPIHostPort()), Map.class);
+        Map<?, ?> response = restTemplate
+                .getForObject(String.format("%s/pls/internal/currentstack", getDeployedRestAPIHostPort()), Map.class);
         String revision = null;
         for (Object key : response.keySet()) {
             if (key.equals("SvnRevision")) {
