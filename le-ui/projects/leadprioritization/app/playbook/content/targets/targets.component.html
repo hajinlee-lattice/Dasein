@@ -54,7 +54,7 @@
             <div ng-if="vm.filtered.length > 0" class="pull-right">
                 <pd-pagination-controls
                     current="vm.current"
-                    max="vm.max = vm.records.length / vm.pagesize">
+                    max="vm.max = vm.filtered.length / vm.pagesize">
                 </pd-pagination-controls>
             </div>
         </div>

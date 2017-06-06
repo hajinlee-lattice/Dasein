@@ -1,17 +1,38 @@
-<div class="playbook-settings container">
-    <div class="header">
-        <h2>Settings</h2>
-    </div>
-    <div class="row">
-        <div>
-            <label for="playName">Play Name</label>
-            <input id="playName" type="text" value="" />
+<div class="playbook-settings container" ng-controller="PlaybookWizardSettings as vm">
+    <form name="settings_form">
+        <div class="header">
+            <h2>Settings</h2>
         </div>
-    </div>
-    <div class="row">
-        <div>
-            <label for="description">Description</label>
-            <textarea id="description"></textarea>
+        <div class="row">
+            <div    class="form-group" 
+                    ng-class="{ 'has-error': settings_form.playName.$invalid && !settings_form.playName.$pristine, 'is-pristine': settings_form.playName.$pristine }">
+                <label for="playName">Play Name</label>
+                <input 
+                        class="form-control" 
+                        id="playName"
+                        name="playName"
+                        type="text" 
+                        placeholder="Example: US-Enterprise-model" 
+                        ng-change="vm.checkValid(settings_form)"
+                        ng-init="vm.checkValidDelay(settings_form)"
+                        ng-model="vm.stored.play_name"
+                        ng-value="vm.stored.play_name"
+                        ng-minlength="3"
+                        ng-maxlength="50"
+                        required />
+            </div>
         </div>
-    </div>
+        <div class="row">
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea 
+                        id="play_description"
+                        class="form-control" 
+                        name="playDescription"
+                        ng-change="vm.checkValid(settings_form)"
+                        ng-model="vm.stored.play_description"
+                        ng-value="vm.stored.play_description"></textarea>
+            </div>
+        </div>
+    </form>
 </div>

@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.launch', [])
 .controller('PlaybookWizardLaunch', function(
-    $state, $stateParams, $scope, ResourceUtility
+    $state, $stateParams, ResourceUtility
 ) {
     var vm = this;
 

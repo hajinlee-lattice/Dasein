@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.targets', [])
 .controller('PlaybookWizardTargets', function(
-    $state, $stateParams, $scope, ResourceUtility, PlaybookWizardStore, DefaultSelectedObject, SelectedSegment, QueryStore, BrowserStorageUtility
+    $state, $stateParams, ResourceUtility, PlaybookWizardStore, DefaultSelectedObject, SelectedSegment, QueryStore, BrowserStorageUtility
 ) {
     var vm = this;
 
@@ -11,6 +11,7 @@ angular.module('lp.playbook.wizard.targets', [])
         segment: SelectedSegment,
         columns: QueryStore.columns[DefaultSelectedObject],
         records: QueryStore.getRecordsForUiState(DefaultSelectedObject),
+        filtered: [],
         queryText: '',
         sortKey: null,
         sortDesc: true,

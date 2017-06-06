@@ -1,4 +1,5 @@
 <div class="playbook-ratings container">
+    <form name="rating_form">
     <div class="header">
         <h2>Rating
             <span class="more-info">&#105;
@@ -31,10 +32,17 @@
             </li>
             <li ng-repeat="rating in vm.ratings| filter: {'Name': search}" class="item rating_">
                 <ul>
-                    <li class="name"><input type="radio" id="rating{{$index}}" name="rating" ng-model="vm.ratingsSelection" value="{{rating.Name}}" /><label for="rating{{$index}}">{{rating.Name}}</label></li>
+                    <li class="name">
+                    <input  type="radio" 
+                            id="rating{{$index}}" 
+                            name="rating.name" 
+                            ng-value="rating.name"
+                            ng-change="vm.checkValid(rating_form)"
+                            ng-model="vm.stored.rating_selection" />
+                    <label for="rating{{$index}}">{{rating.Name}}</label></li>
                 </ul>
             </li>
         </ul>
     </div>
-
+    </form>
 </div>

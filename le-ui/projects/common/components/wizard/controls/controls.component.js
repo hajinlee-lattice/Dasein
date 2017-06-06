@@ -1,7 +1,7 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, 
-    WizardProgressContext, WizardProgressItems, WizardControlsOptions
+    $state, $stateParams, $scope, $timeout, ResourceUtility, WizardProgressItems,
+    WizardProgressContext, WizardControlsOptions, WizardValidationStore
 ) {
     var vm = this;
 
@@ -9,7 +9,8 @@ angular.module('common.wizard.controls', [])
         items: WizardProgressItems,
         state: $state.current.name,
         prev: WizardControlsOptions.backState,
-        next: 'home.' + WizardProgressContext + '.wizard'
+        next: 'home.' + WizardProgressContext + '.wizard',
+        valid: false
     });
 
     vm.init = function() {
@@ -29,36 +30,47 @@ angular.module('common.wizard.controls', [])
     }
 
     vm.setButtons = function() {
-        var current = $state.current.name;
+        var current = $state.current.name,
+            item, state, split, last, prev, next, nsplit, psplit;
 
         for (var i=0; i<vm.items.length; i++) {
-            var item = vm.items[i];
-            var state = item.state;
+            item = vm.items[i];
+            state = item.state;
 
             if ('home.' + WizardProgressContext + '.wizard.' + state == current) {
-                var split = state.split('.');
-                var last = split[split.length-1];
+                split = state.split('.');
+                last = split[split.length-1];
 
+                vm.prev = WizardControlsOptions.backState;
+                vm.next = '';
+                
                 if (i+1 < vm.items.length) {
-                    var next = vm.items[i+1].state;
-                    var nsplit = next.split('.');
+                    next = vm.items[i+1].state;
+                    nsplit = next.split('.');
 
                     vm.next = 'home.' + WizardProgressContext + '.wizard.' + nsplit.join('.');
-                } else {
-                    vm.next = '';
                 }
 
                 if (i-1 >= 0) {
-                    var prev = vm.items[i-1].state;
-                    var psplit = prev.split('.');
+                    prev = vm.items[i-1].state;
+                    psplit = prev.split('.');
                     
                     vm.prev = 'home.' + WizardProgressContext + '.wizard.' + psplit.join('.');
-                } else {
-                    vm.prev = WizardControlsOptions.backState;
                 }
             }
 
         }
+
+        vm.isValid();
+    }
+
+    vm.isValid = function() {
+        var current = $state.current.name;
+        var currentStep = current.split('.').pop();
+
+        vm.valid = WizardValidationStore.getValidation(currentStep);
+
+        return vm.valid;
     }
 
     vm.init();

@@ -1,4 +1,5 @@
 <div class="playbook-segment container">
+    <form name="segment_form">
     <div class="header">
         <h2>Segment
             <span class="more-info">&#105;
@@ -32,10 +33,19 @@
             </li>
             <li ng-repeat="segment in vm.segments | filter: {'display_name': search}" class="item segment">
                 <ul>
-                    <li class="name"><input type="radio" id="{{segment.name}}" name="segment" ng-model="vm.segmentSelection" value="{{segment.name}}" ng-click="vm.saveSegment(segment)" /><label for="{{segment.name}}">{{segment.display_name}}</label></li>
+                    <li class="name">
+                        <input  type="radio" 
+                                id="{{segment.name}}" 
+                                name="segment.name" 
+                                ng-value="segment.name"
+                                ng-model="vm.stored.segment_selection" 
+                                ng-change="vm.checkValid(segment_form)" 
+                                ng-click="vm.saveSegment(segment)" />
+                        <label for="{{segment.name}}">{{segment.display_name}}</label></li>
                     <li class="accounts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li>
                 </ul>
             </li>
         </ul>
     </div>
+    </form>
 </div>

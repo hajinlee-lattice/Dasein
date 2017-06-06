@@ -1,11 +1,13 @@
 angular
 .module('lp.playbook', [
     'common.wizard',
+    'lp.playbook.wizard.settings',
     'lp.playbook.wizard.segment',
-    'lp.playbook.wizard.ratings',
-    'lp.playbook.wizard.insights',
+    'lp.playbook.wizard.rating',
     'lp.playbook.wizard.targets',
-    'lp.playbook.wizard.settings'
+    'lp.playbook.wizard.insights',
+    'lp.playbook.wizard.preview',
+    'lp.playbook.wizard.launch'
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -31,18 +33,21 @@ angular
         .state('home.playbook.wizard', {
             url: '/wizard',
             resolve: {
+                WizardValidationStore: function(PlaybookWizardStore) {
+                    return PlaybookWizardStore;
+                },
                 WizardProgressContext: function() {
                     return 'playbook';
                 },
                 WizardProgressItems: function() {
                     return [
-                        { label: 'Settings', state: 'one' },
-                        { label: 'Segment', state: 'one.two' },
-                        { label: 'Ratings', state: 'one.two.three' },
-                        { label: 'Targets', state: 'one.two.three.four' },
-                        { label: 'Insights', state: 'one.two.three.four.cgfive' },
-                        { label: 'Preview', state: 'one.two.three.four.cgfive.cgsix' },
-                        { label: 'Launch', state: 'one.two.three.four.cgfive.cgsix.seven' }
+                        { label: 'Settings', state: 'settings' },
+                        { label: 'Segment', state: 'settings.segment' },
+                        { label: 'Rating', state: 'settings.segment.rating' },
+                        { label: 'Targets', state: 'settings.segment.rating.targets' },
+                        { label: 'Insights', state: 'settings.segment.rating.targets.insights' },
+                        { label: 'Preview', state: 'settings.segment.rating.targets.insights.preview' },
+                        { label: 'Launch', state: 'settings.segment.rating.targets.insights.preview.launch' }
                     ];
                 }
             },
@@ -63,19 +68,17 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.playbook.wizard.one'
+            redirectTo: 'home.playbook.wizard.settings'
         })
-        .state('home.playbook.wizard.one', {
+        .state('home.playbook.wizard.settings', {
             url: '/settings',
             views: {
                 'wizard_content@home.playbook': {
-                    controller: 'PlaybookWizardSettings',
-                    controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/settings/settings.component.html'
                 }
             },
         })
-        .state('home.playbook.wizard.one.two', {
+        .state('home.playbook.wizard.settings.segment', {
             url: '/segment',
             resolve: {
                 Segments: function(SegmentService) {
@@ -90,8 +93,8 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.one.two.three', {
-            url: '/ratings',
+        .state('home.playbook.wizard.settings.segment.rating', {
+            url: '/rating',
             resolve: {
                 Ratings: function(PlaybookWizardStore) {
                     return PlaybookWizardStore.getRatings();
@@ -99,13 +102,13 @@ angular
             },
             views: {
                 'wizard_content@home.playbook': {
-                    controller: 'PlaybookWizardRatings',
+                    controller: 'PlaybookWizardRating',
                     controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/ratings/ratings.component.html'
+                    templateUrl: 'app/playbook/content/rating/rating.component.html'
                 }
             }
         })
-        .state('home.playbook.wizard.one.two.three.four', {
+        .state('home.playbook.wizard.settings.segment.rating.targets', {
             url: '/targets',
             resolve: {
                 LoadDemoData: function(QueryStore) {
@@ -121,7 +124,7 @@ angular
                         deferred.resolve(segment);
                     });
                     return deferred.promise;
-                },
+                }
             },
             views: {
                 'wizard_content@home.playbook': {
@@ -131,7 +134,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.one.two.three.four.cgfive', {
+        .state('home.playbook.wizard.settings.segment.rating.targets.insights', {
             url: '/insights',
             resolve: {
                 TalkingPoints: function(CgTalkingPointStore) {
@@ -155,7 +158,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.one.two.three.four.cgfive.cgsix', {
+        .state('home.playbook.wizard.settings.segment.rating.targets.insights.preview', {
             url: '/preview',
             views: {
                 'wizard_content@home.playbook': {
@@ -165,7 +168,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.one.two.three.four.cgfive.cgsix.seven', {
+        .state('home.playbook.wizard.settings.segment.rating.targets.insights.preview.launch', {
             url: '/launch',
             views: {
                 'wizard_content@home.playbook': {

@@ -48,8 +48,6 @@ angular
     });
 
     $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
-        console.log('-!- error changing state:', error, event, toState, toParams, fromState, fromParams);
-
         if ($state.current.name != toState.name) {
             $state.reload();
         }
