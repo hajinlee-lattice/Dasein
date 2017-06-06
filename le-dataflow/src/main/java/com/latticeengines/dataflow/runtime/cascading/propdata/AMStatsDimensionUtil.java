@@ -43,8 +43,7 @@ public class AMStatsDimensionUtil implements Serializable {
                 if (objInExistingMergedTuple instanceof AttributeStats
                         && objInOriginalTuple instanceof AttributeStats) {
                     finalObj = dedupMergeUtil.merge(//
-                            (AttributeStats) objInExistingMergedTuple,
-                            (AttributeStats) objInOriginalTuple, isPrint);
+                            (AttributeStats) objInExistingMergedTuple, (AttributeStats) objInOriginalTuple, isPrint);
                 }
                 existingMergedTuple.set(idx, finalObj);
             }
@@ -70,8 +69,7 @@ public class AMStatsDimensionUtil implements Serializable {
                 if (objInExistingMergedTuple instanceof AttributeStats
                         && objInOriginalTuple instanceof AttributeStats) {
                     finalObj = addMergeUtil.merge(//
-                            (AttributeStats) objInExistingMergedTuple,
-                            (AttributeStats) objInOriginalTuple, isPrint);
+                            (AttributeStats) objInExistingMergedTuple, (AttributeStats) objInOriginalTuple, isPrint);
                 }
                 existingMergedTuple.set(idx, finalObj);
             }
@@ -82,10 +80,14 @@ public class AMStatsDimensionUtil implements Serializable {
 
     public static class ExpandedTuple {
         Object[] attrValuesArr;
+        int fieldsLength;
 
         public ExpandedTuple(ExpandedTuple expandedTuple) {
             // used for deep copy during stats calculation
-            attrValuesArr = new Object[expandedTuple.attrValuesArr.length];
+            this.attrValuesArr = new Object[expandedTuple.fieldsLength];
+            this.fieldsLength = expandedTuple.fieldsLength;
+
+            checkZeroSizeTuple();
 
             for (int idx = 0; idx < expandedTuple.attrValuesArr.length; idx++) {
                 Object objInOriginalTuple = expandedTuple.get(idx);
@@ -120,7 +122,10 @@ public class AMStatsDimensionUtil implements Serializable {
         }
 
         public ExpandedTuple(Tuple tuple, int fieldsLength) {
-            attrValuesArr = new Object[fieldsLength];
+            this.attrValuesArr = new Object[fieldsLength];
+            this.fieldsLength = fieldsLength;
+
+            checkZeroSizeTuple();
 
             for (int idx = 0; idx < fieldsLength; idx++) {
                 Object objInOriginalTuple = tuple.getObject(idx);
@@ -154,6 +159,9 @@ public class AMStatsDimensionUtil implements Serializable {
         }
 
         public Tuple generateTuple() {
+
+            checkZeroSizeTuple();
+
             Tuple tuple = new Tuple();
 
             for (int idx = 0; idx < attrValuesArr.length; idx++) {
@@ -168,7 +176,17 @@ public class AMStatsDimensionUtil implements Serializable {
                 tuple.add(value);
             }
 
+            if (tuple.size() == 0) {
+                throw new RuntimeException("Got zero size for generated tuple");
+            }
+
             return tuple;
+        }
+
+        private void checkZeroSizeTuple() {
+            if (this.fieldsLength == 0) {
+                throw new RuntimeException("Got zero size tuple");
+            }
         }
     }
 }
