@@ -26,4 +26,6 @@ public interface TransformationProgressEntityMgr {
 
     TransformationProgress updateStatus(TransformationProgress progress, ProgressStatus status);
 
+    TransformationProgress findPipelineProgressAtVersion(String pipelineName, String version);
+
 }

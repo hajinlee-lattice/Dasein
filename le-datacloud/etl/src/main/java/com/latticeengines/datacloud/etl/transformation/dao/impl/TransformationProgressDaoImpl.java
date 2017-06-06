@@ -82,4 +82,53 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         return (List<TransformationProgress>) query.list();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public TransformationProgress findPipelineAtVersion(String pipelineName, String version) {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format("from %s where PipelineName = :pipelineName and Version = :version", getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("pipelineName", pipelineName);
+        query.setString("version", version);
+        List<TransformationProgress> list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return list.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<TransformationProgress> findFailedPipelines(String pipelineName) {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format(
+                "from %s where PipelineName = :pipelineName and Status = 'FAILED' order by LatestStatusUpdate asc",
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("pipelineName", pipelineName);
+        return (List<TransformationProgress>) query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<TransformationProgress> findUnfinishedPipelines(String pipelineName) {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format("from %s where PipelineName = :pipelineName "
+                        + "and Status != 'FINISHED' and Status != 'FAILED' " + "order by CreateTime asc",
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("pipelineName", pipelineName);
+        return (List<TransformationProgress>) query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<TransformationProgress> findAllforPipeline(String pipelineName) {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format("from %s where PipelineName = :pipelineName", getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("pipelineName", pipelineName);
+        return (List<TransformationProgress>) query.list();
+    }
+
 }

@@ -9,4 +9,9 @@ public interface TransformationProgressDao extends ProgressDao<TransformationPro
 
     List<TransformationProgress> findAllForBaseSourceVersions(String sourceName, String baseVersions);
 
+    TransformationProgress findPipelineAtVersion(String pipelineName, String version);
+    List<TransformationProgress> findFailedPipelines(String pipelineName);
+    List<TransformationProgress> findUnfinishedPipelines(String pipelineName);
+    List<TransformationProgress> findAllforPipeline(String pipelineName);
+
 }

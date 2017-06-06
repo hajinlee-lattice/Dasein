@@ -148,4 +148,10 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
         return false;
     }
 
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true)
+    public TransformationProgress findPipelineProgressAtVersion(String pipelineName, String version) {
+        return progressDao.findPipelineAtVersion(pipelineName, version);
+    }
+
 }

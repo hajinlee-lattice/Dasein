@@ -54,10 +54,10 @@ public class TransformationProgress implements Progress {
     private String hdfsPod;
 
     @Column(name = "LatestStatusUpdate")
-    protected Date latestStatusUpdate;
+    private Date latestStatusUpdate;
 
     @Column(name = "RootOperationUID", unique = true, nullable = false)
-    protected String rootOperationUID;
+    private String rootOperationUID;
 
     @Column(name = "CreatedBy")
     protected String createdBy;
@@ -72,14 +72,14 @@ public class TransformationProgress implements Progress {
     protected int numRetries;
 
     @Column(name = "BaseSourceVersions")
-    protected String baseSourceVersions;
+    private String baseSourceVersions;
 
     @Column(name = "Version")
     @Index(name = "IX_NAME_VERSION")
     protected String version;
 
     @Column(name = "YarnAppId")
-    protected String yarnAppId;
+    private String yarnAppId;
 
     @Override
     public Long getPid() {

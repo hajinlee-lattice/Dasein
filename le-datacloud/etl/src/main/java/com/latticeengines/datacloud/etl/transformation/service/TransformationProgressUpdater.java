@@ -14,6 +14,8 @@ public interface TransformationProgressUpdater {
 
     TransformationProgressUpdater progress(Float progress);
 
+    TransformationProgressUpdater pipelineName(String pipelineName);
+
     TransformationProgress commit();
 
 }

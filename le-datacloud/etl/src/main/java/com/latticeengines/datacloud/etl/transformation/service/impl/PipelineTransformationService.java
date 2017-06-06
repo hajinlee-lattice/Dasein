@@ -124,6 +124,9 @@ public class PipelineTransformationService extends AbstractTransformationService
     protected TransformationProgress transformHook(TransformationProgress progress,
             PipelineTransformationConfiguration transConf) {
 
+        progress.setPipelineName(transConf.getName());
+        progressEntityMgr.updateProgress(progress);
+
         boolean succeeded = false;
         String workflowDir = initialDataFlowDirInHdfs(progress);
 
@@ -148,6 +151,10 @@ public class PipelineTransformationService extends AbstractTransformationService
     @Override
     public List<String> findUnprocessedBaseVersions() {
         return new ArrayList<>();
+    }
+
+    public TransformationProgress findPipelineProgressAtVersion(String pipelineName, String version) {
+        return progressEntityMgr.findPipelineProgressAtVersion(pipelineName, version);
     }
 
     private void cleanupWorkflowDir(TransformationProgress progress, String workflowDir) {
