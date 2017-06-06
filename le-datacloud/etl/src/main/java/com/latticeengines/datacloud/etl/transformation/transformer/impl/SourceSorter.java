@@ -133,16 +133,17 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     }
 
     protected void postDataFlowProcessing(String workflowDir, SorterParameters paramters, SorterConfig configuration) {
-        if (paramters.getPartitions() > 1) {
+        if (paramters.getPartitions() == 1 && !configuration.isCompressed()) {
+            keepOnlyBiggestAvro(workflowDir);
+        } else {
             try {
                 moveAvrosToOutput(workflowDir);
-                splitAvros(configuration.getSplittingThreads(), configuration.getSplittingChunkSize());
+                splitAvros(configuration.getSplittingThreads(), configuration.getSplittingChunkSize(),
+                        Boolean.TRUE.equals(configuration.isCompressed()));
                 cleanupOutputDir();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to process avro files result from cascading flow.", e);
             }
-        } else {
-            keepOnlyBiggestAvro(workflowDir);
         }
     }
 
@@ -153,7 +154,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
             String biggestFile = "";
             long maxFileSize = Integer.MIN_VALUE;
-            for (String file: files) {
+            for (String file : files) {
                 long fileSize = HdfsUtils.getFileSize(yarnConfiguration, file);
                 if (fileSize > maxFileSize) {
                     maxFileSize = fileSize;
@@ -163,7 +164,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             if (StringUtils.isBlank(biggestFile)) {
                 throw new RuntimeException("Cannot determine the biggest file in " + avroGlob);
             } else {
-                for (String file: files) {
+                for (String file : files) {
                     if (!file.equals(biggestFile)) {
                         HdfsUtils.rmdir(yarnConfiguration, file);
                     }
@@ -194,13 +195,13 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
         }
     }
 
-    private void splitAvros(int numThreads, long chunkSize) throws IOException {
+    private void splitAvros(int numThreads, long chunkSize, boolean compress) throws IOException {
         String avroGlob = out + (out.endsWith("/") ? "*.avro" : "/*.avro");
         List<String> avroFiles = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
         ExecutorService executors = Executors.newFixedThreadPool(numThreads);
         Map<String, Future<Boolean>> futures = new HashMap<>();
         for (String avroFile : avroFiles) {
-            Future<Boolean> future = executors.submit(new AvroSplitCallable(avroFile, chunkSize));
+            Future<Boolean> future = executors.submit(new AvroSplitCallable(avroFile, chunkSize, compress));
             futures.put(avroFile, future);
         }
         long startTime = System.currentTimeMillis();
@@ -242,12 +243,14 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
 
         private final String avroFile;
         private final long bufferSize;
+        private final boolean compress;
         private String localDir;
         private int attempt = 0;
 
-        AvroSplitCallable(String avroFile, long bufferSize) {
+        AvroSplitCallable(String avroFile, long bufferSize, boolean compress) {
             this.avroFile = avroFile;
             this.bufferSize = bufferSize < 0 ? Integer.MAX_VALUE : bufferSize;
+            this.compress = compress;
         }
 
         @Override
@@ -309,9 +312,9 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             String outputFileName = localOutputFile(partition);
             try {
                 if (!new File(outputFileName).exists()) {
-                    AvroUtils.writeToLocalFile(targetSchema, buffer, outputFileName, true);
+                    AvroUtils.writeToLocalFile(targetSchema, buffer, outputFileName, compress);
                 } else {
-                    AvroUtils.appendToLocalFile(buffer, outputFileName, true);
+                    AvroUtils.appendToLocalFile(buffer, outputFileName, compress);
                 }
                 log.debug("Dumped " + buffer.size() + " records to the output file " + outputFileName.split("/")[1]);
             } catch (Exception e) {

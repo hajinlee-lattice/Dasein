@@ -16,6 +16,9 @@ public class SorterConfig extends TransformerConfig {
     @JsonProperty("SplittingChunkSize")
     private long splittingChunkSize = -1;
 
+    @JsonProperty("Compressed")
+    private Boolean compressed;
+
     public String getSortingField() {
         return sortingField;
     }
@@ -46,5 +49,13 @@ public class SorterConfig extends TransformerConfig {
 
     public void setSplittingChunkSize(long splittingChunkSize) {
         this.splittingChunkSize = splittingChunkSize;
+    }
+
+    public boolean isCompressed() {
+        return compressed;
+    }
+
+    public void setCompressed(Boolean compressed) {
+        this.compressed = compressed;
     }
 }
