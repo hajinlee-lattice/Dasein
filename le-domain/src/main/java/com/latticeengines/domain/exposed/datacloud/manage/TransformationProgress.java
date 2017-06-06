@@ -36,6 +36,10 @@ public class TransformationProgress implements Progress {
     @Index(name = "IX_NAME_VERSION")
     protected String sourceName;
 
+    @Column(name = "PipelineName")
+    @Index(name = "IX_NAME_VERSION")
+    protected String pipelineName;
+
     @Column(name = "StartDate")
     protected Date startDate;
 
@@ -93,6 +97,14 @@ public class TransformationProgress implements Progress {
 
     public void setSourceName(String sourceName) {
         this.sourceName = sourceName;
+    }
+
+    public String getPipelineName() {
+        return pipelineName;
+    }
+
+    public void setPipelineName(String pipelineName) {
+        this.pipelineName = pipelineName;
     }
 
     public Date getStartDate() {
