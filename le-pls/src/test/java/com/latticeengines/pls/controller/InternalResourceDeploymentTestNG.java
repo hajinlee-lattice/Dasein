@@ -81,7 +81,7 @@ public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDep
         Assert.assertEquals(topology, CRMTopology.ELOQUA);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testRetrieveSvnRevision() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
