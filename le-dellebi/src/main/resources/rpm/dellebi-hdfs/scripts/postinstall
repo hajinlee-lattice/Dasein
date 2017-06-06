@@ -7,11 +7,6 @@ echo $LE_STACK
 echo $STACK_PROFILE
 echo $USE_AWS
 
-if [ "${USE_AWS}" = "true"  ]; then
-    LE_STACK="${LE_STACK}_aws"
-fi
-echo $LE_STACK
-
 JARFILE=`ls /tmp/app/dellebi/le-dellebi*-shaded.jar`
 VERSION=`echo $JARFILE | cut -d \- -f 3`
 SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`

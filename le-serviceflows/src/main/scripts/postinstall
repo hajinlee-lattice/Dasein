@@ -6,11 +6,6 @@ echo $LE_STACK
 echo $STACK_PROFILE
 echo $USE_AWS
 
-if [ "${USE_AWS}" = "true"  ]; then
-    LE_STACK="${LE_STACK}_aws"
-fi
-echo $LE_STACK
-
 HADOOP_CONF_DIR=/usr/hdp/current/hadoop-client/conf
 
 echo $HADOOP_CONF_DIR

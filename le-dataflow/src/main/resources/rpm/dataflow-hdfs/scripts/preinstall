@@ -7,11 +7,6 @@ echo $LE_STACK
 echo $STACK_PROFILE
 echo $USE_AWS
 
-if [ "${USE_AWS}" = "true"  ]; then
-    LE_STACK="${LE_STACK}_aws"
-fi
-echo $LE_STACK
-
 RPMFILE=`ls /tmp/le-dataflow-hdfs-*.rpm`
 VERSION=`echo $RPMFILE | cut -d \- -f 5`
 SNAPSHOT=`echo $RPMFILE | cut -d \- -f 6`

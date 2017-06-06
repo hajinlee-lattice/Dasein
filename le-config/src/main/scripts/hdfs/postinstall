@@ -6,11 +6,6 @@ echo $LE_STACK
 echo $STACK_PROFILE
 echo $USE_AWS
 
-if [ "${USE_AWS}" = "true"  ]; then
-    LE_STACK="${LE_STACK}_aws"
-fi
-echo $LE_STACK
-
 RPMFILE=`ls /tmp/le-config-hdfs-rpm-*.rpm`
 VERSION=`echo $RPMFILE | cut -d \- -f 5`
 SNAPSHOT=`echo $RPMFILE | cut -d \- -f 6`
@@ -35,13 +30,8 @@ cat ${STACK_PROFILE}
 su -l yarn -c "hdfs dfs -rm -r -f /app/${VERSION}/conf"
 su -l yarn -c "hdfs dfs -mkdir -p /app/${VERSION}/conf"
 
-if [ "${USE_AWS}" = "true"  ]; then
-    python replace_token.py /tmp/ledp/${LE_ENVIRONMENT}_aws ${STACK_PROFILE}
-    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/ledp/${LE_ENVIRONMENT}_aws/*.properties /app/${VERSION}/conf"
-else
-    python replace_token.py /tmp/ledp/${LE_ENVIRONMENT} ${STACK_PROFILE}
-    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/ledp/${LE_ENVIRONMENT}/*.properties /app/${VERSION}/conf"
-fi
+python replace_token.py /tmp/ledp/${LE_ENVIRONMENT} ${STACK_PROFILE}
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/ledp/${LE_ENVIRONMENT}/*.properties /app/${VERSION}/conf"
 
 echo "cleaning up"
 rm -rf /tmp/ledp
