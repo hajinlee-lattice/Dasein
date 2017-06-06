@@ -133,9 +133,30 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         DataFeed df = datafeedEntityMgr.findByName(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution(), new Long(datafeed.getActiveExecution() + 1L));
         assertEquals(df.getExecutions().size(), 2);
+        assertEquals(df.getStatus(), Status.Consolidating);
 
         DataFeedExecution exec1 = df.getExecutions().get(0);
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
+        assertEquals(exec1.getImports().size(), df.getTasks().size());
+
+        DataFeedExecution exec2 = df.getExecutions().get(1);
+        assertEquals(exec2.getStatus(), DataFeedExecution.Status.Active);
+        assertEquals(exec2.getImports().size(), 0);
+
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "startExecution")
+    public void finishExecution() {
+        DataFeedExecution exec1 = datafeedEntityMgr.finishExecution(DATA_FEED_NAME);
+        assertEquals(exec1.getPid(), datafeed.getActiveExecution());
+        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Consolidated);
+
+        DataFeed df = datafeedEntityMgr.findByName(DATA_FEED_NAME);
+        assertEquals(df.getActiveExecution(), new Long(datafeed.getActiveExecution() + 1L));
+        assertEquals(df.getExecutions().size(), 2);
+        assertEquals(df.getStatus(), Status.Active);
+
+        assertEquals(exec1.getStatus(), df.getExecutions().get(0).getStatus());
         assertEquals(exec1.getImports().size(), df.getTasks().size());
 
         DataFeedExecution exec2 = df.getExecutions().get(1);

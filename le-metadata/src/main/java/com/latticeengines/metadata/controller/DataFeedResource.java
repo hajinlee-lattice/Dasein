@@ -36,7 +36,16 @@ public class DataFeedResource implements DataFeedInterface {
     @ResponseBody
     @ApiOperation(value = "find data feed by name")
     @Override
-    public DataFeed findDataFeedByName(String customerSpace, String datafeedName) {
+    public DataFeed findDataFeedByName(@PathVariable String customerSpace, @PathVariable String datafeedName) {
         return datafeedService.findDataFeedByName(customerSpace, datafeedName);
+    }
+
+    @RequestMapping(value = "/{datafeedName}/finishexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "finish data feed execution")
+    @Override
+    public DataFeedExecution finishExecution(@PathVariable String customerSpace, //
+            @PathVariable String datafeedName) {
+        return datafeedService.finishExecution(customerSpace, datafeedName);
     }
 }

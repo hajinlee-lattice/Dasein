@@ -10,4 +10,6 @@ public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
 
     DataFeed findByName(String datafeedName);
 
+    DataFeedExecution finishExecution(String datafeedName);
+
 }

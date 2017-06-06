@@ -210,6 +210,8 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         Initing("initing"), //
         InitialLoad("initialLoad"), //
         Active("active"), //
+        Consolidating("consolidating"), //
+        Finalizing("finalizing"), //
         Deleting("deleting");
 
         private final String name;

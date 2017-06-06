@@ -9,4 +9,8 @@ public interface DataFeedService {
 
     DataFeed findDataFeedByName(String customerSpace, String datafeedName);
 
+    void updateDataFeed(String customerSpace, DataFeed datafeed);
+
+    DataFeedExecution finishExecution(String customerSpace, String datafeedName);
+
 }

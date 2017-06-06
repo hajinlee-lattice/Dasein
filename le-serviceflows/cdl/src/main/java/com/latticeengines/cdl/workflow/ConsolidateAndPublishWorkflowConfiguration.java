@@ -62,6 +62,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfigur
             return this;
         }
 
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
+            return this;
+        }
+
         public ConsolidateAndPublishWorkflowConfiguration build() {
             configuration.add(startExecutionConfiguration);
             configuration.add(consolidateDataConfiguration);

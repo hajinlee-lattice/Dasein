@@ -6,6 +6,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.cdl.workflow.ConsolidateAndPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
@@ -13,6 +14,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
@@ -34,6 +36,9 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .microServiceHostPort(microserviceHostPort) //
                 .datafeedName(datafeedName) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
+                .inputProperties(ImmutableMap.<String, String> builder()
+                        .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
+                        .build()) //
                 .build();
     }
 

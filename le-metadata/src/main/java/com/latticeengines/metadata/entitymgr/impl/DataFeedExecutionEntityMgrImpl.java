@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.metadata.dao.DataFeedExecutionDao;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
@@ -27,6 +28,12 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public DataFeedExecution findByExecutionId(long executionId) {
         return findByField("pid", executionId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public DataFeedExecution findConsolidatingExecution(DataFeed datafeed) {
+        return datafeedExecutionDao.findConsolidatingExecution(datafeed);
     }
 
 }

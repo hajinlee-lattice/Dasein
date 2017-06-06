@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.listeners.ConsolidateCompleteListener;
 import com.latticeengines.cdl.workflow.steps.ConsolidateData;
 import com.latticeengines.cdl.workflow.steps.StartExecution;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -23,6 +24,9 @@ public class ConsolidateAndPublishWorkflow extends AbstractWorkflow<ConsolidateA
     @Autowired
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
 
+    @Autowired
+    private ConsolidateCompleteListener consolidateCompleteListener;
+
     @Bean
     public Job consolidateAndPublishWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -34,6 +38,7 @@ public class ConsolidateAndPublishWorkflow extends AbstractWorkflow<ConsolidateA
                 .next(startExecution) //
                 .next(consolidateData) //
                 .next(redshiftPublishWorkflow) //
+                .listener(consolidateCompleteListener) //
                 .build();
     }
 

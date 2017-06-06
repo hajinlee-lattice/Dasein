@@ -14,8 +14,8 @@ import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
@@ -76,21 +76,39 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         List<DataFeedImport> imports = tasks.stream().map(DataFeedImportUtils::createImportFromTask)
                 .collect(Collectors.toList());
         DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecution());
-        execution.setStatus(Status.Started);
+        execution.setStatus(DataFeedExecution.Status.Started);
         execution.addImports(imports);
         datafeedExecutionEntityMgr.update(execution);
 
         DataFeedExecution newExecution = new DataFeedExecution();
         newExecution.setFeed(datafeed);
-        newExecution.setStatus(Status.Active);
+        newExecution.setStatus(DataFeedExecution.Status.Active);
         datafeedExecutionEntityMgr.create(newExecution);
 
         datafeed.addExeuction(newExecution);
         datafeed.setActiveExecution(newExecution.getPid());
+        datafeed.setStatus(Status.Consolidating);
         tasks.forEach(task -> {
             task.setStartTime(new Date());
             task.setImportData(null);
         });
+        datafeedDao.update(datafeed);
+        return execution;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public DataFeedExecution finishExecution(String datafeedName) {
+        DataFeed datafeed = datafeedDao.findByField("name", datafeedName);
+        if (datafeed == null) {
+            log.error("Can't find data feed: " + datafeedName);
+            return null;
+        }
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findConsolidatingExecution(datafeed);
+        execution.setStatus(DataFeedExecution.Status.Consolidated);
+        datafeedExecutionEntityMgr.update(execution);
+
+        datafeed.setStatus(Status.Active);
         datafeedDao.update(datafeed);
         return execution;
     }

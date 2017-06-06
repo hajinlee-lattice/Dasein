@@ -28,4 +28,11 @@ public class DataFeedProxy extends MicroserviceRestApiProxy implements DataFeedI
         return get("findDataFeedByName", url, DataFeed.class);
     }
 
+    @Override
+    public DataFeedExecution finishExecution(String customerSpace, String datafeedName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/finishexecution",
+                customerSpace, datafeedName);
+        return post("finishExecution", url, null, DataFeedExecution.class);
+    }
+
 }

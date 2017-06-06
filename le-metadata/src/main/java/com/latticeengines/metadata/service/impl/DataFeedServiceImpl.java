@@ -23,4 +23,14 @@ public class DataFeedServiceImpl implements DataFeedService {
     public DataFeed findDataFeedByName(String customerSpace, String datafeedName) {
         return datafeedEntityMgr.findByName(datafeedName);
     }
+
+    @Override
+    public void updateDataFeed(String customerSpace, DataFeed datafeed) {
+        datafeedEntityMgr.update(datafeed);
+    }
+
+    @Override
+    public DataFeedExecution finishExecution(String customerSpace, String datafeedName) {
+        return datafeedEntityMgr.finishExecution(datafeedName);
+    }
 }
