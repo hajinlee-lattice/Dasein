@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration.Builder;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
