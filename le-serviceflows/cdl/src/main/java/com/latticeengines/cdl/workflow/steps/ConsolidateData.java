@@ -12,7 +12,6 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -36,13 +34,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("consolidateData")
-public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfiguration> {
+public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfiguration> {
 
     private static final Log log = LogFactory.getLog(ConsolidateData.class);
 
@@ -51,9 +47,8 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
 
     private static String masterTableName;
     private static final String mergedTableName = "MergedTable";
-    private static final String deltaTableName = "DeltaTable";
+    private static final String consolidatedTableName = "ConsolidatedTable";
 
-    private static int MAX_LOOPS = 1800;
     private static final CustomerSpace customerSpace = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
 
     @Autowired
@@ -61,9 +56,6 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
 
     @Autowired
     protected MetadataProxy metadataProxy;
-
-    @Autowired
-    private TransformationProxy transformationProxy;
 
     private List<String> inputTableNames = new ArrayList<>();
     private String targetVersion;
@@ -76,13 +68,11 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
         for (Table table : inputTables) {
             inputTableNames.add(table.getName());
         }
-        String targetTableName = getStringValueFromContext(CONSOLIDATE_MASTER_TABLE);
-        masterTableName = StringUtils.isNotBlank(targetTableName) ? targetTableName : "MasterTable";
 
-        String idFieldName = getStringValueFromContext(CONSOLIDATE_ID_FIELD);
-        idField = StringUtils.isNotBlank(idFieldName) ? idFieldName : "LEAccountIDLong";
+        masterTableName = configuration.getMasterTableName();
+        idField = configuration.getIdField();
+        keyMap = configuration.getMatchKeyMap();
 
-        keyMap = null;
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         targetVersion = dateFormat.format(new Date());
     }
@@ -102,43 +92,15 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
         metadataProxy
                 .deleteTable(customerSpace.toString(), TableUtils.getFullTableName(mergedTableName, targetVersion));
 
-        Table deltaTable = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(deltaTableName, targetVersion));
+        Table consolidatedTable = metadataProxy.getTable(customerSpace.toString(),
+                TableUtils.getFullTableName(consolidatedTableName, targetVersion));
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(masterTableName, targetVersion));
         newMasterTable.setName(masterTableName);
         metadataProxy.updateTable(customerSpace.toString(), masterTableName, newMasterTable);
 
-        putObjectInContext(CONSOLIDATE_OUTPUT_TABLES, Arrays.asList(deltaTable, newMasterTable));
-    }
-
-    private void waitForFinish(TransformationProgress progress) {
-        TransformationProgress progressInDb = null;
-        for (int i = 0; i < MAX_LOOPS; i++) {
-            progressInDb = transformationProxy.getProgress(progress.getRootOperationUID());
-            if (ProgressStatus.FINISHED.equals(progressInDb.getStatus())
-                    || ProgressStatus.FAILED.equals(progressInDb.getStatus())) {
-                break;
-            }
-            log.info("TransformationProgress Id=" + progressInDb.getPid() + " status=" + progressInDb.getStatus());
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                log.warn("Waiting was interrupted, message=" + e.getMessage());
-            }
-        }
-
-        if (ProgressStatus.FINISHED.equals(progressInDb.getStatus())) {
-            log.info("Consolidate data pipeline is finished");
-        } else if (ProgressStatus.FAILED.equals(progressInDb.getStatus())) {
-            String error = "Consolidate data pipeline failed!";
-            log.error(error);
-            throw new RuntimeException(error + " Error=" + progressInDb.getErrorMessage());
-        } else {
-            String error = "Consolidate data pipeline timeout!";
-            log.error(error);
-            throw new RuntimeException(error);
-        }
+        putObjectInContext(CONSOLIDATE_CONSOLIDATED_TABLE, consolidatedTable);
+        putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
     }
 
     private PipelineTransformationRequest getConcolidateReqest() {
@@ -151,9 +113,9 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
             TransformationStepConfig mergeStep = createMergeStep();
             TransformationStepConfig matchStep = createMatchStep();
             TransformationStepConfig upsertMasterStep = createUpsertMasterStep();
-            TransformationStepConfig getDeltaStep = createDeltaStep();
+            TransformationStepConfig getConsolidatedStep = createConsolidatedStep();
 
-            List<TransformationStepConfig> steps = Arrays.asList(mergeStep, matchStep, upsertMasterStep, getDeltaStep);
+            List<TransformationStepConfig> steps = Arrays.asList(mergeStep, matchStep, upsertMasterStep, getConsolidatedStep);
             request.setSteps(steps);
 
             return request;
@@ -218,8 +180,8 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
         step3.setTargetTable(targetTable);
         return step3;
     }
-    
-    private TransformationStepConfig createDeltaStep() {
+
+    private TransformationStepConfig createConsolidatedStep() {
         TargetTable targetTable;
         TransformationStepConfig step4 = new TransformationStepConfig();
         // step 2, 3 output
@@ -229,12 +191,11 @@ public class ConsolidateData extends BaseWorkflowStep<ConsolidateDataConfigurati
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(deltaTableName);
+        targetTable.setNamePrefix(consolidatedTableName);
         step4.setTargetTable(targetTable);
         return step4;
     }
 
-    
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(idField);
