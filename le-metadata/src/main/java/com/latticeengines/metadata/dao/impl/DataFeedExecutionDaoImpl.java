@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.DataFeedExecution.Status;
 import com.latticeengines.metadata.dao.DataFeedExecutionDao;
 
 @Component("datafeedExecutionDao")
@@ -25,7 +26,8 @@ public class DataFeedExecutionDaoImpl extends BaseDaoImpl<DataFeedExecution> imp
         Object res = session.createCriteria(entityClz) //
                 .addOrder(Order.desc("pid")) //
                 .add(Restrictions.eq("dataFeed", datafeed)) //
-                .setFirstResult(1).setMaxResults(1) //
+                .add(Restrictions.eq("status", Status.Started)) //
+                .setFirstResult(0).setMaxResults(1) //
                 .uniqueResult(); //
         if (res == null) {
             return null;
