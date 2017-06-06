@@ -134,7 +134,7 @@ angular
 
                 var deferred = $q.defer(),
                     FR = new FileReader(),
-                    sliced = file.slice(0, 1024); // grab first 1024 chars
+                    sliced = file.slice(0, 1024*8); // grab first 1024 * 8 chars
 
                 FR.onload = function(e) {
                     var lines = e.target.result.split(/[\r\n]+/g);
