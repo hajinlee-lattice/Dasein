@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.metadata.service.DataFeedService;
 import com.latticeengines.network.exposed.metadata.DataFeedInterface;
 
@@ -25,8 +27,16 @@ public class DataFeedResource implements DataFeedInterface {
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     @Override
-    public Boolean startExecution(@PathVariable String customerSpace, //
+    public DataFeedExecution startExecution(@PathVariable String customerSpace, //
             @PathVariable String datafeedName) {
         return datafeedService.startExecution(customerSpace, datafeedName);
+    }
+
+    @RequestMapping(value = "/{datafeedName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "find data feed by name")
+    @Override
+    public DataFeed findDataFeedByName(String customerSpace, String datafeedName) {
+        return datafeedService.findDataFeedByName(customerSpace, datafeedName);
     }
 }

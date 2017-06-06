@@ -2,7 +2,6 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.Date;
@@ -130,7 +129,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
     public void startExecution() {
-        assertTrue(datafeedEntityMgr.startExecution(DATA_FEED_NAME));
+        assertNotNull(datafeedEntityMgr.startExecution(DATA_FEED_NAME).getImports());
         DataFeed df = datafeedEntityMgr.findByName(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution(), new Long(datafeed.getActiveExecution() + 1L));
         assertEquals(df.getExecutions().size(), 2);

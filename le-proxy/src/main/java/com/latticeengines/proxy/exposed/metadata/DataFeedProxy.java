@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.metadata;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.network.exposed.metadata.DataFeedInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -13,10 +15,17 @@ public class DataFeedProxy extends MicroserviceRestApiProxy implements DataFeedI
     }
 
     @Override
-    public Boolean startExecution(String customerSpace, String datafeedName) {
+    public DataFeedExecution startExecution(String customerSpace, String datafeedName) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/startexecution",
                 customerSpace, datafeedName);
-        return post("createImportTable", url, null, Boolean.class);
+        return post("startExecution", url, null, DataFeedExecution.class);
+    }
+
+    @Override
+    public DataFeed findDataFeedByName(String customerSpace, String datafeedName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}", customerSpace,
+                datafeedName);
+        return get("findDataFeedByName", url, DataFeed.class);
     }
 
 }

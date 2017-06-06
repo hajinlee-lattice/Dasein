@@ -63,11 +63,11 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean startExecution(String datafeedName) {
+    public DataFeedExecution startExecution(String datafeedName) {
         DataFeed datafeed = datafeedDao.findByField("name", datafeedName);
         if (datafeed == null) {
             log.info("Can't find data feed: " + datafeedName);
-            return false;
+            return null;
         }
         List<DataFeedTask> tasks = HibernateUtils.inflateDetails(datafeed.getTasks());
         datafeed.getTasks().forEach(task -> {
@@ -92,7 +92,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             task.setImportData(null);
         });
         datafeedDao.update(datafeed);
-        return true;
+        return execution;
     }
 
 }
