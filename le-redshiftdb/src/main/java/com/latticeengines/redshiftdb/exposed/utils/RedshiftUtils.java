@@ -1,6 +1,7 @@
 package com.latticeengines.redshiftdb.exposed.utils;
 
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,26 +27,27 @@ public class RedshiftUtils {
     }
 
     public static String getCreateTableStatement(RedshiftTableConfiguration redshiftTableConfig, Schema schema) {
-        String statement = String.format( //
+        StringBuffer sb = new StringBuffer();
+        sb.append(String.format( //
                 "CREATE TABLE IF NOT EXISTS %s (%s)", //
                 redshiftTableConfig.getTableName(), //
                 String.join( //
                         ",", //
                         schema.getFields().stream() //
                                 .map(RedshiftUtils::getColumnSQLStatement) //
-                                .collect(Collectors.toList())));
+                                .collect(Collectors.toList()))));
 
         if (redshiftTableConfig.getDistStyle() != null) {
-            statement = String.format("%s diststyle %s", statement, redshiftTableConfig.getDistStyle().getName());
+            sb.append(String.format(" diststyle %s", redshiftTableConfig.getDistStyle().getName()));
         }
         if (redshiftTableConfig.getDistStyle() == DistStyle.Key && redshiftTableConfig.getDistKey() != null) {
-            statement = String.format("%s distkey (%s)", statement, String.join(",", redshiftTableConfig.getDistKey()));
+            sb.append(String.format(" distkey (%s)", String.join(",", redshiftTableConfig.getDistKey())));
         }
         if (CollectionUtils.isNotEmpty(redshiftTableConfig.getSortKeys())) {
-            statement = String.format("%s %s sortkey (%s)", statement, redshiftTableConfig.getSortKeyType().getName(),
-                    String.join(",", redshiftTableConfig.getSortKeys()));
+            sb.append(String.format(" %s sortkey (%s)", redshiftTableConfig.getSortKeyType().getName(),
+                    String.join(",", redshiftTableConfig.getSortKeys())));
         }
-        return statement;
+        return sb.append(";").toString();
     }
 
     public static String getColumnSQLStatement(Schema.Field field) {
@@ -75,5 +77,34 @@ public class RedshiftUtils {
                 throw new RuntimeException(String.format("Unsupported avro type %s", schema.getType()));
             }
         }
+    }
+
+    public static String dropTableStatement(String tableName) {
+        return String.format("DROP TABLE IF EXISTS %s;", tableName);
+    }
+
+    public static String createStagingTableStatement(String stageTableName, String targetTableName) {
+        return String.format("CREATE TABLE %s (LIKE %s);", stageTableName, targetTableName);
+    }
+
+    public static String renameTableStatement(String originalTableName, String newTableName) {
+        return String.format("ALTER TABLE %s RENAME TO %s;", originalTableName, newTableName);
+    }
+
+    public static String updateExistingRowsFromStagingTableStatement(String stageTableName, String targetTableName,
+            String... joinFields) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(String.format("DELETE FROM %s USING %s WHERE %s; ", targetTableName, stageTableName,
+                getJoinStatement(stageTableName, targetTableName, joinFields)));
+        sb.append(String.format("INSERT INTO %s SELECT * FROM %s; ", targetTableName, stageTableName));
+        return sb.toString();
+    }
+
+    private static String getJoinStatement(String stageTableName, String targetTableName, String... joinFields) {
+        return Arrays.asList(joinFields).stream().map(f -> {
+            return String.format("%1$s.%3$s = %2$s.%3$s", stageTableName, targetTableName, f).toString();
+        }).reduce((e1, e2) -> {
+            return e1 + " AND " + e2;
+        }).orElse(null);
     }
 }

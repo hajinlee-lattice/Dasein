@@ -44,7 +44,7 @@ public class HdfsToRedshiftService {
         HdfsToS3Configuration s3Configuration = new HdfsToS3Configuration();
         s3Configuration.setSplitSize(500L * 1024 * 1024);
         s3Configuration.setS3Bucket(redshiftTableConfig.getS3Bucket());
-        s3Configuration.setS3Prefix(s3Prefix(redshiftTableConfig));
+        s3Configuration.setS3Prefix(s3Prefix(redshiftTableConfig.getTableName()));
         s3Configuration.setExportInputPath(configuration.getExportInputPath());
         s3Configuration.setTargetFilename(s3FileName(redshiftTableConfig));
 
@@ -80,8 +80,16 @@ public class HdfsToRedshiftService {
 
     public void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
-        redshiftService.loadTableFromAvroInS3(redshiftTableConfig.getTableName(), redshiftTableConfig.getS3Bucket(),
-                s3Prefix(redshiftTableConfig), redshiftTableConfig.getJsonPathPrefix());
+        String tableName = redshiftTableConfig.getTableName();
+        String stagingTableName = tableName + "_staging";
+        redshiftTableConfig.setTableName(stagingTableName);
+
+        dropRedshiftTable(configuration);
+        createRedshiftTableIfNotExist(configuration);
+
+        redshiftService.loadTableFromAvroInS3(stagingTableName, redshiftTableConfig.getS3Bucket(), s3Prefix(tableName),
+                redshiftTableConfig.getJsonPathPrefix());
+        redshiftService.replaceTable(stagingTableName, tableName);
     }
 
     public void updateExistingRows(HdfsToRedshiftConfiguration configuration) {
@@ -89,8 +97,8 @@ public class HdfsToRedshiftService {
         String tableName = redshiftTableConfig.getTableName();
         String stagingTableName = tableName + "_staging";
         redshiftService.createStagingTable(stagingTableName, tableName);
-        redshiftService.loadTableFromAvroInS3(stagingTableName, redshiftTableConfig.getS3Bucket(),
-                s3Prefix(redshiftTableConfig), redshiftTableConfig.getJsonPathPrefix());
+        redshiftService.loadTableFromAvroInS3(stagingTableName, redshiftTableConfig.getS3Bucket(), s3Prefix(tableName),
+                redshiftTableConfig.getJsonPathPrefix());
         redshiftService.updateExistingRowsFromStagingTable(stagingTableName, tableName,
                 redshiftTableConfig.getDistKey()); // we would use dist key as
                                                    // join field
@@ -103,7 +111,7 @@ public class HdfsToRedshiftService {
             return;
         }
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
-        String prefix = s3Prefix(redshiftTableConfig);
+        String prefix = s3Prefix(redshiftTableConfig.getTableName());
         s3Service.cleanupPrefix(redshiftTableConfig.getS3Bucket(), prefix);
         s3Service.cleanupPrefix(redshiftTableConfig.getS3Bucket(), redshiftTableConfig.getJsonPathPrefix());
     }
@@ -112,8 +120,8 @@ public class HdfsToRedshiftService {
         return configuration.getTableName().toLowerCase() + ".avro";
     }
 
-    private String s3Prefix(RedshiftTableConfiguration configuration) {
-        return RedshiftUtils.AVRO_STAGE + "/" + configuration.getTableName();
+    private String s3Prefix(String tableName) {
+        return RedshiftUtils.AVRO_STAGE + "/" + tableName;
     }
 
 }

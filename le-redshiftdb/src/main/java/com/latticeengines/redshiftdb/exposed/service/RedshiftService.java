@@ -14,4 +14,8 @@ public interface RedshiftService {
     void createStagingTable(String stageTableName, String targetTableName);
 
     void updateExistingRowsFromStagingTable(String stageTableName, String targetTableName, String... joinFields);
+
+    void renameTable(String originalTableName, String newTableName);
+
+    void replaceTable(String stageTableName, String targetTableName);
 }
