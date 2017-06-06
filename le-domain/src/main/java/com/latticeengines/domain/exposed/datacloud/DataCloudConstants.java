@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud;
 
+import java.text.SimpleDateFormat;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public final class DataCloudConstants {
@@ -31,4 +33,6 @@ public final class DataCloudConstants {
     public static final String STATS_ATTR_COUNT = "AttrCount";
     public static final String STATS_ATTR_BKTS = "BktCounts";
     public static final String STATS_ATTR_ALGO = PROFILE_ATTR_BKTALGO;
+
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_z");
 }
