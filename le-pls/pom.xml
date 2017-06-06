@@ -449,6 +449,11 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-cdl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-workflow</artifactId>
             <version>${le.workflow.version}</version>
             <classifier>intf</classifier>
