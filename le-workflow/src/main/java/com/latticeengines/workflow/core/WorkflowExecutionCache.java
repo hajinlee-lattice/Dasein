@@ -109,8 +109,7 @@ public class WorkflowExecutionCache {
             return cache.getIfPresent(workflowId.getId());
         }
 
-        log.info(String.format("Job with id: %s is not in the cache, reloading.",
-                workflowId.getId()));
+        log.info(String.format("Job with id: %s is not in the cache, reloading.", workflowId.getId()));
 
         try {
             JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
@@ -121,16 +120,16 @@ public class WorkflowExecutionCache {
             Job job = new Job();
             job.setId(workflowId.getId());
             job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
-            if (workflowJob.getStartTimeInMillis() != null) {
-                job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
-            } else if (workflowStatus.getStartTime() != null) {
-                job.setStartTimestamp(workflowStatus.getStartTime());
-            }
+            job.setStartTimestamp(workflowStatus.getStartTime());
             job.setJobType(jobInstance.getJobName());
             job.setSteps(getJobSteps(jobExecution));
-            job.setReports(getReports(workflowJob));
-            job.setOutputs(getOutputs(workflowJob));
+
             if (workflowJob != null) {
+                if (workflowJob.getStartTimeInMillis() != null) {
+                    job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
+                }
+                job.setReports(getReports(workflowJob));
+                job.setOutputs(getOutputs(workflowJob));
                 job.setInputs(workflowJob.getInputContext());
                 job.setApplicationId(workflowJob.getApplicationId());
                 job.setUser(workflowJob.getUserId());
@@ -147,9 +146,7 @@ public class WorkflowExecutionCache {
             }
             return job;
         } catch (Exception e) {
-            log.error(
-                    String.format("Getting job status for workflow: %d failed", workflowId.getId()),
-                    e);
+            log.error(String.format("Getting job status for workflow: %d failed", workflowId.getId()), e);
             throw e;
         }
     }
