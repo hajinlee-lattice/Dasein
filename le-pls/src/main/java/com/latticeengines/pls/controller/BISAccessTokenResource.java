@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +25,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "bisaccesstoken", description = "REST resource for getting the one-time bis access token")
 @RestController
 @RequestMapping("/bisaccesstoken")
+@PreAuthorize("hasAnyRole('Create_PLS_Oauth2Token','Create_PLS_Oauth2Token_External')")
 public class BISAccessTokenResource {
 
     private static final Log log = LogFactory.getLog(BISAccessTokenResource.class);
