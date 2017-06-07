@@ -14,6 +14,7 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.NumericProfileBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ProfileSampleFunction;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
@@ -58,9 +59,10 @@ public class Profile extends ConfigurableFlowBase<ProfileConfig> {
         log.info("Classifying attributes...");
         for (FieldMetadata mt : src.getSchema()) {
             if (Number.class.isAssignableFrom(mt.getJavaType())) {
+                // if (mt.getJavaType().equals(Long.class)) {
                 log.info(String.format("Numeric attr %s: %s", mt.getFieldName(), mt.getJavaType().getName()));
                 numAttrs.add(mt.getFieldName());
-            } else if (mt.getClass().equals(Boolean.class)) {
+            } else if (mt.getJavaType().equals(Boolean.class)) {
                 log.info(String.format("Boolean attr %s: %s", mt.getFieldName(), mt.getJavaType().getName()));
                 boolAttrs.add(mt.getFieldName());
             } else {
@@ -86,9 +88,19 @@ public class Profile extends ConfigurableFlowBase<ProfileConfig> {
             // add dummy group to put all in one group
             num = num.addColumnWithFixedValue(DUMMY_GROUP, UUID.randomUUID().toString(), String.class);
             List<FieldMetadata> fms = new ArrayList<>();
-            fms.add(new FieldMetadata("_ATTR_", String.class));
-            fms.add(new FieldMetadata("_NUMERIC_INTERVAL_", String.class));
-            NumericProfileBuffer buf = new NumericProfileBuffer(new Fields("_ATTR_", "_NUMERIC_INTERVAL_"), numAttr,
+            fms.add(new FieldMetadata(DataCloudConstants.PROFILE_ATTR_ATTRNAME, String.class));
+            fms.add(new FieldMetadata(DataCloudConstants.PROFILE_ATTR_SRCATTR, String.class));
+            fms.add(new FieldMetadata(DataCloudConstants.PROFILE_ATTR_DECSTRAT, String.class));
+            fms.add(new FieldMetadata(DataCloudConstants.PROFILE_ATTR_ENCATTR, String.class));
+            fms.add(new FieldMetadata(DataCloudConstants.PROFILE_ATTR_LOWESTBIT, Integer.class));
+            fms.add(new FieldMetadata(DataCloudConstants.PROFILE_ATTR_NUMBITS, Integer.class));
+            fms.add(new FieldMetadata(DataCloudConstants.PROFILE_ATTR_BKTALGO, String.class));
+            NumericProfileBuffer buf = new NumericProfileBuffer(
+                    new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
+                            DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
+                            DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
+                            DataCloudConstants.PROFILE_ATTR_BKTALGO),
+                    numAttr,
                     config.isNumBucketEqualSized(), config.getBucketNum(), config.getMinBucketSize(),
                     (Class<Comparable>) num.getSchema(numAttr).getJavaType(), false);
             num = num.groupByAndBuffer(new FieldList(DUMMY_GROUP), buf, fms);

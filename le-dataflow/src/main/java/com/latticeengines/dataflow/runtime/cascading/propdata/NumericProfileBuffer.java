@@ -2,12 +2,19 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -32,6 +39,8 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     private double[] xArr;
     private double[] xArrOri;
 
+    private Map<String, Integer> namePositionMap;
+
     public NumericProfileBuffer(Fields fieldDecl, String attr, boolean equalSized, int buckets, int minBucketSize,
             Class<Comparable> cls, boolean sorted) {
         super(fieldDecl);
@@ -40,6 +49,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         this.buckets = buckets;
         this.minBucketSize = minBucketSize;
         this.cls = cls;
+        this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
     @SuppressWarnings("unchecked")
@@ -62,13 +72,35 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         roundTransform();
         keepOriArr();
         List<Integer> boundIdxes = equalSized ? findBoundIdxesEqualSized() : findBoundIdxesByDist();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < boundIdxes.size() - 1; i++) {
-            sb.append(String.valueOf(xArrOri[boundIdxes.get(i)]) + "||");
+        settleResult(bufferCall, boundIdxes);
+    }
+
+    private void settleResult(BufferCall bufferCall, List<Integer> boundIdxes) {
+        List<Number> boundaries = new ArrayList<>();
+        if (boundIdxes.size() <= 2) {
+            return;
         }
+        for (int i = 1; i < boundIdxes.size() - 1; i++) {
+            boundaries.add(numberTransform(xArrOri[boundIdxes.get(i)]));
+        }
+        if (boundaries.size() == 0) {
+            return;
+        }
+        IntervalBucket bucket = new IntervalBucket();
+        bucket.setBoundaries(boundaries);
+        ObjectMapper om = new ObjectMapper();
         Tuple result = Tuple.size(getFieldDeclaration().size());
-        result.set(0, attr);
-        result.set(1, sb.toString());
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME), attr);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_SRCATTR), attr);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
+        try {
+            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), om.writeValueAsString(bucket));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Fail to format IntervalBucket object to json", e);
+        }
         bufferCall.getOutputCollector().add(result);
     }
 
@@ -256,6 +288,21 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         }
     }
 
+    private Number numberTransform(double x) {
+        if (cls.equals(Integer.class)) {
+            return (Number) Integer.valueOf((int) x);
+        } else if (cls.equals(Long.class)) {
+            return (Number) Long.valueOf((long) x);
+        } else if (cls.equals(Float.class)) {
+            return (Number) Float.valueOf((float) x);
+        } else if (cls.equals(Double.class)) {
+            return (Number) Double.valueOf(x);
+        } else {
+            throw new UnsupportedOperationException(
+                    String.format("%s type is not supported in numeric profiling", attr));
+        }
+    }
+
     private boolean isGeoDist() {
         Kurtosis k = new Kurtosis();
         return k.evaluate(xArr) >= 3.0;
@@ -292,6 +339,16 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
             xStr = xStr.substring(0, secondDigit) + "5" + xStr.substring(secondDigit + 1);
         }
         return Integer.valueOf(xStr).doubleValue();
+    }
+
+    private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
+        Map<String, Integer> positionMap = new HashMap<>();
+        int pos = 0;
+        for (Object field : fieldDeclaration) {
+            String fieldName = (String) field;
+            positionMap.put(fieldName, pos++);
+        }
+        return positionMap;
     }
 
 }
