@@ -36,6 +36,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
+import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -117,6 +118,15 @@ public class TenantServiceImpl implements TenantService {
         final TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         final CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
         final SpaceConfiguration spaceConfig = tenantRegistration.getSpaceConfig();
+
+        try {
+            if (TenantLifecycleManager.exists(contractId, tenantId)) {
+                log.error(String.format("Error! tenant %s already exists in Zookeeper", tenantId));
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("Error checking tenant", e);
+        }
 
         boolean tenantCreationSuccess = tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo,
                 spaceInfo);
