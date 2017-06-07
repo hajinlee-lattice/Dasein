@@ -14,6 +14,9 @@ class AwsEnvironment:
     def aws_account_id(self):
         return self._props['aws.account.id']
 
+    def aws_region(self):
+        return self._props['aws.region']
+
     def ec2_key(self):
         return self._props['key.name']
 
@@ -68,9 +71,6 @@ class AwsEnvironment:
     def zk_sg(self):
         return self._props['sg.zookeeper']
 
-    def kafka_sg(self):
-        return self._props['sg.kafka']
-
     def tomcat_sg(self):
         return self._props['sg.tomcat']
 
@@ -81,7 +81,7 @@ class AwsEnvironment:
         return self._props['sg.nodejs']
 
     def ecr_registry(self):
-        return "%s.dkr.ecr.us-east-1.amazonaws.com" % self.aws_account_id()
+        return "%s.dkr.ecr.%s.amazonaws.com" % (self.aws_region(), self.aws_account_id())
 
     def ecs_instance_profile_arn(self):
         return "arn:aws:iam::%s:instance-profile/%s" % (self.aws_account_id(), self.ecs_instance_profile_name())
@@ -97,9 +97,6 @@ class AwsEnvironment:
 
     def efs_sg(self):
         return self._props['efs.sg']
-
-    def kafka_create_ecs_role(self):
-        return self._props['kafka.create.role'] == 'True'
 
     def ssl_certificate_arn(self):
         return self._props['ssl.certificate.arn']
