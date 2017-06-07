@@ -43,12 +43,6 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete>
-                                    <fileset dir="${project.basedir}/${kafka.connect.docker.context}/plugin" includes="*" />
-                                </delete>
-                                <copy file="${project.basedir}/../le-datafabric/target/le-datafabric-connect-${project.version}-shaded.jar"
-                                      tofile="${project.basedir}/${kafka.connect.docker.context}/plugin/le-datafabric-connect-${project.version}-shaded.jar"
-                                      overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/devcluster/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/devcluster/latticeengines.properties"
                                       overwrite="true" />
