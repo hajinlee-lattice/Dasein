@@ -34,6 +34,7 @@ angular
             $scope.showSalesforceSettings = FeatureFlagService.FlagIsEnabled(flags.USE_SALESFORCE_SETTINGS);
             $scope.showCampaignsPage = FeatureFlagService.FlagIsEnabled(flags.CAMPAIGNS_PAGE);
             $scope.showAnalysisPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+            $scope.showPlayBook = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showSegmentationPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showLatticeInsightsPage = FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS);
             $scope.showContactUs = false;
