@@ -32,7 +32,7 @@ angular
             redirectTo: 'home.playbook.wizard'
         })
         .state('home.playbook.wizard', {
-            url: '/wizard',
+            url: '/wizard/:play_name',
             resolve: {
                 WizardValidationStore: function(PlaybookWizardStore) {
                     return PlaybookWizardStore;
