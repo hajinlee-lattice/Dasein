@@ -45,7 +45,7 @@ class FeatureSelectionStep(PipelineStep):
         sampleFrame = dataFrame
         if dataFrame.shape[0] > 100000:
             logger.info("Large file, doing sampling, record#=" + str(dataFrame.shape[0]))
-            rows = random.sample(dataFrame.index, int(dataFrame.shape[0] * 0.1))
+            rows = random.sample(dataFrame.index, 100000)
             sampleFrame = dataFrame.iloc[rows]
         X_train = sampleFrame[features]
         Y_train = sampleFrame[self.params["schema"]["target"]]
