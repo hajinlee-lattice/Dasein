@@ -27,7 +27,7 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
     private DanteTalkingPointProxy danteTalkingPointProxy;
 
     @Autowired
-    TalkingPointEntityMgr talkingPointEntityMgr;
+    private TalkingPointEntityMgr talkingPointEntityMgr;
 
     private final String externalID = "talkingPointDepTestExtID";
 

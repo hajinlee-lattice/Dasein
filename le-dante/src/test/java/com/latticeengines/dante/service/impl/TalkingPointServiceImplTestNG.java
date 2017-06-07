@@ -21,10 +21,10 @@ import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 public class TalkingPointServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    TalkingPointService talkingPointService;
+    private TalkingPointService talkingPointService;
 
     @Autowired
-    TalkingPointEntityMgr talkingPointEntityMgr;
+    private TalkingPointEntityMgr talkingPointEntityMgr;
 
     private final String externalID = "talkingPointFTestExtID";
 

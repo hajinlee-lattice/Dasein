@@ -29,6 +29,11 @@
             <version>${le.testfwk.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
+        </dependency>
     </dependencies>
 
     <parent>
@@ -46,6 +51,7 @@
         <le.proxy.version>3.6.0-SNAPSHOT</le.proxy.version>
         <le.testfwk.version>3.6.0-SNAPSHOT</le.testfwk.version>
         <le.dantedb.version>3.6.0-SNAPSHOT</le.dantedb.version>
+        <le.camille.version>3.6.0-SNAPSHOT</le.camille.version>
     </properties>
 
 </project>

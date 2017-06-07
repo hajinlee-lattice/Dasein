@@ -16,6 +16,7 @@ public final class PathConstants {
     public static final String EXPORTS = "Exports";
     public static final String METADATA = "Metadata";
     public static final String LOCKS = "Locks";
+    public static final String DANTE = "Dante";
 
     public static final String DEFAULTCONFIG_NODE = "Default";
     public static final String CONFIGSCHEMA_NODE = "Metadata";

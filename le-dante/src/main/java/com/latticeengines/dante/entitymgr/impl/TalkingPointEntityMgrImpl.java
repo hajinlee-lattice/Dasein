@@ -21,7 +21,7 @@ public class TalkingPointEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteTalki
     private static final Logger log = Logger.getLogger(TalkingPointEntityMgrImpl.class);
 
     @Autowired
-    TalkingPointDao talkingPointDao;
+    private TalkingPointDao talkingPointDao;
 
     @Override
     public BaseDanteDao<DanteTalkingPoint> getDao() {

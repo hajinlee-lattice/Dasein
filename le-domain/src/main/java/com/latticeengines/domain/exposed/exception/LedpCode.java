@@ -592,7 +592,9 @@ public enum LedpCode {
 
     // le-dante
     LEDP_38001("Could not find Talking point with External_ID {0}"), //
-    LEDP_38002("Could not find Talking points for Play {0}");
+    LEDP_38002("Could not find Talking points for Play {0}"), //
+    LEDP_38003("Could not find accounts for Tenant {0}"), //
+    LEDP_38004("Cannot return less than 1 account");
 
     private String message;
 

@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 public class TalkingPointEntityManagerTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    TalkingPointEntityMgr talkingPointEntityMgr;
+    private TalkingPointEntityMgr talkingPointEntityMgr;
 
     private final String externalID = "talkingPointTestExtID";
 

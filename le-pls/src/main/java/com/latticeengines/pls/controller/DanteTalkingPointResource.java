@@ -21,9 +21,9 @@ import com.wordnik.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "dantetalkingpoint", description = "REST resource for segments")
+@Api(value = "dantetalkingpoints", description = "REST resource for Dante Talking Points")
 @RestController
-@RequestMapping("/dantetalkingpoint")
+@RequestMapping("/dantetalkingpoints")
 public class DanteTalkingPointResource {
 
     private static final Logger log = Logger.getLogger(DanteTalkingPointResource.class);
