@@ -1,17 +1,8 @@
 {
-  "Environment2Props": {
-    "dev"  : "dynamic values",
-    "qacluster"  : "dynamic values",
-    "prodcluster" : "dynamic values"
-  },
   "AWSRegion2AMI": {
     "us-east-1": {
       "AmazonLinux": "ami-92659c84",
       "AmazonECSLinux": "ami-275ffe31"
-    },
-    "us-west-1": {
-      "AmazonLinux": "ami-ee8cd18e",
-      "AmazonECSLinux": "ami-689bc208"
     },
     "us-west-2": {
       "AmazonLinux": "ami-af8b30cf",

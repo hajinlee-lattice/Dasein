@@ -52,12 +52,11 @@ class CreateServiceThread (threading.Thread):
         else:
             container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, tag=self.tag, region=self.region)
         ledp = ECSVolume("ledp", "/etc/ledp")
-        efsip = ECSVolume("efsip", "/etc/efsip.txt")
+        ledpLog = ECSVolume("ledpLog", "/var/log/ledp")
         internal_addr = ECSVolume("intAddr", "/etc/internaladdr.txt")
-        hadoop_conf = ECSVolume("hadoopConf", "/etc/hadoop/conf")
         token = find_cluster_random_token(self.stackname)
         task = "%s-%s-%s" % (self.stackname, self.app, token)
-        register_task(task, [container], [ledp, efsip, internal_addr, hadoop_conf])
+        register_task(task, [container], [ledp, ledpLog, internal_addr])
         create_service(self.stackname, self.app, task, self.instances)
 
 
@@ -93,21 +92,20 @@ def create_infra_template(environment, stackname, instances, apps):
     stack = ECSStack("AWS CloudFormation template for mini-stack infrastructure.", environment, use_asgroup=False, instances=instances, efs=PARAM_EFS)
     stack.add_params([PARAM_EFS, PARAM_DOCKER_IMAGE_TAG])
 
-    task1 = swagger_task(stackname, apps)
+    config = AwsEnvironment(environment)
+    task1 = swagger_task(stackname, apps, config.ecr_registry())
     stack.add_resource(task1)
     stack.add_service("swagger", task1, capacity=1)
 
-    task2 = haproxy_task(stackname, stack.get_ec2s())
+    task2 = haproxy_task(stackname, stack.get_ec2s(), config.ecr_registry())
     stack.add_resource(task2)
     haproxy, _ = stack.create_service("haproxy", task2, capacity=instances)
     stack.add_resource(haproxy)
 
     return stack
 
-def swagger_task(stackname, apps):
-    container = ContainerDefinition("httpd", { "Fn::Join" : [ "", [
-        { "Fn::FindInMap" : [ "Environment2Props", PARAM_ENVIRONMENT.ref(), "EcrRegistry" ] },
-        "/latticeengines/swagger" ] ]}) \
+def swagger_task(stackname, apps, ecr):
+    container = ContainerDefinition("httpd", ecr + "/latticeengines/swagger") \
         .mem_mb("256") \
         .publish_port(80, 8080) \
         .set_logging({
@@ -122,15 +120,13 @@ def swagger_task(stackname, apps):
     task.add_container(container)
     return task
 
-def haproxy_task(stackname, ec2s):
+def haproxy_task(stackname, ec2s, ecr):
     tokens = []
     for ec2 in ec2s:
         tokens.append({ "Fn::GetAtt" : [ ec2.logical_id(), "PrivateIp" ]})
     ips = { "Fn::Join" : [ ",", tokens ]}
 
-    container = ContainerDefinition("haproxy", { "Fn::Join" : [ "", [
-        { "Fn::FindInMap" : [ "Environment2Props", PARAM_ENVIRONMENT.ref(), "EcrRegistry" ] },
-        "/latticeengines/haproxy" ] ]}) \
+    container = ContainerDefinition("haproxy", ecr + "/latticeengines/haproxy") \
         .mem_mb("768") \
         .publish_port(80, 80) \
         .publish_port(443, 443) \
@@ -153,7 +149,7 @@ def haproxy_task(stackname, ec2s):
 def provision_cli(args):
     provision(args.environment, args.stackname, args.tag, args.instancetype)
 
-def provision(environment, stackname, tag, instance_type='r3.large'):
+def provision(environment, stackname, tag, instance_type):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
@@ -220,7 +216,7 @@ def provision(environment, stackname, tag, instance_type='r3.large'):
 def bootstrap_cli(args):
     bootstrap(args.environment, args.stackname, args.apps, args.profile, args.instances, args.tag)
 
-def bootstrap(environment, stackname, apps, profile, instances, tag,region="us-east-1"):
+def bootstrap(environment, stackname, apps, profile, instances, tag, region="us-east-1"):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
@@ -257,16 +253,13 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
         "awslogs-stream-prefix": app
     })
     container.publish_port(8080, alloc["port"])
-    container.publish_port(1099)
     container.hostname("%s-%s" % (stackname, app))
-    container.privileged()
 
     params = get_profile_vars(profile_file)
     params["LE_CLIENT_ADDRESS"] = ip
     params["HAPROXY_ADDRESS"] = ip
 
-    # TODO: change to https
-    protocol = params["HTTP_PROTOCOL"] if "HTTP_PROTOCOL" in params else "http"
+    protocol = "https"
     params["AWS_PRIVATE_LB"] = "%s://%s" % (protocol, ip)
     params["AWS_PUBLIC_LB"] = "%s://%s" % (protocol, ip)
     params["LE_STACK"] = stackname
@@ -274,12 +267,10 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
     params["CATALINA_OPTS"] = "-Xmx%dm -XX:ReservedCodeCacheSize=%dm" % (int(alloc["mem"] * 0.9), 256 if alloc["mem"] <= 1024 else 512)
     for k, v in params.items():
         container.set_env(k, v)
-    container.set_env("HADOOP_CONF_DIR", "/etc/hadoop/conf")
 
     container = container.mount("/etc/ledp", "ledp") \
-        .mount("/etc/efsip.txt", "efsip") \
-        .mount("/etc/internaladdr.txt", "intAddr") \
-        .mount("/etc/hadoop/conf", "hadoopConf")
+        .mount("/var/log/ledp", "ledpLog") \
+        .mount("/etc/internaladdr.txt", "intAddr")
 
     return container
 
@@ -304,17 +295,16 @@ def ui_container(environment, stackname, ecr_url, app, ip, profile_file, tag, re
     params["HAPROXY_ADDRESS"] = ip
 
     # TODO: change to https
-    protocol = params["HTTP_PROTOCOL"] if "HTTP_PROTOCOL" in params else "http"
+    protocol = "https"
     params["AWS_PRIVATE_LB"] = "%s://%s" % (protocol, ip)
     params["AWS_PUBLIC_LB"] = "%s://%s" % (protocol, ip)
     params["LE_STACK"] = stackname
     params["LE_ENVIRONMENT"] = environment
-    params["CATALINA_OPTS"] = "-Xmx%dm -XX:ReservedCodeCacheSize=%dm" % (int(alloc["mem"] * 0.9), 256 if alloc["mem"] <= 1024 else 512)
     for k, v in params.items():
         container.set_env(k, v)
 
     container = container.mount("/etc/ledp", "ledp") \
-        .mount("/etc/efsip.txt", "efsip") \
+        .mount("/var/log/ledp", "ledpLog") \
         .mount("/etc/internaladdr.txt", "intAddr")
 
     return container

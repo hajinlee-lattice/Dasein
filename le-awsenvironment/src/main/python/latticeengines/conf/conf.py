@@ -121,21 +121,3 @@ class AwsEnvironment:
 
     def chef_bucket(self):
         return self._props['s3.chef.bucket']
-
-    def to_props(self):
-        return {
-            "EcrRegistry": self.ecr_registry(),
-            "SubnetAZ1": self.subnet_az_1(),
-            "SubnetAZ2": self.subnet_az_2(),
-            "SubnetAZ3": self.subnet_az_3(),
-            "LpiEfsIp1": self.lpi_efs_ip_1(),
-            "LpiEfsIp2": self.lpi_efs_ip_2(),
-            "LpiEfsIp3": self.lpi_efs_ip_3()
-        }
-
-    @staticmethod
-    def create_env_props_map():
-        map = {}
-        for env in ('qacluster', 'prodcluster'):
-            map[env] = AwsEnvironment(env).to_props()
-        return map

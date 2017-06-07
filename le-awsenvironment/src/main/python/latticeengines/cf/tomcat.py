@@ -46,7 +46,7 @@ def template(environment, stackname, profile, fixed_instances=False, num_instanc
         stack.validate()
 
 def create_template(environment, profile, fixed_instances=False, num_instances=1, second_tgrp=False):
-    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", environment, use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS, sns_topic=PARAM_SNS_TOPIC_ARN)
+    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", environment, use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS)
     stack.add_params([
         PARAM_DOCKER_IMAGE,
         PARAM_DOCKER_IMAGE_TAG,
@@ -64,7 +64,7 @@ def create_template(environment, profile, fixed_instances=False, num_instances=1
             stack.attach_tgrp(PARAM_SECOND_TGRP_ARN)
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
-    task = tomcat_task(profile_vars, env=environment)
+    task = tomcat_task(profile_vars, environment)
     stack.add_resource(task)
     service, tgt = stack.add_service("tomcat", task, asrolearn=PARAM_ECS_SCALE_ROLE_ARN)
     if not fixed_instances:
@@ -72,18 +72,17 @@ def create_template(environment, profile, fixed_instances=False, num_instances=1
         stack.exact_autoscale(tgt, "ScaleBack", num_instances, 600, ub=0)
     return stack
 
-def tomcat_task(profile_vars, env="qa"):
+def tomcat_task(profile_vars, environment):
+    config = AwsEnvironment(environment)
     container = ContainerDefinition("tomcat", { "Fn::Join" : [ "", [
-        { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
-        "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
+        config.ecr_registry(), "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
         .hostname({ "Fn::Join" : ["-", [{ "Ref" : "AWS::StackName" }, PARAM_DOCKER_IMAGE.ref()]]}) \
         .publish_port(8080, 80) \
         .publish_port(8443, 443) \
         .publish_port(1099, 1099) \
         .add_docker_label("stack", profile_vars["LE_STACK"].ref()) \
-        .add_docker_label("app", PARAM_DOCKER_IMAGE.ref()) \
-        .privileged()
+        .add_docker_label("app", PARAM_DOCKER_IMAGE.ref())
 
     container = container.set_logging({
         "LogDriver": "splunk",
@@ -98,27 +97,23 @@ def tomcat_task(profile_vars, env="qa"):
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
-    container.set_env("HADOOP_CONF_DIR", "/etc/hadoop/conf")
 
     ledp = Volume("ledp", "/etc/ledp")
-    efsip = Volume("efsip", "/etc/efsip.txt")
+    ledpLog = Volume("ledpLog", "/var/log/ledp")
     scoringcache = Volume("scoringcache", "/var/cache/scoringapi")
     internal_addr = Volume("intAddr", "/etc/internaladdr.txt")
-    hadoop_conf = Volume("hadoopConf", "/etc/hadoop/conf")
 
     container = container.mount("/etc/ledp", ledp) \
-        .mount("/etc/efsip.txt", efsip) \
+        .mount("/var/log/ledp", ledpLog) \
         .mount("/var/cache/scoringapi", scoringcache) \
-        .mount("/etc/internaladdr.txt", internal_addr) \
-        .mount("/etc/hadoop/conf", hadoop_conf)
+        .mount("/etc/internaladdr.txt", internal_addr)
 
     task = TaskDefinition("tomcattask")
     task.add_container(container)
     task.add_volume(ledp)
-    task.add_volume(efsip)
+    task.add_volume(ledpLog)
     task.add_volume(scoringcache)
     task.add_volume(internal_addr)
-    task.add_volume(hadoop_conf)
     return task
 
 def provision_cli(args):

@@ -120,7 +120,6 @@ class Stack(Template):
         json_file = os.path.join(TEMPLATE_DIR, 'common', 'common_mappings.json')
         with open(json_file) as f:
             data = json.load(f)
-            data["Environment2Props"] = AwsEnvironment.create_env_props_map()
             self._merge_into_attr('Mappings', data)
             return self
 

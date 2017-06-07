@@ -2,7 +2,7 @@ import json
 import os
 
 from .iam import InstanceProfile
-from .parameter import Parameter, PARAM_ENVIRONMENT
+from .parameter import Parameter
 from .resource import Resource
 from .template import TEMPLATE_DIR
 from ...conf import AwsEnvironment
@@ -104,9 +104,9 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                                 "",
                                 [ "#!/usr/bin/env bash \n",
                                   "mkdir -p /mnt/efs \n",
-                                  "echo \"", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIp1"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZ1"]}, ".ip\n",
-                                  "echo \"", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIp2"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZ2"]}, ".ip\n",
-                                  "echo \"", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIp3"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZ3"]}, ".ip\n",
+                                  "echo \"", config.lpi_efs_ip_1(), "\" > /tmp/", config.subnet_az_1(), ".ip\n",
+                                  "echo \"", config.lpi_efs_ip_2(), "\" > /tmp/", config.subnet_az_2(), ".ip\n",
+                                  "echo \"", config.lpi_efs_ip_3(), "\" > /tmp/", config.subnet_az_3(), ".ip\n",
                                   "for i in {1..100}; do\n",
                                   "    az=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)\n",
                                   "    if [ ! -z \"${az}\" ]; then\n",
