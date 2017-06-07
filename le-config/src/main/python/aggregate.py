@@ -5,7 +5,7 @@ PROPERTY_DIR = "/conf/env/"
 PROPERTY_FILE_SUFFIX = "*.properties"
 LINE_SEPERATOR = "\n=============================\n"
 ENVIRONMENTS=('dev', 'devcluster', 'qacluster','prodcluster')
-ENV_WITH_AWS=('devcluster', 'qacluster','prodcluster')
+ENV_WITH_AWS=('qacluster','prodcluster')
 
 WSHOME=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
