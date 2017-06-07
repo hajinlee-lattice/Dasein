@@ -20,7 +20,6 @@ var mainApp = angular.module('mainApp', [
     'lp.marketo',
     'lp.apiconsole',
     'lp.campaigns',
-    'lp.cg.talkingpoint',
     'lp.campaigns.models',
     'lp.models.list',
     'lp.models.segments',

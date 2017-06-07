@@ -2,10 +2,6 @@
     display: flex;
     flex-direction: row;
 
-    h2 {
-        background-image: url('/assets/images/ico-insights.png');
-    }
-
     &>div:first-child {
         flex: 1 1 auto;
         margin-left: 3px;
@@ -197,10 +193,6 @@
 }
 
 .tp-preview {
-    h2 {
-        background-image: url('/assets/images/ico-preview.png');
-    }
-
     label {
         border-bottom: 1px solid #e5e5e5;
         padding: 5px;

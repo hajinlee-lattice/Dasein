@@ -1,4 +1,13 @@
 angular.module('lp.cg.talkingpoint.preview', [])
+.directive('cgTalkingPointPreview', function() {
+    return {
+        restrict: 'E',
+        replace: true,
+        scope: {},
+        templateUrl: 'app/cgtalkingpoint/tppreview/tppreview.component.html',
+        controller: 'cgTalkingPointPreviewCtrl'
+    };
+})
 .controller('cgTalkingPointPreviewCtrl', function ($scope, $sce, $element, CgTalkingPointStore) {
 
     var iframe = $element.find('#tppreview_iframe')[0];

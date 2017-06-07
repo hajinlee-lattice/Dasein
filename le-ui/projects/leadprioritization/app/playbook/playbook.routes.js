@@ -1,6 +1,7 @@
 angular
 .module('lp.playbook', [
     'common.wizard',
+    'lp.cg.talkingpoint',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.segment',
     'lp.playbook.wizard.rating',
@@ -152,9 +153,9 @@ angular
             },
             views: {
                 'wizard_content@home.playbook': {
-                    controller: 'cgTalkingPointCtrl',
+                    controller: 'PlaybookWizardInsights',
                     controllerAs: 'vm',
-                    templateUrl: 'app/cgtalkingpoint/cgtalkingpoint.component.html'
+                    templateUrl: 'app/playbook/content/insights/insights.component.html'
                 }
             }
         })
@@ -162,9 +163,7 @@ angular
             url: '/preview',
             views: {
                 'wizard_content@home.playbook': {
-                    controller: 'cgTalkingPointPreviewCtrl',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/cgtalkingpoint/tppreview/tppreview.component.html'
+                    templateUrl: 'app/playbook/content/preview/preview.component.html'
                 }
             }
         })
