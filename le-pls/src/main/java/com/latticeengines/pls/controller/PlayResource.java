@@ -50,7 +50,7 @@ public class PlayResource {
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get play for a specific tenant based on playId")
+    @ApiOperation(value = "Get play for a specific tenant based on playName")
     public Play getPlay(@PathVariable String playName, HttpServletRequest request, HttpServletResponse response) {
         Play play = playService.getPlayByName(playName);
         return play;
