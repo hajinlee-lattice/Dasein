@@ -133,7 +133,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     }
 
     protected void postDataFlowProcessing(String workflowDir, SorterParameters paramters, SorterConfig configuration) {
-        if (paramters.getPartitions() == 1 && !Boolean.TRUE.equals(configuration.getCompressResult())) {
+        if (paramters.getPartitions() == 1 && Boolean.TRUE.equals(configuration.getCompressResult())) {
             keepOnlyBiggestAvro(workflowDir);
         } else {
             try {
