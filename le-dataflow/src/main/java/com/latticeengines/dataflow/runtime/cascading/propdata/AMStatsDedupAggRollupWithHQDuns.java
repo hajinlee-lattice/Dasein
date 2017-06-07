@@ -11,6 +11,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionUtil.ExpandedTuple;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.Dimensions;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.MultiListCrossProductUtil;
@@ -130,12 +132,6 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
             dedupAndPut(fieldLength, expandedTupleMap, new Dimensions(dimValues), expandedTuple);
         }
 
-        log.debug("hqDunsFieldValuesStr: " + hqDunsFieldValuesStr);
-
-        if (hqDunsFieldValuesStr == null || hqDunsFieldValues.size() == 0) {
-            log.debug("hqDunsFieldValuesStr: " + hqDunsFieldValuesStr);
-        }
-
         Set<Dimensions> dimSet = new HashSet<>();
         // to avoid ConcurrentModificationException copy key set in separate set
         // to use in for loop which tries to update this map
@@ -170,7 +166,24 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
         }
 
         for (Dimensions dim : expandedTupleMap.keySet()) {
-            outputCollector.add(expandedTupleMap.get(dim).generateTuple());
+            try {
+                outputCollector.add(expandedTupleMap.get(dim).generateTuple());
+            } catch (Exception ex) {
+                String msg = ex.getMessage() //
+                        + "\n{" //
+                        + "hqDunsFieldValuesStr=" + hqDunsFieldValuesStr //
+                        + ", Dimensions=" + dim.toString() //
+                        + ", expandedTupleMapKeySet=" + expandedTupleMap.keySet() //
+                        + ", tupleSize=" + expandedTupleMap.get(dim).fieldsLength //
+                        + ", outputCollectorSize=" + bufferCall.getDeclaredFields().size() //
+                        + "\n}";
+                ObjectMapper om = new ObjectMapper();
+                try {
+                    msg += "\n\n" + om.writeValueAsString(expandedTupleMap.get(dim).generateTuple() + "\n");
+                } catch (JsonProcessingException e) {
+                }
+                throw new RuntimeException(msg, ex);
+            }
         }
     }
 
