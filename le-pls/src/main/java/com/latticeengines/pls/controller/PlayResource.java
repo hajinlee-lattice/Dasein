@@ -100,7 +100,6 @@ public class PlayResource {
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)
     @ResponseBody
-    @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Get list of launches for a given play")
     public List<PlayLaunch> getPlayLaunches(@PathVariable("playName") String playName, //
             @RequestParam(value = "launchState", required = true) LaunchState launchState) {
@@ -110,7 +109,6 @@ public class PlayResource {
 
     @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)
     @ResponseBody
-    @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Get play launch for a given play and launch id")
     public PlayLaunch getPlayLaunch(@PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId) {
