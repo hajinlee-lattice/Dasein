@@ -102,7 +102,7 @@ class Stack(Template):
             fi, temp_file =   tempfile.mkstemp()
             os.write(fi, self.json())
             os.close(fi)
-            print 'uploading template to %s' % (os.path.join("https://s3.amazonaws.com", bucket, prefix, 'template.json') + ' ..')
+            print 'uploading template to %s' % (os.path.join("https://", AwsEnvironment(environment).s3_endpoint(), bucket, prefix, 'template.json') + ' ..')
             client = boto3.client('s3')
             transfer = S3Transfer(client)
             transfer.upload_file(temp_file, bucket, os.path.join(prefix, 'template.json'))
@@ -299,7 +299,7 @@ class ECSStack(Stack):
 
         response = client.create_stack(
             StackName=stackname,
-            TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), s3cfpath, 'template.json'),
+            TemplateURL='https://%s/%s' % (config.s3_endpoint(), os.path.join(config.cf_bucket(), s3cfpath, 'template.json')),
             Parameters=params,
             TimeoutInMinutes=60,
             OnFailure='ROLLBACK',
@@ -309,7 +309,7 @@ class ECSStack(Stack):
             Tags=[
                 {
                     'Key': 'le-env',
-                    'Value': environment.replace("cluster", "")
+                    'Value': config.tag_le_env()
                 },
                 {
                     'Key': 'le-product',

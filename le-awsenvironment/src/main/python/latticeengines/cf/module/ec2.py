@@ -64,7 +64,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         ]]}
                     },
                     "/tmp/s-iss.pub":{
-                        "source":"http://s3.amazonaws.com/" + chefbucket + "/ssh_keys/s-iss/pub",
+                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/ssh_keys/s-iss/pub",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",
@@ -92,7 +92,7 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "group": "root"
                     },
                     "/etc/telegraf/telegraf.conf":{
-                        "source":"http://s3.amazonaws.com/" + bucket + "/telegraf/telegraf.conf",
+                        "source":"http://" + config.s3_endpoint() + "/" + bucket + "/telegraf/telegraf.conf",
                         "mode":"000777",
                         "owner":"root",
                         "group":"root",

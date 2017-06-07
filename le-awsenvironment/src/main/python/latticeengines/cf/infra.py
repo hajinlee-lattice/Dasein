@@ -216,7 +216,7 @@ def provision(environment, stackname):
 
     response = client.create_stack(
         StackName=stackname,
-        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), _S3_CF_PATH, 'template.json'),
+        TemplateURL='https://%s/%s' % (config.s3_endpoint(), os.path.join(config.cf_bucket(), _S3_CF_PATH, 'template.json')),
         Parameters=[
             PARAM_VPC_ID.config(config.vpc()),
             PARAM_SUBNET_1.config(config.private_subnet_1()),
@@ -239,6 +239,10 @@ def provision(environment, stackname):
             'CAPABILITY_IAM',
         ],
         Tags=[
+            {
+                'Key': 'le-env',
+                'Value': config.tag_le_env()
+            },
             {
                 'Key': 'le-product',
                 'Value': 'lpi'

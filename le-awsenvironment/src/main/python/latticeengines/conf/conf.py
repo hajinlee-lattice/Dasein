@@ -20,6 +20,12 @@ class AwsEnvironment:
     def vpc(self):
         return self._props['vpc.id']
 
+    def tag_le_env(self):
+        return self._props['tag.le.env']
+
+    def s3_endpoint(self):
+        return self._props['s3.endpoint']
+
     def subnet_az_1(self):
         return self._props['subnet.az.1']
 

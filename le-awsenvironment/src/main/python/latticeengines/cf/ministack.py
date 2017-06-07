@@ -188,7 +188,7 @@ def provision(environment, stackname, tag, instance_type='r3.large'):
 
     response = client.create_stack(
         StackName=stackname,
-        TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), infra_stack_s3(stackname), 'template.json'),
+        TemplateURL='https://%s/%s' % (config.s3_endpoint(), os.path.join(config.cf_bucket(), infra_stack_s3(stackname), 'template.json')),
         Parameters=params,
         TimeoutInMinutes=60,
         OnFailure='ROLLBACK',
@@ -198,7 +198,7 @@ def provision(environment, stackname, tag, instance_type='r3.large'):
         Tags=[
             {
                 'Key': 'le-env',
-                'Value': environment.replace('cluster', '')
+                'Value': config.tag_le_env()
             },
             {
                 'Key': 'le-product',
