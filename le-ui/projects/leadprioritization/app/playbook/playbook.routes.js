@@ -40,9 +40,9 @@ angular
                 WizardProgressContext: function() {
                     return 'playbook';
                 },
-                WizardProgressItems: function() {
+                WizardProgressItems: function(PlaybookWizardStore) {
                     return [
-                        { label: 'Settings', state: 'settings' },
+                        { label: 'Settings', state: 'settings', nextFn: PlaybookWizardStore.nextSettings },
                         { label: 'Segment', state: 'settings.segment' },
                         { label: 'Rating', state: 'settings.segment.rating' },
                         { label: 'Targets', state: 'settings.segment.rating.targets' },

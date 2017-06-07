@@ -6,6 +6,7 @@ angular.module('common.wizard.controls', [])
     var vm = this;
 
     angular.extend(vm, {
+        itemMap: {},
         items: WizardProgressItems,
         state: $state.current.name,
         prev: WizardControlsOptions.backState,
@@ -15,17 +16,33 @@ angular.module('common.wizard.controls', [])
 
     vm.init = function() {
         vm.setButtons();
+
+        vm.items.forEach(function(item) {
+            vm.itemMap[item.label] = item;
+        });
     }
 
     vm.click = function(isPrev) {
         vm.setButtons();
-        
+
         if (vm.next && !isPrev) {
-            $state.go(vm.next);
+            vm.go(vm.next);
         } else if (isPrev && vm.prev) {
-            $state.go(vm.prev);
+            vm.go(vm.prev);
         } else if (!isPrev && !vm.next) {
-            $state.go(WizardControlsOptions.nextState)
+            vm.go(WizardControlsOptions.nextState);
+        }
+    }
+
+    vm.go = function(state) {
+        vm.nextFn();
+        $state.go(state);
+    }
+
+    vm.nextFn = function() {
+        console.log(vm.itemMap['Settings']);
+        if (vm.itemMap['Settings'].nextFn) {
+            vm.itemMap['Settings'].nextFn();
         }
     }
 

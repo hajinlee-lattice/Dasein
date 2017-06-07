@@ -25,6 +25,10 @@ angular.module('lp.playbook')
         rating_selection: ''
     }
 
+    this.nextSettings = function() {
+        console.log('nextSettings');
+    }
+
     this.savedSegment = this.savedSegment || null;
 
     this.currentPlay = this.currentPlay || null;
