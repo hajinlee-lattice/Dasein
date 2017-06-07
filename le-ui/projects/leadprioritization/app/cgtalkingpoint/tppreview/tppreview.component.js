@@ -18,6 +18,7 @@ angular.module('lp.cg.talkingpoint.preview', [])
         $scope.leadPreviewObject.notionObject.PlayDisplayName = $scope.playName;
         $scope.leadPreviewObject.notionObject.PlayDescription = $scope.playDescription;
         $scope.leadPreviewObject.notionObject.TalkingPoints = CgTalkingPointStore.getTalkingPoints();
+        $scope.hasTalkingPoints = $scope.leadPreviewObject.notionObject.TalkingPoints.length > 0;
     });
 
     window.addEventListener('message', handleLpiPreviewInit);
