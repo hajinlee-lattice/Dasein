@@ -19,6 +19,5 @@
 
     <modules>
         <module>le-config</module>
-        <module>le-datafabric/pom-connect-shaded.xml</module>
     </modules>
 </project>
