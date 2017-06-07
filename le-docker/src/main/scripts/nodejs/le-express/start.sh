@@ -7,7 +7,7 @@ fi;
 
 if [ ! -f "/opt/node/app/ENV_VARS" ]; then
     echo "copying ENV_VARS file for LE_ENVIRONMENT=${LE_ENVIRONMENT}"
-    cp /opt/node/app/conf/env/${LE_ENVIRONMENT}_aws/ENV_VARS /opt/node/app
+    cp /opt/node/app/conf/env/${LE_ENVIRONMENT}/ENV_VARS /opt/node/app
 fi
 
 if [ "${INSTALL_MODE}" == "EXTERNAL" ]; then
