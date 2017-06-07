@@ -29,6 +29,18 @@
                                     ng-maxlength="50"
                                     placeholder="Example: US-Enterprise-model"
                                     required />
+
+
+                            <label>Notes</label>
+                            <textarea 
+                                row="8"
+                                cols="30"
+                                name="notesContent" 
+                                ng-model="notesContent"
+                                id="notesContent" 
+                                class="form-control"></textarea>
+
+
                             <ul class="help-block">
                                 <li ng-show="!modelform.modelDisplayName.$viewValue.length">Model Name cannot be empty</li>
                                 <li ng-show="modelform.modelDisplayName.$viewValue.length >= 50">Model must be less than 50 characters. <em>[{{modelform.modelDisplayName.$viewValue.length}} of 50]<em></li>

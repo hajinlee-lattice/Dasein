@@ -5,7 +5,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 ])
 .service('UpdateFieldsModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     var self = this;
-    this.show = function (oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes, enableTransformations, modelSummaryId, allMetadataFields, oldModelDisplayName, dataRules) {
+    this.show = function (oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes, enableTransformations, modelSummaryId, allMetadataFields, oldModelDisplayName, notesContent, dataRules) {
         $http.get('app/setup/views/UpdateFieldsView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
@@ -17,6 +17,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             scope.enableTransformations = enableTransformations;
             var copy_text = " (copy)";
             scope.modelDisplayName = oldModelDisplayName + (oldModelDisplayName.length + copy_text.length <= 50 ? copy_text : '');
+            scope.notesContent = notesContent;
             var deduplicationTypes = [ "ONELEADPERDOMAIN", "MULTIPLELEADSPERDOMAIN" ];
             if (oneLeadPerDomain) {
                 scope.dedupType = deduplicationTypes[0];
@@ -61,7 +62,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
         $scope.saveInProgress = true;
 
         MetadataService.UpdateAndCloneFields($scope.dedupType, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes, $scope.enableTransformations,
-            modelName, $scope.modelDisplayName, $scope.modelSummaryId, $scope.allMetadataFields, $scope.dataRules).then(function(result){
+            modelName, $scope.modelDisplayName, $scope.notesContent, $scope.modelSummaryId, $scope.allMetadataFields, $scope.dataRules).then(function(result){
 
             if (result.Success) {
                 $("#modalContainer").modal('hide');

@@ -28,6 +28,7 @@ angular.module('mainApp.models.remodel', [
         dataRulesMap: {},
         attributes: [],
         newModelName: Model.ModelDetails.DisplayName.replace(/\s+/g, '_') + $filter('date')(new Date().getTime(), '_yyyyMMdd') + '_Remodel',
+        notesContent: '',
         isDirty: false,
         remodeling: false,
         sortBy: 'name',
@@ -121,6 +122,7 @@ angular.module('mainApp.models.remodel', [
                 Model.ModelDetails.TransformationGroupName === "none") ? false : true,
             modelName = modelNameFormatted,
             modelDisplayName = vm.newModelName,
+            notesContent = vm.NotesContents,
             originalModelSummaryId = Model.ModelDetails.ModelID,
             fields = vm.attributes.map(function(attribute) {
                 return attribute.attribute;
@@ -130,7 +132,7 @@ angular.module('mainApp.models.remodel', [
         RemodelingModal.show();
 
         MetadataService.UpdateAndCloneFields(dedupType, includePersonalEmailDomains, useLatticeAttributes,
-                enableTransformations, modelName, modelDisplayName, originalModelSummaryId, fields, null).then(function(result) {
+                enableTransformations, modelName, modelDisplayName, notesContent, originalModelSummaryId, fields, null).then(function(result) {
 
             if (result.Success === true) {
                 vm.success = true;

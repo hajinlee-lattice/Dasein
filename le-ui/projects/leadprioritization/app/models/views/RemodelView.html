@@ -65,7 +65,12 @@
                         <label for="newModelName">New Model Name</label>
                         <input type="text" class="form-control" name="newModelName" ng-model="vm.newModelName" ng-disabled="vm.remodeling || vm.disableRemodelOnError"/>
                         <label>Note</label>
-                        <textarea rows="2" class="form-control"></textarea>
+                        <textarea 
+                            rows="2" 
+                            class="form-control"
+                            name="NotesContents"
+                            ng-model="vm.NotesContents"
+                        ></textarea>
                         <p class="help-block">* Model Name cannot be empty, must be less than 50 characters.</p>
 
                     </form>

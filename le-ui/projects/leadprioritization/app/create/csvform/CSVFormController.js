@@ -25,6 +25,7 @@ angular
         accountLeadCheck: '',
         modelDisplayName: '',
         modelDescription: '',
+        notesContent: '',
         uploaded: false,
         showTypeDefault: false,
         showNameDefault: false,
@@ -238,7 +239,7 @@ angular
         metaData.name = fileName;
         metaData.modelName = modelName;
         metaData.displayName = displayName;
-        metaData.description = vm.modelDescription;
+        metaData.notesContent = vm.notesContent;
         metaData.schemaInterpretation = schemaInterpretation;
 
         if (vm.pivotUploaded) {

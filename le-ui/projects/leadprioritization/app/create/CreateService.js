@@ -78,7 +78,7 @@ angular
             formData = new FormData(),
             params = options.params || {},
             whitelist = [
-                'schema','modelId','description','compressed',
+                'schema','modelId','notesContent','compressed',
                 'displayName','file','metadataFile'
             ];
 

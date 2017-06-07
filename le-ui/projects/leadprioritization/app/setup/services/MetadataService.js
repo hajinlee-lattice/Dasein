@@ -149,12 +149,13 @@ angular.module('mainApp.setup.services.MetadataService', [
     };
 
     this.UpdateAndCloneFields = function (dedupType, includePersonalEmailDomains, useLatticeAttributes, enableTransformations, modelName,
-                                        modelDisplayName, originalModelSummaryId, fields, dataRules) {
+                                        modelDisplayName, notesContent, originalModelSummaryId, fields, dataRules) {
         var deferred = $q.defer();
 
         var cloneParams = {
             name : modelName,
             displayName: modelDisplayName,
+            notesContent: notesContent,
             description: 'cloned from model: ' + originalModelSummaryId,
             attributes: fields || [],
             sourceModelSummaryId: originalModelSummaryId,

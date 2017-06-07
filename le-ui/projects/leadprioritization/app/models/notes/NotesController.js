@@ -22,7 +22,7 @@ angular.module('lp.models.notes', [
 
 
     vm.init = function($q) {
-        
+        console.log(vm.notes);
     }
     vm.init();
 
