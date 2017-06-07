@@ -133,13 +133,13 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     }
 
     protected void postDataFlowProcessing(String workflowDir, SorterParameters paramters, SorterConfig configuration) {
-        if (paramters.getPartitions() == 1 && !configuration.isCompressed()) {
+        if (paramters.getPartitions() == 1 && !Boolean.TRUE.equals(configuration.getCompressResult())) {
             keepOnlyBiggestAvro(workflowDir);
         } else {
             try {
                 moveAvrosToOutput(workflowDir);
                 splitAvros(configuration.getSplittingThreads(), configuration.getSplittingChunkSize(),
-                        Boolean.TRUE.equals(configuration.isCompressed()));
+                        Boolean.TRUE.equals(configuration.getCompressResult()));
                 cleanupOutputDir();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to process avro files result from cascading flow.", e);
