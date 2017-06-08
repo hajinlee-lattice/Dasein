@@ -258,7 +258,7 @@ public enum LedpCode {
     LEDP_18145("Play displayName cannot be empty."), //
     LEDP_18146("Play Launch not found for {0}"), //
     LEDP_18147("User {0} do not have access for tenant {1}"), //
-
+    LEDP_18148("Your file has {0} million rows. Please reduce number of rows to below 1 million."), //
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
 

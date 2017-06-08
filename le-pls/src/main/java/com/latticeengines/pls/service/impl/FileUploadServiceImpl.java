@@ -9,10 +9,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.FileStreamUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -46,6 +48,9 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Value("${pls.fileupload.maxupload.rows}")
+    private long maxUploadRows;
+
     @Override
     public SourceFile uploadFile(String outputFileName, //
             SchemaInterpretation schemaInterpretation, // 
@@ -69,8 +74,15 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(displayName);
 
-            HdfsUtils.copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
+            long fileRows = FileStreamUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileService.create(file);
+
+            if(fileRows > maxUploadRows) {
+                double rows = (double)fileRows / 1000000;
+                throw new LedpException(LedpCode.LEDP_18148,
+                        new String[] { String.format("%.2f", rows)});
+            }
+
             return sourceFileService.findByName(file.getName());
         } catch (IOException e) {
             log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, displayName), e);
