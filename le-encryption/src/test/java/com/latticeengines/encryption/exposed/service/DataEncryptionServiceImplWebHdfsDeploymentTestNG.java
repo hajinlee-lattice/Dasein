@@ -13,10 +13,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
-import org.testng.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -29,9 +29,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.encryption.functionalframework.EncryptionTestNGBase;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
-public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionTestNGBase {
+public class DataEncryptionServiceImplWebHdfsDeploymentTestNG extends EncryptionTestNGBase {
 
-    private static final Log log = LogFactory.getLog(DataEncyptionServiceImplWebHdfsDeploymentTestNG.class);
+    private static final Log log = LogFactory.getLog(DataEncryptionServiceImplWebHdfsDeploymentTestNG.class);
     private static final String RESOURCE_BASE = "com/latticeengines/encryption/exposed/service";
     private static final String FILE_NAME = "test.txt";
 
@@ -105,8 +105,8 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
         log.info("Start creating a file in Hdfs: " + hdfsDir);
         String fileContents;
         try {
-            fileContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
-                    RESOURCE_BASE + "/" + FILE_NAME).getPath()));
+            fileContents = FileUtils.readFileToString(
+                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
             WebHdfsUtils.writeToFile(webHdfsUrl, yarnConfiguration, String.format("%s/%s", hdfsDir, FILE_NAME),
                     fileContents);
         } catch (IOException e) {
@@ -122,15 +122,12 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
             FileStatus fileStatus = WebHdfsUtils.getFileStatus(webHdfsUrl, yarnConfiguration,
                     String.format("%s/%s", hdfsDir, FILE_NAME));
             Assert.assertTrue(fileStatus.isFile());
-            String expectedFileContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
-                    RESOURCE_BASE + "/" + FILE_NAME).getPath()));
-            log.info("file contents are: "
-                    + WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
-                            String.format("%s/%s", hdfsDir, FILE_NAME)));
-            Assert.assertEquals(
-                    expectedFileContents,
-                    WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
-                            String.format("%s/%s", hdfsDir, FILE_NAME)));
+            String expectedFileContents = FileUtils.readFileToString(
+                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
+            log.info("file contents are: " + WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
+                    String.format("%s/%s", hdfsDir, FILE_NAME)));
+            Assert.assertEquals(expectedFileContents, WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
+                    String.format("%s/%s", hdfsDir, FILE_NAME)));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading the file contents.");
