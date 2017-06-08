@@ -1,17 +1,17 @@
 <div class="tp-preview container">
-    <div ng-if="hasTalkingPoints">
+    <div ng-show="vm.hasTalkingPoints">
         <label>Account:
             <select
                 class="form-control"
-                ng-change="onAccountChange()"
-                ng-model="selected"
-                ng-selected="selected"
-                ng-options="item.name for item in accounts">
+                ng-change="vm.onAccountChange()"
+                ng-model="vm.selected"
+                ng-selected="vm.selected"
+                ng-options="item.name for item in vm.accounts">
             </select>
         </label>
-        <iframe  id="tppreview_iframe" class="tppreview_iframe" src="{{sceIframeSrc}}"></iframe>
+        <iframe  id="tppreview_iframe" class="tppreview_iframe" src="{{vm.sceIframeSrc}}"></iframe>
     </div>
-    <div ng-if="!hasTalkingPoints">
+    <div ng-show="!vm.hasTalkingPoints">
         <p>There are no talking points created</p>
     </div>
 </div>
