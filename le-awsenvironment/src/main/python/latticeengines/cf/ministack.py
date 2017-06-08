@@ -33,7 +33,7 @@ ALLOCATION = {}
 HAPROXY_KEY="HAProxy"
 
 class CreateServiceThread (threading.Thread):
-    def __init__(self, environment, stackname, app, instances, ip, profile, tag):
+    def __init__(self, environment, stackname, app, instances, ip, profile, tag, logdriver):
         threading.Thread.__init__(self)
         self.threadID = "%s-%s" % (stackname, app)
         self.environment = environment
@@ -43,12 +43,13 @@ class CreateServiceThread (threading.Thread):
         self.ip = ip
         self.profile = profile
         self.tag = tag
+        self.logdriver = logdriver
 
     def run(self):
         if self.app == "ui":
-            container = ui_container(self.environment, self.stackname, self.app, self.ip, self.profile, tag=self.tag)
+            container = ui_container(self.environment, self.stackname, self.app, self.ip, self.profile, self.tag, self.logdriver)
         else:
-            container = tomcat_container(self.environment, self.stackname, self.app, self.ip, self.profile, tag=self.tag)
+            container = tomcat_container(self.environment, self.stackname, self.app, self.ip, self.profile, self.tag, self.logdriver)
         ledp = ECSVolume("ledp", "/etc/ledp")
         ledpLog = ECSVolume("ledpLog", "/var/log/ledp")
         internal_addr = ECSVolume("intAddr", "/etc/internaladdr.txt")
@@ -212,9 +213,9 @@ def provision(environment, stackname, tag, instance_type):
     write_to_stack(consul, environment, stackname, HAPROXY_KEY, ip)
 
 def bootstrap_cli(args):
-    bootstrap(args.environment, args.stackname, args.apps, args.profile, args.instances, args.tag)
+    bootstrap(args.environment, args.stackname, args.apps, args.profile, args.instances, args.tag, args.logdriver)
 
-def bootstrap(environment, stackname, apps, profile, instances, tag):
+def bootstrap(environment, stackname, apps, profile, instances, tag, logdriver):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
@@ -229,7 +230,7 @@ def bootstrap(environment, stackname, apps, profile, instances, tag):
         alloc = ALLOCATION[app]
         num_tasks = alloc['capacity'] if 'capacity' in alloc else 1
         num_tasks = instances if instances < num_tasks else num_tasks
-        thread = CreateServiceThread(environment, stackname, app, num_tasks, ip, profile, tag)
+        thread = CreateServiceThread(environment, stackname, app, num_tasks, ip, profile, tag, logdriver)
         thread.start()
         threads.append(thread)
 
@@ -238,7 +239,7 @@ def bootstrap(environment, stackname, apps, profile, instances, tag):
 
     print "HAProxy IP from consul: %s" % ip
 
-def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_driver='awslogs'):
+def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_driver):
     alloc = ALLOCATION[app]
     config = AwsEnvironment(environment)
     container = Container("tomcat", "%s/latticeengines/%s:%s" % (config.ecr_registry(), app, tag))
@@ -286,7 +287,7 @@ def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_dri
 
     return container
 
-def ui_container(environment, stackname, app, ip, profile_file, tag, log_driver='awslogs'):
+def ui_container(environment, stackname, app, ip, profile_file, tag, log_driver):
     config = AwsEnvironment(environment)
     alloc = ALLOCATION[app]
     container = Container("express", "%s/latticeengines/express:%s" % (config.ecr_registry(), tag))
@@ -418,6 +419,7 @@ def parse_args():
     parser1.add_argument('-n', dest='instances', type=int, default="2", help='number of instances.')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
+    parser1.add_argument('-l', dest='logdriver', type=str, default='awslogs', help='log driver')
     parser1.set_defaults(func=bootstrap_cli)
 
     parser1 = commands.add_parser("teardown")
