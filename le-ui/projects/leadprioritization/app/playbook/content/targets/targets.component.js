@@ -16,7 +16,7 @@ angular.module('lp.playbook.wizard.targets', [])
         sortKey: null,
         sortDesc: true,
         current: 1,
-        pagesize: 10,
+        pagesize: 8,
         max: 0
     });
 
