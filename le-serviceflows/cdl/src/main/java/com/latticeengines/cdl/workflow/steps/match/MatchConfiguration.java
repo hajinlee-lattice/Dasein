@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.datacloud.match.IOBufferType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class MatchConfiguration extends MicroserviceStepConfiguration {
     

@@ -1,6 +1,6 @@
 package com.latticeengines.prospectdiscovery.workflow.steps;
 
-import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
 public class RunScoreTableDataFlowConfiguration extends DataFlowStepConfiguration {
     

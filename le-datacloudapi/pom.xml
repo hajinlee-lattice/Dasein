@@ -190,7 +190,7 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-datacloud</artifactId>
+            <artifactId>le-datacloud-etl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -204,13 +204,6 @@
             <artifactId>le-workflow</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-datacloud</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -296,11 +289,6 @@
             <artifactId>commons-csv</artifactId>
             <version>1.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.newrelic.agent.java</groupId>
-            <artifactId>newrelic-api</artifactId>
-            <version>${newrelic.version}</version>
         </dependency>
 
     </dependencies>

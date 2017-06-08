@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.workflow.match;
+package com.latticeengines.domain.exposed.serviceflows.datacloud.match;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDa
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.datacloud.workflow.match.steps.CascadingBulkMatchStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CascadingBulkMatchStepConfiguration;
 
 public class CascadingBulkMatchWorkflowConfiguration extends WorkflowConfiguration {
 

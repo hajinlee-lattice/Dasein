@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

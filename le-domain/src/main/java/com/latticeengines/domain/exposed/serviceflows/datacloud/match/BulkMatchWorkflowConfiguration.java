@@ -1,9 +1,9 @@
-package com.latticeengines.datacloud.workflow.match;
+package com.latticeengines.domain.exposed.serviceflows.datacloud.match;
 
 import java.util.Map;
 
-import com.latticeengines.datacloud.workflow.match.steps.ParallelBlockExecutionConfiguration;
-import com.latticeengines.datacloud.workflow.match.steps.PrepareBulkMatchInputConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;

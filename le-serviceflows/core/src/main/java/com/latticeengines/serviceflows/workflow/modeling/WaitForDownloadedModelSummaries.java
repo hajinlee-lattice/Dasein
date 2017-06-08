@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 @Component("waitForDownloadedModelSummaries")
 public class WaitForDownloadedModelSummaries {

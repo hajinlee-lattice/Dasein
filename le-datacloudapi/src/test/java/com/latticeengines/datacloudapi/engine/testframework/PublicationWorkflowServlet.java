@@ -16,7 +16,7 @@ import org.mortbay.jetty.HttpStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.datacloud.workflow.engine.PublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkflowConfiguration;
 
 public class PublicationWorkflowServlet extends HttpServlet {
 

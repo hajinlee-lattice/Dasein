@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
 public abstract class BaseDataFlowReportStep<T extends BaseDataFlowReportStepConfiguration> extends BaseReportStep<T> {
 

@@ -6,7 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.cdl.CreateStagingTableParameters;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class StageListOfEntitiesConfiguration extends MicroserviceStepConfiguration {
 

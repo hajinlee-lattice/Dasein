@@ -1,12 +1,12 @@
-package com.latticeengines.datacloud.workflow.engine;
+package com.latticeengines.domain.exposed.serviceflows.datacloud.etl;
 
-import com.latticeengines.datacloud.core.util.PropDataConstants;
-import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.datacloud.workflow.engine.steps.PublishConfiguration;
 
 public class PublishWorkflowConfiguration extends WorkflowConfiguration {
 
@@ -38,7 +38,7 @@ public class PublishWorkflowConfiguration extends WorkflowConfiguration {
         public PublishWorkflowConfiguration build() {
             configuration.setContainerConfiguration("publishWorkflow", EngineConstants.PRODATA_CUSTOMERSPACE,
                     "PublishWorkflow");
-            configuration.setCustomerSpace(CustomerSpace.parse(PropDataConstants.SERVICE_CUSTOMERSPACE));
+            configuration.setCustomerSpace(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
             configuration.add(publishConfig);
             return configuration;
         }

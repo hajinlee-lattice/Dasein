@@ -6,7 +6,7 @@ import java.util.Map;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ExportStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull

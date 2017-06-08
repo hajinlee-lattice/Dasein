@@ -1,11 +1,11 @@
-package com.latticeengines.datacloud.workflow.match.steps;
+package com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps;
 
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
 public class CascadingBulkMatchStepConfiguration extends DataFlowStepConfiguration {
 

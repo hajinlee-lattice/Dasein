@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 
 import java.util.Date;
 
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.client.api.YarnClient;

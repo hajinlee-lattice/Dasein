@@ -33,7 +33,6 @@ import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloudapi.engine.transformation.service.CacheLoaderConfig;
 import com.latticeengines.datacloudapi.engine.transformation.service.CacheLoaderService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
@@ -151,7 +150,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     }
 
     private void resportResult(String dirPath, long startTime, AtomicLong counter) {
-        long recordCount = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(dirPath));
+        long recordCount = AvroUtils.count(yarnConfiguration, toAvroGlobs(dirPath));
         long endTime = System.currentTimeMillis();
         log.info("Finished loading all cache on path=" + dirPath + " total records=" + recordCount
                 + " total cached size=" + counter + " Time spent="
@@ -396,5 +395,13 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
                 return 0;
             }
         }
+    }
+
+    protected static String toAvroGlobs(String avroDirOrFile) {
+        String avroGlobs = avroDirOrFile;
+        if (!avroDirOrFile.endsWith(".avro")) {
+            avroGlobs += "/*.avro";
+        }
+        return avroGlobs;
     }
 }

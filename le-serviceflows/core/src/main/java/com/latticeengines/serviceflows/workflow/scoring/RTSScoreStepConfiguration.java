@@ -1,6 +1,6 @@
 package com.latticeengines.serviceflows.workflow.scoring;
 
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 

@@ -1,13 +1,13 @@
-package com.latticeengines.datacloud.workflow.engine;
+package com.latticeengines.domain.exposed.serviceflows.datacloud.etl;
 
-import com.latticeengines.datacloud.core.util.PropDataConstants;
-import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.IngestionStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.datacloud.workflow.engine.steps.IngestionStepConfiguration;
 
 public class IngestionWorkflowConfiguration extends WorkflowConfiguration {
     public static class Builder {
@@ -33,7 +33,7 @@ public class IngestionWorkflowConfiguration extends WorkflowConfiguration {
             ingestionWorkflowConfig.setContainerConfiguration("ingestionWorkflow",
                     EngineConstants.PRODATA_CUSTOMERSPACE, "IngestionWorkflow");
             ingestionWorkflowConfig
-                    .setCustomerSpace(CustomerSpace.parse(PropDataConstants.SERVICE_CUSTOMERSPACE));
+                    .setCustomerSpace(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
             ingestionWorkflowConfig.add(ingestionConfig);
             return ingestionWorkflowConfig;
         }

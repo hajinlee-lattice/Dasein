@@ -3,7 +3,7 @@ package com.latticeengines.leadprioritization.workflow.steps;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ResolveMetadataFromUserRefinedAttributesConfiguration extends MicroserviceStepConfiguration {
 

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.workflow.engine.steps;
+package com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;

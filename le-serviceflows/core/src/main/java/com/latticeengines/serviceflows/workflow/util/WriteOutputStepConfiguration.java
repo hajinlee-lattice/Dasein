@@ -3,7 +3,7 @@ package com.latticeengines.serviceflows.workflow.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class WriteOutputStepConfiguration extends MicroserviceStepConfiguration {
     private Map<String, String> output = new HashMap<>();

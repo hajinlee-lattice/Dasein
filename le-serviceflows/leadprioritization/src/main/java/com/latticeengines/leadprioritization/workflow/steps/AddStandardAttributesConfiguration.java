@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
-import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
 public class AddStandardAttributesConfiguration extends DataFlowStepConfiguration {
 

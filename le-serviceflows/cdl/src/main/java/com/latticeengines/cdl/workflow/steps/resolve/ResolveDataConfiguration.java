@@ -2,7 +2,7 @@ package com.latticeengines.cdl.workflow.steps.resolve;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
 public class ResolveDataConfiguration extends DataFlowStepConfiguration {
     

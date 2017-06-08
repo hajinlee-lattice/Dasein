@@ -2,7 +2,7 @@ package com.latticeengines.leadprioritization.workflow.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
 public class DedupEventTableConfiguration extends DataFlowStepConfiguration {
 

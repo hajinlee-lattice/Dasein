@@ -1,7 +1,7 @@
-package com.latticeengines.datacloud.workflow.match.steps;
+package com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ParallelBlockExecutionConfiguration extends MicroserviceStepConfiguration {
     

@@ -1,8 +1,8 @@
-package com.latticeengines.datacloud.workflow.engine;
+package com.latticeengines.domain.exposed.serviceflows.datacloud.etl;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.workflow.engine.steps.PrepareTransformationStepInputConfiguration;
-import com.latticeengines.datacloud.workflow.engine.steps.TransformationStepExecutionConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.TransformationStepExecutionConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;

@@ -13,7 +13,7 @@ import com.latticeengines.prospectdiscovery.workflow.steps.RunAttributeLevelSumm
 import com.latticeengines.prospectdiscovery.workflow.steps.RunImportSummaryDataFlowConfiguration;
 import com.latticeengines.prospectdiscovery.workflow.steps.RunScoreTableDataFlowConfiguration;
 import com.latticeengines.prospectdiscovery.workflow.steps.TargetMarketStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ChooseModelStepConfiguration;

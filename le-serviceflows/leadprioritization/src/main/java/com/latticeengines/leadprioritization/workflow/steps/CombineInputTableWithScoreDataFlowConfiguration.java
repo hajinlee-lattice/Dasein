@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
 public class CombineInputTableWithScoreDataFlowConfiguration extends DataFlowStepConfiguration {
 

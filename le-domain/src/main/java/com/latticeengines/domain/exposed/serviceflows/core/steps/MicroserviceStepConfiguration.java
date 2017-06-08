@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.workflow.core;
+package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
