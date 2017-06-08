@@ -9,7 +9,7 @@
                 ng-options="item.name for item in vm.accounts">
             </select>
         </label>
-        <iframe  id="tppreview_iframe" class="tppreview_iframe" src="{{vm.sceIframeSrc}}"></iframe>
+        <iframe  id="tppreview_iframe" class="tppreview_iframe" ng-src="{{vm.sceIframeSrc}}"></iframe>
     </div>
     <div ng-show="!vm.hasTalkingPoints">
         <p>There are no talking points created</p>
