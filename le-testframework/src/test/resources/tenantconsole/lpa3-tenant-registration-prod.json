@@ -45,7 +45,7 @@
       "displayName": "LP3_${TENANT}",
       "description": "A LP3 solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePocTransform\":false,\"UseSalesforceSettings\":true,\"UseMarketoSettings\":true,\"UseEloquaSettings\":true,\"AllowPivotFile\":false,\"UseDnbRtsAndModeling\":true,\"EnableLatticeMarketoCredentialPage\":false,\"EnableDataEncryption\":false,\"EnableInternalEnrichmentAttributes\":false,\"EnableDataProfilingV2\":true,\"LatticeInsights\":false,\"EnableFuzzyMatch\":true,\"BypassDnbCache\":false,\"EnableCdl\":false,\"EnableMatchDebug\":false}"
+    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePocTransform\":false,\"UseSalesforceSettings\":true,\"UseMarketoSettings\":true,\"UseEloquaSettings\":true,\"AllowPivotFile\":false,\"UseDnbRtsAndModeling\":true,\"EnableLatticeMarketoCredentialPage\":false,\"EnableDataEncryption\":false,\"EnableInternalEnrichmentAttributes\":false,\"EnableDataProfilingV2\":true,\"LatticeInsights\":false,\"EnableFuzzyMatch\":true,\"BypassDnbCache\":false,\"EnableCdl\":false,\"EnableMatchDebug\":false,\"EnableTalkingPoints\":false}"
   },
   "TenantInfo": {
     "properties": {

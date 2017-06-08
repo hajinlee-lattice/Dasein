@@ -28,7 +28,8 @@ public enum LatticeFeatureFlag {
     LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights"), //
     BYPASS_DNB_CACHE("BypassDnbCache", "Bypass DnB Cache"), //
     ENABLE_CDL("EnableCdl", "Enable Customer Data Lake"), //
-    ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug");
+    ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
+    ENABLE_TALKING_POINTS("EnableTalkingPoints", "Enable Talking Points");
 
     private String name;
     private String documentation;
