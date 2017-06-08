@@ -49,6 +49,11 @@ class Container(Template):
             'options': options
         }
 
+    def add_docker_label(self, key, value):
+        if 'dockerLabels' not in self._template:
+            self._template['dockerLabels'] = {}
+        self._template['dockerLabels'][key] = value
+
     def privileged(self):
         self._template["privileged"] = True
 

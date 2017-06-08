@@ -33,24 +33,22 @@ ALLOCATION = {}
 HAPROXY_KEY="HAProxy"
 
 class CreateServiceThread (threading.Thread):
-    def __init__(self, environment, stackname, app, instances, ecr, ip, profile, tag, region):
+    def __init__(self, environment, stackname, app, instances, ip, profile, tag):
         threading.Thread.__init__(self)
         self.threadID = "%s-%s" % (stackname, app)
         self.environment = environment
         self.stackname = stackname
         self.app = app
-        self.ecr = ecr
         self.instances = instances
         self.ip = ip
         self.profile = profile
         self.tag = tag
-        self.region = region
 
     def run(self):
         if self.app == "ui":
-            container = ui_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, tag=self.tag, region=self.region)
+            container = ui_container(self.environment, self.stackname, self.app, self.ip, self.profile, tag=self.tag)
         else:
-            container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, tag=self.tag, region=self.region)
+            container = tomcat_container(self.environment, self.stackname, self.app, self.ip, self.profile, tag=self.tag)
         ledp = ECSVolume("ledp", "/etc/ledp")
         ledpLog = ECSVolume("ledpLog", "/var/log/ledp")
         internal_addr = ECSVolume("intAddr", "/etc/internaladdr.txt")
@@ -216,12 +214,11 @@ def provision(environment, stackname, tag, instance_type):
 def bootstrap_cli(args):
     bootstrap(args.environment, args.stackname, args.apps, args.profile, args.instances, args.tag)
 
-def bootstrap(environment, stackname, apps, profile, instances, tag, region="us-east-1"):
+def bootstrap(environment, stackname, apps, profile, instances, tag):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
     config = AwsEnvironment(environment)
-    ecr_url = config.ecr_registry()
 
     consul = config.consul_server()
     ip = read_from_stack(consul, environment, stackname, HAPROXY_KEY)
@@ -232,7 +229,7 @@ def bootstrap(environment, stackname, apps, profile, instances, tag, region="us-
         alloc = ALLOCATION[app]
         num_tasks = alloc['capacity'] if 'capacity' in alloc else 1
         num_tasks = instances if instances < num_tasks else num_tasks
-        thread = CreateServiceThread(environment, stackname, app, num_tasks, ecr_url, ip, profile, tag, region)
+        thread = CreateServiceThread(environment, stackname, app, num_tasks, ip, profile, tag)
         thread.start()
         threads.append(thread)
 
@@ -241,17 +238,32 @@ def bootstrap(environment, stackname, apps, profile, instances, tag, region="us-
 
     print "HAProxy IP from consul: %s" % ip
 
-def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag, region):
+def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_driver='awslogs'):
     alloc = ALLOCATION[app]
-    container = Container("tomcat", "%s/latticeengines/%s:%s" % (ecr_url, app, tag))
+    config = AwsEnvironment(environment)
+    container = Container("tomcat", "%s/latticeengines/%s:%s" % (config.ecr_registry(), app, tag))
     container.mem_mb(alloc["mem"])
     if "cpu" in alloc:
         container.cpu(alloc["cpu"])
-    container.log("awslogs", {
-        "awslogs-group": "ministack-%s" % stackname,
-        "awslogs-region": region,
-        "awslogs-stream-prefix": app
-    })
+
+    container.add_docker_label('stack', stackname)
+    container.add_docker_label('app', app)
+
+    if log_driver == 'awslogs':
+        container.log("awslogs", {
+            "awslogs-group": "ministack-%s" % stackname,
+            "awslogs-region": config.aws_region(),
+            "awslogs-stream-prefix": app
+        })
+    elif log_driver == 'splunk':
+        container.log("splunk", {
+            "splunk-url": config.splunk_url(),
+            "splunk-token": config.splunk_token(),
+            "splunk-index": "main",
+            "splunk-sourcetype": "log4j",
+            "labels": "stack,app"
+        })
+
     container.publish_port(8080, alloc["port"])
     container.hostname("%s-%s" % (stackname, app))
 
@@ -274,17 +286,32 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
 
     return container
 
-def ui_container(environment, stackname, ecr_url, app, ip, profile_file, tag, region):
+def ui_container(environment, stackname, app, ip, profile_file, tag, log_driver='awslogs'):
+    config = AwsEnvironment(environment)
     alloc = ALLOCATION[app]
-    container = Container("express", "%s/latticeengines/express:%s" % (ecr_url, tag))
+    container = Container("express", "%s/latticeengines/express:%s" % (config.ecr_registry(), tag))
     container.mem_mb(alloc["mem"])
     if "cpu" in alloc:
         container.cpu(alloc["cpu"])
-    container.log("awslogs", {
-        "awslogs-group": "ministack-%s" % stackname,
-        "awslogs-region": region,
-        "awslogs-stream-prefix": app
-    })
+
+    container.add_docker_label('stack', stackname)
+    container.add_docker_label('app', app)
+
+    if log_driver == 'awslogs':
+        container.log("awslogs", {
+            "awslogs-group": "ministack-%s" % stackname,
+            "awslogs-region": config.aws_region(),
+            "awslogs-stream-prefix": app
+        })
+    elif log_driver == 'splunk':
+        container.log("splunk", {
+            "splunk-url": config.splunk_url(),
+            "splunk-token": config.splunk_token(),
+            "splunk-index": "main",
+            "splunk-sourcetype": "log4j",
+            "labels": "stack,app"
+        })
+
     container.publish_port(3000, 3000)
     container.publish_port(3002, 3002)
     container.hostname("%s-%s" % (stackname, app))
