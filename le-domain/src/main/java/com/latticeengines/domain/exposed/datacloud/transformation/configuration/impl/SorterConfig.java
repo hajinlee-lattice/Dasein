@@ -51,7 +51,7 @@ public class SorterConfig extends TransformerConfig {
         this.splittingChunkSize = splittingChunkSize;
     }
 
-    public boolean getCompressResult() {
+    public Boolean getCompressResult() {
         return compressResult;
     }
 
