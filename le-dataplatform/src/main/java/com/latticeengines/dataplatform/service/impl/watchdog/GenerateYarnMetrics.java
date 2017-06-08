@@ -56,7 +56,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             "modelAndEmailWorkflow", //
             "modelWorkflow", //
             "pmmlModelWorkflow", //
-            "propdataTransformationWorkflow", //
+            "transformationWorkflow", //
             "publishWorkflow", //
             "rtsBulkScoreWorkflow", //
             "scoreWorkflow");

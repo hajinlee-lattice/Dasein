@@ -2,7 +2,6 @@ package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
@@ -11,15 +10,16 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationService;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.datacloudapi.engine.transformation.service.TransformationExecutor;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @SuppressWarnings("rawtypes")
@@ -106,7 +106,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             TransformationProgress progress, TransformationProgressEntityMgr transformationProgressEntityMgr) {
         log.info("Kick off workflow for progress " + progress + " in pod " + HdfsPodContext.getHdfsPodId());
 
-        builder = builder.workflowName("propdataTransformationWorkflow") //
+        builder = builder.workflowName("transformationWorkflow") //
                 .payloadName("Transformation") //
                 .customerSpace(customerSpace) //
                 .hdfsPodId(HdfsPodContext.getHdfsPodId()) //
