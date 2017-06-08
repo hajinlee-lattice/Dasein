@@ -125,6 +125,9 @@
                                 <copy file="${project.basedir}/../le-microservice/dellebi/target/le-dellebi-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/dellebi.war"
                                       overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/dante/target/le-dante-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/dante.war"
+                                      overwrite="true" />
                             </tasks>
                         </configuration>
                     </execution>

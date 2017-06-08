@@ -75,6 +75,9 @@ if [ "${MICROSERVICES}" = "" ]; then
     MICROSERVICES="${MICROSERVICES},datacloudapi"
     MICROSERVICES="${MICROSERVICES},propdata"
     MICROSERVICES="${MICROSERVICES},dellebi"
+    MICROSERVICES="${MICROSERVICES},objectapi"
+    MICROSERVICES="${MICROSERVICES},dante"
+
 fi
 
 mkdir -p /tmp/latticeengines || true
