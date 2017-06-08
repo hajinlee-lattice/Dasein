@@ -33,4 +33,10 @@ public class DataFeedServiceImpl implements DataFeedService {
     public DataFeedExecution finishExecution(String customerSpace, String datafeedName) {
         return datafeedEntityMgr.finishExecution(datafeedName);
     }
+
+    @Override
+    public DataFeed createDataFeed(String customerSpace, DataFeed datafeed) {
+        datafeedEntityMgr.create(datafeed);
+        return datafeed;
+    }
 }

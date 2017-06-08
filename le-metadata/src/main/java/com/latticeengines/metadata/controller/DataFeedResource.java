@@ -2,6 +2,7 @@ package com.latticeengines.metadata.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -47,5 +48,13 @@ public class DataFeedResource implements DataFeedInterface {
     public DataFeedExecution finishExecution(@PathVariable String customerSpace, //
             @PathVariable String datafeedName) {
         return datafeedService.finishExecution(customerSpace, datafeedName);
+    }
+
+    @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "create data feed")
+    @Override
+    public DataFeed createDataFeed(@PathVariable String customerSpace, @RequestBody DataFeed datafeed) {
+        return datafeedService.createDataFeed(customerSpace, datafeed);
     }
 }

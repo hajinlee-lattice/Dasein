@@ -13,4 +13,6 @@ public interface DataFeedService {
 
     DataFeedExecution finishExecution(String customerSpace, String datafeedName);
 
+    DataFeed createDataFeed(String customerSpace, DataFeed datafeed);
+
 }

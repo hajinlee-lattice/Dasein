@@ -44,6 +44,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void create(DataFeedTask task) {
+        if (task.getImportTemplate() != null) {
+            task.getImportTemplate().setTableType(TableType.IMPORTTABLE);
+        }
+        if (task.getImportData() != null) {
+            task.getImportData().setTableType(TableType.DATATABLE);
+        }
+        super.create(task);
+        addImportDataTableToQueue(task);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table peekFirstDataTable(Long taskPid) {
         Table table = datafeedTaskTableDao.peekFirstDataTable(taskPid);
@@ -75,6 +88,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     public void addImportDataTableToQueue(DataFeedTask dataFeedTask) {
         try {
             if (dataFeedTask.getImportData().getPid() == null) {
+                dataFeedTask.getImportData().setTableType(TableType.DATATABLE);
                 createOrUpdate(dataFeedTask);
             }
             addTableToQueue(dataFeedTask, dataFeedTask.getImportData());

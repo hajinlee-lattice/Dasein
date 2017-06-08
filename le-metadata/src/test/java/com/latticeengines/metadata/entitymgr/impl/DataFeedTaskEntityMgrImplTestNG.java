@@ -2,7 +2,6 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.Collections;
 import java.util.Date;
 
 import org.joda.time.DateTime;
@@ -19,7 +18,6 @@ import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
@@ -42,7 +40,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
 
     private DataFeedTask task = new DataFeedTask();
 
-    private Table dataTable = new Table(TableType.DATATABLE);
+    private Table dataTable = new Table();
 
     @Override
     @BeforeClass(groups = "functional")
@@ -65,9 +63,6 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
     public void create() {
         DataCollection dataCollection = new DataCollection();
         dataCollection.setName("DATA_COLLECTION_NAME");
-        Table table = new Table();
-        table.setName(TABLE1);
-        dataCollection.setTables(Collections.singletonList(table));
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollectionEntityMgr.createDataCollection(dataCollection);
 
@@ -77,7 +72,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         datafeed.setDataCollection(dataCollection);
         dataCollection.addDataFeed(datafeed);
 
-        Table importTable = new Table(TableType.IMPORTTABLE);
+        Table importTable = new Table();
         importTable.setName("importTable");
         importTable.setDisplayName(importTable.getName());
         importTable.setTenant(MultiTenantContext.getTenant());
@@ -98,8 +93,6 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         task.setLastImported(new Date());
         datafeed.addTask(task);
         datafeedEntityMgr.create(datafeed);
-        datafeedTaskEntityMgr.create(task);
-        datafeedTaskEntityMgr.addImportDataTableToQueue(task);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
@@ -107,7 +100,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 1);
         assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).toString(), dataTable.toString());
 
-        Table dataTable2 = new Table(TableType.DATATABLE);
+        Table dataTable2 = new Table();
         dataTable2.setName("dataTable2");
         dataTable2.setDisplayName(dataTable2.getName());
         dataTable2.setTenant(MultiTenantContext.getTenant());

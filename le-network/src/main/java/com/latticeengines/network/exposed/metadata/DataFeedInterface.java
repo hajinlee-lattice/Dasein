@@ -10,4 +10,6 @@ public interface DataFeedInterface {
     DataFeed findDataFeedByName(String customerSpace, String datafeedName);
 
     DataFeedExecution finishExecution(String customerSpace, String datafeedName);
+
+    DataFeed createDataFeed(String customerSpace, DataFeed datafeed);
 }

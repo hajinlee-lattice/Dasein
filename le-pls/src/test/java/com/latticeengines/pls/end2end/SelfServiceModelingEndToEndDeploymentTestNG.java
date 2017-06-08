@@ -81,7 +81,6 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component
@@ -110,8 +109,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
     private ModelingParameters parameters;
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @BeforeClass(groups = { "deployment.lp", "precheckin" })
     public void setup() throws Exception {
@@ -231,7 +228,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
-        waitForWorkflowStatus(modelingWorkflowApplicationId, true);
+        waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, true);
 
         boolean thrown = false;
         try {
@@ -244,7 +241,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         assertTrue(thrown);
 
-        JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
@@ -300,6 +297,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 String.format("%s/pls/bucketedscore/abcdbuckets/%s", getRestAPIHostPort(), modelId), Map.class);
         log.info(String.format("The bucket creation time to buckets are: " + JsonUtils.serialize(bucketMetadataRaw)));
         log.info(String.format("The timestamps are: %s", JsonUtils.serialize(bucketMetadataRaw.keySet())));
+        @SuppressWarnings("rawtypes")
         Map<Long, List> creationTimeToBucketMetadatas = JsonUtils.convertMap(bucketMetadataRaw, Long.class, List.class);
 
         Set<BucketName> bucketNames = new HashSet<>(
@@ -361,7 +359,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     void copyModel(String originalModelId, String targetTenantId) {
         log.info("Copy the model that is created ...");
-        ResponseDocument response = getRestTemplate().postForObject(
+        ResponseDocument<?> response = getRestTemplate().postForObject(
                 String.format("%s/pls/models/copymodel/%s?targetTenantId=%s", getRestAPIHostPort(), originalModelId,
                         targetTenantId), //
                 null, ResponseDocument.class);
@@ -431,7 +429,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
 
-        JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
@@ -649,34 +647,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         Object rawSummary = restTemplate.getForObject(
                 String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), found.getId()), Object.class);
         return JsonUtils.convertValue(rawSummary, ModelSummary.class);
-    }
-
-    private JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
-
-        int retryOnException = 4;
-        Job job = null;
-
-        while (true) {
-            try {
-                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
-            } catch (Exception e) {
-                System.out.println(String.format("Workflow job exception: %s", e.getMessage()));
-
-                job = null;
-                if (--retryOnException == 0)
-                    throw new RuntimeException(e);
-            }
-
-            if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
-                return job.getJobStatus();
-            }
-
-            try {
-                Thread.sleep(30000L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     private void compareRtsScoreWithModeling(ModelSummary modelSummary, int countsForScoring, String tenantId)

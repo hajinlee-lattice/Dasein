@@ -53,11 +53,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy implements Dat
 
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<DataCollection> getDataCollections(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollections", customerSpace);
-        List list = get("getDataCollections", url, List.class);
+        List<?> list = get("getDataCollections", url, List.class);
         return JsonUtils.convertList(list, DataCollection.class);
     }
 
@@ -68,10 +67,9 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy implements Dat
         try {
             return dataCollectionCache.get(key);
         } catch (ExecutionException e) {
-            log.error(
-                    String.format(
-                            "Failed to retrieve DataCollection of type %s for customer %s from cache.  Falling back to requesting it explicitly",
-                            type, customerSpace), e);
+            log.error(String.format(
+                    "Failed to retrieve DataCollection of type %s for customer %s from cache.  Falling back to requesting it explicitly",
+                    type, customerSpace), e);
         }
 
         String url = constructUrl("/customerspaces/{customerSpace}/datacollections/types/{type}", customerSpace, type);

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.listeners;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,9 +31,13 @@ public class ConsolidateCompleteListener extends LEJobListener {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
         String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
-        DataFeedExecution execution = datafeedProxy.finishExecution(customerSpace, datafeedName);
-        if (execution.getStatus() != Status.Consolidated) {
-            throw new RuntimeException("Can't finish execution");
+        if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
+            DataFeedExecution execution = datafeedProxy.finishExecution(customerSpace, datafeedName);
+            if (execution.getStatus() != Status.Consolidated) {
+                throw new RuntimeException("Can't finish execution");
+            }
+        } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
+
         }
     }
 

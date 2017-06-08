@@ -1,9 +1,11 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +38,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
 
     @Autowired
-    private DataFeedTaskEntityMgr dataFeedTaskEntityMgr;
+    private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
 
     @Override
     public BaseDao<DataFeed> getDao() {
@@ -48,6 +50,15 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     public void create(DataFeed datafeed) {
         datafeed.setTenant(MultiTenantContext.getTenant());
         super.create(datafeed);
+        for (DataFeedTask task : datafeed.getTasks()) {
+            datafeedTaskEntityMgr.create(task);
+        }
+        if (!CollectionUtils.isEmpty(datafeed.getExecutions())) {
+            DataFeedExecution execution = datafeed.getExecutions().get(0);
+            datafeedExecutionEntityMgr.create(execution);
+            datafeed.setActiveExecution(execution.getPid());
+            update(datafeed);
+        }
     }
 
     @Override
@@ -69,9 +80,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             log.info("Can't find data feed: " + datafeedName);
             return null;
         }
-        List<DataFeedTask> tasks = HibernateUtils.inflateDetails(datafeed.getTasks());
+        List<DataFeedTask> tasks = new ArrayList<>(HibernateUtils.inflateDetails(datafeed.getTasks()));
         datafeed.getTasks().forEach(task -> {
-            task.setImportData(dataFeedTaskEntityMgr.pollFirstDataTable(task.getPid()));
+            task.setImportData(datafeedTaskEntityMgr.pollFirstDataTable(task.getPid()));
         });
         List<DataFeedImport> imports = tasks.stream().map(DataFeedImportUtils::createImportFromTask)
                 .collect(Collectors.toList());

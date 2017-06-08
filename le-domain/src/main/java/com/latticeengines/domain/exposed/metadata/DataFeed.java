@@ -83,7 +83,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @OrderBy
-    @JsonProperty("executions")
+    @JsonIgnore
     private List<DataFeedExecution> executions = new ArrayList<>();
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
@@ -154,7 +154,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     }
 
     public void addExeuction(DataFeedExecution exec) {
-        exec.setFeed(this);
         executions.add(exec);
     }
 

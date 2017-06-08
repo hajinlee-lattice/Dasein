@@ -1,43 +1,65 @@
 package com.latticeengines.pls.workflow;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.cdl.workflow.ConsolidateAndPublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
+@Component
 public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = Logger.getLogger(ConsolidateAndPublishWorkflowSubmitter.class);
 
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
+
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
-    public ApplicationId submit(String datafeedName) {
-        WorkflowConfiguration configuration = generateConfiguration(datafeedName);
+    public ApplicationId submit(DataCollectionType dataCollectionType, String datafeedName) {
+        WorkflowConfiguration configuration = generateConfiguration(dataCollectionType, datafeedName);
         ApplicationId applicationId = workflowJobService.submit(configuration);
         return applicationId;
-
     }
 
-    private WorkflowConfiguration generateConfiguration(String datafeedName) {
+    private WorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType, String datafeedName) {
+        DataCollection dataCollection = dataCollectionProxy
+                .getDataCollectionByType(MultiTenantContext.getCustomerSpace().toString(), dataCollectionType);
         return new ConsolidateAndPublishWorkflowConfiguration.Builder().customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
                 .datafeedName(datafeedName) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
+                        .build()) //
+                .masterTableName(dataCollection.getTable(SchemaInterpretation.Account).getName()) //
+                .idField("LEAccountIDLong") //
+                .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder()
+                        .put(MatchKey.Domain, Arrays.asList(InterfaceName.Domain.name())) //
+                        .put(MatchKey.Country, Arrays.asList(InterfaceName.Country.name())) //
+                        .put(MatchKey.Zipcode, Arrays.asList("Zip")) //
                         .build()) //
                 .build();
     }

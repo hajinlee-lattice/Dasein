@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
 public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
@@ -66,6 +69,34 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
         switchToSuperAdmin();
         String url = getRestAPIHostPort() + "/pls/users/\"" + username + "\"";
         restTemplate.delete(url);
+    }
+
+    protected JobStatus waitForWorkflowStatus(WorkflowProxy workflowProxy, String applicationId, boolean running) {
+
+        int retryOnException = 4;
+        Job job = null;
+
+        while (true) {
+            try {
+                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+            } catch (Exception e) {
+                System.out.println(String.format("Workflow job exception: %s", e.getMessage()));
+
+                job = null;
+                if (--retryOnException == 0)
+                    throw new RuntimeException(e);
+            }
+
+            if ((job != null) && ((running && job.isRunning()) || (!running && !job.isRunning()))) {
+                return job.getJobStatus();
+            }
+
+            try {
+                Thread.sleep(30000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 }
