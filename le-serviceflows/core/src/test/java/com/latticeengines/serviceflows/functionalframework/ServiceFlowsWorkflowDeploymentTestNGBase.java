@@ -39,28 +39,30 @@ import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 public abstract class ServiceFlowsWorkflowDeploymentTestNGBase extends WorkflowTestNGBase {
 
     private static final Log log = LogFactory.getLog(ServiceFlowsWorkflowDeploymentTestNGBase.class);
-    
+
     protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 90;
-    
+
     @Autowired
     protected GlobalAuthTestBed deploymentTestBed;
 
     @Value("${common.test.microservice.url}")
     protected String microServiceUrl;
-    
+
     protected String microServiceHostPort;
-    
+
     @Value("${common.test.pls.url}")
     protected String plsUrl;
 
-    protected CustomerSpace setupTenant() {
+    protected CustomerSpace customer = null;
+
+    protected void setupEnvironment() {
         microServiceHostPort = microServiceUrl.split("//")[1];
         deploymentTestBed.bootstrapForProduct(LatticeProduct.LPA3);
         restTemplate = deploymentTestBed.getRestTemplate();
         magicRestTemplate = deploymentTestBed.getMagicRestTemplate();
         Tenant tenant = deploymentTestBed.getMainTestTenant();
         deploymentTestBed.switchToSuperAdmin();
-        return CustomerSpace.parse(tenant.getId());
+        customer = CustomerSpace.parse(tenant.getId());
     }
 
     @SuppressWarnings("rawtypes")
@@ -83,7 +85,8 @@ public abstract class ServiceFlowsWorkflowDeploymentTestNGBase extends WorkflowT
     }
 
     @SuppressWarnings("rawtypes")
-    public void resolveMetadata(SourceFile sourceFile, SchemaInterpretation schemaInterpretation, EntityExternalType entityExternalType) {
+    public void resolveMetadata(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
+            EntityExternalType entityExternalType) {
         log.info("Resolving metadata for modeling ...");
         ModelingParameters parameters = new ModelingParameters();
         parameters.setDescription("Test");
@@ -109,11 +112,12 @@ public abstract class ServiceFlowsWorkflowDeploymentTestNGBase extends WorkflowT
 
         log.info("The fieldmappings are: " + mappings.getFieldMappings());
         log.info("The ignored fields are: " + mappings.getIgnoredFields());
-        restTemplate.postForObject(String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s",
-                plsUrl, sourceFile.getName()), mappings, Void.class);
-        
-        Table table = restTemplate.getForObject(String.format("%s/pls/fileuploads/%s/metadata",
-                plsUrl, sourceFile.getName()), Table.class);
+        restTemplate.postForObject(
+                String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s", plsUrl, sourceFile.getName()),
+                mappings, Void.class);
+
+        Table table = restTemplate.getForObject(
+                String.format("%s/pls/fileuploads/%s/metadata", plsUrl, sourceFile.getName()), Table.class);
         sourceFile.setTableName(table.getName());
     }
 }
