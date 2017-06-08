@@ -1,7 +1,7 @@
 angular.module('lp.playbook')
 .service('PlaybookWizardStore', function($q, $state, PlaybookWizardService){
     var PlaybookWizardStore = this;
-    
+
     this.settings = this.settings || {};
     this.rating = this.rating || {};
     this.savedSegment = this.savedSegment || null;
@@ -123,6 +123,10 @@ angular.module('lp.playbook')
         this.currentPlay = play;
     }
 
+    this.getCurrentPlay = function() {
+        return this.currentPlay;
+    }
+
     this.getPlay = function(play_name) {
         // test play name: play__cf21f5b9-c513-4076-bac5-dcb33fb076a7
         var deferred = $q.defer();
@@ -145,6 +149,7 @@ angular.module('lp.playbook')
         });
         return deferred.promise;
     }
+
 })
 .service('PlaybookWizardService', function($q, $http, $state) {
     this.host = '/pls'; //default

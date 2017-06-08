@@ -3,7 +3,9 @@ angular.module('lp.cg.talkingpoint.preview', [])
     return {
         restrict: 'E',
         replace: true,
-        scope: {},
+        scope: {
+            play: '='
+        },
         templateUrl: 'app/cgtalkingpoint/tppreview/tppreview.component.html',
         controller: 'cgTalkingPointPreviewCtrl',
         controllerAs: 'vm'
@@ -36,8 +38,8 @@ angular.module('lp.cg.talkingpoint.preview', [])
         }).then(function() {
             vm.selected = vm.accounts[0];
             vm.leadPreviewObject.notionObject.SalesforceAccountID = vm.selected.id;
-            vm.leadPreviewObject.notionObject.PlayDisplayName = 'Foo';
-            vm.leadPreviewObject.notionObject.PlayDescription = 'Bar';
+            vm.leadPreviewObject.notionObject.PlayDisplayName = $scope.play.display_name;
+            vm.leadPreviewObject.notionObject.PlayDescription = $scope.play.description;
             vm.leadPreviewObject.notionObject.TalkingPoints = talkingPoints;
         });
     };

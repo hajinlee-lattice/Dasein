@@ -161,8 +161,15 @@ angular
         })
         .state('home.playbook.wizard.settings.segment.rating.targets.insights.preview', {
             url: '/preview',
+            resolve: {
+                Play: function(PlaybookWizardStore) {
+                    return PlaybookWizardStore.getCurrentPlay();
+                }
+            },
             views: {
                 'wizard_content@home.playbook': {
+                    controller: 'PlaybookWizardPreview',
+                    controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/preview/preview.component.html'
                 }
             }
