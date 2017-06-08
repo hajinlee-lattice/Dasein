@@ -42,6 +42,7 @@ public class DedupeHelperImpl implements DedupeHelper {
             } else {
                 dedupeId = domain;
             }
+            log.debug("Matched, domain=" + domain);
             addDedupeValues(allValues, dedupeId, isRemoved);
             return;
         }
@@ -49,12 +50,15 @@ public class DedupeHelperImpl implements DedupeHelper {
         // un-matched
         boolean isPublicDomain = !processorContext.getOriginalInput().isPublicDomainAsNormalDomain()
                 && publicDomainService.isPublicDomain(domain);
-        int notNullAttrCount = getNotNullAttrCount(outputRecord);
-
+        int numFeatureValue = outputRecord.getNumFeatureValue();
         NameLocation nameLocation = outputRecord.getPreMatchNameLocation();
         String name = nameLocation != null ? nameLocation.getName() : null;
         String country = nameLocation != null ? nameLocation.getCountry() : null;
         boolean hasNoNameLocation = StringUtils.isEmpty(name) && StringUtils.isEmpty(country);
+
+        log.debug("No matched, domain=" + domain + " name=" + name + " country=" + country + ", has nameloation="
+                + hasNoNameLocation + " is public=" + isPublicDomain + " Feature num=" + numFeatureValue
+                + " name location=" + nameLocation);
 
         // removed
         if (isPublicDomain && hasNoNameLocation) {
@@ -64,7 +68,7 @@ public class DedupeHelperImpl implements DedupeHelper {
         }
 
         // non-public domain
-        if (!isPublicDomain && notNullAttrCount > 0) {
+        if (!isPublicDomain && numFeatureValue > 0) {
             if (StringUtils.isEmpty(domain) && StringUtils.isNotEmpty(name)) {
                 if (StringUtils.isEmpty(country)) {
                     country = "USA";
@@ -88,7 +92,7 @@ public class DedupeHelperImpl implements DedupeHelper {
         }
 
         // public domain
-        if (isPublicDomain && notNullAttrCount > 0 && StringUtils.isNotEmpty(name)) {
+        if (isPublicDomain && numFeatureValue > 0 && StringUtils.isNotEmpty(name)) {
             if (StringUtils.isEmpty(country)) {
                 country = "USA";
             }
@@ -102,17 +106,4 @@ public class DedupeHelperImpl implements DedupeHelper {
         allValues.add(isRemoved);
     }
 
-    private int getNotNullAttrCount(OutputRecord outputRecord) {
-        int notNullAttrs = 0;
-        try {
-            if (outputRecord.getOutput() != null) {
-                for (Object obj : outputRecord.getOutput()) {
-                    notNullAttrs += (obj == null ? 0 : 1);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Failed to count populated attributes", e);
-        }
-        return notNullAttrs;
-    }
 }

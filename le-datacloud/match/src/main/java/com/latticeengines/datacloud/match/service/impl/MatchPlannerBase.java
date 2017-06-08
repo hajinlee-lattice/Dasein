@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.newrelic.api.agent.Trace;
@@ -105,11 +106,11 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         List<InternalOutputRecord> records = new ArrayList<>();
         Set<String> domainSet = new HashSet<>();
         Set<NameLocation> nameLocationSet = new HashSet<>();
-
+        Set<String> keyFields = getKeyFields(input);
         for (int i = 0; i < input.getData().size(); i++) {
-            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i, input.getFields()
-                    .size(), keyPositionMap, domainSet, nameLocationSet, input.getExcludeUnmatchedWithPublicDomain(),
-                    input.isPublicDomainAsNormalDomain());
+            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(keyFields, input.getData().get(i), i,
+                    input.getFields(), keyPositionMap, domainSet, nameLocationSet,
+                    input.getExcludeUnmatchedWithPublicDomain(), input.isPublicDomainAsNormalDomain());
             if (record != null) {
                 record.setColumnMatched(new ArrayList<>());
                 records.add(record);
@@ -121,6 +122,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         context.setNameLocations(nameLocationSet);
 
         return context;
+    }
+
+    private Set<String> getKeyFields(MatchInput input) {
+        Set<String> keyFields = new HashSet<>();
+        for (Map.Entry<MatchKey, List<String>> entry : input.getKeyMap().entrySet()) {
+            keyFields.addAll(entry.getValue());
+        }
+        keyFields.add(InterfaceName.Id.toString());
+        keyFields.add(InterfaceName.Event.toString());
+        keyFields.add(InterfaceName.InternalId.toString());
+        return keyFields;
     }
 
     @MatchStep(threshold = 100L)
@@ -153,14 +165,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return statistics;
     }
 
-    private InternalOutputRecord scanInputRecordAndUpdateKeySets(List<Object> inputRecord, int rowNum,
-            int numInputFields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
+    private InternalOutputRecord scanInputRecordAndUpdateKeySets(Set<String> keyFields, List<Object> inputRecord,
+            int rowNum, List<String> fields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
             Set<NameLocation> nameLocationSet, boolean excludePublicDomains, boolean treatPublicDomainAsNormal) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
         record.setInput(inputRecord);
-
+        int numInputFields = fields.size();
         if (inputRecord.size() != numInputFields) {
             record.setFailed(true);
             record.addErrorMessages("The number of objects in this row [" + inputRecord.size()
@@ -172,8 +184,22 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
         parseRecordForDuns(inputRecord, keyPositionMap, record);
         parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
+        profilingInputRecord(keyFields, inputRecord, fields, keyPositionMap, record);
 
         return record;
+    }
+
+    private void profilingInputRecord(Set<String> keyFields, List<Object> inputRecord, List<String> fields,
+            Map<MatchKey, List<Integer>> keyPositionMap, InternalOutputRecord record) {
+        int numFeatureValue = 0;
+        for (int i = 0; i < inputRecord.size(); i++) {
+            if (!keyFields.contains(fields.get(i))) {
+                if (inputRecord.get(i) != null) {
+                    numFeatureValue++;
+                }
+            }
+        }
+        record.setNumFeatureValue(numFeatureValue);
     }
 
     private void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,

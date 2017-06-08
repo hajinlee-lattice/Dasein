@@ -41,6 +41,7 @@ public class DedupeHelperImplTestNG {
         outputRecord.setPreMatchNameLocation(nameLocation);
         if (hasFeatures) {
             outputRecord.setOutput(Arrays.asList("FirstName"));
+            outputRecord.setNumFeatureValue(1);
         } else {
             outputRecord.setOutput(new ArrayList<Object>());
         }

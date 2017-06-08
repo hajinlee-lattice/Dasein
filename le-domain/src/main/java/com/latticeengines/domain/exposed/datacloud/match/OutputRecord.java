@@ -74,6 +74,9 @@ public class OutputRecord {
 
     @JsonIgnore
     private List<String> dnbCacheIds;
+    
+    @JsonProperty("NumFeatureValue")
+    private int numFeatureValue;
 
     public Integer getRowNumber() {
         return rowNumber;
@@ -272,6 +275,14 @@ public class OutputRecord {
             matchLogs = new ArrayList<>();
         }
         matchLogs.add(log);
+    }
+    
+    public int getNumFeatureValue() {
+        return numFeatureValue;
+    }
+
+    public void setNumFeatureValue(int numFeatureValue) {
+        this.numFeatureValue = numFeatureValue;
     }
 
 }
