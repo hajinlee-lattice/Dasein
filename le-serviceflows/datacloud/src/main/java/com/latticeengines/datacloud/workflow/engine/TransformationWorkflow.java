@@ -1,21 +1,21 @@
 package com.latticeengines.datacloud.workflow.engine;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.workflow.engine.steps.TransformationStepExecution;
+import com.latticeengines.datacloud.workflow.engine.steps.TransformationStep;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("propdataTransformationWorkflow")
+@Component("transformationWorkflow")
 public class TransformationWorkflow extends AbstractWorkflow<TransformationWorkflowConfiguration> {
 
     @Autowired
-    private TransformationStepExecution transformationStepExecution;
+    private TransformationStep transformationStep;
 
     @Bean
     public Job transformationWorkflowJob() throws Exception {
@@ -25,7 +25,7 @@ public class TransformationWorkflow extends AbstractWorkflow<TransformationWorkf
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(transformationStepExecution) //
+                .next(transformationStep) //
                 .build();
     }
 }

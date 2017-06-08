@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 
 import java.util.Date;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.client.api.YarnClient;
@@ -22,20 +21,15 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @SuppressWarnings("rawtypes")
-@Component("propdataTransformationStepExecution")
+@Component("transformationStep")
 @Scope("prototype")
-public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransformationStepInputConfiguration>
+public class TransformationStep extends BaseWorkflowStep<PrepareTransformationStepInputConfiguration>
         implements ApplicationContextAware {
-    private static Log log = LogFactory.getLog(TransformationStepExecution.class);
-
-    private TransformationService transformationService;
-
-    private YarnClient yarnClient;
-
-    private PrepareTransformationStepInputConfiguration prepareTransformationConfiguration;
+    private static Log log = LogFactory.getLog(TransformationStep.class);
 
     private ApplicationContext applicationContext;
 
@@ -49,9 +43,9 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
         try {
             log.info("Inside TransformationStepExecution execute()");
             initializeYarnClient();
-            prepareTransformationConfiguration = getConfiguration();
+            PrepareTransformationStepInputConfiguration prepareTransformationConfiguration = getConfiguration();
             String serviceBeanName = prepareTransformationConfiguration.getServiceBeanName();
-            transformationService = (TransformationService) applicationContext.getBean(serviceBeanName);
+            TransformationService transformationService = (TransformationService) applicationContext.getBean(serviceBeanName);
             Class<? extends TransformationConfiguration> configurationClass = transformationService
                     .getConfigurationClass();
 
@@ -91,7 +85,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
     }
 
     private void initializeYarnClient() {
-        yarnClient = YarnClient.createYarnClient();
+        YarnClient yarnClient = YarnClient.createYarnClient();
         yarnClient.init(yarnConfiguration);
         yarnClient.start();
     }

@@ -41,7 +41,7 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
 
     @Test(groups = "functional")
     public void testGetBitCodeBook() {
-        dataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion("2.0").getVersion();
+        dataCloudVersion = versionEntityMgr.currentApprovedVersionAsString();
 
         ColumnSelection columnSelection = new ColumnSelection();
         List<Column> columnList = new ArrayList<>();
@@ -95,7 +95,8 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
 
     private int getBitPosition(String columnName) {
         try {
-            AccountMasterColumn column = columnEntityMgr.findById(columnName, "2.0.0");
+            AccountMasterColumn column = columnEntityMgr.findById(columnName,
+                    versionEntityMgr.currentApprovedVersionAsString());
             String decodeStrategy = column.getDecodeStrategy();
             JsonNode jsonNode = objectMapper.readTree(decodeStrategy);
             return jsonNode.get("BitPosition").asInt();
@@ -103,6 +104,5 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
             throw new RuntimeException(e);
         }
     }
-
 
 }

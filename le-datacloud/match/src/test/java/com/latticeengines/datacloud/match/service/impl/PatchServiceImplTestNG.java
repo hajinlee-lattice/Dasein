@@ -24,8 +24,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component
 public class PatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final String ALPHABET_ACCOUNT_ID = "20014932010";
-    private static final String GREG_GOOGLER_ACCOUNT_ID = "140010637508";
+    private static final String ALPHABET_ACCOUNT_ID = "320001703404";
+    private static final String GREG_GOOGLER_ACCOUNT_ID = "270002176521";
     private static final String GREG_GOOGLER_DUNS = "039024002";
 
     @Autowired
@@ -77,11 +77,11 @@ public class PatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void cannotPathDomainLocationNoName() {
+    public void cannotPatchDomainLocationNoName() {
         LookupUpdateRequest updateRequest = new LookupUpdateRequest();
         MatchKeyTuple tuple = keyTuple("google.com", null, null, "CA", "USA");
         updateRequest.setMatchKeys(tuple);
-        updateRequest.setLatticeAccountId("12345");
+        updateRequest.setLatticeAccountId(ALPHABET_ACCOUNT_ID);
 
         boolean exception = false;
         try {
