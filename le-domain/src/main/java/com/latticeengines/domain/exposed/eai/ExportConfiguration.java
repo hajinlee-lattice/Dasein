@@ -10,7 +10,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonSubTypes({ @Type(value = HdfsToS3Configuration.class, name = "HdfsToS3Configuration"),
-        @Type(value = HdfsToSnowflakeConfiguration.class, name = "HdfsToSnowflakeConfiguration"),
         @Type(value = HdfsToRedshiftConfiguration.class, name = "HdfsToRedshiftConfiguration"), })
 public class ExportConfiguration extends EaiJobConfiguration {
 

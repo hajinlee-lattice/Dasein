@@ -17,7 +17,6 @@
     <modules>
         <module>le-config</module>
         <module>le-aws</module>
-        <module>le-snowflakedb</module>
         <module>le-redshiftdb</module>
         <module>le-transform</module>
         <module>le-common</module>

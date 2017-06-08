@@ -1,6 +1,0 @@
-#!/bin/bash
-cp /tmp/views/* /var/lib/ambari-server/resources/views/
-rm -rf /tmp/views
-# Restart ambari server
-/etc/init.d/ambari-server restart
-

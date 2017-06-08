@@ -1,4 +1,0 @@
-#!/bin/bash
-rm -rf /tmp/views
-rm -rf /var/lib/ambari-server/resources/views
-mkdir /var/lib/ambari-server/resources/views
