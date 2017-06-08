@@ -11,7 +11,13 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
     });
 
     vm.init = function() {
-
+        if($stateParams.play_name) {
+            PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+                console.log(play);
+                vm.savedSegment = play.segment;
+                vm.stored.segment_selection = play.segment;
+            });
+        }
     }
 
     vm.checkValidDelay = function(form) {
@@ -25,7 +31,7 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
     }
 
     vm.saveSegment = function(segment) {
-        PlaybookWizardStore.saveSegment(segment);
+        PlaybookWizardStore.saveSegment(segment, $stateParams.play_name);
     }
 
     vm.init();

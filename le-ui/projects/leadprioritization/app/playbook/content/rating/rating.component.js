@@ -21,6 +21,10 @@ angular.module('lp.playbook.wizard.rating', [])
 
     vm.checkValid = function(form) {
         PlaybookWizardStore.setValidation('rating', form.$valid);
+        if(vm.stored.rating_selection) {
+            console.log(vm.stored.rating_selection);
+            PlaybookWizardStore.setRating(vm.stored.rating_selection);
+        }
     }
 
     vm.init();

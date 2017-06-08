@@ -35,8 +35,8 @@
                     <li class="name">
                     <input  type="radio" 
                             id="rating{{$index}}" 
-                            name="rating.name" 
-                            ng-value="rating.name"
+                            name="rating{{$index}}" 
+                            ng-value="rating.Name"
                             ng-change="vm.checkValid(rating_form)"
                             ng-model="vm.stored.rating_selection" />
                     <label for="rating{{$index}}">{{rating.Name}}</label></li>
