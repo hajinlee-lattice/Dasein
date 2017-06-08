@@ -37,16 +37,15 @@ def template(environment, upload=False):
 def create_template(environment):
     stack = ECSStack("AWS CloudFormation template for swagger ECS cluster.", environment, use_asgroup=False, instances=1)
     stack.add_params([PARAM_SWAGGER_APPS, PARAM_LE_STACK])
-    task = swagger_task()
+    task = swagger_task(environment)
     stack.add_resource(task)
     stack.add_service("swagger", task, capacity=1)
 
     return stack
 
-def swagger_task():
-    container = ContainerDefinition("httpd", { "Fn::Join" : [ "", [
-        { "Fn::FindInMap" : [ "Environment2Props", PARAM_ENVIRONMENT.ref(), "EcrRegistry" ] },
-        "/latticeengines/swagger" ] ]}) \
+def swagger_task(environment):
+    config = AwsEnvironment(environment)
+    container = ContainerDefinition("httpd", config.ecr_registry() + "/latticeengines/swagger") \
         .mem_mb("1700") \
         .publish_port(80, 80) \
         .publish_port(443, 443) \

@@ -48,15 +48,15 @@ def create_template(profile, instances, port, mode, env):
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE, PARAM_LE_STACK, PARAM_ECS_SCALE_ROLE_ARN])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
-    task = express_task(profile_vars, port, mode)
+    task = express_task(env, profile_vars, port, mode)
     stack.add_resource(task)
     stack.add_service("express", task, asrolearn=PARAM_ECS_SCALE_ROLE_ARN)
     return stack
 
-def express_task(profile_vars, port, mode):
+def express_task(environment, profile_vars, port, mode):
+    config = AwsEnvironment(environment)
     container = ContainerDefinition("express", { "Fn::Join" : [ "", [
-        { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
-        "/latticeengines/express:",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
+        config.ecr_registry(), "/latticeengines/express:",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
         .hostname({ "Fn::Join" : ["-", [{ "Ref" : "AWS::StackName" }, "express"]]},) \
         .publish_port(port, 443) \
