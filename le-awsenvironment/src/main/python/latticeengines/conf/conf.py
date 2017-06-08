@@ -81,7 +81,7 @@ class AwsEnvironment:
         return self._props['sg.nodejs']
 
     def ecr_registry(self):
-        return "%s.dkr.ecr.%s.amazonaws.com" % (self.aws_region(), self.aws_account_id())
+        return "%s.dkr.ecr.%s.amazonaws.com" % (self.aws_account_id(), self.aws_region())
 
     def ecs_instance_profile_arn(self):
         return "arn:aws:iam::%s:instance-profile/%s" % (self.aws_account_id(), self.ecs_instance_profile_name())
