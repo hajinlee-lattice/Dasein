@@ -37,6 +37,8 @@ function build_docker() {
     mv -f WEB-INF/web2.xml WEB-INF/web.xml
 	cd ..
 	if [ -f "${TGT_WAR}/META-INF/MANIFEST.MF" ]; then
+	    echo "found MANIFEST.MF"
+	    cat ${TGT_WAR}/META-INF/MANIFEST.MF
 	    jar cmvf ${TGT_WAR}/META-INF/MANIFEST.MF ${TGT_WAR}.war -C ${TGT_WAR}/ .
 	else
 	    jar cvf ${TGT_WAR}.war -C ${TGT_WAR}/ .
