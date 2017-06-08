@@ -13,7 +13,6 @@ source ../functions.sh
 
 #docker run -d \
 #    --name ${CLUSTER}_${SERVICE} \
-#    --host ${CLUSTER}_${SERVICE} \
 #    --net host \
 #    -e LE_ENVIRONMENT=dev \
 #    -e LE_STACK=${LE_STACK} \

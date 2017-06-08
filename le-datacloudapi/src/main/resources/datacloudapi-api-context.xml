@@ -8,7 +8,7 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.datacloud.api.controller.*" />
     </context:component-scan>
 
-    <import resource="classpath:serviceflows-datacloud-collection-context.xml"/>
+    <import resource="classpath:datacloud-etl-collection-context.xml"/>
     <import resource="classpath:datacloudapi-engine-context.xml" />
 
 </beans>
