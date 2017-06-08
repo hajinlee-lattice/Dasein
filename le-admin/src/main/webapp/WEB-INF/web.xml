@@ -13,7 +13,7 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:admin-security-context.xml</param-value>
+        <param-value>classpath:admin-web-context.xml</param-value>
     </context-param>
 
     <filter>

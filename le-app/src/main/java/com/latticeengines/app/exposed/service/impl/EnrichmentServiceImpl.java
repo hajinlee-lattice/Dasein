@@ -55,7 +55,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
 
     @PostConstruct
     public void postConstruct() {
-        topAttrsCache = CacheBuilder.newBuilder().maximumSize(5).expireAfterWrite(1, TimeUnit.HOURS)
+        topAttrsCache = CacheBuilder.newBuilder().maximumSize(5).refreshAfterWrite(1, TimeUnit.HOURS)
                 .build(new CacheLoader<String, TopNAttributeTree>() {
                     @Override
                     public TopNAttributeTree load(String dummyKey) throws Exception {

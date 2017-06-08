@@ -33,7 +33,7 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:pls-security-context.xml</param-value>
+        <param-value>classpath:pls-web-context.xml</param-value>
     </context-param>
 
     <servlet>

@@ -16,14 +16,14 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 public class CorsFilter extends OncePerRequestFilter {
     private static final Log log = LogFactory.getLog(CorsFilter.class);
 
-    private static final String ALLOW_CORS = PropertyUtils.getProperty("common.allow.cors");
+    private static boolean allowCors = false;
+    private static boolean initialized = false;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
-        log.info("allow cors: " + ALLOW_CORS);
-        if (Boolean.valueOf(ALLOW_CORS)) {
+        initializeFlag();
+        if (allowCors) {
             // Enables cross-origin-resource-sharing
             response.addHeader("Access-Control-Allow-Origin", "*");
 
@@ -37,6 +37,14 @@ public class CorsFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private static void initializeFlag() {
+        if (!initialized) {
+            allowCors = Boolean.valueOf(PropertyUtils.getProperty("common.allow.cors"));
+            log.info("allow cors: " + allowCors);
+            initialized = true;
+        }
     }
 
 }
