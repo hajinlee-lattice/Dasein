@@ -10,11 +10,6 @@ COPY tomcat_filters.xml /tomcat_filters.xml
 RUN mkdir ROOT \
     && cd ROOT \
     && jar xvf /ROOT.war \
-    && mv /tomcat_filters.xml . \
-    && line=$(grep -n 'description' WEB-INF/web.xml | cut -d ":" -f 1) \
-    && { head -n $(($line-1)) WEB-INF/web.xml; cat tomcat_filters.xml; tail -n +$(($line+1)) WEB-INF/web.xml; } > WEB-INF/web2.xml \
-    && mv -f WEB-INF/web2.xml WEB-INF/web.xml \
-    && rm tomcat_filters.xml \
     && cd .. \
     && rm -rf /ROOT.war \
     && cp -f /log4j.properties ROOT/WEB-INF/classes/log4j.properties \
