@@ -10,7 +10,11 @@ angular.module('lp.playbook.wizard.rating', [])
     });
 
     vm.init = function() {
-        
+        if($stateParams.play_name) {
+            PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+                console.log(play);
+            });
+        }
     }
 
     vm.checkValidDelay = function(form) {

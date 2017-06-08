@@ -48,7 +48,7 @@ angular
                         { label: 'Targets', state: 'settings.segment.rating.targets' },
                         { label: 'Insights', state: 'settings.segment.rating.targets.insights' },
                         { label: 'Preview', state: 'settings.segment.rating.targets.insights.preview' },
-                        { label: 'Launch', state: 'settings.segment.rating.targets.insights.preview.launch' }
+                        { label: 'Launch', state: 'settings.segment.rating.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
                     ];
                 }
             },

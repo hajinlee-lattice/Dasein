@@ -67,6 +67,31 @@ angular.module('lp.playbook')
         }
     }
 
+    this.nextSegment = function(nextState) {
+        var changed = false;
+        if(PlaybookWizardStore.settings) {
+            if(PlaybookWizardStore.currentPlay) {
+                for(var i in PlaybookWizardStore.settings) {
+                    var key = i,
+                        setting = PlaybookWizardStore.settings[i];
+
+                    if(PlaybookWizardStore.currentPlay[key] && PlaybookWizardStore.currentPlay[key] != setting) {
+                        changed = true;
+                        break;
+                    }
+                }
+            } else {
+                changed = true;
+            }
+            if(changed) {
+                PlaybookWizardStore.savePlay(PlaybookWizardStore.settings).then(function(play){
+                    $state.go(nextState, {play_name: play.name});
+                });
+            } else {
+                $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
+            }
+        }
+    }
     this.setRating = function(rating) {
         this.rating = rating;
     }
@@ -151,6 +176,20 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
+    this.nextLaunch = function() {
+        PlaybookWizardStore.launchPlay(PlaybookWizardStore.currentPlay).then(function(data) {
+        });
+    }
+
+    this.launchPlay = function(play) {
+        var deferred = $q.defer();
+        console.log(play);
+        PlaybookWizardService.launchPlay(play).then(function(data){
+            deferred.resolve(data);
+            PlaybookWizardStore.setPlay(data);
+        });
+        return deferred.promise;
+    }
 })
 .service('PlaybookWizardService', function($q, $http, $state) {
     this.host = '/pls'; //default
@@ -177,6 +216,23 @@ angular.module('lp.playbook')
             method: 'POST',
             url: this.host + '/play',
             data: opts
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.launchPlay = function(play) {
+        var deferred = $q.defer(),
+            play_name = play.name;
+        $http({
+            method: 'POST',
+            url: this.host + '/play/' + play_name + '/launches',
+            data: {
+                name: play.name,
+                description: play.description,
+                segment: play.segment
+            }
         }).then(function(response){
             deferred.resolve(response.data);
         });
