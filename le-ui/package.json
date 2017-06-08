@@ -77,7 +77,7 @@
     "InstallDevLP": "cd projects/leadprioritization/ && npm install",
     "InstallDevInsights": "cd projects/insights/ && npm install",
     "InstallDevLogin": "cd projects/login/ && npm install",
-    "InstallDevAdmin": "cd projects/tenantconsole/ && npm install && grunt init",
+    "InstallDevAdmin": "cd projects/tenantconsole/ && npm install",
     "commonbuild": "cd projects/common/ && grunt build",
     "pdbuild": "cd projects/prospectdiscovery/ && grunt build",
     "lpbuild": "cd projects/leadprioritization/ && grunt build",
