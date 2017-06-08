@@ -37,8 +37,8 @@ angular.module('common.wizard.controls', [])
     }
 
     vm.go = function(state) {
-        var current = vm.itemMap[$state.current.name]
-            console.log(current, vm.rootState, state);
+        var current = vm.itemMap[$state.current.name];
+
         if (current.nextFn) {
             current.nextFn(state);
         } else {
@@ -82,8 +82,8 @@ angular.module('common.wizard.controls', [])
     }
 
     vm.isValid = function() {
-        var current = $state.current.name;
-        var currentStep = current.split('.').pop();
+        var current = $state.current.name,
+            currentStep = current.split('.').pop();
 
         if (WizardValidationStore.getValidation) {
             vm.valid = WizardValidationStore.getValidation(currentStep);
