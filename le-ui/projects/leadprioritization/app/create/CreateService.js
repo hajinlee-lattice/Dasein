@@ -246,7 +246,7 @@ angular
     this.StartModeling = function(MetaData) {
         var deferred = $q.defer(),
             data = {
-                description: MetaData.description,
+                notesContent: MetaData.notesContent,
                 filename: MetaData.name,
                 name: MetaData.modelName,
                 deduplicationType: ImportStore.GetAdvancedSetting('oneLeadPerDomain') ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',

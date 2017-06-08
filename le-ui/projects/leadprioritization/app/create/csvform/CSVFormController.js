@@ -233,6 +233,7 @@ angular
         var fileName = fileName || vm.fileName,
             metaData = vm.metadata = vm.metadata || {},
             displayName = vm.modelDisplayName,
+            notesContent = vm.notesContent,
             modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(displayName),
             schemaInterpretation = vm.accountLeadCheck;
 
