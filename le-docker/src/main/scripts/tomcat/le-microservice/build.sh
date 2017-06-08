@@ -39,7 +39,7 @@ function build_docker() {
 	if [ -f "${TGT_WAR}/META-INF/MANIFEST.MF" ]; then
 	    echo "found MANIFEST.MF"
 	    cat ${TGT_WAR}/META-INF/MANIFEST.MF
-	    jar cmvf ${TGT_WAR}/META-INF/MANIFEST.MF ${TGT_WAR}.war -C ${TGT_WAR}/ .
+	    jar cmvf ${TGT_WAR}.war ${TGT_WAR}/META-INF/MANIFEST.MF -C ${TGT_WAR}/ .
 	else
 	    jar cvf ${TGT_WAR}.war -C ${TGT_WAR}/ .
 	fi
