@@ -41,6 +41,7 @@ angular.module('lp.playbook')
     }
 
     this.nextSettings = function(nextState) {
+        console.log('nextSettings', nextState);
         var changed = false;
         if(PlaybookWizardStore.settings) {
             if(PlaybookWizardStore.currentPlay) {

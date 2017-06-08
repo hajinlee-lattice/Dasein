@@ -9,6 +9,10 @@ angular.module('lp.import')
         fields: ['Id']
     };
 
+    this.validation = {
+        
+    }
+
     this.getAccountIdState = function() {
         return this.accountIdState;
     };

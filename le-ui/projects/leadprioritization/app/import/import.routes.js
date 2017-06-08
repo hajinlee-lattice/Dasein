@@ -85,6 +85,9 @@ angular
         .state('home.import.wizard.accounts', {
             url: '/accounts',
             resolve: {
+                WizardValidationStore: function(ImportWizardStore) {
+                    return ImportWizardStore;
+                },
                 WizardProgressContext: function() {
                     return 'import';
                 },
@@ -202,6 +205,9 @@ angular
         .state('home.import.wizard.accountfields', {
             url: '/accountfields',
             resolve: {
+                WizardValidationStore: function(ImportWizardStore) {
+                    return ImportWizardStore;
+                },
                 WizardProgressContext: function() {
                     return 'import';
                 },
@@ -273,6 +279,9 @@ angular
         .state('home.import.wizard.contacts', {
             url: '/accounts',
             resolve: {
+                WizardValidationStore: function(ImportWizardStore) {
+                    return ImportWizardStore;
+                },
                 WizardProgressContext: function() {
                     return 'import';
                 },
@@ -364,6 +373,9 @@ angular
         .state('home.import.wizard.contactfields', {
             url: '/accounts',
             resolve: {
+                WizardValidationStore: function(ImportWizardStore) {
+                    return ImportWizardStore;
+                },
                 WizardProgressContext: function() {
                     return 'import';
                 },
@@ -424,6 +436,9 @@ angular
         .state('home.import.wizard.eloquoa', {
             url: '/accounts',
             resolve: {
+                WizardValidationStore: function(ImportWizardStore) {
+                    return ImportWizardStore;
+                },
                 WizardProgressContext: function() {
                     return 'import';
                 },

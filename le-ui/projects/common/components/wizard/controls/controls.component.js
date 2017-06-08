@@ -85,7 +85,11 @@ angular.module('common.wizard.controls', [])
         var current = $state.current.name;
         var currentStep = current.split('.').pop();
 
-        vm.valid = WizardValidationStore.getValidation(currentStep);
+        if (WizardValidationStore.getValidation) {
+            vm.valid = WizardValidationStore.getValidation(currentStep);
+        } else {
+            vm.valid = true;
+        }
 
         return vm.valid;
     }

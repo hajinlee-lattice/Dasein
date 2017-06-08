@@ -9,22 +9,26 @@ angular.module('common.wizard.progress', [
 
     angular.extend(vm, {
         items: WizardProgressItems,
-        context: WizardProgressContext
+        context: WizardProgressContext,
+        rootState: 'home.' + WizardProgressContext + '.wizard.',
+        itemMap: {}
     });
 
     vm.init = function() {
-
+        vm.items.forEach(function(item) {
+            vm.itemMap[vm.rootState + item.state] = item;
+        });
     }
 
     vm.click = function(state, $event) {
-        var split = state.split('.');
-        var selected = split.pop();
-        var validation = WizardValidationStore.validation;
-        var not_validated = [];
+        var split = state.split('.'),
+            selected = split.pop(),
+            validation = WizardValidationStore.validation,
+            not_validated = [];
 
         for (var i=0; i<split.length; i++) {
-            var section = split[i];
-            var vsection = validation[section];
+            var section = split[i],
+                vsection = validation[section];
             
             if (!vsection) {
                 not_validated.push(section);
@@ -34,7 +38,14 @@ angular.module('common.wizard.progress', [
         if (not_validated.length > 0) {
             $event.preventDefault();
         } else {
-            $state.go('home.' + vm.context + '.wizard.' + state);
+            var nextState = vm.rootState + state,
+                current = vm.itemMap[$state.current.name];
+
+            if (current.nextFn) {
+                current.nextFn(nextState);
+            } else {
+                $state.go(nextState);
+            }
         }
     }
 
