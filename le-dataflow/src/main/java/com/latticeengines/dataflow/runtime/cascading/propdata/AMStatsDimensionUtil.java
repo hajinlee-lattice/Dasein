@@ -110,7 +110,7 @@ public class AMStatsDimensionUtil implements Serializable {
                         } catch (IOException e) {
                             // ignore if type of serialized obj is not
                             // statsInExistingMergedTuple
-                            log.debug(e.getMessage(), e);
+                            log.info(e.getMessage(), e);
                             attrValuesArr[idx] = objInOriginalTuple;
 
                         }
@@ -141,7 +141,10 @@ public class AMStatsDimensionUtil implements Serializable {
                     } catch (IOException e) {
                         // ignore if type of serialized obj is not
                         // statsInExistingMergedTuple
-                        log.debug(e.getMessage(), e);
+                        log.info(String.format(
+                                "Got deserialization exception=%s, Ignoring this exception and using original "
+                                        + "value [%s] as it could not be deserialized to AttributeStats object",
+                                e.getMessage(), objInOriginalTuple), e);
                         attrValuesArr[idx] = objInOriginalTuple;
                     }
                 } else {
@@ -170,7 +173,10 @@ public class AMStatsDimensionUtil implements Serializable {
                     try {
                         value = OM.writeValueAsString(value);
                     } catch (JsonProcessingException e) {
-                        log.debug(e.getMessage(), e);
+                        log.info(String.format(
+                                "Got serialization exception=%s, Ignoring this exception and using original "
+                                        + "value [%s] of type %s instead of its serialized format",
+                                e.getMessage(), value, value.getClass().getName()), e);
                     }
                 }
                 tuple.add(value);
