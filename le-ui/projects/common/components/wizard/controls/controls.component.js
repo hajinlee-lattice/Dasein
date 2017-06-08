@@ -15,10 +15,12 @@ angular.module('common.wizard.controls', [])
     });
 
     vm.init = function() {
+        vm.rootState = vm.next + '.';
+
         vm.setButtons();
 
         vm.items.forEach(function(item) {
-            vm.itemMap[item.label] = item;
+            vm.itemMap[vm.rootState + item.state] = item;
         });
     }
 
@@ -35,14 +37,12 @@ angular.module('common.wizard.controls', [])
     }
 
     vm.go = function(state) {
-        vm.nextFn();
-        $state.go(state);
-    }
-
-    vm.nextFn = function() {
-        console.log(vm.itemMap['Settings']);
-        if (vm.itemMap['Settings'].nextFn) {
-            vm.itemMap['Settings'].nextFn();
+        var current = vm.itemMap[$state.current.name]
+            console.log(current, vm.rootState, state);
+        if (current.nextFn) {
+            current.nextFn(state);
+        } else {
+            $state.go(state);
         }
     }
 
@@ -54,7 +54,7 @@ angular.module('common.wizard.controls', [])
             item = vm.items[i];
             state = item.state;
 
-            if ('home.' + WizardProgressContext + '.wizard.' + state == current) {
+            if (vm.rootState + state == current) {
                 split = state.split('.');
                 last = split[split.length-1];
 
@@ -65,14 +65,14 @@ angular.module('common.wizard.controls', [])
                     next = vm.items[i+1].state;
                     nsplit = next.split('.');
 
-                    vm.next = 'home.' + WizardProgressContext + '.wizard.' + nsplit.join('.');
+                    vm.next = vm.rootState + nsplit.join('.');
                 }
 
                 if (i-1 >= 0) {
                     prev = vm.items[i-1].state;
                     psplit = prev.split('.');
                     
-                    vm.prev = 'home.' + WizardProgressContext + '.wizard.' + psplit.join('.');
+                    vm.prev = vm.rootState + psplit.join('.');
                 }
             }
 

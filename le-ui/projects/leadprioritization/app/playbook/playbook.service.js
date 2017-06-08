@@ -25,7 +25,7 @@ angular.module('lp.playbook')
         rating_selection: ''
     }
 
-    this.nextSettings = function() {
+    this.nextSettings = function(nextState) {
         console.log('nextSettings');
     }
 
