@@ -17,6 +17,8 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
@@ -25,6 +27,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.Sor
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
@@ -35,13 +38,23 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
+    @Autowired
+    private MetadataProxy metadataProxy;
+
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
     public ApplicationId submit(DataCollectionType dataCollectionType, String datafeedName) {
+        DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
+                datafeedName);
+        log.info("data feed status: " + datafeed.getStatus());
+        if (datafeed.getStatus() != Status.InitialLoad && datafeed.getStatus() != Status.Active) {
+            throw new RuntimeException("we can't launch any consolidate workflow now as it is not ready.");
+        }
         WorkflowConfiguration configuration = generateConfiguration(dataCollectionType, datafeedName);
         ApplicationId applicationId = workflowJobService.submit(configuration);
         return applicationId;
+
     }
 
     private WorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType, String datafeedName) {
