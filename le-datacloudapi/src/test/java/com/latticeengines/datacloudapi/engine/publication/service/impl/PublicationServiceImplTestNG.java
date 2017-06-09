@@ -22,10 +22,11 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.Publis
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
 import com.latticeengines.datacloudapi.engine.testframework.PropDataEngineFunctionalTestNGBase;
 import com.latticeengines.datacloudapi.engine.testframework.PublicationWorkflowServlet;
+import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
-import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
@@ -107,6 +108,9 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");
+        // test status of latest publication progress with required version
+        EngineProgress status = publicationService.status(PUBLICATION_NAME, CURRENT_VERSION);
+        Assert.assertTrue(status.getStatus() == ProgressStatus.FAILED);
     }
 
     @Test(groups = "functional")
@@ -146,7 +150,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         publication.setSourceName(source.getSourceName());
         publication.setNewJobMaxRetry(3);
         publication.setSchedularEnabled(true);
-        publication.setMaterialType(MaterialType.INGESTION);;
+        publication.setMaterialType(MaterialType.INGESTION);
         publication.setPublicationType(Publication.PublicationType.SQL);
 
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();

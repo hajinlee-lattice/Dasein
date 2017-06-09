@@ -45,5 +45,4 @@ public class PublicationEntityMgrImpl implements PublicationEntityMgr {
     public List<Publication> findAll() {
         return dao.findAll();
     }
-
 }

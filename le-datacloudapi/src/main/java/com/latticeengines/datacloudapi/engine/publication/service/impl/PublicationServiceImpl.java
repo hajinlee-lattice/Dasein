@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,10 +24,13 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityMgr;
+import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressService;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressUpdater;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
+import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress.Engine;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
@@ -43,6 +47,9 @@ public class PublicationServiceImpl implements PublicationService {
 
     @Autowired
     private PublicationEntityMgr publicationEntityMgr;
+
+    @Autowired
+    private PublicationProgressEntityMgr progressEntityMgr;
 
     @Autowired
     private PublicationProgressService publicationProgressService;
@@ -183,6 +190,24 @@ public class PublicationServiceImpl implements PublicationService {
                 .progress(progress) //
                 .publication(publication) //
                 .submit();
+    }
+
+    @Override
+    public EngineProgress status(String publicationName, String version) {
+        Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
+        if (publication == null) {
+            throw new RuntimeException("Publication with name : " + publicationName + " does not exist");
+        }
+        List<PublicationProgress> progressStatus = progressEntityMgr.findStatusByPublicationVersion(publication,
+                version);
+        if (CollectionUtils.isEmpty(progressStatus)) {
+            return new EngineProgress(Engine.PUBLICATION, publication.getPublicationName(), version,
+                    ProgressStatus.NOTSTARTED, 0.0f, null);
+        } else {
+            PublicationProgress progress = progressStatus.get(0);
+            return new EngineProgress(Engine.PUBLICATION, publication.getPublicationName(), version,
+                    progress.getStatus(), progress.getProgress(), progress.getErrorMessage());
+        }
     }
 
 }

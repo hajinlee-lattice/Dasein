@@ -138,4 +138,9 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
                 && progress.getRetries() < publication.getNewJobMaxRetry());
     }
 
+    @Override
+    @Transactional(value = "propDataManage")
+    public List<PublicationProgress> findStatusByPublicationVersion(Publication publication, String version) {
+        return progressDao.getStatusForLatestVersion(publication, version);
+    }
 }

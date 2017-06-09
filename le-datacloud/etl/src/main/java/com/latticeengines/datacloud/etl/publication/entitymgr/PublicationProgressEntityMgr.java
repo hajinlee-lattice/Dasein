@@ -23,4 +23,6 @@ public interface PublicationProgressEntityMgr {
 
     PublicationProgress findByPid(Long pid);
 
+    List<PublicationProgress> findStatusByPublicationVersion(Publication publication, String version);
+
 }

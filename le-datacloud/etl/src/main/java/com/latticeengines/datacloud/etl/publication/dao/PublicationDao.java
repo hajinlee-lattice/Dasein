@@ -8,4 +8,5 @@ import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 public interface PublicationDao extends BaseDao<Publication> {
 
     List<Publication> findAllForSource(String sourceName);
+
 }
