@@ -134,7 +134,8 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "startExecution")
     public void finishExecution() {
-        DataFeedExecution exec1 = datafeedEntityMgr.finishExecution(DATA_FEED_NAME);
+        DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(DATA_FEED_NAME,
+                DataFeedExecution.Status.Consolidated);
         assertEquals(exec1.getPid(), datafeed.getActiveExecution());
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Consolidated);
 

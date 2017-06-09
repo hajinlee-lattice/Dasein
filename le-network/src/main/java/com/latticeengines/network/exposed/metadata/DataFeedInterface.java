@@ -12,4 +12,6 @@ public interface DataFeedInterface {
     DataFeedExecution finishExecution(String customerSpace, String datafeedName);
 
     DataFeed createDataFeed(String customerSpace, DataFeed datafeed);
+
+    DataFeedExecution failExecution(String customerSpace, String datafeedName);
 }

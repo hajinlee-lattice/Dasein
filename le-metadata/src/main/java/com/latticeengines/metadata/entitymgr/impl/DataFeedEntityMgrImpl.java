@@ -109,14 +109,14 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public DataFeedExecution finishExecution(String datafeedName) {
+    public DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status) {
         DataFeed datafeed = datafeedDao.findByField("name", datafeedName);
         if (datafeed == null) {
             log.error("Can't find data feed: " + datafeedName);
             return null;
         }
         DataFeedExecution execution = datafeedExecutionEntityMgr.findConsolidatingExecution(datafeed);
-        execution.setStatus(DataFeedExecution.Status.Consolidated);
+        execution.setStatus(status);
         datafeedExecutionEntityMgr.update(execution);
 
         datafeed.setStatus(Status.Active);

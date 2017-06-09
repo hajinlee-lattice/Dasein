@@ -31,12 +31,17 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public DataFeedExecution finishExecution(String customerSpace, String datafeedName) {
-        return datafeedEntityMgr.finishExecution(datafeedName);
+        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Consolidated);
     }
 
     @Override
     public DataFeed createDataFeed(String customerSpace, DataFeed datafeed) {
         datafeedEntityMgr.create(datafeed);
         return datafeed;
+    }
+
+    @Override
+    public DataFeedExecution failExecution(String customerSpace, String datafeedName) {
+        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Failed);
     }
 }

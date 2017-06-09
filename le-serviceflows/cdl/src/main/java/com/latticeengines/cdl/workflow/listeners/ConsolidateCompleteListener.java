@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.listeners;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("consolidateCompleteListener")
 public class ConsolidateCompleteListener extends LEJobListener {
+
+    private static final Log log = LogFactory.getLog(ConsolidateCompleteListener.class);
 
     @Autowired
     private DataFeedProxy datafeedProxy;
@@ -37,7 +41,11 @@ public class ConsolidateCompleteListener extends LEJobListener {
                 throw new RuntimeException("Can't finish execution");
             }
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
-
+            log.error("workflow failed!");
+            DataFeedExecution execution = datafeedProxy.failExecution(customerSpace, datafeedName);
+            if (execution.getStatus() != Status.Failed) {
+                throw new RuntimeException("Can't fail execution");
+            }
         }
     }
 

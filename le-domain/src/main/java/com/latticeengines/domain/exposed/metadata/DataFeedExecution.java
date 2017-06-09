@@ -121,7 +121,8 @@ public class DataFeedExecution implements HasPid, Serializable {
         Inited("inited"), //
         Active("active"), //
         Started("started"), //
-        Consolidated("consolidated");
+        Consolidated("consolidated"), //
+        Failed("failed");
 
         private final String name;
         private static Map<String, Status> nameMap;

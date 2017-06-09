@@ -57,4 +57,12 @@ public class DataFeedResource implements DataFeedInterface {
     public DataFeed createDataFeed(@PathVariable String customerSpace, @RequestBody DataFeed datafeed) {
         return datafeedService.createDataFeed(customerSpace, datafeed);
     }
+
+    @RequestMapping(value = "/{datafeedName}/failexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "fail data feed execution")
+    @Override
+    public DataFeedExecution failExecution(String customerSpace, String datafeedName) {
+        return datafeedService.failExecution(customerSpace, datafeedName);
+    }
 }
