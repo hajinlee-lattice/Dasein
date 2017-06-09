@@ -70,7 +70,7 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
         dataCloudVersion = versionEntityMgr.currentApprovedVersionAsString();
     }
 
-    @Test(groups = "pipeline1", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void testTransformation() {
         uploadBaseSourceFile(baseSource, baseSource.getSourceName() + "_Test" + targetSourceName,
                 "2017-05-12_01-32-12_UTC");
