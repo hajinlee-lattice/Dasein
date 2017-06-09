@@ -77,7 +77,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     @Column(name = "ACTIVE_EXECUTION", nullable = false)
     @JsonIgnore
-    private Long activeExecutionId;
+    private Long activeExecutionId = 1L;
 
     @Transient
     @JsonProperty("active_execution")

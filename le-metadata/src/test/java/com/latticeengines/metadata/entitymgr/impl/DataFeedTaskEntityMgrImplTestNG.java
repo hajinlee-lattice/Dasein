@@ -68,7 +68,6 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
 
         datafeed.setName("datafeed");
         datafeed.setStatus(Status.Active);
-        datafeed.setActiveExecutionId(1L);
         datafeed.setDataCollection(dataCollection);
         dataCollection.addDataFeed(datafeed);
 
@@ -145,7 +144,6 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         extract2.setTable(task.getImportTemplate());
         datafeedTaskEntityMgr.clearTableQueue();
         datafeedTaskEntityMgr.registerExtract(task, extract2);
-        task = datafeedTaskEntityMgr.findByKey(task);
         assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
         assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getPid(),
                 new Long(task.getImportData().getPid() - 1));

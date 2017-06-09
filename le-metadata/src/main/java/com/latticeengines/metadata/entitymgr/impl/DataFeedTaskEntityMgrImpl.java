@@ -62,40 +62,42 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void create(DataFeedTask task) {
-        if (task.getImportTemplate() != null) {
-            task.getImportTemplate().setTableType(TableType.IMPORTTABLE);
+    public void create(DataFeedTask dataFeedTask) {
+        if (dataFeedTask.getImportTemplate() != null) {
+            dataFeedTask.getImportTemplate().setTableType(TableType.IMPORTTABLE);
+            tableEntityMgr.create(dataFeedTask.getImportTemplate());
         }
-        if (task.getImportData() != null) {
-            task.getImportData().setTableType(TableType.DATATABLE);
+        if (dataFeedTask.getImportData() != null) {
+            dataFeedTask.getImportData().setTableType(TableType.DATATABLE);
+            tableEntityMgr.create(dataFeedTask.getImportData());
         }
-        super.create(task);
-        addImportDataTableToQueue(task);
+        super.create(dataFeedTask);
+        addImportDataTableToQueue(dataFeedTask);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Table peekFirstDataTable(DataFeedTask task) {
-        Table table = datafeedTaskTableDao.peekFirstDataTable(task);
+    public Table peekFirstDataTable(DataFeedTask dataFeedTask) {
+        Table table = datafeedTaskTableDao.peekFirstDataTable(dataFeedTask);
         TableEntityMgr.inflateTable(table);
         return table;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public Table pollFirstDataTable(DataFeedTask task) {
-        Table table = datafeedTaskTableDao.pollFirstDataTable(task);
+    public Table pollFirstDataTable(DataFeedTask dataFeedTask) {
+        Table table = datafeedTaskTableDao.pollFirstDataTable(dataFeedTask);
         TableEntityMgr.inflateTable(table);
         return table;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public int getDataTableSize(DataFeedTask task) {
-        if (task == null) {
+    public int getDataTableSize(DataFeedTask dataFeedTask) {
+        if (dataFeedTask == null) {
             return 0;
         }
-        return datafeedTaskTableDao.getDataTableSize(task);
+        return datafeedTaskTableDao.getDataTableSize(dataFeedTask);
     }
 
     @Override
@@ -104,6 +106,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         try {
             if (dataFeedTask.getImportData().getPid() == null) {
                 dataFeedTask.getImportData().setTableType(TableType.DATATABLE);
+                tableEntityMgr.create(dataFeedTask.getImportData());
                 createOrUpdate(dataFeedTask);
             }
             addTableToQueue(dataFeedTask, dataFeedTask.getImportData());
@@ -149,9 +152,11 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             addTableToQueue(dataFeedTask, extractTable);
         }
         if (templateTableChanged || dataTableConsumed) {
+            tableTypeHolder.setTableType(TableType.DATATABLE);
             Table newDataTable = TableUtils.clone(dataFeedTask.getImportTemplate(),
                     "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
             newDataTable.setTenant(MultiTenantContext.getTenant());
+            tableEntityMgr.create(newDataTable);
             dataFeedTask.setImportData(newDataTable);
             dataFeedTask.setStatus(Status.Active);
             dataFeedTask.setLastImported(new Date());

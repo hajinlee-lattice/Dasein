@@ -86,7 +86,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         DataFeed datafeed = new DataFeed();
         datafeed.setName(DATA_FEED_NAME);
         datafeed.setStatus(Status.Active);
-        datafeed.setActiveExecutionId(1L);
         datafeed.setDataCollection(dataCollection);
         dataCollection.addDataFeed(datafeed);
 

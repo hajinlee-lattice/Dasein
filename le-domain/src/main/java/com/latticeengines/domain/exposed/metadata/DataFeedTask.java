@@ -78,13 +78,13 @@ public class DataFeedTask implements HasPid, Serializable {
     private String feedType;
 
     @JsonProperty("import_template")
-    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_TEMPLATE_ID", nullable = false)
     private Table importTemplate;
 
     @JsonProperty("import_data")
-    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_DATA_ID", nullable = true)
     private Table importData;

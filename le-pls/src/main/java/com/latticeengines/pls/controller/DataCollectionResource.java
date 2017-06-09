@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,9 +23,6 @@ public class DataCollectionResource {
 
     @Autowired
     private ConsolidateAndPublishWorkflowSubmitter consolidateAndPublishWorkflowSubmitter;
-
-    @Value("${common.test.microservice.url}")
-    private String microserviceEndpoint;
 
     @RequestMapping(value = "/{dataCollectionType}/datafeeds/{datafeedName}/consolidate", method = RequestMethod.POST)
     @ResponseBody
