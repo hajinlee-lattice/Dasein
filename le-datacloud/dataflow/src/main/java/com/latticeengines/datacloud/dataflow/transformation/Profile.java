@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy;
+import com.latticeengines.dataflow.runtime.cascading.propdata.NumericProfileBuf;
 import com.latticeengines.dataflow.runtime.cascading.propdata.NumericProfileBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ProfileSampleAggregator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -52,9 +54,42 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         return numProfile;
     }
 
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings("rawtypes")
     private Node profileNumAttrs(Node src) {
+        Node num = src.renamePipe("_NUM_PROFILE_").retain(new FieldList(config.getNumAttrs())).addRowID(DUMMY_ROWID)
+                .apply(String.format("%s %% %d", DUMMY_ROWID, SAMPLE_SIZE), new FieldList(DUMMY_ROWID),
+                new FieldMetadata(DUMMY_ROWID, Long.class));
+        Map<String, Class<?>> cls = new HashMap<>();
+        List<FieldMetadata> fms = new ArrayList<>();
+        for (FieldMetadata fm : num.getSchema()) {
+            if (!fm.getFieldName().equals(DUMMY_ROWID)) {
+                fms.add(fm);
+                cls.put(fm.getFieldName(), fm.getJavaType());
+            }
+        }
+        // Sampling
+        Aggregator agg = new ProfileSampleAggregator(
+                new Fields(config.getNumAttrs().toArray(new String[config.getNumAttrs().size()])),
+                config.getNumAttrs());
+        num = num.groupByAndAggregate(new FieldList(DUMMY_ROWID), agg, fms);
+        num = num.kvDepivot(new FieldList(), new FieldList(DUMMY_ROWID));
+        // Profiling
+        fms = getFinalMetadata();
+        NumericProfileBuffer buf = new NumericProfileBuffer(
+                new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
+                        DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
+                        DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
+                        DataCloudConstants.PROFILE_ATTR_BKTALGO),
+                KVDepivotStrategy.KEY_ATTR, cls, config.isNumBucketEqualSized(), config.getBucketNum(),
+                config.getMinBucketSize(), false);
+        num = num.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR), new FieldList(num.getFieldNames()), buf,
+                fms);
+        return num;
+    }
+
+    @Deprecated
+    @SuppressWarnings({ "rawtypes", "unchecked", "unused" })
+    private Node profileNumAttrsGroupByColumn(Node src) {
         src = src.retain(new FieldList(config.getNumAttrs())).addRowID(DUMMY_ROWID).apply(
                 String.format("%s %% %d", DUMMY_ROWID, SAMPLE_SIZE), new FieldList(DUMMY_ROWID),
                 new FieldMetadata(DUMMY_ROWID, Long.class));
@@ -77,7 +112,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
             Node num = src.addColumnWithFixedValue(DUMMY_GROUP, UUID.randomUUID().toString(), String.class)
                     .renamePipe("_NUM_NODE_" + group.get(0));
             fms = getFinalMetadata();
-            NumericProfileBuffer buf = new NumericProfileBuffer(
+            NumericProfileBuf buf = new NumericProfileBuf(
                     new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
                             DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
                             DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,

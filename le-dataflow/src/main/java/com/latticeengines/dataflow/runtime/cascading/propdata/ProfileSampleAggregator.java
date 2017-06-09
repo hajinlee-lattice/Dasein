@@ -16,8 +16,6 @@ public class ProfileSampleAggregator extends BaseAggregator<ProfileSampleAggrega
 
     private static final long serialVersionUID = -4518166131558866707L;
 
-    private static final String DUMMY_ROWID = "_Dummy_RowID_";
-
     private List<String> attrs;
 
     public static class Context extends BaseAggregator.Context {
