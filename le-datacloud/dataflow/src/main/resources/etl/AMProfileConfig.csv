@@ -1,5 +1,5 @@
 AMColumnID,IsBucket,IsSegment,DecodeStrategy
-LatticeAccountId,true,false,
+LatticeID,false,true,
 LDC_Name,true,false,
 CABLE_TELEX_NUMBER,true,false,
 CHIEF_EXECUTIVE_OFFICER_NAME,true,false,
