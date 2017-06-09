@@ -38,6 +38,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     private Map<String, Class<Comparable>> cls;
     private Map<String, Integer> namePositionMap;
     private Map<String, DVal> attrDVals;
+    private ObjectMapper om;
 
     private class DVal implements Serializable {
         private static final long serialVersionUID = -7945104848635769412L;
@@ -79,6 +80,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         for (String attr : attrs) {
             attrDVals.put(attr, new DVal());
         }
+        this.om = new ObjectMapper();
     }
 
     @SuppressWarnings("unchecked")
@@ -127,7 +129,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         }
         IntervalBucket bucket = new IntervalBucket();
         bucket.setBoundaries(boundaries);
-        ObjectMapper om = new ObjectMapper();
+
         Tuple result = Tuple.size(getFieldDeclaration().size());
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME), attr);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_SRCATTR), attr);

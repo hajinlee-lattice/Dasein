@@ -23,6 +23,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndAggOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndBufferOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.HashJoinOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.InsertOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.JoinOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.JythonFunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.KVOperation;
@@ -512,6 +513,11 @@ public class Node {
 
     public Node kvReconstruct(String rowIdField, List<FieldMetadata> outputFields) {
         return new Node(builder.register(new KVOperation(opInput(identifier), rowIdField, outputFields)), builder);
+    }
+
+    // insert/replace literal values to every row, not insert a new row
+    public Node insert(FieldList targetFields, Object... values) {
+        return new Node(builder.register(new InsertOperation(opInput(identifier), targetFields, values)), builder);
     }
 
     public Table getSourceSchema() {

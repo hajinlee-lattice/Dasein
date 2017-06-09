@@ -13,6 +13,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 
@@ -166,6 +168,31 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
             throw new RuntimeException(e);
         }
         hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
+
+    protected void extractSchema(Source source, String version, String avroDir) throws Exception {
+        String avscPath;
+        if (source instanceof TableSource) {
+            TableSource tableSource = (TableSource) source;
+            avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableSource.getTable().getName(),
+                    tableSource.getCustomerSpace(), tableSource.getTable().getNamespace()).toString();
+        } else {
+            avscPath = hdfsPathBuilder.constructSchemaFile(source.getSourceName(), version).toString();
+        }
+        if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
+            HdfsUtils.rmdir(yarnConfiguration, avscPath);
+        }
+
+        Schema parsedSchema = null;
+        List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
+        if (files.size() > 0) {
+            String avroPath = files.get(0);
+            parsedSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+        } else {
+            throw new IllegalStateException("No avro file found at " + avroDir);
+        }
+
+        HdfsUtils.writeToFile(yarnConfiguration, avscPath, parsedSchema.toString());
     }
 
     protected void uploadDataToHdfs(Object[][] data, List<String> colNames, List<Class<?>> colTypes,

@@ -31,6 +31,8 @@ public interface HdfsSourceEntityMgr {
 
     Schema getAvscSchemaAtVersion(String sourceName, String version);
 
+    Schema getAvscSchemaAtVersion(Source sourceName, String version);
+
     /**
      * This is to fill in more detail about the table, after generating avros
      * Source service has another method to create a shell table before avro generation

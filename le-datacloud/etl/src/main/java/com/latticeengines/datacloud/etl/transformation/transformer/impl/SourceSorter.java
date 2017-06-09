@@ -79,7 +79,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
 
     @Override
     protected void updateParameters(SorterParameters parameters, Source[] baseTemplates, Source targetTemplate,
-            SorterConfig config) {
+            SorterConfig config, List<String> baseVersions) {
         String field = config.getSortingField();
         if (StringUtils.isBlank(field)) {
             throw new IllegalArgumentException(

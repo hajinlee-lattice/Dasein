@@ -59,7 +59,7 @@ public abstract class AbstractStatsDataflowTransformer
 
     @Override
     protected void updateParameters(AccountMasterStatsParameters parameters, Source[] baseTemplates,
-            Source targetTemplate, AccountMasterStatisticsConfig config) {
+            Source targetTemplate, AccountMasterStatisticsConfig config, List<String> baseVersions) {
         List<String> dimensions = config.getDimensions();
 
         List<CategoricalDimension> allDimensions = getAllDimensions();

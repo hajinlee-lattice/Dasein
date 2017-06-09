@@ -57,7 +57,7 @@ public class LatticeIdRefreshTransformer
 
     @Override
     protected void updateParameters(LatticeIdRefreshFlowParameter parameters, Source[] baseTemplates,
-            Source targetTemplate, LatticeIdRefreshConfig config) {
+            Source targetTemplate, LatticeIdRefreshConfig config, List<String> baseVersions) {
         parameters.setStrategy(latticeIdStrategyEntityMgr.getStrategyByName(config.getStrategy()));
         if (config.getCurrentCount() == null) {
             // 0th base source should be source of LatticeId

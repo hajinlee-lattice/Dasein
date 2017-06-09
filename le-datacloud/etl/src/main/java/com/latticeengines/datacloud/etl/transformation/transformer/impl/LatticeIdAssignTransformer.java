@@ -53,7 +53,7 @@ public class LatticeIdAssignTransformer
 
     @Override
     protected void updateParameters(LatticeIdRefreshFlowParameter parameters, Source[] baseTemplates,
-            Source targetTemplate, LatticeIdRefreshConfig config) {
+            Source targetTemplate, LatticeIdRefreshConfig config, List<String> baseVersions) {
         parameters.setStrategy(latticeIdStrategyEntityMgr.getStrategyByName(config.getStrategy()));
     }
 

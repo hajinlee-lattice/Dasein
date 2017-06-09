@@ -28,6 +28,9 @@ public class FileParser {
     private static final String[] BOMBORA_INTENT_HEADER = { "CompositeScoreMin", "CompositeScoreMax", "BucketCode",
             "Intent" };
 
+    public static final String[] AM_PROFILE_CONFIG_HEADER = { "AMColumnID", "IsBucket", "IsSegment",
+            "DecodeStrategy" };
+
     @SuppressWarnings("resource")
     public static Map<String, List<NameLocation>> parseBomboraMetroCodes() {
         Map<String, List<NameLocation>> locationMap = new HashMap<>();
@@ -130,5 +133,38 @@ public class FileParser {
             locations.add(location);
         }
         return locations;
+    }
+
+    /**
+     * Temporary used before migrating am profiling job to table driven
+     * transformer
+     */
+    public static Map<String, Map<String, Object>> parseAMProfileConfig() {
+        Map<String, Map<String, Object>> configs = new HashMap<>();
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("etl/AMProfileConfig.csv");
+        if (is == null) {
+            throw new RuntimeException("Cannot find resource etl/AMProfileConfig.csv");
+        }
+        CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(AM_PROFILE_CONFIG_HEADER).withRecordSeparator("\n");
+        try {
+            CSVParser csvFileParser = new CSVParser(new InputStreamReader(is), csvFileFormat);
+            List<CSVRecord> csvRecords = csvFileParser.getRecords();
+            for (int i = 1; i < csvRecords.size(); i++) {
+                Map<String, Object> config = new HashMap<>();
+                CSVRecord record = csvRecords.get(i);
+                String amId = record.get(AM_PROFILE_CONFIG_HEADER[0]);
+                Boolean isBucket = Boolean.valueOf(record.get(AM_PROFILE_CONFIG_HEADER[1]));
+                Boolean isSeg = Boolean.valueOf(record.get(AM_PROFILE_CONFIG_HEADER[2]));
+                String decodeStrategy = StringUtils.isNotBlank(record.get(AM_PROFILE_CONFIG_HEADER[3]))
+                        ? record.get(AM_PROFILE_CONFIG_HEADER[3]) : null;
+                config.put(AM_PROFILE_CONFIG_HEADER[1], isBucket);
+                config.put(AM_PROFILE_CONFIG_HEADER[2], isSeg);
+                config.put(AM_PROFILE_CONFIG_HEADER[3], decodeStrategy);
+                configs.put(amId, config);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to parse BomboraUniqueMetroCodes.csv", e);
+        }
+        return configs;
     }
 }

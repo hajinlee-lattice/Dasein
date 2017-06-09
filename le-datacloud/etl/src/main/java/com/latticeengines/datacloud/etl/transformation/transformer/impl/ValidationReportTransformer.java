@@ -63,8 +63,8 @@ public class ValidationReportTransformer extends AbstractDataflowTransformer<Val
     }
 
     @Override
-    protected void updateParameters(SourceValidationFlowParameters parameters, Source[] baseTemplates, Source targetTemplate,
-                                    ValidationReportTransformerConfig config) {
+    protected void updateParameters(SourceValidationFlowParameters parameters, Source[] baseTemplates,
+            Source targetTemplate, ValidationReportTransformerConfig config, List<String> baseVersions) {
         parameters.setReportAttrs(config.getReportAttrs());
         parameters.setRules(config.getRules());
     }

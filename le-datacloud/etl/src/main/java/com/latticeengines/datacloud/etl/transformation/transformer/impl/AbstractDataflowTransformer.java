@@ -61,12 +61,13 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return (Class<P>) TransformationFlowParameters.class;
     }
 
-    protected void updateParameters(P parameters, Source[] baseTemplates, Source targetTemplate, T configuration) {
+    protected void updateParameters(P parameters, Source[] baseTemplates, Source targetTemplate, T configuration,
+            List<String> baseVersions) {
         return;
     }
 
     protected P getParameters(TransformationProgress progress, Source[] baseSources, Source[] baseTemplates,
-            Source targetTemplate, T configuration, String confJson) {
+            Source targetTemplate, T configuration, String confJson, List<String> baseVersions) {
         P parameters;
         try {
             parameters = getDataFlowParametersClass().newInstance();
@@ -120,7 +121,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
         parameters.setTemplateSourceMap(templateSourceMap);
 
-        updateParameters(parameters, baseTemplates, targetTemplate, configuration);
+        updateParameters(parameters, baseTemplates, targetTemplate, configuration, baseVersions);
         return parameters;
     }
 
@@ -136,7 +137,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
             // The order of base sources in the source object should match with
             // the order of base versions in the configuration
-            P parameters = getParameters(progress, baseSources, baseTemplates, targetTemplate, configuration, confStr);
+            P parameters = getParameters(progress, baseSources, baseTemplates, targetTemplate, configuration, confStr,
+                    baseSourceVersions);
             Map<Source, List<String>> baseSourceVersionMap = new HashMap<Source, List<String>>();
             for (int i = 0; i < baseSources.length; i++) {
                 Source baseSource = baseSources[i];

@@ -66,7 +66,7 @@ public class IngestedFileToSourceTransformer
 
     @Override
     protected void updateParameters(IngestedFileToSourceParameters parameters, Source[] baseTemplates,
-            Source targetTemplate, IngestedFileToSourceTransformerConfig config) {
+            Source targetTemplate, IngestedFileToSourceTransformerConfig config, List<String> baseVersions) {
         parameters.setIngestionName(config.getIngestionName());
         parameters.setQualifier(config.getQualifier());
         parameters.setDelimiter(config.getDelimiter());
@@ -86,7 +86,7 @@ public class IngestedFileToSourceTransformer
             String confStr = step.getConfig();
             IngestedFileToSourceTransformerConfig configuration = getConfiguration(confStr);
             IngestedFileToSourceParameters parameters = getParameters(progress, baseSources, baseTemplates,
-                    targetTemplate, configuration, confStr);
+                    targetTemplate, configuration, confStr, baseSourceVersions);
             dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersions.get(0), parameters);
         } catch (Exception e) {
             log.error("Failed to transform data", e);

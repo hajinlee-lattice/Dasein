@@ -28,6 +28,8 @@ public final class DataCloudConstants {
     public static final String PROFILE_ATTR_LOWESTBIT = "LowestBit";
     public static final String PROFILE_ATTR_NUMBITS = "NumBits";
     public static final String PROFILE_ATTR_BKTALGO = "BktAlgo";
+    public static final String PROFILE_ATTR_SRC = "Attribute_Source";
+    public static final String PROFILE_ATTR_SRC_CUSTOMER = "CUSTOMER";;
 
     public static final String STATS_ATTR_NAME = "AttrName";
     public static final String STATS_ATTR_COUNT = "AttrCount";

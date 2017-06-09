@@ -55,7 +55,8 @@ public class SampleDataTransformer extends AbstractDataflowTransformer<SampleTra
     }
 
     @Override
-    protected void updateParameters(SourceSampleFlowParameters parameters, Source[] baseTemplates, Source targetTemplate, SampleTransformerConfig config) {
+    protected void updateParameters(SourceSampleFlowParameters parameters, Source[] baseTemplates,
+            Source targetTemplate, SampleTransformerConfig config, List<String> baseSources) {
         parameters.setFraction(config.getFraction());
         parameters.setFilter(config.getFilter());
         parameters.setFilterAttrs(config.getReportAttrs());

@@ -74,6 +74,7 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
         if (!isProfileSource(profileSource.getSourceName(), profileVersion)) {
             profileSource = step.getBaseSources()[0];
             profileVersion = step.getBaseVersions().get(0);
+            parameters.amSrcIdx = 1;
             if (!isProfileSource(profileSource.getSourceName(), profileVersion)) {
                 throw new RuntimeException("Neither base source has the profile schema");
             } else {

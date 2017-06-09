@@ -230,8 +230,24 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
+    public Schema getAvscSchemaAtVersion(Source source, String version) {
+        if (source instanceof TableSource) {
+            TableSource tableSource = (TableSource) source;
+            String path = hdfsPathBuilder.constructTableSchemaFilePath(tableSource.getTable().getName(),
+                    tableSource.getCustomerSpace(), tableSource.getTable().getNamespace()).toString();
+            return getAvscSchemaAtVersion(tableSource.getTable().getName(), version, path);
+        } else {
+            return getAvscSchemaAtVersion(source.getSourceName(), version);
+        }
+    }
+
+    @Override
     public Schema getAvscSchemaAtVersion(String sourceName, String version) {
         String path = hdfsPathBuilder.constructSchemaFile(sourceName, version).toString();
+        return getAvscSchemaAtVersion(sourceName, version, path);
+    }
+
+    private Schema getAvscSchemaAtVersion(String sourceName, String version, String path) {
         boolean avscExists;
         try {
             avscExists = HdfsUtils.fileExists(yarnConfiguration, path);
@@ -249,7 +265,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 return null;
             }
         } else {
-            log.warn("AVSC for source " + sourceName + " at version " + version + " does not exist.");
+            log.warn(String.format("AVSC for source %s at version %s does not exist.", sourceName, version));
             return null;
         }
     }

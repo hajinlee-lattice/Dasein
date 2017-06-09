@@ -325,7 +325,7 @@ public class StandardizationTransformer
 
     @Override
     protected void updateParameters(StandardizationFlowParameter parameters, Source[] baseTemplates,
-            Source targetTemplate, StandardizationTransformerConfig config) {
+            Source targetTemplate, StandardizationTransformerConfig config, List<String> baseVersions) {
         parameters.setDomainFields(config.getDomainFields());
         parameters.setCountryFields(config.getCountryFields());
         parameters.setStateFields(config.getStateFields());

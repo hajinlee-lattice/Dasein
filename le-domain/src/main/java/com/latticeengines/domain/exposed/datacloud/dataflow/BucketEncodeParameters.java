@@ -23,4 +23,7 @@ public class BucketEncodeParameters extends TransformationFlowParameters {
     @JsonProperty("rename_row_id_field")
     public String renameRowIdField;
 
+    @JsonProperty("am_src_idx")
+    public int amSrcIdx;
+
 }
