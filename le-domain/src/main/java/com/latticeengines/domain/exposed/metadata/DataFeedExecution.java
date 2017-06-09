@@ -72,11 +72,11 @@ public class DataFeedExecution implements HasPid, Serializable {
         this.pid = pid;
     }
 
-    public DataFeed getFeed() {
+    public DataFeed getDataFeed() {
         return dataFeed;
     }
 
-    public void setFeed(DataFeed feed) {
+    public void setDataFeed(DataFeed feed) {
         this.dataFeed = feed;
     }
 

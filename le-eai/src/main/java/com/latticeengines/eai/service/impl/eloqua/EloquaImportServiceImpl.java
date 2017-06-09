@@ -31,6 +31,11 @@ public class EloquaImportServiceImpl extends ImportService {
     }
 
     @Override
+    public List<Table> prepareMetadata(List<Table> originalTables) {
+        return null;
+    }
+
+    @Override
     public void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext context,
                                          ConnectorConfiguration connectorConfiguration) {
         // TODO Auto-generated method stub

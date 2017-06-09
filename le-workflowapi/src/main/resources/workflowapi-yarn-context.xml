@@ -13,6 +13,7 @@
     <import resource="classpath:serviceflows-prospectdiscovery-workflow-context.xml"/>
     <import resource="classpath:serviceflows-leadprioritization-workflow-context.xml"/>
     <import resource="classpath:serviceflows-datacloud-workflow-context.xml"/>
+    <import resource="classpath:serviceflows-cdl-workflow-context.xml"/>
 
 
 

@@ -46,6 +46,11 @@ public class FileImportServiceImpl extends ImportService {
     }
 
     @Override
+    public List<Table> prepareMetadata(List<Table> originalTables) {
+        return null;
+    }
+
+    @Override
     public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext context,
                                          ConnectorConfiguration connectorConfiguration) {
         context.setProperty(ImportProperty.HDFSFILE, //

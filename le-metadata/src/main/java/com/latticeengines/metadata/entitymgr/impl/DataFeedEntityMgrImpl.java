@@ -53,7 +53,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             datafeedTaskEntityMgr.create(task);
         }
         DataFeedExecution execution = new DataFeedExecution();
-        execution.setFeed(datafeed);
+        execution.setDataFeed(datafeed);
         execution.setStatus(DataFeedExecution.Status.Active);
         datafeedExecutionEntityMgr.create(execution);
         datafeed.setActiveExecutionId(execution.getPid());
@@ -123,7 +123,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.update(execution);
 
         DataFeedExecution newExecution = new DataFeedExecution();
-        newExecution.setFeed(datafeed);
+        newExecution.setDataFeed(datafeed);
         newExecution.setStatus(DataFeedExecution.Status.Active);
         datafeedExecutionEntityMgr.create(newExecution);
 

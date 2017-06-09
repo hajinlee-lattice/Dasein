@@ -21,4 +21,14 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     void addTableToQueue(DataFeedTask dataFeedTask, Table table);
 
+//    boolean dataFeedTaskExist(String dataFeedType, String entity);
+
+    void createDataFeedTask(DataFeedTask dataFeedTask);
+
+    DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, Long dataFeedId);
+
+    DataFeedTask getDataFeedTask(Long pid);
+
+    void updateDataFeedTask(DataFeedTask dataFeedTask);
+
 }

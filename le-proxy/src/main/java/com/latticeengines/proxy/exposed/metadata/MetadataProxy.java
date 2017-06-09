@@ -10,6 +10,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -17,6 +21,8 @@ import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.network.exposed.metadata.ArtifactInterface;
+import com.latticeengines.network.exposed.metadata.DataFeedInterface;
+import com.latticeengines.network.exposed.metadata.DataFeedTaskInterface;
 import com.latticeengines.network.exposed.metadata.MetadataInterface;
 import com.latticeengines.network.exposed.metadata.ModuleInterface;
 import com.latticeengines.network.exposed.metadata.RuleResultInterface;
@@ -24,7 +30,8 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
 public class MetadataProxy extends MicroserviceRestApiProxy
-        implements MetadataInterface, ArtifactInterface, RuleResultInterface, ModuleInterface {
+        implements MetadataInterface, ArtifactInterface, RuleResultInterface, ModuleInterface, DataFeedTaskInterface,
+        DataFeedInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -217,6 +224,94 @@ public class MetadataProxy extends MicroserviceRestApiProxy
         String url = constructUrl("/customerspaces/{customerSpace}/segments/all", customerSpace);
         List raw = get("getSegments", url, List.class);
         return JsonUtils.convertList(raw, MetadataSegment.class);
+    }
+
+    @Override
+    public Boolean dataFeedTaskExist(String customerSpace, String dataFeedType, String entity) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/exist/{dataFeedType}/{entity}",
+                customerSpace, dataFeedType, entity);
+        return get("dataFeedTaskExist", url, Boolean.class);
+    }
+
+    @Override
+    public void createDataFeedTask(String customerSpace, String dataFeedName, DataFeedTask dataFeedTask) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{dataFeedName}/create", customerSpace);
+        post("createDataFeedTask", url, dataFeedTask, Void.class);
+    }
+
+    @Override
+    public DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity,
+                                        String dataFeedName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{source}/{dataFeedType}/{entity}/{dataFeedName}",
+                customerSpace, source, dataFeedType, entity, dataFeedName);
+        return get("getDataFeedTask", url, DataFeedTask.class);
+    }
+
+    @Override
+    public DataFeedTask getDataFeedTask(String customerSpace, String id) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{id}", customerSpace, id);
+        return get("getDataFeedTaskById", url, DataFeedTask.class);
+    }
+
+    @Override
+    public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/update", customerSpace);
+        post("updateDataFeedTask", url, dataFeedTask, Void.class);
+    }
+
+    @Override
+    public void registerExtract(String customerSpace, Long taskId, Extract extract) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/registerextract/{taskId}",
+                customerSpace, taskId);
+        post("registerExtract", url, extract, Void.class);
+    }
+
+//    @Override
+//    public Boolean startExecution(String customerSpace, String datafeedName) {
+//        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/startexecution",
+//                customerSpace, datafeedName);
+//        return post("createImportTable", url, null, Boolean.class);
+//    }
+//
+//    @Override
+//    public DataFeed findDataFeedByName(String customerSpace, String feedName) {
+//        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/getdatafeed",
+//                customerSpace, feedName);
+//        return get("findDataFeedByName", url, DataFeed.class);
+//    }
+//
+    @Override
+    public DataFeedExecution startExecution(String customerSpace, String datafeedName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/startexecution",
+                customerSpace, datafeedName);
+        return post("startExecution", url, null, DataFeedExecution.class);
+    }
+
+    @Override
+    public DataFeed findDataFeedByName(String customerSpace, String datafeedName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}", customerSpace,
+                datafeedName);
+        return get("findDataFeedByName", url, DataFeed.class);
+    }
+
+    @Override
+    public DataFeedExecution finishExecution(String customerSpace, String datafeedName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/finishexecution",
+                customerSpace, datafeedName);
+        return post("finishExecution", url, null, DataFeedExecution.class);
+    }
+
+    @Override
+    public DataFeed createDataFeed(String customerSpace, DataFeed datafeed) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds", customerSpace);
+        return post("createDataFeed", url, datafeed, DataFeed.class);
+    }
+
+    @Override
+    public DataFeedExecution failExecution(String customerSpace, String datafeedName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/failexecution",
+                customerSpace, datafeedName);
+        return post("failExecution", url, null, DataFeedExecution.class);
     }
 
 }

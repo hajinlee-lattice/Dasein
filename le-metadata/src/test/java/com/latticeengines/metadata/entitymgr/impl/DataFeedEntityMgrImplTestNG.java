@@ -82,8 +82,9 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         dataTable.setTenant(MultiTenantContext.getTenant());
 
         DataFeedTask task = new DataFeedTask();
-        task.setFeed(datafeed);
-        task.setActiveJob(3L);
+        task.setDataFeed(datafeed);
+        task.setActiveJob("Not specified");
+        task.setFeedType("VisiDB");
         task.setEntity(SchemaInterpretation.Account.name());
         task.setSource("SFDC");
         task.setStatus(DataFeedTask.Status.Active);

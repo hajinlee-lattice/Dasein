@@ -52,7 +52,7 @@ public class ImportProcessor extends SingleContainerYarnProcessor<ImportConfigur
             @SuppressWarnings("unchecked")
             List<Object> identifiersRaw = JsonUtils.deserialize(collectionIdentifiers, List.class);
             List<String> identifiers = JsonUtils.convertList(identifiersRaw, String.class);
-            List<EaiImportJobDetail> jobDetails = new ArrayList<>();
+//            List<EaiImportJobDetail> jobDetails = new ArrayList<>();
             for (String collectionIdentifier : identifiers) {
                 EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService.getImportJobDetail(collectionIdentifier);
                 if (eaiImportJobDetail != null) {

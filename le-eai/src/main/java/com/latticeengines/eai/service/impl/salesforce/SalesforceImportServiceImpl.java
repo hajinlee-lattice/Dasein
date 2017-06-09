@@ -48,6 +48,11 @@ public class SalesforceImportServiceImpl extends ImportService {
     }
 
     @Override
+    public List<Table> prepareMetadata(List<Table> originalTables) {
+        return null;
+    }
+
+    @Override
     public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext ctx,
                                          ConnectorConfiguration connectorConfiguration) {
         List<Table> tables = srcImportConfig.getTables();

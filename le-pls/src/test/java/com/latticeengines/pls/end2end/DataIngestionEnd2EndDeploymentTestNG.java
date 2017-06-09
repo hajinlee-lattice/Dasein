@@ -91,7 +91,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         dataCollection.addDataFeed(datafeed);
 
         DataFeedExecution execution = new DataFeedExecution();
-        execution.setFeed(datafeed);
+        execution.setDataFeed(datafeed);
         execution.setStatus(DataFeedExecution.Status.Active);
         datafeed.addExeuction(execution);
 
@@ -106,8 +106,8 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         dataTable.setTenant(firstTenant);
 
         DataFeedTask task = new DataFeedTask();
-        task.setFeed(datafeed);
-        task.setActiveJob(1L);
+        task.setDataFeed(datafeed);
+        task.setActiveJob("1");
         task.setEntity(SchemaInterpretation.Account.name());
         task.setSource("VDB");
         task.setStatus(DataFeedTask.Status.Active);

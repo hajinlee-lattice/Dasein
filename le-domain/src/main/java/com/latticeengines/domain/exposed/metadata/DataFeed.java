@@ -94,7 +94,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     @Transient
     @JsonIgnore
-    private Map<String, Map<String, DataFeedTask>> taskMap = new HashMap<>();
+    private Map<String, Map<String, Map<String, DataFeedTask>>> taskMap = new HashMap<>();
 
     @Override
     public Long getPid() {
@@ -175,18 +175,35 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         return tasks;
     }
 
-    public DataFeedTask getTask(String entity, String src) {
-        Map<String, DataFeedTask> taskSrcMap = taskMap.get(entity);
-        return ((tasks == null) ? null : taskSrcMap.get(src));
+    public DataFeedTask getTask(String entity, String src, String feedType) {
+        Map<String, Map<String, DataFeedTask>> taskSrcMap = taskMap.get(entity);
+        if (taskSrcMap == null) {
+            return null;
+        }
+        Map<String, DataFeedTask> taskTypeMap = taskSrcMap.get(src);
+        return ((taskTypeMap == null) ? null : taskTypeMap.get(feedType));
     }
 
     public void addTask(DataFeedTask task) {
-        Map<String, DataFeedTask> taskSrcMap = taskMap.get(task.getEntity());
+        Map<String, Map<String, DataFeedTask>> taskSrcMap = taskMap.get(task.getEntity());
         if (taskSrcMap == null) {
-            taskSrcMap = new HashMap<String, DataFeedTask>();
+            Map<String, DataFeedTask> taskTypeMap = new HashMap<>();
+            taskTypeMap.put(task.getFeedType(), task);
+            taskSrcMap = new HashMap<>();
+            taskSrcMap.put(task.getSource(), taskTypeMap);
+
             taskMap.put(task.getEntity(), taskSrcMap);
+        } else {
+            Map<String, DataFeedTask> taskTypeMap = taskSrcMap.get(task.getSource());
+            if (taskTypeMap == null) {
+                taskTypeMap = new HashMap<>();
+                taskTypeMap.put(task.getFeedType(), task);
+                taskSrcMap.put(task.getSource(), taskTypeMap);
+            } else {
+                taskTypeMap.put(task.getFeedType(), task);
+            }
         }
-        taskSrcMap.put(task.getSource(), task);
+        //taskSrcMap.put(task.getSource(), task);
         tasks.add(task);
     }
 

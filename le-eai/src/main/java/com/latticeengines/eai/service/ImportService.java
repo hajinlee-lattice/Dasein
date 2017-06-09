@@ -47,6 +47,8 @@ public abstract class ImportService {
     public abstract List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context,
                                                ConnectorConfiguration connectorConfiguration);
 
+    public abstract List<Table> prepareMetadata(List<Table> originalTables);
+
     public abstract void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext context,
                                                   ConnectorConfiguration connectorConfiguration);
 

@@ -87,6 +87,11 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
 
     @VisibleForTesting
     void addExtractToTable(Table table, String path, long processedRecords) {
+        Extract e = createExtract(path, processedRecords);
+        table.addExtract(e);
+    }
+
+    private Extract createExtract(String path, long processedRecords) {
         Extract e = new Extract();
         e.setName(StringUtils.substringAfterLast(path, "/"));
         e.setPath(PathUtils.stripoutProtocol(path));
@@ -98,7 +103,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-        table.addExtract(e);
+        return e;
     }
 
     private Tenant getTenant(String customerSpace) {
@@ -125,6 +130,21 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     @Override
     public Table getTable(String customerSpace, String tableName) {
         return metadataProxy.getTable(customerSpace, tableName);
+    }
+
+    @Override
+    public Map<String, Extract> getExtractsForTable(List<Table> tableMetaData, ImportContext importContext) {
+        @SuppressWarnings("unchecked")
+        Map<String, String> targetPathsMap = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
+        HashMap<String, Extract> extracts = new HashMap<>();
+        for (Table table : tableMetaData) {
+            extracts.put(table.getName(),
+                    createExtract(targetPathsMap.get(table.getName()), processedRecordsMap.get(table.getName())));
+        }
+        return extracts;
     }
 
 

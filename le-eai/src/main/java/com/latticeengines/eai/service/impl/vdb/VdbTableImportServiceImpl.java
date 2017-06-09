@@ -186,7 +186,6 @@ public class VdbTableImportServiceImpl extends ImportService {
         String targetPath = "";
         if (eaiImportJobDetail != null) {
             targetPath = eaiImportJobDetail.getTargetPath();
-
         }
         if (StringUtils.isEmpty(targetPath)) {
             targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
@@ -208,84 +207,108 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Override
     public List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context,
                                       ConnectorConfiguration connectorConfiguration) {
-        VdbConnectorConfiguration vdbConnectorConfiguration = null;
-        if(connectorConfiguration instanceof VdbConnectorConfiguration) {
-            vdbConnectorConfiguration = (VdbConnectorConfiguration) connectorConfiguration;
-        } else {
-            throw new LedpException(LedpCode.LEDP_17010);
-        }
+        return null;
+//        VdbConnectorConfiguration vdbConnectorConfiguration = null;
+//        if(connectorConfiguration instanceof VdbConnectorConfiguration) {
+//            vdbConnectorConfiguration = (VdbConnectorConfiguration) connectorConfiguration;
+//        } else {
+//            throw new LedpException(LedpCode.LEDP_17010);
+//        }
+//
+//        String statusUrl = vdbConnectorConfiguration.getReportStatusEndpoint();
+//        VdbLoadTableStatus vdbLoadTableStatus = new VdbLoadTableStatus();
+//        vdbLoadTableStatus.setJobStatus("Running");
+//        vdbLoadTableStatus.setMessage("Start import metadata for Vdb table");
+//
+//        String customer = context.getProperty(ImportProperty.CUSTOMER, String.class);
+//        List<Table> newTables = new ArrayList<>();
 
-        String statusUrl = vdbConnectorConfiguration.getReportStatusEndpoint();
-        VdbLoadTableStatus vdbLoadTableStatus = new VdbLoadTableStatus();
-        vdbLoadTableStatus.setJobStatus("Running");
-        vdbLoadTableStatus.setMessage("Start import metadata for Vdb table");
+//        try {
+//            List<Table> tables = new ArrayList<>();
+//            for (Map.Entry<String, ImportVdbTableConfiguration> entry : vdbConnectorConfiguration
+//                    .getTableConfigurations().entrySet()) {
+//                vdbLoadTableStatus.setVdbQueryHandle(entry.getValue().getVdbQueryHandle());
+//                tables.add(createTable(customer, entry.getKey(), entry.getValue()));
+//            }
+//            for (Table table : tables) {
+//                ImportVdbTableConfiguration importVdbTableConfiguration = vdbConnectorConfiguration
+//                        .getVdbTableConfiguration(table.getName());
+//                if (importVdbTableConfiguration == null) {
+//                    continue;
+//                }
+//                String queryHandle = importVdbTableConfiguration.getVdbQueryHandle();
+//                vdbLoadTableStatus.setVdbQueryHandle(queryHandle);
+//                try {
+//                    List<VdbSpecMetadata> vdbSpecMetadataList = importVdbTableConfiguration.getMetadataList();
+//                    HashMap<String, VdbSpecMetadata> vdbSpecMetadataHashMap = new HashMap<>();
+//                    for (VdbSpecMetadata metadata : vdbSpecMetadataList) {
+//                        vdbSpecMetadataHashMap.put(metadata.getColumnName(), metadata);
+//                    }
+//                    List<Attribute> attributes = table.getAttributes();
+//                    for (Attribute attribute : attributes) {
+//                        if (attribute == null) {
+//                            log.warn(String.format("Empty attribute in table %s", table.getName()));
+//                            continue;
+//                        }
+//                        if (vdbSpecMetadataHashMap.containsKey(attribute.getName())) {
+//                            log.info(String.format("Processing attribute %s with logical type %s.", attribute.getName(),
+//                                    vdbSpecMetadataHashMap.get(attribute.getName()).getDataType()));
+//
+//                            if (vdbSpecMetadataHashMap.get(attribute.getName()) != null) {
+//                                attribute.setSourceLogicalDataType(
+//                                        vdbSpecMetadataHashMap.get(attribute.getName()).getDataType());
+//                                attribute.setPhysicalDataType(vdbTableToAvroTypeConverter
+//                                        .convertTypeToAvro(attribute.getSourceLogicalDataType().toLowerCase()).name());
+//
+//                                if (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
+//                                    attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
+//                                }
+//                            }
+//                        }
+//                    }
+//                    Schema schema = TableUtils.createSchema(table.getName(), table);
+//                    table.setSchema(schema);
+//                    newTables.add(table);
+//                    setExtractContextForVdbTable(table, context, importVdbTableConfiguration);
+//                } catch (Exception e) {
+//                    EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService.getImportJobDetail(
+//                            importVdbTableConfiguration.getCollectionIdentifier());
+//                    eaiImportJobDetail.setStatus(ImportStatus.FAILED);
+//                    eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
+//                    throw new LedpException(LedpCode.LEDP_17014, new String[] {e.toString()});
+//                }
+//            }
+//        } catch (Exception e) {
+//            log.error(String.format("Import table metadata failed with exception: %s", e.toString()));
+//            vdbLoadTableStatus.setJobStatus("Failed");
+//            vdbLoadTableStatus
+//                    .setMessage(String.format("Import table metadata failed with exception: %s", e.toString()));
+//            reportStatus(statusUrl, vdbLoadTableStatus);
+//            throw e;
+//        }
+//        return newTables;
+    }
 
-        String customer = context.getProperty(ImportProperty.CUSTOMER, String.class);
-        List<Table> newTables = new ArrayList<>();
-        try {
-            List<Table> tables = new ArrayList<>();
-            for (Map.Entry<String, ImportVdbTableConfiguration> entry : vdbConnectorConfiguration
-                    .getTableConfigurations().entrySet()) {
-                vdbLoadTableStatus.setVdbQueryHandle(entry.getValue().getVdbQueryHandle());
-                tables.add(createTable(customer, entry.getKey(), entry.getValue()));
-            }
-            for (Table table : tables) {
-                ImportVdbTableConfiguration importVdbTableConfiguration = vdbConnectorConfiguration
-                        .getVdbTableConfiguration(table.getName());
-                if (importVdbTableConfiguration == null) {
+    @Override
+    public List<Table> prepareMetadata(List<Table> originalTables) {
+        List<Table> metaData = new ArrayList<>();
+        for(Table table : originalTables) {
+            for (Attribute attribute : table.getAttributes()) {
+                if (attribute == null) {
+                    log.warn(String.format("Empty attribute in table %s", table.getName()));
                     continue;
                 }
-                String queryHandle = importVdbTableConfiguration.getVdbQueryHandle();
-                vdbLoadTableStatus.setVdbQueryHandle(queryHandle);
-                try {
-                    List<VdbSpecMetadata> vdbSpecMetadataList = importVdbTableConfiguration.getMetadataList();
-                    HashMap<String, VdbSpecMetadata> vdbSpecMetadataHashMap = new HashMap<>();
-                    for (VdbSpecMetadata metadata : vdbSpecMetadataList) {
-                        vdbSpecMetadataHashMap.put(metadata.getColumnName(), metadata);
-                    }
-                    List<Attribute> attributes = table.getAttributes();
-                    for (Attribute attribute : attributes) {
-                        if (attribute == null) {
-                            log.warn(String.format("Empty attribute in table %s", table.getName()));
-                            continue;
-                        }
-                        if (vdbSpecMetadataHashMap.containsKey(attribute.getName())) {
-                            log.info(String.format("Processing attribute %s with logical type %s.", attribute.getName(),
-                                    vdbSpecMetadataHashMap.get(attribute.getName()).getDataType()));
-
-                            if (vdbSpecMetadataHashMap.get(attribute.getName()) != null) {
-                                attribute.setSourceLogicalDataType(
-                                        vdbSpecMetadataHashMap.get(attribute.getName()).getDataType());
-                                attribute.setPhysicalDataType(vdbTableToAvroTypeConverter
-                                        .convertTypeToAvro(attribute.getSourceLogicalDataType().toLowerCase()).name());
-
-                                if (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
-                                    attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
-                                }
-                            }
-                        }
-                    }
-                    Schema schema = TableUtils.createSchema(table.getName(), table);
-                    table.setSchema(schema);
-                    newTables.add(table);
-                    setExtractContextForVdbTable(table, context, importVdbTableConfiguration);
-                } catch (Exception e) {
-                    EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService.getImportJobDetail(
-                            importVdbTableConfiguration.getCollectionIdentifier());
-                    eaiImportJobDetail.setStatus(ImportStatus.FAILED);
-                    eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
-                    throw new LedpException(LedpCode.LEDP_17014, new String[] {e.toString()});
+                attribute.setPhysicalDataType(vdbTableToAvroTypeConverter.convertTypeToAvro(
+                        attribute.getSourceLogicalDataType().toLowerCase()).name());
+                if (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
+                    attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }
             }
-        } catch (Exception e) {
-            log.error(String.format("Import table metadata failed with exception: %s", e.toString()));
-            vdbLoadTableStatus.setJobStatus("Failed");
-            vdbLoadTableStatus
-                    .setMessage(String.format("Import table metadata failed with exception: %s", e.toString()));
-            reportStatus(statusUrl, vdbLoadTableStatus);
-            throw e;
+            Schema schema = TableUtils.createSchema(table.getName(), table);
+            table.setSchema(schema);
+            metaData.add(table);
         }
-        return newTables;
+        return metaData;
     }
 
     private Table createTable(String customerSpace, String tableName, ImportVdbTableConfiguration importTableConfig) {
@@ -365,6 +388,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                 continue;
             }
             try {
+                setExtractContextForVdbTable(table, context, importVdbTableConfiguration);
                 String queryDataUrl = vdbConnectorConfiguration.getGetQueryDataEndpoint();
                 String statusUrl = vdbConnectorConfiguration.getReportStatusEndpoint();
                 String queryHandle = importVdbTableConfiguration.getVdbQueryHandle();

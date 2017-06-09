@@ -25,6 +25,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -41,15 +42,24 @@ public class DataFeedTask implements HasPid, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonProperty("pid")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
+
+//    @JsonProperty("unique_id")
+//    @Column(name = "UNIQUE_ID", unique = true, nullable = false)
+//    @Index(name = "IX_UNIQUE_ID")
+//    private String uniqueId;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "`FK_FEED_ID`", nullable = false)
     private DataFeed dataFeed;
+
+//    @JsonIgnore
+//    @Column(name = "DATA_FEED_ID")
+//    private Long dataFeedId;
 
     @Column(name = "SOURCE", nullable = false)
     @JsonProperty("source")
@@ -63,25 +73,29 @@ public class DataFeedTask implements HasPid, Serializable {
     @JsonProperty("source_config")
     private String sourceConfig;
 
-    @Column(name = "FEED_TYPE", nullable = true)
+    @Column(name = "FEED_TYPE", nullable = false)
     @JsonProperty("feed_type")
     private String feedType;
 
-    @JsonIgnore
+    @JsonProperty("import_template")
     @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_TEMPLATE_ID", nullable = false)
     private Table importTemplate;
 
-    @JsonIgnore
+    @JsonProperty("import_data")
     @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_DATA_ID", nullable = true)
     private Table importData;
 
+//    @Column(name = "STAGING_DIR", nullable = false, length = 1000)
+//    @JsonProperty("staging_dir")
+//    private String stagingDir;
+
     @Column(name = "ACTIVE_JOB", nullable = false)
     @JsonProperty("active_job")
-    private Long activeJob;
+    private String activeJob;
 
     @Column(name = "STATUS", nullable = false)
     @JsonProperty("status")
@@ -113,13 +127,30 @@ public class DataFeedTask implements HasPid, Serializable {
         this.pid = pid;
     }
 
-    public DataFeed getFeed() {
+    public DataFeed getDataFeed() {
         return dataFeed;
     }
 
-    public void setFeed(DataFeed feed) {
-        this.dataFeed = feed;
+    public void setDataFeed(DataFeed dataFeed) {
+        this.dataFeed = dataFeed;
     }
+
+//    public DataFeed getFeed() {
+//        return dataFeed;
+//    }
+//
+//    public void setFeed(DataFeed feed) {
+//        this.dataFeed = feed;
+////        this.dataFeedId = feed.getPid();
+//    }
+
+//    public Long getDataFeedId() {
+//        return dataFeedId;
+//    }
+//
+//    public void setDataFeedId(Long dataFeedId) {
+//        this.dataFeedId = dataFeedId;
+//    }
 
     public String getSource() {
         return source;
@@ -161,6 +192,14 @@ public class DataFeedTask implements HasPid, Serializable {
         this.importData = importData;
     }
 
+//    public String getStagingDir() {
+//        return stagingDir;
+//    }
+//
+//    public void setStagingDir(String stagingDir) {
+//        this.stagingDir = stagingDir;
+//    }
+
     public Status getStatus() {
         return status;
     }
@@ -169,11 +208,11 @@ public class DataFeedTask implements HasPid, Serializable {
         this.status = status;
     }
 
-    public long getActiveJob() {
+    public String getActiveJob() {
         return activeJob;
     }
 
-    public void setActiveJob(long activeJob) {
+    public void setActiveJob(String activeJob) {
         this.activeJob = activeJob;
     }
 
@@ -210,7 +249,7 @@ public class DataFeedTask implements HasPid, Serializable {
     }
 
     public static enum Status {
-        Initing("inited"), //
+        Initiating("initiating"), //
         Active("active"), //
         Updated("updated"), //
         Deleting("deleting");

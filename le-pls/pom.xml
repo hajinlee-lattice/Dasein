@@ -25,6 +25,7 @@
         <le.scheduler.version>3.6.0-SNAPSHOT</le.scheduler.version>
         <le.serviceflows.prospectdiscovery.version>3.6.0-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
         <le.serviceflows.leadprioritization.version>3.6.0-SNAPSHOT</le.serviceflows.leadprioritization.version>
+        <le.serviceflows.cdl.version>3.6.0-SNAPSHOT</le.serviceflows.cdl.version>
         <le.proxy.version>3.6.0-SNAPSHOT</le.proxy.version>
         <le.quartzclient.version>3.6.0-SNAPSHOT</le.quartzclient.version>
         <le.encryption.version>3.6.0-SNAPSHOT</le.encryption.version>

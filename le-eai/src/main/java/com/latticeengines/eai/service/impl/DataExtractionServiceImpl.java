@@ -179,7 +179,12 @@ public class DataExtractionServiceImpl implements DataExtractionService {
                         case RUNNING:
                             throw new LedpException(LedpCode.LEDP_18137, new String[]{eaiImportJobDetail.getLoadApplicationId()});
                         case SUCCESS:
-                            throw new LedpException(LedpCode.LEDP_18138);
+                            eaiImportJobDetail.setStatus(ImportStatus.SUBMITTED);
+                            eaiImportJobDetail.setCollectionTimestamp(new Date());
+                            eaiImportJobDetail.setProcessedRecords(0);
+                            eaiImportJobDetail.setSourceType(importConfig.getSourceConfigurations().get(0).getSourceType());
+                            eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
+                            break;
                     }
                 } else {
                     eaiImportJobDetail = new EaiImportJobDetail();

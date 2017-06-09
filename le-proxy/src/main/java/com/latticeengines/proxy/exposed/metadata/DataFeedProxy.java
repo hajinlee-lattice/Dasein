@@ -11,7 +11,7 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 public class DataFeedProxy extends MicroserviceRestApiProxy implements DataFeedInterface {
 
     public DataFeedProxy() {
-        super("datafeed");
+        super("metadata");
     }
 
     @Override

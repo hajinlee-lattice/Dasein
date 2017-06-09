@@ -22,8 +22,8 @@ public class DataFeedImportUtilsTestNG {
         df.setPid(1L);
         DataFeedTask task = new DataFeedTask();
         task.setPid(2L);
-        task.setFeed(df);
-        task.setActiveJob(3L);
+        task.setDataFeed(df);
+        task.setActiveJob("Not specified");
         task.setEntity(SchemaInterpretation.Account.name());
         task.setSource("SFDC");
         task.setStatus(Status.Active);
