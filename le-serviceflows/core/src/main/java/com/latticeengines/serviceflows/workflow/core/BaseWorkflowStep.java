@@ -79,11 +79,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String DATA_RULES = "DATA_RULES";
     protected static final String SOURCE_IMPORT_TABLE = "SOURCE_IMPORT_TABLE_NAME";
     protected static final String EXECUTION = "EXECUTION";
-    
+    protected static final String DATA_INITIAL_LOAD = "DATA_FEED_STATUS";
     protected static final String CONSOLIDATE_INPUT_TABLES = "CONSOLIDATE_INPUT_TABLES";
     protected static final String CONSOLIDATE_CONSOLIDATED_TABLE = "CONSOLIDATE_CONSOLIDATED_TABLE";
     protected static final String CONSOLIDATE_MASTER_TABLE = "CONSOLIDATE_MASTER_TABLE";
-    
+
     @Autowired
     protected Configuration yarnConfiguration;
 
