@@ -15,18 +15,14 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
@@ -46,6 +42,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
+import com.latticeengines.proxy.exposed.admin.AdminInternalProxy;
+import com.latticeengines.proxy.exposed.admin.AdminTenantProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
@@ -70,6 +68,12 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Autowired
     private DataLoaderService dataLoaderService;
+
+    @Autowired
+    private AdminTenantProxy adminTenantProxy;
+
+    @Autowired
+    private AdminInternalProxy adminInternalProxy;
 
     public GlobalAuthDeploymentTestBed(String plsApiHostPort, String adminApiHostPort, String environment) {
         super();
@@ -98,6 +102,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void bootstrap(Integer numTenants) {
+        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
         involvedDL = false;
         involvedZK = false;
         super.bootstrap(numTenants);
@@ -108,11 +113,12 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         log.info(String.format("Overwriting the feature flag for %s to be %s", featureFlagName, String.valueOf(value)));
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
         FeatureFlagClient.setEnabled(space, featureFlagName, value);
-        assert (FeatureFlagClient.getFlags(space).get(featureFlagName).booleanValue() == value);
+        assert (FeatureFlagClient.getFlags(space).get(featureFlagName) == value);
     }
 
     @Override
     public Tenant bootstrapForProduct(LatticeProduct product) {
+        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
         Tenant tenant = bootstrapViaTenantConsole(product, enviroment, null);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
@@ -121,6 +127,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public Tenant bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
+        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
         Tenant tenant = bootstrapViaTenantConsole(product, enviroment, featureFlagMap);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
@@ -139,6 +146,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void cleanupPlsHdfs() {
+        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
         super.cleanupPlsHdfs();
     }
 
@@ -204,19 +212,19 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    public void deleteTenant(Tenant tenant, boolean transactional) {
+    public void deleteTenant(Tenant tenant) {
         deleteTenantViaTenantConsole(tenant);
         log.info("Deleting test tenant " + tenant.getId() + " from pls and GA");
-        if (transactional) {
-            waitForTenantConsoleUninstall(CustomerSpace.parse(tenant.getId()));
-        }
+        waitForTenantConsoleUninstall(CustomerSpace.parse(tenant.getId()));
     }
 
     private void waitForTenantConsoleUninstall(CustomerSpace customerSpace) {
-        while (true) {
+        Long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L);
+        while (System.currentTimeMillis() < timeout) {
             try {
                 if (!SpaceLifecycleManager.exists(customerSpace.getContractId(), customerSpace.getTenantId(),
                         customerSpace.getSpaceId())) {
+                    log.info("CustomSpace " + customerSpace + " still exists in ZK.");
                     return;
                 } else {
                     Thread.sleep(1000);
@@ -225,13 +233,14 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 throw new RuntimeException(e);
             }
         }
+        throw new IllegalStateException("Tenant console uninstall did not finish with in 5 min.");
     }
 
     /**
      * bootstrap with one full tenant through tenant console
      */
-    public Tenant bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment,
-            Map<String, Boolean> featureFlagMap) {
+    private Tenant bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment,
+                                             Map<String, Boolean> featureFlagMap) {
         Tenant tenant = addBuiltInTestTenant();
         String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase()).replace(
                 "{env}", environment);
@@ -247,7 +256,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         if (featureFlagMap != null) {
             log.info("Overwrite featureFlags " + featureFlagMap);
             for (String featureFlagId : featureFlagMap.keySet()) {
-                overwriteFeatureFlag(tenant, featureFlagId, featureFlagMap.get(featureFlagId).booleanValue());
+                overwriteFeatureFlag(tenant, featureFlagId, featureFlagMap.get(featureFlagId));
             }
         }
         return tenant;
@@ -257,7 +266,6 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             Map<String, Boolean> featureFlagMap) throws IOException {
         String url = "tenantconsole/" + tenantRegJson;
         log.info("Using tenant registration template " + url);
-        List<BasicNameValuePair> adHeaders = loginAd();
         String tenantToken = "${TENANT}";
         String topologyToken = "${TOPOLOGY}";
         String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
@@ -275,8 +283,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
         TenantRegistration tenantRegistration = JsonUtils.deserialize(payload, TenantRegistration.class);
         log.info("Tenant Registration:\n" + JsonUtils.serialize(tenantRegistration));
-        HttpClientWithOptionalRetryUtils.sendPostRequest(adminApiHostPort + "/admin/tenants/" + dlTenantName
-                + "?contractId=" + dlTenantName, false, adHeaders, payload);
+        adminTenantProxy.createTenant(dlTenantName, tenantRegistration);
     }
 
     private String overWriteEncrptionFeatureFlagToFalse(InputStream ins) throws IOException {
@@ -294,19 +301,15 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
         Long timeout = TimeUnit.MINUTES.toMillis(5L);
         long totTime = 0L;
-        String url = adminApiHostPort + "/admin/tenants/" + customerSpace.getTenantId() + "?contractId="
-                + customerSpace.getContractId();
         BootstrapState state = BootstrapState.createInitialState();
         while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
                 && totTime <= timeout) {
             try {
-                List<BasicNameValuePair> adHeaders = loginAd();
-                String jsonResponse = HttpClientWithOptionalRetryUtils.sendGetRequest(url, false, adHeaders);
-                log.info("JSON response from tenant console: " + jsonResponse);
-                TenantDocument tenantDocument = JsonUtils.deserialize(jsonResponse, TenantDocument.class);
-                BootstrapState newState = tenantDocument.getBootstrapState();
+                TenantDocument tenantDoc = adminTenantProxy.getTenant(customerSpace.getTenantId());
+                BootstrapState newState = tenantDoc.getBootstrapState();
+                log.info("BootstrapState from tenant console: " + newState);
                 state = newState == null ? state : newState;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to query tenant installation state", e);
             } finally {
                 try {
@@ -350,8 +353,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             String tenantName = customerSpace.getTenantId();
 
             try {
-                String permStoreUrl = adminApiHostPort + "/admin/internal/BODCDEVVINT207/BODCDEVVINT187/" + tenantName;
-                magicRestTemplate.delete(permStoreUrl);
+                adminInternalProxy.deletePermStore(tenantName);
                 log.info("Cleanup VDB permstore for tenant " + tenantName);
             } catch (Exception e) {
                 log.error("Failed to clean up permstore for vdb " + tenantName + " : "
@@ -359,11 +361,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             }
 
             try {
-                List<BasicNameValuePair> adHeaders = loginAd();
-                String adminUrl = adminApiHostPort + "/admin/tenants/" + customerSpace.getTenantId() + "?contractId="
-                        + customerSpace.getContractId();
-                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(adminUrl, false, adHeaders);
-                TenantDocument tenantDoc = JsonUtils.deserialize(response, TenantDocument.class);
+                TenantDocument tenantDoc = adminTenantProxy.getTenant(customerSpace.getTenantId());
                 String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
                 DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenantName, "3");
                 InstallResult result = dataLoaderService.deleteDLTenant(request, dlUrl, true);
@@ -379,36 +377,13 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         if (testCustomerSpaces.contains(customerSpace.toString())) {
             try {
-                List<BasicNameValuePair> adHeaders = loginAd();
-                String url = adminApiHostPort + "/admin/tenants/" + customerSpace.getTenantId() + "?contractId="
-                        + customerSpace.getContractId();
-                String jsonResponse = HttpClientWithOptionalRetryUtils.sendDeleteRequest(url, false, adHeaders);
-                log.info("DELETE customer space " + customerSpace + " in tenant console: " + jsonResponse);
+                adminTenantProxy.deleteTenant(tenant.getId());
             } catch (Exception e) {
                 log.error("DELETE customer space " + customerSpace + " in tenant console failed.", e);
             }
         } else {
             log.warn("Did not find " + customerSpace.toString() + " in testCustomerSpaces.");
         }
-    }
-
-    private List<BasicNameValuePair> loginAd() throws IOException {
-        List<BasicNameValuePair> headers = new ArrayList<>();
-        headers.add(new BasicNameValuePair("Content-Type", "application/json"));
-        headers.add(new BasicNameValuePair("Accept", "application/json"));
-
-        Credentials credentials = new Credentials();
-        credentials.setUsername(TestFrameworkUtils.AD_USERNAME);
-        credentials.setPassword(TestFrameworkUtils.AD_PASSWORD);
-        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(adminApiHostPort + "/admin/adlogin", false,
-                headers, JsonUtils.serialize(credentials));
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode json = mapper.readTree(response);
-        String token = json.get("Token").asText();
-
-        headers.add(new BasicNameValuePair("Authorization", token));
-        return headers;
     }
 
 }

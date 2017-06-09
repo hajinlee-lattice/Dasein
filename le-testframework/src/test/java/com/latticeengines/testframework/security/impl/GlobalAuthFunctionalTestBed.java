@@ -116,7 +116,7 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    public void deleteTenant(Tenant tenant, boolean transactional) {
+    public void deleteTenant(Tenant tenant) {
         tenantService.discardTenant(tenant);
     }
 }

@@ -8,4 +8,6 @@
 
     <context:component-scan base-package="com.latticeengines.proxy"/>
 
+    <import resource="classpath:common-threadpool-context.xml"/>
+
 </beans>

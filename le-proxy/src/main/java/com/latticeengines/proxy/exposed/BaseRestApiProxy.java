@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -20,11 +21,11 @@ import org.springframework.web.util.UriTemplate;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 
 public abstract class BaseRestApiProxy {
-
 
     private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
@@ -55,27 +56,51 @@ public abstract class BaseRestApiProxy {
         restTemplate.setErrorHandler(new GetResponseErrorHandler());
     }
 
+    protected void setAuthHeader(String authToken) {
+        AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(authToken);
+        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+        List<Integer> toRemove = new ArrayList<>();
+        for (int i = 0; i < interceptors.size(); i++) {
+            ClientHttpRequestInterceptor interceptor = interceptors.get(i);
+            if (interceptor instanceof AuthorizationHeaderHttpRequestInterceptor) {
+                toRemove.add(i);
+            }
+        }
+        toRemove.forEach(interceptors::remove);
+        interceptors.add(authHeader);
+        restTemplate.setInterceptors(interceptors);
+    }
+
     protected void setErrorHandler(ResponseErrorHandler handler) {
         restTemplate.setErrorHandler(handler);
     }
 
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {
+        return post(method, url, body, returnValueClazz, true);
+    }
+
+    protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz,
+            final boolean logBody) {
         RetryTemplate retry = getRetryTemplate();
-        return retry.execute(new RetryCallback<T, RuntimeException>() {
-            @Override
-            public T doWithRetry(RetryContext context) throws RuntimeException {
-                try {
-                    log.info(String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
-                            body, context.getRetryCount() + 1));
-                    return restTemplate.postForObject(url, body, returnValueClazz);
-                } catch (LedpException e) {
-                    context.setExhaustedOnly();
-                    logError(e, method);
-                    throw e;
-                } catch (Exception e) {
-                    logError(e, method);
-                    throw e;
+        return retry.execute(context -> {
+            try {
+                String msg;
+                if (logBody) {
+                    msg = String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
+                            body, context.getRetryCount() + 1);
+                } else {
+                    msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method, url,
+                            context.getRetryCount() + 1);
                 }
+                log.info(msg);
+                return restTemplate.postForObject(url, body, returnValueClazz);
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
             }
         });
     }
@@ -83,20 +108,18 @@ public abstract class BaseRestApiProxy {
     protected <T> T postForEntity(final String method, final String url, final HttpEntity<?> entity,
             final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate();
-        return retry.execute(new RetryCallback<T, RuntimeException>() {
-            @Override
-            public T doWithRetry(RetryContext context) {
-                try {
-                    log.info(String.format("Invoking %s by posting from url %s with http headers.  (Attempt=%d)", method, url, context.getRetryCount() + 1));
-                    return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
-                } catch (LedpException e) {
-                    context.setExhaustedOnly();
-                    logError(e, method);
-                    throw e;
-                } catch (Exception e) {
-                    logError(e, method);
-                    throw e;
-                }
+        return retry.execute(context -> {
+            try {
+                log.info(String.format("Invoking %s by posting from url %s with http headers.  (Attempt=%d)", method,
+                        url, context.getRetryCount() + 1));
+                return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
             }
         });
     }
@@ -107,44 +130,38 @@ public abstract class BaseRestApiProxy {
 
     protected <B> void put(final String method, final String url, final B body) {
         RetryTemplate retry = getRetryTemplate();
-        retry.execute(new RetryCallback<Void, RuntimeException>() {
-            @Override
-            public Void doWithRetry(RetryContext context) throws RuntimeException {
-                try {
-                    log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
-                            body, context.getRetryCount() + 1));
-                    restTemplate.put(url, body);
-                    return null;
-                } catch (LedpException e) {
-                    context.setExhaustedOnly();
-                    logError(e, method);
-                    throw e;
-                } catch (Exception e) {
-                    logError(e, method);
-                    throw e;
-                }
-
+        retry.execute((RetryCallback<Void, RuntimeException>) context -> {
+            try {
+                log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
+                        body, context.getRetryCount() + 1));
+                restTemplate.put(url, body);
+                return null;
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
             }
+
         });
     }
 
     protected <T> T get(final String method, final String url, final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate();
-        return retry.execute(new RetryCallback<T, RuntimeException>() {
-            @Override
-            public T doWithRetry(RetryContext context) {
-                try {
-                    log.info(String.format("Invoking %s by getting from url %s.  (Attempt=%d)", method, url,
-                            context.getRetryCount() + 1));
-                    return restTemplate.getForObject(url, returnValueClazz);
-                } catch (LedpException e) {
-                    context.setExhaustedOnly();
-                    logError(e, method);
-                    throw e;
-                } catch (Exception e) {
-                    logError(e, method);
-                    throw e;
-                }
+        return retry.execute(context -> {
+            try {
+                log.info(String.format("Invoking %s by getting from url %s.  (Attempt=%d)", method, url,
+                        context.getRetryCount() + 1));
+                return restTemplate.getForObject(url, returnValueClazz);
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
             }
         });
     }
@@ -152,21 +169,18 @@ public abstract class BaseRestApiProxy {
     protected <T> T get(final String method, final String url, final HttpEntity<?> entity,
             final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate();
-        return retry.execute(new RetryCallback<T, RuntimeException>() {
-            @Override
-            public T doWithRetry(RetryContext context) {
-                try {
-                    log.info(String.format("Invoking %s by getting from url %s with http headers.  (Attempt=%d)",
-                            method, url, context.getRetryCount() + 1));
-                    return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
-                } catch (LedpException e) {
-                    context.setExhaustedOnly();
-                    logError(e, method);
-                    throw e;
-                } catch (Exception e) {
-                    logError(e, method);
-                    throw e;
-                }
+        return retry.execute(context -> {
+            try {
+                log.info(String.format("Invoking %s by getting from url %s with http headers.  (Attempt=%d)", method,
+                        url, context.getRetryCount() + 1));
+                return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
             }
         });
     }

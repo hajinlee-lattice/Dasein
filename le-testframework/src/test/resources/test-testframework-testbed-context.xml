@@ -3,6 +3,9 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <import resource="classpath:proxy-context.xml"/>
+    <import resource="classpath:remote-context.xml"/>
+
     <bean id="deploymentTestBed" class="com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed">
         <constructor-arg name="plsApiHostPort" value="${common.test.pls.url}"/>
         <constructor-arg name="adminApiHostPort" value="${common.test.admin.url}"/>

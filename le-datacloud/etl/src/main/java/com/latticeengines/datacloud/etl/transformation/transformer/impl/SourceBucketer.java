@@ -93,7 +93,7 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     private boolean isProfileSource(String sourceName, String version) {
         String avroDir = hdfsPathBuilder.constructSnapshotDir(sourceName, version).toString();
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroDir + "/*.avro");
-        while (records.hasNext()) {
+        if (records.hasNext()) {
             GenericRecord record = records.next();
             return BucketEncodeUtils.isProfile(record);
         }

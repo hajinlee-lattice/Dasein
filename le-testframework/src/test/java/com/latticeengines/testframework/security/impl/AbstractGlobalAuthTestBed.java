@@ -181,7 +181,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
         for (Tenant tenant : testTenants) {
             log.info("Clean up test tenant " + tenant.getId());
-            deleteTenant(tenant, true);
+            deleteTenant(tenant);
         }
 
         cleanupHdfs();
@@ -242,7 +242,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     public abstract void createTenant(Tenant tenant);
 
-    public abstract void deleteTenant(Tenant tenant, boolean transactional);
+    public abstract void deleteTenant(Tenant tenant);
 
     private void cleanupHdfs() {
         Configuration yarnConfiguration;

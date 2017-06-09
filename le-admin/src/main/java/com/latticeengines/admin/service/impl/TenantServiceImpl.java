@@ -238,6 +238,9 @@ public class TenantServiceImpl implements TenantService {
     public boolean deleteTenant(final String userName, final String contractId, final String tenantId,
             final boolean deleteZookeeper) {
         CustomerSpace space = new CustomerSpace(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        if (getTenant(contractId, tenantId) == null) {
+            log.info("Tenant " + tenantId + " seems not exist, nothing to delete.");
+        }
         Map<String, Map<String, String>> props = new HashMap<>();
         for (LatticeComponent component : orchestrator.components) {
             BootstrapState state = getTenantServiceState(contractId, tenantId, component.getName());
@@ -279,6 +282,9 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public TenantDocument getTenant(String contractId, String tenantId) {
         TenantDocument doc = tenantEntityMgr.getTenant(contractId, tenantId);
+        if (doc == null) {
+            return null;
+        }
         doc.setBootstrapState(getTenantOverallState(contractId, tenantId));
         return doc;
     }

@@ -46,6 +46,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -140,10 +141,10 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                     .construct(new CustomerSpaceScope(CustomerSpace.parse(tenant.getId())));
             assertTrue(controller.exists(new com.latticeengines.domain.exposed.camille.Path("/EncryptionKey")));
         } else {
-            String TenantName = "LE" + UUID.randomUUID();
+            String TenantName = TestFrameworkUtils.TENANTID_PREFIX + UUID.randomUUID();
             tenant.setName(String.format("%s.%s.Production", TenantName, TenantName));
             tenant.setId(tenant.getName());
-            deploymentTestBed.deleteTenant(tenant, false);
+            deploymentTestBed.deleteTenant(tenant);
             deploymentTestBed.createTenant(tenant);
         }
         return tenant;
