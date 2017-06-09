@@ -67,14 +67,9 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
         datafeed.setName(DATA_FEED_NAME);
         datafeed.setStatus(Status.Active);
-        datafeed.setActiveExecution(1L);
+        datafeed.setActiveExecutionId(1L);
         datafeed.setDataCollection(dataCollection);
         dataCollection.addDataFeed(datafeed);
-
-        DataFeedExecution execution = new DataFeedExecution();
-        execution.setFeed(datafeed);
-        execution.setStatus(DataFeedExecution.Status.Active);
-        datafeed.addExeuction(execution);
 
         Table importTable = new Table();
         importTable.setName("importTable");
@@ -103,9 +98,9 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        DataFeed retrieved = datafeedEntityMgr.findByName(DATA_FEED_NAME);
+        DataFeed retrieved = datafeedEntityMgr.findByNameWithAllExecutions(DATA_FEED_NAME);
         assertEquals(retrieved.getName(), datafeed.getName());
-        assertEquals(retrieved.getActiveExecution(), datafeed.getActiveExecution());
+        assertEquals(retrieved.getActiveExecution().getPid(), datafeed.getActiveExecutionId());
         assertEquals(retrieved.getExecutions().size(), 1);
         assertEquals(retrieved.getTasks().size(), 1);
         assertEquals(retrieved.getTasks().get(0).getImportTemplate().getTableType(), TableType.IMPORTTABLE);
@@ -117,18 +112,14 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "retrieve")
     public void startExecution() {
         assertNotNull(datafeedEntityMgr.startExecution(DATA_FEED_NAME).getImports());
-        DataFeed df = datafeedEntityMgr.findByName(DATA_FEED_NAME);
-        assertEquals(df.getActiveExecution(), new Long(datafeed.getActiveExecution() + 1L));
-        assertEquals(df.getExecutions().size(), 2);
+        DataFeed df = datafeedEntityMgr.findByNameWithAllExecutions(DATA_FEED_NAME);
+        assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
+        assertEquals(df.getExecutions().size(), 1);
         assertEquals(df.getStatus(), Status.Consolidating);
 
-        DataFeedExecution exec1 = df.getExecutions().get(0);
-        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
-        assertEquals(exec1.getImports().size(), df.getTasks().size());
-
-        DataFeedExecution exec2 = df.getExecutions().get(1);
-        assertEquals(exec2.getStatus(), DataFeedExecution.Status.Active);
-        assertEquals(exec2.getImports().size(), 0);
+        DataFeedExecution exec = df.getExecutions().get(0);
+        assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
+        assertEquals(exec.getImports().size(), df.getTasks().size());
 
     }
 
@@ -136,11 +127,10 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     public void finishExecution() {
         DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(DATA_FEED_NAME,
                 DataFeedExecution.Status.Consolidated);
-        assertEquals(exec1.getPid(), datafeed.getActiveExecution());
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Consolidated);
 
-        DataFeed df = datafeedEntityMgr.findByName(DATA_FEED_NAME);
-        assertEquals(df.getActiveExecution(), new Long(datafeed.getActiveExecution() + 1L));
+        DataFeed df = datafeedEntityMgr.findByNameWithAllExecutions(DATA_FEED_NAME);
+        assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
         assertEquals(df.getExecutions().size(), 2);
         assertEquals(df.getStatus(), Status.Active);
 

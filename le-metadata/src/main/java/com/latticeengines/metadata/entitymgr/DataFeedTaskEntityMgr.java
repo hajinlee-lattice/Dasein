@@ -7,11 +7,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
-    Table pollFirstDataTable(Long taskPid);
+    Table pollFirstDataTable(DataFeedTask task);
 
-    Table peekFirstDataTable(Long taskPid);
+    Table peekFirstDataTable(DataFeedTask task);
 
-    int getDataTableSize(Long taskPid);
+    int getDataTableSize(DataFeedTask task);
 
     void addImportDataTableToQueue(DataFeedTask task);
 

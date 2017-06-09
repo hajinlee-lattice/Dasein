@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.entitymgr;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
@@ -9,5 +11,7 @@ public interface DataFeedExecutionEntityMgr extends BaseEntityMgr<DataFeedExecut
     DataFeedExecution findByExecutionId(long executionId);
 
     DataFeedExecution findConsolidatingExecution(DataFeed datafeed);
+
+    List<DataFeedExecution> findByDataFeed(DataFeed datafeed);
 
 }

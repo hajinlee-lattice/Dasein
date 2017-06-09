@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,22 +52,32 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         for (DataFeedTask task : datafeed.getTasks()) {
             datafeedTaskEntityMgr.create(task);
         }
-        if (!CollectionUtils.isEmpty(datafeed.getExecutions())) {
-            DataFeedExecution execution = datafeed.getExecutions().get(0);
-            datafeedExecutionEntityMgr.create(execution);
-            datafeed.setActiveExecution(execution.getPid());
-            update(datafeed);
-        }
+        DataFeedExecution execution = new DataFeedExecution();
+        execution.setFeed(datafeed);
+        execution.setStatus(DataFeedExecution.Status.Active);
+        datafeedExecutionEntityMgr.create(execution);
+        datafeed.setActiveExecutionId(execution.getPid());
+        update(datafeed);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByName(String datafeedName) {
         DataFeed datafeed = findByField("name", datafeedName);
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
+        datafeed.setActiveExecution(execution);
         if (datafeed != null) {
-            HibernateUtils.inflateDetails(datafeed.getExecutions());
             HibernateUtils.inflateDetails(datafeed.getTasks());
+
         }
+        return datafeed;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataFeed findByNameWithAllExecutions(String datafeedName) {
+        DataFeed datafeed = findByName(datafeedName);
+        datafeed.setExecutions(datafeedExecutionEntityMgr.findByDataFeed(datafeed));
         return datafeed;
     }
 
@@ -80,24 +89,18 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             log.info("Can't find data feed: " + datafeedName);
             return null;
         }
-        List<DataFeedTask> tasks = new ArrayList<>(HibernateUtils.inflateDetails(datafeed.getTasks()));
-        datafeed.getTasks().forEach(task -> {
-            task.setImportData(datafeedTaskEntityMgr.pollFirstDataTable(task.getPid()));
+        List<DataFeedTask> tasks = new ArrayList<>(datafeed.getTasks());
+        tasks.forEach(task -> {
+            task.setImportData(datafeedTaskEntityMgr.pollFirstDataTable(task));
         });
         List<DataFeedImport> imports = tasks.stream().map(DataFeedImportUtils::createImportFromTask)
                 .collect(Collectors.toList());
-        DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecution());
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
         execution.setStatus(DataFeedExecution.Status.Started);
         execution.addImports(imports);
         datafeedExecutionEntityMgr.update(execution);
 
-        DataFeedExecution newExecution = new DataFeedExecution();
-        newExecution.setFeed(datafeed);
-        newExecution.setStatus(DataFeedExecution.Status.Active);
-        datafeedExecutionEntityMgr.create(newExecution);
-
-        datafeed.addExeuction(newExecution);
-        datafeed.setActiveExecution(newExecution.getPid());
+        datafeed.setActiveExecution(execution);
         datafeed.setStatus(Status.Consolidating);
         tasks.forEach(task -> {
             task.setStartTime(new Date());
@@ -118,6 +121,13 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         DataFeedExecution execution = datafeedExecutionEntityMgr.findConsolidatingExecution(datafeed);
         execution.setStatus(status);
         datafeedExecutionEntityMgr.update(execution);
+
+        DataFeedExecution newExecution = new DataFeedExecution();
+        newExecution.setFeed(datafeed);
+        newExecution.setStatus(DataFeedExecution.Status.Active);
+        datafeedExecutionEntityMgr.create(newExecution);
+
+        datafeed.setActiveExecutionId(newExecution.getPid());
 
         datafeed.setStatus(Status.Active);
         datafeedDao.update(datafeed);

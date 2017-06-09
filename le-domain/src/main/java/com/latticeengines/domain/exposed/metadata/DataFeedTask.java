@@ -19,10 +19,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
@@ -99,8 +99,7 @@ public class DataFeedTask implements HasPid, Serializable {
     private Date lastImported;
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "dataFeedTask")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @Transient
     private List<DataFeedTaskTable> tables = new ArrayList<>();
 
     @Override

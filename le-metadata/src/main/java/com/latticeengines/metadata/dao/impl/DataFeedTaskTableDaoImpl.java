@@ -2,11 +2,12 @@ package com.latticeengines.metadata.dao.impl;
 
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
@@ -20,30 +21,30 @@ public class DataFeedTaskTableDaoImpl extends BaseDaoImpl<DataFeedTaskTable> imp
     }
 
     @Override
-    public Table peekFirstDataTable(Long taskPid) {
-        DataFeedTaskTable dataFeedTaskTable = peekFirstElement(taskPid);
+    public Table peekFirstDataTable(DataFeedTask task) {
+        DataFeedTaskTable dataFeedTaskTable = peekFirstElement(task);
         if (dataFeedTaskTable == null) {
             return null;
         }
         return dataFeedTaskTable.getTable();
     }
 
-    private DataFeedTaskTable peekFirstElement(Long taskPid) {
+    private DataFeedTaskTable peekFirstElement(DataFeedTask task) {
         Session session = getSessionFactory().getCurrentSession();
         Class<DataFeedTaskTable> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where dataFeedTask = :taskId", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr).setFirstResult(0).setMaxResults(1);
-        query.setLong("taskId", taskPid);
-        List<?> list = query.list();
-        if (list.size() == 0) {
+        Object res = session.createCriteria(entityClz) //
+                .add(Restrictions.eq("dataFeedTask", task)) //
+                .setFirstResult(0).setMaxResults(1) //
+                .uniqueResult(); //
+        if (res == null) {
             return null;
         }
-        return ((DataFeedTaskTable) list.get(0));
+        return (DataFeedTaskTable) res;
     }
 
     @Override
-    public Table pollFirstDataTable(Long taskPid) {
-        DataFeedTaskTable dataFeedTaskTable = peekFirstElement(taskPid);
+    public Table pollFirstDataTable(DataFeedTask task) {
+        DataFeedTaskTable dataFeedTaskTable = peekFirstElement(task);
         if (dataFeedTaskTable == null) {
             return null;
         }
@@ -53,5 +54,18 @@ public class DataFeedTaskTableDaoImpl extends BaseDaoImpl<DataFeedTaskTable> imp
         }
         delete(dataFeedTaskTable);
         return table;
+    }
+
+    @Override
+    public int getDataTableSize(DataFeedTask task) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<DataFeedTaskTable> entityClz = getEntityClass();
+        List<?> ret = session.createCriteria(entityClz) //
+                .add(Restrictions.eq("dataFeedTask", task)) //
+                .list(); //
+        if (ret == null) {
+            return 0;
+        }
+        return ret.size();
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
@@ -58,29 +57,27 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Table peekFirstDataTable(Long taskPid) {
-        Table table = datafeedTaskTableDao.peekFirstDataTable(taskPid);
+    public Table peekFirstDataTable(DataFeedTask task) {
+        Table table = datafeedTaskTableDao.peekFirstDataTable(task);
         TableEntityMgr.inflateTable(table);
         return table;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public Table pollFirstDataTable(Long taskPid) {
-        Table table = datafeedTaskTableDao.pollFirstDataTable(taskPid);
+    public Table pollFirstDataTable(DataFeedTask task) {
+        Table table = datafeedTaskTableDao.pollFirstDataTable(task);
         TableEntityMgr.inflateTable(table);
         return table;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public int getDataTableSize(Long taskPid) {
-        DataFeedTask task = findByField("pid", taskPid);
+    public int getDataTableSize(DataFeedTask task) {
         if (task == null) {
             return 0;
         }
-        HibernateUtils.inflateDetails(task);
-        return task.getTables().size();
+        return datafeedTaskTableDao.getDataTableSize(task);
     }
 
     @Override

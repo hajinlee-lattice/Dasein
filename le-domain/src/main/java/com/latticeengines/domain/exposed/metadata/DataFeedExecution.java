@@ -57,7 +57,7 @@ public class DataFeedExecution implements HasPid, Serializable {
     @JsonProperty("imports")
     private List<DataFeedImport> imports = new ArrayList<>();
 
-    @JsonProperty("runtime_tables")
+    @JsonIgnore
     @Transient
     private List<Table> runtimeTables = new ArrayList<>();
 

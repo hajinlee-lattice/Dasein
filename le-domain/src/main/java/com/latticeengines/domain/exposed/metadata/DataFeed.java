@@ -19,7 +19,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -77,13 +76,15 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     private Status status;
 
     @Column(name = "ACTIVE_EXECUTION", nullable = false)
-    @JsonProperty("active_execution")
-    private Long activeExecution;
-
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @OrderBy
     @JsonIgnore
+    private Long activeExecutionId;
+
+    @Transient
+    @JsonProperty("active_execution")
+    private DataFeedExecution activeExecution;
+
+    @JsonIgnore
+    @Transient
     private List<DataFeedExecution> executions = new ArrayList<>();
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
@@ -161,13 +162,13 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.executions = executions;
     }
 
-    public Long getActiveExecution() {
-        return activeExecution;
+    public Long getActiveExecutionId() {
+        return activeExecutionId;
     }
 
-    public void setActiveExecution(Long execution) {
+    public void setActiveExecutionId(Long activeExecutionId) {
         // Set it to null when executioin is finished.
-        activeExecution = execution;
+        this.activeExecutionId = activeExecutionId;
     }
 
     public List<DataFeedTask> getTasks() {
@@ -203,6 +204,14 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public DataFeedExecution getActiveExecution() {
+        return activeExecution;
+    }
+
+    public void setActiveExecution(DataFeedExecution activeExecution) {
+        this.activeExecution = activeExecution;
     }
 
     public static enum Status {

@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.dao.impl;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -33,6 +35,17 @@ public class DataFeedExecutionDaoImpl extends BaseDaoImpl<DataFeedExecution> imp
             return null;
         }
         return (DataFeedExecution) res;
+    }
+
+    @Override
+    public List<DataFeedExecution> findByDataFeed(DataFeed datafeed) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<DataFeedExecution> entityClz = getEntityClass();
+        @SuppressWarnings("unchecked")
+        List<DataFeedExecution> res = session.createCriteria(entityClz) //
+                .add(Restrictions.eq("dataFeed", datafeed)) //
+                .list(); //
+        return res;
     }
 
 }

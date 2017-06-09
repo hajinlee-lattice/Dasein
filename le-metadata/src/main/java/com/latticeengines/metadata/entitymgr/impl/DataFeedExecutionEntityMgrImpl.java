@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,6 +36,11 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public DataFeedExecution findConsolidatingExecution(DataFeed datafeed) {
         return datafeedExecutionDao.findConsolidatingExecution(datafeed);
+    }
+
+    @Override
+    public List<DataFeedExecution> findByDataFeed(DataFeed datafeed) {
+        return datafeedExecutionDao.findByDataFeed(datafeed);
     }
 
 }

@@ -68,7 +68,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
 
         datafeed.setName("datafeed");
         datafeed.setStatus(Status.Active);
-        datafeed.setActiveExecution(1L);
+        datafeed.setActiveExecutionId(1L);
         datafeed.setDataCollection(dataCollection);
         dataCollection.addDataFeed(datafeed);
 
@@ -97,8 +97,8 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 1);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).toString(), dataTable.toString());
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).toString(), dataTable.toString());
 
         Table dataTable2 = new Table();
         dataTable2.setName("dataTable2");
@@ -107,10 +107,10 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         task.setImportData(dataTable2);
         datafeedTaskEntityMgr.addImportDataTableToQueue(task);
 
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 2);
-        assertEquals(datafeedTaskEntityMgr.pollFirstDataTable(task.getPid()).toString(), dataTable.toString());
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 1);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).toString(), dataTable2.toString());
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
+        assertEquals(datafeedTaskEntityMgr.pollFirstDataTable(task).toString(), dataTable.toString());
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).toString(), dataTable2.toString());
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
@@ -125,9 +125,8 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         extract1.setTable(task.getImportTemplate());
         datafeedTaskEntityMgr.registerExtract(task, extract1);
         task = datafeedTaskEntityMgr.findByKey(task);
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 2);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).getExtracts().get(0).getPid(),
-                extract1.getPid());
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(), extract1.getPid());
         assertEquals(task.getImportData().getDisplayName(), task.getImportTemplate().getDisplayName());
         assertEquals(task.getStatus(), DataFeedTask.Status.Active);
 
@@ -147,11 +146,10 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         datafeedTaskEntityMgr.clearTableQueue();
         datafeedTaskEntityMgr.registerExtract(task, extract2);
         task = datafeedTaskEntityMgr.findByKey(task);
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task.getPid()), 2);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).getPid(),
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getPid(),
                 new Long(task.getImportData().getPid() - 1));
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task.getPid()).getExtracts().get(0).getPid(),
-                extract2.getPid());
+        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(), extract2.getPid());
         assertEquals(task.getImportData().getDisplayName(), task.getImportTemplate().getDisplayName());
     }
 }
