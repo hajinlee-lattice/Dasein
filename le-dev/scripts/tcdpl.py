@@ -31,7 +31,7 @@ MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring
 
 # ms modules for pre check in
 COMMON_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop',
-                  'objectapi', 'dante']
+                  'objectapi']
 
 # apps for pre check in
 COMMON_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi']
