@@ -143,7 +143,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             String TenantName = "LE" + UUID.randomUUID();
             tenant.setName(String.format("%s.%s.Production", TenantName, TenantName));
             tenant.setId(tenant.getName());
-            deploymentTestBed.deleteTenant(tenant);
+            deploymentTestBed.deleteTenant(tenant, false);
             deploymentTestBed.createTenant(tenant);
         }
         return tenant;
