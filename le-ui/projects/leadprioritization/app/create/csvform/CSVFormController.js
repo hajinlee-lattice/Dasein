@@ -240,7 +240,7 @@ angular
         metaData.name = fileName;
         metaData.modelName = modelName;
         metaData.displayName = displayName;
-        metaData.notesContent = vm.notesContent;
+        metaData.notesContent = notesContent;
         metaData.schemaInterpretation = schemaInterpretation;
 
         if (vm.pivotUploaded) {
