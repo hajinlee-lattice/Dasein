@@ -34,7 +34,7 @@ CREATE PROCEDURE `UpdateSchema`()
 	alter table `DATAFEED_EXECUTION` add index FK3E5D3BC1679FF377 (FK_FEED_ID), add constraint FK3E5D3BC1679FF377 foreign key (FK_FEED_ID) references `DATAFEED` (`PID`) on delete cascade;
 	alter table `DATAFEED_IMPORT` add index FKADAC237C56FF4425 (`FK_FEED_EXEC_ID`), add constraint FKADAC237C56FF4425 foreign key (`FK_FEED_EXEC_ID`) references `DATAFEED_EXECUTION` (`PID`) on delete cascade;
 	alter table `DATAFEED_IMPORT` add index FKADAC237C525FEA17 (FK_DATA_ID), add constraint FKADAC237C525FEA17 foreign key (FK_DATA_ID) references `METADATA_TABLE` (`PID`) on delete cascade;
-	alter table `DATAFEED_TASK_TABLE` add index FKF200D4CBD3C51D55 (`FK_TASK_ID`), add constraint FKF200D4CBD3C51D55 foreign key (`FK_TASK_ID`) references `DATAFEED_TASK` (`PID`) on delete cascade;
+	alter table `DATAFEED_TASK_TABLE` add index FKF200D4CBD3C51D55 (`FK_TASK_ID`), add constraint FKF200D4CBD3C51D55 foreign key (`FK_TASK_ID`) references `DATAFEED_TASK` (`PID`);
 	alter table `DATAFEED_TASK_TABLE` add index FKF200D4CB68A6FB47 (`FK_TABLE_ID`), add constraint FKF200D4CB68A6FB47 foreign key (`FK_TABLE_ID`) references `METADATA_TABLE` (`PID`);
 	alter table `DATAFEED_TASK` add index FK7679F31C80AFF377 (`FK_FEED_ID`), add constraint FK7679F31C80AFF377 foreign key (`FK_FEED_ID`) references `DATAFEED` (`PID`) on delete cascade;
 	alter table `DATAFEED_TASK` add index FK7679F31C525FEA17 (FK_DATA_ID), add constraint FK7679F31C525FEA17 foreign key (FK_DATA_ID) references `METADATA_TABLE` (`PID`) on delete cascade;
