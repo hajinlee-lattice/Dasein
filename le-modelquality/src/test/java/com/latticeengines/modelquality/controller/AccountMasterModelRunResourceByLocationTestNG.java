@@ -28,6 +28,7 @@ public class AccountMasterModelRunResourceByLocationTestNG extends BaseAccountMa
         Map<String, Boolean> featureFlagMap = new HashMap<String, Boolean>();
         featureFlagMap.put(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(), true);
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.BYPASS_DNB_CACHE.getName(), false);
 
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, null, featureFlagMap);
     }
@@ -47,14 +48,15 @@ public class AccountMasterModelRunResourceByLocationTestNG extends BaseAccountMa
     @DataProvider(name = "getAccountMasterLocationCsvFile")
     public Object[][] getAccountMasterLocationCsvFile() {
         return new Object[][] { //
-                { "Mulesoft_NA_loc_AccountMaster", "Mulesoft_NA_loc.csv" }, //
-                { "Mulesoft_Emea_loc_AccountMaster", "Mulesoft_Emea_loc.csv" }, //
-                { "Mulesoft_Apac_loc_AccountMaster", "Mulesoft_apac_loc.csv" }, //
-                { "Qlik_loc_AccountMaster", "Qlik_loc.csv" }, //
-                { "HootSuite_loc_AccountMaster", "HootSuite_loc.csv" }, //
-                { "CornerStone_loc_AccountMaster", "Corner_loc.csv" }, //
-                { "PolyCom_loc_AccountMaster", "PolyCom_loc.csv" }, //
-                { "Tenable_loc_AccountMaster", "Tenable_loc.csv" }, //
+        // { "Mulesoft_NA_loc_AccountMaster", "Mulesoft_NA_loc.csv" }, //
+        // { "Mulesoft_Emea_loc_AccountMaster", "Mulesoft_Emea_loc.csv" }, //
+        // { "Mulesoft_Apac_loc_AccountMaster", "Mulesoft_apac_loc.csv"
+        // }, //
+        // { "Qlik_loc_AccountMaster", "Qlik_loc.csv" }, //
+        // { "HootSuite_loc_AccountMaster", "HootSuite_loc.csv" }, //
+//                { "CornerStone_loc_AccountMaster", "Corner_loc.csv" }, //
+//                { "PolyCom_loc_AccountMaster", "PolyCom_loc.csv" }, //
+         { "Tenable_loc_AccountMaster", "Tenable_loc.csv" }, //
         };
     }
 }

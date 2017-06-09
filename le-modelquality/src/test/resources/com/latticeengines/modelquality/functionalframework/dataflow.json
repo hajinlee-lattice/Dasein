@@ -1,5 +1,5 @@
 {
-    "transform_dedup_type": "MULTIPLELEADSPERDOMAIN", 
+    "transform_dedup_type": "ONELEADPERDOMAIN", 
     "name": "ModelQualityDeploymentTest", 
     "match": true, 
     "transform_group": "STANDARD"
