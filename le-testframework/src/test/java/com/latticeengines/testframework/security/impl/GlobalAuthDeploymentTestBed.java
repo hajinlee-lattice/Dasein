@@ -204,10 +204,12 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    public void deleteTenant(Tenant tenant) {
+    public void deleteTenant(Tenant tenant, boolean transactional) {
         deleteTenantViaTenantConsole(tenant);
         log.info("Deleting test tenant " + tenant.getId() + " from pls and GA");
-        waitForTenantConsoleUninstall(CustomerSpace.parse(tenant.getId()));
+        if (transactional) {
+            waitForTenantConsoleUninstall(CustomerSpace.parse(tenant.getId()));
+        }
     }
 
     private void waitForTenantConsoleUninstall(CustomerSpace customerSpace) {
