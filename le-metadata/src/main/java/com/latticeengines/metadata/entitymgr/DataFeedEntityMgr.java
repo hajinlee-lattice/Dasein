@@ -13,6 +13,8 @@ public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
 
     DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, Status status);
 
-    DataFeed findByNameWithAllExecutions(String datafeedName);
+    DataFeed findByNameInflatedWithAllExecutions(String datafeedName);
+
+    DataFeed findByNameInflated(String datafeedName);
 
 }

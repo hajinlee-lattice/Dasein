@@ -203,7 +203,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
                 taskTypeMap.put(task.getFeedType(), task);
             }
         }
-        //taskSrcMap.put(task.getSource(), task);
+        // taskSrcMap.put(task.getSource(), task);
         tasks.add(task);
     }
 
@@ -228,6 +228,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     }
 
     public void setActiveExecution(DataFeedExecution activeExecution) {
+        activeExecution.setDataFeed(this);
         this.activeExecution = activeExecution;
     }
 

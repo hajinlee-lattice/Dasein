@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("startExecution")
 public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration> {
 
     @Autowired
-    private DataFeedProxy datafeedProxy;
+    private MetadataProxy metadataProxy;
 
     @Override
     public void execute() {
-        DataFeedExecution execution = datafeedProxy.startExecution(configuration.getCustomerSpace().toString(),
+        DataFeedExecution execution = metadataProxy.startExecution(configuration.getCustomerSpace().toString(),
                 configuration.getDataFeedName());
         if (execution == null) {
             putObjectInContext(CONSOLIDATE_INPUT_TABLES, Collections.EMPTY_LIST);

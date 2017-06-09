@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -41,7 +41,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     private WorkflowProxy workflowProxy;
 
     @Autowired
-    private DataFeedProxy datafeedProxy;
+    private MetadataProxy metadataProxy;
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
@@ -116,7 +116,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         task.setStartTime(new Date());
         task.setLastImported(new Date());
         datafeed.addTask(task);
-        datafeedProxy.createDataFeed(firstTenant.getId(), datafeed);
+        metadataProxy.createDataFeed(firstTenant.getId(), datafeed);
     }
 
     @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "consolidateAndPublish")

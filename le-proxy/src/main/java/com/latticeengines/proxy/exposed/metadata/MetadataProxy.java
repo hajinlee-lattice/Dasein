@@ -29,9 +29,8 @@ import com.latticeengines.network.exposed.metadata.RuleResultInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
-public class MetadataProxy extends MicroserviceRestApiProxy
-        implements MetadataInterface, ArtifactInterface, RuleResultInterface, ModuleInterface, DataFeedTaskInterface,
-        DataFeedInterface {
+public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataInterface, ArtifactInterface,
+        RuleResultInterface, ModuleInterface, DataFeedTaskInterface, DataFeedInterface {
 
     public MetadataProxy() {
         super("metadata");
@@ -241,8 +240,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy
 
     @Override
     public DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity,
-                                        String dataFeedName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{source}/{dataFeedType}/{entity}/{dataFeedName}",
+            String dataFeedName) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeedtask/{source}/{dataFeedType}/{entity}/{dataFeedName}",
                 customerSpace, source, dataFeedType, entity, dataFeedName);
         return get("getDataFeedTask", url, DataFeedTask.class);
     }
@@ -266,20 +266,6 @@ public class MetadataProxy extends MicroserviceRestApiProxy
         post("registerExtract", url, extract, Void.class);
     }
 
-//    @Override
-//    public Boolean startExecution(String customerSpace, String datafeedName) {
-//        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/startexecution",
-//                customerSpace, datafeedName);
-//        return post("createImportTable", url, null, Boolean.class);
-//    }
-//
-//    @Override
-//    public DataFeed findDataFeedByName(String customerSpace, String feedName) {
-//        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/getdatafeed",
-//                customerSpace, feedName);
-//        return get("findDataFeedByName", url, DataFeed.class);
-//    }
-//
     @Override
     public DataFeedExecution startExecution(String customerSpace, String datafeedName) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/startexecution",
@@ -312,6 +298,14 @@ public class MetadataProxy extends MicroserviceRestApiProxy
         String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/failexecution",
                 customerSpace, datafeedName);
         return post("failExecution", url, null, DataFeedExecution.class);
+    }
+
+    @Override
+    public DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeeds/{datafeedName}/execution/workflow/{workflowId}",
+                customerSpace, datafeedName, workflowId);
+        return post("updateExecutionWorkflowId", url, null, DataFeedExecution.class);
     }
 
 }

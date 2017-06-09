@@ -25,7 +25,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -47,19 +46,19 @@ public class DataFeedTask implements HasPid, Serializable {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-//    @JsonProperty("unique_id")
-//    @Column(name = "UNIQUE_ID", unique = true, nullable = false)
-//    @Index(name = "IX_UNIQUE_ID")
-//    private String uniqueId;
+    // @JsonProperty("unique_id")
+    // @Column(name = "UNIQUE_ID", unique = true, nullable = false)
+    // @Index(name = "IX_UNIQUE_ID")
+    // private String uniqueId;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "`FK_FEED_ID`", nullable = false)
     private DataFeed dataFeed;
 
-//    @JsonIgnore
-//    @Column(name = "DATA_FEED_ID")
-//    private Long dataFeedId;
+    // @JsonIgnore
+    // @Column(name = "DATA_FEED_ID")
+    // private Long dataFeedId;
 
     @Column(name = "SOURCE", nullable = false)
     @JsonProperty("source")
@@ -73,7 +72,7 @@ public class DataFeedTask implements HasPid, Serializable {
     @JsonProperty("source_config")
     private String sourceConfig;
 
-    @Column(name = "FEED_TYPE", nullable = false)
+    @Column(name = "FEED_TYPE", nullable = true)
     @JsonProperty("feed_type")
     private String feedType;
 
@@ -89,9 +88,9 @@ public class DataFeedTask implements HasPid, Serializable {
     @JoinColumn(name = "FK_DATA_ID", nullable = true)
     private Table importData;
 
-//    @Column(name = "STAGING_DIR", nullable = false, length = 1000)
-//    @JsonProperty("staging_dir")
-//    private String stagingDir;
+    // @Column(name = "STAGING_DIR", nullable = false, length = 1000)
+    // @JsonProperty("staging_dir")
+    // private String stagingDir;
 
     @Column(name = "ACTIVE_JOB", nullable = false)
     @JsonProperty("active_job")
@@ -135,22 +134,22 @@ public class DataFeedTask implements HasPid, Serializable {
         this.dataFeed = dataFeed;
     }
 
-//    public DataFeed getFeed() {
-//        return dataFeed;
-//    }
-//
-//    public void setFeed(DataFeed feed) {
-//        this.dataFeed = feed;
-////        this.dataFeedId = feed.getPid();
-//    }
+    // public DataFeed getFeed() {
+    // return dataFeed;
+    // }
+    //
+    // public void setFeed(DataFeed feed) {
+    // this.dataFeed = feed;
+    //// this.dataFeedId = feed.getPid();
+    // }
 
-//    public Long getDataFeedId() {
-//        return dataFeedId;
-//    }
-//
-//    public void setDataFeedId(Long dataFeedId) {
-//        this.dataFeedId = dataFeedId;
-//    }
+    // public Long getDataFeedId() {
+    // return dataFeedId;
+    // }
+    //
+    // public void setDataFeedId(Long dataFeedId) {
+    // this.dataFeedId = dataFeedId;
+    // }
 
     public String getSource() {
         return source;
@@ -192,13 +191,13 @@ public class DataFeedTask implements HasPid, Serializable {
         this.importData = importData;
     }
 
-//    public String getStagingDir() {
-//        return stagingDir;
-//    }
-//
-//    public void setStagingDir(String stagingDir) {
-//        this.stagingDir = stagingDir;
-//    }
+    // public String getStagingDir() {
+    // return stagingDir;
+    // }
+    //
+    // public void setStagingDir(String stagingDir) {
+    // this.stagingDir = stagingDir;
+    // }
 
     public Status getStatus() {
         return status;

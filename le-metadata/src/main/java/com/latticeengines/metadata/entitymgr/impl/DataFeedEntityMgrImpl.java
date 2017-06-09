@@ -63,20 +63,26 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByName(String datafeedName) {
-        DataFeed datafeed = findByField("name", datafeedName);
+        return findByField("name", datafeedName);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataFeed findByNameInflated(String datafeedName) {
+        DataFeed datafeed = findByName(datafeedName);
+        if (datafeed == null) {
+            return null;
+        }
+        HibernateUtils.inflateDetails(datafeed.getTasks());
         DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
         datafeed.setActiveExecution(execution);
-        if (datafeed != null) {
-            HibernateUtils.inflateDetails(datafeed.getTasks());
-
-        }
         return datafeed;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public DataFeed findByNameWithAllExecutions(String datafeedName) {
-        DataFeed datafeed = findByName(datafeedName);
+    public DataFeed findByNameInflatedWithAllExecutions(String datafeedName) {
+        DataFeed datafeed = findByNameInflated(datafeedName);
         datafeed.setExecutions(datafeedExecutionEntityMgr.findByDataFeed(datafeed));
         return datafeed;
     }

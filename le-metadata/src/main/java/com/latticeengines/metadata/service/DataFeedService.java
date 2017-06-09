@@ -9,12 +9,12 @@ public interface DataFeedService {
 
     DataFeed findDataFeedByName(String customerSpace, String datafeedName);
 
-    void updateDataFeed(String customerSpace, DataFeed datafeed);
-
     DataFeedExecution finishExecution(String customerSpace, String datafeedName);
 
     DataFeed createDataFeed(String customerSpace, DataFeed datafeed);
 
     DataFeedExecution failExecution(String customerSpace, String datafeedName);
+
+    DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 
 }

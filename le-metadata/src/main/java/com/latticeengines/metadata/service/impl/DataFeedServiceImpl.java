@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.service.DataFeedService;
 
 @Component("datafeedService")
@@ -14,6 +15,9 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Autowired
     private DataFeedEntityMgr datafeedEntityMgr;
 
+    @Autowired
+    private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
+
     @Override
     public DataFeedExecution startExecution(String customerSpace, String datafeedName) {
         return datafeedEntityMgr.startExecution(datafeedName);
@@ -21,12 +25,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public DataFeed findDataFeedByName(String customerSpace, String datafeedName) {
-        return datafeedEntityMgr.findByName(datafeedName);
-    }
-
-    @Override
-    public void updateDataFeed(String customerSpace, DataFeed datafeed) {
-        datafeedEntityMgr.update(datafeed);
+        return datafeedEntityMgr.findByNameInflated(datafeedName);
     }
 
     @Override
@@ -43,5 +42,17 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public DataFeedExecution failExecution(String customerSpace, String datafeedName) {
         return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Failed);
+    }
+
+    @Override
+    public DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId) {
+        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        if (datafeed == null) {
+            return null;
+        }
+        DataFeedExecution execution = datafeed.getActiveExecution();
+        execution.setWorkflowId(workflowId);
+        datafeedExecutionEntityMgr.update(execution);
+        return execution;
     }
 }

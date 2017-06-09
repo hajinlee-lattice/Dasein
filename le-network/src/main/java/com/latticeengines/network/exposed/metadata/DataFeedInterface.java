@@ -14,4 +14,6 @@ public interface DataFeedInterface {
     DataFeed createDataFeed(String customerSpace, DataFeed datafeed);
 
     DataFeedExecution failExecution(String customerSpace, String datafeedName);
+
+    DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 }

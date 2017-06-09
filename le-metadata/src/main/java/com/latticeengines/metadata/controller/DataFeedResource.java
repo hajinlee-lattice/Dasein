@@ -62,7 +62,16 @@ public class DataFeedResource implements DataFeedInterface {
     @ResponseBody
     @ApiOperation(value = "fail data feed execution")
     @Override
-    public DataFeedExecution failExecution(String customerSpace, String datafeedName) {
+    public DataFeedExecution failExecution(@PathVariable String customerSpace, @PathVariable String datafeedName) {
         return datafeedService.failExecution(customerSpace, datafeedName);
+    }
+
+    @RequestMapping(value = "/{datafeedName}/execution/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "update data feed execution")
+    @Override
+    public DataFeedExecution updateExecutionWorkflowId(@PathVariable String customerSpace,
+            @PathVariable String datafeedName, @PathVariable Long workflowId) {
+        return datafeedService.updateExecutionWorkflowId(customerSpace, datafeedName, workflowId);
     }
 }

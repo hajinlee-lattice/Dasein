@@ -57,11 +57,9 @@ public class DataFeedExecution implements HasPid, Serializable {
     @JsonProperty("imports")
     private List<DataFeedImport> imports = new ArrayList<>();
 
-    // @JsonIgnore
-    // @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    // @JoinColumn(name = "FK_WORKFLOW_ID", nullable = true)
-    // @OnDelete(action = OnDeleteAction.CASCADE)
-    // private WorkflowJob workflowJob;
+    @JsonProperty("workflow_id")
+    @Column(name = "WORKFLOW_ID", nullable = true)
+    private Long workflowId;
 
     @JsonIgnore
     @Transient
@@ -123,13 +121,13 @@ public class DataFeedExecution implements HasPid, Serializable {
         this.status = status;
     }
 
-    // public WorkflowJob getWorkflowJob() {
-    // return workflowJob;
-    // }
-    //
-    // public void setWorkflowJob(WorkflowJob workflowJob) {
-    // this.workflowJob = workflowJob;
-    // }
+    public Long getWorkflowId() {
+        return workflowId;
+    }
+
+    public void setWorkflowId(Long workflowId) {
+        this.workflowId = workflowId;
+    }
 
     public static enum Status {
         Inited("inited"), //

@@ -11,23 +11,28 @@ import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
-@Component("consolidateCompleteListener")
-public class ConsolidateCompleteListener extends LEJobListener {
+@Component("datafeedExecutionListener")
+public class DataFeedExecutionListener extends LEJobListener {
 
-    private static final Log log = LogFactory.getLog(ConsolidateCompleteListener.class);
+    private static final Log log = LogFactory.getLog(DataFeedExecutionListener.class);
 
     @Autowired
-    private DataFeedProxy datafeedProxy;
+    private MetadataProxy metadataProxy;
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
+        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+        String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
+        String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
+
+        metadataProxy.updateExecutionWorkflowId(customerSpace, datafeedName, jobExecution.getId());
     }
 
     @Override
@@ -36,13 +41,13 @@ public class ConsolidateCompleteListener extends LEJobListener {
         String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
         String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            DataFeedExecution execution = datafeedProxy.finishExecution(customerSpace, datafeedName);
+            DataFeedExecution execution = metadataProxy.finishExecution(customerSpace, datafeedName);
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");
-            DataFeedExecution execution = datafeedProxy.failExecution(customerSpace, datafeedName);
+            DataFeedExecution execution = metadataProxy.failExecution(customerSpace, datafeedName);
             if (execution.getStatus() != Status.Failed) {
                 throw new RuntimeException("Can't fail execution");
             }
