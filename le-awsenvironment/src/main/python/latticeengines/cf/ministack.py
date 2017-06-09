@@ -47,7 +47,7 @@ class CreateServiceThread (threading.Thread):
 
     def run(self):
         if self.app == "ui":
-            container = ui_container(self.environment, self.stackname, self.app, self.ip, self.profile, self.tag, self.logdriver)
+            container = ui_container(self.environment, self.stackname, self.app, self.ip, self.profile, self.tag)
         else:
             container = tomcat_container(self.environment, self.stackname, self.app, self.ip, self.profile, self.tag, self.logdriver)
         ledp = ECSVolume("ledp", "/etc/ledp")
@@ -262,6 +262,8 @@ def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_dri
             "splunk-token": config.splunk_token(),
             "splunk-index": "main",
             "splunk-sourcetype": "log4j",
+            "splunk-format": "raw",
+            "splunk-gzip": "true",
             "labels": "stack,app"
         })
 
@@ -287,7 +289,7 @@ def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_dri
 
     return container
 
-def ui_container(environment, stackname, app, ip, profile_file, tag, log_driver):
+def ui_container(environment, stackname, app, ip, profile_file, tag):
     config = AwsEnvironment(environment)
     alloc = ALLOCATION[app]
     container = Container("express", "%s/latticeengines/express:%s" % (config.ecr_registry(), tag))
@@ -296,22 +298,11 @@ def ui_container(environment, stackname, app, ip, profile_file, tag, log_driver)
         container.cpu(alloc["cpu"])
 
     container.add_docker_label('stack', stackname)
-    container.add_docker_label('app', app)
-
-    if log_driver == 'awslogs':
-        container.log("awslogs", {
-            "awslogs-group": "ministack-%s" % stackname,
-            "awslogs-region": config.aws_region(),
-            "awslogs-stream-prefix": app
-        })
-    elif log_driver == 'splunk':
-        container.log("splunk", {
-            "splunk-url": config.splunk_url(),
-            "splunk-token": config.splunk_token(),
-            "splunk-index": "main",
-            "splunk-sourcetype": "log4j",
-            "labels": "stack,app"
-        })
+    container.add_docker_label('app', app)container.log("awslogs", {
+        "awslogs-group": "ministack-%s" % stackname,
+        "awslogs-region": config.aws_region(),
+        "awslogs-stream-prefix": app
+    })
 
     container.publish_port(3000, 3000)
     container.publish_port(3002, 3002)
