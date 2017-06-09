@@ -28,10 +28,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
-            GrantedRight.VIEW_PLS_REFINE_CLONE, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.VIEW_PLS_QUOTAS, //
-            GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL,
+            GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL, //
             GrantedRight.VIEW_PLS_CDL_DATA, //
             GrantedRight.VIEW_PLS_PLAYS, //
             GrantedRight.EDIT_PLS_PLAYS //
