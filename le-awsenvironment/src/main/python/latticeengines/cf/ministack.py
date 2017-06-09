@@ -298,7 +298,8 @@ def ui_container(environment, stackname, app, ip, profile_file, tag):
         container.cpu(alloc["cpu"])
 
     container.add_docker_label('stack', stackname)
-    container.add_docker_label('app', app)container.log("awslogs", {
+    container.add_docker_label('app', app)
+    container.log("awslogs", {
         "awslogs-group": "ministack-%s" % stackname,
         "awslogs-region": config.aws_region(),
         "awslogs-stream-prefix": app
