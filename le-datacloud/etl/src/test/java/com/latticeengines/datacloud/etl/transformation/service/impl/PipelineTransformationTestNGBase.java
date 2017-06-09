@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
@@ -20,6 +21,9 @@ public abstract class PipelineTransformationTestNGBase
 
     @Autowired
     PipelineSource source;
+
+    @Autowired
+    protected DataCloudVersionEntityMgr versionEntityMgr;
 
     @Override
     TransformationService<PipelineTransformationConfiguration> getTransformationService() {
@@ -47,6 +51,12 @@ public abstract class PipelineTransformationTestNGBase
 
     protected TableSource getTargetTableSource() {
         return null;
+    }
+
+    protected String setDataFlowEngine(String conf, String engine) throws IOException {
+        TransformationFlowParameters.EngineConfiguration engineConfiguration = new TransformationFlowParameters.EngineConfiguration();
+        engineConfiguration.setEngine(engine);
+        return setDataFlowEngine(conf, engineConfiguration);
     }
 
     protected String setDataFlowEngine(String conf,
