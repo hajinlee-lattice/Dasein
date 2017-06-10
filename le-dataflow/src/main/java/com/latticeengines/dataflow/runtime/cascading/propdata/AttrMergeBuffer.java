@@ -12,7 +12,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class AttrMergeBuffer extends BaseOperation implements Buffer {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -2120310421596774198L;
 
     public AttrMergeBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
@@ -28,6 +28,7 @@ public class AttrMergeBuffer extends BaseOperation implements Buffer {
         String groupValue = group.getString(0);
 
         Iterator<TupleEntry> argumentsIter = bufferCall.getArgumentsIterator();
+        int notNullCount = 0;
         while (argumentsIter.hasNext()) {
             TupleEntry arguments = argumentsIter.next();
             if (groupValue == null) {
@@ -42,6 +43,7 @@ public class AttrMergeBuffer extends BaseOperation implements Buffer {
                 for (int i = 0; i < size; i++) {
                     if (arguments.getObject(i) != null) {
                         notNulls[i] = true;
+                        notNullCount++;
                     }
                 }
             } else {
@@ -51,9 +53,13 @@ public class AttrMergeBuffer extends BaseOperation implements Buffer {
                         if (obj != null) {
                             result.setRaw(i, obj);
                             notNulls[i] = true;
+                            notNullCount++;
                         }
                     }
                 }
+            }
+            if (notNullCount >= size) {
+                break;
             }
         }
         if (groupValue != null) {

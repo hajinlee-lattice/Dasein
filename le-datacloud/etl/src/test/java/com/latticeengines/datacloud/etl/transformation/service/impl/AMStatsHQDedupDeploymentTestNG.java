@@ -3,11 +3,14 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -316,6 +319,7 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
         boolean isTopIndustry = false;
 
         boolean verifyRecord = false;
+        Set<Integer> matchedRows = new HashSet<>();
 
         while (records.hasNext()) {
             GenericRecord record = records.next();
@@ -331,7 +335,7 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
                     if (field.name().equals("EncodedCube")) {
                         Object val = record.get(field.name());
                         if (val instanceof Utf8) {
-                            val = ((Utf8) val).toString();
+                            val = val.toString();
                         }
                         encodedCubeStr = (String) val;
                     }
@@ -340,19 +344,17 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
                             && !field.name().equals("PID")) {
                         Object val = record.get(field.name());
                         if (val instanceof Utf8) {
-                            val = ((Utf8) val).toString();
+                            val = val.toString();
                         }
                         Object expectedVal = data[idx];
                         if (verifyRecord) {
                             if ((val == null && expectedVal != null) //
                                     || (val != null && !val.equals(expectedVal))) {
-                                if (val != null && val instanceof String
-                                        && ((String) val).startsWith((String) expectedVal)) {
-                                    // consider it matching field
-                                } else {
-                                    foundMatchingRecord = false;
-                                    break;
-                                }
+                                if (val == null || !(val instanceof String)
+                                        || !((String) val).startsWith((String) expectedVal)) {
+                                            foundMatchingRecord = false;
+                                            break;
+                                        }
                             }
                         }
 
@@ -381,6 +383,8 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
                 if (!foundMatchingRecord) {
                     break;
                 }
+
+                matchedRows.add(idx - 1);
 
                 if (isTopIndustry && isTopLocation) {
                     if (encodedCubeStr != null && topmostCubeEncodedStr == null) {
@@ -429,7 +433,11 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
 
             rowNum++;
         }
-
+        for (int i = 0; i < expectedData.length; i++) {
+            if (matchedRows.contains(i)) {
+                System.out.println(Arrays.toString(expectedData[i]));
+            }
+        }
         System.out.println("Final rows " + rowNum);
         Assert.assertEquals(rowNum, 192);
 
@@ -441,7 +449,6 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
         try {
             actualCube = AMStatsUtils.decompressAndDecode(topmostCubeEncodedStr, AccountMasterCube.class);
             expectedCube = om.readValue(expectedCubeStream, AccountMasterCube.class);
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
