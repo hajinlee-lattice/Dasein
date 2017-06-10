@@ -574,6 +574,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     private void saveAttributeSelection(CustomerSpace customerSpace) {
+        log.info("Saving attribute selection via internal api ...");
         internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
                 getRestAPIHostPort());
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);

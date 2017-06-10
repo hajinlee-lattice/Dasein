@@ -306,7 +306,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             try {
                 TenantDocument tenantDoc = adminTenantProxy.getTenant(customerSpace.getTenantId());
                 BootstrapState newState = tenantDoc.getBootstrapState();
-                log.info("BootstrapState from tenant console: " + newState);
+                log.info("BootstrapState from tenant console: " + (newState == null ? null : newState.state));
                 state = newState == null ? state : newState;
                 if (BootstrapState.State.OK.equals(state.state) || BootstrapState.State.ERROR.equals(state.state)) {
                     return;
@@ -315,7 +315,6 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 throw new RuntimeException("Failed to query tenant installation state", e);
             } finally {
                 try {
-                    log.info("Wait for 5 sec.");
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
                     log.error(e);
@@ -379,7 +378,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         if (testCustomerSpaces.contains(customerSpace.toString())) {
             try {
-                adminTenantProxy.deleteTenant(tenant.getId());
+                adminTenantProxy.deleteTenant(customerSpace.getTenantId());
             } catch (Exception e) {
                 log.error("DELETE customer space " + customerSpace + " in tenant console failed.", e);
             }
