@@ -254,7 +254,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         waitForTenantConsoleInstallation(CustomerSpace.parse(tenant.getId()));
 
         if (featureFlagMap != null) {
-            log.info("Overwrite featureFlags " + featureFlagMap);
+            log.info("Overwriting featureFlags " + featureFlagMap);
             for (String featureFlagId : featureFlagMap.keySet()) {
                 overwriteFeatureFlag(tenant, featureFlagId, featureFlagMap.get(featureFlagId));
             }
@@ -299,22 +299,24 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
-        Long timeout = TimeUnit.MINUTES.toMillis(5L);
-        long totTime = 0L;
+        Long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L);
         BootstrapState state = BootstrapState.createInitialState();
         while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
-                && totTime <= timeout) {
+                && System.currentTimeMillis() <= timeout) {
             try {
                 TenantDocument tenantDoc = adminTenantProxy.getTenant(customerSpace.getTenantId());
                 BootstrapState newState = tenantDoc.getBootstrapState();
                 log.info("BootstrapState from tenant console: " + newState);
                 state = newState == null ? state : newState;
+                if (BootstrapState.State.OK.equals(state.state) || BootstrapState.State.ERROR.equals(state.state)) {
+                    return;
+                }
             } catch (Exception e) {
                 throw new RuntimeException("Failed to query tenant installation state", e);
             } finally {
                 try {
+                    log.info("Wait for 5 sec.");
                     Thread.sleep(5000L);
-                    totTime += 5000L;
                 } catch (InterruptedException e) {
                     log.error(e);
                 }
