@@ -219,7 +219,7 @@ public class Node {
             List<FieldMetadata> fieldMetadatas) {
         return new Node(
                 builder.register(
-                        new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer, fieldMetadatas)),
+                        new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, sortFieldList, buffer, fieldMetadatas)),
                 builder);
     }
 
