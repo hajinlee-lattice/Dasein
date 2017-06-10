@@ -34,6 +34,11 @@
             <artifactId>le-camille</artifactId>
             <version>${le.camille.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+        </dependency>
     </dependencies>
 
     <parent>
@@ -52,6 +57,7 @@
         <le.testfwk.version>3.6.0-SNAPSHOT</le.testfwk.version>
         <le.dantedb.version>3.6.0-SNAPSHOT</le.dantedb.version>
         <le.camille.version>3.6.0-SNAPSHOT</le.camille.version>
+        <le.monitor.version>3.6.0-SNAPSHOT</le.monitor.version>
     </properties>
 
 </project>

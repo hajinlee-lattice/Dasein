@@ -1,7 +1,6 @@
 package com.latticeengines.dante.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.dante.service.AccountService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.network.exposed.dante.DanteAccountInterface;
 
 import io.swagger.annotations.Api;
@@ -33,28 +31,8 @@ public class AccountResource implements DanteAccountInterface {
     @RequestMapping(value = "/{count}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get Dante accounts")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
+    @PreAuthorize("hasRole('View_PLS_PLAYS')")
     public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count) {
-        try {
-            return ResponseDocument.successResponse(accountService.getAccounts(count));
-        } catch (LedpException e) {
-            return ResponseDocument.failedResponse(e);
-        } catch (Exception e) {
-            return ResponseDocument.failedResponse(e);
-        }
-    }
-
-    @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "get all account attributes for this tenant")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<Map<String, String>> getAccountAttributes() {
-        try {
-            return ResponseDocument.successResponse(accountService.getAccountAttributes());
-        } catch (LedpException e) {
-            return ResponseDocument.failedResponse(e);
-        } catch (Exception e) {
-            return ResponseDocument.failedResponse(e);
-        }
+        return ResponseDocument.successResponse(accountService.getAccounts(count));
     }
 }

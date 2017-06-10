@@ -1,9 +1,7 @@
 package com.latticeengines.dante.controller;
 
-import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +18,6 @@ import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.network.exposed.dante.DanteTalkingPointInterface;
 
 import io.swagger.annotations.Api;
@@ -30,7 +27,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/talkingpoints")
 public class TalkingPointResource implements DanteTalkingPointInterface {
-
     private static final Logger log = Logger.getLogger(TalkingPointResource.class);
 
     @Autowired
@@ -42,43 +38,24 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @ApiOperation(value = "Create a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> createOrUpdate(@RequestBody DanteTalkingPoint talkingPoint) {
-        try {
-            talkingPointService.createOrUpdate(talkingPoint);
-            log.info("Created a new talking point");
-            return SimpleBooleanResponse.successResponse();
-        } catch (LedpException e) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
-        } catch (Exception e) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils.getFullStackTrace(e)));
-        }
+        talkingPointService.createOrUpdate(talkingPoint);
+        return SimpleBooleanResponse.successResponse();
     }
 
     @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
+    @PreAuthorize("hasRole('View_PLS_Plays')")
     public ResponseDocument<DanteTalkingPoint> findByExternalID(@PathVariable String externalID) {
-        try {
-            return ResponseDocument.successResponse(talkingPointService.findByExternalID(externalID));
-        } catch (LedpException e) {
-            return ResponseDocument.failedResponse(e);
-        } catch (Exception e) {
-            return ResponseDocument.failedResponse(e);
-        }
+        return ResponseDocument.successResponse(talkingPointService.findByExternalID(externalID));
     }
 
     @RequestMapping(value = "/play/{playExternalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
+    @PreAuthorize("hasRole('View_PLS_Plays')")
     public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(@PathVariable String playExternalID) {
-        try {
-            return ResponseDocument.successResponse(talkingPointService.findAllByPlayID(playExternalID));
-        } catch (LedpException e) {
-            return ResponseDocument.failedResponse(e);
-        } catch (Exception e) {
-            return ResponseDocument.failedResponse(e);
-        }
+        return ResponseDocument.successResponse(talkingPointService.findAllByPlayID(playExternalID));
     }
 
     @RequestMapping(value = "/{talkingPointExternalID}", method = RequestMethod.DELETE)
@@ -86,15 +63,8 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @ApiOperation(value = "Delete a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> delete(@PathVariable String talkingPointExternalID) {
-        try {
-            DanteTalkingPoint talkingPoint = talkingPointService.findByExternalID(talkingPointExternalID);
-            talkingPointService.delete(talkingPoint);
-            return SimpleBooleanResponse.successResponse();
-        } catch (LedpException e) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
-        } catch (Exception e) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils.getFullStackTrace(e)));
-        }
+        DanteTalkingPoint talkingPoint = talkingPointService.findByExternalID(talkingPointExternalID);
+        talkingPointService.delete(talkingPoint);
+        return SimpleBooleanResponse.successResponse();
     }
-
 }

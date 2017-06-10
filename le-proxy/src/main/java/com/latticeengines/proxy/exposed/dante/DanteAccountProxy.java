@@ -23,10 +23,4 @@ public class DanteAccountProxy extends MicroserviceRestApiProxy implements Dante
         return get("getAccounts", url, ResponseDocument.class);
     }
 
-    @SuppressWarnings("unchecked")
-    public ResponseDocument<Map<String, String>> getAccountAttributes() {
-        String url = constructUrl("/accountattributes");
-        return get("getAccountAttributes", url, ResponseDocument.class);
-    }
-
 }

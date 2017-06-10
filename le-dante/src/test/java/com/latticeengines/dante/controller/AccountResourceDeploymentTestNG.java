@@ -1,7 +1,6 @@
 package com.latticeengines.dante.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,13 +27,5 @@ public class AccountResourceDeploymentTestNG extends AbstractTestNGSpringContext
         Assert.assertNotNull(result);
         Assert.assertNull(result.getErrors());
         Assert.assertEquals(result.getResult().size(), 10);
-    }
-
-    @Test(groups = "deployment")
-    public void testGetAccountAttributess() {
-        ResponseDocument<Map<String, String>> result = danteAccountProxy.getAccountAttributes();
-
-        Assert.assertNotNull(result);
-        Assert.assertNull(result.getErrors());
     }
 }

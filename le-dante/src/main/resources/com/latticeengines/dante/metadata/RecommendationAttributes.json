@@ -1,0 +1,10 @@
+{
+  "Expected Value": "ExpectedValue",
+  "Likelihood": "LikelihoodBucketOffset",
+  "Play Name": "PlayDisplayName",
+  "Solution Name": "PlaySolutionName",
+  "Solution Type": "PlaySolutionType",
+  "Play Owner": "UserRoleDisplayName",
+  "Target Product": "PlayTargetProductName",
+  "Theme": "Theme"
+}

@@ -594,7 +594,11 @@ public enum LedpCode {
     LEDP_38001("Could not find Talking point with External_ID {0}"), //
     LEDP_38002("Could not find Talking points for Play {0}"), //
     LEDP_38003("Could not find accounts for Tenant {0}"), //
-    LEDP_38004("Cannot return less than 1 account");
+    LEDP_38004("Cannot return less than 1 account"), //
+    LEDP_38005("Failed to find the MetadataDocument for the CustomerSpace {0}"), //
+    LEDP_38006("Failed to parse account attributes from MetadataDocument"), //
+    LEDP_38007("Failed to populate account attributes"), //
+    LEDP_38008("No tenant not found for the request");
 
     private String message;
 

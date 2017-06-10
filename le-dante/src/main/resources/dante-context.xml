@@ -13,5 +13,7 @@
 
     <import resource="classpath:dantedb-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
+    <import resource="classpath:monitor-alerts-context.xml"/>
+    <import resource="classpath:camille-runtime-context.xml"/>
 </beans>
 

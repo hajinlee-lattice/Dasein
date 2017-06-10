@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +33,5 @@ public class DanteAccountResource {
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count) {
         return danteAccountProxy.getAccounts(count);
-    }
-
-    @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "get all account attributes for this tenant")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<Map<String, String>> getAccountAttributes() {
-        return danteAccountProxy.getAccountAttributes();
     }
 }
