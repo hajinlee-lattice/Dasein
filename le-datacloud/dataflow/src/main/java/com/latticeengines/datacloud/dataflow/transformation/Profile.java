@@ -34,7 +34,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
     private static final Log log = LogFactory.getLog(Profile.class);
 
     public static final String BEAN_NAME = "SourceProfile";
-    public static final String TRANSFORMER_NAME = "SourceProfileTransformer";
+    public static final String TRANSFORMER_NAME = "SourceProfiler";
 
     private static final String DUMMY_GROUP = "_Dummy_Group_";
     private static final String DUMMY_ROWID = "_Dummy_RowID_";

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.dataflow.transformation.Profile;
 import com.latticeengines.datacloud.dataflow.utils.FileParser;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -34,12 +35,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
-@Component("profileTransformer")
+@Component(Profile.TRANSFORMER_NAME)
 public class ProfileTransformer extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
     private static final Log log = LogFactory.getLog(ProfileTransformer.class);
-
-    public static final String BEAN_NAME = "SourceProfile";
-    public static final String TRANSFORMER_NAME = "SourceProfileTransformer";
 
     private static final String STRATEGY_ENCODED_COLUMN = "EncodedColumn";
     private static final String STRATEGY_BIT_INTERPRETATION = "BitInterpretation";
@@ -53,12 +51,12 @@ public class ProfileTransformer extends AbstractDataflowTransformer<ProfileConfi
 
     @Override
     protected String getDataFlowBeanName() {
-        return BEAN_NAME;
+        return Profile.BEAN_NAME;
     }
 
     @Override
     public String getName() {
-        return TRANSFORMER_NAME;
+        return Profile.TRANSFORMER_NAME;
     }
 
     @Override

@@ -91,7 +91,6 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
     @Test(groups = "deployment", enabled = true)
     public void testTableToSource() {
         targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
-        uploadBaseSourceFile(source1, avroFile, baseSourceVersion);
         uploadAndRegisterTableSource(avroFile, source1.getSourceName());
         currentConfig.set(tableToSource());
         targetTableSource.set(null);

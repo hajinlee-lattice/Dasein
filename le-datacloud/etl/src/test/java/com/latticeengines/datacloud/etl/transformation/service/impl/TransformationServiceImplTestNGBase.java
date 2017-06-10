@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -131,6 +132,39 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
                 String targetPath = tableDir + "/" + fileName;
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
             }
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            String uploadBaseDir = getPathToUploadBaseData();
+            String successPath = null;
+            if (uploadBaseDir != null) {
+                successPath = getPathToUploadBaseData() + SUCCESS_FLAG;
+            } else {
+                successPath = tableDir + SUCCESS_FLAG;
+            }
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        Table table = MetadataConverter.getTable(yarnConfiguration, tableDir, primaryKeyName, lastModifiedKeyName);
+        table.setName(tableName);
+        metadataProxy.updateTable(DataCloudConstants.SERVICE_CUSTOMERSPACE, tableName, table);
+    }
+
+    protected void uploadAndRegisterTableSource(List<Pair<String, Class<?>>> schema, Object[][] data,
+            String tableName) {
+        uploadAndRegisterTableSource(schema, data, tableName, null, null);
+    }
+
+    protected void uploadAndRegisterTableSource(List<Pair<String, Class<?>>> schema, Object[][] data, String tableName,
+            String primaryKeyName, String lastModifiedKeyName) {
+        String tableDir = hdfsPathBuilder
+                .constructTablePath(tableName, CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE), "")
+                .toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, tableDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, tableDir);
+            }
+            AvroUtils.createAvroFileByData(yarnConfiguration, schema, data, tableDir, "part-00000.avro");
             InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
             String uploadBaseDir = getPathToUploadBaseData();
             String successPath = null;
