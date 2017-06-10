@@ -7,5 +7,5 @@ import com.latticeengines.domain.exposed.dante.DanteAccount;
 
 public interface AccountCacheDao extends BaseDanteDao<DanteAccount> {
 
-    List<DanteAccount> getAccounts(int count);
+    List<DanteAccount> getAccounts(int count, String customerID);
 }

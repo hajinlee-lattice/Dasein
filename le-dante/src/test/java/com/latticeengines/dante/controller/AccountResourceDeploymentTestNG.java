@@ -22,7 +22,8 @@ public class AccountResourceDeploymentTestNG extends AbstractTestNGSpringContext
 
     @Test(groups = "deployment")
     public void testGetAccounts() {
-        ResponseDocument<List<DanteAccount>> result = danteAccountProxy.getAccounts(10);
+        // Todo: create test tenant, add accounts in dante and then test this
+        ResponseDocument<List<DanteAccount>> result = danteAccountProxy.getAccounts(10, "LECLEANX.LECLEANX.Production");
 
         Assert.assertNotNull(result);
         Assert.assertNull(result.getErrors());

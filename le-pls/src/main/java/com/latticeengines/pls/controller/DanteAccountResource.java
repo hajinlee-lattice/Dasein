@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.dante.DanteAccountProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
@@ -32,6 +36,10 @@ public class DanteAccountResource {
     @ApiOperation(value = "get a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count) {
-        return danteAccountProxy.getAccounts(count);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_38008);
+        }
+        return danteAccountProxy.getAccounts(count, customerSpace.toString());
     }
 }

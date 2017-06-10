@@ -7,5 +7,5 @@ import com.latticeengines.domain.exposed.dante.DanteAccount;
 
 public interface DanteAccountInterface {
 
-    ResponseDocument<List<DanteAccount>> getAccounts(int count);
+    ResponseDocument<List<DanteAccount>> getAccounts(int count, String customerSpace);
 }

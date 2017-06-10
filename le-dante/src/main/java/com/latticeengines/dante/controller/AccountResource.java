@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +33,8 @@ public class AccountResource implements DanteAccountInterface {
     @ResponseBody
     @ApiOperation(value = "get Dante accounts")
     @PreAuthorize("hasRole('View_PLS_PLAYS')")
-    public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count) {
-        return ResponseDocument.successResponse(accountService.getAccounts(count));
+    public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count,
+            @RequestParam String customerSpace) {
+        return ResponseDocument.successResponse(accountService.getAccounts(count, customerSpace));
     }
 }

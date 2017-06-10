@@ -15,8 +15,7 @@ import com.latticeengines.dantedb.exposed.entitymgr.impl.BaseDanteEntityMgrImpl;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 
 @Component("accountCacheEntityMgr")
-public class AccountEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteAccount>
-        implements AccountEntityMgr {
+public class AccountEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteAccount> implements AccountEntityMgr {
     private static final Logger log = Logger.getLogger(AccountEntityMgrImpl.class);
 
     @Autowired
@@ -28,7 +27,7 @@ public class AccountEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteAccount>
     }
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<DanteAccount> getAccounts(int count) {
-        return accountCacheDao.getAccounts(count);
+    public List<DanteAccount> getAccounts(int count, String customerID) {
+        return accountCacheDao.getAccounts(count, customerID);
     }
 }

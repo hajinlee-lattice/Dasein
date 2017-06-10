@@ -1,7 +1,6 @@
 package com.latticeengines.proxy.exposed.dante;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -18,9 +17,8 @@ public class DanteAccountProxy extends MicroserviceRestApiProxy implements Dante
     }
 
     @SuppressWarnings("unchecked")
-    public ResponseDocument<List<DanteAccount>> getAccounts(int count) {
-        String url = constructUrl("/" + count);
+    public ResponseDocument<List<DanteAccount>> getAccounts(int count, String customerSpace) {
+        String url = constructUrl("/" + count + "?customerSpace=" + customerSpace);
         return get("getAccounts", url, ResponseDocument.class);
     }
-
 }

@@ -22,10 +22,12 @@ public class AccountCacheDaoImpl extends BaseDanteDaoImpl<DanteAccount> implemen
     }
 
     @SuppressWarnings("unchecked")
-    public List<DanteAccount> getAccounts(int count) {
+    public List<DanteAccount> getAccounts(int count, String customerID) {
         Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format("select a from %s a ", getEntityClass().getSimpleName());
+        String queryStr = String.format("select a from %s a where customerID = :customerID",
+                getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr).setMaxResults(count);
+        query.setParameter("customerID", customerID);
         return (List<DanteAccount>) query.list();
     }
 }

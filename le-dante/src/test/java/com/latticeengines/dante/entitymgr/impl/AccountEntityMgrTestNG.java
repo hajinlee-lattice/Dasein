@@ -21,7 +21,7 @@ public class AccountEntityMgrTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "functional")
     public void testGetAccounts() {
-        List<DanteAccount> accounts = accountCacheEntityMgr.getAccounts(10);
+        List<DanteAccount> accounts = accountCacheEntityMgr.getAccounts(10, "LECLEANX");
 
         Assert.assertNotNull(accounts);
         Assert.assertEquals(accounts.size(), 10);
