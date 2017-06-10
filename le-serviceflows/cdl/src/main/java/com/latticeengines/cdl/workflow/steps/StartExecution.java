@@ -22,13 +22,11 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
 
     @Override
     public void execute() {
-        DataFeedExecution execution = metadataProxy.startExecution(configuration.getCustomerSpace().toString(),
-                configuration.getDataFeedName());
         DataFeed datafeed = metadataProxy.findDataFeedByName(configuration.getCustomerSpace().toString(),
                 configuration.getDataFeedName());
 
         putObjectInContext(DATA_INITIAL_LOAD, datafeed.getStatus() == Status.InitialLoad);
-
+        DataFeedExecution execution = datafeed.getActiveExecution();
         if (execution == null) {
             putObjectInContext(CONSOLIDATE_INPUT_TABLES, Collections.EMPTY_LIST);
         } else {

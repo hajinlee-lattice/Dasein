@@ -88,10 +88,6 @@ public class DataFeedTask implements HasPid, Serializable {
     @JoinColumn(name = "FK_DATA_ID", nullable = true)
     private Table importData;
 
-    // @Column(name = "STAGING_DIR", nullable = false, length = 1000)
-    // @JsonProperty("staging_dir")
-    // private String stagingDir;
-
     @Column(name = "ACTIVE_JOB", nullable = false)
     @JsonProperty("active_job")
     private String activeJob;
@@ -134,23 +130,6 @@ public class DataFeedTask implements HasPid, Serializable {
         this.dataFeed = dataFeed;
     }
 
-    // public DataFeed getFeed() {
-    // return dataFeed;
-    // }
-    //
-    // public void setFeed(DataFeed feed) {
-    // this.dataFeed = feed;
-    //// this.dataFeedId = feed.getPid();
-    // }
-
-    // public Long getDataFeedId() {
-    // return dataFeedId;
-    // }
-    //
-    // public void setDataFeedId(Long dataFeedId) {
-    // this.dataFeedId = dataFeedId;
-    // }
-
     public String getSource() {
         return source;
     }
@@ -190,14 +169,6 @@ public class DataFeedTask implements HasPid, Serializable {
     public void setImportData(Table importData) {
         this.importData = importData;
     }
-
-    // public String getStagingDir() {
-    // return stagingDir;
-    // }
-    //
-    // public void setStagingDir(String stagingDir) {
-    // this.stagingDir = stagingDir;
-    // }
 
     public Status getStatus() {
         return status;

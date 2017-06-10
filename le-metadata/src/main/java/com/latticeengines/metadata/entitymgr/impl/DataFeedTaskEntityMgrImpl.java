@@ -140,8 +140,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             tableEntityMgr.addExtract(dataFeedTask.getImportData(), extract);
         } else {
             tableTypeHolder.setTableType(TableType.IMPORTTABLE);
-            //Table extractTable = tableEntityMgr.findByName(extract.getTable().getName());
-            Table extractTable = tableEntityMgr.findByName(dataFeedTask.getImportTemplate().getName());
+            Table extractTable = tableEntityMgr.findByName(extract.getTable().getName());
             extractTable.getExtracts().clear();
             extractTable = TableUtils.clone(extractTable,
                     "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
@@ -152,10 +151,10 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             addTableToQueue(dataFeedTask, extractTable);
         }
         if (templateTableChanged || dataTableConsumed) {
-            tableTypeHolder.setTableType(TableType.DATATABLE);
             Table newDataTable = TableUtils.clone(dataFeedTask.getImportTemplate(),
                     "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
             newDataTable.setTenant(MultiTenantContext.getTenant());
+            newDataTable.setTableType(TableType.DATATABLE);
             tableEntityMgr.create(newDataTable);
             dataFeedTask.setImportData(newDataTable);
             dataFeedTask.setStatus(Status.Active);
@@ -173,12 +172,13 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         TableEntityMgr.inflateTable(datafeedTask.getImportData());
         return datafeedTask;
     }
-//    @Override
-//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-//    public boolean dataFeedTaskExist(String dataFeedType, String entity) {
-//        DataFeedTask dataFeedTask = datafeedTaskDao.getDataFeedTask(dataFeedType, entity);
-//        return dataFeedTask != null;
-//    }
+    // @Override
+    // @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    // public boolean dataFeedTaskExist(String dataFeedType, String entity) {
+    // DataFeedTask dataFeedTask = datafeedTaskDao.getDataFeedTask(dataFeedType,
+    // entity);
+    // return dataFeedTask != null;
+    // }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -192,9 +192,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             updateReferences(importData);
             createReferences(importData);
         }
-//        tableEntityMgr.create(dataFeedTask.getImportTemplate());
-//        dataFeedTask.setImportTemplate(tableEntityMgr.findByName(dataFeedTask.getImportTemplate().getName()));
-//        create(dataFeedTask);
+        // tableEntityMgr.create(dataFeedTask.getImportTemplate());
+        // dataFeedTask.setImportTemplate(tableEntityMgr.findByName(dataFeedTask.getImportTemplate().getName()));
+        // create(dataFeedTask);
     }
 
     @Override
@@ -236,7 +236,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         createReferences(task.getImportTemplate());
 
         datafeedTaskDao.update(task);
-        //createOrUpdate(dataFeedTask);
+        // createOrUpdate(dataFeedTask);
     }
 
     private void deleteReferences(Table table) {

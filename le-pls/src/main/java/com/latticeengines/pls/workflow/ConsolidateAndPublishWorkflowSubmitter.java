@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
@@ -47,10 +48,13 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     public ApplicationId submit(DataCollectionType dataCollectionType, String datafeedName) {
         DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
                 datafeedName);
-        log.info("data feed status: " + datafeed.getStatus());
+        log.info(String.format("data feed %s status: %s", datafeedName, datafeed.getStatus()));
         if (datafeed.getStatus() != Status.InitialLoad && datafeed.getStatus() != Status.Active) {
             throw new RuntimeException("we can't launch any consolidate workflow now as it is not ready.");
         }
+        DataFeedExecution execution = metadataProxy.startExecution(MultiTenantContext.getCustomerSpace().toString(),
+                datafeedName);
+        log.info(String.format("started execution of %s with status: %s", datafeedName, execution.getStatus()));
         WorkflowConfiguration configuration = generateConfiguration(dataCollectionType, datafeedName);
         ApplicationId applicationId = workflowJobService.submit(configuration);
         return applicationId;
