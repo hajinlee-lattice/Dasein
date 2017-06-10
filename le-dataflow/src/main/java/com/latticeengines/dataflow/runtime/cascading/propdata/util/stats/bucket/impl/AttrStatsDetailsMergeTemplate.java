@@ -23,9 +23,8 @@ public abstract class AttrStatsDetailsMergeTemplate implements AttrStatsDetailsM
 
     private static final long serialVersionUID = -8516799137018006941L;
 
-    protected abstract void combineIndividualBuckets(Buckets resultBucketsObj, //
-            Buckets secondBucketsObj) //
-            throws IOException, JsonParseException, JsonMappingException, JsonProcessingException;
+    protected abstract void combineIndividualBuckets(Buckets resultBucketsObj, Buckets secondBucketsObj)
+            throws IOException;
 
     public AttributeStats merge(AttributeStats firstStatsDetails,
                                 AttributeStats secondStatsDetails, boolean printTop) {

@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.apache.avro.util.Utf8;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,124 +29,84 @@ public class AMStatsDimensionUtil implements Serializable {
 
     public ExpandedTuple dedup(ExpandedTuple existingMergedTuple, //
             ExpandedTuple originalTuple, int numOfFields) {
-
-        for (int idx = 0; idx < numOfFields; idx++) {
-            Object objInExistingMergedTuple = existingMergedTuple.get(idx);
-            Object objInOriginalTuple = originalTuple.get(idx);
-            boolean isPrint = false;
-
-            if (objInExistingMergedTuple == null) {
-                existingMergedTuple.set(idx, objInOriginalTuple);
-            } else if (objInOriginalTuple == null) {
-                existingMergedTuple.set(idx, objInExistingMergedTuple);
-            } else if (objInExistingMergedTuple instanceof AttributeStats) {
-                Object finalObj = objInExistingMergedTuple;
-                if (objInExistingMergedTuple instanceof AttributeStats
-                        && objInOriginalTuple instanceof AttributeStats) {
-                    finalObj = dedupMergeUtil.merge(//
-                            (AttributeStats) objInExistingMergedTuple, (AttributeStats) objInOriginalTuple, isPrint);
-                }
-                existingMergedTuple.set(idx, finalObj);
-            }
-        }
-
-        return existingMergedTuple;
+        return mergeWithTool(existingMergedTuple, originalTuple, numOfFields, dedupMergeUtil);
     }
 
     public ExpandedTuple merge(ExpandedTuple existingMergedTuple, //
             ExpandedTuple originalTuple, int numOfFields) {
+        return mergeWithTool(existingMergedTuple, originalTuple, numOfFields, addMergeUtil);
+    }
 
+    private ExpandedTuple mergeWithTool(ExpandedTuple existingMergedTuple, //
+                                ExpandedTuple originalTuple, int numOfFields, AttrStatsDetailsMergeTool tool) {
         for (int idx = 0; idx < numOfFields; idx++) {
             Object objInExistingMergedTuple = existingMergedTuple.get(idx);
             Object objInOriginalTuple = originalTuple.get(idx);
-            boolean isPrint = false;
-
             if (objInExistingMergedTuple == null) {
                 existingMergedTuple.set(idx, objInOriginalTuple);
             } else if (objInOriginalTuple == null) {
                 existingMergedTuple.set(idx, objInExistingMergedTuple);
             } else if (objInExistingMergedTuple instanceof AttributeStats) {
                 Object finalObj = objInExistingMergedTuple;
-                if (objInExistingMergedTuple instanceof AttributeStats
-                        && objInOriginalTuple instanceof AttributeStats) {
-                    finalObj = addMergeUtil.merge(//
-                            (AttributeStats) objInExistingMergedTuple, (AttributeStats) objInOriginalTuple, isPrint);
+                if (objInOriginalTuple instanceof AttributeStats) {
+                    finalObj = tool.merge(//
+                            (AttributeStats) objInExistingMergedTuple, (AttributeStats) objInOriginalTuple, false);
                 }
                 existingMergedTuple.set(idx, finalObj);
             }
         }
 
         return existingMergedTuple;
+
     }
 
     public static class ExpandedTuple {
         Object[] attrValuesArr;
-        int fieldsLength;
 
-        public ExpandedTuple(ExpandedTuple expandedTuple) {
+        ExpandedTuple(ExpandedTuple expandedTuple) {
             // used for deep copy during stats calculation
-            this.attrValuesArr = new Object[expandedTuple.fieldsLength];
-            this.fieldsLength = expandedTuple.fieldsLength;
+            this.attrValuesArr = new Object[expandedTuple.attrValuesArr.length];
 
-            checkZeroSizeTuple();
-
-            for (int idx = 0; idx < expandedTuple.attrValuesArr.length; idx++) {
+            for (int idx = 0; idx < attrValuesArr.length; idx++) {
                 Object objInOriginalTuple = expandedTuple.get(idx);
 
                 if (objInOriginalTuple != null) {
                     if (objInOriginalTuple instanceof AttributeStats) {
-                        attrValuesArr[idx] = new AttributeStats(//
-                                (AttributeStats) objInOriginalTuple);
-                    } else if (objInOriginalTuple instanceof Long) {
-                        attrValuesArr[idx] = new Long((Long) objInOriginalTuple);
-                    } else if (objInOriginalTuple instanceof String) {
-
-                        AttributeStats statsInOriginalTuple = null;
-
-                        try {
-                            statsInOriginalTuple = //
-                                    OM.readValue((String) objInOriginalTuple, //
-                                            AttributeStats.class);
-                            attrValuesArr[idx] = statsInOriginalTuple;
-                        } catch (IOException e) {
-                            // ignore if type of serialized obj is not
-                            // statsInExistingMergedTuple
-                            log.info(e.getMessage(), e);
-                            attrValuesArr[idx] = objInOriginalTuple;
-
-                        }
+                        attrValuesArr[idx] = new AttributeStats((AttributeStats) objInOriginalTuple);
+                    } else {
+                        attrValuesArr[idx] = objInOriginalTuple;
                     }
                 } else {
-                    attrValuesArr[idx] = objInOriginalTuple;
+                    attrValuesArr[idx] = null;
                 }
             }
         }
 
-        public ExpandedTuple(Tuple tuple, int fieldsLength) {
-            this.attrValuesArr = new Object[fieldsLength];
-            this.fieldsLength = fieldsLength;
+        ExpandedTuple(Tuple tuple) {
+            this.attrValuesArr = new Object[tuple.size()];
 
-            checkZeroSizeTuple();
-
-            for (int idx = 0; idx < fieldsLength; idx++) {
+            for (int idx = 0; idx < attrValuesArr.length; idx++) {
                 Object objInOriginalTuple = tuple.getObject(idx);
 
-                if (objInOriginalTuple != null && objInOriginalTuple instanceof String) {
-                    AttributeStats statsInOriginalTuple = null;
-
-                    try {
-                        statsInOriginalTuple = //
-                                OM.readValue((String) objInOriginalTuple, //
-                                        AttributeStats.class);
-                        attrValuesArr[idx] = statsInOriginalTuple;
-                    } catch (IOException e) {
-                        // ignore if type of serialized obj is not
-                        // statsInExistingMergedTuple
-                        log.info(String.format(
-                                "Got deserialization exception=%s, Ignoring this exception and using original "
-                                        + "value [%s] as it could not be deserialized to AttributeStats object",
-                                e.getMessage(), objInOriginalTuple), e);
-                        attrValuesArr[idx] = objInOriginalTuple;
+                if (objInOriginalTuple != null
+                        && (objInOriginalTuple instanceof String || objInOriginalTuple instanceof Utf8)) {
+                    AttributeStats statsInOriginalTuple;
+                    String strVal = objInOriginalTuple.toString();
+                    if (strVal.startsWith("{") && strVal.endsWith("}")) {
+                        try {
+                            statsInOriginalTuple = OM.readValue(objInOriginalTuple.toString(), AttributeStats.class);
+                            attrValuesArr[idx] = statsInOriginalTuple;
+                        } catch (IOException e) {
+                            // ignore if type of serialized obj is not
+                            // statsInExistingMergedTuple
+                            log.info(String.format(
+                                    "Got deserialization exception=%s, Ignoring this exception and using original "
+                                            + "value [%s] as it could not be deserialized to AttributeStats object",
+                                    e.getMessage(), objInOriginalTuple), e);
+                            attrValuesArr[idx] = objInOriginalTuple;
+                        }
+                    } else {
+                        attrValuesArr[idx] = strVal;
                     }
                 } else {
                     attrValuesArr[idx] = objInOriginalTuple;
@@ -161,11 +122,12 @@ public class AMStatsDimensionUtil implements Serializable {
             attrValuesArr[idx] = objInOriginalTuple;
         }
 
-        public Tuple generateTuple() {
+        int size() {
+            return attrValuesArr.length;
+        }
 
-            checkZeroSizeTuple();
-
-            Tuple tuple = new Tuple();
+        Tuple generateTuple() {
+            Tuple tuple = Tuple.size(attrValuesArr.length);
 
             for (int idx = 0; idx < attrValuesArr.length; idx++) {
                 Object value = attrValuesArr[idx];
@@ -173,26 +135,22 @@ public class AMStatsDimensionUtil implements Serializable {
                     try {
                         value = OM.writeValueAsString(value);
                     } catch (JsonProcessingException e) {
-                        log.info(String.format(
+                        // cannot output AttributeStats to avro
+                        throw new RuntimeException(String.format(
                                 "Got serialization exception=%s, Ignoring this exception and using original "
                                         + "value [%s] of type %s instead of its serialized format",
                                 e.getMessage(), value, value.getClass().getName()), e);
                     }
                 }
-                tuple.add(value);
+                tuple.set(idx, value);
             }
 
-            if (tuple.size() == 0) {
-                throw new RuntimeException("Got zero size for generated tuple");
+            if (tuple.size() != attrValuesArr.length) {
+                throw new RuntimeException("The size of generated tuple is " + tuple.size() + ", but there are "
+                        + attrValuesArr.length + " in attrValuesArr.");
             }
 
             return tuple;
-        }
-
-        private void checkZeroSizeTuple() {
-            if (this.fieldsLength == 0) {
-                throw new RuntimeException("Got zero size tuple");
-            }
         }
     }
 }

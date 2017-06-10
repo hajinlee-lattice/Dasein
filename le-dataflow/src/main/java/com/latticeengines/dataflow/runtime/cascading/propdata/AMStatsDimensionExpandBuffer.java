@@ -29,7 +29,6 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
     private AMStatsDimensionUtil dimensionUtil;
 
     private Map<Long, List<Long>> dimensionValueAncestorPathMap;
-
     private String expandField;
 
     public AMStatsDimensionExpandBuffer(Params parameterObject) {
@@ -48,7 +47,6 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
                 parameterObject.requiredDimensionsValuesMap.get(normalizedExpandField);
 
         calculateDimensionValueAncestorPathMap(expandDimensionFieldValuesMap);
-
     }
 
     @Override
@@ -57,7 +55,6 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
         Iterator<TupleEntry> argumentsInGroup = bufferCall.getArgumentsIterator();
         Map<Long, ExpandedTuple> tuplesMap = new HashMap<>();
         Comparator[] fieldsArray = bufferCall.getArgumentFields().getComparators();
-        int fieldsLength = fieldsArray.length;
 
         Integer pos = null;
         TupleEntryCollector outputCollector = bufferCall.getOutputCollector();
@@ -84,7 +81,7 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
 
             List<Long> ancestorList = dimensionValueAncestorPathMap.get(nonFixedDimensionId);
             mergeAndPutTuple(fieldsArray, tuplesMap, //
-                    new ExpandedTuple(originalTuple, fieldsLength), //
+                    new ExpandedTuple(originalTuple), //
                     nonFixedDimensionId);
 
             if (ancestorList != null //
@@ -92,7 +89,7 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
                     && !nonFixedDimensionId.equals(ancestorList.get(0))) {
                 for (Long ancestorId : ancestorList) {
                     if (!nonFixedDimensionId.equals(ancestorId)) {
-                        ExpandedTuple rollupTuple = new ExpandedTuple(originalTuple, fieldsLength);
+                        ExpandedTuple rollupTuple = new ExpandedTuple(originalTuple);
                         rollupTuple.set(pos, ancestorId);
                         mergeAndPutTuple(fieldsArray, tuplesMap, //
                                 rollupTuple, ancestorId);
@@ -103,7 +100,8 @@ public class AMStatsDimensionExpandBuffer extends BaseOperation implements Buffe
 
         for (Long id : tuplesMap.keySet()) {
             ExpandedTuple tuple = tuplesMap.get(id);
-            outputCollector.add(tuple.generateTuple());
+            Tuple result = tuple.generateTuple();
+            outputCollector.add(result);
         }
     }
 

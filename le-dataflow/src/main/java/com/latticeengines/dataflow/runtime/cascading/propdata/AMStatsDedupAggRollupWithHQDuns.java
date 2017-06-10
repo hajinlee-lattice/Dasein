@@ -39,49 +39,25 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
     private MultiListCrossProductUtil crossProductUtil;
 
     private Map<Long, List<Long>> dimensionValueAncestorPathMap;
-
     private List<String> dimensionFields;
+
     private List<Integer> dimFieldPosList;
-    private List<Integer> hqDunsFieldsPosList;
+    private Map<Integer, Integer> inOutPosMap = new HashMap<>();
 
     public AMStatsDedupAggRollupWithHQDuns(Params parameterObject) {
         super(parameterObject.fieldDeclaration);
-        this.dimensionFields = parameterObject.dimensionFields;
+        dimensionFields = parameterObject.dimensionFields;
         dimensionUtil = new AMStatsDimensionUtil();
         crossProductUtil = new MultiListCrossProductUtil();
         dimFieldPosList = new ArrayList<>();
 
         dimensionValueAncestorPathMap = new HashMap<>();
 
-        for (String dimensionField : dimensionFields) {
-            int idx = 0;
-            for (String field : parameterObject.fields) {
-                if (field.toString().equals(dimensionField)) {
-                    dimFieldPosList.add(idx);
-                    break;
-                }
-                idx++;
-            }
-        }
-
         Collection<Map<String, CategoricalAttribute>> dimFieldValues = //
                 parameterObject.requiredDimensionsValuesMap.values();
 
         for (Map<String, CategoricalAttribute> expandDimensionFieldValuesMap : dimFieldValues) {
             calculateDimensionValueAncestorPathMap(expandDimensionFieldValuesMap);
-        }
-
-        hqDunsFieldsPosList = new ArrayList<>();
-
-        for (String fieldHQ : parameterObject.hqDunsFields) {
-            int idx = 0;
-            for (String field : parameterObject.fields) {
-                if (field.toString().equals(fieldHQ)) {
-                    hqDunsFieldsPosList.add(idx);
-                    break;
-                }
-                idx++;
-            }
         }
 
     }
@@ -103,36 +79,31 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
         // finally write all deduped records
 
         Iterator<TupleEntry> argumentsInGroup = bufferCall.getArgumentsIterator();
-        List<Object> hqDunsFieldValues = null;
         Fields fields = bufferCall.getArgumentFields();
-        int fieldLength = fields.getComparators().length;
+        int argFieldsLength = fields.getComparators().length;
 
         Map<Dimensions, ExpandedTuple> expandedTupleMap = new HashMap<>();
 
         TupleEntryCollector outputCollector = bufferCall.getOutputCollector();
         String hqDunsFieldValuesStr = "";
 
-        while (argumentsInGroup.hasNext()) {
+        TupleEntry group = bufferCall.getGroup();
+        for (Object obj: group.asIterableOf(Object.class)) {
+            hqDunsFieldValuesStr += " [" + obj + "] ";
+        }
 
+        while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
             Tuple originalTuple = arguments.getTuple();
+            initArgPos(arguments);
 
             List<Long> dimValues = new ArrayList<>();
             for (Integer dimPos : dimFieldPosList) {
                 dimValues.add(originalTuple.getLong(dimPos));
             }
 
-            if (hqDunsFieldValues == null) {
-                hqDunsFieldValues = new ArrayList<>();
-                for (Integer hqPos : hqDunsFieldsPosList) {
-                    hqDunsFieldValues.add(originalTuple.getObject(hqPos));
-                    hqDunsFieldValuesStr += " [" + originalTuple.getObject(hqPos) + "] ";
-                }
-
-            }
-
-            ExpandedTuple expandedTuple = new ExpandedTuple(originalTuple, fieldLength);
-            dedupAndPut(fieldLength, expandedTupleMap, new Dimensions(dimValues), expandedTuple);
+            ExpandedTuple expandedTuple = new ExpandedTuple(originalTuple);
+            dedupAndPut(argFieldsLength, expandedTupleMap, new Dimensions(dimValues), expandedTuple);
         }
 
         Set<Dimensions> dimSet = new HashSet<>();
@@ -164,7 +135,7 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
                 for (Integer dimPos : dimFieldPosList) {
                     rollupExpandedTuple.set(dimPos, ancestorTuple.get(idx++));
                 }
-                dedupAndPut(fieldLength, expandedTupleMap, new Dimensions(ancestorTuple), rollupExpandedTuple);
+                dedupAndPut(argFieldsLength, expandedTupleMap, new Dimensions(ancestorTuple), rollupExpandedTuple);
             }
         }
 
@@ -172,22 +143,56 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
             try {
                 log.info(String.format("Writing output tuple: hqDunsFieldValuesStr = %s, Dimensions = %s",
                         hqDunsFieldValuesStr, dim.toString()));
-                outputCollector.add(expandedTupleMap.get(dim).generateTuple());
+                Tuple resultInInputOrder = expandedTupleMap.get(dim).generateTuple();
+                Tuple result = Tuple.size(fieldDeclaration.size());
+                for (int i = 0; i < resultInInputOrder.size(); i++) {
+                    if (inOutPosMap.containsKey(i)) {
+                        Object val = resultInInputOrder.getObject(i);
+                        result.set(inOutPosMap.get(i), val);
+                    }
+                }
+                outputCollector.add(result);
             } catch (Exception ex) {
                 String msg = String.format(
                         "%s\nhqDunsFieldValuesStr=%s, Dimensions=%s, expandedTupleMapKeySet=%s, "
                                 + "tupleSize=%d, outputCollectorSize=%d\n", //
                         ex.getMessage(), hqDunsFieldValuesStr, dim.toString(), expandedTupleMap.keySet(),
-                        expandedTupleMap.get(dim).fieldsLength, bufferCall.getDeclaredFields().size());
+                        expandedTupleMap.get(dim).size(), bufferCall.getDeclaredFields().size());
                 ObjectMapper om = new ObjectMapper();
                 try {
                     msg = String.format("%s\n\n%s\n", msg,
                             om.writeValueAsString(expandedTupleMap.get(dim).generateTuple()));
                 } catch (JsonProcessingException e) {
+                    // ignore
                 }
                 throw new RuntimeException(msg, ex);
             }
         }
+    }
+
+    private void initArgPos(TupleEntry argument) {
+        if (inOutPosMap.isEmpty()) {
+            Map<String, Integer> outPos = new HashMap<>();
+            for (int i = 0; i < fieldDeclaration.size(); i++) {
+                String fieldName = (String) fieldDeclaration.get(i);
+                outPos.put(fieldName, i);
+            }
+            Fields argFields = argument.getFields();
+            for (int i =0; i < argFields.size(); i++) {
+                String fieldName = (String) argFields.get(i);
+                if (outPos.containsKey(fieldName)) {
+                    inOutPosMap.put(i, outPos.get(fieldName));
+                }
+            }
+        }
+
+        if (dimFieldPosList.isEmpty()) {
+            for (String dimField: dimensionFields) {
+                Integer pos = argument.getFields().getPos(dimField);
+                dimFieldPosList.add(pos);
+            }
+        }
+
     }
 
     private void dedupAndPut(int fieldLength, Map<Dimensions, ExpandedTuple> expandedTupleMap, //
@@ -284,20 +289,14 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
     }
 
     public static class Params {
-        List<String> fields;
         List<String> dimensionFields;
-        List<String> hqDunsFields;
         Fields fieldDeclaration;
         Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
 
-        public Params(List<String> fields, //
-                List<String> dimensionFields, //
-                List<String> hqDunsFields, //
+        public Params(List<String> dimensionFields, //
                 Fields fieldDeclaration, //
                 Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap) {
-            this.fields = fields;
             this.dimensionFields = dimensionFields;
-            this.hqDunsFields = hqDunsFields;
             this.fieldDeclaration = fieldDeclaration;
             this.requiredDimensionsValuesMap = requiredDimensionsValuesMap;
         }

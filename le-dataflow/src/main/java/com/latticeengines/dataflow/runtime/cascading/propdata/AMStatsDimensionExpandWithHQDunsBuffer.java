@@ -63,7 +63,7 @@ public class AMStatsDimensionExpandWithHQDunsBuffer extends BaseOperation implem
                 dimValues.add(originalTuple.getLong(dimPos));
             }
 
-            ExpandedTuple expandedTuple = new ExpandedTuple(originalTuple, fieldLength);
+            ExpandedTuple expandedTuple = new ExpandedTuple(originalTuple);
 
             if (resultExpandedTuple == null) {
                 resultExpandedTuple = expandedTuple;

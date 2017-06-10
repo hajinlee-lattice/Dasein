@@ -35,24 +35,23 @@ public class AMStatsDimensionAggregator extends BaseAggregator<AMStatsDimensionA
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        int fieldsLength = arguments.getFields().size();
         Tuple tuple = arguments.getTuple();
 
         if (context.mergedTuple == null) {
-            context.mergedTuple = new ExpandedTuple(tuple, fieldsLength);
+            context.mergedTuple = new ExpandedTuple(tuple);
         } else {
             context.mergedTuple = //
                     dimensionUtil.merge(context.mergedTuple, //
-                            new ExpandedTuple(tuple, fieldsLength), //
-                            fieldsLength);
+                            new ExpandedTuple(tuple), //
+                            tuple.size());
         }
         return context;
     }
 
     @Override
     protected Tuple finalizeContext(Context context) {
-        Tuple tuple = context.mergedTuple.generateTuple();
+        Tuple result = context.mergedTuple.generateTuple();
         context.mergedTuple = null;
-        return tuple;
+        return result;
     }
 }
