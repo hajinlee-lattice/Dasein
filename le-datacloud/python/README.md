@@ -58,6 +58,11 @@ For every module needs an executable interface,
 we create a `*_x.py` wrapper module that
 contains only arguments definitions and hooks up to a backend module.
 
+### Logging
+
+When you run the `datacloud` command, it will log to both console and log files in `/var/log/ledc`. 
+Normally console logs at INFO, while file logs at DEBUG and ERROR.
+
 ### Test
 
 Add tests to `tests` module. Run them by

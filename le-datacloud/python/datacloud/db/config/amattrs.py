@@ -1,8 +1,11 @@
 from __future__ import absolute_import
 
 import MySQLdb
+import logging
 import pymssql
 from datacloud.common.cipher import decrypt
+
+logger = logging.getLogger(__name__)
 
 SOURCE_MAP = {
     'HGData_Pivoted_Source': 'HGDataPivoted',
@@ -41,6 +44,7 @@ def str_to_value(s):
     return ('\'%s\'' % s.replace("'", "''")) if s is not None else 'NULL'
 
 def create_table(conn):
+    logger.info('Recreating table [AccountMaster_Attributes]')
     with conn.cursor() as cursor:
         sql = """
         DROP TABLE IF EXISTS `AccountMaster_Attributes`;
@@ -76,9 +80,9 @@ def create_table(conn):
         """
         cursor.execute(sql)
         conn.commit()
-        print 'Recreated Table [AccountMaster_Attributes]'
 
 def read_dnb_attributes(src_conn, tgt_conn):
+    logger.info("Processing DNB attributes ...")
     with src_conn.cursor() as cursor:
         cursor.execute("""
         SELECT
@@ -107,7 +111,6 @@ def read_dnb_attributes(src_conn, tgt_conn):
 
         stmts = []
         for row in cursor:
-            print row
             item = dnb_row_to_item(row)
             sql = """
                 INSERT INTO `AccountMaster_Attributes` (
@@ -160,9 +163,10 @@ def read_dnb_attributes(src_conn, tgt_conn):
 
     with tgt_conn.cursor() as cursor:
         for n, s in stmts:
-            print "Adding DnB attribute [%s]" % n
+            logger.debug("Adding DnB attribute [%s]" % n)
             cursor.execute(s)
         tgt_conn.commit()
+        logger.info("Inserted %d attributes from DNB." % len(stmts))
 
 
 def dnb_row_to_item(row):
@@ -215,6 +219,7 @@ def dnb_row_to_item(row):
 
 
 def read_existing_attributes(src_conn, tgt_conn, table):
+    logger.info("Processing attributes in %s ..." % table)
     with src_conn.cursor() as cursor:
         cursor.execute("""
         SELECT
@@ -294,9 +299,10 @@ def read_existing_attributes(src_conn, tgt_conn, table):
 
     with tgt_conn.cursor() as cursor:
         for n, s, q in stmts:
-            print "Adding %s attribute [%s]" % (s, n)
+            logger.debug("Adding %s attribute [%s]" % (s, n))
             cursor.execute(q)
         tgt_conn.commit()
+        logger.info("Inserted %d attributes from %s." % (len(stmts), table))
 
 
 def existing_row_to_item(row):
@@ -369,6 +375,7 @@ def existing_row_to_item(row):
 
 
 def verify_am_attrs(conn):
+    logger.info("Verify generated table.")
     with conn.cursor() as cursor:
         cursor.execute("""
         SELECT

@@ -21,4 +21,7 @@ def parse_args():
     return parser.parse_args()
 
 if __name__ == '__main__':
+    from common.log import init_logging
+
+    init_logging()
     main()
