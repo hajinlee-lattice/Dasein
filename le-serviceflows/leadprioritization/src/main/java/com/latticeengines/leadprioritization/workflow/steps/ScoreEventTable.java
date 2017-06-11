@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.workflow.scoring.BaseScoreStep;
-import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
 
 @Component("scoreEventTable")
 public class ScoreEventTable extends BaseScoreStep<ScoreStepConfiguration> {

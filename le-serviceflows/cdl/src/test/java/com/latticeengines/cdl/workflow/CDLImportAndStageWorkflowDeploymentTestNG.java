@@ -5,6 +5,10 @@ import static org.testng.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CDLCreateStagingTablesWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CDLImportWorkflowConfiguration;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
@@ -67,6 +71,7 @@ public class CDLImportAndStageWorkflowDeploymentTestNG extends CDLWorkflowDeploy
         return builder.internalResourceHostPort(plsUrl) //
                 .microServiceHostPort(microServiceHostPort) //
                 .customer(customer) //
+                .customerDataPath(PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customer).toString()) //
                 .sourceFile("Account", sourceFileMap.get("Account")) //
                 .sourceFile("Transaction", sourceFileMap.get("Transaction")) //
                 .sourceFile("Product", sourceFileMap.get("Product")) //

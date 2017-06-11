@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.commons.io.FileUtils;

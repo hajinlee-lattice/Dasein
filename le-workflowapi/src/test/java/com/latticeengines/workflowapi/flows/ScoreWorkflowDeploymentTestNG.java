@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ScoreWorkflow;
-import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;

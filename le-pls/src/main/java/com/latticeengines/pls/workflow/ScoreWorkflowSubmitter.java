@@ -23,13 +23,14 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
@@ -134,6 +135,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .transformationGroup(transformationGroup) //
                 .transformDefinitions(getTransformDefinitions(modelingEventTable, transformationGroup))//
                 .bucketMetadata(bucketMetadataList) //
+                .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
                 .build();
     }
 }

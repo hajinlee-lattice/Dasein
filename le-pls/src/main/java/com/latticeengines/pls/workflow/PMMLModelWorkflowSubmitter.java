@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.PMMLModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 
 @Component("pmmlModelWorkflowSubmitter")

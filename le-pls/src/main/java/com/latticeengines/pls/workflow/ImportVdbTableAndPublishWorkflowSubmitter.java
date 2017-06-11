@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
-import com.latticeengines.leadprioritization.workflow.ImportVdbTableAndPublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportVdbTableAndPublishWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 

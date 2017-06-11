@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.importdata;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportSourceDataConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

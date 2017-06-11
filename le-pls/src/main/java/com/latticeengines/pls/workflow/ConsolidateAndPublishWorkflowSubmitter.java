@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.cdl.workflow.ConsolidateAndPublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateAndPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;

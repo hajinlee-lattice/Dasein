@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 

@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
-import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;

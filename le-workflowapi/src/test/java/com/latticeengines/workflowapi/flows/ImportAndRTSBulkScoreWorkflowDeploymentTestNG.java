@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflow;
-import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportAndRTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 
 public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {

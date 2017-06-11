@@ -40,7 +40,7 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflow;
-import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;

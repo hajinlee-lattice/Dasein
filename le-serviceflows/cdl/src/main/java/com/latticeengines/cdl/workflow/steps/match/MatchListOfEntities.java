@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow.steps.match;
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchListOfEntitiesConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

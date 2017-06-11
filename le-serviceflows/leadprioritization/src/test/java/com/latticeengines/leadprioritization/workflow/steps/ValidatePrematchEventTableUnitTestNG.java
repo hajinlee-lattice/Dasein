@@ -3,6 +3,7 @@ package com.latticeengines.leadprioritization.workflow.steps;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePrematchEventTableReportConfiguration;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeClass;

@@ -3,6 +3,7 @@ package com.latticeengines.prospectdiscovery.workflow.steps;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.stereotype.Component;
 

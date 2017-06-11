@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.prospectdiscovery.workflow.steps.CreateAttributeLevelSummaryWorkflow;
-import com.latticeengines.prospectdiscovery.workflow.steps.CreateAttributeLevelSummaryWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.CreateAttributeLevelSummaryWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 

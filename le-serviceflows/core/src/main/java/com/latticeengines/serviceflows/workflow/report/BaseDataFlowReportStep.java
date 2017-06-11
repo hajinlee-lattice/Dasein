@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.report;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseDataFlowReportStepConfiguration;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.joda.time.DateTime;

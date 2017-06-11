@@ -3,10 +3,9 @@ package com.latticeengines.pls.workflow;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.CDLDataFeedImportWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
-import com.latticeengines.pls.service.DataFeedMetadataService;
 
 @Component
 public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {

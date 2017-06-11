@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;

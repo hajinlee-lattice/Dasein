@@ -5,6 +5,7 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;

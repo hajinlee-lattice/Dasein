@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflow;
-import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModelWorkflowConfiguration;
 
 public class FitModelWorkflowInContainerDeploymentTestNG extends FitModelWorkflowTestNGBase {
 

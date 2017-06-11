@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndScoreWorkflow;
-import com.latticeengines.leadprioritization.workflow.ImportMatchAndScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndScoreWorkflowConfiguration;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;

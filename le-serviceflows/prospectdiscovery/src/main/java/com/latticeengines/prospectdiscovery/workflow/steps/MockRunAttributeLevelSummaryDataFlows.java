@@ -3,6 +3,7 @@ package com.latticeengines.prospectdiscovery.workflow.steps;
 import java.util.Arrays;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;

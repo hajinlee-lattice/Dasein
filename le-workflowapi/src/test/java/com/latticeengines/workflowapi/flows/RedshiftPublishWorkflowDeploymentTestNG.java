@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
-import com.latticeengines.cdl.workflow.RedshiftPublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.RedshiftPublishWorkflowConfiguration;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;

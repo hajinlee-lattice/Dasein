@@ -3,6 +3,7 @@ package com.latticeengines.prospectdiscovery.workflow.steps;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunScoreTableDataFlowConfiguration;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;

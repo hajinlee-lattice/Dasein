@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.MatchAndModelAndEmailWorkflow;
-import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNotesService;

@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow.steps.resolve;
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.resolve.ResolveDataConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.resolve.ResolveListOfEntitiesConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

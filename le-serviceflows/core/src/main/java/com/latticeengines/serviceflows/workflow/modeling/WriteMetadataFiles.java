@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;

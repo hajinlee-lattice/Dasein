@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.ImportAndCreateDiffWorkflowConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

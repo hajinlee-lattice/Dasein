@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow.steps.stage;
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.stage.StageDataConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.stage.StageListOfEntitiesConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

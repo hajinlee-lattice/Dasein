@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 
 @Component("persistDataRules")
 public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {

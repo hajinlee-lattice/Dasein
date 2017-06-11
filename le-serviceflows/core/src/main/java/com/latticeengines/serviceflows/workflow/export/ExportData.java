@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;

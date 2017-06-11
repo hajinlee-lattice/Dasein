@@ -42,7 +42,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         envname=`echo $CONDAENV | cut -d \| -f 1`
         pythonversion=`echo $CONDAENV | cut -d \| -f 2`
         if [ -d $ANACONDA_HOME/envs/$envname ]; then
-            echo "Removing existing Anaconda enironment: $envname"
+            echo "Removing existing Anaconda environment: $envname"
             $ANACONDA_HOME/bin/conda remove -y --name $envname --all 
         fi
         echo "Creating Anaconda environment: $envname"

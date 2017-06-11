@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.leadprioritization.workflow.ImportMatchAndScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;

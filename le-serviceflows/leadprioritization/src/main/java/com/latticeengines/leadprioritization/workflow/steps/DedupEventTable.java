@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.DedupEventTableConfiguration;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 

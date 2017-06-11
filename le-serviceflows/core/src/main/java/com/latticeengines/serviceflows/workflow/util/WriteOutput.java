@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.util;
 
+import com.latticeengines.domain.exposed.serviceflows.core.steps.WriteOutputStepConfiguration;
 import org.springframework.stereotype.Component;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 

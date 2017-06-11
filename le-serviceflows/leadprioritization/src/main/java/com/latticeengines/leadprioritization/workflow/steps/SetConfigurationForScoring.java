@@ -1,5 +1,8 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.DedupEventTableConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SetConfigurationForScoringConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
@@ -7,10 +10,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
-import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
-import com.latticeengines.serviceflows.workflow.match.ProcessMatchResultConfiguration;
-import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
 
 @Component("setConfigurationForScoring")
 public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfigurationForScoringConfiguration> {

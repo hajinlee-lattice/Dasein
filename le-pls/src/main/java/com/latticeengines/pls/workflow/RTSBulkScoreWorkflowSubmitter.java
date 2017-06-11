@@ -22,12 +22,13 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
@@ -121,6 +122,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchRequestSource(MatchRequestSource.ENRICHMENT) //
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //
+                .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
                 .build();
     }
 }

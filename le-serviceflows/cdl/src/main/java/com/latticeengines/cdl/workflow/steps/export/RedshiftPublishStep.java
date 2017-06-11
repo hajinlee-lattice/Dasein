@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.Properties;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.RedshiftPublishStepConfiguration;
 import org.apache.avro.Schema;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;

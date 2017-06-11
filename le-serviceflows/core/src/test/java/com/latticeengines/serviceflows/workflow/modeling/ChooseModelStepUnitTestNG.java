@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ChooseModelStepConfiguration;
 import org.springframework.batch.item.ExecutionContext;
 import org.testng.annotations.Test;
 

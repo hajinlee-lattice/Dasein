@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.RTSBulkScoreWorkflowConfiguration;
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

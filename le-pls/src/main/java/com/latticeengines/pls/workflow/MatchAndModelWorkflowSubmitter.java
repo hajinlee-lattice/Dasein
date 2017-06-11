@@ -23,14 +23,16 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
@@ -94,6 +96,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         String trainingFilePath = modelSummary.getModelSummaryConfiguration()
                 .getString(ProvenancePropertyName.TrainingFilePath, "");
 
+        List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
+                .getTransformDefinitions(sourceSchemaInterpretation, transformationGroup);
+
         MatchAndModelWorkflowConfiguration.Builder builder = new MatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -106,7 +111,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .inputProperties(inputProperties) //
                 .trainingTableName(cloneTableName) //
                 .userId(parameters.getUserId()) //
-                .transformationGroup(transformationGroup) //
+                .transformationGroup(transformationGroup, stdTransformDefns) //
                 .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled() || modelSummary
                         .getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled, false)) //
                 .sourceModelSummary(modelSummary) //
@@ -127,10 +132,11 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchColumnSelection(Predefined.getDefaultSelection(), null).moduleName(modelSummary.getModuleName()) //
                 .matchDebugEnabled(!parameters.isExcludePropDataAttributes() && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
+                .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //
-                .userRefinedAttributes(userRefinedAttributes)
+                .userRefinedAttributes(userRefinedAttributes) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }

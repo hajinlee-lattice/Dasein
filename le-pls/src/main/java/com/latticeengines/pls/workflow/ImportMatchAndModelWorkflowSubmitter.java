@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
@@ -33,15 +31,17 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.PivotMappingFileUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
@@ -117,13 +117,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         if (StringUtils.isNotEmpty(moduleName) && StringUtils.isNotEmpty(pivotFileName)) {
             List<Artifact> pivotArtifacts = metadataFileUploadService.getArtifacts(moduleName,
                     ArtifactType.PivotMapping);
-            pivotArtifact = Iterables.find(pivotArtifacts, new Predicate<Artifact>() {
-                @Override
-                public boolean apply(Artifact artifact) {
-                    return artifact.getName().equals(pivotFileName);
-                }
-            }, null);
-            if (pivotFileName != null && pivotArtifact == null) {
+            pivotArtifact = pivotArtifacts.stream().filter(artifact -> artifact.getName().equals(pivotFileName)).findFirst().orElseGet(() -> null);
+            if (pivotArtifact == null) {
                 throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
             }
         }
@@ -131,6 +126,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             updateTrainingTable(pivotArtifact.getPath(), trainingTable);
         }
         log.info("Modeling parameters: " + parameters.toString());
+
+        String schemaInterpretation = sourceFile.getSchemaInterpretation().toString();
+        TransformationGroup transformationGroup = parameters.getTransformationGroup();
+        List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
+                .getTransformDefinitions(schemaInterpretation, transformationGroup);
 
         ImportMatchAndModelWorkflowConfiguration.Builder builder = new ImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort)
@@ -148,20 +148,21 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns())
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .matchDebugEnabled(!parameters.getExcludePropDataColumns() && plsFeatureFlagService.isMatchDebugEnabled())
-                .matchRequestSource(MatchRequestSource.MODELING)
+                .matchRequestSource(MatchRequestSource.MODELING) //
+                .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE)
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion())
                 // null means latest
                 .dataCloudVersion(getDataCloudVersion(parameters))
                 .modelName(parameters.getName())
                 .displayName(parameters.getDisplayName())
-                .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString())
+                .sourceSchemaInterpretation(schemaInterpretation)
                 .trainingTableName(trainingTableName)
                 .inputProperties(inputProperties)
                 .minRows(minRows)
                 .minPositiveEvents(minPositiveEvents)
                 .minNegativeEvents(minNegativeEvents)
-                .transformationGroup(parameters.getTransformationGroup())
+                .transformationGroup(transformationGroup, stdTransformDefns)
                 .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled())
                 .excludePublicDomains(parameters.isExcludePublicDomains())
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, sourceFile.getPath())

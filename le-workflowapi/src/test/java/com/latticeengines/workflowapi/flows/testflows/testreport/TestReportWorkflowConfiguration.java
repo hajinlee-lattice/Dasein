@@ -2,7 +2,7 @@ package com.latticeengines.workflowapi.flows.testflows.testreport;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 
 public class TestReportWorkflowConfiguration extends WorkflowConfiguration {
     public static class Builder {

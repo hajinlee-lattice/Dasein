@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
-import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 
 @Component("createEventTableReport")
 public class CreateTableImportReport extends BaseReportStep<BaseReportStepConfiguration> {

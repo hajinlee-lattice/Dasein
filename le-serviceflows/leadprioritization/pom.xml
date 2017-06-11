@@ -104,6 +104,7 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-transform</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

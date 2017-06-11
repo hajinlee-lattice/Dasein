@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AddStandardAttributesConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportVdbTableAndPublishWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.importvdbtable.ImportVdbTable;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;

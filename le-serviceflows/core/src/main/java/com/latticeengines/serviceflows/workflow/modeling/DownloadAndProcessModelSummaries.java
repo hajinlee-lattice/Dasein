@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

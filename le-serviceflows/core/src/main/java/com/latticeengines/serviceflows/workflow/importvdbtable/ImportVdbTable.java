@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import org.apache.commons.logging.Log;

@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;

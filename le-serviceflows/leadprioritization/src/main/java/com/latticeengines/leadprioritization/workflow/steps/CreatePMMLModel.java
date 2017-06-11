@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

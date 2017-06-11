@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.TargetMarketService;
-import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModelWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 

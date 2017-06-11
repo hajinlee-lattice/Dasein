@@ -3,6 +3,7 @@ package com.latticeengines.leadprioritization.workflow.steps;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePrematchEventTableReportConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 

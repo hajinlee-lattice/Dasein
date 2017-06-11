@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.importdata;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

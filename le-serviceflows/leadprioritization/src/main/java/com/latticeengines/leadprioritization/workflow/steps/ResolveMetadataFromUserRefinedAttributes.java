@@ -2,6 +2,7 @@ package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

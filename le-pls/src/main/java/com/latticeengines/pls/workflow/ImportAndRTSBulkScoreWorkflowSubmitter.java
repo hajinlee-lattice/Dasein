@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportAndRTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;

@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflow;
-import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModelWorkflowConfiguration;
 
 public class FitModelWorkflowDeploymentTestNG extends FitModelWorkflowTestNGBase {
 

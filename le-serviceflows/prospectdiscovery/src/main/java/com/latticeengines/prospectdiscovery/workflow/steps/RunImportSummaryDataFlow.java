@@ -3,6 +3,7 @@ package com.latticeengines.prospectdiscovery.workflow.steps;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunImportSummaryDataFlowConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;

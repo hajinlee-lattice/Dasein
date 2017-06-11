@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 
 @Component("remediateDataRules")
 public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration> {

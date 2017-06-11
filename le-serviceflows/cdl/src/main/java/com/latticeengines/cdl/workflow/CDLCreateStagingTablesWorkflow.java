@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.CDLCreateStagingTablesWorkflowConfiguration;
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;

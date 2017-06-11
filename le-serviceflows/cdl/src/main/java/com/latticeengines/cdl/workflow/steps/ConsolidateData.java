@@ -12,6 +12,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
