@@ -29,6 +29,8 @@ conda install -y pymssql pycrypto
 
 conda install -y -c bioconda mysqlclient
 
-pip install argparse
+pip install argparse pytest pytest-pythonpath
 
 source ${ANACONDA_HOME}/bin/deactivate ${ENV_NAME}
+
+ln -s ${WSHOME}/le-datacloud/python/bin/datacloud ${ANACONDA_HOME}/envs/${ENV_NAME}/bin/datacloud

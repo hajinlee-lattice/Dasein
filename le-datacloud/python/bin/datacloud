@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+UNAME=`uname`
+
+if [[ "${UNAME}" == 'Darwin' ]]; then
+    script_path=$(readlink $0)
+else
+    script_path=$(readlink -f $0)
+fi
+
+project_root=$(dirname $(dirname ${script_path}))
+python ${project_root}/datacloud/execute.py $@
