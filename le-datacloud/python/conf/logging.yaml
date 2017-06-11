@@ -14,7 +14,7 @@ handlers:
         level: INFO
         formatter: simple
 
-    info_file_handler:
+    debug_file_handler:
         class: logging.handlers.RotatingFileHandler
         level: DEBUG
         formatter: precise
@@ -34,4 +34,4 @@ handlers:
 
 root:
     level: DEBUG
-    handlers: [console, info_file_handler, error_file_handler]
+    handlers: [console, debug_file_handler, error_file_handler]
