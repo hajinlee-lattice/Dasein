@@ -38,16 +38,18 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 public class SourceProfileTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final Log log = LogFactory.getLog(SourceProfileTestNG.class);
 
-    GeneralSource source = new GeneralSource("AMProfile");
+    private static final long RAND_SEED = 0L;
+
+    private GeneralSource source = new GeneralSource("AMProfile");
 
     @Autowired
-    AccountMaster am;
+    private AccountMaster am;
 
     private static final String customerTableName = "CustomerTable";
     GeneralSource customerTable = new GeneralSource(customerTableName);
 
     @Autowired
-    SourceService sourceService;
+    private SourceService sourceService;
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -55,7 +57,7 @@ public class SourceProfileTestNG extends TransformationServiceImplTestNGBase<Pip
     @Autowired
     private PipelineTransformationService pipelineTransformationService;
 
-    ObjectMapper om = new ObjectMapper();
+    private ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "deployment")
     public void testTransformation() {
@@ -148,6 +150,7 @@ public class SourceProfileTestNG extends TransformationServiceImplTestNGBase<Pip
         conf.setNumBucketEqualSized(false);
         conf.setBucketNum(4);
         conf.setMinBucketSize(2);
+        conf.setRandSeed(RAND_SEED);
         return om.writeValueAsString(conf);
     }
 

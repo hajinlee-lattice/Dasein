@@ -75,6 +75,7 @@ public class ProfileTransformer extends AbstractDataflowTransformer<ProfileConfi
         parameters.setNumBucketEqualSized(config.isNumBucketEqualSized());
         parameters.setBucketNum(config.getBucketNum());
         parameters.setMinBucketSize(config.getMinBucketSize());
+        parameters.setRandSeed(config.getRandSeed());
         List<String> numAttrs = new ArrayList<>();
         List<String> boolAttrs = new ArrayList<>();
         Map<String, Pair<Integer, Map<String, String>>> encodedAttrs = new HashMap<>();
