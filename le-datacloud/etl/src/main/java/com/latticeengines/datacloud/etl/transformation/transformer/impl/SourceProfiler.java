@@ -36,8 +36,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component(Profile.TRANSFORMER_NAME)
-public class ProfileTransformer extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
-    private static final Log log = LogFactory.getLog(ProfileTransformer.class);
+public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
+    private static final Log log = LogFactory.getLog(SourceProfiler.class);
 
     private static final String STRATEGY_ENCODED_COLUMN = "EncodedColumn";
     private static final String STRATEGY_BIT_INTERPRETATION = "BitInterpretation";
