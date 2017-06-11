@@ -30,6 +30,9 @@ public class ProfileParameters extends TransformationFlowParameters {
     @JsonProperty("RetainedAttrs")
     private List<String> retainedAttrs; // retained attrs without bucket
 
+    @JsonProperty("IDAttr")
+    private String idAttr;
+
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose
 
@@ -95,6 +98,14 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     public void setRandSeed(Long randSeed) {
         this.randSeed = randSeed;
+    }
+
+    public String getIdAttr() {
+        return idAttr;
+    }
+
+    public void setIdAttr(String idAttr) {
+        this.idAttr = idAttr;
     }
 
 }

@@ -80,16 +80,23 @@ public class ProfileTransformer extends AbstractDataflowTransformer<ProfileConfi
         List<String> boolAttrs = new ArrayList<>();
         Map<String, Pair<Integer, Map<String, String>>> encodedAttrs = new HashMap<>();
         List<String> retainedAttrs = new ArrayList<>();
-        classifyAttrs(baseTemplates[0], baseVersions.get(0), numAttrs, boolAttrs, encodedAttrs, retainedAttrs);
+        List<String> idAttrs = new ArrayList<>();
+        classifyAttrs(baseTemplates[0], baseVersions.get(0), numAttrs, boolAttrs, encodedAttrs, retainedAttrs, idAttrs);
+        if (idAttrs.size() != 1) {
+            throw new RuntimeException(
+                    "One and only one lattice account id is required. Allowed id field: LatticeAccountId, LatticeID");
+        }
         parameters.setNumAttrs(numAttrs);
         parameters.setBoolAttrs(boolAttrs);
         parameters.setEncodedAttrs(encodedAttrs);
         parameters.setRetainedAttrs(retainedAttrs);
+        parameters.setIdAttr(idAttrs.get(0));
     }
 
     @SuppressWarnings("unchecked")
     private void classifyAttrs(Source baseSrc, String baseVer, List<String> numAttrs, List<String> boolAttrs,
-            Map<String, Pair<Integer, Map<String, String>>> encodedAttrs, List<String> retainedAttrs) {
+            Map<String, Pair<Integer, Map<String, String>>> encodedAttrs, List<String> retainedAttrs,
+            List<String> idAttrs) {
         // TODO: Will replace by reading from SourceAttribute table
         Map<String, Map<String, Object>> amAttrConf = FileParser.parseAMProfileConfig();
         Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(baseSrc, baseVer);
@@ -137,6 +144,12 @@ public class ProfileTransformer extends AbstractDataflowTransformer<ProfileConfi
                 isSeg = true;
                 isBucket = true;
             }
+            if (field.name().equals(DataCloudConstants.LATTIC_ID)
+                    || field.name().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) {
+                log.info(String.format("ID attr: %s", field.name()));
+                idAttrs.add(field.name());
+                continue;
+            }
             if (!isSeg) { // If not for segment, exclude it from profiling
                 log.info(String.format("Discarded attr: %s", field.name()));
                 continue;
@@ -183,12 +196,13 @@ public class ProfileTransformer extends AbstractDataflowTransformer<ProfileConfi
 
     @Override
     protected void postDataFlowProcessing(String workflowDir, ProfileParameters para, ProfileConfig config) {
-        int size = para.getBoolAttrs().size() + para.getRetainedAttrs().size();
+        int size = 1 + para.getBoolAttrs().size() + para.getRetainedAttrs().size(); // 1 is id attr
         for (Pair<Integer, Map<String, String>> encodedEnt : para.getEncodedAttrs().values()) {
             size += encodedEnt.getRight().size();
         }
         Object[][] data = new Object[size][7];
-        int i = -1;
+        int i = 0;
+        profileIdAttr(para.getIdAttr(), data[i]);
         for (String attr : para.getRetainedAttrs()) {
             i++;
             profileRetainedAttrs(attr, data[i]);
@@ -232,6 +246,16 @@ public class ProfileTransformer extends AbstractDataflowTransformer<ProfileConfi
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void profileIdAttr(String idAttr, Object[] arr) {
+        arr[0] = DataCloudConstants.LATTICE_ACCOUNT_ID;
+        arr[1] = idAttr;
+        arr[2] = null;
+        arr[3] = null;
+        arr[4] = null;
+        arr[5] = null;
+        arr[6] = null;
     }
 
     private void profileRetainedAttrs(String attr, Object[] arr) {
