@@ -1,0 +1,96 @@
+<section id="main-content" class="container tile-list">
+
+    <div class="row">
+        <div class="twelve columns">
+            <ul class="tiles">
+
+
+                <li
+                    ng-repeat="play in vm.plays"
+                    ng-click="vm.tileClick($event, play.name)"
+                    ng-mouseleave="vm.tileStates[play.name].showCustomMenu ? vm.customMenuClick($event, play) : null"
+                >
+                    <div class="tile-header" ng-if="!vm.tileStates[play.name].editPlay">
+                        <h2 title="{{play.display_name}}">{{play.display_name | limitTo: 44 }}{{play.display_name.length > 44 ? '&hellip;' : ''}}</h2>
+                        <div class="edit">
+                            <button
+                                    type="button"
+                                    ng-click="vm.customMenuClick($event, play)"
+                                    ng-class="{ 'open': vm.tileStates[play.name].showCustomMenu }">
+                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.tileStates[play.name].showCustomMenu }"></span>
+                            </button>
+                            <ul class="model-menu" ng-show="vm.tileStates[play.name].showCustomMenu">
+                                <li data-ng-click="vm.editPlayClick($event, play)">
+                                    <a href="javascript:void(0)">Edit</a>
+                                    <i class="fa fa-edit"></i>
+                                </li>
+                                <li data-ng-click="vm.showDeletePlayModalClick($event, play)">
+                                    <a href="javascript:void(0)">Delete</a>
+                                    <i class="fa fa-trash"></i>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tile-body" ng-if="!vm.tileStates[play.name].editPlay">
+                        <p title="{{play.description}}" ng-if="play.description != null">{{play.description | limitTo: 250 }}{{play.description.length > 250 ? '&hellip;' : ''}}</p>
+                        <p ng-if="play.description === null || play.description === ''"><button class="button link-button" data-ng-click="vm.editPlayClick($event, play)">Add description</button></p>
+                    </div>
+
+                    <form
+                        class="edit-form"
+                        name="editPlayForm"
+                        ng-if="vm.tileStates[play.name].editPlay"
+                        ng-click="$event.stopPropagation()">
+                        <div class="form-group">
+                            <label for="playDisplayName">Name
+                            <input
+                                autofocus
+                                type="text"
+                                id="display_name"
+                                name="display_name"
+                                data-ng-model="play.display_name"
+                                class="form-control" />
+                                </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="playDescription">Description</label>
+                            <textarea
+                                class="form-control"
+                                id="description"
+                                name="description"
+                                data-ng-model="play.description"
+                            ></textarea>
+                        </div>
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="button white-button pull-left"
+                                ng-click="vm.cancelEditPlayClicked($event, play)">
+                                Cancel</button>
+                            <button
+                                type="button"
+                                class="button orange-button pull-right"
+                                ng-disabled="editPlayForm.$pristine"
+                                ng-click="vm.savePlayClicked($event, play)">
+                                Save</button>
+                        </div>
+                    </form>
+
+                </li>
+
+
+                <li class="no-style">
+                    <a
+                        class="button new-tile-button"
+                        ui-sref="home.playbook.wizard">
+                        <span>&#43;</span>
+                        Add Play
+                    </a>
+                </li>
+
+
+            </ul>
+        </div>
+    </div><!-- End .row -->
+
+</section>

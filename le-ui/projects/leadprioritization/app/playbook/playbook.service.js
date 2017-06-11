@@ -149,6 +149,11 @@ angular.module('lp.playbook')
         this.currentPlay = play;
     }
 
+
+
+
+
+
     this.getCurrentPlay = function() {
         return this.currentPlay;
     }
@@ -190,6 +195,38 @@ angular.module('lp.playbook')
         });
         return deferred.promise;
     }
+})
+.service('PlayListService', function($q, $http, $state) {
+
+    this.getPlays = function() {
+
+        var deferred = $q.defer(),
+            result,
+            url = '/pls/play';
+
+        $http({
+            method: 'GET',
+            url: url,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
 })
 .service('PlaybookWizardService', function($q, $http, $state) {
     this.host = '/pls'; //default

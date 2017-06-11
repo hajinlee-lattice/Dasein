@@ -14,22 +14,32 @@ angular
     $stateProvider
         .state('home.playbook', {
             url: '/playbook',
+            redirectTo: 'home.playbook.plays'
+        })
+        .state('home.playbook.plays', {
+            url: '/plays',
+            params: {
+                pageIcon: 'ico-plays',
+                pageTitle: 'Play Book'
+            },
             views: {
-                'main@': {
+                "main@": {
                     resolve: {
-                        WizardHeaderTitle: function() {
-                            return 'Play Book';
-                        },
-                        WizardContainerId: function() {
-                            return 'playbook';
+                        PlayList: function($q, PlayListService) {
+                            var deferred = $q.defer();
+
+                            PlayListService.getPlays().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
                         }
                     },
-                    controller: 'ImportWizard',
+                    controller: 'PlayListController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/wizard/wizard.component.html'
+                    templateUrl: 'app/playbook/content/playList/playList.component.html'
                 }
-            },
-            redirectTo: 'home.playbook.wizard'
+            }
         })
         .state('home.playbook.wizard', {
             url: '/wizard/:play_name',
@@ -53,6 +63,19 @@ angular
                 }
             },
             views: {
+                'main@': {
+                    resolve: {
+                        WizardHeaderTitle: function() {
+                            return 'Play Book';
+                        },
+                        WizardContainerId: function() {
+                            return 'playbook';
+                        }
+                    },
+                    controller: 'ImportWizard',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/wizard.component.html'
+                },
                 'wizard_progress': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
