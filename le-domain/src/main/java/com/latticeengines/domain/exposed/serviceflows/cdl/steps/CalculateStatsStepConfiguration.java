@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow.steps;
+package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;

@@ -1,8 +1,8 @@
-package com.latticeengines.cdl.workflow;
+package com.latticeengines.domain.exposed.serviceflows.cdl;
 
-import com.latticeengines.cdl.workflow.steps.CalculateStatsStepConfiguration;
-import com.latticeengines.cdl.workflow.steps.UpdateStatsObjectsConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class CalculateStatsWorkflowConfiguration extends WorkflowConfiguration {
