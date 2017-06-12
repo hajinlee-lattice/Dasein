@@ -73,6 +73,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
                         .build()) //
                 .masterTableName(dataCollection.getTable(SchemaInterpretation.Account).getName()) //
+                .profileTableName("ProfileTable") // TODO:
                 .idField("LEAccountIDLong") //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder()
                         .put(MatchKey.Domain, Arrays.asList(InterfaceName.Domain.name())) //

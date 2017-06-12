@@ -16,6 +16,11 @@ public class ConsolidateDataConfiguration extends MicroserviceStepConfiguration 
     @NotNull
     private String masterTableName;
 
+    @JsonProperty("profile_table_name")
+    @NotEmptyString
+    @NotNull
+    private String profileTableName;
+    
     @JsonProperty("id_field")
     @NotEmptyString
     @NotNull
@@ -31,6 +36,14 @@ public class ConsolidateDataConfiguration extends MicroserviceStepConfiguration 
     public void setMasterTableName(String masterTableName) {
 
         this.masterTableName = masterTableName;
+    }
+
+    public String getProfileTableName() {
+        return profileTableName;
+    }
+
+    public void setProfileTableName(String profileTableName) {
+        this.profileTableName = profileTableName;
     }
 
     public String getIdField() {

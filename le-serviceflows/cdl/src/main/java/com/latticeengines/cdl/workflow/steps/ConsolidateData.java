@@ -12,7 +12,6 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -28,12 +26,14 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDeltaTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -50,7 +50,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     private static final String mergedTableName = "MergedTable";
     private static final String consolidatedTableName = "ConsolidatedTable";
 
-    private static final CustomerSpace customerSpace = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
+    private CustomerSpace customerSpace = null;
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
@@ -62,9 +62,11 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     private String targetVersion;
     private String idField;
     Map<MatchKey, List<String>> keyMap = null;
+    Boolean dataInitialLoaded = false;
 
     @Override
     public void onConfigurationInitialized() {
+        customerSpace = configuration.getCustomerSpace();
         List<Table> inputTables = getListObjectFromContext(CONSOLIDATE_INPUT_TABLES, Table.class);
         for (Table table : inputTables) {
             inputTableNames.add(table.getName());
@@ -76,6 +78,9 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
 
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         targetVersion = dateFormat.format(new Date());
+
+        dataInitialLoaded = getObjectFromContext(DATA_INITIAL_LOADED, Boolean.class);
+
     }
 
     @Override
@@ -102,6 +107,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
 
         putObjectInContext(CONSOLIDATE_CONSOLIDATED_TABLE, consolidatedTable);
         putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
+        putObjectInContext(CONSOLIDATE_DOING_PUBLISH, isBucketing());
     }
 
     private PipelineTransformationRequest getConcolidateReqest() {
@@ -115,8 +121,18 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
             TransformationStepConfig matchStep = createMatchStep();
             TransformationStepConfig upsertMasterStep = createUpsertMasterStep();
             TransformationStepConfig getConsolidatedStep = createConsolidatedStep();
+            TransformationStepConfig createBucketStep = createBucketStep();
+            TransformationStepConfig sorterStep = createSorterStep();
 
-            List<TransformationStepConfig> steps = Arrays.asList(mergeStep, matchStep, upsertMasterStep, getConsolidatedStep);
+            List<TransformationStepConfig> steps = new ArrayList<>();
+            steps.add(mergeStep);
+            steps.add(matchStep);
+            steps.add(upsertMasterStep);
+            steps.add(getConsolidatedStep);
+            if (createBucketStep != null && sorterStep != null) {
+                steps.add(createBucketStep);
+                steps.add(sorterStep);
+            }
             request.setSteps(steps);
 
             return request;
@@ -183,18 +199,78 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     }
 
     private TransformationStepConfig createConsolidatedStep() {
-        TargetTable targetTable;
         TransformationStepConfig step4 = new TransformationStepConfig();
         // step 2, 3 output
         step4.setInputSteps(Arrays.asList(1, 2));
         step4.setTransformer("consolidateDeltaTransformer");
         step4.setConfiguration(getConsolidateDeltaConfig());
 
-        targetTable = new TargetTable();
+        if (!isBucketing()) {
+            TargetTable targetTable = new TargetTable();
+            targetTable.setCustomerSpace(customerSpace);
+            targetTable.setNamePrefix(consolidatedTableName);
+            step4.setTargetTable(targetTable);
+        }
+        return step4;
+    }
+
+    private boolean isBucketing() {
+        return Boolean.TRUE.equals(dataInitialLoaded);
+    }
+
+    private TransformationStepConfig createBucketStep() {
+        if (!isBucketing()) {
+            return null;
+        }
+        String profileTableName = configuration.getProfileTableName();
+        Table profileTable = metadataProxy.getTable(customerSpace.toString(), profileTableName);
+        if (profileTable == null) {
+            String error = "Profile table does not exist! name=" + profileTableName;
+            log.error(error);
+            return null;
+        }
+        TransformationStepConfig step5 = new TransformationStepConfig();
+        List<String> baseSources = Arrays.asList(profileTableName);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        SourceTable sourceProfileTable = new SourceTable(profileTableName, customerSpace);
+        baseTables.put(profileTableName, sourceProfileTable);
+        step5.setBaseSources(baseSources);
+        step5.setBaseTables(baseTables);
+
+        // step 4 output
+        step5.setInputSteps(Arrays.asList(3));
+        step5.setTransformer("sourceBucketer");
+        step5.setConfiguration("{}");
+
+        return step5;
+    }
+
+    private TransformationStepConfig createSorterStep() {
+        if (!isBucketing()) {
+            return null;
+        }
+        TransformationStepConfig step6 = new TransformationStepConfig();
+        // step 5 output
+        step6.setInputSteps(Arrays.asList(4));
+        step6.setTransformer("sourceSorter");
+        step6.setConfiguration(sortStepConfiguration());
+
+        TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(consolidatedTableName);
-        step4.setTargetTable(targetTable);
-        return step4;
+        step6.setTargetTable(targetTable);
+        return step6;
+    }
+
+    private String sortStepConfiguration() {
+        try {
+            SorterConfig config = new SorterConfig();
+            config.setPartitions(100);
+            config.setSortingField("LatticeAccountId");
+            return JsonUtils.serialize(config);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     private String getConsolidateDataConfig() {

@@ -85,6 +85,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CONSOLIDATE_INPUT_TABLES = "CONSOLIDATE_INPUT_TABLES";
     protected static final String CONSOLIDATE_CONSOLIDATED_TABLE = "CONSOLIDATE_CONSOLIDATED_TABLE";
     protected static final String CONSOLIDATE_MASTER_TABLE = "CONSOLIDATE_MASTER_TABLE";
+    protected static final String CONSOLIDATE_DOING_PUBLISH = "CONSOLIDATE_DOING_PUBLISH";
 
     @Autowired
     protected Configuration yarnConfiguration;
