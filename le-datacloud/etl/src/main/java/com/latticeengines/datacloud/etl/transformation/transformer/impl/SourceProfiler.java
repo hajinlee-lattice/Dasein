@@ -217,16 +217,18 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             result.add(profileRetainedAttr(attr));
         }
         Map<String, List<ProfileParameters.Attribute>> encodedAttrs = groupEncodedAttrs(para.getEncodedAttrs());
+        int size = result.size() + para.getNumericAttrs().size() + encodedAttrs.size();
+        if (size > maxAttrs) {
+            log.warn(String.format("Expected max attr num in bucketed am: %d, actual: %d", maxAttrs, size));
+        } else {
+            log.info(String.format("Attr num in bucketd am: %d", size));
+        }
         for (Map.Entry<String, List<ProfileParameters.Attribute>> entry : encodedAttrs.entrySet()) {
             int lowestBit = 0;
             for (ProfileParameters.Attribute attr : entry.getValue()) {
                 result.add(profileEncodedAttr(attr, entry.getKey(), lowestBit));
                 lowestBit += attr.getEncodeBitUnit();
             }
-        }
-        int size = result.size() + para.getNumericAttrs().size();
-        if (size > maxAttrs) {
-            log.warn(String.format("Expected max attr num in bucketed am: %d, actual: %d", maxAttrs, size));
         }
         Object[][] data = new Object[result.size()][7];
         for (int i = 0; i < result.size(); i++) {
