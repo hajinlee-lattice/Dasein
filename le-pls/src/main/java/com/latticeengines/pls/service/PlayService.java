@@ -8,7 +8,7 @@ public interface PlayService {
 
     List<Play> getAllPlays();
 
-    Play createPlay(Play play, String tenantId);
+    Play createOrUpdate(Play play, String tenantId);
 
     Play getPlayByName(String name);
 

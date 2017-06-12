@@ -1,7 +1,10 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -16,6 +19,8 @@ import com.latticeengines.pls.entitymanager.PlayEntityMgr;
 @Component("playEntityMgr")
 public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEntityMgr {
 
+    private static final Log log = LogFactory.getLog(PlayEntityMgrImpl.class);
+
     @Autowired
     private PlayDao playDao;
 
@@ -26,8 +31,49 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void create(Play entity) {
-        playDao.create(entity);
+    public Play createOrUpdatePlay(Play play) {
+        Date timestamp = new Date(System.currentTimeMillis());
+        if (play.getName() == null) {
+            play.setTimeStamp(timestamp);
+            play.setLastUpdatedTimestamp(timestamp);
+            play.setName(play.generateNameStr());
+            playDao.create(play);
+            return play;
+        } else {
+            Play retrievedPlay = findByName(play.getName());
+            if (retrievedPlay == null) {
+                log.warn(String.format("Play with name %s does not exist, creating it now", play.getName()));
+                play.setTimeStamp(timestamp);
+                play.setLastUpdatedTimestamp(timestamp);
+                playDao.create(play);
+                return play;
+            } else {
+                // Front end only sends delta to the back end to update existing
+                updateExistingPlay(retrievedPlay, play);
+                retrievedPlay.setLastUpdatedTimestamp(timestamp);
+                playDao.update(retrievedPlay);
+                return retrievedPlay;
+            }
+        }
+
+    }
+
+    private void updateExistingPlay(Play existingPlay, Play play) {
+        if (play.getDisplayName() != null) {
+            existingPlay.setDisplayName(play.getDisplayName());
+        }
+        if (play.getDescription() != null) {
+            existingPlay.setDescription(play.getDescription());
+        }
+        if (play.getCallPrep() != null) {
+            existingPlay.setCallPrep(play.getCallPrep());
+        }
+        if (play.getSegmentName() != null) {
+            existingPlay.setSegment(play.getSegment());
+        }
+        if (play.getSegment() != null) {
+            existingPlay.setSegment(play.getSegment());
+        }
     }
 
     @Override

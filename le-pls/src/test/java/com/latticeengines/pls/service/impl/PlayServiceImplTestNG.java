@@ -59,7 +59,7 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCrud() {
-        Play newPlay = playService.createPlay(play, tenant1.getId());
+        Play newPlay = playService.createOrUpdate(play, tenant1.getId());
         assertPlay(newPlay);
         String playName = newPlay.getName();
         newPlay = playService.getPlayByName(playName);

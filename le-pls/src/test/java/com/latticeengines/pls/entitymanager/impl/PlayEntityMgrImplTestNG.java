@@ -26,8 +26,9 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     private Play play;
 
-    private final static String NAME = "playHard";
     private final static String DISPLAY_NAME = "playHarder";
+    private final static String NEW_DISPLAY_NAME = "playHarder!";
+    private final static String DESCRIPTION = "playHardest";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -37,10 +38,10 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant1);
 
         play = new Play();
-        play.setName(NAME);
         play.setTimeStamp(new Date(System.currentTimeMillis()));
         play.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
         play.setDisplayName(DISPLAY_NAME);
+        play.setDescription(DESCRIPTION);
         play.setTenant(tenant1);
     }
 
@@ -54,16 +55,36 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testBasicOperations() {
-        playEntityMgr.create(play);
-
-        Play retreivedPlay = playEntityMgr.findByName(NAME);
-        Assert.assertEquals(retreivedPlay.getName(), NAME);
-        Assert.assertEquals(retreivedPlay.getDisplayName(), DISPLAY_NAME);
-        Assert.assertNotNull(retreivedPlay);
+        playEntityMgr.createOrUpdatePlay(play);
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 1);
-        playEntityMgr.deleteByName(NAME);
+        Play play1 = playList.get(0);
+        String playName = play1.getName();
+        System.out.println(String.format("play1 has name %s", playName));
+        Play retreivedPlay = playEntityMgr.findByName(playName);
+        Assert.assertNotNull(retreivedPlay);
+        Assert.assertEquals(retreivedPlay.getName(), play1.getName());
+        Assert.assertEquals(retreivedPlay.getDescription(), DESCRIPTION);
+        Assert.assertEquals(retreivedPlay.getDisplayName(), DISPLAY_NAME);
+
+        retreivedPlay.setDescription(null);
+        retreivedPlay.setDisplayName(NEW_DISPLAY_NAME);
+        playEntityMgr.createOrUpdatePlay(retreivedPlay);
+        retreivedPlay = playEntityMgr.findByName(playName);
+        Assert.assertNotNull(retreivedPlay);
+        Assert.assertEquals(retreivedPlay.getName(), playName);
+        Assert.assertEquals(retreivedPlay.getDescription(), DESCRIPTION);
+        Assert.assertEquals(retreivedPlay.getDisplayName(), NEW_DISPLAY_NAME);
+
+        playList = playEntityMgr.findAll();
+        Assert.assertNotNull(playList);
+        Assert.assertEquals(playList.size(), 1);
+
+        playEntityMgr.deleteByName(playName);
+        playList = playEntityMgr.findAll();
+        Assert.assertNotNull(playList);
+        Assert.assertEquals(playList.size(), 0);
     }
 
 }

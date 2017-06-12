@@ -60,7 +60,7 @@ public class PlayResource {
     @ResponseBody
     @ApiOperation(value = "Register a play")
     @PreAuthorize("hasRole('Create_PLS_Plays')")
-    public Play createPlay(@RequestBody Play play, HttpServletRequest request) {
+    public Play createOrUpdate(@RequestBody Play play, HttpServletRequest request) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.warn("Tenant is null for the request");
@@ -69,12 +69,7 @@ public class PlayResource {
         if (play == null) {
             throw new NullPointerException("Play is null");
         }
-        if (play.getDisplayName() == null) {
-            throw new NullPointerException("DisplayName is null");
-        }
-        play.setName(play.generateNameStr());
-
-        return playService.createPlay(play, tenant.getId());
+        return playService.createOrUpdate(play, tenant.getId());
     }
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.DELETE, headers = "Accept=application/json")

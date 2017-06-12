@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 
 public interface PlayEntityMgr extends BaseEntityMgr<Play> {
 
-    void create(Play entity);
+    Play createOrUpdatePlay(Play entity);
 
     List<Play> findAll();
 
