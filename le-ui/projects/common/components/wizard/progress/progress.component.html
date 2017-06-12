@@ -5,5 +5,8 @@
             ui-sref-active="previous" 
             ui-sref-active-eq="current">
         {{ item.label }}
+        <span class="import-wizard-progress-validation" ng-class="{'invalid': item.invalid }">
+            <i class="fa fa-warning"></i> Step Incomplete
+        </span>
     </li>
 </ul>

@@ -45,8 +45,22 @@
             transform: translateY(-50%);
             transition: none;
         }
-    }
 
+        span.import-wizard-progress-validation {
+            color: red;
+            font-size: 9pt;
+            float: left;
+            display: block;
+            width: 100%;
+            font-weight: normal;
+            position: absolute;
+            margin-top: -0.3em;
+            opacity: 0;           
+            &.invalid {
+                opacity: 1;
+            }
+        }
+    }
     li.previous {
         cursor: default;
         

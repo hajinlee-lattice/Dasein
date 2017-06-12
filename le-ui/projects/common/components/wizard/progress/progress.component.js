@@ -2,7 +2,7 @@ angular.module('common.wizard.progress', [
     'mainApp.core.modules.ServiceErrorModule'
 ])
 .controller('ImportWizardProgress', function(
-    $state, $stateParams, $scope, ResourceUtility, WizardProgressContext, 
+    $state, $stateParams, $scope, $timeout, ResourceUtility, WizardProgressContext, 
     WizardProgressItems, WizardValidationStore, ServiceErrorUtility
 ) {
     var vm = this;
@@ -16,7 +16,7 @@ angular.module('common.wizard.progress', [
 
     vm.init = function() {
         vm.items.forEach(function(item) {
-            vm.itemMap[vm.rootState + item.state] = item;
+            vm.itemMap[vm.rootState + item.state.split('.').pop()] = item;
         });
     }
 
@@ -37,9 +37,17 @@ angular.module('common.wizard.progress', [
         
         if (not_validated.length > 0) {
             $event.preventDefault();
+
+            not_validated.forEach(function(key, index) {
+                console.log(key, vm.rootState, vm.itemMap[vm.rootState + key]);
+                vm.itemMap[vm.rootState + key].invalid = true;
+                $timeout(function() {
+                    vm.itemMap[vm.rootState + key].invalid = false;
+                }, 3000)
+            })
         } else {
             var nextState = vm.rootState + state,
-                current = vm.itemMap[$state.current.name];
+                current = vm.itemMap[vm.rootState + $state.current.name.split('.').pop()];
 
             if (current.nextFn) {
                 current.nextFn(nextState);

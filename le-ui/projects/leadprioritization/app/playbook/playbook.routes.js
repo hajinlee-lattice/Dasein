@@ -74,12 +74,12 @@ angular
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/wizard.component.html'
                 },
-                'wizard_progress': {
+                'wizard_progress@home.playbook.wizard': {
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'
                 },
-                'wizard_controls': {
+                'wizard_controls@home.playbook.wizard': {
                     resolve: {
                         WizardControlsOptions: function() {
                             return { backState: 'home.models', nextState: 'home.models' };
@@ -95,7 +95,7 @@ angular
         .state('home.playbook.wizard.settings', {
             url: '/settings',
             views: {
-                'wizard_content@home.playbook': {
+                'wizard_content@home.playbook.wizard': {
                     templateUrl: 'app/playbook/content/settings/settings.component.html'
                 }
             },
@@ -108,7 +108,7 @@ angular
                 }
             },
             views: {
-                'wizard_content@home.playbook': {
+                'wizard_content@home.playbook.wizard': {
                     controller: 'PlaybookWizardSegment',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/segment/segment.component.html'
@@ -123,7 +123,7 @@ angular
                 }
             },
             views: {
-                'wizard_content@home.playbook': {
+                'wizard_content@home.playbook.wizard': {
                     controller: 'PlaybookWizardRating',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/rating/rating.component.html'
@@ -149,7 +149,7 @@ angular
                 }
             },
             views: {
-                'wizard_content@home.playbook': {
+                'wizard_content@home.playbook.wizard': {
                     controller: 'PlaybookWizardTargets',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/targets/targets.component.html'
@@ -173,7 +173,7 @@ angular
                 }
             },
             views: {
-                'wizard_content@home.playbook': {
+                'wizard_content@home.playbook.wizard': {
                     controller: 'PlaybookWizardInsights',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/insights/insights.component.html'
@@ -188,7 +188,7 @@ angular
                 }
             },
             views: {
-                'wizard_content@home.playbook': {
+                'wizard_content@home.playbook.wizard': {
                     controller: 'PlaybookWizardPreview',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/preview/preview.component.html'
@@ -198,7 +198,7 @@ angular
         .state('home.playbook.wizard.settings.segment.rating.targets.insights.preview.launch', {
             url: '/launch',
             views: {
-                'wizard_content@home.playbook': {
+                'wizard_content@home.playbook.wizard': {
                     templateUrl: 'app/playbook/content/launch/launch.component.html'
                 }
             }
