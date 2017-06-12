@@ -63,7 +63,7 @@ $stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
 
     vm.tileClick = function ($event, playName) {
         $event.preventDefault();
-        $state.go('home.playbook.wizard', {play: playName}, { reload: true } );
+        $state.go('home.playbook.wizard.settings', {play_name: playName} );
     };
 
     var oldPlayDisplayName = '';
