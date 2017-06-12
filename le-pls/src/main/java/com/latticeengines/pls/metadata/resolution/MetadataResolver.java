@@ -39,7 +39,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 
 public class MetadataResolver {
     private static Logger log = Logger.getLogger(MetadataResolver.class);
-    private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false", "1", "0");
+    private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false");
 
     private String csvPath;
     private FieldMappingDocument fieldMappingDocument;
