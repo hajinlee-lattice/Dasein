@@ -1,12 +1,12 @@
 angular.module('lp.playbook.plays', [
     'mainApp.playbook.content.playList.deletePlayModal'
 ])
-.controller('PlayListController', function ($scope, $element, $state, 
+.controller('PlayListController', function ($scope, $timeout, $element, $state, 
 $stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
 
     var vm = this;
     angular.extend(vm, {
-        plays: PlayList,
+        plays: PlayList || [],
         totalLength: PlayList.length,
         tileStates: {},
         filteredItems: [],
@@ -16,10 +16,18 @@ $stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
                 label: 'Sort By',
                 icon: 'numeric',
                 order: '-',
-                property: 'TimeStamp',
+                property: 'timestamp',
                 items: [
                     { label: 'Creation Date',   icon: 'numeric',    property: 'timestamp' },
                     { label: 'Play Name',      icon: 'alpha',      property: 'dislay_name' }
+                ]
+            },
+            filter: {
+                label: 'Filter By',
+                unfiltered: PlayList,
+                filtered: PlayList,
+                items: [
+                    { label: "All", action: { }, total: 278 }
                 ]
             }
         }
@@ -99,7 +107,13 @@ $stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
         oldPlayDisplayName = '';
         oldPlayDescription = '';
 
-        updatePlay(play);
+        var updatedPlay = {
+            name: play.name,
+            display_name: play.display_name,
+            description: play.description
+        }
+
+        updatePlay(updatedPlay);
     };
 
 
@@ -112,22 +126,13 @@ $stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
 
     };
 
-    function updatePlay(play) {
-        PlaybookWizardService.savePlay(play).then(function(result) {
+    function updatePlay(updatedPlay) {
 
-            var errorMsg = result.errorMsg;
-
-            if (result.success) {
-                if ($state.current.name == 'home.playbook') {
-                    $state.go('home.playbook', {}, { reload: true});
-                } else {
-                    $state.go('home.playbook.wizard', {}, { reload: true });
-                }
-            } else {
-                vm.saveInProgress = false;
-                vm.addPlayErrorMessage = errorMsg;
-                vm.showAddPlayError = true;
-            }
+        PlaybookWizardService.savePlay(updatedPlay).then(function(result) {
+            vm.saveInProgress = true;
+            $timeout( function(){
+                $state.go('home.playbook.plays', {}, { reload: true} );
+            }, 100 );
         });
 
     }

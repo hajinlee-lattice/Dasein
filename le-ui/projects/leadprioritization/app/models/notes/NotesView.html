@@ -43,7 +43,7 @@
                     <h4 ng-if="note.ParentModelId != null">{{vm.ResourceUtility.getString('NOTES_INHERITED_FROM_MODEL')}} {{vm.referModelName}}</h4>
 
                     <div class="note-header">
-                        <h3><strong>{{note.Origin}}</strong> by <span>{{note.createdBy}}</span> on <span>{{note.CreationTimestamp | date:'MMMM dd, yyyy'}} at {{note.CreationTimestamp | date:'hh:mm'}}</span></h3>
+                        <h3><strong>{{note.Origin}}</strong> by <span>{{note.LastModifiedByUser}}</span> on <span>{{note.CreationTimestamp | date:'MMMM dd, yyyy'}} at {{note.CreationTimestamp | date:'hh:mm'}}</span></h3>
                         <button 
                             type="button" 
                             class="button icon-button white-button"
