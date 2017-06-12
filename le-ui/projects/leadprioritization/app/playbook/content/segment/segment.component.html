@@ -39,8 +39,7 @@
                                 name="segment.name" 
                                 ng-value="segment.name"
                                 ng-model="vm.stored.segment_selection"
-                                ng-change="vm.checkValid(segment_form)" 
-                                ng-click="vm.saveSegment(segment)" />
+                                ng-change="vm.checkValid(segment_form)" />
                         <label for="{{segment.name}}">{{segment.display_name}}</label></li>
                     <li class="accounts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li>
                 </ul>

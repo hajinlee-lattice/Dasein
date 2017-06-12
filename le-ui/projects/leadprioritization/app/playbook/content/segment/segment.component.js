@@ -13,7 +13,6 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
     vm.init = function() {
         if($stateParams.play_name) {
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
-                console.log(play);
                 vm.savedSegment = play.segment;
                 vm.stored.segment_selection = play.segment;
             });
@@ -28,6 +27,11 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
 
     vm.checkValid = function(form) {
         PlaybookWizardStore.setValidation('segment', form.$valid);
+        if(vm.stored.segment_selection) {
+            PlaybookWizardStore.setSettings({
+                segment: vm.stored.segment_selection
+            });
+        }
     }
 
     vm.saveSegment = function(segment) {

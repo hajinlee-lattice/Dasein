@@ -13,7 +13,7 @@ angular.module('lp.playbook.wizard.settings', [])
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
                 vm.stored.play_name = play.name;
                 vm.stored.play_display_name = play.display_name;
-                vm.stored.description = play.description;
+                vm.stored.play_description = play.description;
                 if(vm.stored.play_name) {
                     PlaybookWizardStore.setValidation('settings', true);
                 }

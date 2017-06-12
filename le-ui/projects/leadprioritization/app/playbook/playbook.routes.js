@@ -53,8 +53,8 @@ angular
                 },
                 WizardProgressItems: function(PlaybookWizardStore) {
                     return [
-                        { label: 'Settings', state: 'settings', nextFn: PlaybookWizardStore.nextSettings },
-                        { label: 'Segment', state: 'settings.segment' },
+                        { label: 'Settings', state: 'settings', nextFn: PlaybookWizardStore.nextSaveGeneric },
+                        { label: 'Segment', state: 'settings.segment', nextFn: PlaybookWizardStore.nextSaveGeneric },
                         { label: 'Rating', state: 'settings.segment.rating' },
                         { label: 'Targets', state: 'settings.segment.rating.targets' },
                         { label: 'Insights', state: 'settings.segment.rating.targets.insights' },

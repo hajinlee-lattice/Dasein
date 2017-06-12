@@ -17,6 +17,13 @@ angular.module('lp.playbook')
             play_display_name: '',
             play_description: ''
         }
+        this.segment_form = {
+            segment_selection: ''
+        }
+
+        this.rating_form = {
+            rating_selection: ''
+        }
     }
 
     this.validation = {
@@ -51,16 +58,19 @@ angular.module('lp.playbook')
         }
     }
 
-    this.nextSettings = function(nextState) {
-        console.log('nextSettings', nextState);
-        var changed = false;
+    this.nextSaveGeneric = function(nextState) {
+        var changed = false,
+            opts = PlaybookWizardStore.settings;
+
+        opts.name = PlaybookWizardStore.currentPlay.name;
+
         if(PlaybookWizardStore.settings) {
             if(PlaybookWizardStore.currentPlay) {
                 for(var i in PlaybookWizardStore.settings) {
                     var key = i,
                         setting = PlaybookWizardStore.settings[i];
 
-                    if(PlaybookWizardStore.currentPlay[key] && PlaybookWizardStore.currentPlay[key] != setting) {
+                    if(PlaybookWizardStore.currentPlay[key] != setting) {
                         changed = true;
                         break;
                     }
@@ -69,7 +79,7 @@ angular.module('lp.playbook')
                 changed = true;
             }
             if(changed) {
-                PlaybookWizardStore.savePlay(PlaybookWizardStore.settings).then(function(play){
+                PlaybookWizardStore.savePlay(opts).then(function(play){
                     $state.go(nextState, {play_name: play.name});
                 });
             } else {
@@ -78,31 +88,6 @@ angular.module('lp.playbook')
         }
     }
 
-    this.nextSegment = function(nextState) {
-        var changed = false;
-        if(PlaybookWizardStore.settings) {
-            if(PlaybookWizardStore.currentPlay) {
-                for(var i in PlaybookWizardStore.settings) {
-                    var key = i,
-                        setting = PlaybookWizardStore.settings[i];
-
-                    if(PlaybookWizardStore.currentPlay[key] && PlaybookWizardStore.currentPlay[key] != setting) {
-                        changed = true;
-                        break;
-                    }
-                }
-            } else {
-                changed = true;
-            }
-            if(changed) {
-                PlaybookWizardStore.savePlay(PlaybookWizardStore.settings).then(function(play){
-                    $state.go(nextState, {play_name: play.name});
-                });
-            } else {
-                $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
-            }
-        }
-    }
     this.setRating = function(rating) {
         this.rating = rating;
     }
@@ -165,7 +150,6 @@ angular.module('lp.playbook')
     }
 
     this.getPlay = function(play_name) {
-        // test play name: play__cf21f5b9-c513-4076-bac5-dcb33fb076a7
         var deferred = $q.defer();
         if(this.currentPlay && play_name) {
             deferred.resolve(this.currentPlay);
