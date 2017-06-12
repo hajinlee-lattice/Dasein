@@ -39,17 +39,15 @@ angular.module('mainApp.playbook.content.playList.deletePlayModal', [
         deletePlay($scope.playName);
     };
 
-    function deletePLay(playName) {
+    function deletePlay(playName) {
         $("#deletePlayError").hide();
 
-        PlaybookWizardService.DeletePlay(playName).then(function(result) {
+        console.log(playName);
+
+        PlaybookWizardService.deletePlay(playName).then(function(result) {
             if (result != null && result.success === true) {
                 $("#modalContainer").modal('hide');
-                if ($scope.inModel) {
-                    $state.go('home.playbook', {}, { reload: true } );
-                } else {
-                    $state.go('home.playbook', {}, { reload: true } );
-                }
+                $state.go('home.playbook', {}, { reload: true } );
             } else {
                 $scope.deletePlayErrorMessage = result.ResultErrors;
                 $("#deletePlayError").fadeIn();
