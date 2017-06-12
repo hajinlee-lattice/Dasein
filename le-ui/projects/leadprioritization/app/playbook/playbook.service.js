@@ -8,6 +8,17 @@ angular.module('lp.playbook')
     this.currentPlay = this.currentPlay || null;
 
 
+    this.clear = function() {
+        this.settings = {};
+        this.rating = {};
+        this.savedSegment = null;
+        this.currentPlay = null;
+        this.settings_form = {
+            play_display_name: '',
+            play_description: ''
+        }
+    }
+
     this.validation = {
         settings: false,
         segment: false,
@@ -148,11 +159,6 @@ angular.module('lp.playbook')
     this.setPlay = function(play) {
         this.currentPlay = play;
     }
-
-
-
-
-
 
     this.getCurrentPlay = function() {
         return this.currentPlay;

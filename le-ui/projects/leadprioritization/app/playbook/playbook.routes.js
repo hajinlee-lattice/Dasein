@@ -64,6 +64,13 @@ angular
                 }
             },
             views: {
+                'summary@': {
+                    controller: function($scope, PlaybookWizardStore) {
+                        $scope.$on('$destroy', function () {
+                            PlaybookWizardStore.clear();
+                        });
+                    }
+                },
                 'main@': {
                     resolve: {
                         WizardHeaderTitle: function() {
