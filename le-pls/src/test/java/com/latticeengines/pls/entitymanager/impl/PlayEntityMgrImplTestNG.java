@@ -29,6 +29,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private final static String DISPLAY_NAME = "playHarder";
     private final static String NEW_DISPLAY_NAME = "playHarder!";
     private final static String DESCRIPTION = "playHardest";
+    private final static String SEGMENT_NAME = "segment";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -62,20 +63,22 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Play play1 = playList.get(0);
         String playName = play1.getName();
         System.out.println(String.format("play1 has name %s", playName));
-        Play retreivedPlay = playEntityMgr.findByName(playName);
-        Assert.assertNotNull(retreivedPlay);
-        Assert.assertEquals(retreivedPlay.getName(), play1.getName());
-        Assert.assertEquals(retreivedPlay.getDescription(), DESCRIPTION);
-        Assert.assertEquals(retreivedPlay.getDisplayName(), DISPLAY_NAME);
+        Play retrievedPlay = playEntityMgr.findByName(playName);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), play1.getName());
+        Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
+        Assert.assertEquals(retrievedPlay.getDisplayName(), DISPLAY_NAME);
 
-        retreivedPlay.setDescription(null);
-        retreivedPlay.setDisplayName(NEW_DISPLAY_NAME);
-        playEntityMgr.createOrUpdatePlay(retreivedPlay);
-        retreivedPlay = playEntityMgr.findByName(playName);
-        Assert.assertNotNull(retreivedPlay);
-        Assert.assertEquals(retreivedPlay.getName(), playName);
-        Assert.assertEquals(retreivedPlay.getDescription(), DESCRIPTION);
-        Assert.assertEquals(retreivedPlay.getDisplayName(), NEW_DISPLAY_NAME);
+        retrievedPlay.setDescription(null);
+        retrievedPlay.setDisplayName(NEW_DISPLAY_NAME);
+        retrievedPlay.setSegmentName(SEGMENT_NAME);
+        playEntityMgr.createOrUpdatePlay(retrievedPlay);
+        retrievedPlay = playEntityMgr.findByName(playName);
+        Assert.assertNotNull(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getName(), playName);
+        Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
+        Assert.assertEquals(retrievedPlay.getDisplayName(), NEW_DISPLAY_NAME);
+        Assert.assertEquals(retrievedPlay.getSegmentName(), SEGMENT_NAME);
 
         playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);

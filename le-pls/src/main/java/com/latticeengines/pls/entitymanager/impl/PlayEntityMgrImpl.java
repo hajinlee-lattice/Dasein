@@ -69,7 +69,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
             existingPlay.setCallPrep(play.getCallPrep());
         }
         if (play.getSegmentName() != null) {
-            existingPlay.setSegment(play.getSegment());
+            existingPlay.setSegmentName(play.getSegmentName());
         }
         if (play.getSegment() != null) {
             existingPlay.setSegment(play.getSegment());
