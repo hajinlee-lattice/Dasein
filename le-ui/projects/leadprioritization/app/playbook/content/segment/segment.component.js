@@ -35,7 +35,7 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
     }
 
     vm.saveSegment = function(segment) {
-        PlaybookWizardStore.saveSegment(segment, $stateParams.play_name);
+        PlaybookWizardStore.setSegment(segment);
     }
 
     vm.init();
