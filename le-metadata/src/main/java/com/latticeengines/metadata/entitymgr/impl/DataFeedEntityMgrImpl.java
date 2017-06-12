@@ -107,7 +107,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.update(execution);
 
         datafeed.setActiveExecution(execution);
-        datafeed.setStatus(Status.Consolidating);
+        if (datafeed.getStatus() == Status.Active) {
+            datafeed.setStatus(Status.Consolidating);
+        }
         tasks.forEach(task -> {
             task.setStartTime(new Date());
             task.setImportData(null);
@@ -134,7 +136,11 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.create(newExecution);
 
         datafeed.setActiveExecutionId(newExecution.getPid());
-        if (datafeed.getStatus() != Status.InitialLoad) {
+        if (datafeed.getStatus() == Status.InitialLoaded) {
+            if (status == DataFeedExecution.Status.Consolidated) {
+                datafeed.setStatus(Status.InitialConsolidated);
+            }
+        } else if (datafeed.getStatus() == Status.Consolidating) {
             datafeed.setStatus(Status.Active);
         }
         datafeedDao.update(datafeed);

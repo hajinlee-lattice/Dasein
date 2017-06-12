@@ -233,9 +233,12 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     }
 
     public static enum Status {
-        Initing("initing"), //
-        InitialLoad("initialLoad"), //
-        Active("active"), //
+        Initing("initing"), // no template yet
+        Initialized("initialized"), // import is ready to run
+        InitialLoaded("initialLoaded"), // initial import data loaded
+        InitialConsolidated("initialConsolidated"), // initial data consolidated
+        Active("active"), // master table has formed and pushed to data store
+
         Consolidating("consolidating"), //
         Finalizing("finalizing"), //
         Deleting("deleting");

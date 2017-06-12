@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -38,7 +39,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 
@@ -81,7 +81,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EXECUTION = "EXECUTION";
     protected static final String CALCULATE_STATS_TARGET_TABLE = "CALCULATE_STATS_TARGET_TABLE";
     protected static final String CALCULATE_STATS_TRANSFORM_VERSION = "CALCULATE_STATS_TRANSFORM_VERSION";
-    protected static final String DATA_INITIAL_LOAD = "DATA_INITIAL_LOAD";
+    protected static final String DATA_INITIAL_LOADED = "DATA_INITIAL_LOADED";
     protected static final String CONSOLIDATE_INPUT_TABLES = "CONSOLIDATE_INPUT_TABLES";
     protected static final String CONSOLIDATE_CONSOLIDATED_TABLE = "CONSOLIDATE_CONSOLIDATED_TABLE";
     protected static final String CONSOLIDATE_MASTER_TABLE = "CONSOLIDATE_MASTER_TABLE";
