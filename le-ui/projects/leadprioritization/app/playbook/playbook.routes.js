@@ -35,8 +35,6 @@ angular
                             return deferred.promise;
                         }
                     },
-                    controller: 'PlayListController',
-                    controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/playList/playList.component.html'
                 }
             }
