@@ -213,9 +213,11 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void deleteTenant(Tenant tenant) {
-        deleteTenantViaTenantConsole(tenant);
+        boolean needToWait = deleteTenantViaTenantConsole(tenant);
         log.info("Deleting test tenant " + tenant.getId() + " from pls and GA");
-        waitForTenantConsoleUninstall(CustomerSpace.parse(tenant.getId()));
+        if (needToWait) {
+            waitForTenantConsoleUninstall(CustomerSpace.parse(tenant.getId()));
+        }
     }
 
     private void waitForTenantConsoleUninstall(CustomerSpace customerSpace) {
@@ -374,17 +376,19 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         }
     }
 
-    private void deleteTenantViaTenantConsole(Tenant tenant) {
+    private boolean deleteTenantViaTenantConsole(Tenant tenant) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         if (testCustomerSpaces.contains(customerSpace.toString())) {
             try {
                 adminTenantProxy.deleteTenant(customerSpace.getTenantId());
+                return true;
             } catch (Exception e) {
                 log.error("DELETE customer space " + customerSpace + " in tenant console failed.", e);
             }
         } else {
             log.warn("Did not find " + customerSpace.toString() + " in testCustomerSpaces.");
         }
+        return false;
     }
 
 }

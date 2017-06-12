@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -22,7 +23,7 @@ public class AccountResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenant();
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
     @Test(groups = "deployment")

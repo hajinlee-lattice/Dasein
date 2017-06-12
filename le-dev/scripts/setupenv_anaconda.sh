@@ -26,14 +26,12 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         wget https://repo.continuum.io/archive/$ANACONDA_SH -O $ARTIFACT_DIR/$ANACONDA_SH
     fi
 
-    if [ -d $ANACONDA_HOME ]; then
-        echo "Skipping installation of Anaconda"
-    else
-        echo "Downloading Anaconda"
-        pushd $ARTIFACT_DIR
-        bash $ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
-        popd
-    fi
+    echo "delete anaconda home, because installation script will create it"
+    rm -rf $ANACONDA_HOME || true
+    echo "Downloading Anaconda"
+    pushd $ARTIFACT_DIR
+    bash $ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
+    popd
 
     CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
 
