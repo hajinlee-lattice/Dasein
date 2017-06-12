@@ -103,6 +103,11 @@ Icons
 		background-image: url("/assets/images/ico-notes.png");
 		background-size: 18px;
 	}
+	&.ico-playbook {
+		background-color: transparent !important;
+		background-image: url("/assets/images/ico-playbook.png");
+		background-size: 18px;
+	}
 	&.ico-contact-us {
 		background-color: transparent !important;
         position: relative;

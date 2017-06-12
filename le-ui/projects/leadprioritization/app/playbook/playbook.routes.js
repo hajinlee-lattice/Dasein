@@ -20,7 +20,7 @@ angular
         .state('home.playbook.plays', {
             url: '/plays',
             params: {
-                pageIcon: 'ico-plays',
+                pageIcon: 'ico-playbook',
                 pageTitle: 'Play Book'
             },
             resolve: {
