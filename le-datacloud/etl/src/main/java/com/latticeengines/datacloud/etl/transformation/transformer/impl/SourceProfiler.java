@@ -218,10 +218,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
         Map<String, List<ProfileParameters.Attribute>> encodedAttrs = groupEncodedAttrs(para.getEncodedAttrs());
         int size = result.size() + para.getNumericAttrs().size() + encodedAttrs.size();
+        log.info(String.format("1 LatticeAccountId attr, %d numeric attrs, %d encoded attrs, %d retained attrs",
+                para.getNumericAttrs().size(), encodedAttrs.size(), para.getRetainedAttrs().size()));
         if (size > maxAttrs) {
-            log.warn(String.format("Expected max attr num in bucketed am: %d, actual: %d", maxAttrs, size));
-        } else {
-            log.info(String.format("Attr num in bucketd am: %d", size));
+            log.warn(String.format("Attr num in bucketed am %d exceeds expected maximum limit %d", size, maxAttrs));
         }
         for (Map.Entry<String, List<ProfileParameters.Attribute>> entry : encodedAttrs.entrySet()) {
             int lowestBit = 0;
