@@ -2,13 +2,13 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -17,6 +17,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +30,10 @@ import com.latticeengines.datacloud.dataflow.transformation.Profile;
 import com.latticeengines.datacloud.dataflow.utils.FileParser;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CategorizedIntervalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -40,9 +45,12 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private static final Log log = LogFactory.getLog(SourceProfiler.class);
 
     private static final String STRATEGY_ENCODED_COLUMN = "EncodedColumn";
-    private static final String STRATEGY_BIT_INTERPRETATION = "BitInterpretation";
-    private static final String STRATEGY_BIT_UNIT = "BitUnit";
-    private static final String BOOLEAN_YESNO = "BOOLEAN_YESNO";
+
+    @Value("${datacloud.etl.profile.encode.bit:64}")
+    private int encodeBits;
+
+    @Value("${datacloud.etl.profile.attrs:1000}")
+    private int maxAttrs;
 
     private ObjectMapper om = new ObjectMapper();
 
@@ -76,156 +84,156 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         parameters.setBucketNum(config.getBucketNum());
         parameters.setMinBucketSize(config.getMinBucketSize());
         parameters.setRandSeed(config.getRandSeed());
-        List<String> numAttrs = new ArrayList<>();
-        List<String> boolAttrs = new ArrayList<>();
-        Map<String, Pair<Integer, Map<String, String>>> encodedAttrs = new HashMap<>();
-        List<String> retainedAttrs = new ArrayList<>();
+
         List<String> idAttrs = new ArrayList<>();
-        classifyAttrs(baseTemplates[0], baseVersions.get(0), numAttrs, boolAttrs, encodedAttrs, retainedAttrs, idAttrs);
+        List<ProfileParameters.Attribute> numericAttrs = new ArrayList<>();
+        List<ProfileParameters.Attribute> retainedAttrs = new ArrayList<>();
+        List<ProfileParameters.Attribute> encodedAttrs = new ArrayList<>();
+        classifyAttrs(baseTemplates[0], baseVersions.get(0), idAttrs, numericAttrs, retainedAttrs, encodedAttrs);
         if (idAttrs.size() != 1) {
             throw new RuntimeException(
                     "One and only one lattice account id is required. Allowed id field: LatticeAccountId, LatticeID");
         }
-        parameters.setNumAttrs(numAttrs);
-        parameters.setBoolAttrs(boolAttrs);
-        parameters.setEncodedAttrs(encodedAttrs);
+        parameters.setNumericAttrs(numericAttrs);
         parameters.setRetainedAttrs(retainedAttrs);
+        parameters.setEncodedAttrs(encodedAttrs);
         parameters.setIdAttr(idAttrs.get(0));
     }
 
     @SuppressWarnings("unchecked")
-    private void classifyAttrs(Source baseSrc, String baseVer, List<String> numAttrs, List<String> boolAttrs,
-            Map<String, Pair<Integer, Map<String, String>>> encodedAttrs, List<String> retainedAttrs,
-            List<String> idAttrs) {
+    private void classifyAttrs(Source baseSrc, String baseVer, List<String> idAttrs,
+            List<ProfileParameters.Attribute> numericAttrs, List<ProfileParameters.Attribute> retainedAttrs,
+            List<ProfileParameters.Attribute> encodedAttrs) {
         // TODO: Will replace by reading from SourceAttribute table
         Map<String, Map<String, Object>> amAttrConf = FileParser.parseAMProfileConfig();
         Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(baseSrc, baseVer);
         log.info("Classifying attributes...");
-        String[] numTypeArr = {"int", "long", "float", "double"};
-        String[] boolTypeArr = {"boolean"};
-        Set<String> numTypes = new HashSet<>(Arrays.asList(numTypeArr));
-        Set<String> boolTypes = new HashSet<>(Arrays.asList(boolTypeArr));
-        Map<String, Pair<Integer, Map<String, String>>> encodedAttrsPre = new HashMap<>();
+        Set<String> numTypes = new HashSet<>(Arrays.asList(new String[] { "int", "long", "float", "double" }));
+        Set<String> boolTypes = new HashSet<>(Arrays.asList(new String[] { "boolean" }));
+        Map<String, List<ProfileParameters.Attribute>> attrsToDecode = new HashMap<>();
+        // Attributes need to decode
         for (Map.Entry<String, Map<String, Object>> conf : amAttrConf.entrySet()) {
-            if (StringUtils.isNotBlank((String) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[3]))) { // decode strategy
-                String decodeStrategy = (String) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[3]);
-                try {
-                    JsonNode strategy = om.readTree(decodeStrategy);
-                    String encodedAttr = strategy.get(STRATEGY_ENCODED_COLUMN).asText();
-                    String bitInterpretation = strategy.get(STRATEGY_BIT_INTERPRETATION).asText();
-                    Integer bitUnit = strategy.get(STRATEGY_BIT_UNIT) != null
-                            ? Integer.valueOf(strategy.get(STRATEGY_BIT_UNIT).asText()) : null;
-                    if (bitUnit == null && BOOLEAN_YESNO.equals(bitInterpretation)) {
-                        bitUnit = 2;
-                    }
-                    if (bitUnit == null) {
-                        bitUnit = 1;
-                    }
-                    if (!encodedAttrsPre.containsKey(encodedAttr)) {
-                        encodedAttrsPre.put(encodedAttr, Pair.of(bitUnit, new HashMap<>()));
-                    }
-                    encodedAttrsPre.get(encodedAttr).getRight().put(conf.getKey(), decodeStrategy);
-                } catch (IOException e) {
-                    throw new RuntimeException("Fail to parse decodeStrategy in json format: " + decodeStrategy, e);
+            if (StringUtils.isBlank((String) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[2])) || !((Boolean) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[1]))) {
+                continue;
+            }
+            String decodeStrategy = (String) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[2]);
+            String attrToDecode = null;
+            try {
+                JsonNode strategy = om.readTree(decodeStrategy);
+                attrToDecode = strategy.get(STRATEGY_ENCODED_COLUMN).asText();
+                if (!attrsToDecode.containsKey(attrToDecode)) {
+                    attrsToDecode.put(attrToDecode, new ArrayList<>());
                 }
-
+            } catch (IOException e) {
+                throw new RuntimeException("Fail to parse decodeStrategy in json format: " + decodeStrategy, e);
             }
+            Integer encodeBitUnit = conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[3]) == null ? null
+                    : (Integer) (conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[3]));
+            BucketAlgorithm algo = parseBucketAlgo(
+                    (String) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[4]));
+            attrsToDecode.get(attrToDecode)
+                    .add(new ProfileParameters.Attribute(conf.getKey(), encodeBitUnit, decodeStrategy, algo));
         }
+        // Attributes exist in schema of source to profile
         for (Field field : schema.getFields()) {
-            boolean isSeg = false, isBucket = false;
-            if (DataCloudConstants.PROFILE_ATTR_SRC_CUSTOMER
-                    .equals(field.getProp(DataCloudConstants.PROFILE_ATTR_SRC))) { // from customer
-                isSeg = true;
-                isBucket = true;
-            } else if (amAttrConf.containsKey(field.name())) { // from AM
-                isBucket = (Boolean) amAttrConf.get(field.name()).get(FileParser.AM_PROFILE_CONFIG_HEADER[1]);
-                isSeg = (Boolean) amAttrConf.get(field.name()).get(FileParser.AM_PROFILE_CONFIG_HEADER[2]);
-            } else if (encodedAttrsPre.containsKey(field.name())) { // from AM encoded
-                isSeg = true;
-                isBucket = true;
-            }
             if (field.name().equals(DataCloudConstants.LATTIC_ID)
-                    || field.name().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) {
-                log.info(String.format("ID attr: %s", field.name()));
+                    || field.name().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) {    // lattice account id
+                log.info(String.format("ID attr: %s (unencoded)", field.name()));
                 idAttrs.add(field.name());
                 continue;
+            }
+            boolean isSeg = false;
+            if (DataCloudConstants.PROFILE_ATTR_SRC_CUSTOMER
+                    .equals(field.getProp(DataCloudConstants.PROFILE_ATTR_SRC))) { // from customer table
+                isSeg = true;
+            } else if (amAttrConf.containsKey(field.name())) { // from AM attr
+                isSeg = (Boolean) amAttrConf.get(field.name()).get(FileParser.AM_PROFILE_CONFIG_HEADER[1]);
+            } else if (attrsToDecode.containsKey(field.name())) { // from encoded AM attr
+                isSeg = true;
             }
             if (!isSeg) { // If not for segment, exclude it from profiling
                 log.info(String.format("Discarded attr: %s", field.name()));
                 continue;
             }
-            if (!isBucket) { // if for segment but not bucket
-                log.info(String.format("Retained attr: %s", field.name()));
-                retainedAttrs.add(field.name());
+            if (attrsToDecode.containsKey(field.name())) {
+                for (ProfileParameters.Attribute attr : attrsToDecode.get(field.name())) {
+                    if (attr.getAlgo() instanceof BooleanBucket) {
+                        log.info(String.format("%s attr %s (encoded)", attr.getAlgo().getClass().getSimpleName(),
+                                attr.getAttr()));
+                        encodedAttrs.add(attr);
+                    } else if (attr.getAlgo() instanceof IntervalBucket) {
+                        log.info(String.format("%s attr %s (unencoded)", attr.getAlgo().getClass().getSimpleName(),
+                                attr.getAttr()));
+                        numericAttrs.add(attr);
+                    } else {
+                        log.info(String.format("%s attr %s (unencoded)", attr.getAlgo().getClass().getSimpleName(),
+                                attr.getAttr()));
+                        retainedAttrs.add(attr);
+                    }
+                }
                 continue;
             }
             String type = field.schema().getTypes().get(0).getName();
             if (numTypes.contains(type)) {
-                log.info(String.format("Interval bucketed attr %s (%s)", field.name(), type));
-                numAttrs.add(field.name());
+                log.info(String.format("Interval bucketed attr %s (type %s unencoded)", field.name(), type));
+                numericAttrs.add(new ProfileParameters.Attribute(field.name(), null, null, new IntervalBucket()));
                 continue;
             }
             if (boolTypes.contains(type)) {
-                log.info(String.format("Boolean bucketed attr %s (%s)", field.name(), type));
-                boolAttrs.add(field.name());
+                log.info(String.format("Boolean bucketed attr %s (type %s encoded)", field.name(), type));
+                BucketAlgorithm algo = new BooleanBucket();
+                encodedAttrs.add(new ProfileParameters.Attribute(field.name(), 2, null, algo));
                 continue;
             }
-            if (encodedAttrsPre.containsKey(field.name())) {
-                Iterator<Entry<String, String>> iter = encodedAttrsPre.get(field.name()).getRight().entrySet()
-                        .iterator();
-                while (iter.hasNext()) {
-                    String attr = iter.next().getKey();
-                    isBucket = (Boolean) amAttrConf.get(attr).get(FileParser.AM_PROFILE_CONFIG_HEADER[1]);
-                    isSeg = (Boolean) amAttrConf.get(attr).get(FileParser.AM_PROFILE_CONFIG_HEADER[2]);
-                    if (!isSeg) {
-                        log.info(String.format("Discarded attr: %s (from encoded attr %s)", attr, field.name()));
-                        iter.remove();
-                    } else {
-                        log.info(String.format("Encoded bucketed attr %s", attr));
-                    }
-                }
-                if (encodedAttrsPre.get(field.name()).getRight().size() > 0) {
-                    encodedAttrs.put(field.name(), encodedAttrsPre.get(field.name()));
-                }
-                continue;
-            }
-            log.info(String.format("Retained attr: %s", field.name()));
-            retainedAttrs.add(field.name());
+            log.info(String.format("Retained attr: %s (unencoded)", field.name()));
+            retainedAttrs.add(new ProfileParameters.Attribute(field.name(), null, null, null));
         }
+    }
+
+    private BucketAlgorithm parseBucketAlgo(String algo) {
+        if (StringUtils.isBlank(algo)) {
+            return null;
+        }
+        if (BooleanBucket.class.getSimpleName().equalsIgnoreCase(algo)) {
+            return new BooleanBucket();
+        }
+        if (CategoricalBucket.class.getSimpleName().equalsIgnoreCase(algo)) {
+            return new CategoricalBucket();
+        }
+        if (IntervalBucket.class.getSimpleName().equalsIgnoreCase(algo)) {
+            return new IntervalBucket();
+        }
+        if (CategorizedIntervalBucket.class.getSimpleName().equalsIgnoreCase(algo)) {
+            return new CategorizedIntervalBucket();
+        }
+        throw new RuntimeException(String.format("Fail to cast %s to BucketAlgorithm", algo));
     }
 
     @Override
     protected void postDataFlowProcessing(String workflowDir, ProfileParameters para, ProfileConfig config) {
-        int size = 1 + para.getBoolAttrs().size() + para.getRetainedAttrs().size(); // 1 is id attr
-        for (Pair<Integer, Map<String, String>> encodedEnt : para.getEncodedAttrs().values()) {
-            size += encodedEnt.getRight().size();
+        List<Object[]> result = new ArrayList<>();
+        result.add(profileIdAttr(para.getIdAttr()));
+        for (ProfileParameters.Attribute attr : para.getRetainedAttrs()) {
+            result.add(profileRetainedAttr(attr));
         }
-        Object[][] data = new Object[size][7];
-        int i = 0;
-        profileIdAttr(para.getIdAttr(), data[i]);
-        for (String attr : para.getRetainedAttrs()) {
-            i++;
-            profileRetainedAttrs(attr, data[i]);
-        }
-        int j = 0;
-        for (String attr : para.getBoolAttrs()) {
-            i++;
-            profileBoolAttrs(attr, data[i], "EAttrBool", j, 2);
-            j += 2;
-        }
-        Map<String, Pair<Integer, Map<String, String>>> encodedAttrs = para.getEncodedAttrs();
-        for (Map.Entry<String, Pair<Integer, Map<String, String>>> encodedAttr : encodedAttrs.entrySet()) {
-            String encodedAttrOri = encodedAttr.getKey();
-            int bitUnit = encodedAttr.getValue().getLeft();
-            j = 0;
-            for (Map.Entry<String, String> attr : encodedAttr.getValue().getRight().entrySet()) {
-                i++;
-                profileEncodedAttrs(attr.getKey(), data[i], attr.getValue(), "EAttr_" + encodedAttrOri, j, bitUnit);
-                j += bitUnit;
+        Map<String, List<ProfileParameters.Attribute>> encodedAttrs = groupEncodedAttrs(para.getEncodedAttrs());
+        for (Map.Entry<String, List<ProfileParameters.Attribute>> entry : encodedAttrs.entrySet()) {
+            int lowestBit = 0;
+            for (ProfileParameters.Attribute attr : entry.getValue()) {
+                result.add(profileEncodedAttr(attr, entry.getKey(), lowestBit));
+                lowestBit += attr.getEncodeBitUnit();
             }
         }
+        int size = result.size() + para.getNumericAttrs().size();
+        if (size > maxAttrs) {
+            log.warn(String.format("Expected max attr num in bucketed am: %d, actual: %d", maxAttrs, size));
+        }
+        Object[][] data = new Object[result.size()][7];
+        for (int i = 0; i < result.size(); i++) {
+            data[i] = result.get(i);
+        }
         List<Pair<String, Class<?>>> columns = prepareColumns();
-        upload(workflowDir, columns, data);
+        uploadAvro(workflowDir, columns, data);
     }
 
     private List<Pair<String, Class<?>>> prepareColumns() {
@@ -240,7 +248,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return columns;
     }
 
-    private void upload(String targetDir, List<Pair<String, Class<?>>> schema, Object[][] data) {
+    private void uploadAvro(String targetDir, List<Pair<String, Class<?>>> schema, Object[][] data) {
         try {
             AvroUtils.createAvroFileByData(yarnConfiguration, schema, data, targetDir, "AMProfileAdditional.avro");
         } catch (Exception e) {
@@ -248,63 +256,89 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
     }
 
-    private void profileIdAttr(String idAttr, Object[] arr) {
-        arr[0] = DataCloudConstants.LATTICE_ACCOUNT_ID;
-        arr[1] = idAttr;
-        arr[2] = null;
-        arr[3] = null;
-        arr[4] = null;
-        arr[5] = null;
-        arr[6] = null;
+    private Object[] profileIdAttr(String idAttr) {
+        Object[] data = new Object[7];
+        data[0] = DataCloudConstants.LATTICE_ACCOUNT_ID;
+        data[1] = idAttr;
+        data[2] = null;
+        data[3] = null;
+        data[4] = null;
+        data[5] = null;
+        data[6] = null;
+        return data;
     }
 
-    private void profileRetainedAttrs(String attr, Object[] arr) {
-        arr[0] = attr;
-        arr[1] = attr;
-        arr[2] = null;
-        arr[3] = null;
-        arr[4] = null;
-        arr[5] = null;
-        arr[6] = null;
-    }
-
-    private void profileBoolAttrs(String attr, Object[] arr, String encodedAttr, int lowestBit, int bitUnit) {
-        arr[0] = attr;
-        arr[1] = attr;
-        arr[2] = null;
-        arr[3] = encodedAttr;
-        arr[4] = lowestBit;
-        arr[5] = bitUnit;
-        BooleanBucket bucket = new BooleanBucket();
+    private Object[] profileRetainedAttr(ProfileParameters.Attribute attr) {
+        Object[] data = new Object[7];
+        data[0] = attr.getAttr();
+        data[1] = attr.getAttr();
+        data[2] = attr.getDecodeStrategy();
+        data[3] = null;
+        data[4] = null;
+        data[5] = null;
         try {
-            arr[6] = om.writeValueAsString(bucket);
+            data[6] = attr.getAlgo() == null ? null : om.writeValueAsString(attr.getAlgo());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Fail to format BooleanBucket object to json", e);
+            throw new RuntimeException(
+                    String.format("Fail to format %s object to json", attr.getAlgo().getClass().getSimpleName()), e);
         }
-
+        return data;
     }
 
-    private void profileEncodedAttrs(String attr, Object[] arr, String decodeStrategy, String encodedAttr,
-            int lowestBit, int bitUnit) {
-        arr[0] = attr;
-        arr[1] = attr;
-        arr[2] = decodeStrategy;
-        arr[3] = null;
-        arr[4] = null;
-        arr[5] = null;
-        arr[6] = null;
+    private Object[] profileEncodedAttr(ProfileParameters.Attribute attr, String encodedAttr, int lowestBit) {
+        Object[] data = new Object[7];
+        data[0] = attr.getAttr();
+        data[1] = attr.getAttr();
+        data[2] = attr.getDecodeStrategy();
+        data[3] = encodedAttr;
+        data[4] = lowestBit;
+        data[5] = attr.getEncodeBitUnit();
         try {
-            JsonNode strategy = om.readTree(decodeStrategy);
-            String bitInterpretation = strategy.get(STRATEGY_BIT_INTERPRETATION).asText();
-            if (BOOLEAN_YESNO.equals(bitInterpretation)) {
-                arr[3] = encodedAttr;
-                arr[4] = lowestBit;
-                arr[5] = bitUnit;
-                BooleanBucket bucket = new BooleanBucket();
-                arr[6] = om.writeValueAsString(bucket);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Fail to parse bucket strategy", e);
+            data[6] = attr.getAlgo() == null ? null : om.writeValueAsString(attr.getAlgo());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(
+                    String.format("Fail to format %s object to json", attr.getAlgo().getClass().getSimpleName()), e);
         }
+        return data;
+    }
+
+    private Map<String, List<ProfileParameters.Attribute>> groupEncodedAttrs(List<ProfileParameters.Attribute> attrs) {
+        Collections.sort(attrs, (x, y) -> y.getEncodeBitUnit().compareTo(x.getEncodeBitUnit()));    // descending order
+        Map<String, List<ProfileParameters.Attribute>> encodedAttrs = new HashMap<>();
+        List<Map<String, List<ProfileParameters.Attribute>>> availableBits = new ArrayList<>(); // 0 - 63
+        for (int i = 0; i < encodeBits; i++) {
+            availableBits.add(new HashMap<>());
+        }
+        for (ProfileParameters.Attribute attr : attrs) {
+            if (attr.getEncodeBitUnit() == null || attr.getEncodeBitUnit() <= 0 || attr.getEncodeBitUnit() > encodeBits) {
+                throw new RuntimeException(
+                        String.format("Attribute %s EncodeBitUnit %d is not in range [1, %d]",
+                                attr.getAttr(), attr.getEncodeBitUnit(), encodeBits));
+            }
+            int index = attr.getEncodeBitUnit();
+            while (index < encodeBits && availableBits.get(index).size() == 0) {
+                index++;
+            }
+            String encodedAttr = null;
+            List<ProfileParameters.Attribute> attachedAttrs = null;
+            if (index == encodeBits) {  // No available encode attr to add this attr. Add a new encode attr
+                encodedAttr = createEncodeAttrName();
+                attachedAttrs = new ArrayList<>();
+            } else { // find available encode attr to add this attr
+                encodedAttr = availableBits.get(index).entrySet().iterator().next().getKey();
+                attachedAttrs = availableBits.get(index).get(encodedAttr);
+                availableBits.get(index).remove(encodedAttr);
+            }
+            attachedAttrs.add(attr);
+            availableBits.get(index - attr.getEncodeBitUnit()).put(encodedAttr, attachedAttrs);
+        }
+        for (Map<String, List<ProfileParameters.Attribute>> entry : availableBits) {
+            entry.forEach(encodedAttrs::putIfAbsent);
+        }
+        return encodedAttrs;
+    }
+
+    private String createEncodeAttrName() {
+        return "EAttr_" + UUID.randomUUID().toString().replace("-", "_");
     }
 }

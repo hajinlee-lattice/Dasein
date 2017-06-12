@@ -28,8 +28,8 @@ public class FileParser {
     private static final String[] BOMBORA_INTENT_HEADER = { "CompositeScoreMin", "CompositeScoreMax", "BucketCode",
             "Intent" };
 
-    public static final String[] AM_PROFILE_CONFIG_HEADER = { "AMColumnID", "IsBucket", "IsSegment",
-            "DecodeStrategy" };
+    public static final String[] AM_PROFILE_CONFIG_HEADER = { "AMColumnID", "IsSegment", "DecodeStrategy",
+            "EncodeBitUnit", "BucketAlgorithm" };
 
     @SuppressWarnings("resource")
     public static Map<String, List<NameLocation>> parseBomboraMetroCodes() {
@@ -145,7 +145,8 @@ public class FileParser {
         if (is == null) {
             throw new RuntimeException("Cannot find resource etl/AMProfileConfig.csv");
         }
-        CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(AM_PROFILE_CONFIG_HEADER).withRecordSeparator("\n");
+        CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(AM_PROFILE_CONFIG_HEADER).withRecordSeparator("\n")
+                .withDelimiter('\t');
         try {
             CSVParser csvFileParser = new CSVParser(new InputStreamReader(is), csvFileFormat);
             List<CSVRecord> csvRecords = csvFileParser.getRecords();
@@ -153,13 +154,17 @@ public class FileParser {
                 Map<String, Object> config = new HashMap<>();
                 CSVRecord record = csvRecords.get(i);
                 String amId = record.get(AM_PROFILE_CONFIG_HEADER[0]);
-                Boolean isBucket = Boolean.valueOf(record.get(AM_PROFILE_CONFIG_HEADER[1]));
-                Boolean isSeg = Boolean.valueOf(record.get(AM_PROFILE_CONFIG_HEADER[2]));
-                String decodeStrategy = StringUtils.isNotBlank(record.get(AM_PROFILE_CONFIG_HEADER[3]))
-                        ? record.get(AM_PROFILE_CONFIG_HEADER[3]) : null;
-                config.put(AM_PROFILE_CONFIG_HEADER[1], isBucket);
-                config.put(AM_PROFILE_CONFIG_HEADER[2], isSeg);
-                config.put(AM_PROFILE_CONFIG_HEADER[3], decodeStrategy);
+                Boolean isSeg = Boolean.valueOf(record.get(AM_PROFILE_CONFIG_HEADER[1]));
+                String decodeStrategy = StringUtils.isNotBlank(record.get(AM_PROFILE_CONFIG_HEADER[2]))
+                        ? record.get(AM_PROFILE_CONFIG_HEADER[2]) : null;
+                Integer encodeBitUnit = StringUtils.isBlank(record.get(AM_PROFILE_CONFIG_HEADER[3])) ? null
+                        : Integer.valueOf(record.get(AM_PROFILE_CONFIG_HEADER[3]));
+                String algo = StringUtils.isNotBlank(record.get(AM_PROFILE_CONFIG_HEADER[4]))
+                        ? record.get(AM_PROFILE_CONFIG_HEADER[4]) : null;
+                config.put(AM_PROFILE_CONFIG_HEADER[1], isSeg);
+                config.put(AM_PROFILE_CONFIG_HEADER[2], decodeStrategy);
+                config.put(AM_PROFILE_CONFIG_HEADER[3], encodeBitUnit);
+                config.put(AM_PROFILE_CONFIG_HEADER[4], algo);
                 configs.put(amId, config);
             }
         } catch (IOException e) {

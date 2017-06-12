@@ -1,9 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -18,20 +15,17 @@ public class ProfileParameters extends TransformationFlowParameters {
     @JsonProperty("MinBucketSize")
     private int minBucketSize = 10; // only for numBucketEqualSized = false
 
-    @JsonProperty("NumAttrs")
-    private List<String> numAttrs;  // attrs for interval bucket
-
-    @JsonProperty("BoolAttrs")
-    private List<String> boolAttrs; // attrs for boolean bucket
-
-    @JsonProperty("EncodedAttrs")
-    private Map<String, Pair<Integer, Map<String, String>>> encodedAttrs; // encoded attrs (encoded attr->(bit unit, attr->decode strategy))
-
-    @JsonProperty("RetainedAttrs")
-    private List<String> retainedAttrs; // retained attrs without bucket
-
     @JsonProperty("IDAttr")
     private String idAttr;
+
+    @JsonProperty("NumericAttrs")
+    private List<Attribute> numericAttrs;
+
+    @JsonProperty("EncodedAttrs")
+    private List<Attribute> encodedAttrs;
+
+    @JsonProperty("RetainedAttrs")
+    private List<Attribute> retainedAttrs;
 
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose
@@ -60,38 +54,6 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.minBucketSize = minBucketSize;
     }
 
-    public List<String> getNumAttrs() {
-        return numAttrs;
-    }
-
-    public void setNumAttrs(List<String> numAttrs) {
-        this.numAttrs = numAttrs;
-    }
-
-    public List<String> getBoolAttrs() {
-        return boolAttrs;
-    }
-
-    public void setBoolAttrs(List<String> boolAttrs) {
-        this.boolAttrs = boolAttrs;
-    }
-
-    public Map<String, Pair<Integer, Map<String, String>>> getEncodedAttrs() {
-        return encodedAttrs;
-    }
-
-    public void setEncodedAttrs(Map<String, Pair<Integer, Map<String, String>>> encodedAttrs) {
-        this.encodedAttrs = encodedAttrs;
-    }
-
-    public List<String> getRetainedAttrs() {
-        return retainedAttrs;
-    }
-
-    public void setRetainedAttrs(List<String> retainedAttrs) {
-        this.retainedAttrs = retainedAttrs;
-    }
-
     public Long getRandSeed() {
         return randSeed;
     }
@@ -108,4 +70,74 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.idAttr = idAttr;
     }
 
+    public List<Attribute> getEncodedAttrs() {
+        return encodedAttrs;
+    }
+
+    public void setEncodedAttrs(List<Attribute> encodedAttrs) {
+        this.encodedAttrs = encodedAttrs;
+    }
+
+    public List<Attribute> getNumericAttrs() {
+        return numericAttrs;
+    }
+
+    public void setNumericAttrs(List<Attribute> numericAttrs) {
+        this.numericAttrs = numericAttrs;
+    }
+
+    public List<Attribute> getRetainedAttrs() {
+        return retainedAttrs;
+    }
+
+    public void setRetainedAttrs(List<Attribute> retainedAttrs) {
+        this.retainedAttrs = retainedAttrs;
+    }
+
+    public static class Attribute {
+        private String attr;
+        private Integer encodeBitUnit;
+        private String decodeStrategy;
+        private BucketAlgorithm algo;
+
+        public Attribute(String attr, Integer encodeBitUnit, String decodeStrategy, BucketAlgorithm algo) {
+            this.attr = attr;
+            this.encodeBitUnit = encodeBitUnit;
+            this.decodeStrategy = decodeStrategy;
+            this.algo = algo;
+        }
+
+        public String getAttr() {
+            return attr;
+        }
+
+        public void setAttr(String attr) {
+            this.attr = attr;
+        }
+
+        public Integer getEncodeBitUnit() {
+            return encodeBitUnit;
+        }
+
+        public void setEncodeBitUnit(Integer encodeBitUnit) {
+            this.encodeBitUnit = encodeBitUnit;
+        }
+
+        public BucketAlgorithm getAlgo() {
+            return algo;
+        }
+
+        public void setAlgo(BucketAlgorithm algo) {
+            this.algo = algo;
+        }
+
+        public String getDecodeStrategy() {
+            return decodeStrategy;
+        }
+
+        public void setDecodeStrategy(String decodeStrategy) {
+            this.decodeStrategy = decodeStrategy;
+        }
+
+    }
 }

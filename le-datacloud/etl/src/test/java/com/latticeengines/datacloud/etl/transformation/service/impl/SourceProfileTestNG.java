@@ -191,28 +191,28 @@ public class SourceProfileTestNG extends TransformationServiceImplTestNGBase<Pip
         columns.add(Pair.of("AlexaAUUsers", Float.class)); // Interval
         columns.add(Pair.of("AlexaCAPageViews", Double.class)); // Interval
         columns.add(Pair.of("AlexaCategories", String.class)); // Retained
-        columns.add(Pair.of("AlexaCARank", Integer.class)); // Retained
+        columns.add(Pair.of("AlexaCARank", Integer.class)); // Interval (no bucket)
         columns.add(Pair.of("AlexaCAUsers", Boolean.class)); // Boolean
-        columns.add(Pair.of("AlexaDescription", Boolean.class)); // Boolean
+        columns.add(Pair.of("AlexaGBPageViews", Boolean.class)); // Boolean
         columns.add(Pair.of("AlexaDomains", Boolean.class)); // Discarded
-        //columns.add(Pair.of("HGData_SupplierTechIndicators", String.class)); // Encoded
-        //columns.add(Pair.of("BuiltWith_TechIndicators", String.class)); // Encoded
+        columns.add(Pair.of("HGData_SupplierTechIndicators", String.class)); // Boolean (need to decode)
+        //columns.add(Pair.of("BuiltWith_TechIndicators", String.class)); // Boolean (need to decode)
 
         Object[][] data = new Object[][] { //
-                { 1L, 79, 79L, 79F, 79D, "TestRetained", null, true, true, true, }, //
-                { 2L, 15, 15L, 14.89482594F, 14.89482594D, "TestRetained", null, true, true, true, }, //
-                { 3L, -5, -5L, -5F, -5D, "TestRetained", null, true, true, true, }, //
-                { 4L, 2, 2L, 2F, 2D, "TestRetained", null, true, true, true, }, //
-                { 5L, -2, -2L, -2.40582905F, -2.40582905D, "TestRetained", null, true, true, true, }, //
-                { 6L, 9162, 9162L, 9162F, 9162D, "TestRetained", null, true, true, true, }, //
-                { 7L, 0, 0L, 0F, 0D, "TestRetained", null, true, true, true, }, //
-                { 8L, 1, 1L, 1F, 1D, "TestRetained", null, true, true, true, }, //
-                { 9L, 2, 2L, 2F, 2D, "TestRetained", null, true, true, true, }, //
-                { 10L, 2, 2L, 2.12F, 2.12D, "TestRetained", null, true, true, true, }, //
-                { 11L, 44, 44L, 44F, 44D, "TestRetained", null, true, true, true, }, //
-                { 12L, 100002, 100002L, 100002F, 100002D, "TestRetained", null, true, true, true, }, //
-                { 13L, 737, 737L, 737F, 737D, "TestRetained", null, true, true, true, }, //
-                { 14L, 858, 858L, 858F, 858D, "TestRetained", null, true, true, true, }, //
+                { 1L, 79, 79L, 79F, 79D, "TestRetained", null, true, true, true, null, }, //
+                { 2L, 15, 15L, 14.89482594F, 14.89482594D, "TestRetained", null, true, true, true, null, }, //
+                { 3L, -5, -5L, -5F, -5D, "TestRetained", null, true, true, true, null, }, //
+                { 4L, 2, 2L, 2F, 2D, "TestRetained", null, true, true, true, null, }, //
+                { 5L, -2, -2L, -2.40582905F, -2.40582905D, "TestRetained", null, true, true, true, null, }, //
+                { 6L, 9162, 9162L, 9162F, 9162D, "TestRetained", null, true, true, true, null, }, //
+                { 7L, 0, 0L, 0F, 0D, "TestRetained", null, true, true, true, null, }, //
+                { 8L, 1, 1L, 1F, 1D, "TestRetained", null, true, true, true, null, }, //
+                { 9L, 2, 2L, 2F, 2D, "TestRetained", null, true, true, true, null, }, //
+                { 10L, 2, 2L, 2.12F, 2.12D, "TestRetained", null, true, true, true, null, }, //
+                { 11L, 44, 44L, 44F, 44D, "TestRetained", null, true, true, true, null, }, //
+                { 12L, 100002, 100002L, 100002F, 100002D, "TestRetained", null, true, true, true, null, }, //
+                { 13L, 737, 737L, 737F, 737D, "TestRetained", null, true, true, true, null, }, //
+                { 14L, 858, 858L, 858F, 858D, "TestRetained", null, true, true, true, null, }, //
                 
         };
 

@@ -47,13 +47,22 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
     public Node construct(ProfileParameters para) {
         this.config = para;
         Node src = addSource(para.getBaseTables().get(0));
-        Node numProfile = profileNumAttrs(src);
+        List<String> numAttrs = parseNumAttrs();
+        Node numProfile = profileNumAttrs(src, numAttrs);
         return numProfile;
     }
 
+    private List<String> parseNumAttrs() {
+        List<String> numAttrs = new ArrayList<>();
+        for (ProfileParameters.Attribute attr : config.getNumericAttrs()) {
+            numAttrs.add(attr.getAttr());
+        }
+        return numAttrs;
+    }
+
     @SuppressWarnings("rawtypes")
-    private Node profileNumAttrs(Node src) {
-        Node num = src.renamePipe("_NUM_PROFILE_").retain(new FieldList(config.getNumAttrs()));
+    private Node profileNumAttrs(Node src, List<String> numAttrs) {
+        Node num = src.renamePipe("_NUM_PROFILE_").retain(new FieldList(numAttrs));
         num = num.apply(new AddRandomIntFunction(DUMMY_GROUP, 1, SAMPLE_SIZE, config.getRandSeed()),
                 new FieldList(num.getFieldNames()), new FieldMetadata(DUMMY_GROUP, Integer.class));
         Map<String, Class<?>> cls = new HashMap<>();
@@ -65,9 +74,8 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
             }
         }
         // Sampling
-        Aggregator agg = new ProfileSampleAggregator(
-                new Fields(config.getNumAttrs().toArray(new String[config.getNumAttrs().size()])),
-                config.getNumAttrs());
+        Aggregator agg = new ProfileSampleAggregator(new Fields(numAttrs.toArray(new String[numAttrs.size()])),
+                numAttrs);
         num = num.groupByAndAggregate(new FieldList(DUMMY_GROUP), agg, fms);
         num = num.kvDepivot(new FieldList(), new FieldList(DUMMY_GROUP));
         // Profiling
