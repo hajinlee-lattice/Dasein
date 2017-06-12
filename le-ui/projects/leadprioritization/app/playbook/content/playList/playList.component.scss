@@ -1,0 +1,9 @@
+.play-list {
+	.tiles > li {
+		border-top-color: #d0d0d0;
+		border-width: 1px;
+		&:hover {
+			border-top-color: #457eba;
+		}
+	}
+}

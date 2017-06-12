@@ -1,4 +1,15 @@
-<section id="main-content" class="container tile-list">
+<section id="main-content" class="container tile-list play-list">
+
+
+    <div class="row">
+        <div class="list-header">
+            <div class="pull-left number-of-items" ng-if="vm.totalLength > 0">
+                <menu-sort-by config="vm.header.sort"></menu-sort-by>
+                <search-filter query="vm.query.display_name"></search-filter>
+            </div>
+        </div>
+    </div>
+
 
     <div class="row">
         <div class="twelve columns">

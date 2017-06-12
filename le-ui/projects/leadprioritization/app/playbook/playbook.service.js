@@ -229,6 +229,35 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
+    this.deletePlay = function(playName) {
+
+        var deferred = $q.defer(),
+            result,
+            url = '/pls/play/' + playName;
+
+        $http({
+            method: 'DELETE',
+            url: url,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
 
     this.setHost = function(value) {
         this.host = value;

@@ -1,14 +1,37 @@
-angular.module('lp.playbook.plays', [])
+angular.module('lp.playbook.plays', [
+    'mainApp.playbook.content.playList.deletePlayModal'
+])
 .controller('PlayListController', function ($scope, $element, $state, 
-$stateParams, PlayList, PlaybookWizardService) {
+$stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
 
     var vm = this;
     angular.extend(vm, {
-        plays: PlayList
+        plays: PlayList,
+        totalLength: PlayList.length,
+        tileStates: {},
+        filteredItems: [],
+        query: '',
+        header: {
+            sort: {
+                label: 'Sort By',
+                icon: 'numeric',
+                order: '-',
+                property: 'TimeStamp',
+                items: [
+                    { label: 'Creation Date',   icon: 'numeric',    property: 'timestamp' },
+                    { label: 'Play Name',      icon: 'alpha',      property: 'dislay_name' }
+                ]
+            }
+        }
     });
 
     vm.init = function($q) {
-        console.log(vm.plays);
+        PlayList.forEach(function(play) {
+            vm.tileStates[play.name] = {
+                showCustomMenu: false,
+                editSegment: false
+            };
+        });
     }
     vm.init();
 
@@ -85,12 +108,12 @@ $stateParams, PlayList, PlaybookWizardService) {
         $event.preventDefault();
         $event.stopPropagation();
 
-        DeletePlayModal.show(play, !!vm.playName);
+        DeletePlayModal.show(play);
 
     };
 
     function updatePlay(play) {
-        PlaybookWizardService.updatePlay(play).then(function(result) {
+        PlaybookWizardService.savePlay(play).then(function(result) {
 
             var errorMsg = result.errorMsg;
 
