@@ -195,6 +195,18 @@ public enum GrantedRight implements GrantedAuthority {
             return "Edit_PLS_Refine_Clone";
         }
     }, //
+    VIEW_PLS_REMODEL {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Remodel";
+        }
+    }, //
+    EDIT_PLS_REMODEL {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_Remodel";
+        }
+    }, //
     VIEW_PLS_SAMPLE_LEADS {
         @Override
         public String getAuthority() {
