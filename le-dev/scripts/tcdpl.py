@@ -139,10 +139,8 @@ def printWars():
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Deploy wars to local tomcat')
     parser.add_argument('command', type=str, help='command: deploy, cleanup, check, run')
-    parser.add_argument('-a', dest='apps', type=str, help='comma separated list of apps to be deployed. default is ' + ','.join(
-                                COMMON_APPS) + '. Avaiable choices are ' + ', '.join(LE_APPS))
-    parser.add_argument('-m', dest='modules', type=str, help='comma separated list of microservice modules to be deployed. core is implicitly included. default is ' + ','.join(
-                                COMMON_MODULES) + '. Avaiable choices are ' + ', '.join(MS_MODULES))
+    parser.add_argument('-a', dest='apps', type=str, help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(LE_APPS))
+    parser.add_argument('-m', dest='modules', type=str, help='comma separated list of microservice modules to be deployed. core is implicitly included. Available choices are ' + ', '.join(MS_MODULES))
     parser.add_argument('-p', dest='preset', type=str, default='lp',
                         help='preset apps/modules, choose from [' + ', '.join(PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
     args = parser.parse_args()
