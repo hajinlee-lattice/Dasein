@@ -28,6 +28,7 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.Profile;
 import com.latticeengines.datacloud.dataflow.utils.FileParser;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
@@ -84,12 +85,16 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         parameters.setBucketNum(config.getBucketNum());
         parameters.setMinBucketSize(config.getMinBucketSize());
         parameters.setRandSeed(config.getRandSeed());
+    }
 
-        List<String> idAttrs = new ArrayList<>();
+   @Override
+    protected void preDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters parameters,
+                                         ProfileConfig configuration) {
+       List<String> idAttrs = new ArrayList<>();
         List<ProfileParameters.Attribute> numericAttrs = new ArrayList<>();
         List<ProfileParameters.Attribute> retainedAttrs = new ArrayList<>();
         List<ProfileParameters.Attribute> encodedAttrs = new ArrayList<>();
-        classifyAttrs(baseTemplates[0], baseVersions.get(0), idAttrs, numericAttrs, retainedAttrs, encodedAttrs);
+        classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), idAttrs, numericAttrs, retainedAttrs, encodedAttrs);
         if (idAttrs.size() != 1) {
             throw new RuntimeException(
                     "One and only one lattice account id is required. Allowed id field: LatticeAccountId, LatticeID");

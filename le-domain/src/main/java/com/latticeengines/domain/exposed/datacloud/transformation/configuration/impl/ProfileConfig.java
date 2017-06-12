@@ -14,7 +14,7 @@ public class ProfileConfig extends TransformerConfig {
     private int minBucketSize = 10; // used for numBucketEqualSized = false
 
     @JsonProperty("RandSeed")
-    private Long randSeed; // used for testing purpose
+    private Long randSeed; // used for testing purpose, leave it null for real use case
 
     public boolean isNumBucketEqualSized() {
         return numBucketEqualSized;

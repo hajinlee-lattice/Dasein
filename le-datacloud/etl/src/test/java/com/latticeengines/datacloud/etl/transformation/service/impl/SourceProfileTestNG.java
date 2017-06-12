@@ -111,13 +111,11 @@ public class SourceProfileTestNG extends TransformationServiceImplTestNGBase<Pip
             step0.setBaseTables(baseTables);
             step0.setTransformer(AMAttrEnrich.TRANSFORMER_NAME);
             step0.setConfiguration(getCustomerUniverseConfig());
-            step0.setTargetSource("CustomerUniverse");
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<Integer> inputSteps = new ArrayList<>();
             inputSteps.addAll(Collections.singletonList(0));
-            // step1.setInputSteps(inputSteps);
-            step1.setBaseSources(Collections.singletonList("CustomerUniverse"));
+            step1.setInputSteps(inputSteps);
             step1.setTransformer(Profile.TRANSFORMER_NAME);
             step1.setTargetSource(source.getSourceName());
             String confParamStr1 = getProfileConfig();
@@ -180,7 +178,6 @@ public class SourceProfileTestNG extends TransformationServiceImplTestNGBase<Pip
                 { 14L, 10, 0L, null, 10D, false }, //
         };
         uploadAndRegisterTableSource(columns, data, customerTable.getSourceName());
-        uploadBaseSourceData(customerTable.getSourceName(), baseSourceVersion, columns, data);
     }
 
     private void prepareAM() {
