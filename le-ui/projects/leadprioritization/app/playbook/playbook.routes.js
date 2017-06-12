@@ -2,6 +2,7 @@ angular
 .module('lp.playbook', [
     'common.wizard',
     'lp.cg.talkingpoint',
+    'lp.playbook.plays',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.segment',
     'lp.playbook.wizard.rating',
@@ -22,19 +23,21 @@ angular
                 pageIcon: 'ico-plays',
                 pageTitle: 'Play Book'
             },
+            resolve: {
+                PlayList: function($q, PlaybookWizardService) {
+                    var deferred = $q.defer();
+
+                    PlaybookWizardService.getPlays().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "main@": {
-                    resolve: {
-                        PlayList: function($q, PlayListService) {
-                            var deferred = $q.defer();
-
-                            PlayListService.getPlays().then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
+                    controller: 'PlayListController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/playList/playList.component.html'
                 }
             }

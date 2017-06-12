@@ -1,17 +1,10 @@
-angular.module('lp.playbook.plays', [
-    'mainApp.playbook.PlayListService',
-    'mainApp.playbook.DeletePlayModal'
-])
-.controller('PlayListController', function ($scope, $element, $state, $stateParams,
-    PlayList, DeletePlayModal, PlayListService) {
+angular.module('lp.playbook.plays', [])
+.controller('PlayListController', function ($scope, $element, $state, 
+$stateParams, PlayList, PlaybookWizardService) {
 
     var vm = this;
     angular.extend(vm, {
-        modelId: $stateParams.modelId,
-        tenantName: $stateParams.tenantName,
-        plays: PlayList,
-        showCustomMenu: false,
-        editPlay: false
+        plays: PlayList
     });
 
     vm.init = function($q) {
@@ -47,13 +40,7 @@ angular.module('lp.playbook.plays', [
 
     vm.tileClick = function ($event, playName) {
         $event.preventDefault();
-
-        if ($state.current.name == 'home.playbook') {
-            $state.go('home.playbook', { reload: true } );
-        } else {
-            $state.go('home.playbook.wizard', {play: playName}, { reload: true } );
-        }
-
+        $state.go('home.playbook.wizard', {play: playName}, { reload: true } );
     };
 
     var oldPlayDisplayName = '';
@@ -103,7 +90,7 @@ angular.module('lp.playbook.plays', [
     };
 
     function updatePlay(play) {
-        PlayListService.updatePlay(play).then(function(result) {
+        PlaybookWizardService.updatePlay(play).then(function(result) {
 
             var errorMsg = result.errorMsg;
 

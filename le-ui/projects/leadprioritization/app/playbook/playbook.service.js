@@ -196,7 +196,9 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 })
-.service('PlayListService', function($q, $http, $state) {
+.service('PlaybookWizardService', function($q, $http, $state) {
+    this.host = '/pls'; //default
+
 
     this.getPlays = function() {
 
@@ -227,9 +229,6 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-})
-.service('PlaybookWizardService', function($q, $http, $state) {
-    this.host = '/pls'; //default
 
     this.setHost = function(value) {
         this.host = value;
