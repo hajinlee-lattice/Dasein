@@ -29,12 +29,16 @@ LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
               'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante']
 
-# ms modules for pre check in
-COMMON_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop']
-
-# apps for pre check in
-COMMON_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi']
-
+PRESETS = {
+    'lp': {
+        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi'],
+        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop']
+    },
+    'cdl': {
+        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi'],
+        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop', 'datacloudapi']
+    }
+}
 
 def cleanupWars():
     print 'clean up existing wars ...'
@@ -135,12 +139,12 @@ def printWars():
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Deploy wars to local tomcat')
     parser.add_argument('command', type=str, help='command: deploy, cleanup, check, run')
-    parser.add_argument('-a', dest='apps', type=str, default=','.join(COMMON_APPS),
-                        help='comma separated list of apps to be deployed. default is ' + ','.join(
+    parser.add_argument('-a', dest='apps', type=str, help='comma separated list of apps to be deployed. default is ' + ','.join(
                                 COMMON_APPS) + '. Avaiable choices are ' + ', '.join(LE_APPS))
-    parser.add_argument('-m', dest='modules', type=str, default=','.join(COMMON_MODULES),
-                        help='comma separated list of microservice modules to be deployed. core is implicitly included. default is ' + ','.join(
+    parser.add_argument('-m', dest='modules', type=str, help='comma separated list of microservice modules to be deployed. core is implicitly included. default is ' + ','.join(
                                 COMMON_MODULES) + '. Avaiable choices are ' + ', '.join(MS_MODULES))
+    parser.add_argument('-p', dest='preset', type=str, default='lp',
+                        help='preset apps/modules, choose from [' + ', '.join(PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
     args = parser.parse_args()
 
     return args
@@ -186,8 +190,13 @@ if __name__ == '__main__':
             time.sleep(1)
 
     if args.command in ('deploy', 'run'):
-        apps = args.apps.split(',')
-        modules = args.modules.split(',')
+        if args.apps and args.modules:
+            apps = args.apps.split(',')
+            modules = args.modules.split(',')
+        else:
+            print 'using preset ' + args.preset
+            apps = PRESETS[args.preset]['apps']
+            modules = PRESETS[args.preset]['modules']
 
         print 'apps = %s' % apps
         print 'modules = %s\n' % modules
