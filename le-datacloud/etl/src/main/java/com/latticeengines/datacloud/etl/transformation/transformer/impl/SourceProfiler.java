@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -316,6 +315,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         for (int i = 0; i < encodeBits; i++) {
             availableBits.add(new HashMap<>());
         }
+        int encodedSeq = 0;
         for (ProfileParameters.Attribute attr : attrs) {
             if (attr.getEncodeBitUnit() == null || attr.getEncodeBitUnit() <= 0 || attr.getEncodeBitUnit() > encodeBits) {
                 throw new RuntimeException(
@@ -329,7 +329,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             String encodedAttr = null;
             List<ProfileParameters.Attribute> attachedAttrs = null;
             if (index == encodeBits) {  // No available encode attr to add this attr. Add a new encode attr
-                encodedAttr = createEncodeAttrName();
+                encodedAttr = createEncodeAttrName(encodedSeq);
+                encodedSeq++;
                 attachedAttrs = new ArrayList<>();
             } else { // find available encode attr to add this attr
                 encodedAttr = availableBits.get(index).entrySet().iterator().next().getKey();
@@ -345,7 +346,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return encodedAttrs;
     }
 
-    private String createEncodeAttrName() {
-        return "EAttr_" + UUID.randomUUID().toString().replace("-", "_");
+    private String createEncodeAttrName(int encodedSeq) {
+        return "EAttr" + encodedSeq;
     }
 }
