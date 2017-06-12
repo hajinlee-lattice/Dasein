@@ -45,7 +45,7 @@ angular.module('lp.playbook.plays', [
         }
     };
 
-    vm.tileClick = function ($event, segmentName) {
+    vm.tileClick = function ($event, playName) {
         $event.preventDefault();
 
         if ($state.current.name == 'home.playbook') {
@@ -61,10 +61,10 @@ angular.module('lp.playbook.plays', [
     vm.editPlayClick = function($event, play){
         $event.stopPropagation();
 
-        oldPlayDisplayName = segment.display_name;
-        oldPlayDescription = segment.description;
+        oldPlayDisplayName = play.display_name;
+        oldPlayDescription = play.description;
 
-        var tileState = vm.tileStates[segment.name];
+        var tileState = vm.tileStates[play.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editPlay = !tileState.editPlay;
     };
@@ -72,12 +72,12 @@ angular.module('lp.playbook.plays', [
     vm.cancelEditPlayClicked = function($event, play) {
         $event.stopPropagation();
 
-        segment.display_name = oldPlayDisplayName;
-        segment.description = oldPlayDescription;
+        play.display_name = oldPlayDisplayName;
+        play.description = oldPlayDescription;
         oldPlayDisplayName = '';
         oldPlayDescription = '';
 
-        var tileState = vm.tileStates[segment.name];
+        var tileState = vm.tileStates[play.name];
         tileState.editPlay = !tileState.editPlay;
     };
 
