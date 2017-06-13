@@ -72,10 +72,12 @@ public class HttpClientUtils {
 
     private static HttpComponentsClientHttpRequestFactory constructHttpRequestFactory(
             HttpClientConnectionManager connectionManager) {
-        return new HttpComponentsClientHttpRequestFactory( //
+        HttpComponentsClientHttpRequestFactory reqFac = new HttpComponentsClientHttpRequestFactory( //
                 HttpClientBuilder.create() //
                         .setConnectionManager(connectionManager) //
                         .build());
+        reqFac.setConnectTimeout(10000); // 10 sec
+        return reqFac;
     }
 
 }
