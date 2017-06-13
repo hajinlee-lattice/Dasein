@@ -56,18 +56,19 @@ public class DataFeedTaskResource {
             "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
-    public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable Long taskId,
+    public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String taskId,
                                         HttpServletRequest request) {
-        return dataFeedTaskService.getDataFeedTask(taskId);
+        return dataFeedTaskService.getDataFeedTask(customerSpace, Long.parseLong(taskId));
     }
 
-    @RequestMapping(value = "/registerextract/{taskId}", method = RequestMethod.POST,
+    @RequestMapping(value = "/registerextract/{taskId}/{tableName}", method = RequestMethod.POST,
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
-    public void registerExtract(@PathVariable String customerSpace, @PathVariable Long taskId,
+    public void registerExtract(@PathVariable String customerSpace, @PathVariable String taskId,
+                                @PathVariable String tableName,
                                 @RequestBody Extract extract, HttpServletRequest request) {
-        dataFeedTaskService.registerExtract(customerSpace, taskId, extract);
+        dataFeedTaskService.registerExtract(customerSpace, Long.parseLong(taskId), tableName, extract);
     }
 
 }

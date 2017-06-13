@@ -111,7 +111,7 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
                         Extract extract = extracts.get(tableTemplates.get(taskId).getName());
                         if (extract != null) {
                             metadataProxy.registerExtract(importConfig.getCustomerSpace().toString(),
-                                    Long.parseLong(taskId), extract);
+                                    taskId, tableTemplates.get(taskId).getName(), extract);
                         }
                     }
                     log.info("Finalize import job detail record");

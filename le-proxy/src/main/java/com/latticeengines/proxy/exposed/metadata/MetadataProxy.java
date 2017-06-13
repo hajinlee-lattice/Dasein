@@ -234,7 +234,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @Override
     public void createDataFeedTask(String customerSpace, String dataFeedName, DataFeedTask dataFeedTask) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{dataFeedName}/create", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{dataFeedName}/create",
+                customerSpace, dataFeedName);
         post("createDataFeedTask", url, dataFeedTask, Void.class);
     }
 
@@ -260,9 +261,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     }
 
     @Override
-    public void registerExtract(String customerSpace, Long taskId, Extract extract) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/registerextract/{taskId}",
-                customerSpace, taskId);
+    public void registerExtract(String customerSpace, String taskId, String tableName, Extract extract) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/registerextract/{taskId}/{tableName}",
+                customerSpace, taskId, tableName);
         post("registerExtract", url, extract, Void.class);
     }
 

@@ -17,7 +17,7 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     void clearTableQueue();
 
-    void registerExtract(DataFeedTask dataFeedTask, Extract extract);
+    void registerExtract(DataFeedTask dataFeedTask, String tableName, Extract extract);
 
     void addTableToQueue(DataFeedTask dataFeedTask, Table table);
 
@@ -28,6 +28,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
     DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, Long dataFeedId);
 
     DataFeedTask getDataFeedTask(Long pid);
+
+    void deleteByTaskId(Long taskId);
 
     void updateDataFeedTask(DataFeedTask dataFeedTask);
 

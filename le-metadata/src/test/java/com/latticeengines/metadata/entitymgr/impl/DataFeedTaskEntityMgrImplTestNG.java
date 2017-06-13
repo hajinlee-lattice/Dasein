@@ -122,7 +122,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         extract1.setExtractionTimestamp(DateTime.now().getMillis());
         extract1.setProcessedRecords(1L);
         extract1.setTable(task.getImportTemplate());
-        datafeedTaskEntityMgr.registerExtract(task, extract1);
+        datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract1);
         task = datafeedTaskEntityMgr.findByKey(task);
         assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
         assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(), extract1.getPid());
@@ -143,7 +143,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         extract2.setProcessedRecords(2L);
         extract2.setTable(task.getImportTemplate());
         datafeedTaskEntityMgr.clearTableQueue();
-        datafeedTaskEntityMgr.registerExtract(task, extract2);
+        datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract2);
         assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
         assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getPid(),
                 new Long(task.getImportData().getPid() - 1));

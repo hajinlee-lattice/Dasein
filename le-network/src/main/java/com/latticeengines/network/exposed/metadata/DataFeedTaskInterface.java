@@ -16,6 +16,6 @@ public interface DataFeedTaskInterface {
 
     void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
 
-    void registerExtract(String customerSpace, Long taskId, Extract extract);
+    void registerExtract(String customerSpace, String taskId, String tableName, Extract extract);
 
 }

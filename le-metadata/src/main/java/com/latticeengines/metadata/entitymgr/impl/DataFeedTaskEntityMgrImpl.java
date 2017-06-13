@@ -104,12 +104,14 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Transactional(propagation = Propagation.REQUIRED)
     public void addImportDataTableToQueue(DataFeedTask dataFeedTask) {
         try {
-            if (dataFeedTask.getImportData().getPid() == null) {
-                dataFeedTask.getImportData().setTableType(TableType.DATATABLE);
-                tableEntityMgr.create(dataFeedTask.getImportData());
-                createOrUpdate(dataFeedTask);
+            if (dataFeedTask.getImportData() != null) {
+                if (dataFeedTask.getImportData().getPid() == null) {
+                    dataFeedTask.getImportData().setTableType(TableType.DATATABLE);
+                    tableEntityMgr.create(dataFeedTask.getImportData());
+                    createOrUpdate(dataFeedTask);
+                }
+                addTableToQueue(dataFeedTask, dataFeedTask.getImportData());
             }
-            addTableToQueue(dataFeedTask, dataFeedTask.getImportData());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -132,7 +134,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void registerExtract(DataFeedTask dataFeedTask, Extract extract) {
+    public void registerExtract(DataFeedTask dataFeedTask, String tableName, Extract extract) {
         boolean templateTableChanged = dataFeedTask.getStatus() == Status.Updated;
         boolean dataTableConsumed = dataFeedTask.getImportData() == null;
 
@@ -140,7 +142,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             tableEntityMgr.addExtract(dataFeedTask.getImportData(), extract);
         } else {
             tableTypeHolder.setTableType(TableType.IMPORTTABLE);
-            Table extractTable = tableEntityMgr.findByName(extract.getTable().getName());
+            Table extractTable = tableEntityMgr.findByName(tableName);
             extractTable.getExtracts().clear();
             extractTable = TableUtils.clone(extractTable,
                     "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
@@ -172,13 +174,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         TableEntityMgr.inflateTable(datafeedTask.getImportData());
         return datafeedTask;
     }
-    // @Override
-    // @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    // public boolean dataFeedTaskExist(String dataFeedType, String entity) {
-    // DataFeedTask dataFeedTask = datafeedTaskDao.getDataFeedTask(dataFeedType,
-    // entity);
-    // return dataFeedTask != null;
-    // }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -192,9 +187,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             updateReferences(importData);
             createReferences(importData);
         }
-        // tableEntityMgr.create(dataFeedTask.getImportTemplate());
-        // dataFeedTask.setImportTemplate(tableEntityMgr.findByName(dataFeedTask.getImportTemplate().getName()));
-        // create(dataFeedTask);
     }
 
     @Override
@@ -221,6 +213,15 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteByTaskId(Long taskId) {
+        DataFeedTask dataFeedTask = datafeedTaskDao.findByField("PID", taskId);
+        if (dataFeedTask != null) {
+            datafeedTaskDao.delete(dataFeedTask);
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void updateDataFeedTask(DataFeedTask dataFeedTask) {
         DataFeedTask task = datafeedTaskDao.findByKey(dataFeedTask);
         TableEntityMgr.inflateTable(task.getImportTemplate());
@@ -234,9 +235,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         task.getImportTemplate().setAttributes(dataFeedTask.getImportTemplate().getAttributes());
         updateReferences(task.getImportTemplate());
         createReferences(task.getImportTemplate());
-
-        datafeedTaskDao.update(task);
-        // createOrUpdate(dataFeedTask);
+        update(task);
     }
 
     private void deleteReferences(Table table) {
@@ -276,12 +275,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         }
         if (table.getLastModifiedKey() != null) {
             lastModifiedKeyDao.create(table.getLastModifiedKey());
-        }
-
-        if (table.getExtracts() != null) {
-            for (Extract extract : table.getExtracts()) {
-                extractDao.create(extract);
-            }
         }
 
         if (table.getAttributes() != null) {
