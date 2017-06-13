@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -54,7 +55,10 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
-
+    
+    @Value("${datacloud.match.default.decision.graph}")
+    private String defaultGraph;
+    
     @Autowired
     protected MetadataProxy metadataProxy;
 
@@ -286,7 +290,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         } else {
             matchInput.setKeyMap(keyMap);
         }
-        matchInput.setDecisionGraph("DragonClaw");
+        matchInput.setDecisionGraph(defaultGraph);
         matchInput.setExcludeUnmatchedWithPublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(true);
         matchInput.setDataCloudVersion(getDataCloudVersion());
