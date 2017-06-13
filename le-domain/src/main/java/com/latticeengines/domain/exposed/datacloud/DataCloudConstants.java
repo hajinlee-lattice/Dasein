@@ -42,4 +42,6 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_BUCKETER = "sourceBucketer";
     public static final String TRANSFORMER_STATS_CALCULATOR = "statsCalculator";
     public static final String TRANSFORMER_SORTER = "sourceSorter";
+    public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
+    public static final String TRANSFORMER_COPY = "sourceCopier";
 }

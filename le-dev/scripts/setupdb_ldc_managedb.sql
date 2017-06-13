@@ -149,4 +149,9 @@ UPDATE SourceColumn
 SET Arguments = REPLACE(Arguments, 'Â', '')
 WHERE SourceName = 'DnBCacheSeedRaw';
 
+UPDATE AccountMasterColumn
+SET Groups = REPLACE(REPLACE(Groups, ',Segment', ''), 'Segment', '')
+WHERE Groups LIKE '%Segment%'
+AND (AMColumnID LIKE 'Bmbr30%' OR AMColumnID LIKE 'Feature%');
+
 SET SQL_SAFE_UPDATES = 1;

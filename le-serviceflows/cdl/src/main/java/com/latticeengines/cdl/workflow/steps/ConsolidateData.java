@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +41,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationStep;
@@ -58,9 +59,6 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     private static final String consolidatedTableName = "ConsolidatedTable";
 
     private CustomerSpace customerSpace = null;
-
-    @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
@@ -193,7 +191,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         TransformationStepConfig step2 = new TransformationStepConfig();
         // step 1 output
         step2.setInputSteps(Collections.singletonList(0));
-        step2.setTransformer("bulkMatchTransformer");
+        step2.setTransformer(TRANSFORMER_MATCH);
         step2.setConfiguration(getMatchConfig());
         return step2;
     }
@@ -312,7 +310,6 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         } else {
             matchInput.setKeyMap(keyMap);
         }
-        matchInput.setDecisionGraph(defaultGraph);
         matchInput.setExcludeUnmatchedWithPublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(true);
         matchInput.setDataCloudVersion(getDataCloudVersion());
@@ -336,10 +333,6 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         // keyMap.put(MatchKey.Zipcode, Arrays.asList("Zip"));
         // keyMap.put(MatchKey.PhoneNumber, Arrays.asList("PhoneNumber"));
         return keyMap;
-    }
-
-    private String getDataCloudVersion() {
-        return columnMetadataProxy.latestVersion(null).getVersion();
     }
 
 }

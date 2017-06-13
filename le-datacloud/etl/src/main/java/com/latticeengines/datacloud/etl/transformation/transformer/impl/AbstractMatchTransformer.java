@@ -10,11 +10,10 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransformerConfig> {
 
@@ -47,8 +46,11 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
             sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(baseSources[0],
                     baseSourceVersions.get(0)).toString();
         } else {
-            sourceDirInHdfs = hdfsPathBuilder.constructTablePath(baseSources[0].getSourceName(),
-                    CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE), "").toString();
+            Table table = ((TableSource) baseSources[0]).getTable();
+            if (table.getExtracts().size() > 1) {
+                throw new IllegalArgumentException("Can only handle single extract table.");
+            }
+            sourceDirInHdfs = table.getExtracts().get(0).getPath();
         }
         return match(sourceDirInHdfs, workflowDir, getConfiguration(confStr));
     }

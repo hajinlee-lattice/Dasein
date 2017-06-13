@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -20,7 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
-@Component("bulkMatchTransformer")
+@Component(TRANSFORMER_MATCH)
 public class BulkMatchTransformer extends AbstractMatchTransformer {
 
     @Autowired
@@ -30,7 +32,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     protected Configuration yarnConfiguration;
 
     private static final Log log = LogFactory.getLog(AbstractTransformer.class);
-    private static String transfomerName = "bulkMatchTransformer";
+    private static String transfomerName = TRANSFORMER_MATCH;
 
     public String getName() {
         return transfomerName;
@@ -45,11 +47,10 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     }
 
     private MatchInput constructMatchInput(String avroDir, MatchTransformerConfig config) {
-
         MatchInput matchInput = config.getMatchInput();
-        matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
-        matchInput.setFetchOnly(false);
-        matchInput.setSkipKeyResolution(true);
+        if (matchInput.getTenant() == null) {
+            matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
+        }
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);
         matchInput.setInputBuffer(inputBuffer);

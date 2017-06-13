@@ -37,6 +37,7 @@ public class BucketTestUtils {
     static final String ATTR_ENCODED = "Encoded";
     static final String ATTR_RELAY_STR = "RelayString";
     static final String ATTR_RELAY_INT = "RelayInteger";
+    static final String ATTR_EXTRA = "Extra";
     static final String ATTR_ROW_ID = "RowID";
     static final String ATTR_RENAMED_ROW_ID = "RenamedRowId";
 
@@ -102,6 +103,7 @@ public class BucketTestUtils {
                 relayAttr(ATTR_RENAMED_ROW_ID, ATTR_ROW_ID), //
                 relayAttr(ATTR_RELAY_STR, ATTR_RELAY_STR), //
                 relayAttr(ATTR_RELAY_INT, ATTR_RELAY_INT), //
+                relayAttr(ATTR_EXTRA, ATTR_EXTRA), //
                 bktAttr(ATTR_INTERVAL_INT), //
                 bktAttr(ATTR_INTERVAL_DBL), //
                 bktAttr(ATTR_CAT_STR), //

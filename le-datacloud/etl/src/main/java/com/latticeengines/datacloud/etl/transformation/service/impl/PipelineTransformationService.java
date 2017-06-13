@@ -140,6 +140,9 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (!transConf.getKeepTemp()) {
                 cleanupTempSources(steps);
             }
+            if (!succeeded) {
+                updateStatusToFailed(progress, "Failed to finish all transform steps", null);
+            }
         }
         if (doPostProcessing(progress, workflowDir, false) & succeeded) {
             return progress;

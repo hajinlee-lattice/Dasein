@@ -55,7 +55,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Override
     public String process(DataCloudJobConfiguration jobConfiguration) throws Exception {
         try {
-            appContext = loadSoftwarePackages("propdata", softwareLibraryService, appContext, versionManager);
+            appContext = loadSoftwarePackages("datacloud", softwareLibraryService, appContext, versionManager);
             LogManager.getLogger(MatchStepAspect.class).setLevel(Level.DEBUG);
             matchActorSystem.setBatchMode(true);
 

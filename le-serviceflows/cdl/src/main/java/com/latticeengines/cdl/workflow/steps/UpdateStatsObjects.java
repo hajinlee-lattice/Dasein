@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +13,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -27,9 +28,11 @@ import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.StatisticsContainerProxy;
@@ -50,6 +53,9 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
 
     @Autowired
     private StatisticsContainerProxy statisticsContainerProxy;
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
     public void execute() {
@@ -86,20 +92,21 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         }
         log.info("Checking for result file: " + Arrays.toString(paths.toArray()));
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, paths.get(0));
-        while (records.hasNext()) {
-            GenericRecord record = records.next();
-            log.info("record is " + record);
-        }
-        StatsCube statsCube = StatsCubeUtils.parseAvro(records);
-        return statsCube;
+        return StatsCubeUtils.parseAvro(records);
     }
 
-    @VisibleForTesting
-    StatisticsContainer constructStatsContainer(Table masterTable, Table statsTable) {
+    private StatisticsContainer constructStatsContainer(Table masterTable, Table statsTable) {
         StatisticsContainer statsContainer = new StatisticsContainer();
 
         // get StatsCube from statsTable
         StatsCube statsCube = getStatsCube(statsTable);
+
+        // get metadata for account master
+        String latestVersion = columnMetadataProxy.latestVersion("").getVersion();
+        List<ColumnMetadata> cols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
+                latestVersion);
+        Map<String, ColumnMetadata> colLookup = new HashMap<>();
+        cols.forEach(c -> colLookup.put(c.getColumnId(), c));
 
         // get all other metadata from master table (and matchapi if necessary)
         String schemaIntStr = masterTable.getInterpretation();
@@ -124,11 +131,14 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
                 }
                 category = attrInMasterTable.getCategory();
                 subCategory = attrInMasterTable.getSubcategory();
+            } else if (colLookup.containsKey(name)) {
+                ColumnMetadata metadata = colLookup.get(name);
+                category = metadata.getCategory().getName();
+                subCategory = metadata.getSubcategory();
             } else {
-                log.warn(String.format("Attribute %s in StatsCube does not exist in the master table %s", name,
-                        statsTable.getName()));
-                // TODO: it probably is an attribute from account master. If so,
-                // we can get its metadata through matchapi.
+                log.warn(String.format(
+                        "Attribute %s in StatsCube does not exist in account master or the customer master table %s",
+                        name, statsTable.getName()));
                 continue;
             }
 

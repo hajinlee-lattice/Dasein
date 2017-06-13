@@ -102,7 +102,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void bootstrap(Integer numTenants) {
-        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
+        loginAD();
         involvedDL = false;
         involvedZK = false;
         super.bootstrap(numTenants);
@@ -118,7 +118,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public Tenant bootstrapForProduct(LatticeProduct product) {
-        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
+        loginAD();
         Tenant tenant = bootstrapViaTenantConsole(product, enviroment, null);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
@@ -127,7 +127,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public Tenant bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
-        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
+        loginAD();
         Tenant tenant = bootstrapViaTenantConsole(product, enviroment, featureFlagMap);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
@@ -146,6 +146,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void cleanupPlsHdfs() {
+        loginAD();
         super.cleanupPlsHdfs();
     }
 
@@ -388,6 +389,10 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             log.warn("Did not find " + customerSpace.toString() + " in testCustomerSpaces.");
         }
         return false;
+    }
+
+    private void loginAD() {
+        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
     }
 
 }

@@ -17,6 +17,8 @@ public enum FundamentalType {
     YEAR("year"),
     DATE("date");
 
+    public static final String AVRO_PROP_KEY = "FundamentalType";
+
     private final String name;
     private static Map<String, FundamentalType> nameMap;
 

@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler.TRANSFORMER_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+import static com.latticeengines.domain.exposed.metadata.FundamentalType.AVRO_PROP_KEY;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -90,7 +92,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         parameters.setRandSeed(config.getRandSeed());
     }
 
-   @Override
+    @Override
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters parameters,
                                          ProfileConfig configuration) {
        List<String> idAttrs = new ArrayList<>();
@@ -187,7 +189,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 numericAttrs.add(new ProfileParameters.Attribute(field.name(), null, null, new IntervalBucket()));
                 continue;
             }
-            if (boolTypes.contains(type)) {
+            if (boolTypes.contains(type) || field.getProp(AVRO_PROP_KEY).equalsIgnoreCase(FundamentalType.BOOLEAN.getName())) {
                 log.info(String.format("Boolean bucketed attr %s (type %s encoded)", field.name(), type));
                 BucketAlgorithm algo = new BooleanBucket();
                 encodedAttrs.add(new ProfileParameters.Attribute(field.name(), 2, null, algo));

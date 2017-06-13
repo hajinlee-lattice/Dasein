@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.RefreshedSource;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
@@ -58,7 +59,11 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
         }
 
         DataFlowContext ctx = dataFlowContext(source, sourceTables, parameters, workflowDir);
-        ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + flowName);
+        if (source instanceof PipelineSource) {
+            ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + flowName);
+        } else {
+            ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + flowBean);
+        }
         return dataTransformationService.executeNamedTransformation(ctx, flowBean);
     }
 

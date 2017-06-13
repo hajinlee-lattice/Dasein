@@ -80,6 +80,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SOURCE_IMPORT_TABLE = "SOURCE_IMPORT_TABLE_NAME";
     protected static final String EXECUTION = "EXECUTION";
     protected static final String CALCULATE_STATS_TARGET_TABLE = "CALCULATE_STATS_TARGET_TABLE";
+    protected static final String CALCULATE_STATS_SORTED_TABLE = "CALCULATE_STATS_SORTED_TABLE";
     protected static final String DATA_INITIAL_LOADED = "DATA_INITIAL_LOADED";
     protected static final String CONSOLIDATE_INPUT_TABLES = "CONSOLIDATE_INPUT_TABLES";
     protected static final String CONSOLIDATE_CONSOLIDATED_TABLE = "CONSOLIDATE_CONSOLIDATED_TABLE";

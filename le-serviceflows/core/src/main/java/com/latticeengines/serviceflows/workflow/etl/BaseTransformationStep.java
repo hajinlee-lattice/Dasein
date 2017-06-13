@@ -2,19 +2,45 @@ package com.latticeengines.serviceflows.workflow.etl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 public abstract class BaseTransformationStep<T extends BaseStepConfiguration> extends BaseWorkflowStep<T> {
 
     private static int MAX_LOOPS = 1800;
+    private static final ObjectMapper OM = new ObjectMapper();
     
     @Autowired
     protected TransformationProxy transformationProxy;
-    
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
+
+    protected String getDataCloudVersion() {
+        return columnMetadataProxy.latestVersion("").getVersion();
+    }
+
+    protected String useEngine(TransformerConfig conf, String engine) {
+        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
+        engineConf.setEngine(engine);
+        return appendEngineConf(conf, engineConf);
+    }
+
+    private String appendEngineConf(TransformerConfig conf, TransformationFlowParameters.EngineConfiguration engineConf) {
+        ObjectNode on = OM.valueToTree(conf);
+        on.set("EngineConfig", OM.valueToTree(engineConf));
+        return JsonUtils.serialize(on);
+    }
+
     protected void waitForFinish(TransformationProgress progress) {
         TransformationProgress progressInDb = null;
         for (int i = 0; i < MAX_LOOPS; i++) {

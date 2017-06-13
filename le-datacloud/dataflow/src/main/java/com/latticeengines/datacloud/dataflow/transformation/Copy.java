@@ -11,13 +11,14 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
-import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CopierParameters;
 
 /**
  * Directly copy/merge base sources into output avros
  */
 @Component(BEAN_NAME)
-public class Copy extends TypesafeDataFlowBuilder<TransformationFlowParameters> {
+public class Copy extends TypesafeDataFlowBuilder<CopierParameters> {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(Copy.class);
@@ -25,9 +26,8 @@ public class Copy extends TypesafeDataFlowBuilder<TransformationFlowParameters> 
     public static final String BEAN_NAME = "copy";
 
     @Override
-    public Node construct(TransformationFlowParameters parameters) {
+    public Node construct(CopierParameters parameters) {
         Node first = addSource(parameters.getBaseTables().get(0));
-        first = first.retain(first.getFieldNamesArray());
         if (parameters.getBaseTables().size() > 1) {
             List<Node> remaining = new ArrayList<>();
             for (int i = 1; i < parameters.getBaseTables().size(); i++) {
@@ -35,10 +35,18 @@ public class Copy extends TypesafeDataFlowBuilder<TransformationFlowParameters> 
                 node = node.retain(first.getFieldNamesArray());
                 remaining.add(node);
             }
-            return first.merge(remaining);
-        } else {
-            return first;
+            first = first.merge(remaining);
         }
+
+        if (parameters.retainAttrs != null && !parameters.retainAttrs.isEmpty()) {
+            first = first.retain(new FieldList(parameters.retainAttrs));
+        }
+
+        if (parameters.discardAttrs != null && !parameters.discardAttrs.isEmpty()) {
+            first = first.retain(new FieldList(parameters.discardAttrs));
+        }
+
+        return first;
     }
 
 }

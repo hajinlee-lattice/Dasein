@@ -150,11 +150,11 @@ public class MatchInputValidator {
     }
 
     private static void validateKeys(Set<MatchKey> keySet) {
-        if (!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name)) {
-            throw new IllegalArgumentException("Neither domain nor name is provided.");
+        if (!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name) && !keySet.contains(MatchKey.LatticeAccountID)) {
+            throw new IllegalArgumentException("Neither domain nor name nor lattice account id is provided.");
         }
 
-        if (!keySet.contains(MatchKey.Domain) && keySet.contains(MatchKey.Name)
+        if ((!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.LatticeAccountID)) && keySet.contains(MatchKey.Name)
                 && (!keySet.contains(MatchKey.Country) || !keySet.contains(MatchKey.State))) {
             throw new IllegalArgumentException("Name location based match must has country and state.");
         }
