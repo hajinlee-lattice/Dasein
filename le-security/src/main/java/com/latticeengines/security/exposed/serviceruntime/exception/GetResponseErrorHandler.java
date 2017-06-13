@@ -5,12 +5,14 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResponseErrorHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 
@@ -31,13 +33,17 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtils.copy(response.getBody(), baos);
         String body = new String(baos.toByteArray());
-        if (!interpretAndThrowException(response.getStatusCode(), body)) {
+        if (!interpretAndThrowException(response.getStatusCode(), response.getHeaders(), body)) {
             log.error("Could not interpret exception response: " + body);
+            HttpHeaders httpHeaders = response.getHeaders();
+            if (httpHeaders != null) {
+                log.info("HTTP Headers: " + JsonUtils.serialize(httpHeaders));
+            }
             throw new RuntimeException(body);
         }
     }
 
-    private boolean interpretAndThrowException(HttpStatus status, String body) {
+    private boolean interpretAndThrowException(HttpStatus status, HttpHeaders httpHeaders, String body) {
         RemoteLedpException exception;
         try {
             JsonNode node = new ObjectMapper().readTree(body);
@@ -45,6 +51,10 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
             String stackTraceString = null;
             if (stackTrace != null) {
                 stackTraceString = stackTrace.asText();
+            }
+
+            if (httpHeaders != null) {
+                log.info("HTTP Headers: " + JsonUtils.serialize(httpHeaders));
             }
 
             LedpCode code = LedpCode.valueOf(node.get("errorCode").asText());
