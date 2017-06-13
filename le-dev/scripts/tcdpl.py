@@ -37,6 +37,10 @@ PRESETS = {
     'cdl': {
         'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'datacloudapi']
+    },
+    'etl': {
+        'apps': ['microservice', 'matchapi'],
+        'modules': ['metadata', 'workflowapi', 'datacloudapi']
     }
 }
 

@@ -35,12 +35,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class SourceProfileTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(SourceProfileTestNG.class);
+public class SourceProfileDeploymentTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+    private static final Log log = LogFactory.getLog(SourceProfileDeploymentTestNG.class);
 
     private static final long RAND_SEED = 0L;
 
-    private GeneralSource source = new GeneralSource("AMProfile");
+    private GeneralSource source = new GeneralSource("Profile");
 
     @Autowired
     private AccountMaster am;
@@ -111,6 +111,7 @@ public class SourceProfileTestNG extends TransformationServiceImplTestNGBase<Pip
             step0.setBaseTables(baseTables);
             step0.setTransformer(AMAttrEnricher.TRANSFORMER_NAME);
             step0.setConfiguration(getCustomerUniverseConfig());
+            step0.setTargetSource("Enriched");
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<Integer> inputSteps = new ArrayList<>();
