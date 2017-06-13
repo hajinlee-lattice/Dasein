@@ -17,8 +17,6 @@ import com.latticeengines.datacloud.core.source.impl.BuiltWithPivoted;
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityMgr;
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressService;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
 import com.latticeengines.datacloudapi.engine.testframework.PropDataEngineFunctionalTestNGBase;
 import com.latticeengines.datacloudapi.engine.testframework.PublicationWorkflowServlet;
@@ -31,6 +29,8 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfig
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
@@ -88,7 +88,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         publication = getPublication();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", priority = 2)
     public void testPublish() {
         List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 0, "Should have zero progress at beginning");
@@ -113,7 +113,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         Assert.assertTrue(status.getStatus() == ProgressStatus.FAILED);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", priority = 1)
     public void testScan() throws Exception {
         startWorkFlowServer(new PublicationWorkflowServlet.PayloadVerifier() {
             @Override
