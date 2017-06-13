@@ -15,6 +15,9 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
                 vm.savedSegment = play.segment;
                 vm.stored.segment_selection = play.segment;
+                if(play.segment) {
+                    PlaybookWizardStore.setValidation('segment', true);
+                }
             });
         }
     }
