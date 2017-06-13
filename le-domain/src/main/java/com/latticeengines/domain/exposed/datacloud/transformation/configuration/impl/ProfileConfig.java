@@ -8,10 +8,10 @@ public class ProfileConfig extends TransformerConfig {
     private boolean numBucketEqualSized;    // true: bucket size is roughly equal  false: decide bucket upon distribution
 
     @JsonProperty("BucketNum")
-    private int bucketNum = 5;  // roughly bucket number (might not be exactly same in final profiling)
+    private int bucketNum = 3;  // roughly bucket number (might not be exactly same in final profiling)
 
     @JsonProperty("MinBucketSize")
-    private int minBucketSize = 10; // used for numBucketEqualSized = false
+    private int minBucketSize = 2; // used for numBucketEqualSized = false
 
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose, leave it null for real use case
