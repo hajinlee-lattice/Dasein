@@ -40,7 +40,10 @@
         </p>
     </div>
 
-    <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && !vm.lookupMode && (vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' ? (vm.section == 'segment.analysis' ? true : false) : true)">
+    <div class="stats" ng-if="  vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && 
+                                vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && 
+                                !vm.lookupMode && 
+                                (vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)">
         <h5><label>Attribute range</label><label>Records</label></h5>
         <ul class="attribute-stats">
             <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List | limitTo: 5"
