@@ -4,42 +4,37 @@ alias leversion='cat $WSHOME/le-parent/pom.xml | grep \<version\> | head -n 1 | 
 alias hdp-start='$WSHOME/le-dev/scripts/start-cluster.sh'
 alias hdp-stop='$WSHOME/le-dev/scripts/stop-cluster.sh'
 
-alias dfdplnobld='hadoop fs -rm -r -f "/app/dataflow/*" && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -put conf/env/dev/dataflow.properties /app/dataflow'
+alias dfdplnobld='hadoop fs -rm -r -f "/app/dataflow/*" && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib'
 alias dfdpl='mvn -Pshaded-yarn -DskipTests clean install && dfdplnobld'
 
-alias wfdplnobld='hadoop fs -rm -r -f "/app/workflow/*" && hadoop fs -mkdir -p /app/workflow && hadoop fs -put conf/env/dev/workflow.properties /app/workflow'
+alias wfdplnobld='hadoop fs -rm -r -f "/app/workflow/*" && hadoop fs -mkdir -p /app/workflow'
 alias wfdpl='mvn -Pshaded-yarn -DskipTests clean install && wfdplnobld'
 
-alias dfapidplnobld='hadoop fs -rm -r /app/dataflowapi || true && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-dataflowapi/target/le-dataflowapi*shaded.jar /app/dataflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/dataflowapi.properties /app/dataflowapi'
+alias dfapidplnobld='hadoop fs -rm -r /app/dataflowapi || true && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-dataflowapi/target/le-dataflowapi*shaded.jar /app/dataflowapi/lib'
 alias createpod='cd $WSHOME/le-baton && mvn -f pom-batontool.xml -DskipTests clean install && java -jar target/le-baton-tool-*-shaded.jar --podId Default --connectionString localhost:2181 createPod'
 
 alias dfapidpl='mvn -Pshaded-yarn -DskipTests clean install && dfapidplnobld'
 
-alias wfapidplnobld='hadoop fs -rm -r /app/workflowapi || true && hadoop fs -mkdir -p /app/workflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-workflowapi/target/le-workflowapi*shaded.jar /app/workflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/workflowapi.properties /app/workflowapi'
+alias wfapidplnobld='hadoop fs -rm -r /app/workflowapi || true && hadoop fs -mkdir -p /app/workflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-workflowapi/target/le-workflowapi*shaded.jar /app/workflowapi/lib'
 alias wfapidpl='mvn -Pshaded-yarn -DskipTests clean install && wfapidplnobld'
 
-alias scoringdplnobld='hadoop fs -rm -r /app/scoring || true && hadoop fs -mkdir -p /app/scoring/lib  && hadoop fs -mkdir -p /app/scoring/scripts && hadoop fs -copyFromLocal $WSHOME/le-scoring/target/le-scoring*shaded.jar /app/scoring/lib && hadoop fs -copyFromLocal conf/env/dev/scoring.properties /app/scoring  && hadoop fs -copyFromLocal src/main/python/scoring.py /app/scoring/scripts'
+alias scoringdplnobld='hadoop fs -rm -r /app/scoring || true && hadoop fs -mkdir -p /app/scoring/lib  && hadoop fs -mkdir -p /app/scoring/scripts && hadoop fs -copyFromLocal $WSHOME/le-scoring/target/le-scoring*shaded.jar /app/scoring/lib && hadoop fs -copyFromLocal src/main/python/scoring.py /app/scoring/scripts'
 alias scoringdpl='mvn -Pshaded-yarn -DskipTests clean install && scoringdplnobld'
-
-alias pddplnobld='hadoop fs -rm -r /app/propdata || true && hadoop fs -mkdir -p /app/propdata/lib && hadoop fs -copyFromLocal $WSHOME/le-propdata/target/le-propdata*shaded.jar /app/propdata/lib && hdfs dfs -put $WSHOME/le-propdata/conf/env/dev/propdata.properties /app/propdata'
-alias pddpl='pushd $WSHOME/le-propdata && mvn -Pshaded-yarn -DskipTests clean install && popd && pddplnobld'
 
 alias dcbld='pushd $WSHOME/le-datacloud && mvn -T4 -DskipTests clean install && popd'
 alias dcdplnobld='hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -rm -r /app/datacloud || true && hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -copyFromLocal $WSHOME/le-datacloud/yarn/target/le-datacloud*shaded.jar /app/datacloud/lib'
 alias dcdpl='dcbld && pushd $WSHOME/le-datacloud/yarn && mvn -Pshaded-yarn -DskipTests clean install && popd && dcdplnobld'
 
-alias dpdplnobld='hadoop fs -rm -r /app/dataplatform || true && hadoop fs -mkdir -p /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/target/le-dataplatform*shaded.jar /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/conf/env/dev/dataplatform.properties /app/dataplatform && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh'
+alias dpdplnobld='hadoop fs -rm -r /app/dataplatform || true && hadoop fs -mkdir -p /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/target/le-dataplatform*shaded.jar /app/dataplatform/lib && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh'
 alias dpdpl='mvn -Pshaded-yarn -DskipTests clean install && dpdplnobld'
 
-alias dedplnobld='hadoop fs -rm -r /app/dellebi || true && hadoop fs -mkdir -p /app/dellebi/lib && hadoop fs -copyFromLocal $WSHOME/le-dellebi/target/le-dellebi*shaded.jar /app/dellebi/lib && hadoop fs -copyFromLocal $WSHOME/le-dellebi/conf/env/dev/dellebi.properties /app/dellebi'
+alias dedplnobld='hadoop fs -rm -r /app/dellebi || true && hadoop fs -mkdir -p /app/dellebi/lib && hadoop fs -copyFromLocal $WSHOME/le-dellebi/target/le-dellebi*shaded.jar /app/dellebi/lib'
 alias dedpl='mvn -Pshaded-yarn -DskipTests clean install && dedplnobld'
 
 alias sqdplnobld='hadoop fs -rm -r /app/sqoop 2>/dev/null || true && hadoop fs -mkdir -p /app/sqoop/lib && hadoop fs -copyFromLocal $WSHOME/le-sqoop/target/le-sqoop*shaded.jar /app/sqoop/lib'
 alias sqdpl='mvn -Pshaded-yarn -DskipTests clean install && sqdplnobld'
 
-alias fwkdpl='hadoop fs -rm -r /app/proxy || true && hadoop fs -rm -r /app/db || true && hadoop fs -rm -r /app/security || true && hadoop fs -rm -r /app/monitor || true && hadoop fs -rm -r /app/camille || true && hadoop fs -mkdir -p /app/proxy || true && hadoop fs -mkdir -p /app/db || true && hadoop fs -mkdir -p /app/camille || true && hadoop fs -mkdir -p /app/monitor || true && hadoop fs -mkdir -p /app/security || true && hadoop fs -copyFromLocal $WSHOME/le-proxy/conf/env/dev/proxy.properties /app/proxy && hadoop fs -copyFromLocal $WSHOME/le-db/conf/env/dev/db.properties /app/db && hadoop fs -copyFromLocal $WSHOME/le-security/conf/env/dev/security.properties /app/security && hdfs dfs -put $WSHOME/le-monitor/conf/env/dev/monitor.properties /app/monitor && hdfs dfs -put $WSHOME/le-camille/conf/env/dev/camille.properties /app/camille '
-
-alias eaidplnobld='hadoop fs -rm -r /app/eai || true && hadoop fs -mkdir -p /app/eai/lib && hadoop fs -copyFromLocal $WSHOME/le-eai/target/le-eai*shaded.jar /app/eai/lib && hadoop fs -copyFromLocal $WSHOME/le-eai/conf/env/dev/eai.properties /app/eai'
+alias eaidplnobld='hadoop fs -rm -r /app/eai || true && hadoop fs -mkdir -p /app/eai/lib && hadoop fs -copyFromLocal $WSHOME/le-eai/target/le-eai*shaded.jar /app/eai/lib'
 alias eaidpl='mvn -Pshaded-yarn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -DskipTests clean install && eaidplnobld'
 
 alias apidpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-api-*-SNAPSHOT.war $JETTY_HOME/webapps'
@@ -53,9 +48,10 @@ alias microservicedpl='mvn -DskipTests clean package && microservicedplnobld'
 alias msbld='pushd $WSHOME/le-microservice && mvn -T6 -DskipTests clean package && popd'
 
 alias swlibdpldf='bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-cdl -i com.latticeengines.cdl.Initializer -f ../le-serviceflows/cdl/target/le-serviceflows-cdl-*-shaded.jar'
-alias swlibdplwf='bin/deployToSwlib.sh -o install -m workflowapi -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -m workflowapi -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar && bin/deployToSwlib.sh -o install -m workflowapi -g com.latticeengines -a le-serviceflows-cdl -i com.latticeengines.cdl.Initializer -f ../le-serviceflows/cdl/target/le-serviceflows-cdl-*-shaded.jar'
-alias swlibdpl='hadoop fs -rm -r /app/swlib || true && swlibdpldf && swlibdplwf'
+alias swlibdplwf='bin/deployToSwlib.sh -o install -m workflowapi -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -m workflowapi -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar && bin/deployToSwlib.sh -o install -m workflowapi -g com.latticeengines -a le-serviceflows-cdl -i com.latticeengines.cdl.Initializer -f ../le-serviceflows/cdl/target/le-serviceflows-cdl-*-shaded.jar && bin/deployToSwlib.sh -o install -m workflowapi -g com.latticeengines -a le-serviceflows-datacloud -i com.latticeengines.datacloud.Initializer -f ../le-serviceflows/cdl/target/le-serviceflows-datacloud-*-shaded.jar'
+alias swlibdpl='pushd $WSHOME/le-swlib && hadoop fs -rm -r /app/swlib || true && swlibdpldf && swlibdplwf && popd'
 alias sfbld='pushd $WSHOME/le-serviceflows && mvn -T6 -DskipTests clean install && popd'
+alias sfdpl='sfbld && swlibdpl'
 
 alias cfgdplnobld='hdfs dfs -rm -r -f /app/conf || true; hdfs dfs -mkdir -p /app/conf; hdfs dfs -put $WSHOME/le-config/conf/env/dev/latticeengines.properties /app/conf;'
 alias cfgbld='bash $WSHOME/le-dev/scripts/cfgbld.sh'

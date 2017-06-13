@@ -21,7 +21,7 @@ fi
 
 echo $VERSION
 
-for sf in 'dataflowapi|prospectdiscovery' 'dataflowapi|leadprioritization' 'dataflowapi|cdl' 'workflowapi|prospectdiscovery' 'workflowapi|leadprioritization' 'workflowapi|cdl'
+for sf in 'dataflowapi|prospectdiscovery' 'dataflowapi|leadprioritization' 'dataflowapi|cdl' 'workflowapi|prospectdiscovery' 'workflowapi|leadprioritization' 'workflowapi|cdl' 'workflowapi|datacloud'
 do
     module=$(echo ${sf} | cut -d \| -f 1)
     library=$(echo ${sf} | cut -d \| -f 2)
