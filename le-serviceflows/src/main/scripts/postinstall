@@ -21,33 +21,25 @@ fi
 
 echo $VERSION
 
-echo "clean up hdfs"
-hdfs dfs -mkdir -p /app/$LE_STACK/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION
-hdfs dfs -mkdir -p /app/$LE_STACK/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION
+for sf in 'dataflowapi|prospectdiscovery' 'dataflowapi|leadprioritization' 'dataflowapi|cdl' 'workflowapi|prospectdiscovery' 'workflowapi|leadprioritization' 'workflowapi|cdl'
+do
+    module=$(echo ${sf} | cut -d \| -f 1)
+    library=$(echo ${sf} | cut -d \| -f 2)
 
-hdfs dfs -rm -r -f /app/$LE_STACK/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION/*
-hdfs dfs -rm -r -f /app/$LE_STACK/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION/*
+    echo "clean up hdfs for module=${module} library=${library}"
+    hdfs dfs -mkdir -p /app/${LE_STACK}/swlib/${module}/com/latticeengines/le-serviceflows-${library}/${VERSION}
+    hdfs dfs -rm -r -f /app/${LE_STACK}/swlib/${module}/com/latticeengines/le-serviceflows-${library}/${VERSION}/*
 
-echo "install le-serviceflows-prospectdiscovery for dataflowapi"
-java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
-    -o install \
-    -m dataflowapi \
-    -g com.latticeengines \
-    -a le-serviceflows-prospectdiscovery \
-    -v $VERSION \
-    -s $LE_STACK \
-    -i com.latticeengines.prospectdiscovery.Initializer \
-    -f /tmp/swlib/le-serviceflows-prospectdiscovery-*-shaded.jar
-
-echo "install le-serviceflows-leadprioritization for dataflowapi"
-java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
-    -o install \
-    -m dataflowapi \
-    -g com.latticeengines \
-    -a le-serviceflows-leadprioritization \
-    -v $VERSION \
-    -s $LE_STACK \
-    -i com.latticeengines.leadprioritization.Initializer \
-    -f /tmp/swlib/le-serviceflows-leadprioritization-*-shaded.jar
+    echo "install le-serviceflows-${library} for ${module}"
+    java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
+        -o install \
+        -m ${module} \
+        -g com.latticeengines \
+        -a le-serviceflows-${library} \
+        -v ${VERSION} \
+        -s ${LE_STACK} \
+        -i com.latticeengines.${library}.Initializer \
+        -f /tmp/swlib/le-serviceflows-${library}-*-shaded.jar
+done
 
 
