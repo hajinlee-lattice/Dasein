@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +81,12 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     public void onConfigurationInitialized() {
         customerSpace = configuration.getCustomerSpace();
         List<Table> inputTables = getListObjectFromContext(CONSOLIDATE_INPUT_TABLES, Table.class);
+        inputTables.sort(Comparator.comparing(
+                (Table t) -> {
+                    return t.getLastModifiedKey() == null ? -1
+                            : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1 : t.getLastModifiedKey()
+                                    .getLastModifiedTimestamp();
+                }).reversed());
         for (Table table : inputTables) {
             inputTableNames.add(table.getName());
         }
@@ -114,8 +121,8 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
 
     @Override
     public void onExecutionCompleted() {
-        metadataProxy.deleteTable(customerSpace.toString(),
-                TableUtils.getFullTableName(mergedTableName, targetVersion));
+        metadataProxy
+                .deleteTable(customerSpace.toString(), TableUtils.getFullTableName(mergedTableName, targetVersion));
 
         Table consolidatedTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(consolidatedTableName, targetVersion));
