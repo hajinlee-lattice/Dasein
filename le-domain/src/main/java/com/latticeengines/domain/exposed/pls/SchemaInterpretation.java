@@ -10,6 +10,7 @@ public enum SchemaInterpretation {
     Contact, //
     TimeSeries, //
     Category, //
+    Profile, //
     BucketedAccountMaster;
 
     public void apply(SchemaInterpretationFunctionalInterface function) {

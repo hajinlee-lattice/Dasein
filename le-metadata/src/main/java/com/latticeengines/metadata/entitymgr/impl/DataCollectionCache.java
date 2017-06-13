@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
-import com.latticeengines.metadata.service.SegmentationDataCollectionService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -31,9 +30,6 @@ public class DataCollectionCache {
 
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
-
-    @Autowired
-    private SegmentationDataCollectionService segmentationDataCollectionService;
 
     @Autowired
     private TenantService tenantService;

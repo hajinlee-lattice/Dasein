@@ -27,34 +27,43 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.serviceflows.workflow.etl.BaseTransformationStep;
 
 @Component("calculateStatsStep")
-public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfiguration> {
+public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CalculateStatsStep.class);
-
-    private static final String TARGET_TABLE_NAME_PATTERN = "%s_%s";
 
     private static final int JOIN_STEP = 0;
     private static final int PROFILE_STEP = 1;
     private static final int BUCKET_STEP = 2;
 
     @Autowired
-    private WorkflowProxy workflowProxy;
+    private TransformationProxy transformationProxy;
 
     @Autowired
-    private TransformationProxy transformationProxy;
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Override
     public void execute() {
         log.info("Inside CalculateStats execute()");
-        String masterTableName = configuration.getMasterTableName();
+        String customerSpace = configuration.getCustomerSpace().toString();
+        DataCollectionType dataCollectionType = configuration.getDataCollectionType();
+        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace, dataCollectionType);
+        Table masterTable = CDLWorkflowStepUtils.getMasterTable(dataCollection);
+        String masterTableName = masterTable.getName();
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 masterTableName));
 
@@ -63,18 +72,21 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
         PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), masterTableName,
                 profileTableNamePrefix, statsTableNamePrefix);
         TransformationProgress progress = transformationProxy.transform(request, "");
-        String version = progress.getVersion();
-        log.info(String.format("version for customer %s is %s", configuration.getCustomerSpace().toString(), version));
-        putStringValueInContext(CALCULATE_STATS_TRANSFORM_VERSION, version);
-        putStringValueInContext(CALCULATE_STATS_PROFILE_TABLE, String.format(TARGET_TABLE_NAME_PATTERN, profileTableNamePrefix, version));
-        putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, String.format(TARGET_TABLE_NAME_PATTERN, statsTableNamePrefix, version));
+        waitForFinish(progress);
 
-        String applicationId = progress.getYarnAppId();
-        waitForTransformation(applicationId);
+        String version = progress.getVersion();
+        log.info(String.format("The pipeline version for customer %s is %s",
+                configuration.getCustomerSpace().toString(), version));
+
+        String profileTableName = TableUtils.getFullTableName(profileTableNamePrefix, version);
+        String statsTableName = TableUtils.getFullTableName(statsTableNamePrefix, version);
+        putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
+
+        setProfileTable(configuration.getCustomerSpace().toString(), profileTableName);
     }
 
-    private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, String masterTableName, String profileTablePrefix,
-            String statsTablePrefix) {
+    private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, String masterTableName,
+            String profileTablePrefix, String statsTablePrefix) {
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("CalculateStatsStep");
@@ -98,7 +110,7 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
 
     private TransformationStepConfig enrichStepConfig(CustomerSpace customerSpace, String sourceTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
-        String tableSourceName = "Table_" + sourceTableName;
+        String tableSourceName = "CustomerUniverse";
         SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
         List<String> baseSources = new ArrayList<>();
         baseSources.add(tableSourceName);
@@ -109,7 +121,7 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
         step.setBaseTables(baseTables);
         step.setTransformer(TRANSFORMER_AM_ENRICHER);
         AMAttrEnrichConfig conf = new AMAttrEnrichConfig();
-        //TODO: change to false, after we have a local copy of AM
+        // TODO: change to false, after we have a local copy of AM
         conf.setNotJoinAM(true);
         step.setConfiguration(JsonUtils.serialize(conf));
         return step;
@@ -160,28 +172,24 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
         return step;
     }
 
-    private void waitForTransformation(String applicationId) {
-        Job job = null;
-        while (true) {
-            try {
-                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
-            } catch (Exception e) {
-                System.out.println(String.format("Workflow job exception: %s", e.getMessage()));
-                job = null;
-            }
-
-            if (job != null && !job.isRunning()) {
-                break;
-            }
-            try {
-                log.info(String.format("Waiting for the job of applicationId %s to be finished.", applicationId));
-                Thread.sleep(3000L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+    private void setProfileTable(String customerSpace, String profileTableName) {
+        Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
+        if (profileTable == null) {
+            throw new RuntimeException("Failed to find profile table in customer " + customerSpace);
         }
-        if (job.getJobStatus() != JobStatus.COMPLETED) {
-            log.warn(String.format("The actual job status is %s", job.getJobStatus()));
+        profileTable.setInterpretation(SchemaInterpretation.Profile.name());
+        metadataProxy.updateTable(customerSpace, profileTableName, profileTable);
+
+        DataCollectionType dataCollectionType = configuration.getDataCollectionType();
+        DataCollection dataCollection = dataCollectionProxy.upsertTableToDataCollection(customerSpace,
+                dataCollectionType, profileTableName, true);
+        if (dataCollection == null) {
+            throw new IllegalStateException("Failed to upsert profile table to data collection.");
+        }
+
+        profileTable = CDLWorkflowStepUtils.getProfileTable(dataCollection);
+        if (profileTable == null) {
+            throw new IllegalStateException("Cannot find the upsert profile table in data collection.");
         }
     }
 

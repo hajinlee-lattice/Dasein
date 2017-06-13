@@ -14,13 +14,11 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
@@ -63,8 +61,6 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private WorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType, String datafeedName) {
-        DataCollection dataCollection = dataCollectionProxy
-                .getDataCollectionByType(MultiTenantContext.getCustomerSpace().toString(), dataCollectionType);
         return new ConsolidateAndPublishWorkflowConfiguration.Builder().customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
                 .datafeedName(datafeedName) //
@@ -72,8 +68,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
                         .build()) //
-                .masterTableName(dataCollection.getTable(SchemaInterpretation.Account).getName()) //
-                .profileTableName("ProfileTable") // TODO:
+                .dataCollectionType(dataCollectionType) //
                 .idField("LEAccountIDLong") //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder()
                         .put(MatchKey.Domain, Arrays.asList(InterfaceName.Domain.name())) //

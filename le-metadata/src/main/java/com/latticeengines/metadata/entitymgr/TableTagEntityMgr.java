@@ -11,4 +11,8 @@ public interface TableTagEntityMgr extends BaseEntityMgr<TableTag> {
     List<Table> getTablesForTag(String tagName);
 
     List<TableTag> getTableTagsForName(String tagName);
+
+    void tagTable(Table table, String tagName);
+
+    void untagTable(String tableName, String tagName);
 }

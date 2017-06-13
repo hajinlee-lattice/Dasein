@@ -6,6 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -47,16 +48,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfigur
             return this;
         }
 
-        public Builder masterTableName(String masterTableName) {
-            consolidateDataConfiguration.setMasterTableName(masterTableName);
+        public Builder dataCollectionType(DataCollectionType dataCollectionType) {
+            consolidateDataConfiguration.setDataCollectionType(dataCollectionType);
             return this;
         }
 
-        public Builder profileTableName(String profileTableName) {
-            consolidateDataConfiguration.setProfileTableName(profileTableName);
-            return this;
-        }
-        
         public Builder idField(String idField) {
             consolidateDataConfiguration.setIdField(idField);
             return this;

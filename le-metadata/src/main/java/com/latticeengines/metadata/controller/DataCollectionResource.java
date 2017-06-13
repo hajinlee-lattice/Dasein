@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,5 +46,15 @@ public class DataCollectionResource {
     public DataCollection createOrUpdateDataCollection(@PathVariable String customerSpace, //
             @RequestBody DataCollection dataCollection) {
         return dataCollectionService.createOrUpdateDataCollection(customerSpace, dataCollection);
+    }
+
+    @RequestMapping(value = "/types/{dataCollectionType}/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create or update data collection")
+    public DataCollection upsertTableToDataCollection(@PathVariable String customerSpace, //
+                                                      @PathVariable DataCollectionType dataCollectionType, //
+                                                      @PathVariable String tableName, //
+                                                      @RequestParam(value = "purgeOld", defaultValue = "false") boolean purgeOldTable) {
+        return dataCollectionService.upsertTableToCollection(customerSpace, dataCollectionType, tableName, purgeOldTable);
     }
 }

@@ -12,4 +12,6 @@ public interface DataCollectionService {
     DataCollection getDataCollectionByType(String customerSpace, DataCollectionType type);
 
     DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection);
+
+    DataCollection upsertTableToCollection(String customerSpace, DataCollectionType type, String tableName, boolean purgeOldTable);
 }

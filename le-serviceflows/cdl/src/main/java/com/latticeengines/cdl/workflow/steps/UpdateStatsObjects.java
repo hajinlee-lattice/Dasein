@@ -17,6 +17,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -28,6 +30,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.StatisticsContainerProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -43,33 +46,32 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     private MetadataProxy metadataProxy;
 
     @Autowired
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Autowired
     private StatisticsContainerProxy statisticsContainerProxy;
 
     @Override
     public void execute() {
         log.info("Inside UpdateStatsObjects execute()");
-        String masterTableName = configuration.getMasterTableName();
-        log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
-                masterTableName));
-        Table masterTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), masterTableName);
+        DataCollectionType dataCollectionType = configuration.getDataCollectionType();
+        DataCollection dataCollection = dataCollectionProxy
+                .getDataCollectionByType(configuration.getCustomerSpace().toString(), dataCollectionType);
+        Table masterTable = CDLWorkflowStepUtils.getMasterTable(dataCollection);
         if (masterTable == null) {
             throw new NullPointerException("Master table for Stats Object Calculation is not found.");
         }
+        Table profileTable = CDLWorkflowStepUtils.getProfileTable(dataCollection);
+        if (profileTable == null) {
+            throw new NullPointerException("Profile table for Stats Object Calculation is not found.");
+        }
 
         String statsTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
-        log.info(String.format("statsTableName for customer %s is %s",
-                configuration.getCustomerSpace().toString(), statsTableName));
+        log.info(String.format("statsTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
+                statsTableName));
         Table statsTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), statsTableName);
         if (statsTable == null) {
             throw new NullPointerException("Target table for Stats Object Calculation is not found.");
-        }
-
-        String profileTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
-        log.info(String.format("profileTableName for customer %s is %s",
-                configuration.getCustomerSpace().toString(), statsTableName));
-        Table profileTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), profileTableName);
-        if (profileTable == null) {
-            throw new NullPointerException("Profile table for Stats Object Calculation is not found.");
         }
 
         StatisticsContainer statsContainer = constructStatsContainer(masterTable, statsTable);
@@ -125,7 +127,8 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             } else {
                 log.warn(String.format("Attribute %s in StatsCube does not exist in the master table %s", name,
                         statsTable.getName()));
-                //TODO: it probably is an attribute from account master. If so, we can get its metadata through matchapi.
+                // TODO: it probably is an attribute from account master. If so,
+                // we can get its metadata through matchapi.
                 continue;
             }
 

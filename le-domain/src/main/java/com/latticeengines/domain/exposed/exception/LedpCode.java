@@ -589,6 +589,7 @@ public enum LedpCode {
     LEDP_37010("Could not find attribute with name {0} in table {1}"), //
     LEDP_37011("Unsupported lookup type {0}"), //
     LEDP_37012("Failed to retrieve data for object {0}"), //
+    LEDP_37013("Could not find data collection of type {0}"), //
 
     // le-dante
     LEDP_38001("Could not find Talking point with External_ID {0}"), //

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -23,9 +24,9 @@ public class CalculateStatsWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder masterTableName(String masterTableName) {
-            calculateStatsConfiguration.setMasterTableName(masterTableName);
-            updateStatsObjectsConfiguration.setMasterTableName(masterTableName);
+        public Builder dataCollectionType(DataCollectionType dataCollectionType) {
+            calculateStatsConfiguration.setDataCollectionType(dataCollectionType);
+            updateStatsObjectsConfiguration.setDataCollectionType(dataCollectionType);
             return this;
         }
 

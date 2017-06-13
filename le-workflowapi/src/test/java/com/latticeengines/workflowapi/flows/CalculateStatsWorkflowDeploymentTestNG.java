@@ -2,43 +2,34 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertNotNull;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
-import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.Path;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.cdl.workflow.CalculateStatsWorkflow;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CalculateStatsWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
 public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctionalTestNGBase {
 
     private final Log log = LogFactory.getLog(CalculateStatsWorkflowDeploymentTestNG.class);
@@ -49,9 +40,10 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     @Autowired
     private MetadataProxy metadataProxy;
 
-    private Table masterTable;
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
 
-    protected CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("CalculateStatsWorkflowDeploymentTestNG");
+    protected CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("CalculateStatsTest");
 
     @BeforeClass(groups = "deployment")
     protected void setupForWorkflow() throws Exception {
@@ -63,56 +55,40 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         setupHdfs(DEMO_CUSTOMERSPACE);
 
         String hdfsPath = "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        File file = resolver.getResource("com/latticeengines/workflowapi/flows/cdl/master.avro").getFile();
-        String filePath = hdfsPath + "/1.avro";
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, file.getAbsolutePath(), filePath);
-        System.out.println("filePath is " + filePath);
-        Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, filePath);
-        Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
-
-        // TODO directly use AvroUtils to write to HDFS.
-        File f = new File("/tmp/tmp.avro");
-        FileUtils.touch(f);
-        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<GenericRecord>(
-                new GenericDatumWriter<GenericRecord>())) {
-            writer.create(schema, f);
-            int count = 0;
-            while (iterator.hasNext()) {
-                count++;
-                GenericRecord record = iterator.next();
-                writer.append(record);
-                if (count == 6) {
-                    break;
-                }
-            }
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("com/latticeengines/workflowapi/flows/cdl/master.avro");
+        if (is == null) {
+            throw new RuntimeException("Failed to load resource cdl.avro.");
         }
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, f.getAbsolutePath(), hdfsPath + "/tmp.avro");
-
-        List<GenericRecord> list = AvroUtils.getData(yarnConfiguration, new Path(hdfsPath + "/tmp.avro"));
-        System.out.println("list is " + Arrays.toString(list.toArray()));
-        System.out.println("list size is " + list.size());
-
+        String filePath = hdfsPath + "/tmp.avro";
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, hdfsPath + "/tmp.avro");
         Table table = MetadataConverter.getTable(yarnConfiguration, filePath);
+        table.setInterpretation(SchemaInterpretation.Account.name());
+        table.setName("Master");
         metadataProxy.createTable(DEMO_CUSTOMERSPACE.toString(), table.getName(), table);
+
+        DataCollection dataCollection = new DataCollection();
+        dataCollection.setType(DataCollectionType.Segmentation);
+        dataCollection.addTable(table);
+        dataCollectionProxy.createOrUpdateDataCollection(DEMO_CUSTOMERSPACE.toString(), dataCollection);
 
         Table retrievedTable = metadataProxy.getTable(DEMO_CUSTOMERSPACE.toString(), table.getName());
         Assert.assertNotNull(retrievedTable);
         System.out.println("attributes are" + Arrays.toString(retrievedTable.getAttributes().toArray()));
-        masterTable = retrievedTable;
+
+        DataCollection retrievedCollection = dataCollectionProxy.getDataCollectionByType(DEMO_CUSTOMERSPACE.toString(),
+                DataCollectionType.Segmentation);
+        Assert.assertNotNull(retrievedCollection);
     }
 
     @AfterClass(groups = "deployment")
     protected void cleanUpAfterWorkflow() throws Exception {
-        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
-        cleanCamille(DEMO_CUSTOMERSPACE);
-        cleanHdfs(DEMO_CUSTOMERSPACE);
+//        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
+//        cleanCamille(DEMO_CUSTOMERSPACE);
+//        cleanHdfs(DEMO_CUSTOMERSPACE);
     }
 
     @Test(groups = "deployment")
     public void testWorkflow() throws Exception {
-
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());
         CalculateStatsWorkflowConfiguration config = generateConfiguration();
 
@@ -121,14 +97,28 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         System.out.println("Workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
         Assert.assertEquals(status, BatchStatus.COMPLETED);
+
+        verifyWorkflowResult();
     }
 
     private CalculateStatsWorkflowConfiguration generateConfiguration() {
-        Assert.assertNotNull(masterTable.getName());
-        System.out.println("masterTable name is " + masterTable.getName());
         return new CalculateStatsWorkflowConfiguration.Builder() //
-                .customer(CustomerSpace.parse(DEMO_CUSTOMERSPACE.getTenantId())) //
-                .masterTableName(masterTable.getName()).build();
+                .customer(DEMO_CUSTOMERSPACE) //
+                .dataCollectionType(DataCollectionType.Segmentation) //
+                .build();
+    }
+
+    private void verifyWorkflowResult() {
+        verifyDataCollection();
+    }
+
+    private void verifyDataCollection() {
+        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(DEMO_CUSTOMERSPACE.toString(),
+                DataCollectionType.Segmentation);
+        Assert.assertNotNull(dataCollection);
+
+        Table profileTable = dataCollection.getTable(SchemaInterpretation.Profile);
+        Assert.assertNotNull(profileTable);
     }
 
 }

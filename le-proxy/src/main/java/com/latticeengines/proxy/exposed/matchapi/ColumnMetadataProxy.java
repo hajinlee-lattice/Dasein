@@ -33,7 +33,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     public ColumnMetadataProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
-        enrichmentColumnsCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(10, TimeUnit.MINUTES)
+        enrichmentColumnsCache = CacheBuilder.newBuilder().maximumSize(20).refreshAfterWrite(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, List<ColumnMetadata>>() {
                     @Override
                     public List<ColumnMetadata> load(String dataCloudVersion) throws Exception {
@@ -46,7 +46,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                     }
                 });
 
-        latestDataCloudVersionCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(10, TimeUnit.MINUTES)
+        latestDataCloudVersionCache = CacheBuilder.newBuilder().maximumSize(20).refreshAfterWrite(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, DataCloudVersion>() {
                     @Override
                     public DataCloudVersion load(String compatibleVersion) throws Exception {

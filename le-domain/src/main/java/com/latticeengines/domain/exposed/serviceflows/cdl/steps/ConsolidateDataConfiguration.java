@@ -7,20 +7,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ConsolidateDataConfiguration extends MicroserviceStepConfiguration {
 
-    @JsonProperty("master_table_name")
-    @NotEmptyString
+    @JsonProperty("data_collection_type")
     @NotNull
-    private String masterTableName;
+    private DataCollectionType dataCollectionType;
 
-    @JsonProperty("profile_table_name")
-    @NotEmptyString
-    @NotNull
-    private String profileTableName;
-    
     @JsonProperty("id_field")
     @NotEmptyString
     @NotNull
@@ -29,21 +24,12 @@ public class ConsolidateDataConfiguration extends MicroserviceStepConfiguration 
     @JsonProperty("match_key_map")
     Map<MatchKey, List<String>> matchKeyMap = null;
 
-    public String getMasterTableName() {
-        return masterTableName;
+    public DataCollectionType getDataCollectionType() {
+        return dataCollectionType;
     }
 
-    public void setMasterTableName(String masterTableName) {
-
-        this.masterTableName = masterTableName;
-    }
-
-    public String getProfileTableName() {
-        return profileTableName;
-    }
-
-    public void setProfileTableName(String profileTableName) {
-        this.profileTableName = profileTableName;
+    public void setDataCollectionType(DataCollectionType dataCollectionType) {
+        this.dataCollectionType = dataCollectionType;
     }
 
     public String getIdField() {

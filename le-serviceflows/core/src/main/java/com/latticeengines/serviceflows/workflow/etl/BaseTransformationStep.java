@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow.steps;
+package com.latticeengines.serviceflows.workflow.etl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

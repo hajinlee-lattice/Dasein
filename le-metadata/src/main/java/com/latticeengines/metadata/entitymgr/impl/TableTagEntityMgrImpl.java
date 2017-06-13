@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.metadata.dao.TableTagDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("tableTagEntityMgr")
 public class TableTagEntityMgrImpl extends BaseEntityMgrImpl<TableTag> implements TableTagEntityMgr {
@@ -49,6 +50,27 @@ public class TableTagEntityMgrImpl extends BaseEntityMgrImpl<TableTag> implement
         List<TableTag> tags = tableTagDao.findAll();
         return tags.stream().filter(x -> x.getName().equals(tagName) && x.getTable().getTableType() == TableType.DATATABLE) //
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void tagTable(Table table, String tagName) {
+        TableTag tableTag = new TableTag();
+        tableTag.setTable(table);
+        tableTag.setName(tagName);
+        tableTag.setTenantId(MultiTenantContext.getTenant().getPid());
+        tableTagDao.create(tableTag);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void untagTable(String tableName, String tagName) {
+        List<TableTag> tags = getTableTagsForName(tagName);
+        for (TableTag tag: tags) {
+            if (tableName.equals(tag.getTable().getName())) {
+                tableTagDao.delete(tag);
+            }
+        }
     }
 
 }

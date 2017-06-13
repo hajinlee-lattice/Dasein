@@ -31,13 +31,17 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.serviceflows.workflow.etl.BaseTransformationStep;
 
 @Component("consolidateData")
 public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfiguration> {
@@ -47,7 +51,8 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     public static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
-    private static String masterTableName;
+    private String masterTableName;
+    private String profileTableName;
     private static final String mergedTableName = "MergedTable";
     private static final String consolidatedTableName = "ConsolidatedTable";
 
@@ -55,12 +60,15 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
-    
+
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
-    
+
     @Autowired
     protected MetadataProxy metadataProxy;
+
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
 
     private List<String> inputTableNames = new ArrayList<>();
     private String targetVersion;
@@ -76,15 +84,22 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
             inputTableNames.add(table.getName());
         }
 
-        masterTableName = configuration.getMasterTableName();
+        DataCollectionType dataCollectionType = configuration.getDataCollectionType();
+        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace.toString(),
+                dataCollectionType);
+        masterTableName = CDLWorkflowStepUtils.getMasterTable(dataCollection).getName();
+        log.info("Set masterTableName=" + masterTableName);
+
         idField = configuration.getIdField();
         keyMap = configuration.getMatchKeyMap();
-
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         targetVersion = dateFormat.format(new Date());
 
         dataInitialLoaded = getObjectFromContext(DATA_INITIAL_LOADED, Boolean.class);
-
+        if (isBucketing()) {
+            profileTableName = CDLWorkflowStepUtils.getProfileTable(dataCollection).getName();
+            log.info("Set profileTableName=" + profileTableName);
+        }
     }
 
     @Override
@@ -99,8 +114,8 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
 
     @Override
     public void onExecutionCompleted() {
-        metadataProxy
-                .deleteTable(customerSpace.toString(), TableUtils.getFullTableName(mergedTableName, targetVersion));
+        metadataProxy.deleteTable(customerSpace.toString(),
+                TableUtils.getFullTableName(mergedTableName, targetVersion));
 
         Table consolidatedTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(consolidatedTableName, targetVersion));
@@ -226,7 +241,6 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         if (!isBucketing()) {
             return null;
         }
-        String profileTableName = configuration.getProfileTableName();
         TransformationStepConfig step5 = new TransformationStepConfig();
         List<String> baseSources = Arrays.asList(profileTableName);
         step5.setBaseSources(baseSources);
@@ -261,6 +275,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
             SorterConfig config = new SorterConfig();
             config.setPartitions(100);
             config.setSortingField("LatticeAccountId");
+            config.setCompressResult(false);
             return JsonUtils.serialize(config);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
