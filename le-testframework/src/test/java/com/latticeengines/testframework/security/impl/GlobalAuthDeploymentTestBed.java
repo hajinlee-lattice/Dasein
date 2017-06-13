@@ -146,7 +146,6 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void cleanupPlsHdfs() {
-        adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
         super.cleanupPlsHdfs();
     }
 
