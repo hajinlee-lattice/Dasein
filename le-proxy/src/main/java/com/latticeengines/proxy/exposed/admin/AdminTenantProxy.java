@@ -1,6 +1,5 @@
 package com.latticeengines.proxy.exposed.admin;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,18 +15,13 @@ public class AdminTenantProxy extends ProtectedRestApiProxy {
     @Autowired
     private AdminLoginProxy loginProxy;
 
-    private static String adToken; // only one per jvm
-
     public AdminTenantProxy() {
         super(PropertyUtils.getProperty("common.admin.url"), "admin/tenants");
     }
 
     @Override
     protected String loginInternal(String username, String password) {
-        if (StringUtils.isBlank(adToken)) {
-            adToken = loginProxy.login(username, password);
-        }
-        return adToken;
+        return loginProxy.login(username, password);
     }
 
     public TenantDocument getTenant(String tenantId) {

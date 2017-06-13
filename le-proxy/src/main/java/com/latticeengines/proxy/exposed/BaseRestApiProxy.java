@@ -57,18 +57,13 @@ public abstract class BaseRestApiProxy {
     }
 
     void setAuthHeader(String authToken) {
-        AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(authToken);
         List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
-        List<Integer> toRemove = new ArrayList<>();
         for (int i = 0; i < interceptors.size(); i++) {
             ClientHttpRequestInterceptor interceptor = interceptors.get(i);
             if (interceptor instanceof AuthorizationHeaderHttpRequestInterceptor) {
-                toRemove.add(i);
+                ((AuthorizationHeaderHttpRequestInterceptor) interceptor).setAuthValue(authToken);
             }
         }
-        toRemove.forEach(interceptors::remove);
-        interceptors.add(authHeader);
-        restTemplate.setInterceptors(interceptors);
     }
 
     protected void setErrorHandler(ResponseErrorHandler handler) {
