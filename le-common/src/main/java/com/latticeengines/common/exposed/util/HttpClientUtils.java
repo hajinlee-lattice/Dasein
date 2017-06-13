@@ -57,7 +57,7 @@ public class HttpClientUtils {
         return HttpClientBuilder.create() //
                 .setConnectionManager(SSL_BLIND_CONNECTION_MGR) //
                 .setDefaultHeaders(Arrays.asList( //
-                        new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json"), //
+                        new BasicHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE), //
                         new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "gzip") //
                 ))//
                 .build();
@@ -91,7 +91,8 @@ public class HttpClientUtils {
 
     private static List<ClientHttpRequestInterceptor> defaultInterceptors() {
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-        interceptors.add(new HeaderRequestInterceptor("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+        interceptors.add(new HeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+        interceptors.add(new HeaderRequestInterceptor(HttpHeaders.ACCEPT_ENCODING, "gzip"));
         return interceptors;
     }
 
