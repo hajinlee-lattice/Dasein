@@ -158,7 +158,7 @@ angular.module('common.datacloud.explorer', [
         }
 
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
-            $state.go('home.datacloud.lookup.form');
+            $state.go('home.datacloud.explorer');
         }
 
         getEnrichmentCategories();
