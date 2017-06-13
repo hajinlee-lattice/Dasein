@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -27,6 +28,12 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
                 configuration.getDataFeedName());
 
         putObjectInContext(DATA_INITIAL_LOADED, datafeed.getStatus() == Status.InitialLoaded);
+
+        ExportDataToRedshiftConfiguration exportDataToRedshiftConfig = getConfigurationFromJobParameters(
+                ExportDataToRedshiftConfiguration.class);
+        exportDataToRedshiftConfig.setSkipStep(datafeed.getStatus() == Status.InitialLoaded);
+        putObjectInContext(ExportDataToRedshiftConfiguration.class.getName(), exportDataToRedshiftConfig);
+
         DataFeedExecution execution = datafeed.getActiveExecution();
         if (execution == null) {
             putObjectInContext(CONSOLIDATE_INPUT_TABLES, Collections.EMPTY_LIST);
