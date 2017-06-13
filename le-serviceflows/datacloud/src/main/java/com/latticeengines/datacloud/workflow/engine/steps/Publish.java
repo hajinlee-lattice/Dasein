@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,12 +9,12 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -30,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublishTextToSqlC
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration.PublicationStrategy;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -54,6 +54,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
     private PublicationProgress progress;
 
+    @Autowired
     private YarnClient yarnClient;
 
     private String sourceName;
@@ -77,8 +78,6 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
                 throw new IllegalArgumentException("Publication destination is missing.");
             }
 
-            initializeYarnClient();
-
             if (pubConfig instanceof PublishTextToSqlConfiguration) {
                 executePublishTextToSql((PublishTextToSqlConfiguration) pubConfig);
             } else if (pubConfig instanceof PublishToSqlConfiguration) {
@@ -87,12 +86,6 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
         } catch (Exception e) {
             failByException(e);
-        } finally {
-            try {
-                yarnClient.close();
-            } catch (Exception e) {
-                log.error(e);
-            }
         }
     }
 
@@ -209,12 +202,6 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
     private void failByException(Exception e) {
         log.error("Failed to publish " + progress, e);
         progressService.update(progress).fail(e.getMessage()).commit();
-    }
-
-    private void initializeYarnClient() {
-        yarnClient = YarnClient.createYarnClient();
-        yarnClient.init(yarnConfiguration);
-        yarnClient.start();
     }
 
 }

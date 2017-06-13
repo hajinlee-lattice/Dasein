@@ -4,7 +4,6 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -42,7 +41,6 @@ public class TransformationStep extends BaseWorkflowStep<PrepareTransformationSt
         TransformationProgress progress = null;
         try {
             log.info("Inside TransformationStepExecution execute()");
-            initializeYarnClient();
             PrepareTransformationStepInputConfiguration prepareTransformationConfiguration = getConfiguration();
             String serviceBeanName = prepareTransformationConfiguration.getServiceBeanName();
             TransformationService transformationService = (TransformationService) applicationContext.getBean(serviceBeanName);
@@ -82,12 +80,6 @@ public class TransformationStep extends BaseWorkflowStep<PrepareTransformationSt
                 transformationProgressEntityMgr.updateProgress(progress);
             }
         }
-    }
-
-    private void initializeYarnClient() {
-        YarnClient yarnClient = YarnClient.createYarnClient();
-        yarnClient.init(yarnConfiguration);
-        yarnClient.start();
     }
 
     @Override

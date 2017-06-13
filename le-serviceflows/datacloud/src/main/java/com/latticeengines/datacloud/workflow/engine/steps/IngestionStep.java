@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.IngestionStepConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +24,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.hsqldb.lib.StringUtil;
@@ -33,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
@@ -58,6 +57,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.IngestionStepConfiguration;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
@@ -83,6 +83,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Autowired
     private SqoopProxy sqoopProxy;
 
+    @Autowired
     private YarnClient yarnClient;
 
     @Autowired
@@ -115,7 +116,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                     .getProviderConfiguration();
             ingestion.setProviderConfiguration(providerConfiguration);
             progress.setIngestion(ingestion);
-            initializeYarnClient();
             switch (progress.getIngestion().getIngestionType()) {
             case SFTP:
                 ingestFromSftp();
@@ -137,12 +137,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             log.info("Exiting IngestionStep execute()");
         } catch (Exception e) {
             failByException(e);
-        } finally {
-            try {
-                yarnClient.close();
-            } catch (Exception e) {
-                log.error(e);
-            }
         }
     }
 
@@ -498,12 +492,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
                 .errorMessage(e.getMessage()).commit(true);
         log.error("Ingestion failed for progress: " + progress.toString(), e);
-    }
-
-    private void initializeYarnClient() {
-        yarnClient = YarnClient.createYarnClient();
-        yarnClient.init(yarnConfiguration);
-        yarnClient.start();
     }
 
     private FinalApplicationStatus waitForStatus(String applicationId, Long waitTimeInMillis,
