@@ -1,6 +1,8 @@
 package com.latticeengines.common.exposed.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
@@ -13,6 +15,8 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,13 +28,16 @@ public class HttpClientUtils {
             SSL_BLIND_CONNECTION_MGR);
     private static final HttpComponentsClientHttpRequestFactory SSL_ENFORCED_HC_FACTORY = constructHttpRequestFactory(
             constructPoolingConnectionMgr(SSLConnectionSocketFactory.getSocketFactory()));
+    private static final List<ClientHttpRequestInterceptor> DEFAULT_INTERCEPTORS = defaultInterceptors();
 
     /**
      * gives a rest template using connection pool and IGNORE ssl name
      * verification.
      */
     public static RestTemplate newRestTemplate() {
-        return new RestTemplate(SSL_BLIND_HC_FACTORY);
+        RestTemplate restTemplate = new RestTemplate(SSL_BLIND_HC_FACTORY);
+        restTemplate.setInterceptors(DEFAULT_INTERCEPTORS);
+        return restTemplate;
     }
 
     /**
@@ -38,7 +45,9 @@ public class HttpClientUtils {
      * verification.
      */
     public static RestTemplate newSSLEnforcedRestTemplate() {
-        return new RestTemplate(SSL_ENFORCED_HC_FACTORY);
+        RestTemplate restTemplate = new RestTemplate(SSL_ENFORCED_HC_FACTORY);
+        restTemplate.setInterceptors(DEFAULT_INTERCEPTORS);
+        return restTemplate;
     }
 
     /**
@@ -78,6 +87,12 @@ public class HttpClientUtils {
                         .build());
         reqFac.setConnectTimeout(10000); // 10 sec
         return reqFac;
+    }
+
+    private static List<ClientHttpRequestInterceptor> defaultInterceptors() {
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(new HeaderRequestInterceptor("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+        return interceptors;
     }
 
 }
