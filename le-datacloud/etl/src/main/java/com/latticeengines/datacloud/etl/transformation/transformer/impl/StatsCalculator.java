@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.StatsCalculator.TRANSFORMER_NAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 @Component(TRANSFORMER_NAME)
 public class StatsCalculator extends AbstractDataflowTransformer<BucketEncodeConfig, CalculateStatsParameter> {
 
-    public static final String TRANSFORMER_NAME = "statsCalculator";
+    public static final String TRANSFORMER_NAME = TRANSFORMER_STATS_CALCULATOR;
 
     @Override
     public String getName() {

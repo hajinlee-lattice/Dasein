@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceSorter.TRANSFORMER_NAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(SourceSorter.class);
 
-    public static final String TRANSFORMER_NAME = "sourceSorter";
+    public static final String TRANSFORMER_NAME = TRANSFORMER_SORTER;
     private static final String SORTED_PARTITION = "_DC_Sorted_Partition_";
 
     private String wd;

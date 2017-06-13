@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
+import static com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler.TRANSFORMER_NAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,13 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
-import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
-import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketEncodeConfig;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -45,11 +43,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
-@Component(Profile.TRANSFORMER_NAME)
+@Component(TRANSFORMER_NAME)
 public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
     private static final Log log = LogFactory.getLog(SourceProfiler.class);
 
     private static final String STRATEGY_ENCODED_COLUMN = "EncodedColumn";
+    public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILER;
 
     @Value("${datacloud.etl.profile.encode.bit:64}")
     private int encodeBits;
@@ -69,7 +68,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     @Override
     public String getName() {
-        return Profile.TRANSFORMER_NAME;
+        return TRANSFORMER_NAME;
     }
 
     @Override

@@ -1,5 +1,11 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_AM_ENRICHER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,7 +31,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsSt
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -39,9 +44,6 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
     private static final int JOIN_STEP = 0;
     private static final int PROFILE_STEP = 1;
     private static final int BUCKET_STEP = 2;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -80,12 +82,12 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
             request.setKeepTemp(false);
             request.setEnableSlack(false);
             // -----------
-            TransformationStepConfig join = joinStepConfig(customerSpace, masterTableName);
+            TransformationStepConfig enrich = enrichStepConfig(customerSpace, masterTableName);
             TransformationStepConfig profile = profileStepConfig(customerSpace, profileTablePrefix);
             TransformationStepConfig bucket = bucketStepConfig();
             TransformationStepConfig calc = calcStepConfig(customerSpace, statsTablePrefix);
             // -----------
-            List<TransformationStepConfig> steps = Arrays.asList(join, profile, bucket, calc);
+            List<TransformationStepConfig> steps = Arrays.asList(enrich, profile, bucket, calc);
             // -----------
             request.setSteps(steps);
             return request;
@@ -94,19 +96,20 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
         }
     }
 
-    private TransformationStepConfig joinStepConfig(CustomerSpace customerSpace, String sourceTableName) {
+    private TransformationStepConfig enrichStepConfig(CustomerSpace customerSpace, String sourceTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         String tableSourceName = "Table_" + sourceTableName;
         SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
         List<String> baseSources = new ArrayList<>();
         baseSources.add(tableSourceName);
-        baseSources.add("AccountMaster");
+        baseSources.add(ACCOUNT_MASTER);
         step.setBaseSources(baseSources);
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
         step.setBaseTables(baseTables);
-        step.setTransformer("AMAttrEnricher");
+        step.setTransformer(TRANSFORMER_AM_ENRICHER);
         AMAttrEnrichConfig conf = new AMAttrEnrichConfig();
+        //TODO: change to false, after we have a local copy of AM
         conf.setNotJoinAM(true);
         step.setConfiguration(JsonUtils.serialize(conf));
         return step;
@@ -117,7 +120,7 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.addAll(Collections.singletonList(JOIN_STEP));
         step.setInputSteps(inputSteps);
-        step.setTransformer("SourceProfiler");
+        step.setTransformer(TRANSFORMER_PROFILER);
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -135,7 +138,7 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.addAll(Arrays.asList(JOIN_STEP, PROFILE_STEP));
         step.setInputSteps(inputSteps);
-        step.setTransformer("sourceBucketer");
+        step.setTransformer(TRANSFORMER_BUCKETER);
         step.setConfiguration("{}");
         return step;
     }
@@ -146,7 +149,7 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.addAll(Arrays.asList(BUCKET_STEP, PROFILE_STEP));
         step.setInputSteps(inputSteps);
-        step.setTransformer("statsCalculator");
+        step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
         step.setConfiguration("{}");
 
         TargetTable targetTable = new TargetTable();

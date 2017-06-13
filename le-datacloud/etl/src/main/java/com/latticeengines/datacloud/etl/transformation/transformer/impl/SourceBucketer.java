@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceBucketer.TRANSFORMER_NAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(SourceBucketer.class);
 
-    public static final String TRANSFORMER_NAME = "sourceBucketer";
+    public static final String TRANSFORMER_NAME = TRANSFORMER_BUCKETER;
 
     @Autowired
     private Configuration yarnConfiguration;

@@ -110,7 +110,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         cleanHdfs(DEMO_CUSTOMERSPACE);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testWorkflow() throws Exception {
 
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());

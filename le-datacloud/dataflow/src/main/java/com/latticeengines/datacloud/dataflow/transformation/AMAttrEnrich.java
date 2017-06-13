@@ -24,7 +24,6 @@ public class AMAttrEnrich extends TransformationFlowBase<BasicTransformationConf
     private static final Log log = LogFactory.getLog(AMSeedMerge.class);
 
     public static final String BEAN_NAME = "AMAttrEnrich";
-    public static final String TRANSFORMER_NAME = "AMAttrEnricher";
 
     @Override
     public Node construct(AMAttrEnrichParameters paras) {

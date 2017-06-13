@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
+import static com.latticeengines.datacloud.etl.transformation.transformer.impl.AMAttrEnricher.TRANSFORMER_NAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_AM_ENRICHER;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -22,8 +25,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-@Component(AMAttrEnrich.TRANSFORMER_NAME)
+@Component(TRANSFORMER_NAME)
 public class AMAttrEnricher extends AbstractDataflowTransformer<AMAttrEnrichConfig, AMAttrEnrichParameters> {
+
+    public static final String TRANSFORMER_NAME = TRANSFORMER_AM_ENRICHER;
 
     @Override
     protected String getDataFlowBeanName() {
@@ -32,7 +37,7 @@ public class AMAttrEnricher extends AbstractDataflowTransformer<AMAttrEnrichConf
 
     @Override
     public String getName() {
-        return AMAttrEnrich.TRANSFORMER_NAME;
+        return TRANSFORMER_NAME;
     }
 
     @Override
