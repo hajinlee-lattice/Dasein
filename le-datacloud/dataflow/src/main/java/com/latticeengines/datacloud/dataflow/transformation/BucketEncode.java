@@ -48,6 +48,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         source = source.discard(new FieldList(toDiscard));
 
         List<String> oldFields = new ArrayList<>(parameters.renameFields.keySet());
+        oldFields.retainAll(source.getFieldNames());
         List<String> newFields = new ArrayList<>();
         oldFields.forEach(f -> newFields.add(parameters.renameFields.get(f)));
         if (!oldFields.isEmpty()) {
