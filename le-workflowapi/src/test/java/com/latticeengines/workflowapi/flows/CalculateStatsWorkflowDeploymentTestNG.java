@@ -65,7 +65,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         String hdfsPath = "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        File file = resolver.getResource("com/latticeengines/workflowapi/flows/cdl/1.avro").getFile();
+        File file = resolver.getResource("com/latticeengines/workflowapi/flows/cdl/master.avro").getFile();
         String filePath = hdfsPath + "/1.avro";
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, file.getAbsolutePath(), filePath);
         System.out.println("filePath is " + filePath);
@@ -73,7 +73,6 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
 
         // TODO directly use AvroUtils to write to HDFS.
-
         File f = new File("/tmp/tmp.avro");
         FileUtils.touch(f);
         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<GenericRecord>(
@@ -111,7 +110,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         cleanHdfs(DEMO_CUSTOMERSPACE);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testWorkflow() throws Exception {
 
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());

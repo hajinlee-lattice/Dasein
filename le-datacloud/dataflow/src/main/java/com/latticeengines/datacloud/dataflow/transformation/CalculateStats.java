@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -165,13 +164,10 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
         records.forEach(record -> excludeAttrs.remove(record.get(PROFILE_ATTR_ATTRNAME).toString()));
         encAttrs.forEach(attr -> excludeAttrs.remove(attr.getEncAttr()));
 
-        Iterator<GenericRecord> iterator = AvroUtils.iterator(source.getHadoopConfig(),
-                source.getSourceSchema().getExtracts().get(0).getPath());
-        GenericRecord record = iterator.next();
-        List<Schema.Field> fields = record.getSchema().getFields();
+        List<String> avroFieldNames = source.getFieldNames();
         Map<Integer, DCEncodedAttr> encAttrArgPos = new HashMap<>();
-        for (int i = 0; i < fields.size(); i++) {
-            String fieldName = fields.get(i).name();
+        for (int i = 0; i < avroFieldNames.size(); i++) {
+            String fieldName = avroFieldNames.get(i);
             for (DCEncodedAttr encAttr : encAttrs) {
                 if (encAttr.getEncAttr().equals(fieldName)) {
                     encAttrArgPos.put(i, encAttr);
@@ -180,7 +176,7 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
         }
         attrIdMap = new HashMap<>();
         int attrIdx = 0;
-        for (int i = 0; i < fields.size(); i++) {
+        for (int i = 0; i < avroFieldNames.size(); i++) {
             if (encAttrArgPos.containsKey(i)) {
                 DCEncodedAttr encAttr = encAttrArgPos.get(i);
                 for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
@@ -189,7 +185,7 @@ public class CalculateStats extends TypesafeDataFlowBuilder<TransformationFlowPa
                     }
                 }
             } else {
-                String fieldName = fields.get(i).name();
+                String fieldName = avroFieldNames.get(i);
                 if (!excludeAttrs.contains(fieldName)) {
                     attrIdMap.put(fieldName, attrIdx++);
                 }

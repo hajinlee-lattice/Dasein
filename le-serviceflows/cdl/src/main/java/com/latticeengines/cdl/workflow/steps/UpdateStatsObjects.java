@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,6 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
 
     private static final Log log = LogFactory.getLog(UpdateStatsObjects.class);
 
-    private static final String TARGET_TABLE_SOURCE_PATTERN = "%s_%s";
-
     @Autowired
     private MetadataProxy metadataProxy;
 
@@ -53,19 +52,27 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 masterTableName));
         Table masterTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), masterTableName);
+        if (masterTable == null) {
+            throw new NullPointerException("Master table for Stats Object Calculation is not found.");
+        }
 
-        String targetTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
-        String version = getStringValueFromContext(CALCULATE_STATS_TRANSFORM_VERSION);
-        String targetTableSourceName = String.format(TARGET_TABLE_SOURCE_PATTERN, targetTableName, version);
-        log.info(String.format("targetTableSourceName for customer %s is %s",
-                configuration.getCustomerSpace().toString(), targetTableSourceName));
-
-        Table targetTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), targetTableSourceName);
-        if (targetTable == null) {
+        String statsTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
+        log.info(String.format("statsTableName for customer %s is %s",
+                configuration.getCustomerSpace().toString(), statsTableName));
+        Table statsTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), statsTableName);
+        if (statsTable == null) {
             throw new NullPointerException("Target table for Stats Object Calculation is not found.");
         }
 
-        StatisticsContainer statsContainer = constructStatsContainer(targetTable);
+        String profileTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
+        log.info(String.format("profileTableName for customer %s is %s",
+                configuration.getCustomerSpace().toString(), statsTableName));
+        Table profileTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), profileTableName);
+        if (profileTable == null) {
+            throw new NullPointerException("Profile table for Stats Object Calculation is not found.");
+        }
+
+        StatisticsContainer statsContainer = constructStatsContainer(masterTable, statsTable);
         statisticsContainerProxy.createOrUpdateStatistics(configuration.getCustomerSpace().toString(), statsContainer);
     }
 
@@ -86,30 +93,47 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     }
 
     @VisibleForTesting
-    StatisticsContainer constructStatsContainer(Table targetTable) {
-        StatsCube statsCube = getStatsCube(targetTable);
-
+    StatisticsContainer constructStatsContainer(Table masterTable, Table statsTable) {
         StatisticsContainer statsContainer = new StatisticsContainer();
-        String schemaStr = targetTable.getInterpretation();
-        log.info(String.format("schema Str for targetTable %s is %s", targetTable.getName(), schemaStr));
-        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(targetTable.getInterpretation());
+
+        // get StatsCube from statsTable
+        StatsCube statsCube = getStatsCube(statsTable);
+
+        // get all other metadata from master table (and matchapi if necessary)
+        String schemaIntStr = masterTable.getInterpretation();
+        SchemaInterpretation masterTableType = null;
+        if (StringUtils.isNotBlank(schemaIntStr)) {
+            masterTableType = SchemaInterpretation.valueOf(masterTable.getInterpretation());
+            log.info("SchemaInterpretation of master table is: " + masterTableType);
+        }
         Map<String, AttributeStats> attributeStatsMap = statsCube.getStatistics();
 
         Statistics statistics = new Statistics();
         for (String name : attributeStatsMap.keySet()) {
-            ColumnLookup columnLookup = new ColumnLookup(schemaInterpretation, name);
-            Attribute attributeInMetadataTable = targetTable.getAttribute(name);
-            if (attributeInMetadataTable == null) {
-                log.warn(String.format("Attribute %s in StatsCube does not exist in the metadata table %s", name,
-                        targetTable.getName()));
+            ColumnLookup columnLookup = new ColumnLookup(name);
+            String category;
+            String subCategory;
+
+            Attribute attrInMasterTable = masterTable.getAttribute(name);
+            if (attrInMasterTable != null) {
+                // an attribute from master table
+                if (masterTableType != null) {
+                    columnLookup = new ColumnLookup(masterTableType, name);
+                }
+                category = attrInMasterTable.getCategory();
+                subCategory = attrInMasterTable.getSubcategory();
+            } else {
+                log.warn(String.format("Attribute %s in StatsCube does not exist in the master table %s", name,
+                        statsTable.getName()));
+                //TODO: it probably is an attribute from account master. If so, we can get its metadata through matchapi.
                 continue;
             }
-            String category = attributeInMetadataTable.getCategory();
-            String subCategory = attributeInMetadataTable.getSubcategory();
+
             if (category == null || subCategory == null) {
-                log.warn(String.format("Category is % and SubCategory is %s", category, subCategory));
+                log.warn(String.format("Category is %s and SubCategory is %s", category, subCategory));
                 continue;
             }
+
             AttributeStatistics attributeStatistics = new AttributeStatistics();
             attributeStatistics.getBuckets().addAll(attributeStatsMap.get(name).getBuckets().getBucketList());
             if (statistics.getCategories().containsKey(category)) {

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,13 +12,15 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMAttrEnrichConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -30,6 +33,12 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CalculateStatsStep.class);
+
+    private static final String TARGET_TABLE_NAME_PATTERN = "%s_%s";
+
+    private static final int JOIN_STEP = 0;
+    private static final int PROFILE_STEP = 1;
+    private static final int BUCKET_STEP = 2;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -46,24 +55,24 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
         String masterTableName = configuration.getMasterTableName();
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 masterTableName));
-        Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(), masterTableName);
-        // TODO hook up with transform pipeline to calculate statsCube
-        String targetTableName = "SomeRandomNameForNow";
-        putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, targetTableName);
 
+        String profileTableNamePrefix = "Profile";
+        String statsTableNamePrefix = "Stats";
         PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), masterTableName,
-                targetTableName);
-
+                profileTableNamePrefix, statsTableNamePrefix);
         TransformationProgress progress = transformationProxy.transform(request, "");
         String version = progress.getVersion();
         log.info(String.format("version for customer %s is %s", configuration.getCustomerSpace().toString(), version));
         putStringValueInContext(CALCULATE_STATS_TRANSFORM_VERSION, version);
+        putStringValueInContext(CALCULATE_STATS_PROFILE_TABLE, String.format(TARGET_TABLE_NAME_PATTERN, profileTableNamePrefix, version));
+        putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, String.format(TARGET_TABLE_NAME_PATTERN, statsTableNamePrefix, version));
+
         String applicationId = progress.getYarnAppId();
         waitForTransformation(applicationId);
     }
 
-    private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, String masterTableName,
-            String targetTableName) {
+    private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, String masterTableName, String profileTablePrefix,
+            String statsTablePrefix) {
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("CalculateStatsStep");
@@ -71,30 +80,81 @@ public class CalculateStatsStep extends BaseWorkflowStep<CalculateStatsStepConfi
             request.setKeepTemp(false);
             request.setEnableSlack(false);
             // -----------
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = Collections.singletonList("MasterTable");
-            step1.setBaseSources(baseSources);
-
-            SourceTable sourceTable = new SourceTable(masterTableName, customerSpace);
-            Map<String, SourceTable> baseTables = new HashMap<>();
-            baseTables.put("MasterTable", sourceTable);
-            step1.setBaseTables(baseTables);
-
-            step1.setTransformer("sourceCopier");
-            TargetTable targetTable = new TargetTable();
-            targetTable.setCustomerSpace(customerSpace);
-            targetTable.setNamePrefix(targetTableName);
-            step1.setTargetTable(targetTable);
-            step1.setConfiguration("{}");
-
+            TransformationStepConfig join = joinStepConfig(customerSpace, masterTableName);
+            TransformationStepConfig profile = profileStepConfig(customerSpace, profileTablePrefix);
+            TransformationStepConfig bucket = bucketStepConfig();
+            TransformationStepConfig calc = calcStepConfig(customerSpace, statsTablePrefix);
             // -----------
-            List<TransformationStepConfig> steps = Arrays.asList(step1);
+            List<TransformationStepConfig> steps = Arrays.asList(join, profile, bucket, calc);
             // -----------
             request.setSteps(steps);
             return request;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private TransformationStepConfig joinStepConfig(CustomerSpace customerSpace, String sourceTableName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        String tableSourceName = "Table_" + sourceTableName;
+        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add(tableSourceName);
+        baseSources.add("AccountMaster");
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
+        step.setTransformer("AMAttrEnricher");
+        AMAttrEnrichConfig conf = new AMAttrEnrichConfig();
+        conf.setNotJoinAM(true);
+        step.setConfiguration(JsonUtils.serialize(conf));
+        return step;
+    }
+
+    private TransformationStepConfig profileStepConfig(CustomerSpace customerSpace, String profileTablePrefix) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.addAll(Collections.singletonList(JOIN_STEP));
+        step.setInputSteps(inputSteps);
+        step.setTransformer("SourceProfiler");
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(profileTablePrefix);
+        step.setTargetTable(targetTable);
+
+        ProfileConfig conf = new ProfileConfig();
+        String confParamStr1 = JsonUtils.serialize(conf);
+        step.setConfiguration(confParamStr1);
+        return step;
+    }
+
+    private TransformationStepConfig bucketStepConfig() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.addAll(Arrays.asList(JOIN_STEP, PROFILE_STEP));
+        step.setInputSteps(inputSteps);
+        step.setTransformer("sourceBucketer");
+        step.setConfiguration("{}");
+        return step;
+    }
+
+    private TransformationStepConfig calcStepConfig(CustomerSpace customerSpace, String statsTablePrefix) {
+        TransformationStepConfig step = new TransformationStepConfig();
+
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.addAll(Arrays.asList(BUCKET_STEP, PROFILE_STEP));
+        step.setInputSteps(inputSteps);
+        step.setTransformer("statsCalculator");
+        step.setConfiguration("{}");
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(statsTablePrefix);
+        step.setTargetTable(targetTable);
+
+        return step;
     }
 
     private void waitForTransformation(String applicationId) {

@@ -35,8 +35,8 @@ PRESETS = {
         'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop']
     },
     'cdl': {
-        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi'],
-        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop', 'datacloudapi']
+        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi'],
+        'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'datacloudapi']
     }
 }
 
