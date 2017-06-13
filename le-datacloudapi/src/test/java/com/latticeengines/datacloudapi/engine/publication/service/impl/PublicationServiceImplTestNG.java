@@ -3,6 +3,8 @@ package com.latticeengines.datacloudapi.engine.publication.service.impl;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -40,6 +42,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
     public static final String PUBLICATION_NAME = "TestPublication2";
     public static final String CURRENT_VERSION = "version2";
     public final String SUBMITTER = this.getClass().getSimpleName();
+    private static final Log log = LogFactory.getLog(PublicationServiceImplTestNG.class);
 
     @Autowired
     private PublicationProgressService publicationProgressService;
@@ -78,7 +81,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
 
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
-        publicationEntityMgr.removePublication(PUBLICATION_NAME);
+        // publicationEntityMgr.removePublication(PUBLICATION_NAME);
         httpServer.stop();
     }
 
@@ -110,6 +113,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");
         // test status of latest publication progress with required version
         EngineProgress status = publicationService.status(PUBLICATION_NAME, CURRENT_VERSION);
+        log.info("Printing status : " + status.getStatus());
         Assert.assertTrue(status.getStatus() == ProgressStatus.FAILED);
     }
 
