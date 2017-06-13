@@ -89,6 +89,9 @@ class Finalize(State):
         exportFilePath = mediator.modelLocalDir + mediator.name + "_dataexport.csv"
         if os.path.isfile("./exportdfstep.csv"):
             os.rename("./exportdfstep.csv", exportFilePath)
+        exportFilePath = mediator.modelLocalDir + mediator.name + "_exportrftrain.csv"
+        if os.path.isfile("./exportrftrain.csv"):
+            os.rename("./exportrftrain.csv", exportFilePath)
 
     def writePipelineDebugArtifacts(self, mediator):
         base = self.mediator.pipelineLocalDir

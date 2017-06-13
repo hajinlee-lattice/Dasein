@@ -36,7 +36,6 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                                           bootstrap=bool(algorithmProperties.get("bootstrap", True)),
                                           random_state=randomState,
                                           verbose=3)
-        
     with Capture() as capture:
         captureThread = CaptureMonitor(capture, 0.1, 0.233, estimators, runtimeProperties, "building tree.*");
         try:
@@ -46,8 +45,16 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
             captureThread.shutdown()
 
     writeModel(schema, modelDir, clf)
+    
+    exportTrainingData(trainingData)
+    
     return clf
 
+def exportTrainingData(trainingData):
+    columns = list(trainingData.columns.values)
+    columns = [x for x in columns if not x.startswith("###") and not x.startswith("__")]
+    trainingData.to_csv("exportrftrain.csv", sep=',', encoding='utf-8', cols=columns, index=False, float_format='%.10f')
+    
 def writeModel(schema, modelDir, clf):
     estimators = clf.estimators_
     importances = clf.feature_importances_

@@ -1,11 +1,15 @@
 package com.latticeengines.pls.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
+import org.python.jline.internal.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,9 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.pls.service.DataFileProviderService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 @Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
@@ -46,8 +47,8 @@ public class DataFileResource {
     public void getDiagnosticsJsonFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
-        dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_JSON,
-                "diagnostics.json");
+        dataFileProviderService
+                .downloadFile(request, response, modelId, MediaType.APPLICATION_JSON, "diagnostics.json");
     }
 
     @RequestMapping(value = "/metadataavsc", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -89,8 +90,8 @@ public class DataFileResource {
     @RequestMapping(value = "/explorercsv", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get threshold explorer csv file for specific model summary")
-    public void getThresholdExplorerCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+    public void getThresholdExplorerCsvFile(@RequestParam(value = "modelId") String modelId,
+            HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_explorer.csv");
     }
@@ -111,8 +112,14 @@ public class DataFileResource {
             throws IOException {
         response.setHeader("Content-Encoding", "gzip");
         if (eventTableType.equalsIgnoreCase("training")) {
-            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
-                    "postMatchEventTable.*allTraining.*.csv");
+            try {
+                dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
+                        ".*exportrftrain.csv");
+            } catch (Exception ex) {
+                Log.warn("Final modeling file does not exist, fall back to previous modeling file!");
+                dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
+                        "postMatchEventTable.*allTraining.*.csv");
+            }
         } else if (eventTableType.equalsIgnoreCase("test")) {
             dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*allTest.*.csv");
