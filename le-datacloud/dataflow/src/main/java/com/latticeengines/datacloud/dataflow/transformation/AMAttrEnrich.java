@@ -29,6 +29,18 @@ public class AMAttrEnrich extends TransformationFlowBase<BasicTransformationConf
     @Override
     public Node construct(AMAttrEnrichParameters paras) {
         Node input = addSource(paras.getBaseTables().get(0));
+        // Used to mark ATTR_SOURCE in postDataflowProcessing
+        List<String> inputAttrs = new ArrayList<>();
+        for (String attr : input.getFieldNames()) {
+            if (!attr.equals(paras.getInputLatticeId())) {
+                inputAttrs.add(attr);
+            }
+        }
+        paras.setInputAttrs(inputAttrs);
+        if (paras.isNotJoinAM()) {
+            return input.rename(new FieldList(paras.getInputLatticeId()),
+                    new FieldList(DataCloudConstants.LATTICE_ACCOUNT_ID));
+        }
         Node am = addSource(paras.getBaseTables().get(1));
         // Check field conflicts
         Set<String> customerAttrs = new HashSet<>(input.getFieldNames());
@@ -38,14 +50,6 @@ public class AMAttrEnrich extends TransformationFlowBase<BasicTransformationConf
                 throw new RuntimeException("Conflict field name between customer table and account master: " + amAttr);
             }
         }
-        // Used to mark ATTR_SOURCE in postDataflowProcessing
-        List<String> inputAttrs = new ArrayList<>();
-        for (String attr : input.getFieldNames()) {
-            if (!attr.equals(paras.getInputLatticeId())) {
-                inputAttrs.add(attr);
-            }
-        }
-        paras.setInputAttrs(inputAttrs);
         // Resolve lattice account id
         input = input.rename(new FieldList(paras.getInputLatticeId()),
                 new FieldList(renameInputId(paras.getInputLatticeId())));

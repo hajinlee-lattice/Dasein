@@ -50,6 +50,7 @@ public class AMAttrEnricher extends AbstractDataflowTransformer<AMAttrEnrichConf
             AMAttrEnrichConfig config, List<String> baseVersions) {
         parameters.setAmLatticeId(config.getAmLatticeId());
         parameters.setInputLatticeId(config.getInputLatticeId());
+        parameters.setNotJoinAM(config.isNotJoinAM());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
