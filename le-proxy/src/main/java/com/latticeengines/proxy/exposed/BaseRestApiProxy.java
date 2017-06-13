@@ -56,7 +56,7 @@ public abstract class BaseRestApiProxy {
         restTemplate.setErrorHandler(new GetResponseErrorHandler());
     }
 
-    protected void setAuthHeader(String authToken) {
+    void setAuthHeader(String authToken) {
         AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(authToken);
         List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
         List<Integer> toRemove = new ArrayList<>();
