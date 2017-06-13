@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Future;
-
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
@@ -35,6 +33,8 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.newrelic.api.agent.Trace;
+
+import scala.concurrent.Future;
 
 @Component("fuzzyMatchHelper")
 public class FuzzyMatchHelper implements DbHelper {
@@ -108,6 +108,10 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private void updateUseRemoteDnB(MatchInput matchInput) {
+        if (!zkConfigurationService.useRemoteDnBGlobal()) {
+            matchInput.setUseRemoteDnB(Boolean.FALSE);
+            return;
+        }
         Boolean useRemoteDnB = matchInput.getUseRemoteDnB();
         if (useRemoteDnB != null) {
             return;
