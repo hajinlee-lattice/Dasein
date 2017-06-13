@@ -223,19 +223,9 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
             return null;
         }
         String profileTableName = configuration.getProfileTableName();
-        Table profileTable = metadataProxy.getTable(customerSpace.toString(), profileTableName);
-        if (profileTable == null) {
-            String error = "Profile table does not exist! name=" + profileTableName;
-            log.error(error);
-            return null;
-        }
         TransformationStepConfig step5 = new TransformationStepConfig();
         List<String> baseSources = Arrays.asList(profileTableName);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        SourceTable sourceProfileTable = new SourceTable(profileTableName, customerSpace);
-        baseTables.put(profileTableName, sourceProfileTable);
         step5.setBaseSources(baseSources);
-        step5.setBaseTables(baseTables);
 
         // step 4 output
         step5.setInputSteps(Arrays.asList(3));
