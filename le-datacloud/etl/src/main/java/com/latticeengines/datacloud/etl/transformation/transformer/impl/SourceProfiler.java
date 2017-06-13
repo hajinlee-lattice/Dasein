@@ -9,8 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketEncodeConfig;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;

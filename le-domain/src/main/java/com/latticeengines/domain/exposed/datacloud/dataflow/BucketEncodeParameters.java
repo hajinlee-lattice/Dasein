@@ -16,14 +16,7 @@ public class BucketEncodeParameters extends TransformationFlowParameters {
     @JsonProperty("rename_fields")
     public Map<String, String> renameFields;
 
-    // legacy configuration, just to rename LatticeId to LatticeAccountId
-    @JsonProperty("row_id_field")
-    public String rowIdField;
-
-    @JsonProperty("rename_row_id_field")
-    public String renameRowIdField;
-
-    @JsonProperty("am_src_idx")
-    public int amSrcIdx;
+    @JsonProperty("profile_src_idx")
+    public int profileSrcIdx;
 
 }

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.dataflow.transformation.BucketEncode;
 import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.BucketedAttribute;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(TRANSFORMER_NAME)
@@ -69,13 +71,27 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     @Override
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, BucketEncodeParameters parameters,
             BucketEncodeConfig configuration) {
-        Source profileSource = step.getBaseSources()[1];
-        String profileVersion = step.getBaseVersions().get(1);
-        if (!isProfileSource(profileSource.getSourceName(), profileVersion)) {
+        parameters.profileSrcIdx = 1;
+        Source profileSource = step.getBaseSources()[parameters.profileSrcIdx];
+        String profileVersion = step.getBaseVersions().get(parameters.profileSrcIdx);
+
+        List<GenericRecord> records;
+        if (profileSource instanceof TableSource) {
+            Table table = ((TableSource) profileSource).getTable();
+            records = new ArrayList<>();
+            for (Extract extract: table.getExtracts()) {
+                records.addAll(AvroUtils.getDataFromGlob(yarnConfiguration, extract.getPath()));
+            }
+        } else {
+            String avroDir = hdfsPathBuilder.constructSnapshotDir(profileSource.getSourceName(), profileVersion).toString();
+            records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
+        }
+
+        if (!isProfileSource(profileSource, profileVersion)) {
             profileSource = step.getBaseSources()[0];
             profileVersion = step.getBaseVersions().get(0);
-            parameters.amSrcIdx = 1;
-            if (!isProfileSource(profileSource.getSourceName(), profileVersion)) {
+            parameters.profileSrcIdx = 0;
+            if (!isProfileSource(profileSource, profileVersion)) {
                 throw new RuntimeException("Neither base source has the profile schema");
             } else {
                 log.info("Resolved the first base source as profile.");
@@ -83,16 +99,22 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
         } else {
             log.info("Resolved the second base source as profile.");
         }
-        String avroDir = hdfsPathBuilder.constructSnapshotDir(profileSource.getSourceName(), profileVersion).toString();
-        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
+
         parameters.encAttrs = BucketEncodeUtils.encodedAttrs(records);
         parameters.retainAttrs = BucketEncodeUtils.retainFields(records);
         parameters.renameFields = BucketEncodeUtils.renameFields(records);
     }
 
-    private boolean isProfileSource(String sourceName, String version) {
-        String avroDir = hdfsPathBuilder.constructSnapshotDir(sourceName, version).toString();
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroDir + "/*.avro");
+    private boolean isProfileSource(Source source, String version) {
+        String avroPath;
+        if (source instanceof TableSource) {
+            Table table = ((TableSource) source).getTable();
+            avroPath = table.getExtracts().get(0).getPath();
+        } else {
+            String avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
+            avroPath = avroDir + "/*.avro";
+        }
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroPath);
         if (records.hasNext()) {
             GenericRecord record = records.next();
             return BucketEncodeUtils.isProfile(record);
