@@ -45,7 +45,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     }
 
     private ExportConfiguration setupExportConfig() {
-        Table sourceTable = getObjectFromContext(CONSOLIDATE_CONSOLIDATED_TABLE, Table.class);
+        Table sourceTable = getObjectFromContext(TABLE_GOING_TO_REDSHIFT, Table.class);
         if (sourceTable == null) {
             sourceTable = configuration.getSourceTable();
         }
@@ -62,7 +62,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
 
     @Override
     public void onExecutionCompleted() {
-        Table table = getObjectFromContext(CONSOLIDATE_CONSOLIDATED_TABLE, Table.class);
+        Table table = getObjectFromContext(TABLE_GOING_TO_REDSHIFT, Table.class);
         if (table == null) {
             table = configuration.getSourceTable();
         }

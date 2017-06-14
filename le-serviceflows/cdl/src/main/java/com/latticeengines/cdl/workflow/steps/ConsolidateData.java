@@ -128,6 +128,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         metadataProxy.updateTable(customerSpace.toString(), masterTableName, newMasterTable);
 
         putObjectInContext(CONSOLIDATE_CONSOLIDATED_TABLE, consolidatedTable);
+        putObjectInContext(TABLE_GOING_TO_REDSHIFT, consolidatedTable);
         putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
         putObjectInContext(CONSOLIDATE_DOING_PUBLISH, isBucketing());
     }

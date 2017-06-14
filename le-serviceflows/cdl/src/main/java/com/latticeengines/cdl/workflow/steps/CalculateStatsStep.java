@@ -92,7 +92,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, version);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, version);
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
-        putStringValueInContext(CALCULATE_STATS_SORTED_TABLE, sortedTableName);
+        putStringValueInContext(TABLE_GOING_TO_REDSHIFT, sortedTableName);
 
         setProfileTable(configuration.getCustomerSpace().toString(), profileTableName);
     }
