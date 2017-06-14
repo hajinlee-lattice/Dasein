@@ -1,5 +1,6 @@
 import argparse
 import boto3
+from botocore.exceptions import ClientError
 
 from ..elb.targetgroup import find_tgrp_arn
 
@@ -22,22 +23,26 @@ def register_internal(asgroup, tgrp):
     global AS_CLIENT
     if AS_CLIENT is None:
         AS_CLIENT = boto3.client('autoscaling')
-
-    response = AS_CLIENT.describe_load_balancer_target_groups(AutoScalingGroupName=group_name)
-    tgrp_arns = []
-    for t in response['LoadBalancerTargetGroups']:
-        if t['LoadBalancerTargetGroupARN'] == tgrp_arn:
-            print 'ASGroup %s is already registered to target group %s' % (group_name, tgrp)
-            return
-        tgrp_arns.append(t['LoadBalancerTargetGroupARN'])
-    tgrp_arns.append(tgrp_arn)
-
-    response = AS_CLIENT.attach_load_balancer_target_groups(
-        AutoScalingGroupName=group_name,
-        TargetGroupARNs=tgrp_arns
-    )
-    print response
-
+    try:
+        response = AS_CLIENT.describe_load_balancer_target_groups(AutoScalingGroupName=group_name)
+        tgrp_arns = []
+        for t in response['LoadBalancerTargetGroups']:
+            if t['LoadBalancerTargetGroupARN'] == tgrp_arn:
+                print 'ASGroup %s is already registered to target group %s' % (group_name, tgrp)
+                return
+            tgrp_arns.append(t['LoadBalancerTargetGroupARN'])
+        tgrp_arns.append(tgrp_arn)
+    except ClientError as e:
+        print "Error: %s" % e
+ 
+    try:
+        response = AS_CLIENT.attach_load_balancer_target_groups(
+            AutoScalingGroupName=group_name,
+            TargetGroupARNs=tgrp_arns
+        )
+        print response
+    except ClientError as e:
+        print "Error: %s" % e
 
 def deregister_internal(asgroup, tgrp):
     group_name = find_full_group_name(asgroup)
@@ -47,27 +52,33 @@ def deregister_internal(asgroup, tgrp):
     if AS_CLIENT is None:
         AS_CLIENT = boto3.client('autoscaling')
 
-    response = AS_CLIENT.describe_load_balancer_target_groups(AutoScalingGroupName=group_name)
-    for t in response['LoadBalancerTargetGroups']:
-        if t['LoadBalancerTargetGroupARN'] == tgrp_arn:
-            response = AS_CLIENT.detach_load_balancer_target_groups(
-                AutoScalingGroupName=group_name,
-                TargetGroupARNs=[ tgrp_arn ]
-            )
-        print response
+    try:
+        response = AS_CLIENT.describe_load_balancer_target_groups(AutoScalingGroupName=group_name)
+        for t in response['LoadBalancerTargetGroups']:
+            if t['LoadBalancerTargetGroupARN'] == tgrp_arn:
+                response = AS_CLIENT.detach_load_balancer_target_groups(
+                    AutoScalingGroupName=group_name,
+                    TargetGroupARNs=[ tgrp_arn ]
+                )
+            print response
+    except ClientError as e:
+        print "Error: %s" % e
 
 def find_full_group_name(prefix):
     global AS_CLIENT
     if AS_CLIENT is None:
         AS_CLIENT = boto3.client('autoscaling')
 
-    response = AS_CLIENT.describe_auto_scaling_groups()
-    for group in response["AutoScalingGroups"]:
-        grpname = group["AutoScalingGroupName"]
-        if len(grpname) >= len(prefix) and grpname[:len(prefix)] == prefix:
-            print "Found auto scaling group: " + grpname
-            return grpname
-    raise Exception("Cannot find auto scaling group with prefix " + prefix)
+    try:
+        response = AS_CLIENT.describe_auto_scaling_groups()
+        for group in response["AutoScalingGroups"]:
+            grpname = group["AutoScalingGroupName"]
+            if len(grpname) >= len(prefix) and grpname[:len(prefix)] == prefix:
+                print "Found auto scaling group: " + grpname
+                return grpname
+        raise Exception("Cannot find auto scaling group with prefix " + prefix)
+    except ClientError as e:
+        print "Error: %s" % e
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Auto Scaling Group load balancing management')
