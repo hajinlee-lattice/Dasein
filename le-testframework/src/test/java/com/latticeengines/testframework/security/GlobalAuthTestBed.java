@@ -60,6 +60,10 @@ public interface GlobalAuthTestBed {
 
     void switchToThirdPartyUser(Tenant tenant);
 
+    void createTenant(Tenant tenant);
+
+    void deleteTenant(Tenant tenant);
+
     void cleanupDlZk();
 
     void cleanupPlsHdfs();

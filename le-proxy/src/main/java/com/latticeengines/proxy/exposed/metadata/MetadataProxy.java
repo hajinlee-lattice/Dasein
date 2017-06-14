@@ -292,6 +292,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     @Override
     public DataFeed createDataFeed(String customerSpace, DataFeed datafeed) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeeds", customerSpace);
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
         return post("createDataFeed", url, datafeed, DataFeed.class);
     }
 
