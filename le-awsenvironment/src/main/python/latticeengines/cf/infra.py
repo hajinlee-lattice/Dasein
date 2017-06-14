@@ -429,13 +429,13 @@ def parse_args():
     parser1 = commands.add_parser("template")
     parser1.add_argument('-e', dest='environment', type=str, default='qacluster', choices=['devcluster', 'qacluster','prodcluster', 'dr'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
-    parser1.add_argument('-s', dest='stack', type=str, required=True, help='the short stack name for tagging')
+    parser1.add_argument('-s', dest='stack', type=str, required=False, help='the short stack name for tagging')
     parser1.add_argument('--public', dest='public', action='store_true', help='bootstrap the public urls. ignore -s opt')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-e', dest='environment', type=str, default='qacluster', choices=['devcluster', 'qacluster','prodcluster', 'dr'], help='environment')
-    parser1.add_argument('-s', dest='stack', type=str, required=True, help='the LE_STACK to be created')
+    parser1.add_argument('-s', dest='stack', type=str, required=False, help='the LE_STACK to be created')
     parser1.add_argument('--public', dest='public', action='store_true', help='bootstrap the public urls. ignore -s opt')
     parser1.set_defaults(func=provision_cli)
 
