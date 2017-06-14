@@ -68,8 +68,8 @@ class AwsEnvironment:
     def lpi_efs_ip_3(self):
         return self._props['lpi.efs.ip.3']
 
-    def zk_sg(self):
-        return self._props['sg.zookeeper']
+    def https_sg(self):
+        return self._props['sg.https']
 
     def tomcat_sg(self):
         return self._props['sg.tomcat']
