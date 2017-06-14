@@ -9,6 +9,7 @@ import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -55,6 +56,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
         factory.addExceptionToRetry(LockAcquisitionException.class);
         factory.setRetryBackOffMultiplier(2.0);
         factory.setRetryBackOffInitialIntervalMsec(500);
+        factory.setSerializer(new Jackson2ExecutionContextStringSerializer());
         factory.afterPropertiesSet();
         return (JobRepository) factory.getObject();
     }
@@ -77,6 +79,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
     public JobExplorer getJobExplorer() throws Exception {
         LEJobExplorerFactoryBean leJobExplorerFactoryBean = new LEJobExplorerFactoryBean();
         leJobExplorerFactoryBean.setDataSource(dataSource);
+        leJobExplorerFactoryBean.setSerializer(new Jackson2ExecutionContextStringSerializer());
         leJobExplorerFactoryBean.setTablePrefix(WORKFLOW_PREFIX);
         leJobExplorerFactoryBean.setJobExecutionRetriever(leJobExecutionRetriever);
         leJobExplorerFactoryBean.afterPropertiesSet();
