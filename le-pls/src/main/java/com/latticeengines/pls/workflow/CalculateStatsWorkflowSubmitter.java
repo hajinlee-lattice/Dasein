@@ -53,10 +53,10 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
         DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
                 datafeedName);
         Status datafeedStatus = datafeed.getStatus();
-        log.info(String.format("data feed %s status: %s", datafeedName, datafeedStatus));
+        log.info(String.format("data feed %s status: %s", datafeedName, datafeedStatus.getName()));
 
         if (datafeedStatus == Status.Active || datafeedStatus == Status.InitialConsolidated) {
-            metadataProxy.updateDataFeedStatus(customerSpace.toString(), datafeedName, Status.Finalizing.getName());
+            metadataProxy.updateDataFeedStatus(customerSpace.toString(), datafeedName, Status.Finalizing);
             DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace.toString(),
                     dataCollectionType);
             if (dataCollection == null) {
