@@ -38,7 +38,7 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
         if (execution == null) {
             putObjectInContext(CONSOLIDATE_INPUT_TABLES, Collections.EMPTY_LIST);
         } else {
-            List<Table> importTables = execution.getImports().stream().map(i -> i.getImportData())
+            List<Table> importTables = execution.getImports().stream().map(i -> i.getDataTable())
                     .collect(Collectors.toList());
             putObjectInContext(CONSOLIDATE_INPUT_TABLES, importTables);
         }
