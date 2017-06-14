@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
@@ -18,6 +19,7 @@ import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.DataCollectionCache;
 import com.latticeengines.metadata.service.DataCollectionService;
+import com.latticeengines.metadata.service.StatisticsContainerService;
 
 @Component("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
@@ -34,6 +36,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Autowired
     private DataCollectionCache dataCollectionCache;
+
+    @Autowired
+    private StatisticsContainerService statisticsContainerService;
 
     @Override
     public List<DataCollection> getDataCollections(String customerSpace) {
@@ -92,6 +97,32 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         tagEntityMgr.tagTable(table, dataCollection.getName());
         log.info("Tag the table " + tableName + " of type " + schemaInterpretation + " to data collection "
                 + dataCollection.getName());
+
+        dataCollectionCache.invalidate(dataCollection.getType());
+        return dataCollectionCache.get(dataCollection.getType());
+    }
+
+    @Override
+    public DataCollection upsertStatsToCollection(String customerSpace, DataCollectionType type,
+            StatisticsContainer container, boolean purgeOld) {
+        DataCollection dataCollection = getDataCollectionByType(customerSpace, type);
+        if (dataCollection == null) {
+            throw new IllegalArgumentException(
+                    "Cannot find data collection of type " + type + " for customer " + customerSpace);
+        }
+        StatisticsContainer oldContainer = dataCollection.getStatisticsContainer();
+        if (oldContainer != null) {
+            String msg = "There is already a statistics associated with this data collection.";
+            if (purgeOld) {
+                msg += " Remove it first.";
+                statisticsContainerService.delete(customerSpace, oldContainer.getName());
+            }
+            log.info(msg);
+        }
+
+        StatisticsContainer newContainer = statisticsContainerService.createOrUpdate(customerSpace, container);
+        dataCollection.setStatisticsContainer(newContainer);
+        dataCollectionEntityMgr.update(dataCollection);
 
         dataCollectionCache.invalidate(dataCollection.getType());
         return dataCollectionCache.get(dataCollection.getType());

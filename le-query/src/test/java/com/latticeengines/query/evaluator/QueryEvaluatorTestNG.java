@@ -201,7 +201,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         DataCollection collection = getDataCollection();
         Query query = new Query();
         query.setObjectType(SchemaInterpretation.Account);
-        query.addLookup(new ColumnLookup(SchemaInterpretation.BucketedAccountMaster, "number_of_family_members"));
+        query.addLookup(new ColumnLookup(SchemaInterpretation.AccountMaster, "number_of_family_members"));
         query.addLookup(new ColumnLookup(SchemaInterpretation.Account, "companyname"));
         query.setPageFilter(new PageFilter(0, 100));
         List<Map<String, Object>> results = queryEvaluator.getResults(collection, query).getData();
@@ -279,7 +279,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     private DataCollection getDataCollection() {
         DataCollection collection = new DataCollection();
         Table account = getTable("querytest_table", SchemaInterpretation.Account);
-        Table accountMaster = getTable("querytest_table_dup", SchemaInterpretation.BucketedAccountMaster);
+        Table accountMaster = getTable("querytest_table_dup", SchemaInterpretation.AccountMaster);
         Table contact = getTable("querytest_table_dup", SchemaInterpretation.Contact);
 
         TableRelationship relationship = new TableRelationship();

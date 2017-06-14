@@ -89,7 +89,7 @@ public class CDLTestSetupTestNG extends PlsDeploymentTestNGBase {
                     attribute.getSubcategory());
             AttributeStatistics attributeStatistics = generateAttributeStatistics(attribute);
             subcategoryStatistics.getAttributes().put(
-                    new ColumnLookup(SchemaInterpretation.BucketedAccountMaster, attribute.getName()),
+                    new ColumnLookup(SchemaInterpretation.AccountMaster, attribute.getName()),
                     attributeStatistics);
         }
 

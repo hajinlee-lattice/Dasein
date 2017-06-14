@@ -84,7 +84,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
                     TransformationFlowParameters.EngineConfiguration engineConfig = OM.treeToValue(
                             jsonNode.get(ENGINE_CONFIG), TransformationFlowParameters.EngineConfiguration.class);
                     parameters.setEngineConfiguration(engineConfig);
-                    log.info("Loaded engine configuration: " + engineConfig);
+                    log.info("Loaded engine configuration: " + JsonUtils.serialize(engineConfig));
                 }
             } catch (Exception e) {
                 log.error("Failed to parse " + ENGINE_CONFIG + " from conf json.", e);

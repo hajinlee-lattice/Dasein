@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,6 +43,7 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -647,13 +649,14 @@ public class AvroUtils {
         }
         return assembler.endRecord();
     }
+
     public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data)
             throws IOException {
         appendToHdfsFile(configuration, filePath, data, false);
     }
 
-    public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data, boolean snappy)
-            throws IOException {
+    public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data,
+            boolean snappy) throws IOException {
         FileSystem fs = FileSystem.get(configuration);
         Path path = new Path(filePath);
 
@@ -681,12 +684,12 @@ public class AvroUtils {
     }
 
     public static void writeToHdfsFile(Configuration configuration, Schema schema, String filePath,
-                                       List<GenericRecord> data) throws IOException {
+            List<GenericRecord> data) throws IOException {
         writeToHdfsFile(configuration, schema, filePath, data, false);
     }
 
     public static void writeToHdfsFile(Configuration configuration, Schema schema, String filePath,
-                                       List<GenericRecord> data, boolean snappy) throws IOException {
+            List<GenericRecord> data, boolean snappy) throws IOException {
         FileSystem fs = FileSystem.get(configuration);
         Path path = new Path(filePath);
 
@@ -718,7 +721,8 @@ public class AvroUtils {
         writeToLocalFile(schema, data, path, false);
     }
 
-    public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path, boolean snappy) throws IOException {
+    public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path, boolean snappy)
+            throws IOException {
         File avroFile = new File(path);
         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());) {
             if (snappy) {
@@ -820,6 +824,14 @@ public class AvroUtils {
         }
     }
 
+    public static Iterator<GenericRecord> iterator(Configuration configuration, Collection<String> paths) {
+        try {
+            return new AvroFilesIterator(configuration, paths);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static class AvroFilesIterator implements Iterator<GenericRecord> {
 
         private List<String> matchedFiles;
@@ -831,6 +843,19 @@ public class AvroUtils {
             matchedFiles = HdfsUtils.getFilesByGlob(configuration, path);
             if (matchedFiles == null || matchedFiles.isEmpty()) {
                 throw new IOException("Could not find any avro file that matches the path pattern [" + path + "]");
+            }
+            this.configuration = configuration;
+            reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
+        }
+
+        AvroFilesIterator(Configuration configuration, Collection<String> paths) throws IOException {
+            matchedFiles = new ArrayList<>();
+            for (String path : paths) {
+                matchedFiles.addAll(HdfsUtils.getFilesByGlob(configuration, path));
+            }
+            if (matchedFiles == null || matchedFiles.isEmpty()) {
+                throw new IOException("Could not find any avro file that matches one of the path patterns [ "
+                        + StringUtils.join(paths, ", ") + " ]");
             }
             this.configuration = configuration;
             reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));

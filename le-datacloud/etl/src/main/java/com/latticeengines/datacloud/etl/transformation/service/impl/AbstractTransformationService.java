@@ -162,13 +162,15 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         // update status
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
-        progressEntityMgr.updateStatus(progress, ProgressStatus.PROCESSING);
         LoggingUtils.logInfo(getLogger(), progress, "Start transforming ...");
 
-        transformHook(progress, transformationConfiguration);
-
-        LoggingUtils.logInfoWithDuration(getLogger(), progress, "transformed.", startTime);
-        return progressEntityMgr.updateStatus(progress, ProgressStatus.FINISHED);
+        progress = transformHook(progress, transformationConfiguration);
+        if (progress != null) {
+            LoggingUtils.logInfoWithDuration(getLogger(), progress, "transformed.", startTime);
+            return progressEntityMgr.updateStatus(progress, ProgressStatus.FINISHED);
+        } else {
+            return null;
+        }
     }
 
     @Override

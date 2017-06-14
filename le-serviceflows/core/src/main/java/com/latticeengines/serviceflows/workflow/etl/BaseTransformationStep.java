@@ -1,6 +1,12 @@
 package com.latticeengines.serviceflows.workflow.etl;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -18,24 +24,28 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
 
     private static int MAX_LOOPS = 1800;
     private static final ObjectMapper OM = new ObjectMapper();
-    
+    private static Log log = LogFactory.getLog(BaseTransformationStep.class);
+
     @Autowired
     protected TransformationProxy transformationProxy;
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
+    @Value("${pls.cdl.transform.workflow.mem.mb}")
+    protected int workflowMemMb;
+
+    @Value("${pls.cdl.transform.cascading.partitions}")
+    private int cascadingPartitions;
+
+    @Value("${pls.cdl.transform.tez.task.mem.gb}")
+    private int tezMemGb;
+
     protected String getDataCloudVersion() {
         return columnMetadataProxy.latestVersion("").getVersion();
     }
 
-    protected String useEngine(TransformerConfig conf, String engine) {
-        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
-        engineConf.setEngine(engine);
-        return appendEngineConf(conf, engineConf);
-    }
-
-    private String appendEngineConf(TransformerConfig conf, TransformationFlowParameters.EngineConfiguration engineConf) {
+    protected String appendEngineConf(TransformerConfig conf, TransformationFlowParameters.EngineConfiguration engineConf) {
         ObjectNode on = OM.valueToTree(conf);
         on.set("EngineConfig", OM.valueToTree(engineConf));
         return JsonUtils.serialize(on);
@@ -49,7 +59,9 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
                     || ProgressStatus.FAILED.equals(progressInDb.getStatus())) {
                 break;
             }
-            log.info("TransformationProgress Id=" + progressInDb.getPid() + " status=" + progressInDb.getStatus());
+            if (i % 3 == 0) {
+                log.info("TransformationProgress Id=" + progressInDb.getPid() + " status=" + progressInDb.getStatus());
+            }
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
@@ -58,7 +70,7 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
         }
 
         if (ProgressStatus.FINISHED.equals(progressInDb.getStatus())) {
-            log.info("Consolidate data pipeline is finished");
+            log.info("Consolidate data pipeline is " + ProgressStatus.FINISHED);
         } else if (ProgressStatus.FAILED.equals(progressInDb.getStatus())) {
             String error = "Consolidate data pipeline failed!";
             log.error(error);
@@ -68,5 +80,20 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
             log.error(error);
             throw new RuntimeException(error);
         }
+    }
+
+    protected String emptyStepConfig() {
+        return appendEngineConf(new TransformerConfig(), baseEngineConfig());
+    }
+
+    protected TransformationFlowParameters.EngineConfiguration baseEngineConfig() {
+        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
+        engineConf.setEngine("TEZ");
+        Map<String, String> jobProperties = new HashMap<>();
+        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
+        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions));
+        engineConf.setJobProperties(jobProperties);
+        engineConf.setPartitions(cascadingPartitions);
+        return engineConf;
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.network.exposed.metadata.DataCollectionInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -43,6 +44,15 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy implements Dat
                 "/customerspaces/{customerSpace}/datacollections/types/{dataCollectionType}/tables/{tableName}?purgeOld={purgeOldTable}",
                 customerSpace, dataCollectionType, tableName, purgeOldTable);
         return post("upsertTableToDataCollection", url, null, DataCollection.class);
+    }
+
+    @Override
+    public DataCollection upsertStatsToDataCollection(String customerSpace, DataCollectionType dataCollectionType,
+            StatisticsContainer container, boolean purgeOld) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollections/types/{dataCollectionType}/stats?purgeOld={purgeOld}",
+                customerSpace, dataCollectionType, purgeOld);
+        return post("upsertStatsToDataCollection", url, container, DataCollection.class);
     }
 
 }

@@ -152,14 +152,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 idAttrs.add(field.name());
                 continue;
             }
-            boolean isSeg = false;
-            if (DataCloudConstants.PROFILE_ATTR_SRC_CUSTOMER
-                    .equals(field.getProp(DataCloudConstants.PROFILE_ATTR_SRC))) { // from customer table
-                isSeg = true;
-            } else if (amAttrConf.containsKey(field.name())) { // from AM attr
+            boolean isSeg = true; // from encoded AM attr or customer field
+            if (amAttrConf.containsKey(field.name())) { // from AM attr
                 isSeg = (Boolean) amAttrConf.get(field.name()).get(FileParser.AM_PROFILE_CONFIG_HEADER[1]);
-            } else if (attrsToDecode.containsKey(field.name())) { // from encoded AM attr
-                isSeg = true;
             }
             if (!isSeg) { // If not for segment, exclude it from profiling
                 log.info(String.format("Discarded attr: %s", field.name()));
@@ -189,7 +184,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 numericAttrs.add(new ProfileParameters.Attribute(field.name(), null, null, new IntervalBucket()));
                 continue;
             }
-            if (boolTypes.contains(type) || field.getProp(AVRO_PROP_KEY).equalsIgnoreCase(FundamentalType.BOOLEAN.getName())) {
+            if (boolTypes.contains(type) || FundamentalType.BOOLEAN.getName().equalsIgnoreCase(field.getProp(AVRO_PROP_KEY))) {
                 log.info(String.format("Boolean bucketed attr %s (type %s encoded)", field.name(), type));
                 BucketAlgorithm algo = new BooleanBucket();
                 encodedAttrs.add(new ProfileParameters.Attribute(field.name(), 2, null, algo));

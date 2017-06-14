@@ -52,7 +52,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
         storage.setDatabaseName(DatabaseName.REDSHIFT);
         storage.setTableNameInStorage("redshift_bucketedaccountmaster");
         bucketedTable.setStorageMechanism(storage);
-        bucketedTable.setInterpretation(SchemaInterpretation.BucketedAccountMaster.toString());
+        bucketedTable.setInterpretation(SchemaInterpretation.AccountMaster.toString());
         log.info("Registering AccountMaster Bucketed Metadata Table");
         mdService.updateTable(CustomerSpace.parse(DataCloudConstants.SERVICE_TENANT), bucketedTable);
     }

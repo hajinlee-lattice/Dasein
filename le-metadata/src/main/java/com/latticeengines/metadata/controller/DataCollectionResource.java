@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.metadata.service.DataCollectionService;
 
 import io.swagger.annotations.Api;
@@ -56,5 +57,15 @@ public class DataCollectionResource {
                                                       @PathVariable String tableName, //
                                                       @RequestParam(value = "purgeOld", defaultValue = "false") boolean purgeOldTable) {
         return dataCollectionService.upsertTableToCollection(customerSpace, dataCollectionType, tableName, purgeOldTable);
+    }
+
+    @RequestMapping(value = "/types/{dataCollectionType}/stats", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create or update data collection")
+    public DataCollection upsertStatsToDataCollection(@PathVariable String customerSpace, //
+                                                      @PathVariable DataCollectionType dataCollectionType, //
+                                                      @RequestBody StatisticsContainer statisticsContainer, //
+                                                      @RequestParam(value = "purgeOld", defaultValue = "false") boolean purgeOldTable) {
+        return dataCollectionService.upsertStatsToCollection(customerSpace, dataCollectionType, statisticsContainer, purgeOldTable);
     }
 }

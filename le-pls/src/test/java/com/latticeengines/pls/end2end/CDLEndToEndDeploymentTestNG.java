@@ -111,12 +111,12 @@ public class CDLEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         AttributeStatistics attributeStatistics = statistics //
                 .getCategories().get(Category.DEFAULT.toString()) //
                 .getSubcategories().get(ColumnMetadata.SUBCATEGORY_OTHER).getAttributes() //
-                .get(new ColumnLookup(SchemaInterpretation.BucketedAccountMaster, "TechIndicator_AdRoll"));
+                .get(new ColumnLookup(SchemaInterpretation.AccountMaster, "TechIndicator_AdRoll"));
 
         arbitraryRestriction = new FrontEndRestriction();
         BucketRange range = attributeStatistics.getBuckets().get(0).getRange();
         BucketRestriction bucketRestriction = new BucketRestriction(new ColumnLookup(
-                SchemaInterpretation.BucketedAccountMaster, "TechIndicator_AdRoll"), range);
+                SchemaInterpretation.AccountMaster, "TechIndicator_AdRoll"), range);
         arbitraryRestriction.setAll(Collections.singletonList(bucketRestriction));
         return arbitraryRestriction;
     }

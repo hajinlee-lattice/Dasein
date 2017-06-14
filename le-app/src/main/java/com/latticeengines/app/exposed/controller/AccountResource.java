@@ -55,7 +55,7 @@ public class AccountResource {
 
         // TODO drive this from metadata
         // TODO need additional lookups from Yintao
-        translated.setLookups(SchemaInterpretation.BucketedAccountMaster, "BUSINESS_NAME");
+        translated.setLookups(SchemaInterpretation.AccountMaster, "BUSINESS_NAME");
         return translated;
     }
 }

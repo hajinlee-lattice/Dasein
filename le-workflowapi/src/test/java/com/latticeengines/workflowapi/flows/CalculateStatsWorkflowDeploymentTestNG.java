@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -83,9 +84,9 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
 
     @AfterClass(groups = "deployment")
     protected void cleanUpAfterWorkflow() throws Exception {
-        // deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
-        // cleanCamille(DEMO_CUSTOMERSPACE);
-        // cleanHdfs(DEMO_CUSTOMERSPACE);
+        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
+        cleanCamille(DEMO_CUSTOMERSPACE);
+        cleanHdfs(DEMO_CUSTOMERSPACE);
     }
 
     @Test(groups = "deployment", enabled = false)
@@ -120,6 +121,9 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
 
         Table profileTable = dataCollection.getTable(SchemaInterpretation.Profile);
         Assert.assertNotNull(profileTable);
+
+        StatisticsContainer statisticsContainer = dataCollection.getStatisticsContainer();
+        Assert.assertNotNull(statisticsContainer);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
-import static com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceBucketer.TRANSFORMER_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 
 import java.io.File;
@@ -38,7 +37,7 @@ import com.latticeengines.domain.exposed.metadata.BucketedAttribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-@Component(TRANSFORMER_NAME)
+@Component(SourceBucketer.TRANSFORMER_NAME)
 public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConfig, BucketEncodeParameters> {
 
     @SuppressWarnings("unused")

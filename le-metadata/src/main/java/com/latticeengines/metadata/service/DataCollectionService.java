@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 
 public interface DataCollectionService {
 
@@ -13,5 +14,9 @@ public interface DataCollectionService {
 
     DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection);
 
-    DataCollection upsertTableToCollection(String customerSpace, DataCollectionType type, String tableName, boolean purgeOldTable);
+    DataCollection upsertTableToCollection(String customerSpace, DataCollectionType type, String tableName,
+            boolean purgeOldTable);
+
+    DataCollection upsertStatsToCollection(String customerSpace, DataCollectionType type, StatisticsContainer container,
+            boolean purgeOld);
 }

@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.exposed.builder.engine;
 import java.util.Properties;
 
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.configuration.Configuration;
 
 import com.dataartisans.flink.cascading.FlinkConnector;
 import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
@@ -27,7 +28,8 @@ public class FlinkExecutionEngine extends ExecutionEngine {
         ExecutionEnvironment environment = dataFlowCtx.getProperty(DataFlowProperty.FLINKENV,
                 ExecutionEnvironment.class);
         if (environment == null) {
-            environment = ExecutionEnvironment.getExecutionEnvironment();
+            Configuration flinkConf = dataFlowCtx.getProperty(DataFlowProperty.FLINKCONF, Configuration.class);
+            environment = ExecutionEnvironment.createLocalEnvironment(flinkConf);
             environment.setParallelism(getPartitions(dataFlowCtx));
         }
         return new FlinkConnector(environment, properties);

@@ -39,10 +39,10 @@ public class SegmentationDataCollectionServiceImpl implements SegmentationDataCo
 
     @Override
     public void fillInDefaultTables(DataCollection dataCollection) {
-        if (dataCollection.getTable(SchemaInterpretation.BucketedAccountMaster) == null) {
+        if (dataCollection.getTable(SchemaInterpretation.AccountMaster) == null) {
             Tenant tenant = MultiTenantContext.getTenant();
             try {
-                log.info(String.format("Populating BucketedAccountMaster table for tenant %s", tenant.getId()));
+                log.info(String.format("Populating AccountMaster table for tenant %s", tenant.getId()));
                 MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(DataCloudConstants.SERVICE_CUSTOMERSPACE));
                 Table table = metadataService.getTable(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE),
                         DataCloudConstants.BUCKETED_ACCOUNT_MASTER_TABLE_NAME);
@@ -50,7 +50,7 @@ public class SegmentationDataCollectionServiceImpl implements SegmentationDataCo
                     dataCollection.addTable(table);
                 } else {
                     log.warn(String
-                            .format("Could not locate BucketedAccountMaster table in order to populate Segmentation data collection for tenant %s",
+                            .format("Could not locate AccountMaster table in order to populate Segmentation data collection for tenant %s",
                                     tenant.getId()));
                 }
             } finally {
@@ -65,7 +65,7 @@ public class SegmentationDataCollectionServiceImpl implements SegmentationDataCo
                 .getTables() //
                 .stream() //
                 .filter(t -> t.getInterpretation() == null //
-                        || !t.getInterpretation().equals(SchemaInterpretation.BucketedAccountMaster.toString())) //
+                        || !t.getInterpretation().equals(SchemaInterpretation.AccountMaster.toString())) //
                 .collect(Collectors.toList()));
     }
 }

@@ -35,10 +35,7 @@ import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.metadata.StatisticsContainerProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component("updateStatsObjects")
 public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfiguration> {
@@ -52,17 +49,15 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     private DataCollectionProxy dataCollectionProxy;
 
     @Autowired
-    private StatisticsContainerProxy statisticsContainerProxy;
-
-    @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
     public void execute() {
         log.info("Inside UpdateStatsObjects execute()");
+        String customerSpaceStr = configuration.getCustomerSpace().toString();
         DataCollectionType dataCollectionType = configuration.getDataCollectionType();
-        DataCollection dataCollection = dataCollectionProxy
-                .getDataCollectionByType(configuration.getCustomerSpace().toString(), dataCollectionType);
+        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpaceStr,
+                dataCollectionType);
         Table masterTable = CDLWorkflowStepUtils.getMasterTable(dataCollection);
         if (masterTable == null) {
             throw new NullPointerException("Master table for Stats Object Calculation is not found.");
@@ -73,34 +68,35 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         }
 
         String statsTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
-        log.info(String.format("statsTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
-                statsTableName));
-        Table statsTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), statsTableName);
+        log.info(String.format("statsTableName for customer %s is %s", customerSpaceStr, statsTableName));
+        Table statsTable = metadataProxy.getTable(customerSpaceStr, statsTableName);
         if (statsTable == null) {
             throw new NullPointerException("Target table for Stats Object Calculation is not found.");
         }
 
         StatisticsContainer statsContainer = constructStatsContainer(masterTable, statsTable);
-        statisticsContainerProxy.createOrUpdateStatistics(configuration.getCustomerSpace().toString(), statsContainer);
+        dataCollectionProxy.upsertStatsToDataCollection(customerSpaceStr, dataCollectionType, statsContainer, false);
     }
 
     private StatsCube getStatsCube(Table targetTable) {
         List<Extract> extracts = targetTable.getExtracts();
-        List<String> paths = new ArrayList<String>();
+        List<String> paths = new ArrayList<>();
         for (Extract extract : extracts) {
             paths.add(extract.getPath());
         }
-        log.info("Checking for result file: " + Arrays.toString(paths.toArray()));
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, paths.get(0));
+        log.info("Checking for result file: " + StringUtils.join(paths, ", "));
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, paths);
         return StatsCubeUtils.parseAvro(records);
     }
 
     private StatisticsContainer constructStatsContainer(Table masterTable, Table statsTable) {
         StatisticsContainer statsContainer = new StatisticsContainer();
+        statsContainer.setName(statsTable.getName());
 
         // get StatsCube from statsTable
         StatsCube statsCube = getStatsCube(statsTable);
 
+        log.info("Converting stats cube to statistics container.");
         // get metadata for account master
         String latestVersion = columnMetadataProxy.latestVersion("").getVersion();
         List<ColumnMetadata> cols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
@@ -108,7 +104,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         Map<String, ColumnMetadata> colLookup = new HashMap<>();
         cols.forEach(c -> colLookup.put(c.getColumnId(), c));
 
-        // get all other metadata from master table (and matchapi if necessary)
+        // get all other metadata from master table and matchapi
         String schemaIntStr = masterTable.getInterpretation();
         SchemaInterpretation masterTableType = null;
         if (StringUtils.isNotBlank(schemaIntStr)) {

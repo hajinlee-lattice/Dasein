@@ -29,7 +29,7 @@ public class QueryUnitTestNG {
         List<JoinSpecification> joins = query.getNecessaryJoins();
         assertEquals(joins.size(), 2);
         JoinSpecification amJoin = joins.stream()
-                .filter(j -> j.getDestinationType().equals(SchemaInterpretation.BucketedAccountMaster)).findFirst()
+                .filter(j -> j.getDestinationType().equals(SchemaInterpretation.AccountMaster)).findFirst()
                 .orElse(null);
         assertEquals(amJoin.getDestinationObjectUsage(), ObjectUsage.LOOKUP);
         JoinSpecification contactJoin = joins.stream()
@@ -46,7 +46,7 @@ public class QueryUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetAllOfTypeComplexRestriction() {
-        String json = "{\"logicalRestriction\":{\"operator\":\"AND\",\"restrictions\":[{\"logicalRestriction\":{\"operator\":\"OR\",\"restrictions\":[]}},{\"logicalRestriction\":{\"operator\":\"AND\",\"restrictions\":[{\"bucketRestriction\":{\"lhs\":{\"columnLookup\":{\"column_name\":\"TechIndicator_AdRoll\",\"object_type\":\"BucketedAccountMaster\"}},\"range\":{\"min\":\"Yes\",\"max\":\"Yes\",\"is_null_only\":false}}}]}}]}}";
+        String json = "{\"logicalRestriction\":{\"operator\":\"AND\",\"restrictions\":[{\"logicalRestriction\":{\"operator\":\"OR\",\"restrictions\":[]}},{\"logicalRestriction\":{\"operator\":\"AND\",\"restrictions\":[{\"bucketRestriction\":{\"lhs\":{\"columnLookup\":{\"column_name\":\"TechIndicator_AdRoll\",\"object_type\":\"AccountMaster\"}},\"range\":{\"min\":\"Yes\",\"max\":\"Yes\",\"is_null_only\":false}}}]}}]}}";
         Restriction restriction = JsonUtils.deserialize(json, Restriction.class);
         List<ColumnLookup> lookups = GraphUtils.getAllOfType(restriction, ColumnLookup.class);
         assertEquals(lookups.size(), 1);
@@ -56,7 +56,7 @@ public class QueryUnitTestNG {
         Query query = new Query();
         query.setObjectType(SchemaInterpretation.Account);
         query.addLookup(new ColumnLookup(SchemaInterpretation.Account, "foo"));
-        query.addLookup(new ColumnLookup(SchemaInterpretation.BucketedAccountMaster, "bar"));
+        query.addLookup(new ColumnLookup(SchemaInterpretation.AccountMaster, "bar"));
         query.setRestriction(new ExistsRestriction(SchemaInterpretation.Contact, false, null));
         return query;
     }

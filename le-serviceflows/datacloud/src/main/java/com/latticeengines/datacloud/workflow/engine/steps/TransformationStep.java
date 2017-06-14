@@ -58,14 +58,10 @@ public class TransformationStep extends BaseWorkflowStep<PrepareTransformationSt
                         .findProgressByRootOperationUid(transformationConfiguration.getRootOperationId());
 
                 log.info("Processing transformation progress: " + progress.getRootOperationUID());
-                if (progress != null) {
-                    progress.setStartDate(new Date());
-                    progress.setStatus(ProgressStatus.PROCESSING);
-                    progress = transformationProgressEntityMgr.updateProgress(progress);
-                }
+                progress.setStartDate(new Date());
+                progress.setStatus(ProgressStatus.PROCESSING);
+                progress = transformationProgressEntityMgr.updateProgress(progress);
                 transformationService.transform(progress, transformationConfiguration);
-                progress.setStatus(ProgressStatus.FINISHED);
-
             } else {
                 log.info("No new data available in firehose.");
             }
@@ -76,6 +72,7 @@ public class TransformationStep extends BaseWorkflowStep<PrepareTransformationSt
             throw new LedpException(LedpCode.LEDP_25013, e.getMessage(), e);
         } finally {
             if (progress != null) {
+                progress = transformationProgressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
                 progress.setEndDate(new Date());
                 transformationProgressEntityMgr.updateProgress(progress);
             }

@@ -80,11 +80,9 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         customerSpace = configuration.getCustomerSpace();
         List<Table> inputTables = getListObjectFromContext(CONSOLIDATE_INPUT_TABLES, Table.class);
         inputTables.sort(Comparator.comparing(
-                (Table t) -> {
-                    return t.getLastModifiedKey() == null ? -1
-                            : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1 : t.getLastModifiedKey()
-                                    .getLastModifiedTimestamp();
-                }).reversed());
+                (Table t) -> t.getLastModifiedKey() == null ? -1
+                        : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1 : t.getLastModifiedKey()
+                                .getLastModifiedTimestamp()).reversed());
         for (Table table : inputTables) {
             inputTableNames.add(table.getName());
         }
@@ -158,7 +156,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
                 steps.add(sorterStep);
             }
             request.setSteps(steps);
-
+            request.setContainerMemMB(workflowMemMb);
             return request;
 
         } catch (Exception e) {
@@ -253,7 +251,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         // step 4 output
         step5.setInputSteps(Arrays.asList(3));
         step5.setTransformer("sourceBucketer");
-        step5.setConfiguration("{}");
+        step5.setConfiguration(emptyStepConfig());
 
         return step5;
     }
@@ -281,7 +279,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
             config.setPartitions(100);
             config.setSortingField("LatticeAccountId");
             config.setCompressResult(false);
-            return JsonUtils.serialize(config);
+            return appendEngineConf(config, baseEngineConfig());
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -290,13 +288,13 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(idField);
-        return JsonUtils.serialize(config);
+        return appendEngineConf(config, baseEngineConfig());
     }
 
     private String getConsolidateDeltaConfig() {
         ConsolidateDeltaTransformerConfig config = new ConsolidateDeltaTransformerConfig();
         config.setSrcIdField(idField);
-        return JsonUtils.serialize(config);
+        return appendEngineConf(config, baseEngineConfig());
     }
 
     private String getMatchConfig() {

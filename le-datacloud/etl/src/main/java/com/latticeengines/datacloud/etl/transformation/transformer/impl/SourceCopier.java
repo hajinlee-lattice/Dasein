@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceCopier.TRANSFORMER_NAME;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,12 +15,13 @@ import com.latticeengines.datacloud.dataflow.transformation.Copy;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CopierParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(TRANSFORMER_NAME)
 public class SourceCopier extends AbstractDataflowTransformer<CopierConfig, CopierParameters> {
 
-    public static final String TRANSFORMER_NAME = TRANSFORMER_COPY;
+    public static final String TRANSFORMER_NAME = "sourceCopier";
 
     @Override
     public String getName() {
@@ -36,6 +36,16 @@ public class SourceCopier extends AbstractDataflowTransformer<CopierConfig, Copi
     @Override
     protected boolean validateConfig(CopierConfig config, List<String> sourceNames) {
         return true;
+    }
+
+    @Override
+    protected Class<? extends TransformerConfig> getConfigurationClass() {
+        return CopierConfig.class;
+    }
+
+    @Override
+    protected Class<CopierParameters> getDataFlowParametersClass() {
+        return CopierParameters.class;
     }
 
     @Override

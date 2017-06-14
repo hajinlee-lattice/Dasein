@@ -58,7 +58,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         METADATA_SEGMENT.addSegmentProperty(METADATA_SEGMENT_PROPERTY_1);
         METADATA_SEGMENT.addSegmentProperty(METADATA_SEGMENT_PROPERTY_2);
         METADATA_SEGMENT.setRestriction(new ConcreteRestriction(false, new ColumnLookup(
-                SchemaInterpretation.BucketedAccountMaster, "BUSINESS_NAME"), ComparisonType.EQUAL, null));
+                SchemaInterpretation.AccountMaster, "BUSINESS_NAME"), ComparisonType.EQUAL, null));
         METADATA_SEGMENT.setDataCollection(DATA_COLLECTION);
     }
 

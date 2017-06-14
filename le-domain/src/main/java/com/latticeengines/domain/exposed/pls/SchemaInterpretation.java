@@ -11,7 +11,7 @@ public enum SchemaInterpretation {
     TimeSeries, //
     Category, //
     Profile, //
-    BucketedAccountMaster;
+    AccountMaster;
 
     public void apply(SchemaInterpretationFunctionalInterface function) {
         InterfaceName name = null;
