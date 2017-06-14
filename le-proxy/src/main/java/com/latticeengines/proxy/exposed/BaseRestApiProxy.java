@@ -64,6 +64,7 @@ public abstract class BaseRestApiProxy {
                 ((AuthorizationHeaderHttpRequestInterceptor) interceptor).setAuthValue(authToken);
             }
         }
+        restTemplate.setInterceptors(interceptors);
     }
 
     protected void setErrorHandler(ResponseErrorHandler handler) {
