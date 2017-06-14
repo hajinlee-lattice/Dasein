@@ -1,28 +1,26 @@
-package com.latticeengines.domain.exposed.datacloud.manage;
+package com.latticeengines.domain.exposed.datacloud.orchestration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
 public class EngineProgress {
-    private Engine engine;
-    private String name;    // Ingestion name/Transformation pipeline name/Publication name
+    private DataCloudEngine engine;
+    private String engineName;    // Ingestion name/Transformation pipeline name/Publication name
     private String version;
     private ProgressStatus status;
     private Float progress;
     private String message;
 
-    public enum Engine {
-        INGESTION, TRANSFORMATION, PUBLICATION
-    }
-
     public EngineProgress() {
 
     }
 
-    public EngineProgress(Engine engine, String name, String version, ProgressStatus status, Float progress,
+    public EngineProgress(DataCloudEngine engine, String engineName, String version, ProgressStatus status,
+            Float progress,
             String message) {
         this.engine = engine;
-        this.name = name;
+        this.engineName = engineName;
         this.version = version;
         this.status = status;
         this.progress = progress;
@@ -30,23 +28,23 @@ public class EngineProgress {
     }
 
     @JsonProperty("Engine")
-    public Engine getEngine() {
+    public DataCloudEngine getEngine() {
         return engine;
     }
 
     @JsonProperty("Engine")
-    public void setEngine(Engine engine) {
+    public void setEngine(DataCloudEngine engine) {
         this.engine = engine;
     }
 
-    @JsonProperty("Name")
-    public String getName() {
-        return name;
+    @JsonProperty("EngineName")
+    public String getEngineName() {
+        return engineName;
     }
 
-    @JsonProperty("Name")
-    public void setName(String name) {
-        this.name = name;
+    @JsonProperty("EngineName")
+    public void setEngineName(String engineName) {
+        this.engineName = engineName;
     }
 
     @JsonProperty("Version")

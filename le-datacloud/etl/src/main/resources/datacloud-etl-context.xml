@@ -50,5 +50,9 @@
     <bean id="latticeIdStrategyDao" class="com.latticeengines.datacloud.etl.transformation.dao.impl.LatticeIdStrategyDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
+    
+    <bean id="orchestrationDao" class="com.latticeengines.datacloud.etl.orchestration.dao.impl.OrchestrationDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
 
 </beans>

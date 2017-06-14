@@ -29,11 +29,11 @@ import com.latticeengines.datacloud.etl.publication.service.PublicationProgressS
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressUpdater;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
-import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
-import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress.Engine;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
+import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -201,11 +201,11 @@ public class PublicationServiceImpl implements PublicationService {
         List<PublicationProgress> progressStatus = progressEntityMgr.findStatusByPublicationVersion(publication,
                 version);
         if (CollectionUtils.isEmpty(progressStatus)) {
-            return new EngineProgress(Engine.PUBLICATION, publication.getPublicationName(), version,
+            return new EngineProgress(DataCloudEngine.PUBLICATION, publication.getPublicationName(), version,
                     ProgressStatus.NOTSTARTED, 0.0f, null);
         } else {
             PublicationProgress progress = progressStatus.get(0);
-            return new EngineProgress(Engine.PUBLICATION, publication.getPublicationName(), version,
+            return new EngineProgress(DataCloudEngine.PUBLICATION, publication.getPublicationName(), version,
                     progress.getStatus(), progress.getProgress(), progress.getErrorMessage());
         }
     }

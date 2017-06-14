@@ -36,11 +36,11 @@ import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionServic
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
-import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
-import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress.Engine;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
+import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 
 @Component("ingestionVersionService")
 public class IngestionVersionServiceImpl implements IngestionVersionService {
@@ -277,7 +277,8 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
         fields.put("Version", version);
         List<IngestionProgress> progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         if (CollectionUtils.isEmpty(progresses)) {
-            return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.NOTSTARTED, null, null);
+            return new EngineProgress(DataCloudEngine.INGESTION, ingestionName, version, ProgressStatus.NOTSTARTED,
+                    null, null);
         }
         Set<String> allJobs = new HashSet<>();
         Set<String> finishedJobs = new HashSet<>();
@@ -297,12 +298,13 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
             }
         }
         if (allJobs.size() == finishedJobs.size()) {
-            return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.FINISHED, 1.0F, null);
+            return new EngineProgress(DataCloudEngine.INGESTION, ingestionName, version, ProgressStatus.FINISHED, 1.0F,
+                    null);
         } else if (allJobs.size() == finishedJobs.size() + runningJobs.size()) {
-            return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.PROCESSING,
+            return new EngineProgress(DataCloudEngine.INGESTION, ingestionName, version, ProgressStatus.PROCESSING,
                     (float) finishedJobs.size() / allJobs.size(), null);
         } else {
-            return new EngineProgress(Engine.INGESTION, ingestionName, version, ProgressStatus.FAILED,
+            return new EngineProgress(DataCloudEngine.INGESTION, ingestionName, version, ProgressStatus.FAILED,
                     (float) finishedJobs.size() / allJobs.size(), null);
         }
     }

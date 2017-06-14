@@ -28,9 +28,9 @@ import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionServic
 import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
-import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
+import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;

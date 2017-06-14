@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.etl.ingestion.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
-import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 
 public interface IngestionVersionService {
     List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion);

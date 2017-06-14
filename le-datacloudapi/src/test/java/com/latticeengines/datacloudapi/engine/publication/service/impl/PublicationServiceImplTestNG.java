@@ -22,10 +22,10 @@ import com.latticeengines.datacloud.etl.publication.service.PublicationProgressS
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
 import com.latticeengines.datacloudapi.engine.testframework.PropDataEngineFunctionalTestNGBase;
 import com.latticeengines.datacloudapi.engine.testframework.PublicationWorkflowServlet;
-import com.latticeengines.domain.exposed.datacloud.manage.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
+import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
