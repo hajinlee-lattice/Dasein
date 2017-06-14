@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +10,10 @@ import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
-import com.latticeengines.domain.exposed.metadata.JdbcStorage;
-import com.latticeengines.domain.exposed.metadata.JdbcStorage.DatabaseName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -24,9 +21,6 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftConfiguration> {
 
     private static final Log log = LogFactory.getLog(ExportDataToRedshift.class);
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Autowired
     private EaiProxy eaiProxy;
@@ -60,17 +54,4 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         return exportConfig;
     }
 
-    @Override
-    public void onExecutionCompleted() {
-        Table table = getObjectFromContext(TABLE_GOING_TO_REDSHIFT, Table.class);
-        if (table == null) {
-            table = configuration.getSourceTable();
-        }
-        JdbcStorage storage = new JdbcStorage();
-        storage.setDatabaseName(DatabaseName.REDSHIFT);
-        storage.setTableNameInStorage(table.getName());
-        table.setStorageMechanism(storage);
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), table.getName(), table);
-        putObjectInContext(EVENT_TABLE, table);
-    }
 }
