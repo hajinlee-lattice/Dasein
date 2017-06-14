@@ -66,7 +66,7 @@ def main():
 def template_cli(args):
     template(args.environment, args.stack, args.public, upload=args.upload)
 
-def template(environment, stack, public, ui=False, upload=False):
+def template(environment, stack, public, upload=False):
     if public:
         stack = create_public_template(environment)
     else:
@@ -96,7 +96,7 @@ def create_template(env, stack_tag):
         'scoringapi':  albs['public']
     }
     alarms = create_alarms(env, stack_tag, tg_map, alb_map)
-    stack.add_resource(alarms)
+    stack.add_resources(alarms)
 
     stack.add_ouputs(add_outputs(albs))
     return stack
