@@ -66,7 +66,9 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .dataCollectionType(dataCollectionType) //
                 .idField("LEAccountIDLong") //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder()
-                        .put(MatchKey.Domain, Arrays.asList(InterfaceName.Domain.name())) //
+                        .put(MatchKey.Domain, Arrays.asList("URL")) //
+                        .put(MatchKey.City, Arrays.asList(InterfaceName.City.name())) //
+                        .put(MatchKey.State, Arrays.asList("StateProvince")) //
                         .put(MatchKey.Country, Arrays.asList(InterfaceName.Country.name())) //
                         .put(MatchKey.Zipcode, Arrays.asList("Zip")) //
                         .build()) //
