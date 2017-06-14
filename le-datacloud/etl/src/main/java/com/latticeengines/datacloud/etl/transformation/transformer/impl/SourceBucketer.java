@@ -76,18 +76,6 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
         Source profileSource = step.getBaseSources()[parameters.profileSrcIdx];
         String profileVersion = step.getBaseVersions().get(parameters.profileSrcIdx);
 
-        List<GenericRecord> records;
-        if (profileSource instanceof TableSource) {
-            Table table = ((TableSource) profileSource).getTable();
-            records = new ArrayList<>();
-            for (Extract extract: table.getExtracts()) {
-                records.addAll(AvroUtils.getDataFromGlob(yarnConfiguration, extract.getPath()));
-            }
-        } else {
-            String avroDir = hdfsPathBuilder.constructSnapshotDir(profileSource.getSourceName(), profileVersion).toString();
-            records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
-        }
-
         if (!isProfileSource(profileSource, profileVersion)) {
             profileSource = step.getBaseSources()[0];
             profileVersion = step.getBaseVersions().get(0);
@@ -99,6 +87,18 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
             }
         } else {
             log.info("Resolved the second base source as profile.");
+        }
+
+        List<GenericRecord> records;
+        if (profileSource instanceof TableSource) {
+            Table table = ((TableSource) profileSource).getTable();
+            records = new ArrayList<>();
+            for (Extract extract: table.getExtracts()) {
+                records.addAll(AvroUtils.getDataFromGlob(yarnConfiguration, extract.getPath()));
+            }
+        } else {
+            String avroDir = hdfsPathBuilder.constructSnapshotDir(profileSource.getSourceName(), profileVersion).toString();
+            records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
         }
 
         parameters.encAttrs = BucketEncodeUtils.encodedAttrs(records);
