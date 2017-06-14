@@ -93,7 +93,7 @@ def create_template(env, stack_tag):
 
 def create_public_template(env):
     stack = Stack("AWS CloudFormation template for LPI public urls.")
-    stack.add_params([PARAM_HTTPS_SECURITY_GROUP, PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    stack.add_params([PARAM_HTTPS_SECURITY_GROUP, PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3, PARAM_LE_STACK])
 
     # target groups
     tgs, tg_map = create_public_target_groups(env)
