@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.metadata.dao.DataFeedDao;
+import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
@@ -39,6 +40,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Autowired
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
 
+    @Autowired
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
+
     @Override
     public BaseDao<DataFeed> getDao() {
         return datafeedDao;
@@ -48,8 +52,13 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(DataFeed datafeed) {
         datafeed.setTenant(MultiTenantContext.getTenant());
+        if (datafeed.getDataCollectionType() == null) {
+            throw new NullPointerException("data collection type cannot be null");
+        }
+        datafeed.setDataCollection(dataCollectionEntityMgr.getDataCollection(datafeed.getDataCollectionType()));
         super.create(datafeed);
         for (DataFeedTask task : datafeed.getTasks()) {
+            task.setDataFeed(datafeed);
             datafeedTaskEntityMgr.create(task);
         }
         DataFeedExecution execution = new DataFeedExecution();
@@ -57,6 +66,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         execution.setStatus(DataFeedExecution.Status.Active);
         datafeedExecutionEntityMgr.create(execution);
         datafeed.setActiveExecutionId(execution.getPid());
+        datafeed.setActiveExecution(execution);
         update(datafeed);
     }
 

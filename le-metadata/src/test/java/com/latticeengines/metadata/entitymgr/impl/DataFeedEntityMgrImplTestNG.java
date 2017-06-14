@@ -67,7 +67,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
         datafeed.setName(DATA_FEED_NAME);
         datafeed.setStatus(Status.Active);
-        datafeed.setDataCollection(dataCollection);
+        datafeed.setDataCollectionType(DataCollectionType.Segmentation);
         dataCollection.addDataFeed(datafeed);
 
         Table importTable = new Table();

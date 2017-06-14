@@ -12,8 +12,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.AfterClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -59,7 +59,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 
-    //private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 5;
+    // private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 5;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -82,10 +82,10 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
-        firstTenant = createTenant(CustomerSpace.parse(DL_TENANT_NAME).toString());//testBed.getMainTestTenant();
+        firstTenant = createTenant(CustomerSpace.parse(DL_TENANT_NAME).toString());// testBed.getMainTestTenant();
 
         log.info("Test environment setup finished.");
-        //createDataFeed();
+        createDataFeed();
     }
 
     @AfterClass
@@ -101,7 +101,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         testBed.createTenant(tenant);
         return tenant;
     }
-
 
     @Test(groups = { "deployment.cdl" }, enabled = true)
     public void importData() throws Exception {
@@ -195,17 +194,13 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     private void createDataFeed() {
         DataCollection dataCollection = new DataCollection();
         dataCollection.setName(DATA_COLLECTION_NAME);
-//        Table table = new Table();
-//        table.setName(SchemaInterpretation.Account.name());
-//        table.setInterpretation(SchemaInterpretation.Account.name());
-//        dataCollection.setTables(Collections.singletonList(table));
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollectionProxy.createOrUpdateDataCollection(firstTenant.getId(), dataCollection);
 
         DataFeed datafeed = new DataFeed();
         datafeed.setName(DATA_FEED_NAME);
         datafeed.setStatus(Status.Active);
-        datafeed.setDataCollection(dataCollection);
+        datafeed.setDataCollectionType(dataCollection.getType());
         dataCollection.addDataFeed(datafeed);
 
         DataFeedExecution execution = new DataFeedExecution();
