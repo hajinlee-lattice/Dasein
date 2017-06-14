@@ -59,7 +59,7 @@ public abstract class BaseRestApiProxy {
 
     void setMagicAuthHeader() {
         MagicAuthenticationHeaderHttpRequestInterceptor authHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
-        List<ClientHttpRequestInterceptor> interceptors = this.restTemplate.getInterceptors();
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
         restTemplate.setInterceptors(interceptors);
@@ -67,14 +67,14 @@ public abstract class BaseRestApiProxy {
 
     void setAuthHeader(String authToken) {
         AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(authToken);
-        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
         restTemplate.setInterceptors(interceptors);
     }
 
     protected void cleanupAuthHeader() {
-        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         restTemplate.setInterceptors(interceptors);
     }
