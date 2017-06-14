@@ -28,7 +28,6 @@ public class HttpClientUtils {
             SSL_BLIND_CONNECTION_MGR);
     private static final HttpComponentsClientHttpRequestFactory SSL_ENFORCED_HC_FACTORY = constructHttpRequestFactory(
             constructPoolingConnectionMgr(SSLConnectionSocketFactory.getSocketFactory()));
-    private static final List<ClientHttpRequestInterceptor> DEFAULT_INTERCEPTORS = defaultInterceptors();
 
     /**
      * gives a rest template using connection pool and IGNORE ssl name
@@ -36,7 +35,7 @@ public class HttpClientUtils {
      */
     public static RestTemplate newRestTemplate() {
         RestTemplate restTemplate = new RestTemplate(SSL_BLIND_HC_FACTORY);
-        restTemplate.setInterceptors(DEFAULT_INTERCEPTORS);
+        restTemplate.setInterceptors(defaultInterceptors());
         return restTemplate;
     }
 
@@ -46,12 +45,12 @@ public class HttpClientUtils {
      */
     public static RestTemplate newSSLEnforcedRestTemplate() {
         RestTemplate restTemplate = new RestTemplate(SSL_ENFORCED_HC_FACTORY);
-        restTemplate.setInterceptors(DEFAULT_INTERCEPTORS);
+        restTemplate.setInterceptors(defaultInterceptors());
         return restTemplate;
     }
 
     /**
-     * gives a blocking http client using connection pool and ignor ssl.
+     * gives a blocking http client using connection pool and ignore ssl.
      */
     static HttpClient newHttpClient() {
         return HttpClientBuilder.create() //
