@@ -71,14 +71,14 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     @Override
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, BucketEncodeParameters parameters,
             BucketEncodeConfig configuration) {
-        parameters.profileSrcIdx = 1;
-        Source profileSource = step.getBaseSources()[parameters.profileSrcIdx];
-        String profileVersion = step.getBaseVersions().get(parameters.profileSrcIdx);
+        parameters.srcIdx = 0;
+        Source profileSource = step.getBaseSources()[1];
+        String profileVersion = step.getBaseVersions().get(1);
 
         if (!isProfileSource(profileSource, profileVersion)) {
             profileSource = step.getBaseSources()[0];
             profileVersion = step.getBaseVersions().get(0);
-            parameters.profileSrcIdx = 0;
+            parameters.srcIdx = 1;
             if (!isProfileSource(profileSource, profileVersion)) {
                 throw new RuntimeException("Neither base source has the profile schema");
             } else {

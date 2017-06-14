@@ -146,4 +146,8 @@ public class BucketEncodeUtils {
         throw new IllegalArgumentException("This record cannot be parsed to a bucked attr: " + record);
     }
 
+    public static boolean isCEAttr(String fieldName) {
+        return fieldName.matches("CEAttr\\d+");
+    }
+
 }

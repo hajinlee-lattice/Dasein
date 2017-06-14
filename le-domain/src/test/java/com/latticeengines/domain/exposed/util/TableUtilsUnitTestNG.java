@@ -21,6 +21,31 @@ public class TableUtilsUnitTestNG {
         assertOrderingIsRight();
     }
 
+    @Test(groups = "unit")
+    public void testGetAvscPath() {
+        String avroDir = "/Pods/Default/Contracts/CalculateStatsTest/Tenants/CalculateStatsTest/Spaces/Production/Data/Tables/Profile_2017-06-14_17-33-16_UTC";
+        String expected = "/Pods/Default/Contracts/CalculateStatsTest/Tenants/CalculateStatsTest/Spaces/Production/Data/TableSchemas/Profile_2017-06-14_17-33-16_UTC/*.avsc";
+        Assert.assertEquals(TableUtils.getAvscGlob(avroDir), expected);
+
+        avroDir = "/Pods/Default/Contracts/CalculateStatsTest/Tenants/CalculateStatsTest/Spaces/Production/Data/Tables/Profile_2017-06-14_17-33-16_UTC/";
+        Assert.assertEquals(TableUtils.getAvscGlob(avroDir), expected);
+
+        avroDir = "/Pods/Default/Contracts/CalculateStatsTest/Tenants/CalculateStatsTest/Spaces/Production/Data/Tables/Profile_2017-06-14_17-33-16_UTC/*.avro";
+        Assert.assertEquals(TableUtils.getAvscGlob(avroDir), expected);
+
+        avroDir = "/Pods/Default/Contracts/CalculateStatsTest/Tenants/CalculateStatsTest/Spaces/Production/Data/Tables/Profile_2017-06-14_17-33-16_UTC/part-v003-o000-00000.avro";
+        Assert.assertEquals(TableUtils.getAvscGlob(avroDir), expected);
+
+        avroDir = "/some/other/path/part-00000.avro";
+        boolean encounteredError = false;
+        try {
+            TableUtils.getAvscGlob(avroDir);
+        } catch (IllegalArgumentException e) {
+            encounteredError = true;
+        }
+        Assert.assertTrue(encounteredError, "Should encounter IllegalArgumentException.");
+    }
+
     private void createSchema() {
         Table table = new Table();
         table.setName("table");

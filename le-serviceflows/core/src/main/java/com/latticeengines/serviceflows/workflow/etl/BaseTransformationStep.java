@@ -96,4 +96,11 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
         engineConf.setPartitions(cascadingPartitions);
         return engineConf;
     }
+
+    protected TransformationFlowParameters.EngineConfiguration localFlinkEngineConfig() {
+        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
+        engineConf.setEngine("FLINK");
+        engineConf.setPartitions(cascadingPartitions);
+        return engineConf;
+    }
 }

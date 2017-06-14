@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 
 
 public interface SourceService {
@@ -20,7 +20,7 @@ public interface SourceService {
      * hdfs source entity mgr has a method to materialize the table with more details,
      * using the generated avro
      */
-    TableSource createTableSource(String tableNamePrefix, String version, CustomerSpace customerSpace);
+    TableSource createTableSource(TargetTable targetTable, String version);
 
     Source findOrCreateSource(String sourceName);
 

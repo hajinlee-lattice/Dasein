@@ -14,7 +14,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.cdl.workflow.CalculateStatsWorkflow;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -36,7 +35,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     private final Log log = LogFactory.getLog(CalculateStatsWorkflowDeploymentTestNG.class);
 
     @Autowired
-    private CalculateStatsWorkflow calculateStatsWorkflow;
+    private ShortCalcStatsWorkflow calculateStatsWorkflow;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -84,12 +83,12 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
 
     @AfterClass(groups = "deployment")
     protected void cleanUpAfterWorkflow() throws Exception {
-        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
-        cleanCamille(DEMO_CUSTOMERSPACE);
-        cleanHdfs(DEMO_CUSTOMERSPACE);
+//        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
+//        cleanCamille(DEMO_CUSTOMERSPACE);
+//        cleanHdfs(DEMO_CUSTOMERSPACE);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testWorkflow() throws Exception {
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());
         CalculateStatsWorkflowConfiguration config = generateConfiguration();

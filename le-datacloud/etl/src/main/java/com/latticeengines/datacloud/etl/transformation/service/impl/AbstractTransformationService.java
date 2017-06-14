@@ -328,9 +328,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
             if (source instanceof TableSource) {
                 // register table with metadata proxy
-                TableSource tableSource = (TableSource) source;
-                tableSource = hdfsSourceEntityMgr.materializeTableSource(tableSource.getTable().getName(),
-                        tableSource.getCustomerSpace());
+                TableSource tableSource = hdfsSourceEntityMgr.materializeTableSource((TableSource) source);
                 metadataProxy.updateTable(tableSource.getCustomerSpace().toString(), tableSource.getTable().getName(),
                         tableSource.getTable());
             } else {

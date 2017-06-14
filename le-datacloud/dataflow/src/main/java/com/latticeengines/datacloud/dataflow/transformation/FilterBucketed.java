@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import static com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils.isCEAttr;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,10 +35,6 @@ public class FilterBucketed extends TypesafeDataFlowBuilder<FilterBucketedParame
         sourceFieldNames.removeIf(f -> !originalFields.contains(f) && !isCEAttr(f));
 
         return source.retain(new FieldList(sourceFieldNames));
-    }
-
-    private boolean isCEAttr(String fieldName) {
-        return fieldName.matches("CEAttr\\d+");
     }
 
 }

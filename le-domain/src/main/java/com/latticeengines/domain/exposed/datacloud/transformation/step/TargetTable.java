@@ -13,6 +13,15 @@ public class TargetTable {
     @JsonProperty("NamePrefix")
     private String namePrefix;
 
+    @JsonProperty("ExpandBucketedAttrs")
+    private Boolean expandBucketedAttrs;
+
+    @JsonProperty("PrimaryKey")
+    private String primaryKey;
+
+    @JsonProperty("LastModifiedKey")
+    private String lastModifiedKey;
+
     @JsonIgnore
     private CustomerSpace customerSpace;
 
@@ -22,6 +31,30 @@ public class TargetTable {
 
     public void setNamePrefix(String namePrefix) {
         this.namePrefix = namePrefix;
+    }
+
+    public Boolean getExpandBucketedAttrs() {
+        return expandBucketedAttrs;
+    }
+
+    public void setExpandBucketedAttrs(Boolean expandBucketedAttrs) {
+        this.expandBucketedAttrs = expandBucketedAttrs;
+    }
+
+    public String getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(String primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
+    public String getLastModifiedKey() {
+        return lastModifiedKey;
+    }
+
+    public void setLastModifiedKey(String lastModifiedKey) {
+        this.lastModifiedKey = lastModifiedKey;
     }
 
     @JsonIgnore

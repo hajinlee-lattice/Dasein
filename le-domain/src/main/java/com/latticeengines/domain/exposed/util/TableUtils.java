@@ -101,4 +101,20 @@ public class TableUtils {
         }
     }
 
+    public static String getAvscGlob(String avroPath) throws IllegalArgumentException {
+        String pattern = "/Pods/.*/Contracts/.*/Tenants/.*/Spaces/Production/Data/Tables/.*";
+        if (avroPath.matches(pattern)) {
+            String avscPath = avroPath.replace("/Tables/", "/TableSchemas/");
+            if (avscPath.endsWith(".avro")) {
+                avscPath = avscPath.substring(0, avscPath.lastIndexOf("/"));
+            }
+            if (!avscPath.endsWith("/")) {
+                avscPath += "/";
+            }
+            return avscPath + "*.avsc";
+        } else {
+            throw new IllegalArgumentException("The avro path does not match regex pattern " + pattern);
+        }
+    }
+
 }

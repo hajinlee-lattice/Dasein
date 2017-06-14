@@ -16,7 +16,7 @@ public class BucketEncodeParameters extends TransformationFlowParameters {
     @JsonProperty("rename_fields")
     public Map<String, String> renameFields;
 
-    @JsonProperty("profile_src_idx")
-    public int profileSrcIdx;
+    @JsonProperty("src_idx")
+    public int srcIdx = 0;
 
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -69,16 +71,23 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public TableSource createTableSource(String tableNamePrefix, String version, CustomerSpace customerSpace) {
+    public TableSource createTableSource(TargetTable targetTable, String version) {
+        String tablePrefix = targetTable.getNamePrefix();
+        CustomerSpace customerSpace = targetTable.getCustomerSpace();
+
         Table table = new Table();
-        String tableName = TableSource.getFullTableName(tableNamePrefix, version);
+        String tableName = TableSource.getFullTableName(tablePrefix, version);
         table.setName(tableName);
         table.setNamespace("");
         String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
         Extract extract = new Extract();
         extract.setPath(avroDir + "/*.avro");
         table.addExtract(extract);
-        return new TableSource(table, customerSpace);
+
+        TableSource source = new TableSource(table, customerSpace);
+        source.setExpandBucketedAttrs(Boolean.TRUE.equals(targetTable.getExpandBucketedAttrs()));
+
+        return source;
     }
 
     public Source findOrCreateSource(String sourceName) {

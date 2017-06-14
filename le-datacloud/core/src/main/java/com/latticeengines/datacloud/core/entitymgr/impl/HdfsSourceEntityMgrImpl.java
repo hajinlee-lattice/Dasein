@@ -279,6 +279,23 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
+    public TableSource materializeTableSource(TableSource tableSource) {
+        boolean expandBucketed = tableSource.isExpandBucketedAttrs();
+        String tableName = tableSource.getTable().getName();
+        CustomerSpace customerSpace = tableSource.getCustomerSpace();
+        Table table;
+        if (expandBucketed) {
+            String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName, customerSpace, "").toString();
+            table = MetadataConverter.getBucketedTableFromSchemaPath(yarnConfiguration, avscPath, tableSource.getPrimaryKey()[0], tableSource.getLastModifiedKey());
+        } else {
+            String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
+            table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getPrimaryKey()[0], tableSource.getLastModifiedKey());
+        }
+        table.setName(tableName);
+        return new TableSource(table, customerSpace);
+    }
+
+    @Override
     public List<String> getVersions(Source source) {
         String snapshot = hdfsPathBuilder.constructSnapshotRootDir(source).toString();
         List<String> versions = new ArrayList<>();

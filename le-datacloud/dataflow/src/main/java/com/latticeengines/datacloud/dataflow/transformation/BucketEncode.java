@@ -37,8 +37,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
 
     @Override
     public Node construct(BucketEncodeParameters parameters) {
-        int srcIdx = parameters.profileSrcIdx == 0 ? 1 : 0;
-        Node source = addSource(parameters.getBaseTables().get(srcIdx));
+        Node source = addSource(parameters.getBaseTables().get(parameters.srcIdx));
 
         // handle exclude and rename fields
         List<String> toDiscard = new ArrayList<>(source.getFieldNames());

@@ -55,10 +55,10 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
     private static final String STATS_TABLE_PREFIX = "Stats";
     private static final String SORTED_TABLE_PREFIX = "Sorted";
 
-    private static final int ENRICH_STEP = 0;
-    private static final int PROFILE_STEP = 1;
-    private static final int BUCKET_STEP = 2;
-    private static final int FILTER_STEP = 4;
+    private static int matchStep;
+    private static int profileStep;
+    private static int bucketStep;
+    private static int filterStep;
 
     @Autowired
     private TransformationProxy transformationProxy;
@@ -94,7 +94,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
         putStringValueInContext(TABLE_GOING_TO_REDSHIFT, sortedTableName);
 
-        setProfileTable(configuration.getCustomerSpace().toString(), profileTableName);
+        upsertProfileTable(customerSpace, profileTableName);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
@@ -106,21 +106,27 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
             request.setSubmitter(customerSpace.getTenantId());
             request.setKeepTemp(false);
             request.setEnableSlack(false);
+            matchStep = 0;
+            profileStep = 1;
+            bucketStep = 2;
+            filterStep = 4;
             // -----------
-            TransformationStepConfig enrich = match(customerSpace, masterTableName);
-            TransformationStepConfig profile = profile(customerSpace, PROFILE_TABLE_PREFIX);
+            TransformationStepConfig match = match(customerSpace, masterTableName);
+            TransformationStepConfig profile = profile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig calc = calcStats(customerSpace, STATS_TABLE_PREFIX);
             TransformationStepConfig filter = filter(originalAttrs);
             TransformationStepConfig sort = sort(customerSpace);
+            TransformationStepConfig sortProfile = sortProfile(customerSpace, PROFILE_TABLE_PREFIX);
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
-                    enrich, //
+                    match, //
                     profile, //
                     bucket, //
                     calc, //
                     filter, //
-                    sort //
+                    sort, //
+                    sortProfile //
             );
             // -----------
             request.setSteps(steps);
@@ -157,17 +163,10 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         return step;
     }
 
-    private TransformationStepConfig profile(CustomerSpace customerSpace, String profileTablePrefix) {
+    private TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(ENRICH_STEP);
-        step.setInputSteps(inputSteps);
+        step.setInputSteps(Collections.singletonList(matchStep));
         step.setTransformer(TRANSFORMER_PROFILER);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(profileTablePrefix);
-        step.setTargetTable(targetTable);
-
         ProfileConfig conf = new ProfileConfig();
         String confStr = appendEngineConf(conf, baseEngineConfig());
         step.setConfiguration(confStr);
@@ -176,8 +175,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
 
     private TransformationStepConfig bucket() {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Arrays.asList(ENRICH_STEP, PROFILE_STEP);
-        step.setInputSteps(inputSteps);
+        step.setInputSteps(Arrays.asList(matchStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
         step.setConfiguration(emptyStepConfig());
         return step;
@@ -185,23 +183,21 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
 
     private TransformationStepConfig calcStats(CustomerSpace customerSpace, String statsTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
-
-        List<Integer> inputSteps = Arrays.asList(BUCKET_STEP, PROFILE_STEP);
-        step.setInputSteps(inputSteps);
+        step.setInputSteps(Arrays.asList(bucketStep, profileStep));
         step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
-        step.setConfiguration(emptyStepConfig());
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(statsTablePrefix);
         step.setTargetTable(targetTable);
 
+        step.setConfiguration(emptyStepConfig());
         return step;
     }
 
     private TransformationStepConfig filter(List<String> originalAttrs) {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(BUCKET_STEP));
+        step.setInputSteps(Collections.singletonList(bucketStep));
         step.setTransformer(TRANSFORMER_BUCKETED_FILTER);
         BucketedFilterConfig conf = new BucketedFilterConfig();
         conf.setOriginalAttrs(originalAttrs);
@@ -212,7 +208,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
 
     private TransformationStepConfig sort(CustomerSpace customerSpace) {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(FILTER_STEP);
+        List<Integer> inputSteps = Collections.singletonList(filterStep);
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_SORTER);
 
@@ -231,13 +227,34 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         return step;
     }
 
+    private TransformationStepConfig sortProfile(CustomerSpace customerSpace, String profileTablePrefix) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = Collections.singletonList(profileStep);
+        step.setInputSteps(inputSteps);
+        step.setTransformer(TRANSFORMER_SORTER);
+
+        SorterConfig conf = new SorterConfig();
+        conf.setPartitions(1);
+        conf.setCompressResult(true);
+        conf.setSortingField(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
+        String confStr = appendEngineConf(conf, localFlinkEngineConfig());
+        step.setConfiguration(confStr);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(profileTablePrefix);
+        step.setTargetTable(targetTable);
+
+        return step;
+    }
+
     private Map<MatchKey, List<String>> getKeyMap() {
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(DataCloudConstants.LATTICE_ACCOUNT_ID));
         return keyMap;
     }
 
-    private void setProfileTable(String customerSpace, String profileTableName) {
+    private void upsertProfileTable(String customerSpace, String profileTableName) {
         Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
         if (profileTable == null) {
             throw new RuntimeException("Failed to find profile table in customer " + customerSpace);

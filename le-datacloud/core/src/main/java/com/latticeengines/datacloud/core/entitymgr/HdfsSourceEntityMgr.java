@@ -38,6 +38,7 @@ public interface HdfsSourceEntityMgr {
      * Source service has another method to create a shell table before avro generation
      */
     TableSource materializeTableSource(String tableName, CustomerSpace customerSpace);
+    TableSource materializeTableSource(TableSource tableSource);
 
     Table getCollectedTableSince(IngestedRawSource source, Date earliest);
 

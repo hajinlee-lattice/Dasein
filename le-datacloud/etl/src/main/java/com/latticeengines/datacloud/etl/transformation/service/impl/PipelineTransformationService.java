@@ -313,8 +313,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             String targetName = config.getTargetSource();
             TargetTable targetTable = config.getTargetTable();
             if (targetTable != null) {
-                target = sourceService.createTableSource(targetTable.getNamePrefix(), targetVersion,
-                        targetTable.getCustomerSpace());
+                target = sourceService.createTableSource(targetTable, pipelineVersion);
             } else if (targetName == null) {
                 targetName = getTempSourceName(transConf.getName(), pipelineVersion, stepIdx);
                 target = sourceService.createSource(targetName);

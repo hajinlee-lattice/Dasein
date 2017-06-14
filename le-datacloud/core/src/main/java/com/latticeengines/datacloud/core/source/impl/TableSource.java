@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -15,6 +17,9 @@ public class TableSource implements Source {
     private static final CustomerSpace DEFAULT_TENANT = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
 
     private Table table;
+    private String primaryKey;
+    private String lastModifiedKey;
+    private boolean expandBucketedAttrs = false;
 
     private final CustomerSpace customerSpace;
 
@@ -35,25 +40,51 @@ public class TableSource implements Source {
         this.table = table;
     }
 
+    public boolean isExpandBucketedAttrs() {
+        return expandBucketedAttrs;
+    }
+
+    public void setExpandBucketedAttrs(boolean expandBucketedAttrs) {
+        this.expandBucketedAttrs = expandBucketedAttrs;
+    }
+
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
 
+    public void setPrimaryKey(String primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
+    public String getLastModifiedKey() {
+        return lastModifiedKey;
+    }
+
+    public void setLastModifiedKey(String lastModifiedKey) {
+        this.lastModifiedKey = lastModifiedKey;
+    }
+
     /*
-     * name of the source
-     */
+         * name of the source
+         */
     public String getSourceName() {
-        return table.getName();
+        return getSourceName(customerSpace, table.getName());
+    }
+
+    public static String getSourceName(CustomerSpace customerSpace, String tableName) {
+        return customerSpace.toString() + "-" + tableName;
     }
 
     /*
      * timestamp field for sorting
      */
     public String getTimestampField() {
-        if (table.getLastModifiedKey() == null) {
-            return null;
-        } else {
+        if (StringUtils.isNotBlank(lastModifiedKey)) {
+            return lastModifiedKey;
+        } else if (table.getLastModifiedKey() != null) {
             return table.getLastModifiedKey().getAttributesAsStr();
+        } else {
+            return null;
         }
     }
 
@@ -61,10 +92,12 @@ public class TableSource implements Source {
      * primary key
      */
     public String[] getPrimaryKey() {
-        if (table.getPrimaryKey() == null) {
-            return null;
-        } else {
+        if (StringUtils.isNotBlank(primaryKey)) {
+            return new String[]{primaryKey};
+        } else if (table.getPrimaryKey() != null) {
             return table.getPrimaryKey().getAttributeNames();
+        } else {
+            return null;
         }
     }
 
