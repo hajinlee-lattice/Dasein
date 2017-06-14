@@ -33,6 +33,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
+import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
@@ -43,7 +44,7 @@ import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine
 import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 
 @Component("ingestionVersionService")
-public class IngestionVersionServiceImpl implements IngestionVersionService {
+public class IngestionVersionServiceImpl implements IngestionVersionService, DataCloudEngineService {
     private static Log log = LogFactory.getLog(IngestionVersionServiceImpl.class);
 
     @Autowired
@@ -63,6 +64,11 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
 
     @Autowired
     private SourceService sourceService;
+
+    @Override
+    public DataCloudEngine getEngine() {
+        return DataCloudEngine.INGESTION;
+    }
 
     @Override
     public List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion) {
@@ -211,14 +217,23 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
 
     @Override
     public void updateCurrentVersion(Ingestion ingestion, String version) {
-        String currentVersion = getCurrentVersion(ingestion);
+        String currentVersion = findCurrentVersion(ingestion);
         if (currentVersion == null || currentVersion.compareTo(version) < 0) {
             setCurrentVersion(ingestion, version);
         }
     }
 
     @Override
-    public String getCurrentVersion(Ingestion ingestion) {
+    public String findCurrentVersion(String ingestionName) {
+        Ingestion ingestion = ingestionEntityMgr.getIngestionByName(ingestionName);
+        if (ingestion == null) {
+            throw new IllegalArgumentException(String.format("Fail to find ingestion %s", ingestionName));
+        }
+        return findCurrentVersion(ingestion);
+    }
+
+    @Override
+    public String findCurrentVersion(Ingestion ingestion) {
         switch (ingestion.getIngestionType()) {
         case SQL_TO_SOURCE:
             SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
@@ -308,4 +323,5 @@ public class IngestionVersionServiceImpl implements IngestionVersionService {
                     (float) finishedJobs.size() / allJobs.size(), null);
         }
     }
+
 }

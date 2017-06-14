@@ -30,9 +30,9 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
 
 @Component
@@ -167,7 +167,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
             if (size != null) {
                 Assert.assertEquals(progress.getSize().intValue(), size.intValue());
             }
-            String currentVersion = ingestionVersionService.getCurrentVersion(ingestion);
+            String currentVersion = ingestionVersionService.findCurrentVersion(ingestion);
             Assert.assertEquals(currentVersion, version);
         }
     }

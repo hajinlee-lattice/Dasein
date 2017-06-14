@@ -250,6 +250,4 @@ public class IngestionServiceImpl implements IngestionService {
                 .providerConfiguration(providerConfiguration) //
                 .submit();
     }
-
-
 }

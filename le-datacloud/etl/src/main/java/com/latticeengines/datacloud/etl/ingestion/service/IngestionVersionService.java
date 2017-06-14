@@ -21,7 +21,7 @@ public interface IngestionVersionService {
 
     boolean isCompleteVersion(Ingestion ingestion, String version);
 
-    String getCurrentVersion(Ingestion ingestion);
+    String findCurrentVersion(Ingestion ingestion);
 
     EngineProgress status(String ingestionName, String version);
 }
