@@ -17,6 +17,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.FeatureMostRecent;
 import com.latticeengines.datacloud.core.source.impl.FeaturePivoted;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.dataflow.transformation.FeaturePivotFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -25,7 +26,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class FeaturePivotServiceImplTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private final static String TRANSFORMER_NAME = "featurePivotFlowTransformer";
 
     @Autowired
     FeaturePivoted source;
@@ -41,6 +41,9 @@ public class FeaturePivotServiceImplTestNG
 
     @Autowired
     private PipelineTransformationService pipelineTransformationService;
+
+    @Autowired
+    private FeaturePivotFlow featurePivotFlow;
 
     ObjectMapper om = new ObjectMapper();
 
@@ -82,7 +85,7 @@ public class FeaturePivotServiceImplTestNG
             baseSourceStep1.add(baseSource.getSourceName());
             step1.setBaseSources(baseSourceStep1);
             step1.setTargetSource(source.getSourceName());
-            step1.setTransformer(TRANSFORMER_NAME);
+            step1.setTransformer(featurePivotFlow.getTransformerName());
             String confParamStr1 = getFeatureMostRecentConfig();
             step1.setConfiguration(confParamStr1);
             // -----------
@@ -118,12 +121,12 @@ public class FeaturePivotServiceImplTestNG
                 { "laxfinancialconsulting.com", 119379, 119379, 29, 40, 1691 } };
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            Object url = record.get("URL");
-            Object averageDocumentSizeFetched = record.get("Average_Document_Size_Fetched");
-            Object averageDocumentSizeProcessed = record.get("Average_Document_Size_Processed");
-            Object executionFull = record.get("Execution_Full");
-            Object termStore = record.get("Term_Store");
-            Object currencyUsDollar = record.get("Currency_US_Dollar");
+            String url = record.get("URL").toString();
+            Integer averageDocumentSizeFetched = (Integer) (record.get("Average_Document_Size_Fetched"));
+            Integer averageDocumentSizeProcessed = (Integer) (record.get("Average_Document_Size_Processed"));
+            Integer executionFull = (Integer) (record.get("Execution_Full"));
+            Integer termStore = (Integer) (record.get("Term_Store"));
+            Integer currencyUsDollar = (Integer) (record.get("Currency_US_Dollar"));
             int index = 0;
             for (int i = 0; i < expectedData.length; i++) {
                 if ((url.toString()).equals(expectedData[i][0])) {
@@ -131,12 +134,12 @@ public class FeaturePivotServiceImplTestNG
                     break;
                 }
             }
-            Assert.assertEquals(url.toString(), expectedData[index][0]);
-            Assert.assertEquals(Integer.parseInt(averageDocumentSizeFetched.toString()), expectedData[index][1]);
-            Assert.assertEquals(Integer.parseInt(averageDocumentSizeProcessed.toString()), expectedData[index][2]);
-            Assert.assertEquals(Integer.parseInt(executionFull.toString()), expectedData[index][3]);
-            Assert.assertEquals(Integer.parseInt(termStore.toString()), expectedData[index][4]);
-            Assert.assertEquals(Integer.parseInt(currencyUsDollar.toString()), expectedData[index][5]);
+            Assert.assertEquals(url, expectedData[index][0]);
+            Assert.assertEquals(averageDocumentSizeFetched, expectedData[index][1]);
+            Assert.assertEquals(averageDocumentSizeProcessed, expectedData[index][2]);
+            Assert.assertEquals(executionFull, expectedData[index][3]);
+            Assert.assertEquals(termStore, expectedData[index][4]);
+            Assert.assertEquals(currencyUsDollar, expectedData[index][5]);
             rowCount++;
         }
         Assert.assertEquals(rowCount, 3);

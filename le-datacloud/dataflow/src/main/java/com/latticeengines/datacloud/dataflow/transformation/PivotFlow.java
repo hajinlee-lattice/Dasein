@@ -35,13 +35,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-@Component("pivotFlowTransform")
+@Component(PivotFlow.DATAFLOW_BEAN_NAME)
 public class PivotFlow extends ConfigurableFlowBase<PivotConfig> {
 
     protected static ObjectMapper objectMapper = new ObjectMapper();
     private String rowIdField = "RowId" + UUID.randomUUID().toString().replace("-", "");
     private static final String ESCAPED_COMMA = "{{COMMA}}";
-    private final static String DATAFLOW_BEAN_NAME = "pivotFlowTransform";
+    public final static String DATAFLOW_BEAN_NAME = "pivotFlowTransform";
     private final static String TRANSFORMER_NAME = "pivotFlowTransformer";
 
     @Override

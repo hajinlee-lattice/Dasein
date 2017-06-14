@@ -3,8 +3,6 @@ package com.latticeengines.datacloudapi.engine.publication.service.impl;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -25,8 +23,8 @@ import com.latticeengines.datacloudapi.engine.testframework.PublicationWorkflowS
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
@@ -42,7 +40,6 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
     public static final String PUBLICATION_NAME = "TestPublication2";
     public static final String CURRENT_VERSION = "version2";
     public final String SUBMITTER = this.getClass().getSimpleName();
-    private static final Log log = LogFactory.getLog(PublicationServiceImplTestNG.class);
 
     @Autowired
     private PublicationProgressService publicationProgressService;

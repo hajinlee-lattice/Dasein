@@ -8,10 +8,10 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PivotConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("featurePivotFlowTransform")
+@Component(FeaturePivotFlow.DATAFLOW_BEAN_NAME)
 public class FeaturePivotFlow extends PivotFlow {
-    private final static String DATAFLOW_BEAN_NAME = "featurePivotFlowTransform";
-    private final static String TRANSFORMER_NAME = "featurePivotFlowTransformer";
+    public final static String DATAFLOW_BEAN_NAME = "featurePivotFlowTransform";
+    public final static String TRANSFORMER_NAME = "featurePivotFlowTransformer";
 
     @Override
     public String getDataFlowBeanName() {
