@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
@@ -27,6 +29,11 @@ public class CalculateStatsWorkflowConfiguration extends WorkflowConfiguration {
         public Builder dataCollectionType(DataCollectionType dataCollectionType) {
             calculateStatsConfiguration.setDataCollectionType(dataCollectionType);
             updateStatsObjectsConfiguration.setDataCollectionType(dataCollectionType);
+            return this;
+        }
+
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
             return this;
         }
 

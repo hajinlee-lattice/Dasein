@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.metadata.service.DataFeedService;
 import com.latticeengines.network.exposed.metadata.DataFeedInterface;
@@ -39,6 +40,15 @@ public class DataFeedResource implements DataFeedInterface {
     @Override
     public DataFeed findDataFeedByName(@PathVariable String customerSpace, @PathVariable String datafeedName) {
         return datafeedService.findDataFeedByName(customerSpace, datafeedName);
+    }
+
+    @RequestMapping(value = "/{datafeedName}/status/{status}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "update data feed status by name")
+    @Override
+    public void updateDataFeedStatus(@PathVariable String customerSpace, @PathVariable String datafeedName,
+            @PathVariable Status status) {
+        datafeedService.updateDataFeed(customerSpace, datafeedName, status);
     }
 
     @RequestMapping(value = "/{datafeedName}/finishexecution", method = RequestMethod.POST, headers = "Accept=application/json")

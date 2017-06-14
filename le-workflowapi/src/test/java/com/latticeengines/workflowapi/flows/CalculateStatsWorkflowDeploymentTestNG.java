@@ -55,7 +55,8 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         setupHdfs(DEMO_CUSTOMERSPACE);
 
         String hdfsPath = "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString();
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("com/latticeengines/workflowapi/flows/cdl/master.avro");
+        InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("com/latticeengines/workflowapi/flows/cdl/master.avro");
         if (is == null) {
             throw new RuntimeException("Failed to load resource cdl.avro.");
         }
@@ -82,12 +83,12 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
 
     @AfterClass(groups = "deployment")
     protected void cleanUpAfterWorkflow() throws Exception {
-//        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
-//        cleanCamille(DEMO_CUSTOMERSPACE);
-//        cleanHdfs(DEMO_CUSTOMERSPACE);
+        // deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
+        // cleanCamille(DEMO_CUSTOMERSPACE);
+        // cleanHdfs(DEMO_CUSTOMERSPACE);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());
         CalculateStatsWorkflowConfiguration config = generateConfiguration();

@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.Sor
 import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateAndPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -33,9 +32,6 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = Logger.getLogger(ConsolidateAndPublishWorkflowSubmitter.class);
-
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -57,7 +53,6 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         WorkflowConfiguration configuration = generateConfiguration(dataCollectionType, datafeedName);
         ApplicationId applicationId = workflowJobService.submit(configuration);
         return applicationId;
-
     }
 
     private WorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType, String datafeedName) {

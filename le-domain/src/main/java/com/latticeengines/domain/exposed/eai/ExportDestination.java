@@ -8,7 +8,6 @@ public enum ExportDestination {
     SALESFORCE, //
     S3, //
     DYNAMO, //
-    Snowflake, //
     RedShift
 
 }

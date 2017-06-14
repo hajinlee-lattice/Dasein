@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
@@ -37,6 +38,17 @@ public class DataFeedServiceImpl implements DataFeedService {
     public DataFeed createDataFeed(String customerSpace, DataFeed datafeed) {
         datafeedEntityMgr.create(datafeed);
         return datafeed;
+    }
+
+    @Override
+    public void updateDataFeed(String customerSpace, String datafeedName, Status status) {
+        DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
+        if (datafeed == null) {
+            throw new NullPointerException("Datafeed is null. Cannot update status.");
+        } else {
+            datafeed.setStatus(status);
+            datafeedEntityMgr.update(datafeed);
+        }
     }
 
     @Override

@@ -30,4 +30,5 @@ public class CalculateStatsStepConfiguration extends BaseStepConfiguration {
     public void setDataCollectionType(DataCollectionType dataCollectionType) {
         this.dataCollectionType = dataCollectionType;
     }
+
 }

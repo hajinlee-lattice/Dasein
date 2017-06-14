@@ -1,6 +1,7 @@
 package com.latticeengines.network.exposed.metadata;
 
 import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 
 public interface DataFeedInterface {
@@ -16,4 +17,6 @@ public interface DataFeedInterface {
     DataFeedExecution failExecution(String customerSpace, String datafeedName);
 
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
+
+    void updateDataFeedStatus(String customerSpace, String datafeedName, Status status);
 }

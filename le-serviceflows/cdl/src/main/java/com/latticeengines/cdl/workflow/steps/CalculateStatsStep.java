@@ -74,6 +74,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         log.info("Inside CalculateStats execute()");
         String customerSpace = configuration.getCustomerSpace().toString();
         DataCollectionType dataCollectionType = configuration.getDataCollectionType();
+
         DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace, dataCollectionType);
         Table masterTable = CDLWorkflowStepUtils.getMasterTable(dataCollection);
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),

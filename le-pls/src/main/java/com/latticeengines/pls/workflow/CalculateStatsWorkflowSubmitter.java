@@ -5,13 +5,17 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CalculateStatsWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -27,29 +31,49 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
-    public ApplicationId submit(DataCollectionType dataCollectionType) {
+    public ApplicationId submit(DataCollectionType dataCollectionType, String datafeedName) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
         log.info(String.format("Submitting calculate stats workflow for data collection %s for customer %s",
                 dataCollectionType, customerSpace));
-        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace.toString(), dataCollectionType);
-        if (dataCollection == null) {
-            throw new LedpException(LedpCode.LEDP_37013, new String[] { dataCollectionType.name() });
-        }
-        if (dataCollection.getTable(SchemaInterpretation.Account.name()) == null) {
-            throw new LedpException(LedpCode.LEDP_37003, new String[] { SchemaInterpretation.Account.name() });
+
+        DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
+                datafeedName);
+        Status datafeedStatus = datafeed.getStatus();
+        log.info(String.format("data feed %s status: %s", datafeedName, datafeedStatus));
+
+        if (datafeedStatus == Status.Active || datafeedStatus == Status.InitialConsolidated) {
+            metadataProxy.updateDataFeedStatus(customerSpace.toString(), datafeedName, Status.Finalizing);
+            DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace.toString(),
+                    dataCollectionType);
+            if (dataCollection == null) {
+                throw new LedpException(LedpCode.LEDP_37013, new String[] { dataCollectionType.name() });
+            }
+            if (dataCollection.getTable(SchemaInterpretation.Account.name()) == null) {
+                throw new LedpException(LedpCode.LEDP_37003, new String[] { SchemaInterpretation.Account.name() });
+            }
+
+            CalculateStatsWorkflowConfiguration configuration = generateConfiguration(dataCollectionType, datafeedName,
+                    datafeedStatus);
+            return workflowJobService.submit(configuration);
+        } else {
+            throw new RuntimeException(
+                    "The status of dataFeed does not meet Finalize Step requirement. We cannot launch Finalize step yet.");
         }
 
-        CalculateStatsWorkflowConfiguration configuration = generateConfiguration(dataCollectionType);
-        return workflowJobService.submit(configuration);
     }
 
-    public CalculateStatsWorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType) {
+    public CalculateStatsWorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType,
+            String datafeedName, Status status) {
         return new CalculateStatsWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .dataCollectionType(dataCollectionType) //
+                .inputProperties(ImmutableMap.<String, String> builder()
+                        .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
+                        .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
+                        .build()) //
                 .build();
     }
 
