@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedImport;
 import com.latticeengines.metadata.dao.DataFeedExecutionDao;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedImportEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("datafeedExecutionEntityMgr")
@@ -23,9 +24,21 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     @Autowired
     private DataFeedExecutionDao datafeedExecutionDao;
 
+    @Autowired
+    private DataFeedImportEntityMgr datafeedImportEntityMgr;
+
     @Override
     public BaseDao<DataFeedExecution> getDao() {
         return datafeedExecutionDao;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void create(DataFeedExecution execution) {
+        super.create(execution);
+        for (DataFeedImport datafeedImport : execution.getImports()) {
+            datafeedImportEntityMgr.create(datafeedImport);
+        }
     }
 
     @Override
