@@ -81,7 +81,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
 
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
-        // publicationEntityMgr.removePublication(PUBLICATION_NAME);
+        publicationEntityMgr.removePublication(PUBLICATION_NAME);
         httpServer.stop();
     }
 
@@ -113,8 +113,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");
         // test status of latest publication progress with required version
         EngineProgress status = publicationService.status(PUBLICATION_NAME, CURRENT_VERSION);
-        log.info("Printing status : " + status.getStatus());
-        Assert.assertTrue(status.getStatus() == ProgressStatus.FAILED);
+        Assert.assertTrue(status.getStatus() == ProgressStatus.NEW);
     }
 
     @Test(groups = "functional", priority = 1)

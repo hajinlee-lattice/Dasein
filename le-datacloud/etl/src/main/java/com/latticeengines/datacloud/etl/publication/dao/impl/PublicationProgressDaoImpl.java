@@ -34,7 +34,7 @@ public class PublicationProgressDaoImpl extends BaseDaoWithAssignedSessionFactor
     public List<PublicationProgress> getStatusForLatestVersion(Publication publication, String version) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format(
-                "from %s p where p.publication.pid = :pid and sourceVersion = :sourceVersion order by createTime desc limit 1",
+                "from %s p where p.publication.pid = :pid and sourceVersion = :sourceVersion order by pid desc limit 1",
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("pid", publication.getPid());
