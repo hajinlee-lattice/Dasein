@@ -66,7 +66,6 @@ public class DataFeedResourceTestNG extends MetadataFunctionalTestNGBase {
         datafeed.setStatus(Status.Initing);
         datafeed.setName(DATAFEED_NAME);
         datafeed.setTenant(new Tenant(customerSpace1));
-        datafeed.setActiveExecutionId(1L);
         DataFeedExecution datafeedExecution = new DataFeedExecution();
         datafeed.setActiveExecution(datafeedExecution);
         return datafeed;
