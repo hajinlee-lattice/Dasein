@@ -25,6 +25,9 @@ public class CalculateStatsWorkflow extends AbstractWorkflow<CalculateStatsWorkf
     @Autowired
     private CalculateStatsListener calculateStatsListener;
 
+    @Autowired
+    private RedshiftPublishWorkflow redshiftPublishWorkflow;
+
     @Bean
     public Job calculateStatsWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -35,6 +38,7 @@ public class CalculateStatsWorkflow extends AbstractWorkflow<CalculateStatsWorkf
         return new WorkflowBuilder() //
                 .next(calculateStatsStep)//
                 .next(updateStatsObjects) //
+                .next(redshiftPublishWorkflow) //
                 .listener(calculateStatsListener) //
                 .build();
     }
