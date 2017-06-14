@@ -7,6 +7,7 @@ import boto3
 import os
 
 from .consul import write_to_stack
+from .module.cw import CloudWatchAlarm
 from .module.elb2 import TargetGroup, ApplicationLoadBalancer, Listener, ListenerRule
 from .module.parameter import *
 from .module.stack import Stack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
@@ -82,11 +83,20 @@ def create_template(env, stack_tag):
     stack.add_params([PARAM_HTTPS_SECURITY_GROUP, PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3, PARAM_LE_STACK])
 
     # target groups
-    tgs, tg_map = create_taget_groups(env, stack_tag)
+    tgs, tg_map = create_target_groups(env, stack_tag)
     stack.add_resources(tgs)
 
+    # load balancers
     resources, albs = create_load_balancers(tg_map, stack_tag)
     stack.add_resources(resources)
+
+    # alarms
+    alb_map = {
+        'matchapi':  albs['private'],
+        'scoringapi':  albs['public']
+    }
+    alarms = create_alarms(env, stack_tag, tg_map, alb_map)
+    stack.add_resource(alarms)
 
     stack.add_ouputs(add_outputs(albs))
     return stack
@@ -104,7 +114,6 @@ def create_public_template(env):
 
     stack.add_ouputs(add_outputs(albs))
     return stack
-
 
 def create_public_target_groups(environment):
     tgs = []
@@ -228,7 +237,7 @@ def create_public_load_balancers(env, tg_map):
 
     return resources, albs
 
-def create_taget_groups(env, stack):
+def create_target_groups(env, stack):
     tgs = []
     tg_map = {}
     for app, health in TOMCAT_APP_HEALTH_MAP.items():
@@ -341,6 +350,52 @@ def create_listener_rule(listener, tg, path):
     lr.depends_on(listener)
     lr.depends_on(tg)
     return lr
+
+def create_alarms(env, stack_tag, tg_map, alb_map):
+    alarms = []
+    for app in ['scoringapi', 'matchapi']:
+        tg = tg_map[app]
+        alarms += create_latency_alarms(env, stack_tag, app, alb_map[app], tg)
+    return alarms
+
+def create_latency_alarms(env, stack_tag, app, alb, tg):
+    alarms = []
+
+    if app == 'matchapi':
+        eval_periods = [ 5, 30, 45 ]
+    elif app == 'scoringapi':
+        eval_periods = [ 2, 20, 35 ]
+    else:
+        raise Exception('Unknown application for CW alarms: ' + app)
+
+    alarm_1 = CloudWatchAlarm(app + "HighLatency", "%s-lpi-%s-high-latency" % (app, stack_tag), "AWS/ApplicationELB", "TargetResponseTime")
+    alarm_1.evaluate("GreaterThanOrEqualToThreshold", "1", eval_periods=eval_periods[0])
+    alarm_1.add_targetgroup(alb, tg)
+    alarm_1.add_tag("le-product", "lpi")
+    alarm_1.add_tag("le-service", app)
+    alarm_1.add_tag("le-stack", stack_tag)
+    alarm_1.add_tag("le-env", env.replace("cluster", ""))
+    alarms.append(alarm_1)
+
+    alarm_2 = CloudWatchAlarm(app + "LowLatency", "%s-lpi-%s-low-latency" % (app, stack_tag), "AWS/ApplicationELB", "TargetResponseTime")
+    alarm_2.evaluate("LessThanThreshold", "0.5", eval_periods=eval_periods[1])
+    alarm_2.add_targetgroup(alb, tg)
+    alarm_2.add_tag("le-product", "lpi")
+    alarm_2.add_tag("le-service", app)
+    alarm_2.add_tag("le-stack", stack_tag)
+    alarm_2.add_tag("le-env", env.replace("cluster", ""))
+    alarms.append(alarm_2)
+
+    alarm_3 = CloudWatchAlarm(app + "LowLatency", "%s-lpi-%s-low-latency-2" % (app, stack_tag), "AWS/ApplicationELB", "TargetResponseTime")
+    alarm_3.evaluate("LessThanThreshold", "0.5", eval_periods=eval_periods[2])
+    alarm_3.add_targetgroup(alb, tg)
+    alarm_3.add_tag("le-product", "lpi")
+    alarm_3.add_tag("le-service", app)
+    alarm_3.add_tag("le-stack", stack_tag)
+    alarm_3.add_tag("le-env", env.replace("cluster", ""))
+    alarms.append(alarm_3)
+
+    return alarms
 
 def add_outputs(albs):
     outputs = {}

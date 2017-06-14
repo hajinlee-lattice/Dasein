@@ -1,14 +1,16 @@
 from .autoscaling import AutoScalingGroup, ScalingPolicy
 from .ecs import ECSCluster, ECSService
+from .elb2 import TargetGroup
 from .resource import Resource
 
 
 class CloudWatchAlarm(Resource):
-    def __init__(self, logicalId, namespace, metric):
+    def __init__(self, logicalId, name, namespace, metric):
         Resource.__init__(self, logicalId)
         self._template = {
             "Type" : "AWS::CloudWatch::Alarm",
             "Properties": {
+                "AlarmName": name,
                 "AlarmActions": [ ],
                 "Namespace": namespace,
                 "Dimensions": [ ],
@@ -23,6 +25,18 @@ class CloudWatchAlarm(Resource):
         self._template["Properties"]["Period"] = str(period_minute * 60)
         self._template["Properties"]["EvaluationPeriods"] = eval_periods
         self._template["Properties"]["Statistic"] = stat
+        return self
+
+    def add_targetgroup(self, elb, targetgroup):
+        assert isinstance(targetgroup, TargetGroup)
+        self._template["Properties"]["Dimensions"].append({
+            "Name": "TargetGroup",
+            "Value": targetgroup.ref()
+        })
+        self._template["Properties"]["Dimensions"].append({
+            "Name": "LoadBalancer",
+            "Value": elb.ref()
+        })
         return self
 
     def add_asgroup(self, asgroup):
@@ -50,8 +64,6 @@ class CloudWatchAlarm(Resource):
             "Value": ecsservice.ref()
         })
         return self
-
-
 
     def add_scaling_policy(self, scaling):
         assert isinstance(scaling, ScalingPolicy)
