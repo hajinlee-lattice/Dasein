@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.pls.workflow.CalculateStatsWorkflowSubmitter;
 import com.latticeengines.pls.workflow.ConsolidateAndPublishWorkflowSubmitter;
 
 import io.swagger.annotations.Api;
@@ -24,6 +25,9 @@ public class DataCollectionResource {
     @Autowired
     private ConsolidateAndPublishWorkflowSubmitter consolidateAndPublishWorkflowSubmitter;
 
+    @Autowired
+    private CalculateStatsWorkflowSubmitter calculateStatsWorkflowSubmitter;
+
     @RequestMapping(value = "/{dataCollectionType}/datafeeds/{datafeedName}/consolidate", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Invoke data feed consolidate workflow. Returns the job id.")
@@ -32,5 +36,14 @@ public class DataCollectionResource {
         return ResponseDocument.successResponse( //
                 consolidateAndPublishWorkflowSubmitter.submit(dataCollectionType, datafeedName).toString());
 
+    }
+
+    @RequestMapping(value = "/{dataCollectionType}/datafeeds/{datafeedName}/calculatestats", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Invoke calculate stats workflow. Returns the job id.")
+    public ResponseDocument<String> calculateStats(@PathVariable DataCollectionType dataCollectionType,
+            @PathVariable String datafeedName) {
+        return ResponseDocument
+                .successResponse(calculateStatsWorkflowSubmitter.submit(dataCollectionType, datafeedName).toString());
     }
 }

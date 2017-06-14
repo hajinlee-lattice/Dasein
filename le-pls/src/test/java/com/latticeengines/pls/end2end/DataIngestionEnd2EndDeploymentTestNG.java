@@ -233,7 +233,14 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "consolidateAndPublish")
     public void finalize() {
-
+        log.info("Start calculating statistics ...");
+        ResponseDocument<?> response = restTemplate.postForObject(
+                String.format("%s/pls/datacollections/%s/datafeeds/%s/calculatestats", getRestAPIHostPort(),
+                        DataCollectionType.Segmentation, DATA_FEED_NAME),
+                null, ResponseDocument.class);
+        String appId = new ObjectMapper().convertValue(response.getResult(), String.class);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId, false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "finalize")
