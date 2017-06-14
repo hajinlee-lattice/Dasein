@@ -23,7 +23,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -81,7 +80,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @BeforeClass(groups = { "deployment.cdl" })
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        // setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         firstTenant = createTenant(CustomerSpace.parse(DL_TENANT_NAME).toString());// testBed.getMainTestTenant();
 
         log.info("Test environment setup finished.");
@@ -94,15 +93,12 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     protected Tenant createTenant(String customerSpace) {
-        Tenant tenant = new Tenant();
-        tenant.setId(customerSpace);
-        tenant.setName(customerSpace);
-        tenant.setRegisteredTime(System.currentTimeMillis());
-        testBed.createTenant(tenant);
+        Tenant tenant = testBed.addExtraTestTenant(customerSpace);
+        testBed.switchToExternalAdmin(tenant);
         return tenant;
     }
 
-    @Test(groups = { "deployment.cdl" }, enabled = true)
+    @Test(groups = { "deployment.cdl" }, enabled = false)
     public void importData() throws Exception {
         String launchId = startExecuteGroup();
         long startMillis = System.currentTimeMillis();
@@ -181,11 +177,12 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         }
     }
 
-    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "importData")
+    @Test(groups = { "deployment.cdl" }, enabled = true)
     public void consolidateAndPublish() {
         log.info("Start consolidating data ...");
-        ResponseDocument<?> response = restTemplate.postForObject(String.format("%s/pls/%s/datafeeds/%s/consolidate",
-                getRestAPIHostPort(), DataCollectionType.Segmentation, DATA_FEED_NAME), null, ResponseDocument.class);
+        ResponseDocument<?> response = restTemplate
+                .postForObject(String.format("%s/pls/datacollections/%s/datafeeds/%s/consolidate", getRestAPIHostPort(),
+                        DataCollectionType.Segmentation, DATA_FEED_NAME), null, ResponseDocument.class);
         String appId = new ObjectMapper().convertValue(response.getResult(), String.class);
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId, false);
         assertEquals(completedStatus, JobStatus.COMPLETED);

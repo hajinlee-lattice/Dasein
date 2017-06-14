@@ -24,7 +24,9 @@ import com.latticeengines.metadata.dao.DataFeedDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedImportEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("datafeedEntityMgr")
@@ -36,6 +38,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Autowired
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
+
+    @Autowired
+    private DataFeedImportEntityMgr datafeedImportEntityMgr;
 
     @Autowired
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
@@ -84,6 +89,10 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             return null;
         }
         HibernateUtils.inflateDetails(datafeed.getTasks());
+        for (DataFeedTask datafeedTask : datafeed.getTasks()) {
+            TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
+            TableEntityMgr.inflateTable(datafeedTask.getImportData());
+        }
         DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
         datafeed.setActiveExecution(execution);
         return datafeed;
@@ -114,6 +123,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         DataFeedExecution execution = datafeed.getActiveExecution();
         execution.setStatus(DataFeedExecution.Status.Started);
         execution.addImports(imports);
+        for (DataFeedImport datafeedImport : imports) {
+            datafeedImportEntityMgr.create(datafeedImport);
+        }
         datafeedExecutionEntityMgr.update(execution);
 
         datafeed.setActiveExecution(execution);

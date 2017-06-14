@@ -11,6 +11,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
@@ -75,6 +76,11 @@ public class DataFeedTaskEntityMgrImplTestNG extends MetadataFunctionalTestNGBas
         importTable.setName("importTable");
         importTable.setDisplayName(importTable.getName());
         importTable.setTenant(MultiTenantContext.getTenant());
+        Attribute a1 = new Attribute();
+        a1.setName("a1");
+        a1.setDisplayName(a1.getName());
+        a1.setPhysicalDataType("string");
+        importTable.addAttribute(a1);
 
         dataTable.setName("dataTable");
         dataTable.setDisplayName(dataTable.getName());

@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.DataFeedTaskDao;
 import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
-import com.latticeengines.metadata.dao.ExtractDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
@@ -45,9 +44,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Autowired
     private AttributeDao attributeDao;
-
-    @Autowired
-    private ExtractDao extractDao;
 
     @Autowired
     private LastModifiedKeyDao lastModifiedKeyDao;
@@ -134,12 +130,12 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void registerExtract(DataFeedTask dataFeedTask, String tableName, Extract extract) {
-        boolean templateTableChanged = dataFeedTask.getStatus() == Status.Updated;
-        boolean dataTableConsumed = dataFeedTask.getImportData() == null;
+    public void registerExtract(DataFeedTask datafeedTask, String tableName, Extract extract) {
+        boolean templateTableChanged = datafeedTask.getStatus() == Status.Updated;
+        boolean dataTableConsumed = datafeedTask.getImportData() == null;
 
         if (!dataTableConsumed) {
-            tableEntityMgr.addExtract(dataFeedTask.getImportData(), extract);
+            tableEntityMgr.addExtract(datafeedTask.getImportData(), extract);
         } else {
             tableTypeHolder.setTableType(TableType.IMPORTTABLE);
             Table extractTable = tableEntityMgr.findByName(tableName);
@@ -150,19 +146,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             extractTable.addExtract(extract);
             tableTypeHolder.setTableType(TableType.DATATABLE);
             tableEntityMgr.create(extractTable);
-            addTableToQueue(dataFeedTask, extractTable);
+            addTableToQueue(datafeedTask, extractTable);
         }
         if (templateTableChanged || dataTableConsumed) {
-            Table newDataTable = TableUtils.clone(dataFeedTask.getImportTemplate(),
+            Table newDataTable = TableUtils.clone(datafeedTask.getImportTemplate(),
                     "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
             newDataTable.setTenant(MultiTenantContext.getTenant());
             newDataTable.setTableType(TableType.DATATABLE);
             tableEntityMgr.create(newDataTable);
-            dataFeedTask.setImportData(newDataTable);
-            dataFeedTask.setStatus(Status.Active);
-            dataFeedTask.setLastImported(new Date());
-            createOrUpdate(dataFeedTask);
-            addTableToQueue(dataFeedTask, dataFeedTask.getImportData());
+            datafeedTask.setImportData(newDataTable);
+            datafeedTask.setStatus(Status.Active);
+            datafeedTask.setLastImported(new Date());
+            createOrUpdate(datafeedTask);
+            addTableToQueue(datafeedTask, datafeedTask.getImportData());
         }
     }
 

@@ -52,7 +52,7 @@ public class DataFeedExecution implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "execution")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "execution")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("imports")
     private List<DataFeedImport> imports = new ArrayList<>();

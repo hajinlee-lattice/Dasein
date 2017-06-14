@@ -58,11 +58,11 @@ public class DataFeedImport implements HasPid, Serializable {
     @JsonProperty("source_config")
     private String sourceConfig;
 
-    @JsonIgnore
+    @JsonProperty("data_table")
     @OneToOne
     @JoinColumn(name = "FK_DATA_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Table importData;
+    private Table dataTable;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "START_TIME", nullable = false)
@@ -112,12 +112,12 @@ public class DataFeedImport implements HasPid, Serializable {
         this.entity = entity;
     }
 
-    public Table getImportData() {
-        return importData;
+    public Table getDataTable() {
+        return dataTable;
     }
 
-    public void setImportData(Table importData) {
-        this.importData = importData;
+    public void setDataTable(Table dataTable) {
+        this.dataTable = dataTable;
     }
 
     public Date getStartTime() {

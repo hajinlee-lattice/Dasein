@@ -35,7 +35,7 @@ public class DataFeedImportUtilsTestNG {
 
         DataFeedImport dfImport = DataFeedImportUtils.createImportFromTask(task);
         assertEquals(dfImport.getEntity(), task.getEntity());
-        assertEquals(dfImport.getImportData(), task.getImportData());
+        assertEquals(dfImport.getDataTable(), task.getImportData());
         assertEquals(dfImport.getSource(), task.getSource());
         assertEquals(dfImport.getSourceConfig(), task.getSourceConfig());
         assertNull(dfImport.getPid());

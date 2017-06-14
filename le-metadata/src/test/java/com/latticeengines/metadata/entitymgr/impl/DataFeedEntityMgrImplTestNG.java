@@ -11,6 +11,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
@@ -74,11 +75,21 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         importTable.setName("importTable");
         importTable.setDisplayName(importTable.getName());
         importTable.setTenant(MultiTenantContext.getTenant());
+        Attribute a1 = new Attribute();
+        a1.setName("a1");
+        a1.setDisplayName(a1.getName());
+        a1.setPhysicalDataType("string");
+        importTable.addAttribute(a1);
 
         Table dataTable = new Table();
         dataTable.setName("dataTable");
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(MultiTenantContext.getTenant());
+        Attribute a2 = new Attribute();
+        a2.setName("a2");
+        a2.setDisplayName(a1.getName());
+        a2.setPhysicalDataType("string");
+        dataTable.addAttribute(a2);
 
         DataFeedTask task = new DataFeedTask();
         task.setDataFeed(datafeed);
@@ -120,6 +131,7 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         DataFeedExecution exec = df.getExecutions().get(0);
         assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
         assertEquals(exec.getImports().size(), df.getTasks().size());
+        assertEquals(exec.getImports().get(0).getDataTable().getAttributes().size(), 1);
 
     }
 
