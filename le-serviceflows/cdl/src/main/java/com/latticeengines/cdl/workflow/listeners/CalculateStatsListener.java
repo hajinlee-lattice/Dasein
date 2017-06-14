@@ -41,12 +41,12 @@ public class CalculateStatsListener extends LEJobListener {
             log.info(String.format(
                     "Workflow failed. Update datafeed status for customer %s with datafeed name of %s and status of %s",
                     customerSpace, datafeedName, status));
-            metadataProxy.updateDataFeedStatus(customerSpace, datafeedName, status);
+            metadataProxy.updateDataFeedStatus(customerSpace, datafeedName, status.getName());
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info(String.format(
                     "Workflow completed. Update datafeed status for customer %s with datafeed name of %s and status of %s",
                     customerSpace, datafeedName, Status.Active.getName()));
-            metadataProxy.updateDataFeedStatus(customerSpace, datafeedName, Status.Active);
+            metadataProxy.updateDataFeedStatus(customerSpace, datafeedName, Status.Active.getName());
         } else {
             log.warn("Workflow ended in an unknown state.");
         }

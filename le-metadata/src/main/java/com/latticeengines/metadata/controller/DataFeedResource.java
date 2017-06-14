@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.metadata.service.DataFeedService;
 import com.latticeengines.network.exposed.metadata.DataFeedInterface;
@@ -47,7 +46,7 @@ public class DataFeedResource implements DataFeedInterface {
     @ApiOperation(value = "update data feed status by name")
     @Override
     public void updateDataFeedStatus(@PathVariable String customerSpace, @PathVariable String datafeedName,
-            @PathVariable Status status) {
+            @PathVariable String status) {
         datafeedService.updateDataFeed(customerSpace, datafeedName, status);
     }
 

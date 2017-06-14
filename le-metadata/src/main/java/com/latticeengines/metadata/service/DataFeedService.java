@@ -1,7 +1,6 @@
 package com.latticeengines.metadata.service;
 
 import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 
 public interface DataFeedService {
@@ -14,7 +13,7 @@ public interface DataFeedService {
 
     DataFeed createDataFeed(String customerSpace, DataFeed datafeed);
 
-    void updateDataFeed(String customerSpace, String datafeedName, Status status);
+    void updateDataFeed(String customerSpace, String datafeedName, String status);
 
     DataFeedExecution failExecution(String customerSpace, String datafeedName);
 

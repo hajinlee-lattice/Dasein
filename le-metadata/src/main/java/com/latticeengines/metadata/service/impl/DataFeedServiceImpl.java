@@ -41,11 +41,12 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public void updateDataFeed(String customerSpace, String datafeedName, Status status) {
+    public void updateDataFeed(String customerSpace, String datafeedName, String statusStr) {
         DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
         if (datafeed == null) {
             throw new NullPointerException("Datafeed is null. Cannot update status.");
         } else {
+            Status status = Status.fromName(statusStr);
             datafeed.setStatus(status);
             datafeedEntityMgr.update(datafeed);
         }

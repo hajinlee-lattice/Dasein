@@ -11,7 +11,6 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -235,8 +234,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @Override
     public void createDataFeedTask(String customerSpace, String dataFeedName, DataFeedTask dataFeedTask) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{dataFeedName}/create",
-                customerSpace, dataFeedName);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{dataFeedName}/create", customerSpace,
+                dataFeedName);
         post("createDataFeedTask", url, dataFeedTask, Void.class);
     }
 
@@ -314,7 +313,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     }
 
     @Override
-    public void updateDataFeedStatus(String customerSpace, String datafeedName, Status status) {
+    public void updateDataFeedStatus(String customerSpace, String datafeedName, String status) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/status/{status}",
                 customerSpace, datafeedName, status);
         put("updateDataFeedStatus", url, null);
