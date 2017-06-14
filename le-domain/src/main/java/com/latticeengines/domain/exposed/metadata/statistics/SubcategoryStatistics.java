@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
@@ -36,8 +35,7 @@ public class SubcategoryStatistics {
         }
 
         @Override
-        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException,
-                JsonProcessingException {
+        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
             String[] elements = key.split("\\.");
             if (elements.length == 1) {
                 return new ColumnLookup(elements[0]);
@@ -54,9 +52,12 @@ public class SubcategoryStatistics {
         }
 
         @Override
-        public void serialize(ColumnLookup value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
-                JsonProcessingException {
-            jgen.writeFieldName(value.getObjectType() + "." + value.getColumnName());
+        public void serialize(ColumnLookup value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+            String str = value.getColumnName();
+            if (value.getObjectType() != null) {
+                str = value.getObjectType() + "." + str;
+            }
+            jgen.writeFieldName(str);
         }
     }
 }

@@ -126,9 +126,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             Attribute attrInMasterTable = masterTable.getAttribute(name);
             if (attrInMasterTable != null) {
                 // an attribute from master table
-                if (masterTableType != null) {
-                    columnLookup = new ColumnLookup(masterTableType, name);
-                }
+                columnLookup = new ColumnLookup(masterTableType, name);
                 category = attrInMasterTable.getCategory();
                 subCategory = attrInMasterTable.getSubcategory();
             } else if (colLookup.containsKey(name)) {
@@ -148,7 +146,10 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             }
 
             AttributeStatistics attributeStatistics = new AttributeStatistics();
-            attributeStatistics.getBuckets().addAll(attributeStatsMap.get(name).getBuckets().getBucketList());
+            AttributeStats statsInCube = attributeStatsMap.get(name);
+            if (statsInCube.getBuckets() != null) {
+                attributeStatistics.getBuckets().addAll(attributeStatsMap.get(name).getBuckets().getBucketList());
+            }
             if (statistics.getCategories().containsKey(category)) {
                 CategoryStatistics categoryStatistics = statistics.getCategories().get(category);
                 if (categoryStatistics.getSubcategories().containsKey(subCategory)) {
