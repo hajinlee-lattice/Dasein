@@ -95,7 +95,7 @@ def create_template(env, stack_tag):
         'matchapi':  albs['private'],
         'scoringapi':  albs['public']
     }
-    alarms = create_alarms(env, stack_tag, tg_map, alb_map)
+    alarms = create_alarms(stack_tag, tg_map, alb_map)
     stack.add_resources(alarms)
 
     stack.add_ouputs(add_outputs(albs))
@@ -351,14 +351,14 @@ def create_listener_rule(listener, tg, path):
     lr.depends_on(tg)
     return lr
 
-def create_alarms(env, stack_tag, tg_map, alb_map):
+def create_alarms(stack_tag, tg_map, alb_map):
     alarms = []
     for app in ['scoringapi', 'matchapi']:
         tg = tg_map[app]
-        alarms += create_latency_alarms(env, stack_tag, app, alb_map[app], tg)
+        alarms += create_latency_alarms(stack_tag, app, alb_map[app], tg)
     return alarms
 
-def create_latency_alarms(env, stack_tag, app, alb, tg):
+def create_latency_alarms(stack_tag, app, alb, tg):
     alarms = []
 
     if app == 'matchapi':
@@ -371,28 +371,16 @@ def create_latency_alarms(env, stack_tag, app, alb, tg):
     alarm_1 = CloudWatchAlarm(app + "HighLatency", "%s-lpi-%s-high-latency" % (app, stack_tag), "AWS/ApplicationELB", "TargetResponseTime")
     alarm_1.evaluate("GreaterThanOrEqualToThreshold", "1", eval_periods=eval_periods[0])
     alarm_1.add_targetgroup(alb, tg)
-    alarm_1.add_tag("le-product", "lpi")
-    alarm_1.add_tag("le-service", app)
-    alarm_1.add_tag("le-stack", stack_tag)
-    alarm_1.add_tag("le-env", env.replace("cluster", ""))
     alarms.append(alarm_1)
 
     alarm_2 = CloudWatchAlarm(app + "LowLatency", "%s-lpi-%s-low-latency" % (app, stack_tag), "AWS/ApplicationELB", "TargetResponseTime")
     alarm_2.evaluate("LessThanThreshold", "0.5", eval_periods=eval_periods[1])
     alarm_2.add_targetgroup(alb, tg)
-    alarm_2.add_tag("le-product", "lpi")
-    alarm_2.add_tag("le-service", app)
-    alarm_2.add_tag("le-stack", stack_tag)
-    alarm_2.add_tag("le-env", env.replace("cluster", ""))
     alarms.append(alarm_2)
 
     alarm_3 = CloudWatchAlarm(app + "LowLatency", "%s-lpi-%s-low-latency-2" % (app, stack_tag), "AWS/ApplicationELB", "TargetResponseTime")
     alarm_3.evaluate("LessThanThreshold", "0.5", eval_periods=eval_periods[2])
     alarm_3.add_targetgroup(alb, tg)
-    alarm_3.add_tag("le-product", "lpi")
-    alarm_3.add_tag("le-service", app)
-    alarm_3.add_tag("le-stack", stack_tag)
-    alarm_3.add_tag("le-env", env.replace("cluster", ""))
     alarms.append(alarm_3)
 
     return alarms
