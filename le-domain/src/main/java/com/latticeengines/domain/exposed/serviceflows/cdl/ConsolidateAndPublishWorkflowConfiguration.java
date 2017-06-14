@@ -28,12 +28,14 @@ public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfigur
             configuration.setContainerConfiguration("consolidateAndPublishWorkflow", customerSpace,
                     "consolidateAndPublishWorkflow");
             startExecutionConfiguration.setCustomerSpace(customerSpace);
+            consolidateDataConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             startExecutionConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            consolidateDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
