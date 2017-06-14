@@ -147,7 +147,7 @@ def create_public_target_groups(environment):
 
     for app in ADMINCONSOLE_APPS:
         if app in TOMCAT_APP_HEALTH_MAP:
-            health = TOMCAT_APP_HEALTH_MAP['app']
+            health = TOMCAT_APP_HEALTH_MAP[app]
         else:
             health = '/'
         tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health, name="adminconsole-" + app)
