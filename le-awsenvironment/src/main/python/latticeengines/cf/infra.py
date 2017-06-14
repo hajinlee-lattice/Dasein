@@ -378,7 +378,7 @@ def create_latency_alarms(stack_tag, app, alb, tg):
     alarm_2.add_targetgroup(alb, tg)
     alarms.append(alarm_2)
 
-    alarm_3 = CloudWatchAlarm(app + "LowLatency", "%s-lpi-%s-low-latency-2" % (app, stack_tag), "AWS/ApplicationELB", "TargetResponseTime")
+    alarm_3 = CloudWatchAlarm(app + "LowLatency2", "%s-lpi-%s-low-latency-2" % (app, stack_tag), "AWS/ApplicationELB", "TargetResponseTime")
     alarm_3.evaluate("LessThanThreshold", "0.5", eval_periods=eval_periods[2])
     alarm_3.add_targetgroup(alb, tg)
     alarms.append(alarm_3)
