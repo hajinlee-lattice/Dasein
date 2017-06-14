@@ -83,7 +83,7 @@ class ApplicationLoadBalancer(Resource):
                         {"Ref": "AWS::StackName"},
                         name
                     ]]},
-                "Scheme": "internet_facing" if internet_facing else "internal",
+                "Scheme": "internet-facing" if internet_facing else "internal",
                 "SecurityGroups": [sg.ref()],
                 "Subnets": [p.ref() for p in subnet_params]
             }
