@@ -220,7 +220,7 @@ def create_public_load_balancers(env, tg_map):
     resources.append(oauth_lsnr)
 
     # adminconsole listeners
-    adminconsole_lsnr = create_listener(ac_lb, tg_map["adminconsole"])
+    adminconsole_lsnr = create_listener(adminconsole_lb, tg_map["adminconsole"])
     resources.append(adminconsole_lsnr)
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["matchapi"], "/match/*"))
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["api"], "/api/*"))
