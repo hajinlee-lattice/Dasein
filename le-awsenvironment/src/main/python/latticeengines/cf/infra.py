@@ -16,7 +16,6 @@ _S3_CF_PATH='cloudformation/infra'
 TOMCAT_APP_HEALTH_MAP = {
     "swaggerprivate": "/",
     "swaggerpublic": "/",
-    "haproxy": "/",
 
     "api": "/rest/add/1/2",
     "eai": "/eai/v2/api-docs",
@@ -43,8 +42,14 @@ TOMCAT_APP_HEALTH_MAP = {
 PUBLIC_APPS = ["scoringapi", "oauth2", "playmaker", "pls", "ulysses"]
 UI_APPS = ["lpi", "adminconsole"]
 
+API_APPS = [ 'playmaker', 'scoringapi', 'ulysses' ]
+APP_APPS = [ 'lpi', 'pls' ]
+OAUTH_APPS = [ 'oauth2' ]
+ADMINCONSOLE_APPS = [ 'adminconsole', 'matchapi', 'api', 'propdata' ]
+
 PARAM_TOMCAT_SECURITY_GROUP = Parameter("TomcatSecurityGroupId", "The security group to be used by tomcat", type="AWS::EC2::SecurityGroup::Id")
 PARAM_NODEJS_SECURITY_GROUP = Parameter("NodeJsSecurityGroupId", "The security group to be used by nodejs", type="AWS::EC2::SecurityGroup::Id")
+PARAM_HTTPS_SECURITY_GROUP = Parameter("HTTPSGroupId", "The security group to be used by public https", type="AWS::EC2::SecurityGroup::Id")
 PARAM_PUBLIC_SUBNET_1 = Parameter("PublicSubnetId1", "The first public subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
 PARAM_PUBLIC_SUBNET_2 = Parameter("PublicSubnetId2", "The second public subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
 PARAM_PUBLIC_SUBNET_3 = Parameter("PublicSubnetId3", "The third public subnet to provision EC2 instances.", type="AWS::EC2::Subnet::Id")
@@ -58,10 +63,13 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.stack, ui=args.ui, upload=args.upload)
+    template(args.environment, args.stack, args.public, upload=args.upload)
 
-def template(environment, stack, ui=False, upload=False):
-    stack = create_template(stack, ui)
+def template(environment, stack, public, ui=False, upload=False):
+    if public:
+        stack = create_public_template(environment)
+    else:
+        stack = create_template(environment, stack)
     if upload:
         stack.validate()
         stack.upload(environment, _S3_CF_PATH)
@@ -69,21 +77,158 @@ def template(environment, stack, ui=False, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(stack_tag, ui):
+def create_template(env, stack_tag):
     stack = Stack("AWS CloudFormation template for LPI infrastructure.")
     stack.add_params([PARAM_TOMCAT_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3, PARAM_LE_STACK])
 
     # target groups
-    tgs, tg_map = create_taget_groups(stack_tag)
+    tgs, tg_map = create_taget_groups(env, stack_tag)
     stack.add_resources(tgs)
 
-    resources, albs = create_load_balancers(tg_map, stack_tag, ui=ui)
+    resources, albs = create_load_balancers(tg_map, stack_tag)
     stack.add_resources(resources)
 
     stack.add_ouputs(add_outputs(albs))
     return stack
 
-def create_taget_groups(stack):
+def create_public_template(env):
+    stack = Stack("AWS CloudFormation template for LPI public urls.")
+    stack.add_params([PARAM_HTTPS_SECURITY_GROUP, PARAM_NODEJS_SECURITY_GROUP, PARAM_SSL_CERTIFICATE_ARN, PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+
+    # target groups
+    tgs, tg_map = create_public_target_groups(env)
+    stack.add_resources(tgs)
+
+    resources, albs = create_public_load_balancers(env, tg_map)
+    stack.add_resources(resources)
+
+    stack.add_ouputs(add_outputs(albs))
+    return stack
+
+
+def create_public_target_groups(environment):
+    tgs = []
+    tg_map = {}
+    for app in API_APPS:
+        if app in TOMCAT_APP_HEALTH_MAP:
+            health = TOMCAT_APP_HEALTH_MAP[app]
+        else:
+            health = '/'
+        tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health, name="api-" + app)
+        tg.add_tag("le-env", environment.replace("cluster", ""))
+        tg.add_tag("le-product", "lpi")
+        tg.add_tag("le-service", app)
+        tgs.append(tg)
+        tg_map[app] = tg
+
+    for app in APP_APPS:
+        if app in TOMCAT_APP_HEALTH_MAP:
+            health = TOMCAT_APP_HEALTH_MAP[app]
+        else:
+            health = '/'
+        tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health, name="app-" + app)
+        tg.add_tag("le-env", environment.replace("cluster", ""))
+        tg.add_tag("le-product", "lpi")
+        tg.add_tag("le-service", app)
+        tgs.append(tg)
+        tg_map[app] = tg
+
+    for app in OAUTH_APPS:
+        if app in TOMCAT_APP_HEALTH_MAP:
+            health = TOMCAT_APP_HEALTH_MAP[app]
+        else:
+            health = '/'
+        tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health, name="oauth2-" + app)
+        tg.add_tag("le-env", environment.replace("cluster", ""))
+        tg.add_tag("le-product", "lpi")
+        tg.add_tag("le-service", app)
+        tgs.append(tg)
+        tg_map[app] = tg
+
+    for app in ADMINCONSOLE_APPS:
+        if app in TOMCAT_APP_HEALTH_MAP:
+            health = TOMCAT_APP_HEALTH_MAP['app']
+        else:
+            health = '/'
+        tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health, name="adminconsole-" + app)
+        tg.add_tag("le-env", environment.replace("cluster", ""))
+        tg.add_tag("le-product", "lpi")
+        tg.add_tag("le-service", app)
+        tgs.append(tg)
+        tg_map[app] = tg
+
+    return tgs, tg_map
+
+def create_public_load_balancers(env, tg_map):
+    albs = {}
+    resources = []
+
+    # app.lattice-engines.com
+    app_lb = ApplicationLoadBalancer("app", PARAM_HTTPS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3], internet_facing=True)
+    app_lb.idle_timeout(600)
+    app_lb.add_tag("le-env", env.replace("cluster", ""))
+    app_lb.add_tag("le-product", "lpi")
+    for k, v in tg_map.items():
+        app_lb.depends_on(v)
+    resources.append(app_lb)
+    albs["app"] = app_lb
+
+    # api.lattice-engines.com
+    api_lb = ApplicationLoadBalancer("api", PARAM_HTTPS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3], internet_facing=True)
+    api_lb.idle_timeout(600)
+    app_lb.add_tag("le-env", env.replace("cluster", ""))
+    api_lb.add_tag("le-product", "lpi")
+    for k, v in tg_map.items():
+        app_lb.depends_on(v)
+    resources.append(api_lb)
+    albs["api"] = api_lb
+
+    # oauth.lattice-engines.com
+    oauth_lb = ApplicationLoadBalancer("oauth2", PARAM_HTTPS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3], internet_facing=True)
+    oauth_lb.idle_timeout(600)
+    oauth_lb.add_tag("le-env", env.replace("cluster", ""))
+    oauth_lb.add_tag("le-product", "lpi")
+    for k, v in tg_map.items():
+        oauth_lb.depends_on(v)
+    resources.append(oauth_lb)
+    albs["oauth2"] = oauth_lb
+
+    # admin.prod.lattice.local
+    adminconsole_lb = ApplicationLoadBalancer("adminconsole", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+    adminconsole_lb.idle_timeout(600)
+    adminconsole_lb.add_tag("le-env", env.replace("cluster", ""))
+    adminconsole_lb.add_tag("le-product", "lpi")
+    for k, v in tg_map.items():
+        adminconsole_lb.depends_on(v)
+    resources.append(adminconsole_lb)
+    albs["adminconsole"] = adminconsole_lb
+
+    # app listeners
+    lpi_lsnr = create_listener(app_lb, tg_map["lpi"])
+    resources.append(lpi_lsnr)
+    resources.append(create_listener_rule(lpi_lsnr, tg_map["pls"], "/pls/*"))
+    resources.append(create_listener_rule(lpi_lsnr, tg_map["pls"], "/lp2/*"))
+
+    # api listeners
+    api_lsnr = create_listener(api_lb, tg_map["playmaker"])
+    resources.append(api_lsnr)
+    resources.append(create_listener_rule(api_lsnr, tg_map["scoringapi"], "/score/*"))
+    resources.append(create_listener_rule(api_lsnr, tg_map["ulysses"], "/ulysses/*"))
+
+    # oauth listeners
+    oauth_lsnr = create_listener(oauth_lb, tg_map["oauth2"])
+    resources.append(oauth_lsnr)
+
+    # adminconsole listeners
+    adminconsole_lsnr = create_listener(ac_lb, tg_map["adminconsole"])
+    resources.append(adminconsole_lsnr)
+    resources.append(create_listener_rule(adminconsole_lsnr, tg_map["matchapi"], "/match/*"))
+    resources.append(create_listener_rule(adminconsole_lsnr, tg_map["api"], "/api/*"))
+    resources.append(create_listener_rule(adminconsole_lsnr, tg_map["propdata"], "/propdata/*"))
+
+    return resources, albs
+
+def create_taget_groups(env, stack):
     tgs = []
     tg_map = {}
     for app, health in TOMCAT_APP_HEALTH_MAP.items():
@@ -91,6 +236,7 @@ def create_taget_groups(stack):
         tg.add_tag("le-product", "lpi")
         tg.add_tag("le-service", app)
         tg.add_tag("le-stack", stack)
+        tg.add_tag("le-env", env.replace("cluster", ""))
         tgs.append(tg)
         tg_map[app] = tg
 
@@ -99,11 +245,12 @@ def create_taget_groups(stack):
         tg.add_tag("le-product", "lpi")
         tg.add_tag("le-service", app)
         tg.add_tag("le-stack", stack)
+        tg.add_tag("le-env", env.replace("cluster", ""))
         tgs.append(tg)
         tg_map[app] = tg
     return tgs, tg_map
 
-def create_load_balancers(tg_map, stack, ui=False):
+def create_load_balancers(tg_map, stack):
     albs = {}
     resources = []
 
@@ -155,27 +302,26 @@ def create_load_balancers(tg_map, stack, ui=False):
     resources.append(create_listener_rule(public_lsnr, tg_map["oauth2"], "/oauth2/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["playmaker"], "/api/*"))
 
-    if ui:
-        # lpi
-        lpi_lb = ApplicationLoadBalancer("lpi", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
-        lpi_lb.idle_timeout(600)
-        lpi_lb.depends_on(tg_map["lpi"])
-        lpi_lb.add_tag("le-product", "lpi")
-        lpi_lb.add_tag("le-stack", stack)
-        resources.append(lpi_lb)
-        albs["lpi"] = lpi_lb
+    # lpi
+    lpi_lb = ApplicationLoadBalancer("lpi", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    lpi_lb.idle_timeout(600)
+    lpi_lb.depends_on(tg_map["lpi"])
+    lpi_lb.add_tag("le-product", "lpi")
+    lpi_lb.add_tag("le-stack", stack)
+    resources.append(lpi_lb)
+    albs["lpi"] = lpi_lb
 
-        # adminconsole
-        ac_lb = ApplicationLoadBalancer("adminconsole", PARAM_NODEJS_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
-        ac_lb.idle_timeout(600)
-        ac_lb.depends_on(tg_map["adminconsole"])
-        ac_lb.add_tag("le-product", "lpi")
-        ac_lb.add_tag("le-stack", stack)
-        resources.append(ac_lb)
-        albs["adminconsole"] = ac_lb
+    # adminconsole
+    ac_lb = ApplicationLoadBalancer("adminconsole", PARAM_NODEJS_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+    ac_lb.idle_timeout(600)
+    ac_lb.depends_on(tg_map["adminconsole"])
+    ac_lb.add_tag("le-product", "lpi")
+    ac_lb.add_tag("le-stack", stack)
+    resources.append(ac_lb)
+    albs["adminconsole"] = ac_lb
 
-        resources.append(create_listener(lpi_lb, tg_map["lpi"]))
-        resources.append(create_listener(ac_lb, tg_map["adminconsole"]))
+    resources.append(create_listener(lpi_lb, tg_map["lpi"]))
+    resources.append(create_listener(ac_lb, tg_map["adminconsole"]))
 
     return resources, albs
 
@@ -284,12 +430,13 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='qacluster', choices=['devcluster', 'qacluster','prodcluster', 'dr'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('-s', dest='stack', type=str, required=True, help='the short stack name for tagging')
-    parser1.add_argument('--include-ui', dest='ui', action='store_true', help='include ui load balancers')
+    parser1.add_argument('--public', dest='public', action='store_true', help='bootstrap the public urls. ignore -s opt')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-e', dest='environment', type=str, default='qacluster', choices=['devcluster', 'qacluster','prodcluster', 'dr'], help='environment')
     parser1.add_argument('-s', dest='stack', type=str, required=True, help='the LE_STACK to be created')
+    parser1.add_argument('--public', dest='public', action='store_true', help='bootstrap the public urls. ignore -s opt')
     parser1.set_defaults(func=provision_cli)
 
     args = parser.parse_args()

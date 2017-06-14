@@ -3,14 +3,17 @@ from .resource import Resource
 
 
 class TargetGroup(Resource):
-    def __init__(self, logicalId, port="80", protocol="http", checkon="/"):
+    def __init__(self, logicalId, port="80", protocol="http", checkon="/", name=None):
         Resource.__init__(self, logicalId)
 
-        self.__name = {
-            "Fn::Join": ["-", [
-                logicalId,
-                {"Ref": "AWS::StackName"}
-            ]]}
+        if name is None:
+            self.__name = {
+                "Fn::Join": ["-", [
+                    logicalId,
+                    {"Ref": "AWS::StackName"}
+                ]]}
+        else:
+            self.__name = name
 
         self._template = {
             "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
@@ -68,7 +71,7 @@ class ListenerRule(Resource):
 
 
 class ApplicationLoadBalancer(Resource):
-    def __init__(self, name, sg, subnet_params):
+    def __init__(self, name, sg, subnet_params, internet_facing=False):
         logicalId = name + "Alb"
         Resource.__init__(self, logicalId)
         self.__name = name
@@ -77,10 +80,10 @@ class ApplicationLoadBalancer(Resource):
             "Properties": {
                 "Name": {
                     "Fn::Join": ["-", [
-                        name,
-                        {"Ref": "AWS::StackName"}
+                        {"Ref": "AWS::StackName"},
+                        name
                     ]]},
-                "Scheme": "internal",
+                "Scheme": "internet_facing" if internet_facing else "internal",
                 "SecurityGroups": [sg.ref()],
                 "Subnets": [p.ref() for p in subnet_params]
             }
