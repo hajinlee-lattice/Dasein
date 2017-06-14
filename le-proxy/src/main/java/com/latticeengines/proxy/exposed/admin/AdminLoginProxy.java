@@ -24,7 +24,11 @@ public class AdminLoginProxy extends BaseRestApiProxy {
         Credentials creds = new Credentials();
         creds.setUsername(username);
         creds.setPassword(password);
+        cleanupAuthHeader();
         JsonNode json = post("adlogin", url, creds, JsonNode.class, false);
+        if (json == null) {
+            throw new RuntimeException("Failed to login AD for the user " + username); // don't put pw in this log
+        }
         String token = json.get("Token").asText();
         if (StringUtils.isBlank(token)) {
             throw new RuntimeException("Failed to login AD for the user " + username); // don't put pw in this log

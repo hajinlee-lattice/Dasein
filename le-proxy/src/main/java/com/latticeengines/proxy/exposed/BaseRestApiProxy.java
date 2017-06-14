@@ -28,7 +28,7 @@ import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseE
 public abstract class BaseRestApiProxy {
 
     private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
-    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    private RestTemplate restTemplate;
     private String hostport;
     private String rootpath;
 
@@ -40,9 +40,9 @@ public abstract class BaseRestApiProxy {
 
     @Value("${proxy.retry.maxAttempts:10}")
     private int maxAttempts;
-
     // Used to call external API because there is no standardized error handler
     protected BaseRestApiProxy() {
+        this.restTemplate = HttpClientUtils.newRestTemplate();
     }
 
     protected BaseRestApiProxy(String hostport) {
@@ -52,22 +52,30 @@ public abstract class BaseRestApiProxy {
     protected BaseRestApiProxy(String hostport, String rootpath, Object... urlVariables) {
         this.hostport = hostport;
         this.rootpath = StringUtils.isEmpty(rootpath) ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
-        restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
-        restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        this.restTemplate = HttpClientUtils.newRestTemplate();
+        this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        setMagicAuthHeader();
+    }
+
+    void setMagicAuthHeader() {
+        MagicAuthenticationHeaderHttpRequestInterceptor authHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
+        List<ClientHttpRequestInterceptor> interceptors = this.restTemplate.getInterceptors();
+        interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
+        interceptors.add(authHeader);
+        restTemplate.setInterceptors(interceptors);
     }
 
     void setAuthHeader(String authToken) {
         AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(authToken);
         List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
-        List<Integer> toRemove = new ArrayList<>();
-        for (int i = 0; i < interceptors.size(); i++) {
-            ClientHttpRequestInterceptor interceptor = interceptors.get(i);
-            if (interceptor instanceof AuthorizationHeaderHttpRequestInterceptor) {
-                toRemove.add(i);
-            }
-        }
-        toRemove.forEach(interceptors::remove);
+        interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
+        restTemplate.setInterceptors(interceptors);
+    }
+
+    protected void cleanupAuthHeader() {
+        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+        interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         restTemplate.setInterceptors(interceptors);
     }
 
@@ -275,7 +283,7 @@ public abstract class BaseRestApiProxy {
 
     void enforceSSLNameVerification() {
         restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
-        restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
         restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        setMagicAuthHeader();
     }
 }
