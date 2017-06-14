@@ -29,7 +29,6 @@ public class OrchestrationEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
     private OrchestrationEntityMgr orchestrationEntityMgr;
 
     private List<Orchestration> orchestrations = new ArrayList<>();
-    // 
 
     // Name, ConfigStr, expected config class, expected pipeline length,
     // expected first step, expected next step

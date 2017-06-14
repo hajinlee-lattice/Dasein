@@ -17,6 +17,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +32,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "OrchestrationProgress")
+@FilterDef(name = "hdfsPodFilter", parameters = { @ParamDef(name = "hdfsPod", type = "string") })
+@Filter(name = "hdfsPodFilter", condition = "HdfsPod = :hdfsPod")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrchestrationProgress implements HasPid, Serializable {
@@ -45,6 +51,9 @@ public class OrchestrationProgress implements HasPid, Serializable {
 
     @Column(name = "Version", length = 50)
     private String version;
+
+    @Column(name = "HdfsPod", nullable = false, length = 100)
+    private String hdfsPod;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false, length = 20)
@@ -95,6 +104,16 @@ public class OrchestrationProgress implements HasPid, Serializable {
     @JsonProperty("Version")
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    @JsonProperty("HdfsPod")
+    public String getHdfsPod() {
+        return hdfsPod;
+    }
+
+    @JsonProperty("HdfsPod")
+    public void setHdfsPod(String hdfsPod) {
+        this.hdfsPod = hdfsPod;
     }
 
     @JsonProperty("Status")
