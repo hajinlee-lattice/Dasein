@@ -95,6 +95,7 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
         exportConfig.setExportFormat(ExportFormat.AVRO);
         exportConfig.setCleanupS3(true);
         exportConfig.setAppend(true);
+        exportConfig.setCreateNew(true);
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setDistStyle(DistStyle.Key);
         redshiftTableConfig.setDistKey("LatticeAccountId");
