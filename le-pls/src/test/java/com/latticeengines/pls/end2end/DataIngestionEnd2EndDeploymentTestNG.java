@@ -3,17 +3,24 @@ package com.latticeengines.pls.end2end;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -21,8 +28,10 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
@@ -32,9 +41,12 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
@@ -50,15 +62,13 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
     private static final String DATA_FEED_NAME = "DATA_FEED_NAME";
 
-    private static final String DL_TENANT_NAME = "DellEB";
+    private static final String DL_TENANT_NAME = "ManualELQ_2016_1215_1051";
 
-    private static final String DL_LOAD_GROUP = "G_Test";
+    private static final String DL_LOAD_GROUP = "TestDP_20170615";
 
-    private static final String DL_ENDPOINT = "http://10.61.0.55:8888";
+    private static final String DL_ENDPOINT = "http://10.41.1.187:8089";
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
-
-    // private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 5;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -74,6 +84,9 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Value("${common.test.env}")
+    private String testEnv;
 
     private Tenant firstTenant;
 
@@ -98,14 +111,83 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         return tenant;
     }
 
-    @Test(groups = { "deployment.cdl" }, enabled = false)
+    @Test(groups = { "deployment.cdl" }, enabled = true)
     public void importData() throws Exception {
-        String launchId = startExecuteGroup();
-        long startMillis = System.currentTimeMillis();
-        waitLoadGroup(launchId, 1800);
-        long endMillis = System.currentTimeMillis();
-        checkExtractFolderExist(startMillis, endMillis);
+        if (testEnv.equalsIgnoreCase("dev")) {
+            mockAvroData();
+            Thread.sleep(5000);
+            mockAvroData();
+        } else {
+            String launchId = startExecuteGroup();
+            long startMillis = System.currentTimeMillis();
+            waitLoadGroup(launchId, 1800);
+            long endMillis = System.currentTimeMillis();
+            checkExtractFolderExist(startMillis, endMillis);
+        }
     }
+
+    private void mockAvroData() throws IOException {
+        CustomerSpace customerSpace = CustomerSpace.parse(DL_TENANT_NAME);
+        URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/pls/end2end/cdl/Extract_Accounts_0.avro");
+        Table importTemplate = null;
+
+        //DataFeedTask dataFeedTask = new DataFeedTask();
+        DataFeedTask dataFeedTask = metadataProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
+                "Account", DATA_FEED_NAME);
+        if (dataFeedTask == null) {
+            Schema schema = AvroUtils.readSchemaFromLocalFile(dataUrl.getPath());
+            importTemplate = MetadataConverter.getTable(schema, new ArrayList<Extract>(), null, null, false);
+            importTemplate.setTableType(TableType.IMPORTTABLE);
+            importTemplate.setName("Account");
+            metadataProxy.createTable(customerSpace.toString(), importTemplate.getName(), importTemplate);
+            dataFeedTask = new DataFeedTask();
+            dataFeedTask.setImportTemplate(importTemplate);
+            dataFeedTask.setStatus(DataFeedTask.Status.Active);
+            dataFeedTask.setEntity("Account");
+            dataFeedTask.setFeedType("Query");
+            dataFeedTask.setSource("VisiDB");
+            dataFeedTask.setActiveJob("Not specified");
+            dataFeedTask.setSourceConfig("Not specified");
+            dataFeedTask.setStartTime(new Date());
+            dataFeedTask.setLastImported(new Date(0L));
+
+            metadataProxy.createDataFeedTask(customerSpace.toString(), DATA_FEED_NAME, dataFeedTask);
+        } else {
+            importTemplate = dataFeedTask.getImportTemplate();
+        }
+
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
+                SourceType.VISIDB.getName(),
+                new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
+        String fileName = dataUrl.getPath().substring(dataUrl.getPath().lastIndexOf("/") + 1);
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, dataUrl.getPath(), String.format("%s/%s",targetPath, fileName));
+
+        String defaultFS = yarnConfiguration.get(FileSystem.FS_DEFAULT_NAME_KEY);
+        String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
+        Extract e = createExtract(hdfsUri, 1000L);
+
+        dataFeedTask = metadataProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
+                "Account", DATA_FEED_NAME);
+
+        metadataProxy.registerExtract(customerSpace.toString(), dataFeedTask.getPid().toString(), importTemplate.getName(), e);
+    }
+
+    private Extract createExtract(String path, long processedRecords) {
+        Extract e = new Extract();
+        e.setName(StringUtils.substringAfterLast(path, "/"));
+        e.setPath(PathUtils.stripoutProtocol(path));
+        e.setProcessedRecords(processedRecords);
+        String dateTime = StringUtils.substringBetween(path, "/Extracts/", "/");
+        SimpleDateFormat f = new SimpleDateFormat(COLLECTION_DATE_FORMAT);
+        try {
+            e.setExtractionTimestamp(f.parse(dateTime).getTime());
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return e;
+    }
+
 
     private void checkExtractFolderExist(long startMillis, long endMillis) throws Exception {
         CustomerSpace customerSpace = CustomerSpace.parse(DL_TENANT_NAME);
@@ -215,18 +297,18 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(firstTenant);
 
-        DataFeedTask task = new DataFeedTask();
-        task.setDataFeed(datafeed);
-        task.setActiveJob("1");
-        task.setEntity(SchemaInterpretation.Account.name());
-        task.setSource("VDB");
-        task.setStatus(DataFeedTask.Status.Active);
-        task.setSourceConfig("config");
-        task.setImportTemplate(importTable);
-        task.setImportData(dataTable);
-        task.setStartTime(new Date());
-        task.setLastImported(new Date());
-        datafeed.addTask(task);
+//        DataFeedTask task = new DataFeedTask();
+//        task.setDataFeed(datafeed);
+//        task.setActiveJob("1");
+//        task.setEntity(SchemaInterpretation.Account.name());
+//        task.setSource("VDB");
+//        task.setStatus(DataFeedTask.Status.Active);
+//        task.setSourceConfig("config");
+//        task.setImportTemplate(importTable);
+//        task.setImportData(dataTable);
+//        task.setStartTime(new Date());
+//        task.setLastImported(new Date());
+//        datafeed.addTask(task);
         metadataProxy.createDataFeed(firstTenant.getId(), datafeed);
     }
 
