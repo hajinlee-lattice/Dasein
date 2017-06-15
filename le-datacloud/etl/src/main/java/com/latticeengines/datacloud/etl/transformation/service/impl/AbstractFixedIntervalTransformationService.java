@@ -41,7 +41,7 @@ public abstract class AbstractFixedIntervalTransformationService<T extends Trans
 
     @Override
     protected TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration) {
-        if (!transformDataAndUpdateProgress(progress, transformationConfiguration)) {
+        if (transformDataAndUpdateProgress(progress, transformationConfiguration)) {
             return progress;
         }
         return null;
