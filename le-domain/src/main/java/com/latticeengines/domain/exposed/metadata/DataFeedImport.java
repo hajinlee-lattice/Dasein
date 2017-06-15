@@ -60,7 +60,7 @@ public class DataFeedImport implements HasPid, Serializable {
 
     @JsonProperty("data_table")
     @OneToOne
-    @JoinColumn(name = "FK_DATA_ID", nullable = false)
+    @JoinColumn(name = "FK_DATA_ID", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Table dataTable;
 
