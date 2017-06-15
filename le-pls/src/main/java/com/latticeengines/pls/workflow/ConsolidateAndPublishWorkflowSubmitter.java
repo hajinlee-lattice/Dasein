@@ -45,6 +45,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("data feed %s status: %s", datafeedName, datafeed.getStatus()));
         DataFeedExecution execution = datafeed.getActiveExecution();
         if (datafeed.getStatus() != Status.InitialLoaded && datafeed.getStatus() != Status.Active
+                && datafeed.getStatus() != Status.InitialConsolidated
                 || execution.getStatus() == DataFeedExecution.Status.Started) {
             throw new RuntimeException("we can't launch any consolidate workflow now as it is not ready.");
         }
@@ -56,7 +57,8 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private WorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType, String datafeedName) {
-        return new ConsolidateAndPublishWorkflowConfiguration.Builder().customer(MultiTenantContext.getCustomerSpace()) //
+        return new ConsolidateAndPublishWorkflowConfiguration.Builder() //
+                .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
                 .datafeedName(datafeedName) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
@@ -65,8 +67,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .build()) //
                 .dataCollectionType(dataCollectionType) //
                 .idField("LEAccountIDLong") //
-                .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder()
-                        .put(MatchKey.Domain, Arrays.asList("URL")) //
+                .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder().put(MatchKey.Domain, Arrays.asList("URL")) //
                         .put(MatchKey.City, Arrays.asList(InterfaceName.City.name())) //
                         .put(MatchKey.State, Arrays.asList("StateProvince")) //
                         .put(MatchKey.Country, Arrays.asList(InterfaceName.Country.name())) //
