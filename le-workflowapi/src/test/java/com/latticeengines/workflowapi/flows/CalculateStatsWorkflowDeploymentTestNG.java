@@ -1,9 +1,11 @@
 package com.latticeengines.workflowapi.flows;
 
+import static com.latticeengines.domain.exposed.metadata.MetadataConstants.DATE_FORMAT;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CalculateStatsWorkflowConfiguration;
@@ -44,6 +47,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     private DataCollectionProxy dataCollectionProxy;
 
     protected CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("CalculateStatsTest");
+    protected String dataCollectionName = "DataCollection_" + DATE_FORMAT.format(new Date());
 
     @BeforeClass(groups = "deployment")
     protected void setupForWorkflow() throws Exception {
@@ -68,27 +72,31 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         metadataProxy.createTable(DEMO_CUSTOMERSPACE.toString(), table.getName(), table);
 
         DataCollection dataCollection = new DataCollection();
+        dataCollection.setName(dataCollectionName);
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollection.addTable(table);
         dataCollectionProxy.createOrUpdateDataCollection(DEMO_CUSTOMERSPACE.toString(), dataCollection);
+        dataCollectionProxy.upsertTable(DEMO_CUSTOMERSPACE.toString(), dataCollectionName, table.getName(),
+                TableRoleInCollection.ConsolidatedAccount);
 
         Table retrievedTable = metadataProxy.getTable(DEMO_CUSTOMERSPACE.toString(), table.getName());
         Assert.assertNotNull(retrievedTable);
         System.out.println("attributes are" + Arrays.toString(retrievedTable.getAttributes().toArray()));
 
-        DataCollection retrievedCollection = dataCollectionProxy.getDataCollectionByType(DEMO_CUSTOMERSPACE.toString(),
-                DataCollectionType.Segmentation);
+        DataCollection retrievedCollection = dataCollectionProxy.getDataCollection(DEMO_CUSTOMERSPACE.toString(),
+                dataCollectionName);
         Assert.assertNotNull(retrievedCollection);
+
+        Table retrivedMasterTable = dataCollectionProxy.getTable(DEMO_CUSTOMERSPACE.toString(), dataCollectionName,
+                TableRoleInCollection.ConsolidatedAccount);
+        Assert.assertNotNull(retrivedMasterTable);
     }
 
     @AfterClass(groups = "deployment")
     protected void cleanUpAfterWorkflow() throws Exception {
-//        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
-//        cleanCamille(DEMO_CUSTOMERSPACE);
-//        cleanHdfs(DEMO_CUSTOMERSPACE);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());
         CalculateStatsWorkflowConfiguration config = generateConfiguration();
@@ -105,7 +113,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     private CalculateStatsWorkflowConfiguration generateConfiguration() {
         return new CalculateStatsWorkflowConfiguration.Builder() //
                 .customer(DEMO_CUSTOMERSPACE) //
-                .dataCollectionType(DataCollectionType.Segmentation) //
+                .dataCollectionName(dataCollectionName) //
                 .build();
     }
 
@@ -121,7 +129,8 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         Table profileTable = dataCollection.getTable(SchemaInterpretation.Profile);
         Assert.assertNotNull(profileTable);
 
-        StatisticsContainer statisticsContainer = dataCollection.getStatisticsContainer();
+        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(DEMO_CUSTOMERSPACE.toString(),
+                dataCollectionName);
         Assert.assertNotNull(statisticsContainer);
     }
 

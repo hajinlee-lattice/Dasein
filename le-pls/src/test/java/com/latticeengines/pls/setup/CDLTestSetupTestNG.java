@@ -51,13 +51,12 @@ public class CDLTestSetupTestNG extends PlsDeploymentTestNGBase {
         if (!tenantService.hasTenantId(customerSpace.toString())) {
             createTenant(customerSpace);
         }
-
-        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace.toString(),
-                DataCollectionType.Segmentation);
+        DataCollection dataCollection = new DataCollection();
+        dataCollection.setType(DataCollectionType.Segmentation);
+        dataCollection = dataCollectionProxy.createOrUpdateDataCollection(customerSpace.toString(), dataCollection);
         StatisticsContainer container = new StatisticsContainer();
         container.setStatistics(generateStatistics());
-        dataCollection.setStatisticsContainer(container);
-        dataCollectionProxy.createOrUpdateDataCollection(customerSpace.toString(), dataCollection);
+        dataCollectionProxy.upsertStats(customerSpace.toString(), dataCollection.getName(), container);
     }
 
     private Statistics generateStatistics() {
@@ -85,12 +84,11 @@ public class CDLTestSetupTestNG extends PlsDeploymentTestNGBase {
             if (!categoryStatistics.getSubcategories().containsKey(attribute.getSubcategory())) {
                 categoryStatistics.getSubcategories().put(attribute.getSubcategory(), new SubcategoryStatistics());
             }
-            SubcategoryStatistics subcategoryStatistics = categoryStatistics.getSubcategories().get(
-                    attribute.getSubcategory());
+            SubcategoryStatistics subcategoryStatistics = categoryStatistics.getSubcategories()
+                    .get(attribute.getSubcategory());
             AttributeStatistics attributeStatistics = generateAttributeStatistics(attribute);
             subcategoryStatistics.getAttributes().put(
-                    new ColumnLookup(SchemaInterpretation.AccountMaster, attribute.getName()),
-                    attributeStatistics);
+                    new ColumnLookup(SchemaInterpretation.AccountMaster, attribute.getName()), attributeStatistics);
         }
 
         return statistics;

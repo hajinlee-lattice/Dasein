@@ -3,17 +3,17 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class UpdateStatsObjectsConfiguration extends BaseStepConfiguration {
 
     @JsonProperty("customer_space")
+    @NotNull
     private CustomerSpace customerSpace;
 
-    @JsonProperty("data_collection_type")
+    @JsonProperty("data_collection_name")
     @NotNull
-    private DataCollectionType dataCollectionType;
+    private String dataCollectionName;
 
     public CustomerSpace getCustomerSpace() {
         return this.customerSpace;
@@ -23,12 +23,11 @@ public class UpdateStatsObjectsConfiguration extends BaseStepConfiguration {
         this.customerSpace = customerSpace;
     }
 
-    public DataCollectionType getDataCollectionType() {
-        return dataCollectionType;
+    public String getDataCollectionName() {
+        return dataCollectionName;
     }
 
-    public void setDataCollectionType(DataCollectionType dataCollectionType) {
-        this.dataCollectionType = dataCollectionType;
+    public void setDataCollectionName(String dataCollectionName) {
+        this.dataCollectionName = dataCollectionName;
     }
-
 }

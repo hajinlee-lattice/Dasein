@@ -18,11 +18,10 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
@@ -55,14 +54,14 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     public void execute() {
         log.info("Inside UpdateStatsObjects execute()");
         String customerSpaceStr = configuration.getCustomerSpace().toString();
-        DataCollectionType dataCollectionType = configuration.getDataCollectionType();
-        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpaceStr,
-                dataCollectionType);
-        Table masterTable = CDLWorkflowStepUtils.getMasterTable(dataCollection);
+        String collectionName = configuration.getDataCollectionName();
+        Table masterTable = dataCollectionProxy.getTable(customerSpaceStr, collectionName,
+                TableRoleInCollection.ConsolidatedAccount);
         if (masterTable == null) {
             throw new NullPointerException("Master table for Stats Object Calculation is not found.");
         }
-        Table profileTable = CDLWorkflowStepUtils.getProfileTable(dataCollection);
+        Table profileTable = dataCollectionProxy.getTable(customerSpaceStr, collectionName,
+                TableRoleInCollection.Profile);
         if (profileTable == null) {
             throw new NullPointerException("Profile table for Stats Object Calculation is not found.");
         }
@@ -75,7 +74,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         }
 
         StatisticsContainer statsContainer = constructStatsContainer(masterTable, statsTable);
-        dataCollectionProxy.upsertStatsToDataCollection(customerSpaceStr, dataCollectionType, statsContainer, false);
+        dataCollectionProxy.upsertStats(customerSpaceStr, collectionName, statsContainer);
     }
 
     private StatsCube getStatsCube(Table targetTable) {

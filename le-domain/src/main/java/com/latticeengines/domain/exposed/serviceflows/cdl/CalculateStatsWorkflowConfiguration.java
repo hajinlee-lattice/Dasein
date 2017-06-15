@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -29,9 +28,9 @@ public class CalculateStatsWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder dataCollectionType(DataCollectionType dataCollectionType) {
-            calculateStatsConfiguration.setDataCollectionType(dataCollectionType);
-            updateStatsObjectsConfiguration.setDataCollectionType(dataCollectionType);
+        public Builder dataCollectionName(String dataCollectionName) {
+            calculateStatsConfiguration.setDataCollectionName(dataCollectionName);
+            updateStatsObjectsConfiguration.setDataCollectionName(dataCollectionName);
             return this;
         }
 

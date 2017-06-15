@@ -15,10 +15,10 @@ import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
@@ -42,13 +42,13 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
-    public ApplicationId submit(DataCollectionType dataCollectionType, String datafeedName) {
+    public ApplicationId submit(String dataCollectionName, String datafeedName) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
         log.info(String.format("Submitting calculate stats workflow for data collection %s for customer %s",
-                dataCollectionType, customerSpace));
+                dataCollectionName, customerSpace));
 
         DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
                 datafeedName);
@@ -57,16 +57,18 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
 
         if (datafeedStatus == Status.Active || datafeedStatus == Status.InitialConsolidated) {
             metadataProxy.updateDataFeedStatus(customerSpace.toString(), datafeedName, Status.Finalizing.getName());
-            DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace.toString(),
-                    dataCollectionType);
+            DataCollection dataCollection = dataCollectionProxy.getDataCollection(customerSpace.toString(),
+                    dataCollectionName);
             if (dataCollection == null) {
-                throw new LedpException(LedpCode.LEDP_37013, new String[] { dataCollectionType.name() });
+                throw new LedpException(LedpCode.LEDP_37013, new String[] { dataCollection.getType().name() });
             }
-            if (dataCollection.getTable(SchemaInterpretation.Account.name()) == null) {
-                throw new LedpException(LedpCode.LEDP_37003, new String[] { SchemaInterpretation.Account.name() });
+            Table masterTableInDb = dataCollectionProxy.getTable(customerSpace.toString(), dataCollectionName,
+                    TableRoleInCollection.ConsolidatedAccount);
+            if (masterTableInDb == null) {
+                throw new LedpException(LedpCode.LEDP_37003,
+                        new String[] { TableRoleInCollection.ConsolidatedAccount.name() });
             }
-
-            CalculateStatsWorkflowConfiguration configuration = generateConfiguration(dataCollectionType, datafeedName,
+            CalculateStatsWorkflowConfiguration configuration = generateConfiguration(dataCollectionName, datafeedName,
                     datafeedStatus);
             return workflowJobService.submit(configuration);
         } else {
@@ -76,12 +78,12 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
 
     }
 
-    public CalculateStatsWorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType,
-            String datafeedName, Status status) {
+    public CalculateStatsWorkflowConfiguration generateConfiguration(String collectionName, String datafeedName,
+            Status status) {
         return new CalculateStatsWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(MultiTenantContext.getCustomerSpace()) //
-                .dataCollectionType(dataCollectionType) //
+                .dataCollectionName(collectionName) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
@@ -100,7 +102,7 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
         redshiftTableConfig.setDistStyle(DistStyle.Key);
         redshiftTableConfig.setDistKey("LatticeAccountId");
         redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
-        redshiftTableConfig.setSortKeys(Collections.<String> singletonList("LatticeAccountId"));
+        redshiftTableConfig.setSortKeys(Collections.singletonList("LatticeAccountId"));
         redshiftTableConfig.setS3Bucket(s3Bucket);
         exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
         return exportConfig;

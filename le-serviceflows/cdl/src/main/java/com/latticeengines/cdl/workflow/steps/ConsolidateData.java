@@ -35,8 +35,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
@@ -79,18 +79,19 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     public void onConfigurationInitialized() {
         customerSpace = configuration.getCustomerSpace();
         List<Table> inputTables = getListObjectFromContext(CONSOLIDATE_INPUT_TABLES, Table.class);
-        inputTables.sort(Comparator.comparing(
-                (Table t) -> t.getLastModifiedKey() == null ? -1
-                        : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1 : t.getLastModifiedKey()
-                                .getLastModifiedTimestamp()).reversed());
+        inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
+                : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
+                        : t.getLastModifiedKey().getLastModifiedTimestamp())
+                .reversed());
         for (Table table : inputTables) {
             inputTableNames.add(table.getName());
         }
 
-        DataCollectionType dataCollectionType = configuration.getDataCollectionType();
-        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace.toString(),
-                dataCollectionType);
-        masterTableName = CDLWorkflowStepUtils.getMasterTable(dataCollection).getName();
+        String collectionName = configuration.getDataCollectionName();
+        DataCollection dataCollection = dataCollectionProxy.getDataCollection(customerSpace.toString(), collectionName);
+        Table masterTable = dataCollectionProxy.getTable(customerSpace.toString(), collectionName,
+                TableRoleInCollection.ConsolidatedAccount);
+        masterTableName = masterTable.getName();
         log.info("Set masterTableName=" + masterTableName);
 
         idField = configuration.getIdField();
@@ -100,7 +101,9 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
 
         dataInitialLoaded = getObjectFromContext(DATA_INITIAL_LOADED, Boolean.class);
         if (isBucketing()) {
-            profileTableName = CDLWorkflowStepUtils.getProfileTable(dataCollection).getName();
+            Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(), collectionName,
+                    TableRoleInCollection.Profile);
+            profileTableName = profileTable.getName();
             log.info("Set profileTableName=" + profileTableName);
         }
     }
@@ -117,8 +120,8 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
 
     @Override
     public void onExecutionCompleted() {
-        metadataProxy
-                .deleteTable(customerSpace.toString(), TableUtils.getFullTableName(mergedTableName, targetVersion));
+        metadataProxy.deleteTable(customerSpace.toString(),
+                TableUtils.getFullTableName(mergedTableName, targetVersion));
 
         Table consolidatedTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(consolidatedTableName, targetVersion));

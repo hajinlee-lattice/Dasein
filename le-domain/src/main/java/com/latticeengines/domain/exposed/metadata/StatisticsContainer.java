@@ -27,6 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -44,6 +45,7 @@ uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) }
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTenant {
     private static final Log log = LogFactory.getLog(StatisticsContainer.class);
 
@@ -63,14 +65,24 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
     @JsonIgnore
     private byte[] data;
 
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
     @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "FK_SEGMENT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private MetadataSegment segment;
+
+    @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
+
+    @JsonProperty("model")
+    @Column(name = "MODEL")
+    private String modelId;
 
     public byte[] getData() {
         return data;
@@ -155,5 +167,21 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
             setTenantId(tenant.getPid());
         }
         this.tenant = tenant;
+    }
+
+    public MetadataSegment getSegment() {
+        return segment;
+    }
+
+    public void setSegment(MetadataSegment segment) {
+        this.segment = segment;
+    }
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 }

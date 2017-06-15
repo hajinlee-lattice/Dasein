@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.MetadataService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -54,15 +55,16 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     private void personalize(List<ColumnMetadata> list) {
-        attributeCustomizationService.addFlags(list.stream().map(c -> (HasAttributeCustomizations) c)
-                .collect(Collectors.toList()));
+        attributeCustomizationService
+                .addFlags(list.stream().map(c -> (HasAttributeCustomizations) c).collect(Collectors.toList()));
     }
 
     @Override
     public Statistics getStatistics() {
         DataCollection dataCollection = getDataCollection();
         if (dataCollection != null) {
-            StatisticsContainer container = dataCollection.getStatisticsContainer();
+            String customerSpace = CustomerSpace.parse(dataCollection.getTenant().getId()).toString();
+            StatisticsContainer container = dataCollectionProxy.getStats(customerSpace, dataCollection.getName());
             if (container != null) {
                 return container.getStatistics();
             }

@@ -1,8 +1,17 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import static com.latticeengines.domain.exposed.metadata.MetadataConstants.DATE_FORMAT;
+
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -10,17 +19,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
+import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableTag;
-import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.metadata.dao.DataCollectionDao;
 import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
+import com.latticeengines.metadata.dao.DataCollectionTableDao;
+import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
@@ -30,11 +43,22 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("dataCollectionEntityMgr")
 public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollection> implements DataCollectionEntityMgr {
 
+    private static final Log log = LogFactory.getLog(DataCollectionEntityMgrImpl.class);
+
     @Autowired
     private DataCollectionDao dataCollectionDao;
 
     @Autowired
+    private DataCollectionTableDao dataCollectionTableDao;
+
+    @Autowired
     private TableEntityMgr tableEntityMgr;
+
+    @Autowired
+    private TableDao tableDao;
+
+    @Autowired
+    private SegmentEntityMgr segmentEntityMgr;
 
     @Autowired
     private TableTagEntityMgr tableTagEntityMgr;
@@ -44,9 +68,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Autowired
     private SegmentationDataCollectionService segmentationDataCollectionService;
-
-    @Autowired
-    private TableTypeHolder tableTypeHolder;
 
     @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
@@ -59,34 +80,35 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void createDataCollection(DataCollection dataCollection) {
-        removeDefaultTables(dataCollection);
+//        removeDefaultTables(dataCollection);
 
-        List<String> tableNames = dataCollection.getTables().stream() //
-                .map(Table::getName).collect(Collectors.toList());
-        List<Table> tables = tableNames.stream() //
-                .map(name -> tableEntityMgr.findByName(name)) //
-                .collect(Collectors.toList());
-        if (tables.stream().anyMatch(table -> table == null)) {
-            throw new LedpException(LedpCode.LEDP_11006, new String[] { String.join(",", tableNames) });
-        }
-
-        if (dataCollection.getStatisticsContainer() != null) {
-            statisticsContainerEntityMgr.createStatistics(dataCollection.getStatisticsContainer());
-        }
-
-        for (Table table : tables) {
-            TableTag tableTag = new TableTag();
-            tableTag.setTable(table);
-            tableTag.setName(dataCollection.getName());
-            tableTag.setTenantId(MultiTenantContext.getTenant().getPid());
-            tableTagEntityMgr.create(tableTag);
-        }
         dataCollection.setTenant(MultiTenantContext.getTenant());
+        if (StringUtils.isBlank(dataCollection.getName())) {
+            dataCollection.setName("DataCollection_" + DATE_FORMAT.format(new Date()));
+        }
         create(dataCollection);
         for (DataCollectionProperty dataCollectionProperty : dataCollection.getProperties()) {
             dataCollectionProperty.setDataCollection(dataCollection);
             dataCollectionPropertyDao.create(dataCollectionProperty);
         }
+
+        if (segmentEntityMgr.findMasterSegment(dataCollection.getName()) == null) {
+            // create master segment
+            MetadataSegment segment = masterSegment(dataCollection);
+            segmentEntityMgr.createOrUpdate(segment);
+        }
+    }
+
+    private MetadataSegment masterSegment(DataCollection dataCollection) {
+        MetadataSegment segment = new MetadataSegment();
+        segment.setDataCollection(dataCollection);
+        segment.setName("Segment_" + UUID.randomUUID());
+        segment.setDisplayName("Customer Universe");
+        segment.setDescription("Master segment of the collection " + dataCollection.getName());
+        segment.setUpdated(new Date());
+        segment.setCreated(new Date());
+        segment.setMasterSegment(true);
+        return segment;
     }
 
     private void removeDefaultTables(DataCollection dataCollection) {
@@ -104,7 +126,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
         DataCollection dataCollection = candidates.get(0);
         HibernateUtils.inflateDetails(dataCollection.getProperties());
-        HibernateUtils.inflateDetails(dataCollection.getDataFeeds());
         return dataCollection;
     }
 
@@ -114,11 +135,10 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         DataCollection collection = findByField("type", type);
         if (collection != null) {
             HibernateUtils.inflateDetails(collection.getProperties());
-            HibernateUtils.inflateDetails(collection.getDataFeeds());
         } else {
-            if (registerDefault(type)) {
-                collection = getDataCollection(type);
-            }
+//            if (registerDefault(type)) {
+//                collection = getDataCollection(type);
+//            }
         }
 
         return collection;
@@ -127,8 +147,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public void fillInTables(DataCollection dataCollection) {
-        tableTypeHolder.setTableType(TableType.DATATABLE);
-        List<Table> tables = tableTagEntityMgr.getTablesForTag(dataCollection.getName());
+        List<Table> tables = getTablesOfRole(dataCollection.getName(), null);
         dataCollection.setTables(tables);
         fillInDefaultTables(dataCollection);
     }
@@ -159,6 +178,73 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
 
         return false;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    @Override
+    public List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole) {
+        List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole);
+        if (tableNames == null) {
+            return Collections.emptyList();
+        }
+        return tableNames.stream().map(tableEntityMgr::findByName).filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role) {
+        Table table = tableEntityMgr.findByName(tableName);
+        if (table != null) {
+            DataCollection collection = getDataCollection(collectionName);
+            DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
+            if (dataCollectionTable == null) {
+                dataCollectionTable = new DataCollectionTable();
+                dataCollectionTable.setTenant(MultiTenantContext.getTenant());
+            } else {
+                dataCollectionTableDao.delete(dataCollectionTable);
+            }
+            dataCollectionTable.setDataCollection(collection);
+            dataCollectionTable.setTable(table);
+            dataCollectionTable.setRole(role);
+            dataCollectionTableDao.create(dataCollectionTable);
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void removeTableFromCollection(String collectionName, String tableName) {
+        DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
+        if (dataCollectionTable != null) {
+            dataCollectionTableDao.create(dataCollectionTable);
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer,
+            String modelId) {
+        DataCollection dataCollection = getDataCollection(collectionName);
+        if (dataCollection == null) {
+            throw new IllegalArgumentException("Cannot find data collection named " + collectionName);
+        }
+        MetadataSegment masterSeg = segmentEntityMgr.findMasterSegment(dataCollection.getName());
+        if (masterSeg == null) {
+            log.info("Did not see the master segment. Creating one now.");
+            masterSeg = masterSegment(dataCollection);
+            segmentEntityMgr.create(masterSeg);
+            masterSeg = segmentEntityMgr.findMasterSegment(dataCollection.getName());
+        }
+        if (masterSeg == null) {
+            throw new IllegalStateException("Cannot find master segment of the collection " + collectionName);
+        }
+        StatisticsContainer oldStats = statisticsContainerEntityMgr.findInMasterSegment(collectionName, modelId);
+        if (oldStats != null) {
+            log.info("There is already a main stats for collection " + collectionName + ". Remove it first.");
+            statisticsContainerEntityMgr.delete(oldStats);
+        }
+        statisticsContainer.setSegment(masterSeg);
+        statisticsContainerEntityMgr.create(statisticsContainer);
     }
 
 }

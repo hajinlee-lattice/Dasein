@@ -5,12 +5,15 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -53,6 +56,9 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
 
     protected void waitForFinish(TransformationProgress progress) {
         TransformationProgress progressInDb = null;
+        String appIdStr = progress.getYarnAppId();
+        ApplicationId appId = ConverterUtils.toApplicationId(appIdStr);
+        YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
         for (int i = 0; i < MAX_LOOPS; i++) {
             progressInDb = transformationProxy.getProgress(progress.getRootOperationUID());
             if (ProgressStatus.FINISHED.equals(progressInDb.getStatus())

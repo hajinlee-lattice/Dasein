@@ -2,31 +2,52 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
+    @Autowired
+    private TableEntityMgr tableEntityMgr;
+
+    @Autowired
+    private SegmentService segmentService;
+
     private static final DataCollection dataCollection = new DataCollection();
-    private static final String DATA_COLLECTION_NAME = "DATA_COLLECTION_NAME";
+    private static final String DATA_COLLECTION_NAME = "TestDataCollection";
+
+    private static final String tableName1 = "Table1";
+    private static final String tableName2 = "Table2";
 
     @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace1));
+        tableEntityMgr.deleteByName(tableName1);
+        tableEntityMgr.deleteByName(tableName2);
     }
 
     @BeforeMethod(groups = "functional")
@@ -37,23 +58,56 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     @Test(groups = "functional")
     public void create() {
         dataCollection.setName(DATA_COLLECTION_NAME);
-        Table table = new Table();
-        table.setName(TABLE1);
-        dataCollection.setTables(Collections.singletonList(table));
+        Table table1 = new Table();
+        table1.setName(tableName1);
+        table1.setDisplayName(tableName1);
+        table1.setTableType(TableType.DATATABLE);
+        tableEntityMgr.create(table1);
+
+        Table table2 = new Table();
+        table2.setName(tableName2);
+        table2.setDisplayName(tableName2);
+        table2.setTableType(TableType.DATATABLE);
+        tableEntityMgr.create(table2);
+
+        dataCollection.setTables(Arrays.asList(table1, table2));
         dataCollection.setType(DataCollectionType.Segmentation);
+
+        List<DataCollectionProperty> properties = new ArrayList<>();
+        properties.add(new DataCollectionProperty("key1", "value1"));
+        properties.add(new DataCollectionProperty("key2", "value2"));
+        dataCollection.setProperties(properties);
+
         dataCollectionEntityMgr.createDataCollection(dataCollection);
+        dataCollectionEntityMgr.upsertTableToCollection(dataCollection.getName(), tableName1, TableRoleInCollection.ConsolidatedAccount);
+        dataCollectionEntityMgr.upsertTableToCollection(dataCollection.getName(), tableName2, TableRoleInCollection.Profile);
+
+        DataCollection collection = dataCollectionEntityMgr.getDataCollection(dataCollection.getName());
+        Assert.assertEquals(collection.getName(), DATA_COLLECTION_NAME);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "create")
+    public void findTableByRole() {
+        List<Table> tables = dataCollectionEntityMgr.getTablesOfRole(dataCollection.getName(), TableRoleInCollection.ConsolidatedAccount);
+        Assert.assertNotNull(tables);
+        Assert.assertEquals(tables.size(), 1);
+        Assert.assertEquals(tables.get(0).getName(), tableName1);
+
+        tables = dataCollectionEntityMgr.getTablesOfRole(dataCollection.getName(), TableRoleInCollection.Profile);
+        Assert.assertNotNull(tables);
+        Assert.assertEquals(tables.size(), 1);
+        Assert.assertEquals(tables.get(0).getName(), tableName2);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "create")
+    public void checkMasterSegment() {
+        MetadataSegment masterSegment = segmentService.findMaster(customerSpace1, dataCollection.getName());
+        Assert.assertNotNull(masterSegment);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(DataCollectionType.Segmentation);
-        assertEquals(retrieved.getName(), dataCollection.getName());
-        assertEquals(retrieved.getType(), dataCollection.getType());
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "retrieve")
-    public void retrieveByName() {
-        DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(dataCollection.getName());
+        DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(DATA_COLLECTION_NAME);
         assertEquals(retrieved.getName(), dataCollection.getName());
         assertEquals(retrieved.getType(), dataCollection.getType());
     }

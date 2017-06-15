@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.metadata;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -18,14 +19,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
-
-import springfox.documentation.annotations.ApiIgnore;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -38,13 +38,16 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+
 import io.swagger.annotations.ApiModelProperty;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_SEGMENT")
+@javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = {
+        "TENANT_ID", "NAME" }))
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
-public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId {
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, HasProperties<MetadataSegmentProperty> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,7 +65,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     private String displayName;
 
     @JsonProperty("description")
-    @Column(name = "DESCRIPTION", nullable = true)
+    @Column(name = "DESCRIPTION")
     private String description;
 
     @JsonIgnore
@@ -77,7 +80,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_DATA_COLLECTION_ID", nullable = false)
+    @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private DataCollection dataCollection;
 
@@ -89,15 +92,24 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @JsonProperty("created")
     private Date created;
 
+    @JsonProperty("is_master_segment")
+    @Column(name = "IS_MASTER_SEGMENT", nullable = false)
+    private Boolean isMasterSegment = false;
+
     @OneToMany(cascade = CascadeType.MERGE, mappedBy = "metadataSegment", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("segment_properties")
-    private List<MetadataSegmentProperty> metadataSegmentProperties = new ArrayList<>();
+    private List<MetadataSegmentProperty> properties = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JsonProperty("attributes")
     @JoinTable(name = "METADATA_SEGMENT_ATTRIBUTE_DEPENDENCY", joinColumns = { @JoinColumn(name = "FK_ATTRIBUTE_ID") }, inverseJoinColumns = { @JoinColumn(name = "FK_SEGMENT_ID") })
     private List<Attribute> attributeDependencies = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "segment")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("statistics_containers")
+    private List<StatisticsContainer> statisticsContainers = new ArrayList<>();
 
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
@@ -187,28 +199,28 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         this.updated = updated;
     }
 
-    public List<MetadataSegmentProperty> getMetadataSegmentProperties() {
-        return metadataSegmentProperties;
+    public List<MetadataSegmentProperty> getProperties() {
+        return properties;
     }
 
-    public void setMetadataSegmentProperties(List<MetadataSegmentProperty> metadataSegmentProperties) {
-        this.metadataSegmentProperties = metadataSegmentProperties;
-    }
-
-    public void addSegmentProperty(MetadataSegmentProperty metadataSegmentProperty) {
-        this.metadataSegmentProperties.add(metadataSegmentProperty);
+    public void setProperties(List<MetadataSegmentProperty> properties) {
+        this.properties = properties;
     }
 
     @Transient
     @JsonIgnore
     public MetadataSegmentPropertyBag getSegmentPropertyBag() {
-        return new MetadataSegmentPropertyBag(metadataSegmentProperties);
+        return new MetadataSegmentPropertyBag(properties);
     }
 
     @Transient
     @JsonIgnore
-    public void setSegmentPropertyBag(MetadataSegmentPropertyBag metadataSegmentPropertyBag) {
-        this.metadataSegmentProperties = metadataSegmentPropertyBag.getBag();
+    public void setSegmentPropertyBag(MetadataSegmentPropertyBag properties) {
+        this.properties = properties.getBag();
+    }
+
+    public void addSegmentProperty(MetadataSegmentProperty metadataSegmentProperty) {
+        this.properties.add(metadataSegmentProperty);
     }
 
     @Override
@@ -236,5 +248,32 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setAttributeDependencies(List<Attribute> attributeDependencies) {
         this.attributeDependencies = attributeDependencies;
+    }
+
+    @Override
+    public void putProperty(String key, String value) {
+        List<MetadataSegmentProperty> properties = getProperties().stream() //
+                .filter(p -> !p.getProperty().equals(key))
+                .collect(Collectors.toList());
+        properties.add(new MetadataSegmentProperty(key, value));
+        setProperties(properties);
+    }
+
+    @Override
+    public MetadataSegmentProperty getProperty(String key) {
+        for (MetadataSegmentProperty property: getProperties()) {
+            if (property.getProperty().equals(key)) {
+                return property;
+            }
+        }
+        return null;
+    }
+
+    public Boolean getMasterSegment() {
+        return isMasterSegment;
+    }
+
+    public void setMasterSegment(Boolean masterSegment) {
+        isMasterSegment = masterSegment;
     }
 }

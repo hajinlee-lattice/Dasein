@@ -36,6 +36,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
     @Autowired
     private DataCollectionService dataCollectionService;
 
+    private static final String DATA_COLLECTION_NAME = "SegmentTestCollection";
     private static final String SEGMENT_NAME = "SEGMENT_NAME";
 
     private static final String SEGMENT_DISPLAY_NAME = "SEGMENT_DISPLAY_NAME";
@@ -45,7 +46,10 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
     private static final MetadataSegment METADATA_SEGMENT = new MetadataSegment();
     private static final MetadataSegmentProperty METADATA_SEGMENT_PROPERTY_1 = new MetadataSegmentProperty();
     private static final MetadataSegmentProperty METADATA_SEGMENT_PROPERTY_2 = new MetadataSegmentProperty();
+
     private Attribute arbitraryAttribute;
+
+    private DataCollection dataCollection;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -62,7 +66,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
         METADATA_SEGMENT_PROPERTY_2.setOption(MetadataSegmentPropertyName.NumContacts.getName());
         METADATA_SEGMENT_PROPERTY_2.setValue("200");
 
-        DataCollection dataCollection = dataCollectionService.getDataCollectionByType(MultiTenantContext
+        dataCollection = dataCollectionService.getDataCollectionByType(MultiTenantContext
                 .getCustomerSpace().toString(), DataCollectionType.Segmentation);
         arbitraryAttribute = dataCollection.getTables().get(0).getAttributes().get(5);
     }
@@ -98,7 +102,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends MetadataFunctionalTestNG
         assertEquals(retrieved.getDisplayName(), METADATA_SEGMENT.getDisplayName());
         assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);
         assertEquals(METADATA_SEGMENT.getDataCollection().getType(), DataCollectionType.Segmentation);
-        assertEquals(retrieved.getMetadataSegmentProperties().size(), 2);
+        assertEquals(retrieved.getProperties().size(), 2);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumAccounts), 100);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumContacts), 200);
         assertEquals(retrieved.getAttributeDependencies().size(), 1);

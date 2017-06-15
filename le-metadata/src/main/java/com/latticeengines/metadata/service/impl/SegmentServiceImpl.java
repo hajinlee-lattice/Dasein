@@ -42,6 +42,11 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
+    public MetadataSegment findMaster(String customerSpace, String collectionName) {
+        return segmentEntityMgr.findMasterSegment(collectionName);
+    }
+
+    @Override
     public void deleteAllSegments(String customerSpace) {
         List<MetadataSegment> segments = getSegments(customerSpace);
         for (MetadataSegment segment : segments) {

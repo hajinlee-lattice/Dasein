@@ -73,7 +73,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         assertNotNull(retrieved);
         assertEquals(retrieved.getName(), METADATA_SEGMENT_NAME);
         assertEquals(retrieved.getDisplayName(), METADATA_SEGMENT_DISPLAY_NAME);
-        assertEquals(retrieved.getMetadataSegmentProperties().size(), 2);
+        assertEquals(retrieved.getProperties().size(), 2);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumAccounts), NUM_ACCOUNTS);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumContacts), NUM_CONTACTS);
         assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);

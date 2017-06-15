@@ -14,5 +14,7 @@ public interface SegmentService {
 
     MetadataSegment findByName(String customerSpace, String name);
 
+    MetadataSegment findMaster(String customerSpace, String collectionName);
+
     void deleteAllSegments(String customerSpace);
 }

@@ -72,7 +72,8 @@ public class TableSource implements Source {
     }
 
     public static String getSourceName(CustomerSpace customerSpace, String tableName) {
-        return customerSpace.toString() + "-" + tableName;
+        String name = customerSpace.getTenantId() + "_" + tableName;
+        return name.replace("-", "_");
     }
 
     /*

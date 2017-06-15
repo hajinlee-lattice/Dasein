@@ -51,21 +51,23 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findByName(String name) {
-        MetadataSegment segment = segmentDao.findByNameWithSegmentationDataCollection(name);
-        initialize(segment);
+        MetadataSegment segment = segmentDao.findByField("name", name);
+        inflate(segment);
         return segment;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<MetadataSegment> findAll() {
-        return super.findAll().stream().map(this::initialize).collect(Collectors.toList());
+        return super.findAll().stream().map(this::inflate).collect(Collectors.toList());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findByName(String querySourceName, String name) {
-        return segmentDao.findByDataCollectionAndName(querySourceName, name);
+        MetadataSegment segment = segmentDao.findByDataCollectionAndName(querySourceName, name);
+        inflate(segment);
+        return segment;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -93,10 +95,27 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         addAttributeDependencies(segment);
 
         super.createOrUpdate(segment);
-        for (MetadataSegmentProperty metadataSegmentProperty : segment.getMetadataSegmentProperties()) {
+        for (MetadataSegmentProperty metadataSegmentProperty : segment.getProperties()) {
             metadataSegmentProperty.setMetadataSegment(segment);
             segmentPropertyDao.create(metadataSegmentProperty);
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public List<MetadataSegment> findAllInCollection(String collectionName) {
+        return super.findAll().stream() //
+                .filter(s -> s.getDataCollection().getName().equals(collectionName)) //
+                .map(this::inflate).collect(Collectors.toList());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public MetadataSegment findMasterSegment(String collectionName) {
+        return super.findAll().stream() //
+                .filter(s -> s.getDataCollection().getName().equals(collectionName)) //
+                .filter(s -> Boolean.TRUE.equals(s.getMasterSegment())) //
+                .map(this::inflate).findFirst().orElse(null);
     }
 
     private void addAttributeDependencies(MetadataSegment segment) {
@@ -128,7 +147,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         segment.setAttributeDependencies(attributes);
     }
 
-    private MetadataSegment initialize(MetadataSegment segment) {
+    private MetadataSegment inflate(MetadataSegment segment) {
         if (segment != null) {
             HibernateUtils.inflateDetails(segment.getAttributeDependencies());
         }

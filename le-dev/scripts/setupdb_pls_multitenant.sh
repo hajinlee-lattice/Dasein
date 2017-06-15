@@ -15,6 +15,7 @@ else
     sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_pls_multitenant_mysql5innodb.sql
 fi
 
+source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 
 mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true
 if [ -z "${mysql_version}" ]; then
@@ -30,9 +31,9 @@ else
     sed "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/scripts/setupdb_pls_multitenant.sql | eval $MYSQL_COMMAND
 fi
 
-# Expand aliases
-echo "Expanding aliases."
-shopt -s expand_aliases
-echo "Sourcing aliases file"
-source $WSHOME/le-dev/aliases
-runtest metadata -g registertable -t RegisterAccountMasterMetadataTableTestNG 
+## Expand aliases
+#echo "Expanding aliases."
+#shopt -s expand_aliases
+#echo "Sourcing aliases file"
+#source $WSHOME/le-dev/aliases
+#runtest metadata -g registertable -t RegisterAccountMasterMetadataTableTestNG

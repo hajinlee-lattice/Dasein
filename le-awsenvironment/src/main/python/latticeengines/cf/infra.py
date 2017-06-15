@@ -27,7 +27,6 @@ TOMCAT_APP_HEALTH_MAP = {
     "workflowapi": "/workflowapi/v2/api-docs",
     "quartz": "/quartz/v2/api-docs",
     "modelquality": "/modelquality/v2/api-docs",
-    "propdata": "/propdata/v2/api-docs",
     "datacloudapi": "/datacloudapi/v2/api-docs",
     "dellebi": "/dellebi/v2/api-docs",
     "objectapi": "/objectapi/health",
@@ -46,7 +45,7 @@ UI_APPS = ["lpi", "adminconsole"]
 API_APPS = [ 'playmaker', 'scoringapi', 'ulysses' ]
 APP_APPS = [ 'lpi', 'pls' ]
 OAUTH_APPS = [ 'oauth2' ]
-ADMINCONSOLE_APPS = [ 'adminconsole', 'matchapi', 'api', 'propdata' ]
+ADMINCONSOLE_APPS = [ 'adminconsole', 'matchapi', 'api' ]
 
 PARAM_TOMCAT_SECURITY_GROUP = Parameter("TomcatSecurityGroupId", "The security group to be used by tomcat", type="AWS::EC2::SecurityGroup::Id")
 PARAM_NODEJS_SECURITY_GROUP = Parameter("NodeJsSecurityGroupId", "The security group to be used by nodejs", type="AWS::EC2::SecurityGroup::Id")
@@ -233,7 +232,6 @@ def create_public_load_balancers(env, tg_map):
     resources.append(adminconsole_lsnr)
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["matchapi"], "/match/*"))
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["api"], "/api/*"))
-    resources.append(create_listener_rule(adminconsole_lsnr, tg_map["propdata"], "/propdata/*"))
 
     return resources, albs
 
@@ -302,7 +300,6 @@ def create_load_balancers(tg_map, stack):
     resources.append(create_listener_rule(private_lsnr, tg_map["api"], "/rest/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["datacloudapi"], "/datacloudapi/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["modelquality"], "/modelquality/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["propdata"], "/propdata/*"))
 
     resources.append(create_listener_rule(public_lsnr, tg_map["pls"], "/pls/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/score/*"))

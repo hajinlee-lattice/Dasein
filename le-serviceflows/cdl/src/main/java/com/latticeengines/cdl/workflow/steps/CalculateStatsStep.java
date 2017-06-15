@@ -33,10 +33,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
@@ -73,10 +71,13 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
     public void execute() {
         log.info("Inside CalculateStats execute()");
         String customerSpace = configuration.getCustomerSpace().toString();
-        DataCollectionType dataCollectionType = configuration.getDataCollectionType();
+        String collectionName = configuration.getDataCollectionName();
 
-        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(customerSpace, dataCollectionType);
-        Table masterTable = CDLWorkflowStepUtils.getMasterTable(dataCollection);
+        Table masterTable = dataCollectionProxy.getTable(customerSpace, collectionName,
+                TableRoleInCollection.ConsolidatedAccount);
+        if (masterTable == null) {
+            throw new IllegalStateException("Cannot find the master table in collection " + collectionName);
+        }
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 masterTable.getName()));
 
@@ -259,19 +260,11 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         if (profileTable == null) {
             throw new RuntimeException("Failed to find profile table in customer " + customerSpace);
         }
-        profileTable.setInterpretation(SchemaInterpretation.Profile.name());
-        metadataProxy.updateTable(customerSpace, profileTableName, profileTable);
-
-        DataCollectionType dataCollectionType = configuration.getDataCollectionType();
-        DataCollection dataCollection = dataCollectionProxy.upsertTableToDataCollection(customerSpace,
-                dataCollectionType, profileTableName, true);
-        if (dataCollection == null) {
-            throw new IllegalStateException("Failed to upsert profile table to data collection.");
-        }
-
-        profileTable = CDLWorkflowStepUtils.getProfileTable(dataCollection);
+        String collectionName = configuration.getDataCollectionName();
+        dataCollectionProxy.upsertTable(customerSpace, collectionName, profileTableName, TableRoleInCollection.Profile);
+        profileTable = dataCollectionProxy.getTable(customerSpace, collectionName, TableRoleInCollection.Profile);
         if (profileTable == null) {
-            throw new IllegalStateException("Cannot find the upsert profile table in data collection.");
+            throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
         }
     }
 

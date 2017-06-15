@@ -14,7 +14,6 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
@@ -39,7 +38,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
-    public ApplicationId submit(DataCollectionType dataCollectionType, String datafeedName) {
+    public ApplicationId submit(String dataCollectionName, String datafeedName) {
         DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
                 datafeedName);
         log.info(String.format("data feed %s status: %s", datafeedName, datafeed.getStatus()));
@@ -51,12 +50,11 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         }
         execution = metadataProxy.startExecution(MultiTenantContext.getCustomerSpace().toString(), datafeedName);
         log.info(String.format("started execution of %s with status: %s", datafeedName, execution.getStatus()));
-        WorkflowConfiguration configuration = generateConfiguration(dataCollectionType, datafeedName);
-        ApplicationId applicationId = workflowJobService.submit(configuration);
-        return applicationId;
+        WorkflowConfiguration configuration = generateConfiguration(dataCollectionName, datafeedName);
+        return workflowJobService.submit(configuration);
     }
 
-    private WorkflowConfiguration generateConfiguration(DataCollectionType dataCollectionType, String datafeedName) {
+    private WorkflowConfiguration generateConfiguration(String dataCollectionName, String datafeedName) {
         return new ConsolidateAndPublishWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -65,7 +63,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
                         .build()) //
-                .dataCollectionType(dataCollectionType) //
+                .dataCollectionName(dataCollectionName) //
                 .idField("LEAccountIDLong") //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder().put(MatchKey.Domain, Arrays.asList("URL")) //
                         .put(MatchKey.City, Arrays.asList(InterfaceName.City.name())) //

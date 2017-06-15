@@ -9,4 +9,8 @@ public interface StatisticsContainerEntityMgr extends BaseEntityMgr<StatisticsCo
     StatisticsContainer createOrUpdateStatistics(StatisticsContainer container);
 
     StatisticsContainer createStatistics(StatisticsContainer container);
+
+    StatisticsContainer findInSegment(String collectionName, String segmentName, String modelId);
+
+    StatisticsContainer findInMasterSegment(String collectionName, String modelId);
 }

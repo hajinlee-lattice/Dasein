@@ -24,14 +24,14 @@ public class SegmentResource {
     @Autowired
     private SegmentService segmentService;
 
-    @RequestMapping(value = "/all", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
         return segmentService.getSegments(customerSpace);
     }
 
-    @RequestMapping(value = "/name/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
     public MetadataSegment getSegment(@PathVariable String customerSpace, //

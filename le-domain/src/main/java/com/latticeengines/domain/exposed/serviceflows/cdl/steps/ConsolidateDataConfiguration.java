@@ -12,9 +12,9 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 
 public class ConsolidateDataConfiguration extends MicroserviceStepConfiguration {
 
-    @JsonProperty("data_collection_type")
+    @JsonProperty("data_collection_name")
     @NotNull
-    private DataCollectionType dataCollectionType;
+    private String dataCollectionName;
 
     @JsonProperty("id_field")
     @NotEmptyString
@@ -24,12 +24,12 @@ public class ConsolidateDataConfiguration extends MicroserviceStepConfiguration 
     @JsonProperty("match_key_map")
     Map<MatchKey, List<String>> matchKeyMap = null;
 
-    public DataCollectionType getDataCollectionType() {
-        return dataCollectionType;
+    public String getDataCollectionName() {
+        return dataCollectionName;
     }
 
-    public void setDataCollectionType(DataCollectionType dataCollectionType) {
-        this.dataCollectionType = dataCollectionType;
+    public void setDataCollectionName(String dataCollectionName) {
+        this.dataCollectionName = dataCollectionName;
     }
 
     public String getIdField() {

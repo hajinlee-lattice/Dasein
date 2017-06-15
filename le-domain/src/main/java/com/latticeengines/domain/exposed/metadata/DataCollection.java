@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -17,7 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -39,14 +38,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_DATA_COLLECTION", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "TENANT_ID", "TYPE" }))
+        "TENANT_ID", "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
-
-    public DataCollection() {
-        setName("DataCollection_" + UUID.randomUUID());
-    }
+public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, HasProperties<DataCollectionProperty> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,30 +64,34 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @JsonProperty("type")
-    @Column(name = "TYPE", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private DataCollectionType type;
-
-    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "dataCollection", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "dataCollection")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("properties")
     private List<DataCollectionProperty> properties = new ArrayList<>();
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataCollection")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "dataCollection")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private List<DataFeed> datafeeds = new ArrayList<>();
 
-    @OneToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "FK_STATISTICS_CONTAINER_ID")
-    @JsonProperty("statistics_container")
-    private StatisticsContainer statisticsContainer;
-
-    @JsonProperty("tables")
     @Transient
+    @JsonProperty("tables")
     private List<Table> tables = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "dataCollection")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private List<MetadataSegment> segments = new ArrayList<>();
+
+    @JsonProperty("type")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TYPE", nullable = false)
+    private DataCollectionType type;
+
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "dataCollection")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private List<DataCollectionTable> collectionTables = new ArrayList<>();
 
     @Override
     public Long getPid() {
@@ -158,6 +157,7 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         return JsonUtils.serialize(this);
     }
 
+    @JsonIgnore
     public Table getTable(SchemaInterpretation objectType) {
         if (objectType == null) {
             return null;
@@ -168,14 +168,6 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
 
     }
 
-    public List<DataCollectionProperty> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(List<DataCollectionProperty> properties) {
-        this.properties = properties;
-    }
-
     public Table getTable(String tableName) {
         return getTables().stream().filter(t -> t.getName().equals(tableName)).findFirst().orElse(null);
     }
@@ -184,29 +176,60 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         tables.add(table);
     }
 
+    public List<DataCollectionProperty> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(List<DataCollectionProperty> properties) {
+        this.properties = properties;
+    }
+
+    // =====
+    // Use datafeed entity mgr
+    private List<DataFeed> getDatafeeds() {
+        return datafeeds;
+    }
+
+    private void setDatafeeds(List<DataFeed> datafeeds) {
+        this.datafeeds = datafeeds;
+    }
+    // =====
+
+    // =====
+    // Use segment entity mgr
+    private List<MetadataSegment> getSegments() {
+        return segments;
+    }
+
+    private void setSegments(List<MetadataSegment> segments) {
+        this.segments = segments;
+    }
+    // =====
+
+    @Override
+    public void putProperty(String key, String value) {
+        List<DataCollectionProperty> properties = getProperties().stream() //
+                .filter(p -> !p.getProperty().equals(key))
+                .collect(Collectors.toList());
+        properties.add(new DataCollectionProperty(key, value));
+        setProperties(properties);
+    }
+
+    @JsonIgnore
+    @Override
+    public DataCollectionProperty getProperty(String key) {
+        for (DataCollectionProperty property: getProperties()) {
+            if (property.getProperty().equals(key)) {
+                return property;
+            }
+        }
+        return null;
+    }
+
     @JsonIgnore
     @Transient
     public DataCollectionPropertyBag getDataCollectionPropertyBag() {
         return new DataCollectionPropertyBag(properties);
     }
 
-    public List<DataFeed> getDataFeeds() {
-        return datafeeds;
-    }
-
-    public void setDataFeeds(List<DataFeed> datafeeds) {
-        this.datafeeds = datafeeds;
-    }
-
-    public void addDataFeed(DataFeed datafeed) {
-        datafeeds.add(datafeed);
-    }
-
-    public StatisticsContainer getStatisticsContainer() {
-        return statisticsContainer;
-    }
-
-    public void setStatisticsContainer(StatisticsContainer statisticsContainer) {
-        this.statisticsContainer = statisticsContainer;
-    }
 }

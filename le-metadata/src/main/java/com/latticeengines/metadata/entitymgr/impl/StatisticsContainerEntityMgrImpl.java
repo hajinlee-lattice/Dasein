@@ -50,8 +50,20 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Override
     public StatisticsContainer createStatistics(StatisticsContainer container) {
         container.setTenant(MultiTenantContext.getTenant());
-        container.setName("Statistics_" + UUID.randomUUID());
+        container.setName("Stats_" + UUID.randomUUID());
         create(container);
         return container;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public StatisticsContainer findInSegment(String collectionName, String segmentName, String modelId) {
+        return statisticsContainerDao.findInSegment(collectionName, segmentName, modelId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public StatisticsContainer findInMasterSegment(String collectionName, String modelId) {
+        return statisticsContainerDao.findInMasterSegment(collectionName, modelId);
     }
 }
