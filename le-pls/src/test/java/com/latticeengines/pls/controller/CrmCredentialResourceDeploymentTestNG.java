@@ -31,19 +31,24 @@ public class CrmCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBa
 
     @AfterClass(groups = { "deployment" })
     public void afterClass() throws Exception {
-//        Camille camille = CamilleEnvironment.getCamille();
-//        Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
-//        camille.delete(path);
+        // Camille camille = CamilleEnvironment.getCamille();
+        // Path path =
+        // PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+        // contractId, tenantId, spaceId);
+        // camille.delete(path);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void verifyCredentialUsingEai() {
         // sfdc production
-//        FeatureFlagDefinition def = FeatureFlagClient.getDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL
-//                .getName());
-//        def.setConfigurable(true);
-//        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
-//        FeatureFlagClient.setEnabled(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), true);
+        // FeatureFlagDefinition def =
+        // FeatureFlagClient.getDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL
+        // .getName());
+        // def.setConfigurable(true);
+        // FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(),
+        // def);
+        // FeatureFlagClient.setEnabled(customerSpace,
+        // LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), true);
 
         switchToThirdPartyUser();
         CrmCredential crmCredential = new CrmCredential();
@@ -67,12 +72,14 @@ public class CrmCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBa
         // crmCredential, CrmCredential.class);
         // Assert.assertEquals(newCrmCredential.getOrgId(),
         // "00DM0000001dg3uMAA");
-//        FeatureFlagClient.removeFromSpace(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
-//        def.setConfigurable(false);
-//        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
+        // FeatureFlagClient.removeFromSpace(customerSpace,
+        // LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
+        // def.setConfigurable(false);
+        // FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(),
+        // def);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyCredentialUsingEai")
+    @Test(groups = "deployment", dependsOnMethods = "verifyCredentialUsingEai", enabled = false)
     public void getCredentialUsingEai() {
         CrmCredential newCrmCredential = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/credentials/sfdc?tenantId=" + customerSpace.toString() + "&&isProduction=true",

@@ -102,7 +102,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
         httpServer.stop();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void verifyCredentialUsingEai() {
         // sfdc production
         FeatureFlagDefinition def = FeatureFlagClient.getDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
@@ -125,7 +125,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "verifyCredentialUsingEai")
+    @Test(groups = "functional", dependsOnMethods = "verifyCredentialUsingEai", enabled = false)
     public void getCredentialUsingEai() {
         CrmCredential newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
         Assert.assertEquals(newCrmCredential.getOrgId(), SFDC_PROD_ORG_ID);

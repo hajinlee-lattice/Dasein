@@ -56,7 +56,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         System.out.println("Test environment setup finished.");
     }
 
-    @Test(groups = "deployment.pd")
+    @Test(groups = "deployment.pd", enabled = false)
     public void validateSfdcCreds() {
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
@@ -69,12 +69,12 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "deployment.pd", dependsOnMethods = { "validateSfdcCreds" }, enabled = true)
+    @Test(groups = "deployment.pd", dependsOnMethods = { "validateSfdcCreds" }, enabled = false)
     public void createDefaultTargetMarket() throws Exception {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, TargetMarket.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TargetMarket.DEFAULT_NAME, TargetMarket.class);
+        TargetMarket targetMarket = restTemplate.getForObject(
+                getRestAPIHostPort() + PLS_TARGETMARKET_URL + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
 
         System.out.println("Workflow app id = " + targetMarket.getApplicationId());
