@@ -29,6 +29,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -40,6 +41,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "DATAFEED", uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID",
         "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;

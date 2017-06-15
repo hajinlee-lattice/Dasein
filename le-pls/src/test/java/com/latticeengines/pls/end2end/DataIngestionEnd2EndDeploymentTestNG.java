@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -191,6 +191,11 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     private void createDataFeed() {
         DataCollection dataCollection = new DataCollection();
         dataCollection.setName(DATA_COLLECTION_NAME);
+        Table table = new Table();
+        table.setName(SchemaInterpretation.Account.name());
+        table.setDisplayName(table.getName());
+        metadataProxy.createTable(firstTenant.getId(), table.getName(), table);
+        dataCollection.setTables(Collections.singletonList(table));
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollectionProxy.createOrUpdateDataCollection(firstTenant.getId(), dataCollection);
 
@@ -199,12 +204,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         datafeed.setStatus(Status.Active);
         datafeed.setDataCollectionType(dataCollection.getType());
         dataCollection.addDataFeed(datafeed);
-
-        DataFeedExecution execution = new DataFeedExecution();
-        execution.setDataFeed(datafeed);
-        execution.setStatus(DataFeedExecution.Status.Active);
-        datafeed.addExeuction(execution);
-        datafeed.setActiveExecution(execution);
 
         Table importTable = new Table();
         importTable.setName("importTable");

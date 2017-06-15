@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -66,8 +65,6 @@ public class DataFeedResourceTestNG extends MetadataFunctionalTestNGBase {
         datafeed.setStatus(Status.Initing);
         datafeed.setName(DATAFEED_NAME);
         datafeed.setTenant(new Tenant(customerSpace1));
-        DataFeedExecution datafeedExecution = new DataFeedExecution();
-        datafeed.setActiveExecution(datafeedExecution);
         return datafeed;
     }
 
