@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,8 @@ import com.latticeengines.matchapi.testframework.TestMatchInputService;
 public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
 
     private static final String MATCH_ENDPOINT = "/match/matches/realtime";
+
+    private static Log log = LogFactory.getLog(MatchResourceTestNG.class);
 
     @Autowired
     private TestMatchInputService testMatchInputService;
@@ -94,6 +98,9 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
         input.setUseRemoteDnB(false);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
+        for (OutputRecord result : output.getResult()) {
+            log.info(String.format("Record %d matched: %b", result.getRowNumber(), result.isMatched()));
+        }
         Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(5));
     }
 
