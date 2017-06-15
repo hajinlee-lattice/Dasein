@@ -30,7 +30,7 @@ public class DataFeedExecutionListener extends LEJobListener {
     public void beforeJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
-        String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
+        String customerSpace = job.getTenant().getId();
 
         metadataProxy.updateExecutionWorkflowId(customerSpace, datafeedName, jobExecution.getId());
     }
@@ -39,7 +39,7 @@ public class DataFeedExecutionListener extends LEJobListener {
     public void afterJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
-        String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
+        String customerSpace = job.getTenant().getId();
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             DataFeedExecution execution = metadataProxy.finishExecution(customerSpace, datafeedName);
             if (execution.getStatus() != Status.Consolidated) {

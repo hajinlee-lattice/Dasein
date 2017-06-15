@@ -27,7 +27,6 @@ public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfigur
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("consolidateAndPublishWorkflow", customerSpace,
                     "consolidateAndPublishWorkflow");
-            configuration.setCustomerSpace(customerSpace);
             startExecutionConfiguration.setCustomerSpace(customerSpace);
             consolidateDataConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
