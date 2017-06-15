@@ -81,7 +81,7 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataCollection")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("datafeeds")
+    @JsonIgnore
     private List<DataFeed> datafeeds = new ArrayList<>();
 
     @OneToOne
