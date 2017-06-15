@@ -9,6 +9,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.yarn.client.YarnClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -35,6 +36,9 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
+    @Autowired
+    protected YarnClient yarnClient;
+
     @Value("${pls.cdl.transform.workflow.mem.mb}")
     protected int workflowMemMb;
 
@@ -58,7 +62,7 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
         TransformationProgress progressInDb = null;
         String appIdStr = progress.getYarnAppId();
         ApplicationId appId = ConverterUtils.toApplicationId(appIdStr);
-        YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         for (int i = 0; i < MAX_LOOPS; i++) {
             progressInDb = transformationProxy.getProgress(progress.getRootOperationUID());
             if (ProgressStatus.FINISHED.equals(progressInDb.getStatus())
