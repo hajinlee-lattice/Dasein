@@ -19,8 +19,8 @@ import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgres
 import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
-import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.PublicationProxy;
@@ -70,7 +70,7 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
         PublicationProgress progress = progressList.get(0);
 
         ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication);

@@ -10,8 +10,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
+import org.springframework.yarn.client.YarnClient;
 
 import com.google.common.base.Strings;
 
@@ -35,9 +35,17 @@ public class YarnUtils {
         return (diagnostics.contains("-102") && diagnostics.contains("Container preempted by scheduler"));
     }
 
+    public static ApplicationReport getApplicationReport(YarnClient yarnClient, ApplicationId applicationId)
+            throws YarnException, IOException {
+        ApplicationReport report = yarnClient.getApplicationReport(applicationId);
+        return report;
+    }
+
+    @Deprecated
     public static ApplicationReport getApplicationReport(Configuration yarnConfiguration, ApplicationId applicationId)
             throws YarnException, IOException {
-        YarnClient yarnClient = YarnClient.createYarnClient();
+        org.apache.hadoop.yarn.client.api.YarnClient yarnClient = org.apache.hadoop.yarn.client.api.YarnClient
+                .createYarnClient();
         yarnClient.init(yarnConfiguration);
         yarnClient.start();
         ApplicationReport report;
@@ -49,11 +57,49 @@ public class YarnUtils {
         return report;
     }
 
-    public static FinalApplicationStatus waitFinalStatusForAppId(Configuration yarnConfiguration,
+    public static FinalApplicationStatus waitFinalStatusForAppId(YarnClient yarnClient,
             ApplicationId applicationId) {
-        return waitFinalStatusForAppId(yarnConfiguration, applicationId, 3600);
+        return waitFinalStatusForAppId(yarnClient, applicationId, 3600);
     }
 
+    public static FinalApplicationStatus waitFinalStatusForAppId(YarnClient yarnClient,
+            ApplicationId applicationId, Integer timeoutInSec) {
+        log.info("Wait " + applicationId + " for " + timeoutInSec + " seconds.");
+        FinalApplicationStatus finalStatus = null;
+        Long startTime = System.currentTimeMillis();
+        int maxTries = 10000;
+        int i = 0;
+        do {
+            try {
+                ApplicationReport report = getApplicationReport(yarnClient, applicationId);
+                finalStatus = report.getFinalApplicationStatus();
+                String logMsg = "Waiting for application [" + applicationId + "]: " + report.getYarnApplicationState();
+                if (report.getYarnApplicationState().equals(YarnApplicationState.RUNNING)) {
+                    logMsg += " " + report.getProgress() * 100 + " %";
+                }
+                log.info(logMsg);
+            } catch (Exception e) {
+                log.warn("Failed to get application status of application id " + applicationId);
+            }
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                // Do nothing for InterruptedException
+            }
+            i++;
+
+            if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
+                break;
+            }
+        } while (!YarnUtils.TERMINAL_STATUS.contains(finalStatus));
+
+        log.info("The terminal status of application [" + applicationId + "] is " + finalStatus);
+
+        return finalStatus;
+
+    }
+
+    @Deprecated
     public static FinalApplicationStatus waitFinalStatusForAppId(Configuration yarnConfiguration,
             ApplicationId applicationId, Integer timeoutInSec) {
         log.info("Wait " + applicationId + " for " + timeoutInSec + " seconds.");
@@ -91,8 +137,10 @@ public class YarnUtils {
 
     }
 
+    @Deprecated
     public static void kill(Configuration yarnConfiguration, ApplicationId applicationId) {
-        YarnClient yarnClient = YarnClient.createYarnClient();
+        org.apache.hadoop.yarn.client.api.YarnClient yarnClient = org.apache.hadoop.yarn.client.api.YarnClient
+                .createYarnClient();
         yarnClient.init(yarnConfiguration);
         yarnClient.start();
         try {
@@ -103,5 +151,15 @@ public class YarnUtils {
             yarnClient.stop();
         }
     }
+
+    @Deprecated
+    public static void kill(YarnClient yarnClient, ApplicationId applicationId) {
+        try {
+            yarnClient.killApplication(applicationId);
+        } catch (Exception e) {
+            log.error("Failed to kill application " + applicationId, e);
+        }
+    }
+
 
 }

@@ -9,13 +9,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.service.PropDataTenantService;
@@ -67,7 +67,7 @@ public class PublicationServiceImpl implements PublicationService {
     private WorkflowProxy workflowProxy;
 
     @Autowired
-    private Configuration yarnConfiguration;
+    private YarnClient yarnClient;
 
     @Override
     public List<PublicationProgress> scan(String hdfsPod) {
@@ -111,7 +111,7 @@ public class PublicationServiceImpl implements PublicationService {
             if (ProgressStatus.PROCESSING.equals(progress.getStatus())) {
                 String appIdStr = progress.getApplicationId();
                 try {
-                    ApplicationReport report = YarnUtils.getApplicationReport(yarnConfiguration,
+                    ApplicationReport report = YarnUtils.getApplicationReport(yarnClient,
                             ConverterUtils.toApplicationId(appIdStr));
                     if (YarnApplicationState.FAILED.equals(report.getYarnApplicationState())) {
                         log.info("Found a running progress which is already failed.");

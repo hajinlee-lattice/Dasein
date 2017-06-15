@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
@@ -82,9 +81,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
     @Autowired
     private SqoopProxy sqoopProxy;
-
-    @Autowired
-    private YarnClient yarnClient;
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
@@ -340,7 +336,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
         ApplicationId appId = ConverterUtils
                 .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
-        FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId,
+        FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnClient, appId,
                 WORKFLOW_WAIT_TIME_IN_SECOND);
         if (finalStatus == FinalApplicationStatus.SUCCEEDED
                 && ingestionVersionService.isCompleteVersion(progress.getIngestion(), progress.getVersion())) {
@@ -409,7 +405,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         }
         importer.setOtherOptions(otherOptions);
         ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
-        FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
+        FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnClient,
                 appId, WORKFLOW_WAIT_TIME_IN_SECOND);
         if (finalStatus != FinalApplicationStatus.SUCCEEDED) {
             throw new RuntimeException("Application final status is not " + FinalApplicationStatus.SUCCEEDED.toString());

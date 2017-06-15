@@ -138,7 +138,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         MatchInput input = prepareBulkMatchInput(scenario, true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
@@ -174,7 +174,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             MatchInput input = prepareBulkMatchInput(scenario, false);
             MatchCommand command = matchProxy.matchBulk(input, podId);
             ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
             Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
             MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());

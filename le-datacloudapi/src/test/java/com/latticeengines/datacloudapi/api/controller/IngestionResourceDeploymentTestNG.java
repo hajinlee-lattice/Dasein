@@ -143,13 +143,13 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         List<IngestionProgress> progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         Assert.assertEquals(progresses.size(), expectedProgresses);
         Long startTime = System.currentTimeMillis();
-        EngineProgress engineProgress = ingestionVersionService.status(name, version);
+        EngineProgress engineProgress = ingestionVersionService.findProgressAtVersion(name, version);
         log.info(engineProgress);
         while (engineProgress.getStatus() != ProgressStatus.FINISHED
                 && engineProgress.getStatus() != ProgressStatus.FAILED
                 && System.currentTimeMillis() - startTime <= timeout) {
             ingestionProxy.scan(POD_ID);
-            engineProgress = ingestionVersionService.status(name, version);
+            engineProgress = ingestionVersionService.findProgressAtVersion(name, version);
             log.info(engineProgress);
             try {
                 Thread.sleep(60000L);
@@ -161,7 +161,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         for (IngestionProgress progress : progresses) {
             ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
             Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
             Assert.assertEquals(progress.getStatus(), ProgressStatus.FINISHED);
             if (size != null) {

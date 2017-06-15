@@ -86,7 +86,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
             MatchInput input = createAvroBulkMatchInput(true, schema);
             MatchCommand command = matchProxy.matchBulk(input, podId);
             ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
             Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
             MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());

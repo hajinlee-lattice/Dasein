@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -34,6 +35,9 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected YarnClient yarnClient;
 
     @Autowired
     protected MatchProxy matchProxy;

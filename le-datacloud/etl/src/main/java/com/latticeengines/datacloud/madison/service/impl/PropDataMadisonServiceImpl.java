@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -48,6 +49,9 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected YarnClient yarnClient;
 
     @Autowired
     @Qualifier("propdataMadisonJdbcTemplate")
@@ -161,8 +165,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                     .build();
 
             ApplicationId appId = sqoopJobService.importData(importer);
-            FinalApplicationStatus status =
-                    YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
@@ -295,8 +298,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                         .setSync(false)
                         .build();
                 ApplicationId appId = sqoopJobService.importData(importer);
-                FinalApplicationStatus status =
-                        YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+                FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
                 if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                     throw new IllegalStateException("The final state of " + appId + " is not "
                             + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
@@ -417,8 +419,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .build();
 
         ApplicationId appId = sqoopJobService.exportData(exporter);
-        FinalApplicationStatus status =
-                YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
         if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
             throw new IllegalStateException("The final state of " + appId + " is not "
                     + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
@@ -487,8 +488,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .build();
 
         ApplicationId appId = sqoopJobService.exportData(exporter);
-        FinalApplicationStatus status =
-                YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
         if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
             throw new IllegalStateException("The final state of " + appId + " is not "
                     + FinalApplicationStatus.SUCCEEDED + " but rather " + status);

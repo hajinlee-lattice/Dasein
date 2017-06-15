@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
@@ -64,7 +65,7 @@ public class OrchestrationProgress implements HasPid, Serializable {
     private DataCloudEngine currentStage;
 
     @Transient
-    private String currentEngineName;
+    private Pair<DataCloudEngine, String> currentStep;
 
     @Column(name = "StartTime", nullable = false)
     private Date startTime;
@@ -197,13 +198,13 @@ public class OrchestrationProgress implements HasPid, Serializable {
     }
 
     @JsonIgnore
-    public String getCurrentEngineName() {
-        return currentEngineName;
+    public Pair<DataCloudEngine, String> getCurrentStep() {
+        return currentStep;
     }
 
     @JsonIgnore
-    public void setCurrentEngineName(String currentEngineName) {
-        this.currentEngineName = currentEngineName;
+    public void setCurrentStep(Pair<DataCloudEngine, String> currentStep) {
+        this.currentStep = currentStep;
     }
 
     @JsonIgnore

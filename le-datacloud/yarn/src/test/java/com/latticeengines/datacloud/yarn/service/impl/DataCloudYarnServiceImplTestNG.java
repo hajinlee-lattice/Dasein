@@ -69,7 +69,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         jobConfiguration.getMatchInput().setRequestSource(MatchRequestSource.MODELING);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         verifyDedupeHelpers(jobConfiguration);
@@ -83,7 +83,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         String avroPath = avroDir + "/" + fileName;
         DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -98,7 +98,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         jobConfiguration.getMatchInput().setPredefinedSelection(Predefined.Enrichment);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         String avroGlob = getBlockOutputDir(jobConfiguration) + "/*.avro";

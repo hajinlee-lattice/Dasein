@@ -212,7 +212,7 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
             SqoopExporter exporter = getCollectionDbExporter(stageTableName, avroDir);
             ApplicationId appId = ConverterUtils
                     .toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);

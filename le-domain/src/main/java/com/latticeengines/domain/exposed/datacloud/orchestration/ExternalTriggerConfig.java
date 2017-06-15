@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.orchestration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class EngineTriggeredConfig extends OrchestrationConfig {
+public class ExternalTriggerConfig extends OrchestrationConfig {
     private DataCloudEngine engine;
     private String engineName;
     private TriggerStrategy strategy;

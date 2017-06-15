@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
@@ -60,6 +61,9 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected YarnClient yarnClient;
 
     @Autowired
     protected CollectionDataFlowService collectionDataFlowService;
@@ -185,7 +189,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             SqoopImporter importer = getCollectionDbImporter(table, targetDir, splitColumn, whereClause);
             ApplicationId appId = ConverterUtils
                     .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);

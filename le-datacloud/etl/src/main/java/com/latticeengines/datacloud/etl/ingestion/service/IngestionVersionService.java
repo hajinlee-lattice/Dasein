@@ -23,5 +23,5 @@ public interface IngestionVersionService {
 
     String findCurrentVersion(Ingestion ingestion);
 
-    EngineProgress status(String ingestionName, String version);
+    EngineProgress findProgressAtVersion(String ingestionName, String version);
 }

@@ -153,7 +153,7 @@ public class PipelineTransformationService extends AbstractTransformationService
         return new ArrayList<>();
     }
 
-    public TransformationProgress findPipelineProgressAtVersion(String pipelineName, String version) {
+    public TransformationProgress findProgressAtVersion(String pipelineName, String version) {
         return progressEntityMgr.findPipelineProgressAtVersion(pipelineName, version);
     }
 

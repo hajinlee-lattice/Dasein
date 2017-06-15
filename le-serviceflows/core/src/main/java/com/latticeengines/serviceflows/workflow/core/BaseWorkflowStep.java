@@ -13,6 +13,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -89,6 +90,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected YarnClient yarnClient;
 
     @Autowired
     protected ModelProxy modelProxy;

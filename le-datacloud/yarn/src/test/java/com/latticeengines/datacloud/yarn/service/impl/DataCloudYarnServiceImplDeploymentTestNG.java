@@ -79,7 +79,7 @@ public class DataCloudYarnServiceImplDeploymentTestNG extends DataCloudYarnFunct
         jobConfiguration.setMatchInput(matchInput);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 

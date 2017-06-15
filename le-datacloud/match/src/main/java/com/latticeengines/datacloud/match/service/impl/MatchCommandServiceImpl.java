@@ -17,6 +17,7 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -51,6 +52,9 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private YarnClient yarnClient;
 
     @Autowired
     private DnbMatchCommandEntityMgr dnbMatchCommandEntityMgr;
@@ -186,7 +190,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         while (retries++ < 5) {
             try {
                 ApplicationId applicationId = ConverterUtils.toApplicationId(appIdStr);
-                ApplicationReport report = YarnUtils.getApplicationReport(yarnConfiguration, applicationId);
+                ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, applicationId);
                 if (report == null) {
                     throw new IOException("Cannot find application report for ApplicationId " + applicationId);
                 }

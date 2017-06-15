@@ -19,6 +19,7 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.service.PropDataTenantService;
@@ -57,6 +58,9 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected YarnClient yarnClient;
 
     @Resource(name = "ingestionApiProviderService")
     private IngestionProviderService apiProviderService;
@@ -109,7 +113,7 @@ public class IngestionServiceImpl implements IngestionService {
         for (IngestionProgress progress : progresses) {
             ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
             try {
-                ApplicationReport report = YarnUtils.getApplicationReport(yarnConfiguration, appId);
+                ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, appId);
                 if (report == null || report.getYarnApplicationState() == null
                         || report.getYarnApplicationState().equals(YarnApplicationState.FAILED)
                         || report.getYarnApplicationState().equals(YarnApplicationState.KILLED)) {

@@ -282,7 +282,8 @@ public class IngestionVersionServiceImpl implements IngestionVersionService, Dat
 
     }
 
-    public EngineProgress status(String ingestionName, String version) {
+    @Override
+    public EngineProgress findProgressAtVersion(String ingestionName, String version) {
         Ingestion ingestion = ingestionEntityMgr.getIngestionByName(ingestionName);
         if (ingestion == null) {
             throw new IllegalArgumentException(String.format("Fail to find ingestion %s", ingestionName));

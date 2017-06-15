@@ -109,6 +109,11 @@ public class Orchestration implements HasPid, Serializable {
         return config;
     }
 
+    @JsonIgnore
+    public void setConfig(OrchestrationConfig config) {
+        this.config = config;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -32,6 +33,9 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected YarnClient yarnClient;
 
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;

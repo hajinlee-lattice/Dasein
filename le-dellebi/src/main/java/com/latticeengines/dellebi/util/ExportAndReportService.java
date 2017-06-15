@@ -15,6 +15,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -87,6 +88,9 @@ public class ExportAndReportService {
     protected Configuration yarnConfiguration;
 
     @Autowired
+    protected YarnClient yarnClient;
+
+    @Autowired
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
     public boolean export(DataFlowContext context) {
@@ -131,10 +135,10 @@ public class ExportAndReportService {
         try {
             ApplicationId appId = ConverterUtils
                     .toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
 
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
-                boolean isRunning = isJobRunning(yarnConfiguration, appId);
+                boolean isRunning = isJobRunning(appId);
                 jobService.killJob(appId);
                 if (isRunning) {
                     throw new IllegalStateException(appId + " is running but stuck, the job is killed now");
@@ -217,9 +221,9 @@ public class ExportAndReportService {
         return DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS");
     }
 
-    private Boolean isJobRunning(Configuration yarnConfiguration, ApplicationId applicationId) {
+    private Boolean isJobRunning(ApplicationId applicationId) {
         try {
-            ApplicationReport report = YarnUtils.getApplicationReport(yarnConfiguration, applicationId);
+            ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, applicationId);
             return (report.getYarnApplicationState().equals(YarnApplicationState.RUNNING));
         } catch (Exception e) {
             log.warn("Failed to get application status of application id " + applicationId);

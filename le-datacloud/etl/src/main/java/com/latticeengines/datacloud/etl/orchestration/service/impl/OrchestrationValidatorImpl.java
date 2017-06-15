@@ -21,7 +21,7 @@ import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineTriggeredConfig;
+import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig;
 import com.latticeengines.domain.exposed.datacloud.orchestration.PredefinedScheduleConfig;
 
 @Component("orchestrationValidator")
@@ -60,8 +60,8 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
                 return true;
             }
         }
-        if (orch.getConfig() instanceof EngineTriggeredConfig) {
-            EngineTriggeredConfig config = (EngineTriggeredConfig) orch.getConfig();
+        if (orch.getConfig() instanceof ExternalTriggerConfig) {
+            ExternalTriggerConfig config = (ExternalTriggerConfig) orch.getConfig();
             DataCloudEngineService service = serviceMap.get(config.getEngine());
             if (service == null) {
                 throw new UnsupportedOperationException(String

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -33,6 +34,7 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -89,6 +91,12 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Value("${datacloud.match.latest.data.cloud.major.version}")
     private String latestMajorVersion;
+
+    @Autowired
+    private YarnClient yarnClient;
+
+    @Autowired
+    private JobService jobService;
 
     // Test against DerivedColumnsCache
     @Test(groups = "deployment")
@@ -290,7 +298,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         MatchInput input = createAvroBulkMatchInput(true, schema, version);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
@@ -327,7 +335,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         input.setExcludeUnmatchedWithPublicDomain(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
@@ -353,9 +361,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
         }
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
-        YarnUtils.kill(yarnConfiguration, ConverterUtils.toApplicationId(blockAppId));
+        //YarnUtils.kill(yarnClient, ConverterUtils.toApplicationId(blockAppId));
+        jobService.killJob(ConverterUtils.toApplicationId(blockAppId));
 
-        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());

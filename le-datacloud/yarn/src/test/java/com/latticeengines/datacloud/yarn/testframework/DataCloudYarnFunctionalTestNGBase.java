@@ -24,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -41,6 +42,9 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected YarnClient yarnClient;
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
