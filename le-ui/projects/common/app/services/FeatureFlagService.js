@@ -152,6 +152,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         UpdateFlag(flags.VIEW_SAMPLE_LEADS, RightsUtility.currentUserMay("View", "Sample_Leads"));
         UpdateFlag(flags.VIEW_REFINE_CLONE, RightsUtility.currentUserMay("View", "Refine_Clone"));
         UpdateFlag(flags.EDIT_REFINE_CLONE, RightsUtility.currentUserMay("Edit", "Refine_Clone"));
+        
+        UpdateFlag(flags.VIEW_REMODEL, RightsUtility.currentUserMay("View", "Remodel"));
 
         UpdateFlag(flags.CHANGE_MODEL_NAME, RightsUtility.currentUserMay("Edit", "Models"));
         UpdateFlag(flags.DELETE_MODEL, RightsUtility.currentUserMay("Edit", "Models"));

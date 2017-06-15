@@ -296,7 +296,6 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         for (var i = 0; i < possibleNumberofCategories; i++) {
             var categoryName = categoryList[i].categoryName,
                 color = categoryColors[categoryName] || colorChoices[i];
-            console.log(color, categoryName);
             categoryList[i].color = color;
             //categoryList[i].color = (categoryColors[i].categoryName ? categoryColors[categoryColors[i].categoryName] : colorChoices[i]);
         }

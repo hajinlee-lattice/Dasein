@@ -45,7 +45,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             }
 
             $scope.isNotPmmlModel = $scope.data.ModelFileType !== 'PmmlModel';
-            $scope.canRemodel = ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
+            $scope.canRemodel = FeatureFlagService.FlagIsEnabled(flags.VIEW_REMODEL) && ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
             $scope.modelRecommendation = !!$scope.data.ConflictWithOptionalRules;
 
             
