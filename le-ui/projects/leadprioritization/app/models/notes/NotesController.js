@@ -20,7 +20,6 @@ angular.module('lp.models.notes', [
         saveInProgress: false
     });
 
-
     vm.init = function($q) {
         console.log(vm.notes);
     }

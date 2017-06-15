@@ -35,6 +35,11 @@ angular.module('mainApp.models.remodel', [
         sortAsc: true
     });
 
+    vm.init = function($q) {
+        console.log(!vm.newModelName, vm.newModelName.length > 50, vm.remodeling, vm.disableRemodelOnError);
+    }
+    vm.init();
+
     vm.toggle = function(attribute) {
         if (vm.remodeling) { return; }
 
@@ -122,7 +127,7 @@ angular.module('mainApp.models.remodel', [
                 Model.ModelDetails.TransformationGroupName === "none") ? false : true,
             modelName = modelNameFormatted,
             modelDisplayName = vm.newModelName,
-            notesContent = vm.NotesContents,
+            notesContent = vm.notesContent,
             originalModelSummaryId = Model.ModelDetails.ModelID,
             fields = vm.attributes.map(function(attribute) {
                 return attribute.attribute;

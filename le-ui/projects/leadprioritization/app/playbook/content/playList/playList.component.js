@@ -34,7 +34,7 @@ $stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
     });
 
     vm.init = function($q) {
-        PlayList.forEach(function(play) {
+        angular.forEach(PlayList, function(play) {
             vm.tileStates[play.name] = {
                 showCustomMenu: false,
                 editSegment: false

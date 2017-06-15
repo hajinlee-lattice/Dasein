@@ -2,13 +2,10 @@
     <div class="container row">
         <div class="ten columns offset-one">
 
-
             <!-- Error Messaging -->
             <div class="messaging error-messaging" ng-if="vm.showAddNoteError">
-                Error
+                You're note could not be added at this time.
             </div>
-
-
             <!-- Form & Button States -->
             <form name="addNoteForm">
                 <textarea 
@@ -36,14 +33,17 @@
             <h3 class="no-notes" ng-if="vm.notes.length == 0">{{vm.ResourceUtility.getString('NOTES_NO_NOTES')}}</h3>
 
 
-            <!-- If notes exist, show this list of notes -->
+            <!-- If notes exist, show a list of notes -->
             <ul ng-if="vm.notes.length != 0">
                 <li ng-repeat="note in vm.notes | orderBy: '-CreationTimestamp'">
 
+
+                    <!-- If the note was a clone from another model -->
                     <h4 ng-if="note.ParentModelId != null">{{vm.ResourceUtility.getString('NOTES_INHERITED_FROM_MODEL')}} {{vm.referModelName}}</h4>
 
+                    <!-- Note content -->
                     <div class="note-header">
-                        <h3><strong>{{note.Origin}}</strong> by <span>{{note.LastModifiedByUser}}</span> on <span>{{note.CreationTimestamp | date:'MMMM dd, yyyy'}} at {{note.CreationTimestamp | date:'hh:mm'}}</span></h3>
+                        <h3><strong>{{note.Origin}}</strong> by <span>{{note.CreatedByUser}}</span> on <span>{{note.CreationTimestamp | date:'MMMM dd, yyyy'}} at {{note.CreationTimestamp | date:'hh:mm'}}</span></h3>
                         <button 
                             type="button" 
                             class="button icon-button white-button"
@@ -71,8 +71,7 @@
                         <p>{{note.NotesContents}}</p>
                     </div>
 
-
-
+                    <!-- Edit note form -->
                     <div 
                         class="edit-note"
                         ng-show="editingNote">
@@ -102,8 +101,8 @@
                         </button>
                     </div>
 
+                    <p class="author" ng-if="note.CreationTimestamp != note.LastModificationTimestamp">Edited by <span>{{note.LastModifiedByUser}}</span> on <span>{{note.LastModificationTimestamp | date:'MMMM dd, yyyy'}} at {{note.LastModificationTimestamp | date:'hh:mm'}}</span></p>
 
-                    <p class="author" ng-if="note.LastModifiedByUser != ''">Edited by <span>{{note.LastModifiedByUser}}</span> on <span>{{note.LastModificationTimestamp | date:'MMMM dd, yyyy'}} at {{note.LastModificationTimestamp | date:'hh:mm'}}</span></p>
 
                 </li>
             </ul>
