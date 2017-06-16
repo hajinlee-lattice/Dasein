@@ -44,9 +44,10 @@ public class DataCollectionResource {
         return dataCollectionService.getDataCollections(customerSpace);
     }
 
+    @Deprecated
     @RequestMapping(value = "/types/{dataCollectionType}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get data collection by type. (Deprecated)")
+    @ApiOperation(value = "Get data collection by type.")
     public DataCollection getDataCollectionByType(@PathVariable String customerSpace,
             @PathVariable DataCollectionType dataCollectionType) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
@@ -83,9 +84,9 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse upsertTableToDataCollection(@PathVariable String customerSpace, //
-                                                             @PathVariable String collectionName, //
-                                                             @PathVariable String tableName, //
-                                                             @RequestParam(value = "role") TableRoleInCollection role) {
+            @PathVariable String collectionName, //
+            @PathVariable String tableName, //
+            @RequestParam(value = "role") TableRoleInCollection role) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataCollectionService.upsertTable(customerSpace, collectionName, tableName, role);
         return SimpleBooleanResponse.successResponse();
@@ -117,8 +118,8 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Create a data feed and add to the collection")
     public SimpleBooleanResponse addDataFeed(@PathVariable String customerSpace, //
-                                             @PathVariable String collectionName, //
-                                             @RequestBody DataFeed dataFeed) {
+            @PathVariable String collectionName, //
+            @RequestBody DataFeed dataFeed) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedService.createDataFeed(customerSpace, collectionName, dataFeed);
         return SimpleBooleanResponse.successResponse();

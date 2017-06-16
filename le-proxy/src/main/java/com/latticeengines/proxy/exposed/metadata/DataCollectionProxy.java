@@ -54,6 +54,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("getDataCollection", url, DataCollection.class);
     }
 
+    @Deprecated
     public DataCollection getDataCollectionByType(String customerSpace, DataCollectionType type) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollections/types/{type}",
                 shortenCustomerSpace(customerSpace), type);
@@ -67,8 +68,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public void addDataFeed(String customerSpace, String collectionName, DataFeed dataFeed) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/datafeeds",
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/datafeeds",
                 shortenCustomerSpace(customerSpace), collectionName);
         post("add data feed", url, dataFeed, DataCollection.class);
     }
@@ -88,8 +88,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
             String modelId) {
         String url;
         if (StringUtils.isBlank(modelId)) {
-            url = constructUrl(
-                    "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats",
+            url = constructUrl("/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats",
                     shortenCustomerSpace(customerSpace), collectionName);
         } else {
             url = constructUrl(
@@ -106,8 +105,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     public StatisticsContainer getStatsForModel(String customerSpace, String collectionName, String modelId) {
         String url;
         if (StringUtils.isBlank(modelId)) {
-            url = constructUrl(
-                    "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats",
+            url = constructUrl("/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats",
                     shortenCustomerSpace(customerSpace), collectionName);
         } else {
             url = constructUrl(

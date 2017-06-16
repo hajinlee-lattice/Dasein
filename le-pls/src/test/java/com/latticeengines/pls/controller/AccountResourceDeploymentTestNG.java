@@ -26,7 +26,7 @@ public class AccountResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void checkEnvironment() {
         DataCollection collection = dataCollectionProxy.getDataCollectionByType(mainTestTenant.getId(),
                 DataCollectionType.Segmentation);
@@ -34,7 +34,7 @@ public class AccountResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(collection.getTables().size(), 1);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "checkEnvironment")
+    @Test(groups = "deployment", enabled = false)
     public void testGetCount() {
         FrontEndQuery query = new FrontEndQuery();
         try (PerformanceTimer timer = new PerformanceTimer("testGetCount")) {
