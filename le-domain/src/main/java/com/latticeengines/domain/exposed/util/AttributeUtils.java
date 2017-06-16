@@ -37,10 +37,14 @@ public class AttributeUtils {
                             || (sourceValue instanceof Set && ((Set<?>) sourceValue).size() == 0);
                     if (includeEmptySourceValues || !sourceEmpty) {
                         setValue(dest, descriptor, sourceValue);
-                        log.info(String.format("Setting property %s on attribute %s to be %s from source %s.  Value was previously %s",
-                                descriptor.getName(), dest.getName(), sourceValue, source.getName(), destValue));
+                        // log.info(String.format("Setting property %s on
+                        // attribute %s to be %s from source %s. Value was
+                        // previously %s",
+                        // descriptor.getName(), dest.getName(), sourceValue,
+                        // source.getName(), destValue));
                     } else {
-                        log.debug(String.format("Ignoring property %s on attribute %s because it is null/empty on source %s",
+                        log.debug(String.format(
+                                "Ignoring property %s on attribute %s because it is null/empty on source %s",
                                 descriptor.getName(), dest.getName(), source.getName()));
                     }
                 }
@@ -69,14 +73,14 @@ public class AttributeUtils {
                         String avroValue = fm.getPropertyValue(key);
 
                         if (avroValue != null && metadataValue != null && !avroValue.equals(metadataValue.toString())) {
-                            log.warn(String
-                                    .format("Property collision for field %s in Attribute %s. " //
-                                            + "Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table", //
-                                            key, source.getName(), avroValue, metadataValue));
+                            log.warn(String.format("Property collision for field %s in Attribute %s. " //
+                                    + "Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table", //
+                                    key, source.getName(), avroValue, metadataValue));
                         }
                         fm.setPropertyValue(key, metadataValue);
-                        log.info(String.format("Setting property %s to be %s from source.", descriptor.getName(),
-                                sourceValue));
+                        // log.info(String.format("Setting property %s to be %s
+                        // from source.", descriptor.getName(),
+                        // sourceValue));
                     } else {
                         log.debug(String.format("Ignoring property %s because it is null/empty on source",
                                 descriptor.getName()));
@@ -103,13 +107,13 @@ public class AttributeUtils {
 
             if (m != null) {
                 try {
-                    log.info(String.format("Setting property %s on attribute %s to be %s", propertyName,
-                            attribute.getName(), propertyValue));
+                    // log.info(String.format("Setting property %s on attribute
+                    // %s to be %s", propertyName,
+                    // attribute.getName(), propertyValue));
                     m.invoke(attribute, propertyValue);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.warn(
-                            String.format("Failed to set property %s on attribute %s", propertyName,
-                                    attribute.getName()));
+                    log.warn(String.format("Failed to set property %s on attribute %s", propertyName,
+                            attribute.getName()));
                 }
             }
         } catch (Exception e) {
@@ -139,13 +143,13 @@ public class AttributeUtils {
 
                 if (m != null) {
                     try {
-                        log.info(String.format("Setting property %s on attribute %s to be %s", propertyName,
-                                attribute.getName(), properties.get(propertyName)));
+                        // log.info(String.format("Setting property %s on
+                        // attribute %s to be %s", propertyName,
+                        // attribute.getName(), properties.get(propertyName)));
                         m.invoke(attribute, properties.get(propertyName));
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        log.warn(
-                                String.format("Failed to set property %s on attribute %s", propertyName,
-                                        attribute.getName()));
+                        log.warn(String.format("Failed to set property %s on attribute %s", propertyName,
+                                attribute.getName()));
                     }
                 }
             }
