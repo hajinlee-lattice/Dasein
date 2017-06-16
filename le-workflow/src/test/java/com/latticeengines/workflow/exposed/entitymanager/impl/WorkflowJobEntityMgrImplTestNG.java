@@ -4,11 +4,13 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -45,6 +47,16 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
+
+        tenant1 = new Tenant();
+        tenant1.setId(tenantId1);
+        tenant1.setName(tenantId1);
+        tenantEntityMgr.create(tenant1);
+
+        tenant2 = new Tenant();
+        tenant2.setId(tenantId2);
+        tenant2.setName(tenantId2);
+        tenantEntityMgr.create(tenant2);
     }
 
     @AfterClass(groups = "functional")
@@ -61,16 +73,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
     @Test(groups = "functional")
     public void testCreateWorkflowJob() {
-        Tenant tenant1 = new Tenant();
-        tenant1.setId(tenantId1);
-        tenant1.setName(tenantId1);
-        tenantEntityMgr.create(tenant1);
-
-        Tenant tenant2 = new Tenant();
-        tenant2.setId(tenantId2);
-        tenant2.setName(tenantId2);
-        tenantEntityMgr.create(tenant2);
-
+        Tenant tenant1 = tenantService.findByTenantId(tenantId1);
+        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
         WorkflowJob workflowJob1 = new WorkflowJob();
         workflowJob1.setApplicationId("application_00001");
         workflowJob1.setTenant(tenant1);
@@ -108,5 +112,26 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJobs.get(0).getApplicationId(), "application_00002");
         assertEquals(workflowJobs.get(0).getUserId(), "user2");
 
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")
+    public void testUpdateStatusFromYarn() {
+        Tenant tenant1 = tenantService.findByTenantId(tenantId1);
+        WorkflowJob workflowJob5 = new WorkflowJob();
+        workflowJob5.setApplicationId("application_00005");
+        workflowJob5.setTenant(tenant1);
+        workflowJob5.setUserId(WorkflowUser.DEFAULT_USER.name());
+        workflowJob5.setInputContextValue("filename", "abc");
+        workflowJob5.setWorkflowId(5L);
+        workflowJobEntityMgr.create(workflowJob5);
+        JobStatus yarnJobStatus = new JobStatus();
+        yarnJobStatus.setStatus(FinalApplicationStatus.FAILED);
+        yarnJobStatus.setStartTime(10000L);
+        workflowJob5.setWorkflowId(null);
+        workflowJobEntityMgr.updateStatusFromYarn(workflowJob5, yarnJobStatus);
+        workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
+        assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
+        assertEquals(workflowJob5.getStatus(), FinalApplicationStatus.FAILED);
+        assertEquals(workflowJob5.getStartTimeInMillis(), new Long(10000L));
     }
 }

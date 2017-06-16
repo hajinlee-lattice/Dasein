@@ -68,7 +68,7 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         workflowJob = findByApplicationId(workflowJob.getApplicationId());
         workflowJob.setStatus(yarnJobStatus.getStatus());
         workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
-        update(workflowJob);
+        workflowJobDao.updateStatusFromYarn(workflowJob, yarnJobStatus);
         return workflowJob;
     }
 }

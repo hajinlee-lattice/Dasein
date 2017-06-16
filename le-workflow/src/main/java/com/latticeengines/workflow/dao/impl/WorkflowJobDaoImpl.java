@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.dao.WorkflowJobDao;
@@ -39,5 +40,19 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Query query = session.createQuery(queryStr);
         query.setLong("tenantPid", tenant.getPid());
         return query.list();
+    }
+
+    @Override
+    public void updateStatusFromYarn(WorkflowJob workflowJob, JobStatus yarnJobStatus) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s workflowjob set workflowjob.status=:status, workflowjob.startTimeInMillis=:startTimeInMillis where workflowjob.applicationId=:applicationId",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("status", yarnJobStatus.getStatus().name());
+        query.setLong("startTimeInMillis", yarnJobStatus.getStartTime());
+        query.setString("applicationId", workflowJob.getApplicationId());
+        query.executeUpdate();
     }
 }
