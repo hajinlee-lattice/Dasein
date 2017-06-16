@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.entitymgr;
 
+import java.util.List;
+
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -27,5 +29,9 @@ public interface TransformationProgressEntityMgr {
     TransformationProgress updateStatus(TransformationProgress progress, ProgressStatus status);
 
     TransformationProgress findPipelineProgressAtVersion(String pipelineName, String version);
+
+    void deleteProgress(TransformationProgress progress);
+
+    List<TransformationProgress> findAllforPipeline(String pipelineName);
 
 }

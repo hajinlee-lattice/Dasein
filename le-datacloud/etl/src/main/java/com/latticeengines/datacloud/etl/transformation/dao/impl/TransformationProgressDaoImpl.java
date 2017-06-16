@@ -86,7 +86,9 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
     @Override
     public TransformationProgress findPipelineAtVersion(String pipelineName, String version) {
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format("from %s where PipelineName = :pipelineName and Version = :version", getEntityClass().getSimpleName());
+        String queryStr = String.format(
+                "from %s where PipelineName = :pipelineName and Version = :version order by ProgressID desc",
+                getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("pipelineName", pipelineName);
         query.setString("version", version);

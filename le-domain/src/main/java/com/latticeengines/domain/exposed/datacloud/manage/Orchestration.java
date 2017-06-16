@@ -1,16 +1,24 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -45,6 +53,11 @@ public class Orchestration implements HasPid, Serializable {
 
     @Column(name = "MaxRetries", nullable = false)
     private int maxRetries;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "orchestration")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @Fetch(FetchMode.SUBSELECT)
+    private List<OrchestrationProgress> progresses;
 
     @Transient
     private OrchestrationConfig config;
@@ -112,6 +125,16 @@ public class Orchestration implements HasPid, Serializable {
     @JsonIgnore
     public void setConfig(OrchestrationConfig config) {
         this.config = config;
+    }
+
+    @JsonIgnore
+    public List<OrchestrationProgress> getProgresses() {
+        return progresses;
+    }
+
+    @JsonIgnore
+    public void setProgresses(List<OrchestrationProgress> progresses) {
+        this.progresses = progresses;
     }
 
     @Override

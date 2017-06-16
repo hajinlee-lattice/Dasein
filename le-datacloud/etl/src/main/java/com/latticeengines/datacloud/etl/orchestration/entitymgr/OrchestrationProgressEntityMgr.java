@@ -15,4 +15,6 @@ public interface OrchestrationProgressEntityMgr {
     void saveProgresses(List<OrchestrationProgress> progresses);
 
     List<OrchestrationProgress> findProgressesToKickoff();
+
+    boolean isDuplicateVersion(String orchName, String version);
 }

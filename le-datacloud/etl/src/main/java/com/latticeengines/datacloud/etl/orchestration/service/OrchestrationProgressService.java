@@ -12,4 +12,6 @@ public interface OrchestrationProgressService {
     List<OrchestrationProgress> createDraftProgresses(Orchestration orch, List<String> triggeredVersions);
 
     List<OrchestrationProgress> findProgressesToKickoff();
+
+    OrchestrationProgress updateSubmittedProgress(OrchestrationProgress progress, String applicationId);
 }

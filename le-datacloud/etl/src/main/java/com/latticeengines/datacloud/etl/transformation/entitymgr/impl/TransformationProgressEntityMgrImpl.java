@@ -154,4 +154,15 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
         return progressDao.findPipelineAtVersion(pipelineName, version);
     }
 
+    @Override
+    @Transactional(value = "propDataManage")
+    public void deleteProgress(TransformationProgress progress) {
+        progressDao.delete(progress);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage")
+    public List<TransformationProgress> findAllforPipeline(String pipelineName) {
+        return progressDao.findAllforPipeline(pipelineName);
+    }
 }

@@ -50,12 +50,12 @@ public class OrchestrationEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
     @Test(groups = "functional", priority = 1, dataProvider = "Orchestrations")
     public void init(String name, String config, Class<?> configCls, int pipelineLen,
             OrchestrationPipelineStep firstStep, OrchestrationPipelineStep nextStep) {
-        Orchestration orchestration = new Orchestration();
-        orchestration.setName(name);
-        orchestration.setSchedularEnabled(false);
-        orchestration.setMaxRetries(3);
-        orchestration.setConfigStr(config);
-        orchestrationEntityMgr.save(orchestration);
+        Orchestration orch = new Orchestration();
+        orch.setName(name);
+        orch.setSchedularEnabled(false);
+        orch.setMaxRetries(3);
+        orch.setConfigStr(config);
+        orchestrationEntityMgr.save(orch);
     }
 
     @Test(groups = "functional", priority = 2, dataProvider = "Orchestrations")

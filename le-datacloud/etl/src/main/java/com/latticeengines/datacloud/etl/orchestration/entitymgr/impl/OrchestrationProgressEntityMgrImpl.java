@@ -31,6 +31,7 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     }
 
     @Override
+    @Transactional(value = "propDataManage")
     public OrchestrationProgress saveProgress(OrchestrationProgress progress) {
         String podIdInProgress = progress.getHdfsPod();
         String podIdInContext = HdfsPodContext.getHdfsPodId();
@@ -45,6 +46,7 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     }
 
     @Override
+    @Transactional(value = "propDataManage")
     public void saveProgresses(List<OrchestrationProgress> progresses) {
         for (OrchestrationProgress progress : progresses) {
             saveProgress(progress);
@@ -52,8 +54,15 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     }
 
     @Override
+    @Transactional(value = "propDataManage", readOnly = true)
     public List<OrchestrationProgress> findProgressesToKickoff() {
         return orchestrationProgressDao.findProgressesToKickoff();
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true)
+    public boolean isDuplicateVersion(String orchName, String version) {
+        return orchestrationProgressDao.isDuplicateVersion(orchName, version);
     }
 
 }

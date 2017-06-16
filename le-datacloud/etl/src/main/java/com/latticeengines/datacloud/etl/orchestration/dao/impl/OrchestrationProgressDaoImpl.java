@@ -57,13 +57,25 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
     }
 
     @Override
+    public boolean isDuplicateVersion(String orchName, String version) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<OrchestrationProgress> entityClz = getEntityClass();
+        String queryStr = String.format("from %s p where p.version = :version and p.orchestration.name = :name",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("version", version);
+        query.setParameter("name", orchName);
+        return !CollectionUtils.isEmpty(query.list());
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public List<OrchestrationProgress> findProgressesToKickoff() {
         Session session = getSessionFactory().getCurrentSession();
-        Class<OrchestrationProgress> progressEntityClz = OrchestrationProgress.class;
+        Class<OrchestrationProgress> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s progress where progress.status = :newStatus or (progress.status = :failedStatus and progress.retries < progress.orchestration.maxRetries)",
-                progressEntityClz.getSimpleName());
+                "from %s p where p.status = :newStatus or (p.status = :failedStatus and p.retries < p.orchestration.maxRetries)",
+                entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("newStatus", ProgressStatus.NEW);
         query.setParameter("failedStatus", ProgressStatus.FAILED);

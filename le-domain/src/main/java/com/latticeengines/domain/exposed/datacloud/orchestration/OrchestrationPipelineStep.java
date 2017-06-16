@@ -1,13 +1,14 @@
 package com.latticeengines.domain.exposed.datacloud.orchestration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class OrchestrationPipelineStep {
     private DataCloudEngine engine;
 
     private String engineName;
 
-    private long timeout;
+    private long timeout; // in minute
 
     public OrchestrationPipelineStep() {
 
@@ -56,6 +57,11 @@ public class OrchestrationPipelineStep {
         }
         OrchestrationPipelineStep step = (OrchestrationPipelineStep) obj;
         return this.engine == step.engine && this.engineName.equals(step.engineName);
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

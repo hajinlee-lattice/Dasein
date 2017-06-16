@@ -72,26 +72,35 @@ public class OrchestrationStep extends BaseWorkflowStep<OrchestrationStepConfig>
     @Override
     public void execute() {
         try {
-            log.info("Start to execute orchestration step");
+            log.info("Start to execute orchestration pipeline");
             progress = getConfiguration().getOrchestrationProgress();
             HdfsPodContext.changeHdfsPodId(progress.getHdfsPod());
             orch = getConfiguration().getOrchestration();
             config = getConfiguration().getOrchestrationConfig();
             orch.setConfig(config);
             progress.setOrchestration(orch);
+            log.info(String.format("Pipeline configuration: %s", config.getPipelineConfig()));
             OrchestrationPipelineStep step = config.firstStep();
             while (step != null) {
                 execPipelineStep(step);
                 step = config.nextStep(step);
             }
-            log.info("Finished to execute orchestration pipeline");
+            progress = orchestrationProgressService.updateProgress(progress).currentStage(null)
+                    .status(ProgressStatus.FINISHED).commit(true);
+            log.info("Finished orchestration pipeline");
         } catch (Exception e) {
             failByException(e);
         }
     }
 
     private void execPipelineStep(OrchestrationPipelineStep step) {
+        log.info(String.format("Current pipeline step: %s", step.toString()));
+        progress = orchestrationProgressService.updateProgress(progress).currentStage(step.getEngine()).commit(true);
         DataCloudEngineService engineService = serviceMap.get(step.getEngine());
+        if (engineService == null) {
+            throw new UnsupportedOperationException(String
+                    .format("Not support to execute orchestration pipeline from %s engine", step.getEngine().name()));
+        }
         EngineProgress engineProgress = engineService.findProgressAtVersion(step.getEngineName(),
                 progress.getVersion());
         if (engineProgress.getStatus() == ProgressStatus.FINISHED) {
@@ -108,24 +117,33 @@ public class OrchestrationStep extends BaseWorkflowStep<OrchestrationStepConfig>
         case PUBLICATION:
             startPublish(step.getEngineName(), progress.getVersion());
             break;
+        default:
+            throw new UnsupportedOperationException(
+                    String.format("Unsupported engine type %s in orchestration pipeline", step.getEngine().name()));
         }
 
         Long startTime = System.currentTimeMillis();
         do {
+            try {
+                Thread.sleep(60000L);
+            } catch (InterruptedException e) {
+                // Do nothing for InterruptedException
+            }
             engineProgress = engineService.findProgressAtVersion(step.getEngineName(), progress.getVersion());
+            log.info(String.format("Progress for version %s: %s", progress.getVersion(), engineProgress.toString()));
         } while (engineProgress.getStatus() != ProgressStatus.FINISHED
                 && engineProgress.getStatus() != ProgressStatus.FAILED
-                && System.currentTimeMillis() - startTime <= step.getTimeout());
+                && (System.currentTimeMillis() - startTime) / 1000 / 60 <= step.getTimeout());
         if (engineProgress.getStatus() == ProgressStatus.FINISHED) {
-            log.info(String.format("Pipeline step %s is finished", step));
+            log.info(String.format("Pipeline step %s is finished", step.toString()));
             return;
         }
         if (engineProgress.getStatus() == ProgressStatus.FAILED) {
-            throw new RuntimeException(
-                    String.format("Pipeline step %s is failed. Message: %s", step, engineProgress.getMessage()));
+            throw new RuntimeException(String.format("Pipeline step %s is failed. Message: %s", step.toString(),
+                    engineProgress.getMessage()));
         }
-        throw new RuntimeException(
-                String.format("Pipeline step %s is timed out. Current progress: %s", step, engineProgress));
+        throw new RuntimeException(String.format("Pipeline step %s is timed out. Current progress: %s", step.toString(),
+                engineProgress.toString()));
     }
 
     private void startIngest(String ingestionName, String version) {

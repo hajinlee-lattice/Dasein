@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,17 +66,23 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
                 throw new UnsupportedOperationException(String
                         .format("Not support to trigger orchestration from %s engine", config.getEngine().name()));
             }
-            // TODO: Should check all versions?
-            String currentVersion = service.findCurrentVersion(config.getEngineName());
-            if (StringUtils.isEmpty(currentVersion)) {
-                return false;
+            switch (config.getStrategy()) {
+            case LATEST_VERSION:
+                String currentVersion = service.findCurrentVersion(config.getEngineName());
+                if (StringUtils.isEmpty(currentVersion)) {
+                    return false;
+                }
+                if (!isDuplicateVersion(orch.getName(), currentVersion)) {
+                    triggeredVersions.add(currentVersion);
+                    return true;
+                } else {
+                    return false;
+                }
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Unsupported external trigger strategy %s", config.getStrategy().name()));
             }
-            if (!isDuplicateVersion(orch, currentVersion)) {
-                triggeredVersions.add(currentVersion);
-                return true;
-            } else {
-                return false;
-            }
+
         }
         throw new UnsupportedOperationException(
                 String.format("Unsupported orchestration config: %s", orch.getConfig().toString()));
@@ -88,7 +93,7 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
         Iterator<OrchestrationProgress> iter = progresses.iterator();
         while (iter.hasNext()) {
             OrchestrationProgress progress = iter.next();
-            if (isDuplicateVersion(progress.getOrchestration(), progress.getVersion())) {
+            if (isDuplicateVersion(progress.getOrchestration().getName(), progress.getVersion())) {
                 iter.remove();
                 log.info("Duplicate progress is ignored: " + progress.toString());
             }
@@ -96,12 +101,8 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
         return progresses;
     }
 
-    private boolean isDuplicateVersion(Orchestration orch, String version) {
-        Map<String, Object> fields = new HashMap<>();
-        fields.put("Orchestration", orch.getPid());
-        fields.put("Version", version);
-        List<OrchestrationProgress> progresses = orchestrationProgressEntityMgr.findProgressesByField(fields, null);
-        return !CollectionUtils.isEmpty(progresses);
+    private boolean isDuplicateVersion(String orchName, String version) {
+        return orchestrationProgressEntityMgr.isDuplicateVersion(orchName, version);
     }
 
 }

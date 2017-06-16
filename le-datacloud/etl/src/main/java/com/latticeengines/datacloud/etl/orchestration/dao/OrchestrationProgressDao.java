@@ -10,4 +10,6 @@ public interface OrchestrationProgressDao extends BaseDao<OrchestrationProgress>
     List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields);
 
     List<OrchestrationProgress> findProgressesToKickoff();
+
+    boolean isDuplicateVersion(String orchName, String version);
 }

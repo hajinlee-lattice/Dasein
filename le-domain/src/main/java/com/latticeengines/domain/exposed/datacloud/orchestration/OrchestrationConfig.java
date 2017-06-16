@@ -70,7 +70,7 @@ public abstract class OrchestrationConfig {
     }
 
     @JsonProperty("PipelineConfig")
-    private String getPipelineConfig() {
+    public String getPipelineConfig() {
         return pipelineConfig;
     }
 

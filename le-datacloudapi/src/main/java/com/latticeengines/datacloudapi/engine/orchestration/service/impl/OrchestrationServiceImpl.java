@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.service.PropDataTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationEntityMgr;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
@@ -29,6 +30,7 @@ import com.latticeengines.datacloudapi.engine.orchestration.service.Orchestratio
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.orchestration.OrchestrationConfig;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("orchestrationService")
@@ -56,6 +58,9 @@ public class OrchestrationServiceImpl implements OrchestrationService {
 
     @Autowired
     protected YarnClient yarnClient;
+
+    @Autowired
+    private PropDataTenantService propDataTenantService;
 
     @Override
     public List<OrchestrationProgress> scan(String hdfsPod) {
@@ -111,7 +116,36 @@ public class OrchestrationServiceImpl implements OrchestrationService {
 
     private List<OrchestrationProgress> kickoffAll() {
         List<OrchestrationProgress> progresses = orchestrationProgressService.findProgressesToKickoff();
-        return progresses;
+        if (progresses == null) {
+            return new ArrayList<>();
+        }
+        List<OrchestrationProgress> submitted = new ArrayList<>();
+        Boolean serviceTenantBootstrapped = false;
+        for (OrchestrationProgress progress : progresses) {
+            try {
+                if (!serviceTenantBootstrapped) {
+                    propDataTenantService.bootstrapServiceTenant();
+                    serviceTenantBootstrapped = true;
+                }
+                ApplicationId applicationId = submitWorkflow(progress);
+                progress = orchestrationProgressService.updateSubmittedProgress(progress, applicationId.toString());
+                submitted.add(progress);
+                log.info(String.format("Submitted workflow for progress [%s]. ApplicationID = %s", progress.toString(),
+                        applicationId.toString()));
+            } catch (Exception e) {
+                log.error("Failed to submit workflow for progress " + progress, e);
+            }
+        }
+        return submitted;
+    }
+
+    private ApplicationId submitWorkflow(OrchestrationProgress progress) {
+        Orchestration orch = progress.getOrchestration();
+        OrchestrationConfig config = orch.getConfig();
+        return new OrchestrationWorkflowSubmitter() //
+                .workflowProxy(workflowProxy) //
+                .orchestration(orch).orchestrationProgress(progress).orchestrationConfig(config)
+                .submit();
     }
 
 }

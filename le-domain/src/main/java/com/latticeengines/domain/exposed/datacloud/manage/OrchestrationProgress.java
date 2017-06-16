@@ -61,7 +61,7 @@ public class OrchestrationProgress implements HasPid, Serializable {
     private ProgressStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "CurrentStage", nullable = false, length = 20)
+    @Column(name = "CurrentStage", length = 20)
     private DataCloudEngine currentStage;
 
     @Transient
