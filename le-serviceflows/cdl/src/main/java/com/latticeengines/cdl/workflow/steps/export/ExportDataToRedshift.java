@@ -36,19 +36,14 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
-
-        boolean shouldSkip = configuration.isSkipStep()
-                || Boolean.TRUE.equals(getObjectFromContext(DATA_INITIAL_LOADED, Boolean.class));
-        log.info("shouldSkip=" + shouldSkip);
-        if (!shouldSkip) {
-            sourceTable = getObjectFromContext(TABLE_GOING_TO_REDSHIFT, Table.class);
-            needToSplit = getObjectFromContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.class);
-            if (sourceTable == null) {
-                sourceTable = configuration.getSourceTable();
-            }
-            renameTable();
-            exportData();
+        sourceTable = getObjectFromContext(TABLE_GOING_TO_REDSHIFT, Table.class);
+        needToSplit = getObjectFromContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.class);
+        if (sourceTable == null) {
+            sourceTable = configuration.getSourceTable();
         }
+        renameTable();
+        exportData();
+
     }
 
     private void exportData() {
