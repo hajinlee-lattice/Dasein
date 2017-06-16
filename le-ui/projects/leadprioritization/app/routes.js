@@ -213,7 +213,7 @@ angular
                             $scope.HasRatingsAvailable = false;
                         }
 
-                        $scope.canRemodel = !$scope.IsPmml && !$scope.Uploaded;
+                        $scope.canRemodel = FeatureFlagService.FlagIsEnabled(flags.VIEW_REMODEL) && !$scope.IsPmml && !$scope.Uploaded;
 
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
