@@ -150,7 +150,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
     @ApiIgnore
     @ApiOperation(value = "Get the TransformationProgress.")
     public TransformationProgress getProgress(
-            @RequestParam(value = "rootOperationUid", required = true) String rootOperationUid,
+            @RequestParam(value = "rootOperationUid") String rootOperationUid,
             HttpServletRequest request) {
         checkHeader(request);
         try {

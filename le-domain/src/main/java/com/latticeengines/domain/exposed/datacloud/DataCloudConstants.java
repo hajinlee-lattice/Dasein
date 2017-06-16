@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public final class DataCloudConstants {
 
@@ -11,7 +12,7 @@ public final class DataCloudConstants {
     public static final String ACCOUNT_MASTER = "AccountMaster";
 
     public static final String LATTIC_ID = "LatticeID";
-    public static final String LATTICE_ACCOUNT_ID = "LatticeAccountId";
+    public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();
 
     public static final String ATTR_CATEGORY = "Category";
     public static final String ATTR_SUB_CATEGORY = "SubCategory";

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -69,7 +69,6 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
     private MetadataProxy metadataProxy;
 
     private String pipelineVersion;
-    private String masterTableIdField;
 
     @Override
     public void execute() {
@@ -85,14 +84,6 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         }
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 masterTable.getName()));
-        if (masterTable.getPrimaryKey() == null || StringUtils.isBlank(masterTable.getPrimaryKey().getAttributesAsStr())) {
-            log.warn("master table should have primary key.");
-            log.info(JsonUtils.pprint(masterTable));
-            masterTableIdField = "LEAccountLong";
-        } else {
-            masterTableIdField = masterTable.getPrimaryKey().getAttributesAsStr();
-        }
-        log.info("masterTableIdField=" + masterTableIdField);
 
         PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), masterTable);
         TransformationProgress progress = transformationProxy.transform(request, "");
@@ -110,9 +101,11 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
-        putStringValueInContext(TABLE_GOING_TO_REDSHIFT, sortedTableName);
         putObjectInContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.FALSE);
-        upsertProfileTable(configuration.getCustomerSpace().toString(), profileTableName);
+        upsertTables(configuration.getCustomerSpace().toString(), profileTableName, sortedTableName);
+
+        Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
+        putObjectInContext(TABLE_GOING_TO_REDSHIFT, sortedTable);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
@@ -239,7 +232,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         conf.setPartitions(500);
         conf.setSplittingThreads(maxSplitThreads);
         conf.setCompressResult(false);
-        conf.setSortingField(masterTableIdField);
+        conf.setSortingField(InterfaceName.LatticeAccountId.name());
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
@@ -268,11 +261,11 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
 
     private Map<MatchKey, List<String>> getKeyMap() {
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
-        keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(DataCloudConstants.LATTICE_ACCOUNT_ID));
+        keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
         return keyMap;
     }
 
-    private void upsertProfileTable(String customerSpace, String profileTableName) {
+    private void upsertTables(String customerSpace, String profileTableName, String sortedTableName) {
         Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
         if (profileTable == null) {
             throw new RuntimeException("Failed to find profile table in customer " + customerSpace);
@@ -282,6 +275,16 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         profileTable = dataCollectionProxy.getTable(customerSpace, collectionName, TableRoleInCollection.Profile);
         if (profileTable == null) {
             throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
+        }
+
+        Table bktTable = metadataProxy.getTable(customerSpace, sortedTableName);
+        if (bktTable == null) {
+            throw new RuntimeException("Failed to find bucketed table in customer " + customerSpace);
+        }
+        dataCollectionProxy.upsertTable(customerSpace, collectionName, sortedTableName, TableRoleInCollection.BucketedAccount);
+        bktTable = dataCollectionProxy.getTable(customerSpace, collectionName, TableRoleInCollection.BucketedAccount);
+        if (bktTable == null) {
+            throw new IllegalStateException("Cannot find the upserted bucketed table in data collection.");
         }
     }
 

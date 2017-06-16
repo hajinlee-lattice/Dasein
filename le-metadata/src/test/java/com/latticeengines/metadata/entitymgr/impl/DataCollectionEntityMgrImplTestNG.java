@@ -18,10 +18,13 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.SegmentService;
@@ -33,6 +36,9 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
     @Autowired
     private TableEntityMgr tableEntityMgr;
+
+    @Autowired
+    private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Autowired
     private SegmentService segmentService;
@@ -105,6 +111,14 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     public void checkMasterSegment() {
         MetadataSegment masterSegment = segmentService.findMaster(customerSpace1, dataCollection.getName());
         Assert.assertNotNull(masterSegment);
+
+        Statistics statistics = new Statistics();
+        StatisticsContainer statisticsContainer = new StatisticsContainer();
+        statisticsContainer.setStatistics(statistics);
+        dataCollectionEntityMgr.upsertStatsForMasterSegment(dataCollection.getName(), statisticsContainer, null);
+
+        StatisticsContainer retrieved = statisticsContainerEntityMgr.findInMasterSegment(dataCollection.getName(), null);
+        Assert.assertNotNull(retrieved);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")

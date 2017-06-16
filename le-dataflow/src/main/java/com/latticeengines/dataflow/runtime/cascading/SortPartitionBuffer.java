@@ -74,11 +74,11 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
     private void bootstrapIdList(Object id) {
         LogManager.getLogger(FileBackedOrderedList.class).setLevel(Level.DEBUG);
         if (id instanceof Integer) {
-            ids = new FileBackedOrderedList<>(ID_BUFFER_SIZE, Integer::valueOf);
+            ids = FileBackedOrderedList.newIntList(ID_BUFFER_SIZE);
         } else if (id instanceof Long) {
-            ids = new FileBackedOrderedList<>(ID_BUFFER_SIZE, Long::valueOf);
+            ids = FileBackedOrderedList.newLongList(ID_BUFFER_SIZE);
         } else if (id instanceof String || id instanceof Utf8) {
-            ids = new FileBackedOrderedList<>(ID_BUFFER_SIZE, String::valueOf);
+            ids = FileBackedOrderedList.newStrList(ID_BUFFER_SIZE);
         }
     }
 
@@ -89,7 +89,7 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
         List<String> boundaries = new ArrayList<>();
         for (Object id: ids) {
             currentPartition++;
-            if (boundaries.size() < partitions - 1 && currentPartition >= partitionSize) {
+            if (id != null && boundaries.size() < partitions - 1 && currentPartition >= partitionSize) {
                 // not last partition, and current partition is not full
                 currentPartition = 0;
                 boundaries.add(String.valueOf(id));

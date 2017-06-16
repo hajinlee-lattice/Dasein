@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -279,7 +281,7 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         try {
             SorterConfig config = new SorterConfig();
             config.setPartitions(100);
-            config.setSortingField(idField);
+            config.setSortingField(InterfaceName.LatticeAccountId.name());
             config.setCompressResult(false);
             return appendEngineConf(config, lightEngineConfig());
         } catch (Exception ex) {

@@ -6,7 +6,7 @@ public enum InterfaceName {
     DUNS, //
     Event, //
     Domain, //
-    AccountId, //
+    AccountId, // reused in cdl to be unique in one customer universe
     CategoryId, //
     SubcategoryId, //
 
@@ -38,5 +38,12 @@ public enum InterfaceName {
     YearStarted, //
     
     Quantity, //
-    Amount
+    Amount,
+
+    // CDL
+    VdbAccountId, // account id whose uniqueness is managed by vdb
+    LEAccountIDLong, // TODO: to be replaced by VdbAccountId
+
+    // Data Cloud
+    LatticeAccountId // Id in AccountMaster
 }

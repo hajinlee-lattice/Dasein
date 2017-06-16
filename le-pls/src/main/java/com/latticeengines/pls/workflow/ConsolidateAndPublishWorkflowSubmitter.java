@@ -64,7 +64,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
                         .build()) //
                 .dataCollectionName(dataCollectionName) //
-                .idField("LEAccountIDLong") //
+                .idField(InterfaceName.LEAccountIDLong.name()) //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder().put(MatchKey.Domain, Arrays.asList("URL")) //
                         .put(MatchKey.City, Arrays.asList(InterfaceName.City.name())) //
                         .put(MatchKey.State, Arrays.asList("StateProvince")) //
@@ -80,9 +80,9 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         exportConfig.setCleanupS3(true);
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setDistStyle(DistStyle.Key);
-        redshiftTableConfig.setDistKey("LatticeAccountId");
+        redshiftTableConfig.setDistKey(InterfaceName.LEAccountIDLong.name());
         redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
-        redshiftTableConfig.setSortKeys(Collections.<String> singletonList("LatticeAccountId"));
+        redshiftTableConfig.setSortKeys(Collections.<String> singletonList(InterfaceName.LatticeAccountId.name()));
         redshiftTableConfig.setS3Bucket(s3Bucket);
         exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
         return exportConfig;

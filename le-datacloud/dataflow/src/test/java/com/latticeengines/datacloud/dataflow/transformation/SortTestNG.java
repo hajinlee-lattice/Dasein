@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import org.apache.avro.generic.GenericRecord;
@@ -41,8 +42,12 @@ public class SortTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Pair.of("Field", String.class)
         );
         List<Long> ids = new ArrayList<>();
+        Random random = new Random(System.currentTimeMillis());
         for (int i = 0; i < NUM_ROWS; i++) {
             ids.add((long) (i + 1));
+            if (random.nextInt(100) > 50) {
+                ids.add(null);
+            }
         }
         Collections.shuffle(ids);
         Object[][] data = new Object[NUM_ROWS][2];

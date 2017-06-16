@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +28,28 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
     private int size = 0;
     private List<T> buffer;
     private Map<String, T> maxiums = new HashMap<>();
+    private Comparator<T> comparator = new NullFirstComparator<T>();
 
+    public static FileBackedOrderedList<Integer> newIntList(long bufferSize) {
+        return new FileBackedOrderedList<>(bufferSize, s -> "".equals(s) ? null : Integer.valueOf(s));
+    }
+
+    public static FileBackedOrderedList<Long> newLongList(long bufferSize) {
+        return new FileBackedOrderedList<>(bufferSize, s -> "".equals(s) ? null : Long.valueOf(s));
+    }
+
+    public static FileBackedOrderedList<Float> newFloatList(long bufferSize) {
+        return new FileBackedOrderedList<>(bufferSize, s -> "".equals(s) ? null : Float.valueOf(s));
+    }
+
+    public static FileBackedOrderedList<Double> newDoubleList(long bufferSize) {
+        return new FileBackedOrderedList<>(bufferSize, s -> "".equals(s) ? null : Double.valueOf(s));
+    }
+
+    public static FileBackedOrderedList<String> newStrList(long bufferSize) {
+        return new FileBackedOrderedList<>(bufferSize, s -> "".equals(s) ? null : s);
+    }
+    
     public FileBackedOrderedList(long bufferSize, Function<String, T> deserializeFunc) {
         this.bufferSize = bufferSize;
         this.deserializeFunc = deserializeFunc;
@@ -78,7 +100,7 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
         }
         File file = new File(tempDir + File.separator + fileName);
         if (!file.exists()) {
-            Collections.sort(sortedList);
+            sortedList.sort(comparator);
             T max = sortedList.get(sortedList.size() - 1);
             try {
                 FileUtils.writeLines(file, sortedList);
@@ -104,7 +126,7 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
         FileUtils.deleteQuietly(parentFile);
         List<T> sortedList = new ArrayList<>(list);
         lines.forEach(l -> sortedList.add(deserializeFunc.apply(l)));
-        Collections.sort(sortedList);
+        sortedList.sort(comparator);
         if (sortedList.size() > bufferSize) {
             int chunkSize = Math.max(sortedList.size() / NUM_FORKS, 1);
             Iterator<T> iterator = sortedList.listIterator();
@@ -138,8 +160,8 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
     @SuppressWarnings("unchecked")
     private String findInsertingFile(T item, List<String> fileNames) {
         for (String fileName : fileNames) {
-            Comparable<T> max = (Comparable<T>) maxiums.get(fileName);
-            if (max.compareTo(item) >= 0) {
+            T max = maxiums.get(fileName);
+            if (comparator.compare(max, item) >= 0) {
                 return fileName;
             }
         }
@@ -149,7 +171,7 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
     @SuppressWarnings("unchecked")
     public Iterator<T> iterator() {
         if (maxiums.isEmpty()) {
-            Collections.sort(buffer);
+            buffer.sort(comparator);
             return buffer.listIterator();
         } else {
             dumpBuffer();
@@ -159,6 +181,23 @@ public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> 
 
     private void shutdownHook() {
         FileUtils.deleteQuietly(new File(tempDir));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static class NullFirstComparator<T> implements Comparator<T> {
+        @Override
+        public int compare(T o1, T o2) {
+            if (o1 == null && o2 == null) {
+                return 0;
+            }
+            if (o1 == null) {
+                return -1;
+            }
+            if (o2 == null) {
+                return 1;
+            }
+            return ((Comparable<T>) o1).compareTo(o2);
+        }
     }
 
     public class FileBackedIterator implements Iterator<T> {

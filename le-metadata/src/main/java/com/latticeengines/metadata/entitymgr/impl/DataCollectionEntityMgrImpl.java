@@ -234,7 +234,11 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             log.info("There is already a main stats for collection " + collectionName + ". Remove it first.");
             statisticsContainerEntityMgr.delete(oldStats);
         }
+        if (StringUtils.isBlank(statisticsContainer.getName())) {
+            statisticsContainer.setName("Stats_" + DATE_FORMAT.format(new Date()));
+        }
         statisticsContainer.setSegment(masterSeg);
+        statisticsContainer.setTenant(MultiTenantContext.getTenant());
         statisticsContainerEntityMgr.create(statisticsContainer);
     }
 

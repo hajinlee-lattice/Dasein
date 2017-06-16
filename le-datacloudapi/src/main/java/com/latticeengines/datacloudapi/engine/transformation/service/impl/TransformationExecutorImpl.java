@@ -126,4 +126,29 @@ public class TransformationExecutorImpl implements TransformationExecutor {
         progress.setYarnAppId(appSubmission.getApplicationIds().get(0));
         transformationProgressEntityMgr.updateProgress(progress);
     }
+
+    private void getTransformationWorkflowConf(TransformationConfiguration transformationConfiguration,
+                                                TransformationProgress progress, TransformationProgressEntityMgr transformationProgressEntityMgr) {
+        log.info("Kick off workflow for progress " + progress + " in pod " + HdfsPodContext.getHdfsPodId());
+
+        builder = builder.workflowName("transformationWorkflow") //
+                .payloadName("Transformation") //
+                .customerSpace(customerSpace) //
+                .hdfsPodId(HdfsPodContext.getHdfsPodId()) //
+                .transformationConfiguration(transformationConfiguration) //
+                .rootOperationUid(progress.getRootOperationUID()) //
+                .serviceBeanName(transformationConfiguration.getServiceBeanName()) //
+                .internalResourceHostPort("propdata");
+
+        if (transformationConfiguration instanceof PipelineTransformationConfiguration) {
+            PipelineTransformationConfiguration ppConf = (PipelineTransformationConfiguration) transformationConfiguration;
+            builder.containerMemMB(ppConf.getContainerMemMB());
+        }
+
+        TransformationWorkflowConfiguration configuration = builder.build();
+
+        AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
+        progress.setYarnAppId(appSubmission.getApplicationIds().get(0));
+        transformationProgressEntityMgr.updateProgress(progress);
+    }
 }

@@ -22,14 +22,13 @@ public class StatisticsContainerDaoImpl extends BaseDaoImpl<StatisticsContainer>
     @Override
     public StatisticsContainer findInSegment(String collectionName, String segmentName, String modelId) {
         Session session = getSessionFactory().getCurrentSession();
-        String queryPattern = "select seg.stat from %s as dc";
-        queryPattern += " join dc.segments as seg";
-        queryPattern += " where dc.name = :collectionName";
-        queryPattern += " and seg.name = :segmentName";
+        String queryPattern = "from %s as stat";
+        queryPattern += " where stat.segment.dataCollection.name = :collectionName";
+        queryPattern += " and stat.segment.name = :segmentName";
         if (StringUtils.isBlank(modelId)) {
-            queryPattern += " and seg.stat.model is null";
+            queryPattern += " and stat.modelId is null";
         } else {
-            queryPattern += " and seg.stat.model = :modelId";
+            queryPattern += " and stat.modelId = :modelId";
         }
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
@@ -46,14 +45,13 @@ public class StatisticsContainerDaoImpl extends BaseDaoImpl<StatisticsContainer>
     @Override
     public StatisticsContainer findInMasterSegment(String collectionName, String modelId) {
         Session session = getSessionFactory().getCurrentSession();
-        String queryPattern = "select seg.stat from %s as dc";
-        queryPattern += " join dc.segments as seg";
-        queryPattern += " where dc.name = :collectionName";
-        queryPattern += " and seg.isMasterSegment = :isMaster";
+        String queryPattern = "from %s as stat";
+        queryPattern += " where stat.segment.dataCollection.name = :collectionName";
+        queryPattern += " and stat.segment.isMasterSegment = :isMaster";
         if (StringUtils.isBlank(modelId)) {
-            queryPattern += " and seg.stat.model is null";
+            queryPattern += " and stat.modelId is null";
         } else {
-            queryPattern += " and seg.stat.model = :modelId";
+            queryPattern += " and stat.modelId = :modelId";
         }
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);

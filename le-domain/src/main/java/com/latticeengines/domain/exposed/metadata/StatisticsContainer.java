@@ -80,7 +80,7 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonProperty("model")
+    @JsonProperty("modelId")
     @Column(name = "MODEL")
     private String modelId;
 

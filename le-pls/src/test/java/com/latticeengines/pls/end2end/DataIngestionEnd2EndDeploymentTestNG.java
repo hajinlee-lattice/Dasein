@@ -103,6 +103,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
         log.info("Test environment setup finished.");
         createDataFeed();
+        Assert.fail();
     }
 
     @Test(groups = { "deployment.cdl" })
@@ -122,7 +123,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "importData")
-    public void consolidateAndPublish() {
+    public void initialConsolidate() {
         log.info("Start consolidating data ...");
         ResponseDocument<?> response = restTemplate
                 .postForObject(String.format("%s/pls/datacollections/%s/datafeeds/%s/consolidate", getRestAPIHostPort(),
@@ -132,8 +133,8 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "consolidateAndPublish")
-    public void finalize() {
+    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "initialConsolidate")
+    public void firstFinalize() {
         log.info("Start calculating statistics ...");
         ResponseDocument<?> response = restTemplate.postForObject(
                 String.format("%s/pls/datacollections/%s/datafeeds/%s/calculatestats", getRestAPIHostPort(),
@@ -144,8 +145,8 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "finalize")
-    public void verifyStats() throws IOException {
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "firstFinalize")
+    public void verifyFirstImport() throws IOException {
         String customerSpace = CustomerSpace.parse(firstTenant.getId()).toString();
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(customerSpace, DATA_COLLECTION_NAME);
         Assert.assertNotNull(statisticsContainer);
@@ -155,7 +156,27 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         FileUtils.write(statsJson, JsonUtils.pprint(statisticsContainer));
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifyStats")
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifyFirstImport")
+    public void importSecondData() {
+
+    }
+
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importSecondData")
+    public void secondConsolidate() {
+
+    }
+
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondConsolidate")
+    public void secondFinalize() {
+
+    }
+
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondFinalize")
+    public void verifySecondImport() {
+
+    }
+
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifySecondImport")
     public void querySegment() {
 
     }
@@ -300,7 +321,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
         DataFeed datafeed = new DataFeed();
         datafeed.setName(DATA_FEED_NAME);
-        datafeed.setStatus(Status.Active);
         datafeed.setDataCollectionType(dataCollection.getType());
 
         Table importTable = new Table();
