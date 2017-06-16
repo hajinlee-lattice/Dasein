@@ -709,6 +709,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
                             modelSummary.getId()));
                     continue;
                 }
+                modelDetail.setStatus(modelSummary.getStatus());
+                modelDetail.setLastModifiedTimestamp(convertLongTimestampToString(modelSummary.getLastUpdateTime()));
                 models.add(modelDetail);
             }
         }
@@ -721,7 +723,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelSummaryStatus status = modelSummary.getStatus();
 
         Model model = new Model(modelSummary.getId(), modelSummary.getDisplayName(), modelType);
-        Long lastModifiedTimestamp = modelSummary.getLastUpdateTime();
 
         Fields fields = null;
         if (ModelSummaryStatus.DELETED.equals(status)) {
@@ -737,8 +738,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
             fields = getModelFields(customerSpace, model.getModelId());
         }
         ModelDetail modelDetail = new ModelDetail(model, status, fields,
-                BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp)));
+                convertLongTimestampToString(modelSummary.getLastUpdateTime()));
         return modelDetail;
+    }
+
+    private String convertLongTimestampToString(Long lastModifiedTimestamp) {
+        return BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp));
     }
 
     @VisibleForTesting
