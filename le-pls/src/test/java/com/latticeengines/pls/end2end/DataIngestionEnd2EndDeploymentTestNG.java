@@ -103,7 +103,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
         log.info("Test environment setup finished.");
         createDataFeed();
-        Assert.fail();
     }
 
     @Test(groups = { "deployment.cdl" })
@@ -191,7 +190,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
                 "Account", DATA_FEED_NAME);
         if (dataFeedTask == null) {
             Schema schema = AvroUtils.readSchemaFromLocalFile(dataUrl.getPath());
-            importTemplate = MetadataConverter.getTable(schema, new ArrayList<Extract>(), null, null, false);
+            importTemplate = MetadataConverter.getTable(schema, new ArrayList<>(), null, null, false);
             importTemplate.setTableType(TableType.IMPORTTABLE);
             importTemplate.setName(SchemaInterpretation.Account.name());
             dataFeedTask = new DataFeedTask();
