@@ -43,7 +43,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     private boolean sorted;
     private Map<String, Integer> namePositionMap;
     private double[] dVals;
-    private double[] dValsOri;
+    private double[] dValsRounded;
     private ObjectMapper om;
 
     public NumericProfileBuffer(Fields fieldDecl, String keyAttr, Map<String, Class<?>> classes, boolean equalSized,
@@ -81,7 +81,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         }
         doubleTransform(vals, cls);
         roundTransform();
-        keepOriArr();
+        keepRoundedValues();
         List<Integer> boundIdxes = equalSized ? findBoundIdxesEqualSized() : findBoundIdxesByDist();
         settleResult(bufferCall, boundIdxes, cls);
     }
@@ -89,14 +89,20 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     private void settleResult(BufferCall bufferCall, List<Integer> boundIdxes, Class<?> cls) {
         List<Number> boundaries = new ArrayList<>();
         if (boundIdxes.size() <= 2) {
-            return;
-        }
-        for (int i = 1; i < boundIdxes.size() - 1; i++) {
-            boundaries.add(numberTransform(dValsOri[boundIdxes.get(i)], cls));
+            boundaries.addAll(findDistinctValueBoundaries(cls));
+        } else {
+            for (int i = 1; i < boundIdxes.size() - 1; i++) {
+                boundaries.add(numberTransform(dValsRounded[boundIdxes.get(i)], cls));
+            }
         }
         if (boundaries.size() == 0) {
-            return;
+            bufferCall.getOutputCollector().add(setupRetainedAttrTuple(bufferCall));
+        } else {
+            bufferCall.getOutputCollector().add(setupIntervalBucketTuple(bufferCall, boundaries));
         }
+    }
+
+    private Tuple setupIntervalBucketTuple(BufferCall bufferCall, List<Number> boundaries) {
         IntervalBucket bucket = new IntervalBucket();
         bucket.setBoundaries(boundaries);
 
@@ -114,7 +120,35 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Fail to format IntervalBucket object to json", e);
         }
-        bufferCall.getOutputCollector().add(result);
+        return result;
+    }
+
+    private Tuple setupRetainedAttrTuple(BufferCall bufferCall) {
+        Tuple result = Tuple.size(getFieldDeclaration().size());
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME),
+                bufferCall.getGroup().getObject(keyAttr));
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_SRCATTR),
+                bufferCall.getGroup().getObject(keyAttr));
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), null);
+        return result;
+    }
+
+    private List<Number> findDistinctValueBoundaries(Class<?> cls) {
+        Set<Double> distinctValues = new HashSet<>();
+        for (double dVal : dValsRounded) {
+            if (!distinctValues.contains(dVal)) {
+                distinctValues.add(dVal);
+            }
+        }
+        List<Number> boundaries = new ArrayList<>();
+        for (Double dVal : distinctValues) {
+            boundaries.add(numberTransform(dVal, cls));
+        }
+        return boundaries;
     }
 
     /**
@@ -260,15 +294,15 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         return bIdx;
     }
 
-    private void keepOriArr() {
+    private void keepRoundedValues() {
         for (int i = 0; i < dVals.length; i++) {
-            dValsOri[i] = dVals[i];
+            dValsRounded[i] = dVals[i];
         }
     }
 
     private void doubleTransform(List<Comparable> vals, Class<?> cls) {
         dVals = new double[vals.size()];
-        dValsOri = new double[vals.size()];
+        dValsRounded = new double[vals.size()];
         if (cls.equals(Integer.class)) {
             for (int i = 0; i < vals.size(); i++) {
                 dVals[i] = ((Integer) vals.get(i)).doubleValue();

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -161,22 +162,23 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         columns.add(Pair.of("Customer3", Float.class)); // Interval
         columns.add(Pair.of("Customer4", Double.class)); // Interval
         columns.add(Pair.of("Customer5", Boolean.class)); // Boolean
+        columns.add(Pair.of("Customer6", Double.class)); // Interval (use distinct value as interval boundary)
 
         Object[][] data = new Object[][] { //
-                { 1L, 0, null, 10F, null, true }, //
-                { 2L, null, 10L, null, 100D, false }, //
-                { 3L, 10, null, 100F, 100D, null }, //
-                { 4L, null, 100L, 100F, 1000D, true }, //
-                { 5L, 100, 100L, 1000F, 1000D, false }, //
-                { 6L, 100, 1000L, 1000F, 10000D, null }, //
-                { 7L, 1000, 1000L, 10000F, 10000D, true }, //
-                { 8L, 1000, 10000L, 10000F, null, false }, //
-                { 9L, 10000, 10000L, null, 0D, null }, //
-                { 10L, 10000, null, 0F, 100D, true }, //
-                { 11L, null, 0L, 100F, 10D, false }, //
-                { 12L, 0, 100L, 10F, 0D, null }, //
-                { 13L, 100, 10L, 0F, null, true }, //
-                { 14L, 10, 0L, null, 10D, false }, //
+                { 1L, 0, null, 10F, null, true, 1.01 }, //
+                { 2L, null, 10L, null, 100D, false, 1.01 }, //
+                { 3L, 10, null, 100F, 100D, null, 1.01 }, //
+                { 4L, null, 100L, 100F, 1000D, true, 1.01 }, //
+                { 5L, 100, 100L, 1000F, 1000D, false, 2.02 }, //
+                { 6L, 100, 1000L, 1000F, 10000D, null, 2.02 }, //
+                { 7L, 1000, 1000L, 10000F, 10000D, true, 2.02 }, //
+                { 8L, 1000, 10000L, 10000F, null, false, null }, //
+                { 9L, 10000, 10000L, null, 0D, null, null }, //
+                { 10L, 10000, null, 0F, 100D, true, null }, //
+                { 11L, null, 0L, 100F, 10D, false, null }, //
+                { 12L, 0, 100L, 10F, 0D, null, null }, //
+                { 13L, 100, 10L, 0F, null, true, null }, //
+                { 14L, 10, 0L, null, 10D, false, null }, //
         };
         uploadAndRegisterTableSource(columns, data, customerTable.getSourceName());
     }
@@ -189,7 +191,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         columns.add(Pair.of("AlexaAUUsers", Float.class)); // Interval
         columns.add(Pair.of("AlexaCAPageViews", Double.class)); // Interval
         columns.add(Pair.of("AlexaCategories", String.class)); // Retained
-        columns.add(Pair.of("AlexaCARank", Integer.class)); // Interval (no bucket)
+        columns.add(Pair.of("AlexaCARank", Integer.class)); // Retained (Numeric without any value)
         columns.add(Pair.of("AlexaCAUsers", Boolean.class)); // Boolean
         columns.add(Pair.of("AlexaGBPageViews", Boolean.class)); // Boolean
         columns.add(Pair.of("AlexaDomains", Boolean.class)); // Discarded
@@ -229,7 +231,9 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         log.info("Start to verify records one by one.");
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(record);
+            if (!StringUtils.contains(record.toString(), "TechIndicator")) {
+                log.info(record);
+            }
         }
     }
 
