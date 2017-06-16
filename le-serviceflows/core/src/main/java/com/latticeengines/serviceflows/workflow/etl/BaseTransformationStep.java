@@ -51,6 +51,12 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
     @Value("${pls.cdl.transform.tez.task.mem.gb}")
     private int tezMemGb;
 
+    @Value("${pls.cdl.transform.default.cascading.engine}")
+    private String defaultEngine;
+
+    @Value("${pls.cdl.transform.sort.max.split.threads}")
+    protected int maxSplitThreads;
+
     protected String getDataCloudVersion() {
         return columnMetadataProxy.latestVersion("").getVersion();
     }
@@ -95,11 +101,11 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
         }
     }
 
-    protected String emptyStepConfig() {
-        return appendEngineConf(new TransformerConfig(), baseEngineConfig());
+    protected String emptyStepConfig(TransformationFlowParameters.EngineConfiguration engineConf) {
+        return appendEngineConf(new TransformerConfig(), engineConf);
     }
 
-    protected TransformationFlowParameters.EngineConfiguration baseEngineConfig() {
+    protected TransformationFlowParameters.EngineConfiguration heavyEngineConfig() {
         TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
         engineConf.setEngine("TEZ");
         Map<String, String> jobProperties = new HashMap<>();
@@ -110,10 +116,14 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
         return engineConf;
     }
 
-    protected TransformationFlowParameters.EngineConfiguration localFlinkEngineConfig() {
-        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
-        engineConf.setEngine("FLINK");
-        engineConf.setPartitions(cascadingPartitions);
-        return engineConf;
+    protected TransformationFlowParameters.EngineConfiguration lightEngineConfig() {
+        if ("FLINK".equals(defaultEngine)) {
+            TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
+            engineConf.setEngine("FLINK");
+            engineConf.setPartitions(cascadingPartitions);
+            return engineConf;
+        } else {
+            return heavyEngineConfig();
+        }
     }
 }

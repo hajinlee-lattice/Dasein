@@ -17,6 +17,7 @@ public class RestApiClient extends BaseRestApiProxy {
 
     public RestApiClient(String hostport) {
         super(hostport);
+        cleanupAuthHeader();
     }
 
     /**

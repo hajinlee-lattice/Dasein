@@ -94,18 +94,23 @@ public class TableSource implements Source {
      * primary key
      */
     public String[] getPrimaryKey() {
-        if (StringUtils.isNotBlank(primaryKey)) {
-            return new String[]{ primaryKey };
-        } else if (table.getPrimaryKey() != null) {
+        if (table.getPrimaryKey() != null) {
             return table.getPrimaryKey().getAttributeNames();
+        } else if (StringUtils.isNotBlank(primaryKey)) {
+            return new String[]{ primaryKey };
         } else {
             return null;
         }
     }
 
     public String getSinglePrimaryKey() {
-        String[] pk = getPrimaryKey();
-        return (pk == null || pk.length == 0) ? null : pk[0];
+        if (table.getPrimaryKey() != null) {
+            return table.getPrimaryKey().getAttributesAsStr();
+        } else if (StringUtils.isNotBlank(primaryKey)) {
+            return primaryKey;
+        } else {
+            return null;
+        }
     }
 
     /*

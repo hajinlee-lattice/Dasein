@@ -3,6 +3,7 @@ package com.latticeengines.pls.end2end;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +44,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -115,6 +118,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
             long endMillis = System.currentTimeMillis();
             checkExtractFolderExist(startMillis, endMillis);
         }
+        metadataProxy.updateDataFeedStatus(firstTenant.getId(), DATA_FEED_NAME, Status.InitialLoaded.getName());
     }
 
     @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "importData")
@@ -140,7 +144,18 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.cdl" }, enabled = false, dependsOnMethods = "finalize")
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "finalize")
+    public void verifyStats() throws IOException {
+        String customerSpace = CustomerSpace.parse(firstTenant.getId()).toString();
+        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(customerSpace, DATA_COLLECTION_NAME);
+        Assert.assertNotNull(statisticsContainer);
+        // save stats to a local json to help create verifications
+        File statsJson = new File("stats.json");
+        FileUtils.deleteQuietly(statsJson);
+        FileUtils.write(statsJson, JsonUtils.pprint(statisticsContainer));
+    }
+
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifyStats")
     public void querySegment() {
 
     }
@@ -282,17 +297,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         dataCollection.setName(DATA_COLLECTION_NAME);
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollectionProxy.createOrUpdateDataCollection(firstTenant.getId(), dataCollection);
-
-//        Table table = new Table();
-//        table.setName(SchemaInterpretation.Account.name());
-//        table.setDisplayName(table.getName());
-//        Table retrieved = metadataProxy.getTable(firstTenant.getId(), table.getName());
-//        if (retrieved != null) {
-//            metadataProxy.deleteTable(firstTenant.getId(), table.getName());
-//        }
-//        metadataProxy.createTable(firstTenant.getId(), table.getName(), table);
-//        dataCollectionProxy.upsertTable(firstTenant.getId(), DATA_COLLECTION_NAME, table.getName(),
-//                TableRoleInCollection.ConsolidatedAccount);
 
         DataFeed datafeed = new DataFeed();
         datafeed.setName(DATA_FEED_NAME);

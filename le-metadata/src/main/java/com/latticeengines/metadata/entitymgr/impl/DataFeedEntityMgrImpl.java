@@ -65,6 +65,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             throw new IllegalStateException("Data collection " + dataCollectionName + " does not exist");
         }
         datafeed.setDataCollection(dataCollection);
+        datafeed.setStatus(Status.Initing);
         super.create(datafeed);
         datafeed = findByName(datafeed.getName());
         for (DataFeedTask task : datafeed.getTasks()) {

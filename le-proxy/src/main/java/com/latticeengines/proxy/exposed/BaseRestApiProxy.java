@@ -76,6 +76,7 @@ public abstract class BaseRestApiProxy {
     protected void cleanupAuthHeader() {
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
+        interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
         restTemplate.setInterceptors(interceptors);
     }
 

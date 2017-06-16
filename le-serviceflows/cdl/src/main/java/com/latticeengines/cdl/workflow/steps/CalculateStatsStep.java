@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -59,9 +59,6 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
     private static int bucketStep;
     private static int filterStep;
 
-    @Value("${pls.cdl.transform.sort.max.split.threads}")
-    private int maxSplitThreads;
-
     @Autowired
     private TransformationProxy transformationProxy;
 
@@ -72,10 +69,12 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
     private MetadataProxy metadataProxy;
 
     private String pipelineVersion;
+    private String masterTableIdField;
 
     @Override
     public void execute() {
         log.info("Inside CalculateStats execute()");
+
         String customerSpace = configuration.getCustomerSpace().toString();
         String collectionName = configuration.getDataCollectionName();
 
@@ -86,6 +85,14 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         }
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 masterTable.getName()));
+        if (masterTable.getPrimaryKey() == null || StringUtils.isBlank(masterTable.getPrimaryKey().getAttributesAsStr())) {
+            log.warn("master table should have primary key.");
+            log.info(JsonUtils.pprint(masterTable));
+            masterTableIdField = "LEAccountLong";
+        } else {
+            masterTableIdField = masterTable.getPrimaryKey().getAttributesAsStr();
+        }
+        log.info("masterTableIdField=" + masterTableIdField);
 
         PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), masterTable);
         TransformationProgress progress = transformationProxy.transform(request, "");
@@ -179,7 +186,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         step.setInputSteps(Collections.singletonList(matchStep));
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
-        String confStr = appendEngineConf(conf, baseEngineConfig());
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
@@ -188,7 +195,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(matchStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
-        step.setConfiguration(emptyStepConfig());
+        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;
     }
 
@@ -202,7 +209,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         targetTable.setNamePrefix(statsTablePrefix);
         step.setTargetTable(targetTable);
 
-        step.setConfiguration(emptyStepConfig());
+        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;
     }
 
@@ -212,7 +219,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         step.setTransformer(TRANSFORMER_BUCKETED_FILTER);
         BucketedFilterConfig conf = new BucketedFilterConfig();
         conf.setOriginalAttrs(originalAttrs);
-        String confStr = appendEngineConf(conf, baseEngineConfig());
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
@@ -232,8 +239,8 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         conf.setPartitions(500);
         conf.setSplittingThreads(maxSplitThreads);
         conf.setCompressResult(false);
-        conf.setSortingField(DataCloudConstants.LATTICE_ACCOUNT_ID);
-        String confStr = appendEngineConf(conf, baseEngineConfig());
+        conf.setSortingField(masterTableIdField);
+        String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
@@ -248,7 +255,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         conf.setPartitions(1);
         conf.setCompressResult(true);
         conf.setSortingField(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
-        String confStr = appendEngineConf(conf, localFlinkEngineConfig());
+        String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
 
         TargetTable targetTable = new TargetTable();

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -85,6 +84,8 @@ public class SourceServiceImpl implements SourceService {
         table.addExtract(extract);
 
         TableSource source = new TableSource(table, customerSpace);
+        source.setPrimaryKey(targetTable.getPrimaryKey());
+        source.setLastModifiedKey(targetTable.getLastModifiedKey());
         source.setExpandBucketedAttrs(Boolean.TRUE.equals(targetTable.getExpandBucketedAttrs()));
 
         return source;

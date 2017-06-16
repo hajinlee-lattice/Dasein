@@ -111,6 +111,7 @@
     </properties>
 
     <!-- set up to use LE local Nexus Repository for dependencies -->
+    <!--
     <repositories>
         <repository>
             <id>central</id>
@@ -129,7 +130,9 @@
             </snapshots>
         </repository>
     </repositories>
+    -->
     <!-- set up to use LE local Nexus Repository for maven plugins -->
+    <!--
     <pluginRepositories>
         <pluginRepository>
             <id>central</id>
@@ -144,6 +147,7 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
+    -->
 
 
     <profiles>

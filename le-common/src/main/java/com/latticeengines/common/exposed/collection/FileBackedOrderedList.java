@@ -3,6 +3,7 @@ package com.latticeengines.common.exposed.collection;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,9 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
-public class FileBackedOrderedList<T> implements Iterable<T> {
+public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> {
 
     private static final Log log = LogFactory.getLog(FileBackedOrderedList.class);
     private static final int NUM_FORKS = 10;
@@ -72,6 +71,7 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
         buffer.clear();
     }
 
+    @SuppressWarnings("unchecked")
     private void dumpListToFile(List<T> sortedList, String fileName) {
         if (sortedList.isEmpty()) {
             return;
@@ -86,13 +86,12 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
                 throw new RuntimeException("Failed to dump buffer to local file " + file, e);
             }
             maxiums.put(fileName, max);
-            //log.debug("Dumping " + sortedList.size() + " items with maximum " + max + " to file "
-            //        + fileName);
         } else {
             insertAndSplit(sortedList, fileName);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void insertAndSplit(List<T> list, String parent) {
         File parentFile = new File(tempDir + File.separator + parent);
         List<String> lines;
@@ -104,9 +103,7 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
         maxiums.remove(parent);
         FileUtils.deleteQuietly(parentFile);
         List<T> sortedList = new ArrayList<>(list);
-        for (String line : lines) {
-            sortedList.add(deserializeFunc.apply(line));
-        }
+        lines.forEach(l -> sortedList.add(deserializeFunc.apply(l)));
         Collections.sort(sortedList);
         if (sortedList.size() > bufferSize) {
             int chunkSize = Math.max(sortedList.size() / NUM_FORKS, 1);
@@ -149,6 +146,7 @@ public class FileBackedOrderedList<T> implements Iterable<T> {
         return fileNames.isEmpty() ? "0" : fileNames.get(fileNames.size() - 1);
     }
 
+    @SuppressWarnings("unchecked")
     public Iterator<T> iterator() {
         if (maxiums.isEmpty()) {
             Collections.sort(buffer);
