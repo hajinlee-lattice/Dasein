@@ -1,12 +1,11 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,32 +24,27 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.AccountMaster;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceBucketer;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceSorter;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.StatsCalculator;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase {
 
     private static final Log log = LogFactory.getLog(AccountMasterBucketTestNG.class);
 
-    private static final String AM_PROFILE = "AccountMasterProfile";
-
     @Autowired
     private AccountMaster accountMaster;
 
-    @Test(groups = "pipeline1", enabled = true)
+    @Test(groups = "pipeline1")
     public void testTransformation() throws Exception {
         uploadBaseSourceFile(accountMaster.getSourceName(), "AMBucketTest_AM", baseSourceVersion);
-
-        //TODO: will be changed to a profile step, instead of manual upload
-        uploadBaseSourceFile(AM_PROFILE, "AMBucketTest_AMProfile", baseSourceVersion);
-
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -78,33 +72,21 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             configuration.setName("AccountMasterBucket");
             configuration.setVersion(targetVersion);
             // -----------
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = Arrays.asList(accountMaster.getSourceName(), AM_PROFILE);
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(SourceBucketer.TRANSFORMER_NAME);
-            step1.setConfiguration("{}");
-//            step1.setTargetSource(getTargetSourceName());
+            TransformationStepConfig profile = profile();
+            TransformationStepConfig sortProfile = sortProfile();
+            TransformationStepConfig bucket = bucket();
+            TransformationStepConfig calcStats = calcStats();
+            TransformationStepConfig sortBucket = sortBucket();
             // -----------
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            step2.setInputSteps(Collections.singletonList(0));
-            step2.setBaseSources(Collections.singletonList(AM_PROFILE));
-            step2.setTransformer(StatsCalculator.TRANSFORMER_NAME);
-            step2.setConfiguration("{}");
-            step2.setTargetSource("AccountMasterBucketedStats");
-            // -----------
-            TransformationStepConfig step3 = new TransformationStepConfig();
-            step3.setInputSteps(Collections.singletonList(0));
-            step3.setTransformer(SourceSorter.TRANSFORMER_NAME);
-            step3.setConfiguration(sortStepConfiguration());
-            step3.setTargetSource(getTargetSourceName());
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<>();
-            steps.add(step1);
-            steps.add(step2);
-            steps.add(step3);
+            List<TransformationStepConfig> steps = Arrays.asList( //
+                    profile, //
+                    sortProfile, //
+                    bucket, //
+                    calcStats, //
+                    sortBucket //
+            );
             // -----------
             configuration.setSteps(steps);
-            configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
             return configuration;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -133,10 +115,59 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         Assert.assertEquals(rowCount, 1000);
     }
 
-    private String sortStepConfiguration() throws IOException {
+    private TransformationStepConfig profile() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<String> baseSources = Collections.singletonList(accountMaster.getSourceName());
+        step.setBaseSources(baseSources);
+        step.setTransformer(SourceProfiler.TRANSFORMER_NAME);
+        step.setConfiguration(JsonUtils.serialize(new ProfileConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig sortProfile() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(0));
+        step.setTransformer(SourceSorter.TRANSFORMER_NAME);
+        SorterConfig conf = new SorterConfig();
+        conf.setPartitions(1);
+        conf.setSortingField(PROFILE_ATTR_ATTRNAME);
+        conf.setCompressResult(true);
+        step.setConfiguration(JsonUtils.serialize(conf));
+        step.setTargetSource("AccountMasterProfile");
+        return step;
+    }
+
+    private TransformationStepConfig bucket() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setBaseSources(Collections.singletonList(accountMaster.getSourceName()));
+        step.setInputSteps(Collections.singletonList(1));
+        step.setTransformer(SourceBucketer.TRANSFORMER_NAME);
+        step.setConfiguration("{}");
+        return step;
+    }
+
+    private TransformationStepConfig calcStats() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Arrays.asList(0, 2));
+        step.setTransformer(StatsCalculator.TRANSFORMER_NAME);
+        step.setConfiguration("{}");
+        step.setTargetSource("AccountMasterBucketedStats");
+        return step;
+    }
+
+    private TransformationStepConfig sortBucket() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(2));
+        step.setTransformer(SourceSorter.TRANSFORMER_NAME);
+        step.setConfiguration(sortStepConfiguration());
+        step.setTargetSource(getTargetSourceName());
+        return step;
+    }
+
+    private String sortStepConfiguration() {
         SorterConfig config = new SorterConfig();
         config.setPartitions(100);
-        config.setSortingField("LatticeAccountId");
+        config.setSortingField(InterfaceName.LatticeAccountId.name());
         return JsonUtils.serialize(config);
     }
 
@@ -180,12 +211,12 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
 
     private void verifyStats() throws IOException {
         Iterator<GenericRecord> records = iterateSource("AccountMasterBucketedStats");
-        while(records.hasNext()) {
+        while (records.hasNext()) {
             GenericRecord record = records.next();
             String attrName = record.get("AttrName").toString();
             if (attrName.startsWith("TechIndicator")) {
                 String[] bkts = record.get("BktCounts").toString().split("\\|");
-                for(String bkt: bkts) {
+                for (String bkt : bkts) {
                     String[] tokens = bkt.split(":");
                     int bktId = Integer.valueOf(tokens[0]);
                     Assert.assertTrue(bktId >= 0 && bktId < 3, "Found an invalid bkt id " + bktId);

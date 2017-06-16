@@ -93,7 +93,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
 
     @Override
     protected boolean validateConfig(SorterConfig config, List<String> sourceNames) {
-        return true;
+        return !(config.getPartitions() == 1 && !Boolean.TRUE.equals(config.getCompressResult()));
     }
 
     @Override
@@ -134,8 +134,13 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     }
 
     protected void postDataFlowProcessing(String workflowDir, SorterParameters paramters, SorterConfig configuration) {
-        if (paramters.getPartitions() == 1 && Boolean.TRUE.equals(configuration.getCompressResult())) {
-            keepOnlyBiggestAvro(workflowDir);
+        if (paramters.getPartitions() == 1) {
+            if (Boolean.TRUE.equals(configuration.getCompressResult())) {
+                keepOnlyBiggestAvro(workflowDir);
+            } else {
+                // single partition, uncompressed.
+                throw new UnsupportedOperationException("single partition, uncompressed sorting has not been implemented");
+            }
         } else {
             try {
                 moveAvrosToOutput(workflowDir);

@@ -117,6 +117,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         // TODO: Will replace by reading from SourceAttribute table
         Map<String, Map<String, Object>> amAttrConf = FileParser.parseAMProfileConfig();
         Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(baseSrc, baseVer);
+        if (schema == null) {
+            String avroDir = hdfsPathBuilder.constructSnapshotDir(baseSrc.getSourceName(), baseVer).toString();
+            schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroDir + "/*.avro");
+        }
         log.info("Classifying attributes...");
         Set<String> numTypes = new HashSet<>(Arrays.asList(new String[] { "int", "long", "float", "double" }));
         Set<String> boolTypes = new HashSet<>(Arrays.asList(new String[] { "boolean" }));
