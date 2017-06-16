@@ -41,7 +41,7 @@ public class HdfsToS3ExportService {
 
     private static final Log log = LogFactory.getLog(HdfsToS3ExportService.class);
 
-    private static final Long MIN_SPLIT_SIZE = 100L * 1024L * 1024L; // 100 GB
+    private static final Long MIN_SPLIT_SIZE = 10L * 1024L * 1024L; // 10 MB
     private static final String LOCAL_CACHE = "tmp/camel";
 
     @Autowired
@@ -127,8 +127,7 @@ public class HdfsToS3ExportService {
     }
 
     public void parallelDownloadToLocal(HdfsToS3Configuration config) {
-        Long splitSize = config.getSplitSize();
-        final boolean needToSplit = splitSize > 0;
+        final boolean needToSplit = shouldSplit(config);
 
         String hdfsPath = config.getExportInputPath();
         String fileName = config.getTargetFilename();
@@ -154,42 +153,41 @@ public class HdfsToS3ExportService {
             futures.put(filePath, executorService.submit(new Callable<Long>() {
 
                 Integer splitIdx = 0;
+                Long splitSize;
 
                 @Override
                 public Long call() throws Exception {
                     if (needToSplit) {
+                        splitSize = config.getSplitSize();
                         return splitToLocal(filePath);
                     } else {
                         return downloadToLocal(filePath);
                     }
                 }
 
-                protected Long downloadToLocal(String filePath) {
+                private Long downloadToLocal(String filePath) {
                     log.info("Downloading original file " + filePath + " to local as a whole.");
                     String fileName = new Path(filePath).getName();
                     try {
                         File avroFile = new File(LOCAL_CACHE + "/" + fileName);
-                        HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, avroFile.getPath());
+                        HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, avroFile.getAbsolutePath());
+                        FileUtils.deleteQuietly(new File(LOCAL_CACHE + "/." + fileName + ".crc"));
                         Long fileSize = FileUtils.sizeOf(avroFile);
                         log.info("Downloaded filePath to " + fileName
                                 + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
+                        return 1L;
                     } catch (IOException e) {
                         throw new RuntimeException("Failed to download to split file " + fileName, e);
                     }
-                    return 1L;
                 }
 
-                protected Long splitToLocal(String filePath) throws IllegalArgumentException, IOException {
+                private Long splitToLocal(String filePath) throws IllegalArgumentException, IOException {
                     log.info("Downloading original file " + filePath + " to local, and split into chunks of "
                             + splitSize + " records.");
                     Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
                     Long recordsInFile = 0L;
                     while (iterator.hasNext()) {
-                        String fileName = new Path(filePath).getName();
-                        if (config.getSplitSize() != null) {
-                            fileName = new Path(filePath).getName().replace(".avro", "-" + splitIdx + ".avro");
-                        }
-
+                        String fileName = new Path(filePath).getName().replace(".avro", "-" + splitIdx + ".avro");
                         File avroFile = new File(LOCAL_CACHE + "/" + fileName);
                         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
                                 new GenericDatumWriter<GenericRecord>())) {
@@ -217,7 +215,7 @@ public class HdfsToS3ExportService {
                 }
 
                 @SuppressWarnings("unused")
-                protected Long copyToLocalJson(String filePath) throws IllegalArgumentException, IOException {
+                private Long copyToLocalJson(String filePath) throws IllegalArgumentException, IOException {
                     log.info("Downloading original file " + filePath + " to local.");
                     Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
                     Long recordsInFile = 0L;

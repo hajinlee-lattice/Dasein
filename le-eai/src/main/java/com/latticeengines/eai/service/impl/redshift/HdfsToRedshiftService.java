@@ -43,7 +43,7 @@ public class HdfsToRedshiftService {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         HdfsToS3Configuration s3Configuration = new HdfsToS3Configuration();
         if (configuration.isNoSplit()) {
-            s3Configuration.setSplitSize(-1L);
+            s3Configuration.setSplitSize(null);
         } else {
             s3Configuration.setSplitSize(500L * 1024 * 1024);
         }

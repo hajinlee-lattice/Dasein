@@ -33,7 +33,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     private static final Log log = LogFactory.getLog(HdfsToRedshiftServiceImplTestNG.class);
 
     private static final String HDFS_DIR = "/tmp/hdfs2sf";
-    private static final String FILENAME = "camel.avro";
+    private static final String FILENAME = "uncompressed.avro";
 
     private static final String TEST_TABLE = "CAMEL_TEST";
 
@@ -70,7 +70,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
         super.setup();
         testTable = leStack + "_" + TEST_TABLE;
         cleanup();
-        URL url = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/camel/camel.avro");
+        URL url = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/camel/uncompressed.avro");
         log.info("Uploading test avro to hdfs.");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, url.getPath(), HDFS_DIR + "/" + FILENAME);
     }
@@ -122,7 +122,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
         configuration.setNoSplit(true);
         RedshiftTableConfiguration redshiftTableConfiguration = new RedshiftTableConfiguration();
         redshiftTableConfiguration.setTableName(testTable);
-        redshiftTableConfiguration.setJsonPathPrefix("camel.jsonpath");
+        redshiftTableConfiguration.setJsonPathPrefix("uncompressed.jsonpath");
         redshiftTableConfiguration.setS3Bucket(s3Bucket);
         configuration.setRedshiftTableConfiguration(redshiftTableConfiguration);
         return configuration;
