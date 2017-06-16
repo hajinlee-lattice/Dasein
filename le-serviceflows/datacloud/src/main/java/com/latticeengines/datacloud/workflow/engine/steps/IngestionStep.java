@@ -22,7 +22,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.codehaus.plexus.util.StringUtils;
@@ -34,7 +33,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -43,6 +41,7 @@ import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.SourceService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
@@ -53,6 +52,7 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfigurat
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -94,8 +94,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Autowired
     private EmailService emailService;
 
-    private static final long WORKFLOW_WAIT_TIME_IN_MILLIS = TimeUnit.HOURS.toMillis(6);
-    private static final long MAX_MILLIS_TO_WAIT = TimeUnit.HOURS.toMillis(5);
+    @Autowired
+    protected JobService jobService;
+
     private static final Integer WORKFLOW_WAIT_TIME_IN_SECOND = (int) TimeUnit.HOURS.toSeconds(6);
 
     private static final String sqoopPrefix = "part-m-";
@@ -207,10 +208,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         AppSubmission submission = eaiProxy.submitEaiJob(camelRouteConfig);
         String eaiAppId = submission.getApplicationIds().get(0);
         log.info("EAI Service ApplicationId: " + eaiAppId);
-        FinalApplicationStatus status = waitForStatus(eaiAppId, WORKFLOW_WAIT_TIME_IN_MILLIS,
-                FinalApplicationStatus.SUCCEEDED);
-
-        if (status == FinalApplicationStatus.SUCCEEDED
+        JobStatus finalStatus = jobService.waitFinalJobStatus(eaiAppId.toString(), WORKFLOW_WAIT_TIME_IN_SECOND);
+        if (finalStatus.getStatus() == FinalApplicationStatus.SUCCEEDED
                 && waitForFileToBeDownloaded(tmpDestFile.toString())) {
             HdfsUtils.moveFile(yarnConfiguration, tmpDestFile.toString(),
                     progress.getDestination());
@@ -336,9 +335,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
         ApplicationId appId = ConverterUtils
                 .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
-        FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnClient, appId,
-                WORKFLOW_WAIT_TIME_IN_SECOND);
-        if (finalStatus == FinalApplicationStatus.SUCCEEDED
+        JobStatus finalStatus = jobService.waitFinalJobStatus(appId.toString(), WORKFLOW_WAIT_TIME_IN_SECOND);
+        if (finalStatus.getStatus() == FinalApplicationStatus.SUCCEEDED
                 && ingestionVersionService.isCompleteVersion(progress.getIngestion(), progress.getVersion())) {
             Source source = sourceService.findBySourceName(config.getSource());
             log.info(String.format("Counting total records in source %s for version %s...", source.getSourceName(),
@@ -405,9 +403,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         }
         importer.setOtherOptions(otherOptions);
         ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
-        FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnClient,
-                appId, WORKFLOW_WAIT_TIME_IN_SECOND);
-        if (finalStatus != FinalApplicationStatus.SUCCEEDED) {
+        JobStatus finalStatus = jobService.waitFinalJobStatus(appId.toString(), WORKFLOW_WAIT_TIME_IN_SECOND);
+        if (finalStatus.getStatus() != FinalApplicationStatus.SUCCEEDED) {
             throw new RuntimeException("Application final status is not " + FinalApplicationStatus.SUCCEEDED.toString());
         }
         for (int i = 0; i < config.getMappers(); i++) {
@@ -477,6 +474,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             log.error("Email for notification is empty");
             return;
         }
+        log.info(String.format("Sending notification email to %s", config.getNotifyEmail()));
         String subject = String.format("Ingestion %s for version %s is finished", ingestion, version);
         String content = String.format("Files are accessible at the following HDFS folder: %s", destPath);
         emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(config.getNotifyEmail()));
@@ -488,31 +486,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
                 .errorMessage(e.getMessage()).commit(true);
         log.error("Ingestion failed for progress: " + progress.toString(), e);
-    }
-
-    private FinalApplicationStatus waitForStatus(String applicationId, Long waitTimeInMillis,
-            FinalApplicationStatus... applicationStatuses) throws Exception {
-        waitTimeInMillis = waitTimeInMillis == null ? MAX_MILLIS_TO_WAIT : waitTimeInMillis;
-        log.info(String.format("Waiting on %s for at most %dms.", applicationId, waitTimeInMillis));
-
-        FinalApplicationStatus status = null;
-        long start = System.currentTimeMillis();
-
-        done: do {
-            ApplicationReport report = yarnClient
-                    .getApplicationReport(ConverterUtils.toApplicationId(applicationId));
-            status = report.getFinalApplicationStatus();
-            if (status == null) {
-                break;
-            }
-            for (FinalApplicationStatus statusCheck : applicationStatuses) {
-                if (status.equals(statusCheck) || YarnUtils.TERMINAL_STATUS.contains(status)) {
-                    break done;
-                }
-            }
-            Thread.sleep(1000);
-        } while (System.currentTimeMillis() - start < waitTimeInMillis);
-        return status;
     }
 
     private boolean waitForFileToBeDownloaded(String destPath) {
