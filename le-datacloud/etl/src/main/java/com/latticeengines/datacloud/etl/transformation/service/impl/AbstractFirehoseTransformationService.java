@@ -41,7 +41,7 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
 
     @Override
     protected TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration) {
-        if (!ingestDataFromFirehoseAndUpdateProgress(progress, transformationConfiguration)) {
+        if (ingestDataFromFirehoseAndUpdateProgress(progress, transformationConfiguration)) {
             return progress;
         }
         return null;
