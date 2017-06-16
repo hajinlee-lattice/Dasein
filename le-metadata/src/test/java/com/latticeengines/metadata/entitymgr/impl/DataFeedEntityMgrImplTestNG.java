@@ -12,8 +12,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
@@ -24,10 +22,10 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
-import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
+public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGBase {
 
     @Autowired
     private DataFeedEntityMgr datafeedEntityMgr;
@@ -37,6 +35,9 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
+
+    @Autowired
+    private TableTypeHolder tableTypeHolder;
 
     private static final String DATA_FEED_NAME = "datafeed";
 
@@ -61,15 +62,8 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void create() {
-        DataCollection dataCollection = new DataCollection();
-        dataCollection.setName("DATA_COLLECTION_NAME");
-        dataCollection.setType(DataCollectionType.Segmentation);
-        dataCollectionEntityMgr.createDataCollection(dataCollection);
-
+        datafeed.setDataCollection(dataCollection);
         datafeed.setName(DATA_FEED_NAME);
-        datafeed.setStatus(Status.Active);
-        datafeed.setDataCollectionType(DataCollectionType.Segmentation);
-//        dataCollection.addDatafeed(datafeed);
 
         Table importTable = new Table();
         importTable.setName("importTable");
@@ -80,6 +74,9 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         a1.setDisplayName(a1.getName());
         a1.setPhysicalDataType("string");
         importTable.addAttribute(a1);
+        importTable.setTableType(TableType.IMPORTTABLE);
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        tableEntityMgr.create(importTable);
 
         Table dataTable = new Table();
         dataTable.setName("dataTable");
@@ -90,6 +87,9 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         a2.setDisplayName(a1.getName());
         a2.setPhysicalDataType("string");
         dataTable.addAttribute(a2);
+        dataTable.setTableType(TableType.DATATABLE);
+        tableTypeHolder.setTableType(TableType.DATATABLE);
+        tableEntityMgr.create(dataTable);
 
         DataFeedTask task = new DataFeedTask();
         task.setDataFeed(datafeed);
@@ -104,7 +104,11 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         task.setStartTime(new Date());
         task.setLastImported(new Date());
         datafeed.addTask(task);
+
         datafeedEntityMgr.create(datafeed);
+        DataFeed dataFeed = datafeedEntityMgr.findByName(DATA_FEED_NAME);
+        dataFeed.setStatus(Status.Active);
+        datafeedEntityMgr.update(dataFeed);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
@@ -132,7 +136,6 @@ public class DataFeedEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
         assertEquals(exec.getImports().size(), df.getTasks().size());
         assertEquals(exec.getImports().get(0).getDataTable().getAttributes().size(), 1);
-
     }
 
     @Test(groups = "functional", dependsOnMethods = "startExecution")

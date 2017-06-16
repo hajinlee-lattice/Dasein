@@ -1,6 +1,5 @@
 package com.latticeengines.workflowapi.flows;
 
-import static com.latticeengines.domain.exposed.metadata.MetadataConstants.DATE_FORMAT;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.InputStream;
@@ -47,7 +46,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     private DataCollectionProxy dataCollectionProxy;
 
     protected CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("CalculateStatsTest");
-    protected String dataCollectionName = "DataCollection_" + DATE_FORMAT.format(new Date());
+    protected String dataCollectionName;
 
     @BeforeClass(groups = "deployment")
     protected void setupForWorkflow() throws Exception {
@@ -72,10 +71,10 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         metadataProxy.createTable(DEMO_CUSTOMERSPACE.toString(), table.getName(), table);
 
         DataCollection dataCollection = new DataCollection();
-        dataCollection.setName(dataCollectionName);
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollection.addTable(table);
-        dataCollectionProxy.createOrUpdateDataCollection(DEMO_CUSTOMERSPACE.toString(), dataCollection);
+        dataCollection = dataCollectionProxy.createOrUpdateDataCollection(DEMO_CUSTOMERSPACE.toString(), dataCollection);
+        dataCollectionName = dataCollection.getName();
         dataCollectionProxy.upsertTable(DEMO_CUSTOMERSPACE.toString(), dataCollectionName, table.getName(),
                 TableRoleInCollection.ConsolidatedAccount);
 

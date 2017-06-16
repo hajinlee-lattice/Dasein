@@ -1,7 +1,5 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
-import static com.latticeengines.domain.exposed.metadata.MetadataConstants.DATE_FORMAT;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +16,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.HibernateUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
@@ -70,14 +69,13 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void createDataCollection(DataCollection dataCollection) {
-//        removeDefaultTables(dataCollection);
+    public DataCollection createDataCollection(DataCollection dataCollection) {
         if (getDataCollection(dataCollection.getName()) != null) {
             throw new IllegalStateException("Data collection " + dataCollection.getName() + " already exist.");
         }
         dataCollection.setTenant(MultiTenantContext.getTenant());
         if (StringUtils.isBlank(dataCollection.getName())) {
-            dataCollection.setName("DataCollection_" + DATE_FORMAT.format(new Date()));
+            dataCollection.setName(NamingUtils.timestamp("DataCollection"));
         }
         create(dataCollection);
         for (DataCollectionProperty dataCollectionProperty : dataCollection.getProperties()) {
@@ -89,6 +87,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             MetadataSegment segment = masterSegment(dataCollection);
             segmentEntityMgr.createOrUpdate(segment);
         }
+        return getDataCollection(dataCollection.getName());
     }
 
     private MetadataSegment masterSegment(DataCollection dataCollection) {
@@ -112,12 +111,10 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection getDataCollection(String name) {
-        List<DataCollection> candidates = dataCollectionDao.findAllByField("name", name);
-        if (candidates.size() == 0) {
-            return null;
+        DataCollection dataCollection = dataCollectionDao.findByField("name", name);
+        if (dataCollection != null) {
+            HibernateUtils.inflateDetails(dataCollection.getProperties());
         }
-        DataCollection dataCollection = candidates.get(0);
-        HibernateUtils.inflateDetails(dataCollection.getProperties());
         return dataCollection;
     }
 
@@ -235,7 +232,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             statisticsContainerEntityMgr.delete(oldStats);
         }
         if (StringUtils.isBlank(statisticsContainer.getName())) {
-            statisticsContainer.setName("Stats_" + DATE_FORMAT.format(new Date()));
+            statisticsContainer.setName(NamingUtils.timestamp("Stats"));
         }
         statisticsContainer.setSegment(masterSeg);
         statisticsContainer.setTenant(MultiTenantContext.getTenant());

@@ -11,12 +11,16 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.StatisticsContainerProxy;
 
-public class StatisticsContainerResourceTestNG extends MetadataFunctionalTestNGBase {
+public class StatisticsContainerResourceTestNG extends DataCollectionFunctionalTestNGBase {
     @Autowired
     private StatisticsContainerProxy statisticsContainerProxy;
+
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
 
     private StatisticsContainer container;
 
@@ -31,12 +35,21 @@ public class StatisticsContainerResourceTestNG extends MetadataFunctionalTestNGB
         Statistics statistics = new Statistics();
         statistics.getCategories().put(Category.ACCOUNT_INFORMATION.getName(), new CategoryStatistics());
         container.setStatistics(statistics);
-        container = statisticsContainerProxy.createOrUpdateStatistics(customerSpace1, container);
+        dataCollectionProxy.upsertStats(customerSpace1, collectionName, container);
+        container = dataCollectionProxy.getStats(customerSpace1, collectionName);
+        System.out.println("stats name = " + container.getName());
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testRetrieve() {
-        StatisticsContainer retrieved = statisticsContainerProxy.getStatistics(customerSpace1, container.getName());
+        // from collection
+        StatisticsContainer retrieved = dataCollectionProxy.getStats(customerSpace1, collectionName);
+        assertEquals(retrieved.getStatistics().getCategories().size(), container.getStatistics().getCategories().size());
+        assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION.getName()));
+
+
+        // from stats directly
+        retrieved = statisticsContainerProxy.getStatistics(customerSpace1, container.getName());
         assertEquals(retrieved.getStatistics().getCategories().size(), container.getStatistics().getCategories().size());
         assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION.getName()));
     }

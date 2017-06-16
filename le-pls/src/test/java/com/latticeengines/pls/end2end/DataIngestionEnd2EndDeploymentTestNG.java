@@ -320,7 +320,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
         DataFeed datafeed = new DataFeed();
         datafeed.setName(DATA_FEED_NAME);
-        datafeed.setDataCollectionType(dataCollection.getType());
 
         Table importTable = new Table();
         importTable.setName("importTable");

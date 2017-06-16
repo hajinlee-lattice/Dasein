@@ -5,6 +5,8 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -17,18 +19,28 @@ import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.ColumnLookup;
-import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
+import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.StatisticsContainerService;
 
-public class StatisticsContainerServiceImplTestNG extends MetadataFunctionalTestNGBase {
+public class StatisticsContainerServiceImplTestNG extends DataCollectionFunctionalTestNGBase {
 
     @Autowired
     private StatisticsContainerService statisticsContainerService;
+
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
     private StatisticsContainer container;
 
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanup() {
+        super.cleanup();
     }
 
     @Test(groups = "functional")
@@ -42,7 +54,11 @@ public class StatisticsContainerServiceImplTestNG extends MetadataFunctionalTest
         statistics.getCategories().get(Category.ACCOUNT_INFORMATION.getName()).getSubcategories()
                 .put(ColumnMetadata.SUBCATEGORY_OTHER, subcategoryStatistics);
         container.setStatistics(statistics);
-        container = statisticsContainerService.createOrUpdate(customerSpace1, container);
+        dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container, null);
+        container = dataCollectionService.getStats(customerSpace1, collectionName, null);
+        Long pid = container.getPid();
+        StatisticsContainer container2 = statisticsContainerService.findByName(customerSpace1, container.getName());
+        Assert.assertEquals(container2.getPid(), pid);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")

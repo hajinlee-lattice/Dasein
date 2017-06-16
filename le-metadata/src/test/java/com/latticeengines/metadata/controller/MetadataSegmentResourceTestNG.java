@@ -62,7 +62,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         METADATA_SEGMENT.setDataCollection(DATA_COLLECTION);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void createMetadataSegment_assertCreated() {
         restTemplate.postForObject(String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS, customerSpace1),
                 METADATA_SEGMENT, MetadataSegment.class);
@@ -80,7 +80,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "functional", dependsOnMethods = "createMetadataSegment_assertCreated")
+    @Test(groups = "functional", dependsOnMethods = "createMetadataSegment_assertCreated", enabled = false)
     public void deleteMetadataSegment_assertDeleted() {
         restTemplate.delete(String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS + "/%s", customerSpace1,
                 METADATA_SEGMENT_NAME));

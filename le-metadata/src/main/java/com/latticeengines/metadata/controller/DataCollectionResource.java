@@ -95,12 +95,12 @@ public class DataCollectionResource {
     @RequestMapping(value = "/{collectionName}/stats", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create or update the main statistics of the collection")
-    public SimpleBooleanResponse upsertMainStats(@PathVariable String customerSpace, //
+    public SimpleBooleanResponse addStats(@PathVariable String customerSpace, //
             @PathVariable String collectionName, //
             @RequestBody StatisticsContainer statisticsContainer, //
             @RequestParam(value = "model", required = false) String modelId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataCollectionService.upsertStats(customerSpace, collectionName, statisticsContainer, modelId);
+        dataCollectionService.addStats(customerSpace, collectionName, statisticsContainer, modelId);
         return SimpleBooleanResponse.successResponse();
     }
 

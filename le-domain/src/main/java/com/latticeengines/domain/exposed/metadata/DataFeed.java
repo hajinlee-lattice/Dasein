@@ -63,10 +63,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonProperty("type")
-    @Transient
-    private DataCollectionType dataCollectionType;
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
@@ -156,17 +152,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setDataCollection(DataCollection dataCollection) {
         this.dataCollection = dataCollection;
-        if (dataCollection != null) {
-            this.dataCollectionType = dataCollection.getType();
-        }
-    }
-
-    public DataCollectionType getDataCollectionType() {
-        return dataCollectionType;
-    }
-
-    public void setDataCollectionType(DataCollectionType dataCollectionType) {
-        this.dataCollectionType = dataCollectionType;
     }
 
     public List<DataFeedExecution> getExecutions() {
@@ -251,7 +236,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.activeExecution = activeExecution;
     }
 
-    public static enum Status {
+    public enum Status {
         Initing("initing"), // no template yet
         Initialized("initialized"), // import is ready to run
         InitialLoaded("initialLoaded"), // initial import data loaded

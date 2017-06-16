@@ -41,12 +41,8 @@ import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.hive.util.HiveUtils;
 import com.latticeengines.metadata.service.MetadataService;
-import com.latticeengines.metadata.service.TenantPurgeService;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
-import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.AuthorizationHeaderHttpRequestInterceptor;
-import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase.GetHttpStatusErrorHandler;
 import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
 
@@ -54,6 +50,7 @@ import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBe
 @ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:metadata-aspects-context.xml" })
 @Listeners({ GlobalAuthCleanupTestListener.class })
 public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+    
     private static final Logger log = Logger.getLogger(MetadataFunctionalTestNGBase.class);
 
     protected String customerSpace1;
@@ -71,7 +68,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
-    @Value("${metadata.test.functional.api:http://localhost:8080/}")
+    @Value("${common.test.microservice.url}")
     private String hostPort;
 
     @Value("${metadata.hive.enabled:false}")
@@ -79,9 +76,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Autowired
     protected TableEntityMgr tableEntityMgr;
-
-    @Autowired
-    private TenantPurgeService tenantPurgeService;
 
     @Autowired
     protected TenantEntityMgr tenantEntityMgr;
@@ -93,26 +87,22 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected TableTypeHolder tableTypeHolder;
 
     @Autowired
-    private GlobalAuthFunctionalTestBed globalAuthFunctionalTestBed;
+    protected GlobalAuthFunctionalTestBed functionalTestBed;
 
     @Autowired
     private MetadataService metadataService;
 
-    protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
-
-    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
-    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase
-            .getMagicAuthHeaderInterceptor();
-    protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase.getStatusErrorHandler();
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
+            "");
 
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 
     protected void setup() {
-        globalAuthFunctionalTestBed.bootstrap(2);
-        customerSpace1 = globalAuthFunctionalTestBed.getTestTenants().get(0).getId();
-        customerSpace2 = globalAuthFunctionalTestBed.getTestTenants().get(1).getId();
+        functionalTestBed.bootstrap(2);
+        customerSpace1 = functionalTestBed.getTestTenants().get(0).getId();
+        customerSpace2 = functionalTestBed.getTestTenants().get(1).getId();
 
         tableLocation1 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(customerSpace1), "x.y.z");
@@ -205,13 +195,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
             table.setTableType(TableType.DATATABLE);
         }
         metadataService.createTable(CustomerSpace.parse(tenant.getId()), table);
-    }
-
-    protected Tenant createTenant(String customerSpace) {
-        Tenant tenant = new Tenant();
-        tenant.setId(customerSpace);
-        tenant.setName(customerSpace);
-        return tenant;
     }
 
     protected Table createTable(Tenant tenant, String tableName, String path) {

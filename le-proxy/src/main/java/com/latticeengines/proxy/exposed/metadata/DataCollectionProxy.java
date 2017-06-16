@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
@@ -95,7 +96,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
                     "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats?model={modelId}",
                     shortenCustomerSpace(customerSpace), collectionName, modelId);
         }
-        post("upsertStats", url, container, DataCollection.class);
+        post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
     public StatisticsContainer getStats(String customerSpace, String collectionName) {

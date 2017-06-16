@@ -64,8 +64,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public void upsertStats(String customerSpace, String collectionName, StatisticsContainer container,
-            String modelId) {
+    public void addStats(String customerSpace, String collectionName, StatisticsContainer container,
+                                        String modelId) {
         DataCollection dataCollection = getDataCollection(customerSpace, collectionName);
         if (dataCollection == null) {
             throw new IllegalArgumentException(

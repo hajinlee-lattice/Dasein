@@ -1,14 +1,12 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
-import static com.latticeengines.domain.exposed.metadata.MetadataConstants.DATE_FORMAT;
-
-import java.util.Date;
-
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -52,7 +50,9 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Override
     public StatisticsContainer createStatistics(StatisticsContainer container) {
         container.setTenant(MultiTenantContext.getTenant());
-        container.setName("Stats_" + DATE_FORMAT.format(new Date()));
+        if (StringUtils.isBlank(container.getName())) {
+            container.setName(NamingUtils.timestamp("Stats"));
+        }
         create(container);
         return container;
     }

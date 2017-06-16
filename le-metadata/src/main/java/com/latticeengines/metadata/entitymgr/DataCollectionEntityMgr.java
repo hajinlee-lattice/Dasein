@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
-    void createDataCollection(DataCollection dataCollection);
+    DataCollection createDataCollection(DataCollection dataCollection);
 
     DataCollection getDataCollection(String name);
 
