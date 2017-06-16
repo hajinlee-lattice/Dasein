@@ -110,7 +110,6 @@ public class OrchestrationServiceImpl implements OrchestrationService {
                 progresses.addAll(orchestrationProgressService.createDraftProgresses(orch, triggeredVersions));
             }
         }
-        progresses = orchestrationValidator.cleanupDuplicateProgresses(progresses);
         orchestrationProgressEntityMgr.saveProgresses(progresses);
     }
 

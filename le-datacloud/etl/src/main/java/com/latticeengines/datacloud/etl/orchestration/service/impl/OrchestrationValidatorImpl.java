@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.etl.orchestration.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,17 +14,19 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.CronUtils;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationValidator;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
-import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig;
 import com.latticeengines.domain.exposed.datacloud.orchestration.PredefinedScheduleConfig;
 
 @Component("orchestrationValidator")
 public class OrchestrationValidatorImpl implements OrchestrationValidator {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(OrchestrationValidatorImpl.class);
 
     @Autowired
@@ -55,8 +57,15 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
             PredefinedScheduleConfig config = (PredefinedScheduleConfig) orch.getConfig();
             if (StringUtils.isBlank(config.getCronExpression())) {
                 return false;
-            } else { // TODO: Add cron expression checking, cron expression to version conversion
-                return true;
+            } else {
+                Date latestScheduledTime = CronUtils.getPreviousFireTime(config.getCronExpression()).toDate();
+                String scheduledVersion = HdfsPathBuilder.dateFormat.format(latestScheduledTime);
+                if (!isDuplicateVersion(orch.getName(), scheduledVersion)) {
+                    triggeredVersions.add(scheduledVersion);
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
         if (orch.getConfig() instanceof ExternalTriggerConfig) {
@@ -86,19 +95,6 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
         }
         throw new UnsupportedOperationException(
                 String.format("Unsupported orchestration config: %s", orch.getConfig().toString()));
-    }
-
-    @Override
-    public List<OrchestrationProgress> cleanupDuplicateProgresses(List<OrchestrationProgress> progresses) {
-        Iterator<OrchestrationProgress> iter = progresses.iterator();
-        while (iter.hasNext()) {
-            OrchestrationProgress progress = iter.next();
-            if (isDuplicateVersion(progress.getOrchestration().getName(), progress.getVersion())) {
-                iter.remove();
-                log.info("Duplicate progress is ignored: " + progress.toString());
-            }
-        }
-        return progresses;
     }
 
     private boolean isDuplicateVersion(String orchName, String version) {
