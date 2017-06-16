@@ -65,6 +65,7 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public WorkflowJob updateStatusFromYarn(WorkflowJob workflowJob,
             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus) {
+        workflowJob = findByApplicationId(workflowJob.getApplicationId());
         workflowJob.setStatus(yarnJobStatus.getStatus());
         workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
         update(workflowJob);
