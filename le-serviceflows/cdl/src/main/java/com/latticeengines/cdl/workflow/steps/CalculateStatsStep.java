@@ -17,6 +17,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -58,6 +59,9 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
     private static int bucketStep;
     private static int filterStep;
 
+    @Value("${pls.cdl.transform.sort.max.split.threads}")
+    private int maxSplitThreads;
+
     @Autowired
     private TransformationProxy transformationProxy;
 
@@ -66,6 +70,8 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    private String pipelineVersion;
 
     @Override
     public void execute() {
@@ -85,17 +91,21 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         TransformationProgress progress = transformationProxy.transform(request, "");
         waitForFinish(progress);
 
-        String version = progress.getVersion();
+        pipelineVersion = progress.getVersion();
         log.info(String.format("The pipeline version for customer %s is %s",
-                configuration.getCustomerSpace().toString(), version));
+                configuration.getCustomerSpace().toString(), pipelineVersion));
+    }
 
-        String profileTableName = TableUtils.getFullTableName(PROFILE_TABLE_PREFIX, version);
-        String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, version);
-        String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, version);
+
+    @Override
+    public void onExecutionCompleted() {
+        String profileTableName = TableUtils.getFullTableName(PROFILE_TABLE_PREFIX, pipelineVersion);
+        String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
+        String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
         putStringValueInContext(TABLE_GOING_TO_REDSHIFT, sortedTableName);
-
-        upsertProfileTable(customerSpace, profileTableName);
+        putObjectInContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.FALSE);
+        upsertProfileTable(configuration.getCustomerSpace().toString(), profileTableName);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
@@ -131,7 +141,7 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
             );
             // -----------
             request.setSteps(steps);
-            request.setContainerMemMB(workflowMemMb);
+            request.setContainerMemMB(workflowMemMbMax);
             return request;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -219,8 +229,8 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         step.setTargetTable(targetTable);
 
         SorterConfig conf = new SorterConfig();
-        conf.setPartitions(200);
-        conf.setSplittingThreads(4);
+        conf.setPartitions(500);
+        conf.setSplittingThreads(maxSplitThreads);
         conf.setCompressResult(false);
         conf.setSortingField(DataCloudConstants.LATTICE_ACCOUNT_ID);
         String confStr = appendEngineConf(conf, baseEngineConfig());

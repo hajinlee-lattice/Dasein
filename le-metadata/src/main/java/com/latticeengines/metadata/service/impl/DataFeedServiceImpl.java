@@ -1,8 +1,11 @@
 package com.latticeengines.metadata.service.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
@@ -12,6 +15,8 @@ import com.latticeengines.metadata.service.DataFeedService;
 
 @Component("datafeedService")
 public class DataFeedServiceImpl implements DataFeedService {
+
+    private static final Log log = LogFactory.getLog(DataFeedServiceImpl.class);
 
     @Autowired
     private DataFeedEntityMgr datafeedEntityMgr;
@@ -35,7 +40,16 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public DataFeed createDataFeed(String customerSpace, DataFeed datafeed) {
+    public DataFeed createDataFeed(String customerSpace, String collectionName, DataFeed datafeed) {
+        DataFeed existing = datafeedEntityMgr.findByName(datafeed.getName());
+        if (existing != null) {
+            log.warn("There is already a data feed called " + datafeed.getName() + ". Delete it first.");
+            datafeedEntityMgr.delete(existing);
+        }
+        DataCollection shellCollection = new DataCollection();
+        shellCollection.setName(collectionName);
+        datafeed.setDataCollection(shellCollection);
+        log.info("Creating a new datafeed named " + datafeed.getName() + " in collection " + collectionName);
         datafeedEntityMgr.create(datafeed);
         return datafeed;
     }

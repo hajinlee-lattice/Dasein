@@ -9,6 +9,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -65,18 +66,25 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return post("createOrUpdateDataCollection", url, dataCollection, DataCollection.class);
     }
 
-    public DataCollection upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role) {
+    public void addDataFeed(String customerSpace, String collectionName, DataFeed dataFeed) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/datafeeds",
+                shortenCustomerSpace(customerSpace), collectionName);
+        post("add data feed", url, dataFeed, DataCollection.class);
+    }
+
+    public void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/tables/{tableName}?role={role}",
                 shortenCustomerSpace(customerSpace), collectionName, tableName, role);
-        return post("upsertTable", url, null, DataCollection.class);
+        post("upsertTable", url, null, DataCollection.class);
     }
 
-    public DataCollection upsertStats(String customerSpace, String collectionName, StatisticsContainer container) {
-        return upsertStatsForModel(customerSpace, collectionName, container, null);
+    public void upsertStats(String customerSpace, String collectionName, StatisticsContainer container) {
+        upsertStatsForModel(customerSpace, collectionName, container, null);
     }
 
-    public DataCollection upsertStatsForModel(String customerSpace, String collectionName, StatisticsContainer container,
+    public void upsertStatsForModel(String customerSpace, String collectionName, StatisticsContainer container,
             String modelId) {
         String url;
         if (StringUtils.isBlank(modelId)) {
@@ -88,7 +96,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
                     "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats?model={modelId}",
                     shortenCustomerSpace(customerSpace), collectionName, modelId);
         }
-        return post("upsertStats", url, container, DataCollection.class);
+        post("upsertStats", url, container, DataCollection.class);
     }
 
     public StatisticsContainer getStats(String customerSpace, String collectionName) {

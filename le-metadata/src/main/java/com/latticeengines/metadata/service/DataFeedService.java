@@ -11,7 +11,7 @@ public interface DataFeedService {
 
     DataFeedExecution finishExecution(String customerSpace, String datafeedName);
 
-    DataFeed createDataFeed(String customerSpace, DataFeed datafeed);
+    DataFeed createDataFeed(String customerSpace, String collectionName, DataFeed datafeed);
 
     void updateDataFeed(String customerSpace, String datafeedName, String status);
 

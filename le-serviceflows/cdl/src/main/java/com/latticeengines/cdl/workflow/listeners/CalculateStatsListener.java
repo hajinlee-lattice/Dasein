@@ -34,7 +34,7 @@ public class CalculateStatsListener extends LEJobListener {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
         String statusStr = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_STATUS);
-        Status status = Status.valueOf(statusStr);
+        Status status = Status.fromName(statusStr);
         String customerSpace = job.getTenant().getId();
 
         if (jobExecution.getStatus() == BatchStatus.FAILED) {

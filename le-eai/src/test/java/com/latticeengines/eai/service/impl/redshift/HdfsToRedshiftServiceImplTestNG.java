@@ -119,6 +119,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
         configuration.setCleanupS3(true);
         configuration.setCreateNew(true);
         configuration.setAppend(true);
+        configuration.setNoSplit(true);
         RedshiftTableConfiguration redshiftTableConfiguration = new RedshiftTableConfiguration();
         redshiftTableConfiguration.setTableName(testTable);
         redshiftTableConfiguration.setJsonPathPrefix("camel.jsonpath");

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
@@ -33,6 +34,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implements DataFeedEntityMgr {
 
     private static final Logger log = Logger.getLogger(DataFeedEntityMgrImpl.class);
+
     @Autowired
     private DataFeedDao datafeedDao;
 
@@ -56,12 +58,15 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(DataFeed datafeed) {
+        String dataCollectionName = datafeed.getDataCollection().getName();
         datafeed.setTenant(MultiTenantContext.getTenant());
-        if (datafeed.getDataCollectionType() == null) {
-            throw new NullPointerException("data collection type cannot be null");
+        DataCollection dataCollection = dataCollectionEntityMgr.getDataCollection(dataCollectionName);
+        if (dataCollection == null) {
+            throw new IllegalStateException("Data collection " + dataCollectionName + " does not exist");
         }
-        datafeed.setDataCollection(dataCollectionEntityMgr.getDataCollection(datafeed.getDataCollectionType()));
+        datafeed.setDataCollection(dataCollection);
         super.create(datafeed);
+        datafeed = findByName(datafeed.getName());
         for (DataFeedTask task : datafeed.getTasks()) {
             task.setDataFeed(datafeed);
             datafeedTaskEntityMgr.create(task);

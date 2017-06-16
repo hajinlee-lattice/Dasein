@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.core.source.impl;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -73,7 +74,7 @@ public class TableSource implements Source {
 
     public static String getSourceName(CustomerSpace customerSpace, String tableName) {
         String name = customerSpace.getTenantId() + "_" + tableName;
-        return name.replace("-", "_");
+        return AvroUtils.getAvroFriendlyString(name);
     }
 
     /*
@@ -94,12 +95,17 @@ public class TableSource implements Source {
      */
     public String[] getPrimaryKey() {
         if (StringUtils.isNotBlank(primaryKey)) {
-            return new String[]{primaryKey};
+            return new String[]{ primaryKey };
         } else if (table.getPrimaryKey() != null) {
             return table.getPrimaryKey().getAttributeNames();
         } else {
             return null;
         }
+    }
+
+    public String getSinglePrimaryKey() {
+        String[] pk = getPrimaryKey();
+        return (pk == null || pk.length == 0) ? null : pk[0];
     }
 
     /*

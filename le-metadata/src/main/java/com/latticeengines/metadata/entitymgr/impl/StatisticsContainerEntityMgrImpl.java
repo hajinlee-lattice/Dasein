@@ -1,6 +1,8 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
-import java.util.UUID;
+import static com.latticeengines.domain.exposed.metadata.MetadataConstants.DATE_FORMAT;
+
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,7 +52,7 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Override
     public StatisticsContainer createStatistics(StatisticsContainer container) {
         container.setTenant(MultiTenantContext.getTenant());
-        container.setName("Stats_" + UUID.randomUUID());
+        container.setName("Stats_" + DATE_FORMAT.format(new Date()));
         create(container);
         return container;
     }

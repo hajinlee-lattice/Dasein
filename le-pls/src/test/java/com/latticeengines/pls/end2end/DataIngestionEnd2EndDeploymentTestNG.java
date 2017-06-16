@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.AfterClass;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -33,6 +32,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -52,7 +52,6 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -80,9 +79,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     private DataCollectionProxy dataCollectionProxy;
 
     @Autowired
-    private DataLoaderService dataLoaderService;
-
-    @Autowired
     protected Configuration yarnConfiguration;
 
     @Value("${common.test.env}")
@@ -93,25 +89,20 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @BeforeClass(groups = { "deployment.cdl" })
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
-        // setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
-        firstTenant = createTenant(CustomerSpace.parse(DL_TENANT_NAME).toString());// testBed.getMainTestTenant();
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        Tenant tenant = testBed.addExtraTestTenant(CustomerSpace.parse(DL_TENANT_NAME).toString());
+        testBed.deleteTenant(testBed.getMainTestTenant());
+        testBed.setMainTestTenant(tenant);
+        testBed.switchToSuperAdmin(tenant);
+        firstTenant = testBed.getMainTestTenant();
+        Tenant retrieved = testBed.getMainTestTenant();
+        Assert.assertEquals(retrieved.getId(), CustomerSpace.parse(DL_TENANT_NAME).toString());
 
         log.info("Test environment setup finished.");
         createDataFeed();
     }
 
-    @AfterClass
-    public void cleanup() {
-        // testBed.deleteTenant(firstTenant);
-    }
-
-    protected Tenant createTenant(String customerSpace) {
-        Tenant tenant = testBed.addExtraTestTenant(customerSpace);
-        testBed.switchToSuperAdmin(tenant);
-        return tenant;
-    }
-
-    @Test(groups = { "deployment.cdl" }, enabled = true)
+    @Test(groups = { "deployment.cdl" })
     public void importData() throws Exception {
         if (testEnv.equalsIgnoreCase("dev")) {
             mockAvroData();
@@ -124,6 +115,34 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
             long endMillis = System.currentTimeMillis();
             checkExtractFolderExist(startMillis, endMillis);
         }
+    }
+
+    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "importData")
+    public void consolidateAndPublish() {
+        log.info("Start consolidating data ...");
+        ResponseDocument<?> response = restTemplate
+                .postForObject(String.format("%s/pls/datacollections/%s/datafeeds/%s/consolidate", getRestAPIHostPort(),
+                        DATA_COLLECTION_NAME, DATA_FEED_NAME), null, ResponseDocument.class);
+        String appId = new ObjectMapper().convertValue(response.getResult(), String.class);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId, false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "consolidateAndPublish")
+    public void finalize() {
+        log.info("Start calculating statistics ...");
+        ResponseDocument<?> response = restTemplate.postForObject(
+                String.format("%s/pls/datacollections/%s/datafeeds/%s/calculatestats", getRestAPIHostPort(),
+                        DATA_COLLECTION_NAME, DATA_FEED_NAME),
+                null, ResponseDocument.class);
+        String appId = new ObjectMapper().convertValue(response.getResult(), String.class);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId, false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    @Test(groups = { "deployment.cdl" }, enabled = false, dependsOnMethods = "finalize")
+    public void querySegment() {
+
     }
 
     private void mockAvroData() throws IOException {
@@ -258,33 +277,27 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         }
     }
 
-    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "importData")
-    public void consolidateAndPublish() {
-        log.info("Start consolidating data ...");
-        ResponseDocument<?> response = restTemplate
-                .postForObject(String.format("%s/pls/datacollections/%s/datafeeds/%s/consolidate", getRestAPIHostPort(),
-                        DataCollectionType.Segmentation, DATA_FEED_NAME), null, ResponseDocument.class);
-        String appId = new ObjectMapper().convertValue(response.getResult(), String.class);
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId, false);
-        assertEquals(completedStatus, JobStatus.COMPLETED);
-    }
-
     private void createDataFeed() {
         DataCollection dataCollection = new DataCollection();
         dataCollection.setName(DATA_COLLECTION_NAME);
-        Table table = new Table();
-        table.setName(SchemaInterpretation.Account.name());
-        table.setDisplayName(table.getName());
-        metadataProxy.createTable(firstTenant.getId(), table.getName(), table);
-        dataCollection.setTables(Collections.singletonList(table));
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollectionProxy.createOrUpdateDataCollection(firstTenant.getId(), dataCollection);
+
+//        Table table = new Table();
+//        table.setName(SchemaInterpretation.Account.name());
+//        table.setDisplayName(table.getName());
+//        Table retrieved = metadataProxy.getTable(firstTenant.getId(), table.getName());
+//        if (retrieved != null) {
+//            metadataProxy.deleteTable(firstTenant.getId(), table.getName());
+//        }
+//        metadataProxy.createTable(firstTenant.getId(), table.getName(), table);
+//        dataCollectionProxy.upsertTable(firstTenant.getId(), DATA_COLLECTION_NAME, table.getName(),
+//                TableRoleInCollection.ConsolidatedAccount);
 
         DataFeed datafeed = new DataFeed();
         datafeed.setName(DATA_FEED_NAME);
         datafeed.setStatus(Status.Active);
         datafeed.setDataCollectionType(dataCollection.getType());
-//        dataCollection.addDatafeed(datafeed);
 
         Table importTable = new Table();
         importTable.setName("importTable");
@@ -308,23 +321,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         // task.setStartTime(new Date());
         // task.setLastImported(new Date());
         // datafeed.addTask(task);
-        metadataProxy.createDataFeed(firstTenant.getId(), datafeed);
-    }
-
-    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "consolidateAndPublish")
-    public void finalize() {
-        log.info("Start calculating statistics ...");
-        ResponseDocument<?> response = restTemplate.postForObject(
-                String.format("%s/pls/datacollections/%s/datafeeds/%s/calculatestats", getRestAPIHostPort(),
-                        DataCollectionType.Segmentation, DATA_FEED_NAME),
-                null, ResponseDocument.class);
-        String appId = new ObjectMapper().convertValue(response.getResult(), String.class);
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId, false);
-        assertEquals(completedStatus, JobStatus.COMPLETED);
-    }
-
-    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "finalize")
-    public void querySegment() {
-
+        dataCollectionProxy.addDataFeed(firstTenant.getId(), DATA_COLLECTION_NAME, datafeed);
     }
 }

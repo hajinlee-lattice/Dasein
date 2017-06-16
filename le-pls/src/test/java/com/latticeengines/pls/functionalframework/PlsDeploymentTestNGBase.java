@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -69,6 +70,11 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
         switchToSuperAdmin();
         String url = getRestAPIHostPort() + "/pls/users/\"" + username + "\"";
         restTemplate.delete(url);
+    }
+
+    protected void forceDeleteTenantViaTenantConsole(CustomerSpace customerSpace) {
+        ((GlobalAuthDeploymentTestBed) testBed).forceDeleteTenantViaTenantConsole(customerSpace);
+        ((GlobalAuthDeploymentTestBed) testBed).forceDeleteViaPls(customerSpace);
     }
 
     protected JobStatus waitForWorkflowStatus(WorkflowProxy workflowProxy, String applicationId, boolean running) {

@@ -42,6 +42,9 @@ public abstract class BaseTransformationStep<T extends BaseStepConfiguration> ex
     @Value("${pls.cdl.transform.workflow.mem.mb}")
     protected int workflowMemMb;
 
+    @Value("${pls.cdl.transform.workflow.mem.mb.max}")
+    protected int workflowMemMbMax;
+
     @Value("${pls.cdl.transform.cascading.partitions}")
     private int cascadingPartitions;
 

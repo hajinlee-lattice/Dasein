@@ -22,6 +22,9 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
     @JsonProperty("cleanup_s3")
     private boolean cleanupS3 = false;
 
+    @JsonProperty("no_split")
+    private boolean noSplit = false;
+
     public RedshiftTableConfiguration getRedshiftTableConfiguration() {
         return redshiftTableConfiguration;
     }
@@ -62,4 +65,11 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
         this.cleanupS3 = cleanupS3;
     }
 
+    public boolean isNoSplit() {
+        return noSplit;
+    }
+
+    public void setNoSplit(boolean noSplit) {
+        this.noSplit = noSplit;
+    }
 }

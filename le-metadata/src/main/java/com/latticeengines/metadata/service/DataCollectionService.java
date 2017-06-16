@@ -18,10 +18,10 @@ public interface DataCollectionService {
 
     DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection);
 
-    DataCollection upsertStats(String customerSpace, String collectionName, StatisticsContainer container,
+    void upsertStats(String customerSpace, String collectionName, StatisticsContainer container,
             String modelId);
 
-    DataCollection upsertTable(String customerSpace, String collectionName, String tableName,
+    void upsertTable(String customerSpace, String collectionName, String tableName,
             TableRoleInCollection tableRole);
 
     List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole);

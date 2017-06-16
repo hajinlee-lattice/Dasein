@@ -27,16 +27,13 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.TableTag;
 import com.latticeengines.metadata.dao.DataCollectionDao;
 import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
 import com.latticeengines.metadata.dao.DataCollectionTableDao;
-import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.metadata.entitymgr.TableTagEntityMgr;
 import com.latticeengines.metadata.service.SegmentationDataCollectionService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -55,13 +52,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     private TableEntityMgr tableEntityMgr;
 
     @Autowired
-    private TableDao tableDao;
-
-    @Autowired
     private SegmentEntityMgr segmentEntityMgr;
-
-    @Autowired
-    private TableTagEntityMgr tableTagEntityMgr;
 
     @Autowired
     private DataCollectionPropertyDao dataCollectionPropertyDao;
@@ -81,7 +72,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Override
     public void createDataCollection(DataCollection dataCollection) {
 //        removeDefaultTables(dataCollection);
-
+        if (getDataCollection(dataCollection.getName()) != null) {
+            throw new IllegalStateException("Data collection " + dataCollection.getName() + " already exist.");
+        }
         dataCollection.setTenant(MultiTenantContext.getTenant());
         if (StringUtils.isBlank(dataCollection.getName())) {
             dataCollection.setName("DataCollection_" + DATE_FORMAT.format(new Date()));
@@ -91,7 +84,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             dataCollectionProperty.setDataCollection(dataCollection);
             dataCollectionPropertyDao.create(dataCollectionProperty);
         }
-
         if (segmentEntityMgr.findMasterSegment(dataCollection.getName()) == null) {
             // create master segment
             MetadataSegment segment = masterSegment(dataCollection);
@@ -102,7 +94,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     private MetadataSegment masterSegment(DataCollection dataCollection) {
         MetadataSegment segment = new MetadataSegment();
         segment.setDataCollection(dataCollection);
-        segment.setName("Segment_" + UUID.randomUUID());
+        segment.setName("Segment_" + UUID.randomUUID().toString().replace("-", ""));
         segment.setDisplayName("Customer Universe");
         segment.setDescription("Master segment of the collection " + dataCollection.getName());
         segment.setUpdated(new Date());
@@ -161,11 +153,10 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void removeDataCollection(String name) {
-        DataCollection dataCollection = dataCollectionDao.findByField("name", name);
+        DataCollection dataCollection = getDataCollection(name);
 
-        for (TableTag tableTag : tableTagEntityMgr.getTableTagsForName(name)) {
-            tableTagEntityMgr.delete(tableTag);
-        }
+        List<Table> tablesInCollection = getTablesOfRole(name, null);
+        tablesInCollection.forEach(t -> removeTableFromCollection(name, t.getName()));
 
         dataCollectionDao.delete(dataCollection);
     }

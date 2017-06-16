@@ -59,14 +59,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(DataFeedTask dataFeedTask) {
-        if (dataFeedTask.getImportTemplate() != null) {
-            dataFeedTask.getImportTemplate().setTableType(TableType.IMPORTTABLE);
-            tableEntityMgr.create(dataFeedTask.getImportTemplate());
-        }
-        if (dataFeedTask.getImportData() != null) {
-            dataFeedTask.getImportData().setTableType(TableType.DATATABLE);
-            tableEntityMgr.create(dataFeedTask.getImportData());
-        }
         super.create(dataFeedTask);
         addImportDataTableToQueue(dataFeedTask);
     }

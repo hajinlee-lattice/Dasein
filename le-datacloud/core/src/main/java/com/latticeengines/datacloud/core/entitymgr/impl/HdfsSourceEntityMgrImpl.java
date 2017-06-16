@@ -286,10 +286,10 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         Table table;
         if (expandBucketed) {
             String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName, customerSpace, "").toString();
-            table = MetadataConverter.getBucketedTableFromSchemaPath(yarnConfiguration, avscPath, tableSource.getPrimaryKey()[0], tableSource.getLastModifiedKey());
+            table = MetadataConverter.getBucketedTableFromSchemaPath(yarnConfiguration, avscPath, tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey());
         } else {
             String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
-            table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getPrimaryKey()[0], tableSource.getLastModifiedKey());
+            table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey());
         }
         table.setName(tableName);
         return new TableSource(table, customerSpace);

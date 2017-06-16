@@ -70,12 +70,18 @@ public class DataFeedResourceTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true)
     public void testCrud() {
-        metadataProxy.createDataFeed(customerSpace1, datafeed);
-        DataFeed retrievedDataFeed = metadataProxy.findDataFeedByName(customerSpace1.toString(), DATAFEED_NAME);
+        dataCollectionProxy.addDataFeed(customerSpace1, dc.getName(), datafeed);
+        DataFeed retrievedDataFeed = metadataProxy.findDataFeedByName(customerSpace1, DATAFEED_NAME);
         Assert.assertNotNull(retrievedDataFeed);
         Assert.assertTrue(retrievedDataFeed.getStatus() == Status.Initing);
-        metadataProxy.updateDataFeedStatus(customerSpace1.toString(), DATAFEED_NAME, Status.Active.getName());
-        retrievedDataFeed = metadataProxy.findDataFeedByName(customerSpace1.toString(), DATAFEED_NAME);
+
+        dataCollectionProxy.addDataFeed(customerSpace1, dc.getName(), datafeed);
+        retrievedDataFeed = metadataProxy.findDataFeedByName(customerSpace1, DATAFEED_NAME);
+        Assert.assertNotNull(retrievedDataFeed);
+        Assert.assertTrue(retrievedDataFeed.getStatus() == Status.Initing);
+
+        metadataProxy.updateDataFeedStatus(customerSpace1, DATAFEED_NAME, Status.Active.getName());
+        retrievedDataFeed = metadataProxy.findDataFeedByName(customerSpace1, DATAFEED_NAME);
         Assert.assertNotNull(retrievedDataFeed);
         Assert.assertTrue(retrievedDataFeed.getStatus() == Status.Active);
     }

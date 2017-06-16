@@ -1,9 +1,11 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import static com.latticeengines.domain.exposed.metadata.MetadataConstants.DATE_FORMAT;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +112,14 @@ public class DataCollectionEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(DATA_COLLECTION_NAME);
         assertEquals(retrieved.getName(), dataCollection.getName());
         assertEquals(retrieved.getType(), dataCollection.getType());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "create")
+    public void recreate() {
+        DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(DATA_COLLECTION_NAME);
+        String newCollectionName = "DataCollection_" + DATE_FORMAT.format(new Date());
+        retrieved.setName(newCollectionName);
+        dataCollectionEntityMgr.createOrUpdate(retrieved);
     }
 
 }

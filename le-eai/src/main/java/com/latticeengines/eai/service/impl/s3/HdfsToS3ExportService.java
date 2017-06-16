@@ -128,6 +128,8 @@ public class HdfsToS3ExportService {
 
     public void parallelDownloadToLocal(HdfsToS3Configuration config) {
         Long splitSize = config.getSplitSize();
+        final boolean needToSplit = splitSize > 0;
+
         String hdfsPath = config.getExportInputPath();
         String fileName = config.getTargetFilename();
 
@@ -145,7 +147,6 @@ public class HdfsToS3ExportService {
             log.error("Failed to find files from " + hdfsPath, e);
         }
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, hdfsPath);
-        Double downloadProgress = 0.0;
         Long count = 0L;
         ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, filePaths.size()));
         Map<String, Future<Long>> futures = new LinkedHashMap<>();
@@ -156,11 +157,31 @@ public class HdfsToS3ExportService {
 
                 @Override
                 public Long call() throws Exception {
-                    return copyToLocal(filePath);
+                    if (needToSplit) {
+                        return splitToLocal(filePath);
+                    } else {
+                        return downloadToLocal(filePath);
+                    }
                 }
 
-                protected Long copyToLocal(String filePath) throws IllegalArgumentException, IOException {
-                    log.info("Downloading original file " + filePath + " to local.");
+                protected Long downloadToLocal(String filePath) {
+                    log.info("Downloading original file " + filePath + " to local as a whole.");
+                    String fileName = new Path(filePath).getName();
+                    try {
+                        File avroFile = new File(LOCAL_CACHE + "/" + fileName);
+                        HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, avroFile.getPath());
+                        Long fileSize = FileUtils.sizeOf(avroFile);
+                        log.info("Downloaded filePath to " + fileName
+                                + String.format(" (%.2f MB)", fileSize.doubleValue() / 1024.0 / 1024.0));
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to download to split file " + fileName, e);
+                    }
+                    return 1L;
+                }
+
+                protected Long splitToLocal(String filePath) throws IllegalArgumentException, IOException {
+                    log.info("Downloading original file " + filePath + " to local, and split into chunks of "
+                            + splitSize + " records.");
                     Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
                     Long recordsInFile = 0L;
                     while (iterator.hasNext()) {
@@ -226,8 +247,13 @@ public class HdfsToS3ExportService {
             } catch (Exception e) {
                 throw new RuntimeException("Failed to count file " + file, e);
             }
-            downloadProgress = count.doubleValue() / totalRecords.doubleValue();
-            log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
+            if (needToSplit) {
+                Double downloadProgress = count.doubleValue() / totalRecords.doubleValue();
+                log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
+            } else {
+                Double downloadProgress = count.doubleValue() / filePaths.size();
+                log.info(String.format("Current Progress: %.2f %%", downloadProgress * 100));
+            }
         }
         executorService.shutdown();
 

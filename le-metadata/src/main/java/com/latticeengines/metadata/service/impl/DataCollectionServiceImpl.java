@@ -60,24 +60,22 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             dataCollectionEntityMgr.removeDataCollection(existing.getName());
         }
         dataCollectionEntityMgr.createDataCollection(dataCollection);
-        dataCollectionCache.invalidate(DataCollectionType.Segmentation);
         return getDataCollection(customerSpace, dataCollection.getName());
     }
 
     @Override
-    public DataCollection upsertStats(String customerSpace, String collectionName,
-                                      StatisticsContainer container, String modelId) {
+    public void upsertStats(String customerSpace, String collectionName, StatisticsContainer container,
+            String modelId) {
         DataCollection dataCollection = getDataCollection(customerSpace, collectionName);
         if (dataCollection == null) {
             throw new IllegalArgumentException(
                     "Cannot find data collection named " + collectionName + " for customer " + customerSpace);
         }
         dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container, modelId);
-        return getDataCollection(customerSpace, collectionName);
     }
 
     @Override
-    public DataCollection upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role) {
+    public void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table == null) {
             throw new IllegalArgumentException(
@@ -92,7 +90,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role);
-        return getDataCollection(customerSpace, collectionName);
     }
 
     @Override
@@ -100,10 +97,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return statisticsContainerEntityMgr.findInMasterSegment(collectionName, modelId);
     }
 
-
     @Override
-    public List<Table> getTables(String customerSpace, String collectionName,
-                                 TableRoleInCollection tableRole) {
+    public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole) {
         log.info("Getting all tables of role " + tableRole + " in collection " + collectionName);
         return dataCollectionEntityMgr.getTablesOfRole(collectionName, tableRole);
     }

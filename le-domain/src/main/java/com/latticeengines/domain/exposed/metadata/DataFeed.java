@@ -69,6 +69,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private DataCollection dataCollection;
 
     @Column(name = "NAME", nullable = false)

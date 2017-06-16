@@ -226,9 +226,10 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             try {
                 if (!SpaceLifecycleManager.exists(customerSpace.getContractId(), customerSpace.getTenantId(),
                         customerSpace.getSpaceId())) {
-                    log.info("CustomSpace " + customerSpace + " still exists in ZK.");
+                    log.info("CustomSpace " + customerSpace + " is removed from in ZK.");
                     return;
                 } else {
+                    log.info("CustomSpace " + customerSpace + " is still in ZK.");
                     Thread.sleep(1000);
                 }
             } catch (Exception e) {
@@ -394,5 +395,20 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     private void loginAD() {
         adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
     }
+
+    public void forceDeleteTenantViaTenantConsole(CustomerSpace customerSpace) {
+        loginAD();
+        try {
+            adminTenantProxy.deleteTenant(customerSpace.getTenantId());
+        } catch (Exception e) {
+            log.error("DELETE customer space " + customerSpace + " in tenant console failed.", e);
+        }
+        waitForTenantConsoleUninstall(customerSpace);
+    }
+
+    public void forceDeleteViaPls(CustomerSpace customerSpace) {
+        magicRestTemplate.delete(plsApiHostPort + "/pls/admin/tenants/" + customerSpace.toString());
+    }
+
 
 }
