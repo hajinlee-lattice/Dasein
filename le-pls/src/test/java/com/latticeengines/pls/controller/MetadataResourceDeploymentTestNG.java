@@ -21,18 +21,17 @@ public class MetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTestEnvironmentWithOneTenant();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testGetAttributes() {
         List<ColumnMetadata> attributes = new ArrayList<>();
         int count = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/metadata/attributes/count",
                 Integer.class);
         int offset = 0;
         while (offset < count) {
-            attributes.addAll(JsonUtils.convertList(
-                    restTemplate.getForObject(
-                            getDeployedRestAPIHostPort()
-                                    + String.format("/pls/metadata/attributes?offset=%s&max=%s", offset, PAGE_SIZE),
-                            List.class), ColumnMetadata.class));
+            attributes.addAll(JsonUtils.convertList(restTemplate.getForObject(
+                    getDeployedRestAPIHostPort()
+                            + String.format("/pls/metadata/attributes?offset=%s&max=%s", offset, PAGE_SIZE),
+                    List.class), ColumnMetadata.class));
             offset += PAGE_SIZE;
         }
         assertEquals(attributes.size(), count);
