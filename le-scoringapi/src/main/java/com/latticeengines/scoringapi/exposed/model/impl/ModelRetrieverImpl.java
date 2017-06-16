@@ -709,6 +709,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                             modelSummary.getId()));
                     continue;
                 }
+                modelDetail.getModel().setName(modelSummary.getDisplayName());
                 modelDetail.setStatus(modelSummary.getStatus());
                 modelDetail.setLastModifiedTimestamp(convertLongTimestampToString(modelSummary.getLastUpdateTime()));
                 models.add(modelDetail);
