@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +51,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     protected static final Log log = LogFactory.getLog(JobServiceImpl.class);
     protected static final int MAX_TRIES = 60;
     protected static final long APP_WAIT_TIME = 1000L;
+
+    private static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
+            FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
 
     private ApplicationContext applicationContext;
 
@@ -260,6 +266,46 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         JobStatus jobStatus = new JobStatus();
         populateJobStatusFromYarnAppReport(jobStatus, applicationId);
         return jobStatus;
+    }
+
+    @Override
+    public JobStatus waitFinalJobStatus(String applicationId, Integer timeoutInSec) {
+        if (timeoutInSec == null) {
+            timeoutInSec = 3600;
+        }
+        log.info(String.format("Wait %s for %d seconds", applicationId, timeoutInSec));
+        JobStatus finalStatus = null;
+        long startTime = System.currentTimeMillis();
+        int maxTries = 17280; // maximum wait time 24h
+        int i = 0;
+        do {
+            try {
+                finalStatus = getJobStatus(applicationId);
+                String logMsg = String.format("Waiting for application [%s]: %s", applicationId,
+                        finalStatus.getState());
+                if (YarnApplicationState.RUNNING.equals(finalStatus.getState())) {
+                    logMsg += String.format(" %f ", finalStatus.getProgress() * 100);
+                }
+                log.info(logMsg);
+            } catch (Exception e) {
+                log.warn("Failed to get application status of application id " + applicationId);
+            }
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                // Do nothing for InterruptedException
+            }
+            i++;
+
+            if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
+                break;
+            }
+        } while (!TERMINAL_STATUS.contains(finalStatus.getStatus()));
+
+        log.info(
+                String.format("The terminal status of application [%s] is %s", applicationId, finalStatus.getStatus()));
+
+        return finalStatus;
     }
 
     @Override

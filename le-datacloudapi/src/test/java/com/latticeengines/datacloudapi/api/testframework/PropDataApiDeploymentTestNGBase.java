@@ -24,6 +24,7 @@ import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstractTestNGBase {
@@ -36,6 +37,9 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
 
     @Autowired
     protected YarnClient yarnClient;
+
+    @Autowired
+    protected JobService jobService;
 
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;

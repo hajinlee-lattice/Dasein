@@ -34,6 +34,8 @@ public interface JobService {
 
     JobStatus getJobStatus(String applicationId);
 
+    JobStatus waitFinalJobStatus(String applicationId, Integer timeoutInSec);
+
     void populateJobStatusFromYarnAppReport(JobStatus jobStatus, String applicationId);
 
     Counters getMRJobCounters(String applicationId);

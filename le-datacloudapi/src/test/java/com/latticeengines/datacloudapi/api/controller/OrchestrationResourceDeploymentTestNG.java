@@ -9,9 +9,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -21,7 +19,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
@@ -38,6 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.OrchestrationProxy;
 
 @Component
@@ -135,9 +133,8 @@ public class OrchestrationResourceDeploymentTestNG extends PropDataApiDeployment
         Assert.assertEquals(orchProxy.scan(POD_ID).size(), 0); // no job should be triggered
         for (OrchestrationProgress progress : progresses) {
             log.info(String.format("Waiting for progress to finish: %s", progress.toString()));
-            ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
-            Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+            JobStatus status = jobService.waitFinalJobStatus(progress.getApplicationId(), 3600);
+            Assert.assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
             OrchestrationProgress finished = orchestrationProgressEntityMgr.findProgress(progress);
             Assert.assertEquals(finished.getStatus(), ProgressStatus.FINISHED);
         }
@@ -150,9 +147,8 @@ public class OrchestrationResourceDeploymentTestNG extends PropDataApiDeployment
         Assert.assertEquals(orchProxy.scan(POD_ID).size(), 0); // no job should be triggered
         for (OrchestrationProgress progress : progresses) {
             log.info(String.format("Waiting for progress to finish: %s", progress.toString()));
-            ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
-            Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+            JobStatus status = jobService.waitFinalJobStatus(progress.getApplicationId(), 3600);
+            Assert.assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
             OrchestrationProgress finished = orchestrationProgressEntityMgr.findProgress(progress);
             Assert.assertEquals(finished.getStatus(), ProgressStatus.FINISHED);
             Assert.assertEquals(finished.getRetries(), 1);
