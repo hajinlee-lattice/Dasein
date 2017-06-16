@@ -31,9 +31,9 @@ else
     sed "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/scripts/setupdb_pls_multitenant.sql | eval $MYSQL_COMMAND
 fi
 
-## Expand aliases
-#echo "Expanding aliases."
-#shopt -s expand_aliases
-#echo "Sourcing aliases file"
-#source $WSHOME/le-dev/aliases
-#runtest metadata -g registertable -t RegisterAccountMasterMetadataTableTestNG
+# Expand aliases
+echo "Expanding aliases."
+shopt -s expand_aliases
+echo "Sourcing aliases file"
+source $WSHOME/le-dev/aliases
+runtest metadata -g registertable -t RegisterAccountMasterMetadataTableTestNG
