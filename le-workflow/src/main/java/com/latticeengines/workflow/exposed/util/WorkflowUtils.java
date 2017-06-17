@@ -27,8 +27,8 @@ public class WorkflowUtils {
         if (workflowJob.getApplicationId() != null
                 && (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED)) {
             try {
-                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(workflowJob
-                        .getApplicationId());
+                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy
+                        .getJobStatus(workflowJob.getApplicationId());
                 jobState = status.getState();
                 workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
             } catch (Exception e) {
@@ -37,7 +37,7 @@ public class WorkflowUtils {
                 try {
                     com.latticeengines.domain.exposed.dataplatform.JobStatus terminal = getTerminalStatus(workflowJob);
                     jobState = terminal.getState();
-                    workflowJobEntityMgr.updateStatusFromYarn(workflowJob, terminal);
+                    workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, terminal);
                 } catch (Exception inner) {
                     log.error("Failed to update WorkflowJob so that successive queries aren't necessary", inner);
                 }
