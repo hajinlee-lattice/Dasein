@@ -1,20 +1,20 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -22,13 +22,8 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeStatistics;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.ColumnLookup;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -89,19 +84,16 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     }
 
     private StatisticsContainer constructStatsContainer(Table masterTable, Table statsTable) {
-        StatisticsContainer statsContainer = new StatisticsContainer();
-        statsContainer.setName(statsTable.getName());
-
-        // get StatsCube from statsTable
-        StatsCube statsCube = getStatsCube(statsTable);
 
         log.info("Converting stats cube to statistics container.");
+        // get StatsCube from statsTable
+        StatsCube statsCube = getStatsCube(statsTable);
+        String name = statsTable.getName();
+
         // get metadata for account master
         String latestVersion = columnMetadataProxy.latestVersion("").getVersion();
         List<ColumnMetadata> cols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
                 latestVersion);
-        Map<String, ColumnMetadata> colLookup = new HashMap<>();
-        cols.forEach(c -> colLookup.put(c.getColumnId(), c));
 
         // get all other metadata from master table and matchapi
         String schemaIntStr = masterTable.getInterpretation();
@@ -110,62 +102,18 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             masterTableType = SchemaInterpretation.valueOf(masterTable.getInterpretation());
             log.info("SchemaInterpretation of master table is: " + masterTableType);
         }
-        Map<String, AttributeStats> attributeStatsMap = statsCube.getStatistics();
+        List<ColumnMetadata> masterCols = masterTable.getAttributes().stream().map(Attribute::getColumnMetadata)
+                .collect(Collectors.toList());
 
-        Statistics statistics = new Statistics();
-        for (String name : attributeStatsMap.keySet()) {
-            ColumnLookup columnLookup = new ColumnLookup(name);
-            String category;
-            String subCategory;
+        Pair<SchemaInterpretation, List<ColumnMetadata>> masterTablePair = new ImmutablePair<SchemaInterpretation, List<ColumnMetadata>>(
+                masterTableType, masterCols);
+        Pair<SchemaInterpretation, List<ColumnMetadata>> accountMasterPair = new ImmutablePair<SchemaInterpretation, List<ColumnMetadata>>(
+                SchemaInterpretation.AccountMaster, cols);
+        List<Pair<SchemaInterpretation, List<ColumnMetadata>>> interpretationToColMetadataList = new ArrayList<Pair<SchemaInterpretation, List<ColumnMetadata>>>();
+        interpretationToColMetadataList.add(masterTablePair);
+        interpretationToColMetadataList.add(accountMasterPair);
 
-            Attribute attrInMasterTable = masterTable.getAttribute(name);
-            if (attrInMasterTable != null) {
-                // an attribute from master table
-                columnLookup = new ColumnLookup(masterTableType, name);
-                category = attrInMasterTable.getCategory();
-                subCategory = attrInMasterTable.getSubcategory();
-            } else if (colLookup.containsKey(name)) {
-                ColumnMetadata metadata = colLookup.get(name);
-                category = metadata.getCategory().getName();
-                subCategory = metadata.getSubcategory();
-            } else {
-                log.warn(String.format(
-                        "Attribute %s in StatsCube does not exist in account master or the customer master table %s",
-                        name, statsTable.getName()));
-                continue;
-            }
-
-            if (category == null || subCategory == null) {
-                log.warn(String.format("Category is %s and SubCategory is %s", category, subCategory));
-                continue;
-            }
-
-            AttributeStatistics attributeStatistics = new AttributeStatistics();
-            AttributeStats statsInCube = attributeStatsMap.get(name);
-            if (statsInCube.getBuckets() != null) {
-                attributeStatistics.getBuckets().addAll(attributeStatsMap.get(name).getBuckets().getBucketList());
-            }
-            if (statistics.getCategories().containsKey(category)) {
-                CategoryStatistics categoryStatistics = statistics.getCategories().get(category);
-                if (categoryStatistics.getSubcategories().containsKey(subCategory)) {
-                    categoryStatistics.getSubcategories().get(subCategory).getAttributes().put(columnLookup,
-                            attributeStatistics);
-                } else {
-                    SubcategoryStatistics subCategoryStatistics = new SubcategoryStatistics();
-                    subCategoryStatistics.getAttributes().put(columnLookup, attributeStatistics);
-                    categoryStatistics.getSubcategories().put(subCategory, subCategoryStatistics);
-                }
-            } else {
-                CategoryStatistics categoryStatistics = new CategoryStatistics();
-                SubcategoryStatistics subCategoryStatistics = new SubcategoryStatistics();
-                subCategoryStatistics.getAttributes().put(columnLookup, attributeStatistics);
-                categoryStatistics.getSubcategories().put(subCategory, subCategoryStatistics);
-                statistics.getCategories().put(category, categoryStatistics);
-            }
-        }
-        statsContainer.setStatistics(statistics);
-
-        return statsContainer;
+        return StatsCubeUtils.getStatisticsContainer(statsCube, interpretationToColMetadataList);
     }
 
 }
