@@ -1,13 +1,13 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.Date;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -59,7 +59,17 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(DataFeedTask dataFeedTask) {
-        super.create(dataFeedTask);
+        Table dataTable = dataFeedTask.getImportData();
+        Table templateTable = dataFeedTask.getImportTemplate();
+        if (dataTable != null && tableEntityMgr.findByName(dataTable.getName()) == null) {
+            dataTable.setTableType(TableType.DATATABLE);
+            tableEntityMgr.create(dataTable);
+        }
+        if (templateTable != null && tableEntityMgr.findByName(templateTable.getName()) == null) {
+            templateTable.setTableType(TableType.IMPORTTABLE);
+            tableEntityMgr.create(templateTable);
+        }
+        datafeedTaskDao.create(dataFeedTask);
         addImportDataTableToQueue(dataFeedTask);
     }
 
@@ -132,8 +142,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             tableTypeHolder.setTableType(TableType.IMPORTTABLE);
             Table extractTable = tableEntityMgr.findByName(tableName);
             extractTable.getExtracts().clear();
-            extractTable = TableUtils.clone(extractTable,
-                    "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
+            extractTable = TableUtils.clone(extractTable, NamingUtils.uuid("DataTable"));
             extractTable.setTenant(MultiTenantContext.getTenant());
             extractTable.addExtract(extract);
             tableTypeHolder.setTableType(TableType.DATATABLE);
@@ -141,8 +150,8 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             addTableToQueue(datafeedTask, extractTable);
         }
         if (templateTableChanged || dataTableConsumed) {
-            Table newDataTable = TableUtils.clone(datafeedTask.getImportTemplate(),
-                    "datatable_" + UUID.randomUUID().toString().replace('-', '_'));
+            Table newDataTable = TableUtils.clone(datafeedTask.getImportTemplate(), //
+                    NamingUtils.uuid("DataTable"));
             newDataTable.setTenant(MultiTenantContext.getTenant());
             newDataTable.setTableType(TableType.DATATABLE);
             tableEntityMgr.create(newDataTable);

@@ -46,11 +46,6 @@ public class DataFeedTask implements HasPid, Serializable {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    // @JsonProperty("unique_id")
-    // @Column(name = "UNIQUE_ID", unique = true, nullable = false)
-    // @Index(name = "IX_UNIQUE_ID")
-    // private String uniqueId;
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "`FK_FEED_ID`", nullable = false)
@@ -81,7 +76,7 @@ public class DataFeedTask implements HasPid, Serializable {
     @JsonIgnore
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "FK_DATA_ID", nullable = true)
+    @JoinColumn(name = "FK_DATA_ID", nullable = false)
     private Table importData;
 
     @Column(name = "ACTIVE_JOB", nullable = false)

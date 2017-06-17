@@ -5,6 +5,7 @@ import static java.time.ZoneOffset.UTC;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 
 public final class NamingUtils {
 
@@ -20,6 +21,14 @@ public final class NamingUtils {
 
     public static String timestamp(String original, Date date) {
         return original + DATE_FORMAT.format(date);
+    }
+
+    public static String uuid(String original) {
+        return uuid(original, UUID.randomUUID());
+    }
+
+    public static String uuid(String original, UUID uuid) {
+        return original + "_" + uuid.toString().replace("-", "_");
     }
 
 }

@@ -36,9 +36,6 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
     @Autowired
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
 
-    @Autowired
-    private DataCollectionEntityMgr dataCollectionEntityMgr;
-
     private DataFeed datafeed = new DataFeed();
 
     private DataFeedTask task = new DataFeedTask();
@@ -76,16 +73,10 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         a1.setDisplayName(a1.getName());
         a1.setPhysicalDataType("string");
         importTable.addAttribute(a1);
-        importTable.setTableType(TableType.IMPORTTABLE);
-        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
-        tableEntityMgr.create(importTable);
 
         dataTable.setName("dataTable");
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(MultiTenantContext.getTenant());
-        dataTable.setTableType(TableType.DATATABLE);
-        tableTypeHolder.setTableType(TableType.DATATABLE);
-        tableEntityMgr.create(dataTable);
 
         task.setDataFeed(datafeed);
         task.setActiveJob("Not specified");
