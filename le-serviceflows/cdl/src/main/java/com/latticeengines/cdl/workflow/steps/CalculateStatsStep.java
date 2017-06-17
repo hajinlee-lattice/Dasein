@@ -94,14 +94,13 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
                 configuration.getCustomerSpace().toString(), pipelineVersion));
     }
 
-
     @Override
     public void onExecutionCompleted() {
         String profileTableName = TableUtils.getFullTableName(PROFILE_TABLE_PREFIX, pipelineVersion);
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
-        putObjectInContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.FALSE);
+        putStringValueInContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.FALSE.toString());
         upsertTables(configuration.getCustomerSpace().toString(), profileTableName, sortedTableName);
 
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
@@ -281,7 +280,8 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         if (bktTable == null) {
             throw new RuntimeException("Failed to find bucketed table in customer " + customerSpace);
         }
-        dataCollectionProxy.upsertTable(customerSpace, collectionName, sortedTableName, TableRoleInCollection.BucketedAccount);
+        dataCollectionProxy.upsertTable(customerSpace, collectionName, sortedTableName,
+                TableRoleInCollection.BucketedAccount);
         bktTable = dataCollectionProxy.getTable(customerSpace, collectionName, TableRoleInCollection.BucketedAccount);
         if (bktTable == null) {
             throw new IllegalStateException("Cannot find the upserted bucketed table in data collection.");

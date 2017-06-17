@@ -37,7 +37,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     public void execute() {
         log.info("Inside ExportData execute()");
         sourceTable = getObjectFromContext(TABLE_GOING_TO_REDSHIFT, Table.class);
-        needToSplit = getObjectFromContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.class);
+        needToSplit = Boolean.valueOf(getStringValueFromContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT));
         if (sourceTable == null) {
             sourceTable = configuration.getSourceTable();
         }
