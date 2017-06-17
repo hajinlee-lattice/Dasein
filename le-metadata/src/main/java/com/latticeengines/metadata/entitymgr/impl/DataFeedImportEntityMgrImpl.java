@@ -30,7 +30,7 @@ public class DataFeedImportEntityMgrImpl extends BaseEntityMgrImpl<DataFeedImpor
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(DataFeedImport dataFeedImport) {
-        if (dataFeedImport.getDataTable() != null) {
+        if (dataFeedImport.getDataTable() != null && dataFeedImport.getDataTable().getPid() == null) {
             dataFeedImport.getDataTable().setTableType(TableType.DATATABLE);
             tableEntityMgr.create(dataFeedImport.getDataTable());
         }
