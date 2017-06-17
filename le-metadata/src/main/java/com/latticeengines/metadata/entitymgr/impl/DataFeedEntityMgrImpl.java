@@ -138,9 +138,11 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         if (datafeed.getStatus() == Status.Active) {
             datafeed.setStatus(Status.Consolidating);
         }
+        tasks = datafeed.getTasks();
         tasks.forEach(task -> {
             task.setStartTime(new Date());
             task.setImportData(null);
+            datafeedTaskEntityMgr.update(task);
         });
         datafeedDao.update(datafeed);
         return execution;
