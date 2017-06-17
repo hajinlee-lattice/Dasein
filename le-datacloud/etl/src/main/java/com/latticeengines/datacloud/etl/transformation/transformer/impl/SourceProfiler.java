@@ -354,4 +354,14 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private String createEncodeAttrName(int encodedSeq) {
         return "EAttr" + encodedSeq;
     }
+
+    @Override
+    protected void updateStepCount(TransformStep step, String workflowDir) {
+        try {
+            Long targetRecords = AvroUtils.count(yarnConfiguration, workflowDir + "/*.avro");
+            step.setCount(targetRecords);
+        } catch (Exception ex) {
+            log.error(String.format("Fail to count records in %s", workflowDir), ex);
+        }
+    }
 }

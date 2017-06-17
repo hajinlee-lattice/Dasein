@@ -157,6 +157,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             List<Schema> baseSchemas = getBaseSourceSchemas(step);
             step.setTargetSchema(getTargetSchema(result, parameters, baseSchemas));
             postDataFlowProcessing(workflowDir, parameters, configuration);
+            updateStepCount(step, workflowDir);
         } catch (Exception e) {
             log.error("Failed to transform data", e);
             return false;
@@ -203,5 +204,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, P parameters, T configuration) {}
 
     protected void postDataFlowProcessing(String workflowDir, P parameters, T configuration) {}
+
+    protected void updateStepCount(TransformStep step, String workflowDir) {
+    }
 
 }
