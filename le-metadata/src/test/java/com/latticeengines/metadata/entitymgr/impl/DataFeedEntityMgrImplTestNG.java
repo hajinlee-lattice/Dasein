@@ -75,8 +75,6 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         a1.setPhysicalDataType("string");
         importTable.addAttribute(a1);
         importTable.setTableType(TableType.IMPORTTABLE);
-        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
-        tableEntityMgr.create(importTable);
 
         Table dataTable = new Table();
         dataTable.setName("dataTable");
@@ -88,8 +86,6 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         a2.setPhysicalDataType("string");
         dataTable.addAttribute(a2);
         dataTable.setTableType(TableType.DATATABLE);
-        tableTypeHolder.setTableType(TableType.DATATABLE);
-        tableEntityMgr.create(dataTable);
 
         DataFeedTask task = new DataFeedTask();
         task.setDataFeed(datafeed);
