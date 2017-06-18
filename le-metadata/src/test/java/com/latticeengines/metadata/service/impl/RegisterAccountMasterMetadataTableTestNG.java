@@ -1,7 +1,11 @@
 package com.latticeengines.metadata.service.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -34,7 +38,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
     private TenantEntityMgr tenantEntityMgr;
 
     @Test(groups = "registertable")
-    public void registerMetadataTable() {
+    public void registerMetadataTable() throws Exception {
         Tenant tenant = tenantEntityMgr.findByTenantId(DataCloudConstants.SERVICE_CUSTOMERSPACE);
         if (tenant == null) {
             tenant = new Tenant();
@@ -43,8 +47,13 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
             tenantEntityMgr.create(tenant);
         }
         File currPath = new File(System.getProperty("user.dir"));
+        File zipFile = new File(currPath.getParentFile().getAbsolutePath()
+                + "/le-dev/testartifacts/AccountMaster/AccountMasterBucketed.avsc.gz");
         File file = new File(currPath.getParentFile().getAbsolutePath()
                 + "/le-dev/testartifacts/AccountMaster/AccountMasterBucketed.avsc");
+        InputStream is = new GZIPInputStream(new FileInputStream(zipFile));
+        FileUtils.copyInputStreamToFile(is, file);
+
         Configuration config = new Configuration();
         config.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
         Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(config, file.getPath(), null, null);
@@ -55,5 +64,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
         bucketedTable.setInterpretation(SchemaInterpretation.AccountMaster.toString());
         log.info("Registering AccountMaster Bucketed Metadata Table");
         mdService.updateTable(CustomerSpace.parse(DataCloudConstants.SERVICE_TENANT), bucketedTable);
+
+        FileUtils.deleteQuietly(file);
     }
 }
