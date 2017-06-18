@@ -1,36 +1,50 @@
 package com.latticeengines.domain.exposed.query;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class RangeLookup extends Lookup {
-    @JsonProperty("range")
-    private BucketRange range;
+
+    @JsonProperty("min")
+    private Object min;
+
+    @JsonProperty("max")
+    private Object max;
 
     public RangeLookup(Object min, Object max) {
-        range = BucketRange.range(min, max);
-    }
-
-    public RangeLookup(BucketRange range) {
-        this.range = range;
+        this.max = max;
+        this.min = min;
     }
 
     public RangeLookup() {
     }
 
-    public BucketRange getRange() {
-        return range;
+    public Object getMin() {
+        return min;
     }
 
-    public void setRange(BucketRange range) {
-        this.range = range;
+    public void setMin(Object min) {
+        this.min = min;
+    }
+
+    public Object getMax() {
+        return max;
+    }
+
+    public void setMax(Object max) {
+        this.max = max;
     }
 
     @Override
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
     }
+
 }

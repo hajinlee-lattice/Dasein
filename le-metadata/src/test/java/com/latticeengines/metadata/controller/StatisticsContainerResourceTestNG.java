@@ -33,7 +33,7 @@ public class StatisticsContainerResourceTestNG extends DataCollectionFunctionalT
     public void testCreate() {
         container = new StatisticsContainer();
         Statistics statistics = new Statistics();
-        statistics.getCategories().put(Category.ACCOUNT_INFORMATION.getName(), new CategoryStatistics());
+        statistics.getCategories().put(Category.ACCOUNT_INFORMATION, new CategoryStatistics());
         container.setStatistics(statistics);
         dataCollectionProxy.upsertStats(customerSpace1, collectionName, container);
         container = dataCollectionProxy.getStats(customerSpace1, collectionName);
@@ -45,13 +45,13 @@ public class StatisticsContainerResourceTestNG extends DataCollectionFunctionalT
         // from collection
         StatisticsContainer retrieved = dataCollectionProxy.getStats(customerSpace1, collectionName);
         assertEquals(retrieved.getStatistics().getCategories().size(), container.getStatistics().getCategories().size());
-        assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION.getName()));
+        assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION));
 
 
         // from stats directly
         retrieved = statisticsContainerProxy.getStatistics(customerSpace1, container.getName());
         assertEquals(retrieved.getStatistics().getCategories().size(), container.getStatistics().getCategories().size());
-        assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION.getName()));
+        assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testRetrieve")

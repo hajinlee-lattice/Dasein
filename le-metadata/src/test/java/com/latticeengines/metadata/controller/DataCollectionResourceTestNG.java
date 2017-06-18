@@ -3,7 +3,6 @@ package com.latticeengines.metadata.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +12,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 
-public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
+public class DataCollectionResourceTestNG extends DataCollectionFunctionalTestNGBase {
 
     private static final DataCollection DATA_COLLECTION = new DataCollection();
     private static final String COLLECTION_NAME = "ApiTestCollection";
@@ -43,14 +41,12 @@ public class DataCollectionResourceTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void createDataCollection_assertCreated() {
-        DATA_COLLECTION.setType(DataCollectionType.Segmentation);
-        DATA_COLLECTION.setTables(Collections.singletonList(TABLE_1));
         dataCollectionProxy.createOrUpdateDataCollection(customerSpace1, DATA_COLLECTION);
         dataCollectionProxy.upsertTable(customerSpace1, DATA_COLLECTION.getName(), TABLE1, TableRoleInCollection.ConsolidatedAccount);
 
         DataCollection retrieved = dataCollectionProxy.getDataCollection(customerSpace1, DATA_COLLECTION.getName());
         assertNotNull(retrieved);
-        assertEquals(retrieved.getType(), DataCollectionType.Segmentation);
+        assertEquals(retrieved.getName(), COLLECTION_NAME);
 
         List<Table> tables = dataCollectionProxy.getAllTables(customerSpace1, DATA_COLLECTION.getName());
         Assert.assertEquals(tables.size(), 1);

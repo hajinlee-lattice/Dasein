@@ -47,7 +47,6 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
@@ -357,20 +356,23 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             } else if (isEquivalentNo(bucket.getBucketLabel())) {
                 bucket.setBucketLabel(NO);
             }
-            BucketRange range = bucket.getRange();
-            if (range == null) {
-                continue;
-            }
-            if (isEquivalentYes(range.getMin())) {
-                range.setMin(YES);
-            } else if (isEquivalentNo(range.getMin())) {
-                range.setMin(NO);
-            }
-            if (isEquivalentYes(range.getMax())) {
-                range.setMax(YES);
-            } else if (isEquivalentNo(range.getMax())) {
-                range.setMax(NO);
-            }
+
+            // BucketRange is retired. if need to show range in UI, use FrontEndBucket
+            // For now only "Yes" and "No" labels are needed.
+//            BucketRange range = bucket.getRange();
+//            if (range == null) {
+//                continue;
+//            }
+//            if (isEquivalentYes(range.getMin())) {
+//                range.setMin(YES);
+//            } else if (isEquivalentNo(range.getMin())) {
+//                range.setMin(NO);
+//            }
+//            if (isEquivalentYes(range.getMax())) {
+//                range.setMax(YES);
+//            } else if (isEquivalentNo(range.getMax())) {
+//                range.setMax(NO);
+//            }
         }
     }
 

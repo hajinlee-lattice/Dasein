@@ -30,9 +30,8 @@ public interface TableEntityMgr {
             Hibernate.initialize(table.getLastModifiedKey());
             Hibernate.initialize(table.getHierarchies());
             Hibernate.initialize(table.getDataRules());
-            Hibernate.initialize(table.getRelationships());
         }
     }
 
-    public void addExtract(Table table, Extract extract);
+    void addExtract(Table table, Extract extract);
 }

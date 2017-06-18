@@ -76,7 +76,7 @@
         <snappy.version>1.1.1.6</snappy.version>
         <curator.version>2.7.1</curator.version>
         <redshift.jdbc.version>1.2.1.1001</redshift.jdbc.version>
-        <querydsl.version>4.1.3</querydsl.version>
+        <querydsl.version>4.1.4</querydsl.version>
 
         <commons.io.version>2.4</commons.io.version>
         <commons.lang3.version>3.4</commons.lang3.version>

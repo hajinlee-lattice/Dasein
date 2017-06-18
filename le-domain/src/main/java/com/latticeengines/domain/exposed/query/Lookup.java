@@ -13,9 +13,11 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
-@Type(value = ColumnLookup.class, name = "columnLookup"), //
-        @Type(value = ValueLookup.class, name = "valueLookup"), //
-        @Type(value = RangeLookup.class, name = "rangeLookup") })
+        @Type(value = EntityLookup.class, name = "entity"), //
+        @Type(value = AttributeLookup.class, name = "attribute"), //
+        @Type(value = ColumnLookup.class, name = "column"), //
+        @Type(value = ValueLookup.class, name = "value"), //
+        @Type(value = RangeLookup.class, name = "range") })
 public abstract class Lookup implements GraphNode {
 
     @Override

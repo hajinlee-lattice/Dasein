@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
@@ -23,6 +24,7 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 
 public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
+
     @Autowired
     @Qualifier("redshiftDataSource")
     private DataSource redshiftDataSource;
@@ -53,6 +55,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         StringPath tablePath = Expressions.stringPath("querytest_table");
         try (PerformanceTimer timer = new PerformanceTimer("getCount")) {
             long count = factory.query().from(tablePath).fetchCount();
+            Assert.assertTrue(count > 0);
         }
     }
 
@@ -75,7 +78,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         return new SQLQueryFactory(configuration, redshiftDataSource);
     }
 
-    @Test(groups = "functional", expectedExceptions = Exception.class)
+    @Test(groups = "functional")
     public void testWindowFunctionBug() throws SQLException {
         SQLQueryFactory factory = factory();
         StringPath tablePath = Expressions.stringPath("querytest_table");
@@ -92,7 +95,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         query.setUseLiterals(true);
         ResultSet results = query.getResults();
         while (results.next()) {
-            System.out.println(results.getString("count"));
+            System.out.println(results.getLong("count"));
         }
 
         // SQL is buggy. SQL is:
@@ -113,5 +116,8 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         // - Fix WindowFunctions in QueryDSL by doing a git pull request
         // - Add a correct WindowFunction builder that when build() is called
         // return a simpleTemplate
+        //
+        // 2017-06-16, we hacked a new WindowRows.java in our code base to make QueryDSL-4.1.4 work in test.
+        // not sure if it works in runtime as well.
     }
 }

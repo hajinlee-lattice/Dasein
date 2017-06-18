@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -14,7 +16,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
@@ -22,21 +26,50 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
+/**
+ * NOTE:
+ *
+ * SchemaInterpretation and ColumnLookup based implementation is deprecated
+ * The new framework uses BusinessEntity and AttributeLookup.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Query implements GraphNode {
+
     @JsonProperty("object_type")
     private SchemaInterpretation objectType;
+
     @JsonProperty("lookups")
     private List<Lookup> lookups = new ArrayList<>();
+
     @JsonProperty("restriction")
     private Restriction restriction;
+
     @JsonProperty("sort")
     private Sort sort;
+
     @JsonProperty("page_filter")
     private PageFilter pageFilter;
+
     @JsonProperty("free_form_text_search")
     private String freeFormTextSearch;
+
+    @JsonIgnore
+    private Set<BusinessEntity> entitiesForJoin;
+
+    @JsonIgnore
+    private Set<BusinessEntity> entitiesForExists;
+
+    @JsonIgnore
+    private List<JoinSpecification> lookupJoins;
+
+    @JsonIgnore
+    private List<JoinSpecification> existsJoins;
+
+    public static QueryBuilder builder() {
+        return new QueryBuilder();
+    }
 
     public Query(SchemaInterpretation objectType, List<Lookup> lookups, Restriction restriction, Sort sort,
             PageFilter pageFilter, String freeFromRestriction) {
@@ -48,7 +81,7 @@ public class Query implements GraphNode {
         this.freeFormTextSearch = freeFromRestriction;
     }
 
-    public Query() {
+    Query() {
     }
 
     public Restriction getRestriction() {
@@ -144,6 +177,83 @@ public class Query implements GraphNode {
         });
 
         return joins;
+    }
+
+    public void analyze() {
+        traverseEntities();
+        generateJoins();
+    }
+
+    private void traverseEntities() {
+        DepthFirstSearch search = new DepthFirstSearch();
+        entitiesForJoin = new HashSet<>();
+        entitiesForExists = new HashSet<>();
+        search.run(this, (object, ctx) -> {
+            GraphNode node = (GraphNode) object;
+            if (node instanceof EntityLookup) {
+                EntityLookup unityLookup = (EntityLookup) node;
+                entitiesForJoin.add(unityLookup.getEntity());
+            } else if (node instanceof AttributeLookup) {
+                AttributeLookup lookup = (AttributeLookup) node;
+                entitiesForJoin.add(lookup.getEntity());
+            } else if (node instanceof ExistsRestriction) {
+                ExistsRestriction exists = (ExistsRestriction) node;
+                entitiesForExists.add(exists.getEntity());
+            }
+        });
+    }
+
+    private void generateJoins() {
+        BusinessEntity entity = getMainEntity();
+        Set<JoinSpecification> lookupJoinsSet = entitiesForJoin.stream() //
+                .filter(j -> !entity.equals(j)) //
+                .map(j -> new JoinSpecification(entity, j, ObjectUsage.LOOKUP)) //
+                .collect(Collectors.toSet());
+        entitiesForJoin.forEach(j1 -> {
+            entitiesForJoin.forEach(j2 -> {
+                if (!j1.equals(j2)) {
+                    lookupJoinsSet.add(new JoinSpecification(j1, j2, ObjectUsage.LOOKUP));
+                }
+            });
+        });
+
+        Set<JoinSpecification> existsJoinsSet = entitiesForExists.stream() //
+                .filter(e -> !entity.equals(e)) //
+                .map(e -> new JoinSpecification(entity, e, ObjectUsage.EXISTS)) //
+                .collect(Collectors.toSet());
+
+        lookupJoins = new ArrayList<>(lookupJoinsSet);
+        existsJoins = new ArrayList<>(existsJoinsSet);
+    }
+
+    public BusinessEntity getMainEntity() {
+        if (entitiesForJoin.contains(BusinessEntity.Account)) {
+            return BusinessEntity.Account;
+        }
+        return entitiesForJoin.iterator().next();
+    }
+
+    public List<JoinSpecification> from(BusinessEntity entity) {
+        analyze();
+        List<JoinSpecification> joins = new ArrayList<>(lookupJoins);
+        joins.addAll(existsJoins);
+        return joins;
+    }
+
+    public Set<BusinessEntity> getEntitiesForJoin() {
+        return entitiesForJoin;
+    }
+
+    public Set<BusinessEntity> getEntitiesForExists() {
+        return entitiesForExists;
+    }
+
+    public List<JoinSpecification> getLookupJoins() {
+        return lookupJoins;
+    }
+
+    public List<JoinSpecification> getExistsJoins() {
+        return existsJoins;
     }
 
     @Override

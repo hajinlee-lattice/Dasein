@@ -79,8 +79,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     private void updateStatistics(MetadataSegment segment) {
-        Query query = new Query();
-        query.setRestriction(segment.getRestriction());
+        Query query = Query.builder().where(segment.getRestriction()).build();
 
         try {
             long count = accountProxy.getCount(MultiTenantContext.getTenant().getId(), query);

@@ -15,11 +15,6 @@ public class TableListener {
     
     @PrePersist
     public void tablePrePersist(Table table) {
-        for (TableTag tag : table.getTableTags()) {
-            tag.setTable(table);
-            tag.setTenantId(table.getTenantId());
-        }
-
         StorageMechanism storageMechanism = table.getStorageMechanism();
         
         if (storageMechanism == null) {

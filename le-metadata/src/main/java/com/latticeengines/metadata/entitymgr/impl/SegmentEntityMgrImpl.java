@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,13 +18,14 @@ import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.metadata.dao.SegmentDao;
 import com.latticeengines.metadata.dao.SegmentPropertyDao;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
@@ -62,14 +64,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         return super.findAll().stream().map(this::inflate).collect(Collectors.toList());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    @Override
-    public MetadataSegment findByName(String querySourceName, String name) {
-        MetadataSegment segment = segmentDao.findByDataCollectionAndName(querySourceName, name);
-        inflate(segment);
-        return segment;
-    }
-
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void delete(MetadataSegment segment) {
@@ -82,21 +76,25 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Override
     public void createOrUpdate(MetadataSegment segment) {
         segment.setTenant(MultiTenantContext.getTenant());
+        if (Boolean.TRUE.equals(segment.getMasterSegment())) {
+            MetadataSegment master = findMasterSegment(segment.getDataCollection().getName());
+            if (master != null && !master.getName().equals(segment.getName())) {
+                // master exists and not the incoming one
+                segment.setMasterSegment(false);
+            }
+        }
+
         MetadataSegment existing = findByName(segment.getName());
         if (existing != null) {
-            delete(existing);
+            segment = cloneForUpdate(existing, segment);
+            HibernateUtils.inflateDetails(segment.getProperties());
+            segment.getProperties().forEach(p -> segmentPropertyDao.delete(p));
+            segmentDao.update(segment);
+        } else {
+            segmentDao.create(segment);
         }
-
-        if (segment.getDataCollection() == null) {
-            segment.setDataCollection(dataCollectionService
-                    .getDataCollectionByType(MultiTenantContext.getTenant().getId(), DataCollectionType.Segmentation));
-        }
-
-        addAttributeDependencies(segment);
-
-        super.createOrUpdate(segment);
         for (MetadataSegmentProperty metadataSegmentProperty : segment.getProperties()) {
-            metadataSegmentProperty.setMetadataSegment(segment);
+            metadataSegmentProperty.setOwner(segment);
             segmentPropertyDao.create(metadataSegmentProperty);
         }
     }
@@ -119,26 +117,25 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     }
 
     private void addAttributeDependencies(MetadataSegment segment) {
-        List<ColumnLookup> lookups = GraphUtils.getAllOfType(segment.getRestriction(), ColumnLookup.class);
-        Set<ColumnLookup> set = new HashSet<>(lookups);
+        List<AttributeLookup> lookups = GraphUtils.getAllOfType(segment.getRestriction(), AttributeLookup.class);
+        Set<AttributeLookup> set = new HashSet<>(lookups);
         DataCollection dataCollection = segment.getDataCollection();
-
-        if (lookups.stream().anyMatch(l -> l.getObjectType() == null)) {
-            throw new RuntimeException("All ColumnLookup object types must be specified");
-        }
         List<Attribute> attributes = new ArrayList<>();
-        for (ColumnLookup lookup : set) {
-            Table table = dataCollection.getTable(lookup.getObjectType());
-            if (table == null) {
-                log.warn(String.format("No such Table in DataCollection %s with type %s", dataCollection.getName(),
-                        lookup.getObjectType()));
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        String collectionName = segment.getDataCollection().getName();
+        for (AttributeLookup lookup : set) {
+            TableRoleInCollection tableRole = lookup.getEntity().getServingStore();
+            List<Table> tables = dataCollectionService.getTables(customerSpace.toString(), collectionName, tableRole);
+            if (tables == null || tables.isEmpty()) {
+                log.warn(String.format("No serving Table in DataCollection %s for entity %s", dataCollection.getName(),
+                        lookup.getEntity()));
                 continue;
             }
-
-            Attribute attribute = table.getAttribute(lookup.getColumnName());
+            Table table = tables.get(0);
+            Attribute attribute = table.getAttribute(lookup.getAttribute());
             if (attribute == null) {
                 log.warn(String.format("No such Attribute in Table %s with name %s", table.getName(),
-                        lookup.getColumnName()));
+                        lookup.getAttribute()));
                 continue;
             }
             attributes.add(attribute);
@@ -149,9 +146,20 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
     private MetadataSegment inflate(MetadataSegment segment) {
         if (segment != null) {
-            HibernateUtils.inflateDetails(segment.getAttributeDependencies());
+            addAttributeDependencies(segment);
         }
         return segment;
+    }
+
+    private MetadataSegment cloneForUpdate(MetadataSegment existing, MetadataSegment incoming) {
+        existing.setRestriction(incoming.getRestriction());
+        existing.setMasterSegment(incoming.getMasterSegment());
+        existing.setDisplayName(incoming.getDisplayName());
+        existing.setDescription(incoming.getDescription());
+        existing.setProperties(incoming.getProperties());
+        existing.setMasterSegment(incoming.getMasterSegment());
+        existing.setUpdated(new Date());
+        return existing;
     }
 
 }

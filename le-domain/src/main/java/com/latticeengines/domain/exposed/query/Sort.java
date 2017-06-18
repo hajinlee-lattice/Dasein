@@ -14,22 +14,26 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Sort implements GraphNode {
+
     @JsonProperty("lookups")
     private List<Lookup> lookups;
+
     @JsonProperty("descending")
     private boolean descending;
 
-    public Sort(List<Lookup> lookups, boolean descending) {
-        this.lookups = lookups;
+    @SuppressWarnings("unchecked")
+    public <T extends Lookup> Sort(List<T> lookups, boolean descending) {
+        this.lookups = (List<Lookup>) lookups;
         this.descending = descending;
     }
 
@@ -72,14 +76,9 @@ public class Sort implements GraphNode {
         return ToStringBuilder.reflectionToString(this);
     }
 
-    public void addLookup(Lookup lookup) {
-        this.lookups.add(lookup);
-    }
-
-    @SuppressWarnings("unchecked")
-    public void setLookups(SchemaInterpretation objectType, String... columnNames) {
-        this.lookups = new ArrayList<String>(Arrays.asList(columnNames)).stream() //
-                .map((columnName) -> new ColumnLookup(objectType, columnName)) //
+    public void setLookups(BusinessEntity entity, String... columnNames) {
+        this.lookups = new ArrayList<>(Arrays.asList(columnNames)).stream() //
+                .map((columnName) -> new AttributeLookup(entity, columnName)) //
                 .collect(Collectors.toList());
     }
 

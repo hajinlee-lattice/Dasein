@@ -1,5 +1,6 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,7 +34,7 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
         DataCollection dataCollection = getDataCollection();
-        List<Table> tables = dataCollection.getTables();
+        List<Table> tables = new ArrayList<>(); // BROKEN
         Stream<ColumnMetadata> stream = tables.stream() //
                 .flatMap(t -> t.getAttributes().stream()) //
                 .map(a -> a.getColumnMetadata()) //

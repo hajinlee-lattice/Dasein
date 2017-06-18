@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.query.BucketRange;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndBucket;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -26,8 +26,8 @@ public class Bucket implements Serializable {
     @JsonProperty("En")
     private Long[] encodedCountList;
 
-    @JsonProperty("Range")
-    private BucketRange range;
+    @JsonProperty("Bkt")
+    private FrontEndBucket bkt;
 
     @JsonProperty("Lift")
     private Double lift;
@@ -50,12 +50,9 @@ public class Bucket implements Serializable {
                 this.encodedCountList[idx++] = new Long(cnt);
             }
         }
-        if (bucket.range != null) {
-            // TODO - this is temporary and will be fixed once range logic is
-            // figured out properly
-            this.range = bucket.range;
+        if (bucket.bkt != null) {
+            this.bkt = bucket.bkt;
         }
-
         if (bucket.lift != null) {
             this.lift = new Double(bucket.lift);
         }
@@ -67,8 +64,6 @@ public class Bucket implements Serializable {
 
     public void setBucketLabel(String bucketLabel) {
         this.bucketLabel = bucketLabel;
-        // TODO TEMPORARY FOR M10
-        this.range = BucketRange.value(bucketLabel);
     }
 
     public Long getCount() {
@@ -95,12 +90,12 @@ public class Bucket implements Serializable {
         this.encodedCountList = encodedCountList;
     }
 
-    public BucketRange getRange() {
-        return range;
+    public FrontEndBucket getBkt() {
+        return bkt;
     }
 
-    public void setRange(BucketRange range) {
-        this.range = range;
+    public void setBkt(FrontEndBucket bkt) {
+        this.bkt = bkt;
     }
 
     public Double getLift() {
@@ -109,5 +104,9 @@ public class Bucket implements Serializable {
 
     public void setLift(Double lift) {
         this.lift = lift;
+    }
+
+    public int getIdAsInt() {
+        return id.intValue();
     }
 }

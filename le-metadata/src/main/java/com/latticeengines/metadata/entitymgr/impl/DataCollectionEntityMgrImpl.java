@@ -33,7 +33,6 @@ import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.metadata.service.SegmentationDataCollectionService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataCollectionEntityMgr")
@@ -57,9 +56,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     private DataCollectionPropertyDao dataCollectionPropertyDao;
 
     @Autowired
-    private SegmentationDataCollectionService segmentationDataCollectionService;
-
-    @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Override
@@ -73,13 +69,16 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         if (getDataCollection(dataCollection.getName()) != null) {
             throw new IllegalStateException("Data collection " + dataCollection.getName() + " already exist.");
         }
+        if (dataCollection.getType() == null) {
+            dataCollection.setType(DataCollectionType.Segmentation);
+        }
         dataCollection.setTenant(MultiTenantContext.getTenant());
         if (StringUtils.isBlank(dataCollection.getName())) {
             dataCollection.setName(NamingUtils.timestamp("DataCollection"));
         }
-        create(dataCollection);
+        dataCollectionDao.create(dataCollection);
         for (DataCollectionProperty dataCollectionProperty : dataCollection.getProperties()) {
-            dataCollectionProperty.setDataCollection(dataCollection);
+            dataCollectionProperty.setOwner(dataCollection);
             dataCollectionPropertyDao.create(dataCollectionProperty);
         }
         if (segmentEntityMgr.findMasterSegment(dataCollection.getName()) == null) {
@@ -102,12 +101,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return segment;
     }
 
-    private void removeDefaultTables(DataCollection dataCollection) {
-        if (dataCollection.getType() == DataCollectionType.Segmentation) {
-            segmentationDataCollectionService.removeDefaultTables(dataCollection);
-        }
-    }
-
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection getDataCollection(String name) {
@@ -124,27 +117,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         DataCollection collection = findByField("type", type);
         if (collection != null) {
             HibernateUtils.inflateDetails(collection.getProperties());
-        } else {
-//            if (registerDefault(type)) {
-//                collection = getDataCollection(type);
-//            }
         }
-
         return collection;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    @Override
-    public void fillInTables(DataCollection dataCollection) {
-        List<Table> tables = getTablesOfRole(dataCollection.getName(), null);
-        dataCollection.setTables(tables);
-        fillInDefaultTables(dataCollection);
-    }
-
-    private void fillInDefaultTables(DataCollection dataCollection) {
-        if (dataCollection.getType() == DataCollectionType.Segmentation) {
-            segmentationDataCollectionService.fillInDefaultTables(dataCollection);
-        }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -156,16 +130,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         tablesInCollection.forEach(t -> removeTableFromCollection(name, t.getName()));
 
         dataCollectionDao.delete(dataCollection);
-    }
-
-    private boolean registerDefault(DataCollectionType type) {
-        if (type == DataCollectionType.Segmentation) {
-            DataCollection collection = segmentationDataCollectionService.getDefaultDataCollection();
-            createDataCollection(collection);
-            return true;
-        }
-
-        return false;
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)

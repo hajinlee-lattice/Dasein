@@ -18,8 +18,6 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
 
     DataCollection getDataCollection(DataCollectionType type);
 
-    void fillInTables(DataCollection collection);
-
     List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole);
 
     void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role);

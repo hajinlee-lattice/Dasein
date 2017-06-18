@@ -28,17 +28,15 @@ import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.latticeengines.common.exposed.graph.GraphNode;
-import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
 import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
-import com.latticeengines.domain.exposed.query.BucketRange;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -117,6 +115,18 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
     private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
+
+    @Transient
+    @JsonProperty("stats")
+    private AttributeStats stats;
+
+    public Attribute() {
+
+    }
+
+    public Attribute(String name) {
+        this.name = name;
+    }
 
     @Override
     public Long getPid() {
@@ -849,42 +859,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (Integer) properties.get("NumOfBits");
     }
 
-    @Transient
-    @JsonIgnore
-    public void setBucketRangeList(List<BucketRange> bucketRangeList) {
-        properties.put("BucketRangeList", bucketRangeList);
-    }
-
-    @Transient
-    @JsonIgnore
-    public void addBucketRange(BucketRange bucketRange) {
-        List<BucketRange> bucketRangeList = getBucketRangeList();
-        if (bucketRangeList == null) {
-            bucketRangeList = new ArrayList<>();
-        }
-        bucketRangeList.add(bucketRange);
-        setBucketRangeList(bucketRangeList);
-    }
-
-    @Transient
-    @JsonIgnore
-    public void addBucketedValue(String bucketRangeStr) {
-        if (bucketRangeStr == null || bucketRangeStr.equals("null")) {
-            addBucketRange(BucketRange.nullBucket());
-        } else {
-            addBucketRange(BucketRange.value(bucketRangeStr));
-        }
-    }
-
-    @Transient
-    @JsonIgnore
-    public List<BucketRange> getBucketRangeList() {
-        Object obj = properties.get("BucketRangeList");
-        return obj == null ? null : JsonUtils.getObjectMapper().convertValue(obj,
-                new TypeReference<List<BucketRange>>() {
-                });
-    }
-
     @Override
     @Transient
     @JsonIgnore
@@ -953,6 +927,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (getInterfaceName() != null)
             return false;
         return true;
+    }
+
+    public AttributeStats getStats() {
+        return stats;
+    }
+
+    public void setStats(AttributeStats stats) {
+        this.stats = stats;
     }
 
     @Transient

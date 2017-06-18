@@ -47,10 +47,15 @@ public class DataCollectionFunctionalTestNGBase extends MetadataFunctionalTestNG
     }
 
     protected void addTableToCollection(Table table) {
-        tableEntityMgr.deleteByName(table.getName());
-        tableEntityMgr.create(table);
+        addTableToCollection(table, TableRoleInCollection.ConsolidatedAccount);
+    }
+
+    protected void addTableToCollection(Table table, TableRoleInCollection role) {
+        if (tableEntityMgr.findByName(table.getName()) == null) {
+            tableEntityMgr.create(table);
+        }
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(),
-                TableRoleInCollection.ConsolidatedAccount);
+                role);
     }
 
     protected List<Table> getTablesInCollection() {

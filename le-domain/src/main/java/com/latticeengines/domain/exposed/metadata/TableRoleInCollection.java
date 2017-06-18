@@ -4,10 +4,11 @@ public enum TableRoleInCollection {
     ConsolidatedAccount, //
     ConsolidatedContact, //
     ConsolidatedTimeSeries, //
-    ConsolidatedCategory, //
 
     Profile, //
+
     BucketedAccount, //
+    BucketedContact, //
     
     AccountMaster
 }

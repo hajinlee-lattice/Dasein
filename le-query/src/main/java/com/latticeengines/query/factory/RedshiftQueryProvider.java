@@ -2,6 +2,7 @@ package com.latticeengines.query.factory;
 
 import javax.sql.DataSource;
 
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -22,14 +23,9 @@ public class RedshiftQueryProvider extends QueryProvider {
     private DataSource redshiftDataSource;
 
     @Override
-    public boolean providesQueryAgainst(DataCollection dataCollection) {
-        return dataCollection //
-                .getTables() //
-                .stream() //
-                .map(Table::getStorageMechanism) //
-                .allMatch(
-                        storageMechanism -> storageMechanism instanceof JdbcStorage
-                                && ((JdbcStorage) storageMechanism).getDatabaseName() == JdbcStorage.DatabaseName.REDSHIFT);
+    public boolean providesQueryAgainst(AttributeRepository repository) {
+        // Redshift provides query against all attribute repository, for now
+        return true;
     }
 
     @Override

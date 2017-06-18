@@ -14,10 +14,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -27,22 +23,9 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeStatistics;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.BucketRange;
-import com.latticeengines.domain.exposed.query.ColumnLookup;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndBucket;
 
 public class StatsCubeUtils {
-
-    private static final Log log = LogFactory.getLog(StatsCubeUtils.class);
-
-    private static final String DEFAULT_SUBCATEGORY = "Other";
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);
@@ -58,67 +41,6 @@ public class StatsCubeUtils {
         cube.setStatistics(statsMap);
         cube.setCount(maxCount.get());
         return cube;
-    }
-
-    public static StatisticsContainer getStatisticsContainer(StatsCube statsCube,
-            List<Pair<SchemaInterpretation, List<ColumnMetadata>>> interpretationToColMetadataList) {
-
-        Map<String, AttributeStats> attributeStatsMap = statsCube.getStatistics();
-        StatisticsContainer statsContainer = new StatisticsContainer();
-
-        Map<String, Pair<ColumnMetadata, SchemaInterpretation>> colLookup = new HashMap<>();
-        for (Pair<SchemaInterpretation, List<ColumnMetadata>> pair : interpretationToColMetadataList) {
-            SchemaInterpretation schema = pair.getKey();
-            List<ColumnMetadata> colMetadataList = pair.getValue();
-            colMetadataList.forEach(c -> colLookup.put(c.getColumnId(),
-                    new ImmutablePair<ColumnMetadata, SchemaInterpretation>(c, schema)));
-        }
-
-        Statistics statistics = new Statistics();
-        for (String name : attributeStatsMap.keySet()) {
-            ColumnLookup columnLookup = new ColumnLookup(name);
-            String category;
-            String subCategory;
-
-            if (colLookup.containsKey(name)) {
-                ColumnMetadata metadata = colLookup.get(name).getLeft();
-                columnLookup.setObjectType(colLookup.get(name).getRight());
-                category = metadata.getCategory().getName() != null ? metadata.getCategory().getName()
-                        : Category.DEFAULT.getName();
-                subCategory = metadata.getSubcategory() != null ? metadata.getSubcategory() : DEFAULT_SUBCATEGORY;
-            } else {
-                log.warn(String.format(
-                        "Attribute %s in StatsCube does not exist in account master or the customer master table",
-                        name));
-                continue;
-            }
-
-            AttributeStatistics attributeStatistics = new AttributeStatistics();
-            AttributeStats statsInCube = attributeStatsMap.get(name);
-            if (statsInCube.getBuckets() != null) {
-                attributeStatistics.getBuckets().addAll(attributeStatsMap.get(name).getBuckets().getBucketList());
-            }
-            if (statistics.getCategories().containsKey(category)) {
-                CategoryStatistics categoryStatistics = statistics.getCategories().get(category);
-                if (categoryStatistics.getSubcategories().containsKey(subCategory)) {
-                    categoryStatistics.getSubcategories().get(subCategory).getAttributes().put(columnLookup,
-                            attributeStatistics);
-                } else {
-                    SubcategoryStatistics subCategoryStatistics = new SubcategoryStatistics();
-                    subCategoryStatistics.getAttributes().put(columnLookup, attributeStatistics);
-                    categoryStatistics.getSubcategories().put(subCategory, subCategoryStatistics);
-                }
-            } else {
-                CategoryStatistics categoryStatistics = new CategoryStatistics();
-                SubcategoryStatistics subCategoryStatistics = new SubcategoryStatistics();
-                subCategoryStatistics.getAttributes().put(columnLookup, attributeStatistics);
-                categoryStatistics.getSubcategories().put(subCategory, subCategoryStatistics);
-                statistics.getCategories().put(category, categoryStatistics);
-            }
-        }
-        statsContainer.setStatistics(statistics);
-
-        return statsContainer;
     }
 
     private static AttributeStats parseAttrStats(GenericRecord record) {
@@ -166,7 +88,7 @@ public class StatsCubeUtils {
             Bucket bucket = new Bucket();
             bucket.setId((long) i);
             bucket.setBucketLabel(label);
-            bucket.setRange(null);
+            bucket.setBkt(FrontEndBucket.nullBkt());
             bucket.setCount(0L);
             bucketList.add(bucket);
         }
@@ -189,26 +111,27 @@ public class StatsCubeUtils {
     }
 
     private static void updateBooleanBucket(Bucket bucket, BooleanBucket algo, int bktId) {
+        String val = null;
         switch (bktId) {
         case 1:
-            bucket.setBucketLabel(algo.getTrueLabelWithDefault());
+            val = algo.getTrueLabelWithDefault();
             break;
         case 2:
-            bucket.setBucketLabel(algo.getFalseLabelWithDefault());
+            val = algo.getFalseLabelWithDefault();
         default:
         }
-        bucket.setRange(null);
+        bucket.setBucketLabel(val);
+        bucket.setBkt(FrontEndBucket.value(val));
     }
 
     private static void updateIntervalBucket(Bucket bucket, IntervalBucket algo, int bktId) {
         List<Number> boundaries = algo.getBoundaries();
         Number min = bktId == 1 ? null : boundaries.get(bktId - 2);
         Number max = bktId == boundaries.size() + 1 ? null : boundaries.get(bktId - 1);
-        BucketRange bucketRange = BucketRange.range(min, max);
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setBucketLabel(bucketLabel);
-        bucket.setRange(bucketRange);
+        bucket.setBkt(FrontEndBucket.range(min, max));
     }
 
 }

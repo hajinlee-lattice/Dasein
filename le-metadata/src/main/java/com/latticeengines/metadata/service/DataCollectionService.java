@@ -3,18 +3,16 @@ package com.latticeengines.metadata.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 
 public interface DataCollectionService {
 
     List<DataCollection> getDataCollections(String customerSpace);
 
     DataCollection getDataCollection(String customerSpace, String collectionName);
-
-    DataCollection getDataCollectionByType(String customerSpace, DataCollectionType type);
 
     DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection);
 
@@ -25,5 +23,7 @@ public interface DataCollectionService {
     List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole);
 
     StatisticsContainer getStats(String customerSpace, String collectionName, String modelId);
+
+    AttributeRepository getAttrRepo(String customerSpace, String collectionName);
 
 }

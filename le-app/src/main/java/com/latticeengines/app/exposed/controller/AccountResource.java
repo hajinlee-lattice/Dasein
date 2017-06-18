@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -23,6 +22,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/accounts")
 public class AccountResource {
+
     @Autowired
     private AccountProxy accountProxy;
 
@@ -50,12 +50,10 @@ public class AccountResource {
     }
 
     private Query translate(FrontEndQuery query) {
-        QueryTranslator translator = new QueryTranslator(query, SchemaInterpretation.Account);
-        Query translated = translator.translate();
-
+        Query translated = QueryTranslator.translate(query);
         // TODO drive this from metadata
         // TODO need additional lookups from Yintao
-        translated.setLookups(SchemaInterpretation.AccountMaster, "BUSINESS_NAME");
+//        translated.setLookups(SchemaInterpretation.AccountMaster, "BUSINESS_NAME");
         return translated;
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryProcessor;
@@ -21,15 +21,16 @@ import com.querydsl.sql.SQLQuery;
 
 @Component("queryEvaluator")
 public class QueryEvaluator {
+
     @Autowired
     private QueryProcessor processor;
 
-    public SQLQuery<?> evaluate(DataCollection dataCollection, Query query) {
-        return processor.process(dataCollection, query);
+    public SQLQuery<?> evaluate(AttributeRepository repository, Query query) {
+        return processor.process(repository, query);
     }
 
-    public DataPage getResults(DataCollection dataCollection, Query query) {
-        SQLQuery<?> sqlquery = evaluate(dataCollection, query);
+    public DataPage run(AttributeRepository repository, Query query) {
+        SQLQuery<?> sqlquery = evaluate(repository, query);
         List<Map<String, Object>> data = new ArrayList<>();
         try (ResultSet results = sqlquery.getResults()) {
             ResultSetMetaData metadata = results.getMetaData();
@@ -43,7 +44,7 @@ public class QueryEvaluator {
             }
             return new DataPage(data);
         } catch (SQLException e) {
-            throw new LedpException(LedpCode.LEDP_37012, new String[] { query.getObjectType().toString() });
+            throw new LedpException(LedpCode.LEDP_37012, new String[] { repository.getIdentifier() });
         }
     }
 }

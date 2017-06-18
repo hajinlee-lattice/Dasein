@@ -3,29 +3,27 @@ package com.latticeengines.domain.exposed.util;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 
-public class ReverseQueryTranslator {
-    private Query query;
+public final class ReverseQueryTranslator {
 
-    public ReverseQueryTranslator(Query query) {
-        this.query = query;
-    }
-
-    public FrontEndQuery translate() {
+    public static FrontEndQuery translate(Query query) {
         FrontEndQuery result = new FrontEndQuery();
-
         FrontEndRestriction restriction = translateRestriction(query.getRestriction());
         result.setRestriction(restriction);
         result.setFreeFormTextSearch(query.getFreeFormTextSearch());
         result.setPageFilter(query.getPageFilter());
-        result.setSort(query.getSort());
+        result.setSort(translateSort(query.getSort()));
         return result;
     }
 
@@ -33,7 +31,6 @@ public class ReverseQueryTranslator {
         if (restriction == null) {
             return null;
         }
-
         FrontEndRestriction result = new FrontEndRestriction();
         if (restriction instanceof LogicalRestriction) {
             LogicalRestriction casted = (LogicalRestriction) restriction;
@@ -50,14 +47,14 @@ public class ReverseQueryTranslator {
 
                     if (and != null) {
                         List<BucketRestriction> andChildren = and.getRestrictions().stream()
-                                .filter(r -> r instanceof BucketRestriction).map(r -> (BucketRestriction) r)
+                                .filter(r -> r instanceof ConcreteRestriction).map(BucketRestriction::from)
                                 .collect(Collectors.toList());
                         result.setAll(andChildren);
                     }
 
                     if (or != null) {
                         List<BucketRestriction> orChildren = or.getRestrictions().stream()
-                                .filter(r -> r instanceof BucketRestriction).map(r -> (BucketRestriction) r)
+                                .filter(r -> r instanceof ConcreteRestriction).map(BucketRestriction::from)
                                 .collect(Collectors.toList());
                         result.setAny(orChildren);
                     }
@@ -68,5 +65,29 @@ public class ReverseQueryTranslator {
         }
 
         throw new RuntimeException(String.format("Restriction is not in the correct format: %s", restriction));
+    }
+
+    private static FrontEndSort translateSort(Sort sort) {
+        List<AttributeLookup> lookups = sort.getLookups().stream().map(l -> (AttributeLookup) l).collect(Collectors.toList());
+        return new FrontEndSort(lookups, sort.getDescending());
+    }
+
+    private Query query;
+
+    @Deprecated
+    public ReverseQueryTranslator(Query query) {
+        this.query = query;
+    }
+
+    @Deprecated
+    public FrontEndQuery translate() {
+        FrontEndQuery result = new FrontEndQuery();
+
+//        FrontEndRestriction restriction = translateRestriction(query.getRestriction());
+//        result.setRestriction(restriction);
+//        result.setFreeFormTextSearch(query.getFreeFormTextSearch());
+//        result.setPageFilter(query.getPageFilter());
+//        result.setSort(query.getSort());
+        return result;
     }
 }

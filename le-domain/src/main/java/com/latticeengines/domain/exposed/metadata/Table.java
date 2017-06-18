@@ -86,7 +86,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "NAME", unique = false, nullable = false)
+    @Column(name = "NAME", nullable = false)
     @JsonProperty("name")
     private String name;
 
@@ -151,11 +151,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DataRule> dataRules = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "table")
-    @JsonIgnore
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<TableTag> tableTags = new ArrayList<>();
-
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("storage_mechanism")
@@ -168,11 +163,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonProperty("count")
     @Transient
     private Long count;
-
-    @JsonProperty("relationships")
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "sourceTable")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public List<TableRelationship> relationships = new ArrayList<>();
 
     public Table() {
     }
@@ -715,30 +705,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         this.namespace = namespace;
     }
 
-    @JsonProperty("tags")
-    public void setTags(List<String> tags) {
-        Set<String> tagSet = tableTags.stream().map(x -> x.getName()).collect(Collectors.toSet());
-
-        for (String tag : tags) {
-            if (!tagSet.contains(tag)) {
-                TableTag tableTag = new TableTag();
-                tableTag.setName(tag);
-                tableTag.setTable(this);
-                tableTags.add(tableTag);
-            }
-        }
-    }
-
-    @JsonProperty("tags")
-    public List<String> getTags() {
-        return tableTags.stream().map(x -> x.getName()).collect(Collectors.toList());
-    }
-
-    @JsonIgnore
-    public List<TableTag> getTableTags() {
-        return tableTags;
-    }
-
     public Long getCount() {
         return count;
     }
@@ -764,29 +730,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
     }
 
-    public void addTag(String name) {
-        List<String> tags = getTags();
-        tags.add(name);
-        setTags(tags);
-    }
-
     public List<LevelBasedHierarchy> getHierarchies() {
         return hierarchies;
     }
 
     public void setHierarchies(List<LevelBasedHierarchy> hierarchies) {
         this.hierarchies = hierarchies;
-    }
-
-    public List<TableRelationship> getRelationships() {
-        return relationships;
-    }
-
-    public void setRelationships(List<TableRelationship> relationships) {
-        this.relationships = relationships;
-    }
-
-    public void addRelationship(TableRelationship relationship) {
-        this.relationships.add(relationship);
     }
 }

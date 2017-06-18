@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -19,13 +20,23 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
+/**
+ * Entities satisfy the Restriction exists (if negate then not exists)
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ExistsRestriction extends Restriction {
+
     @JsonProperty("object_type")
     private SchemaInterpretation objectType;
+
+    @JsonProperty("entity")
+    private BusinessEntity entity;
+
     @JsonProperty("negate")
     private boolean negate;
+
     @JsonProperty("restriction")
     private Restriction restriction;
 
@@ -44,7 +55,29 @@ public class ExistsRestriction extends Restriction {
         this.negate = negate;
     }
 
+    private ExistsRestriction(BusinessEntity entity) {
+        this.entity = entity;
+    }
+
+    private ExistsRestriction(BusinessEntity entity, boolean negate) {
+        this(entity);
+        this.negate = negate;
+    }
+
+    ExistsRestriction(BusinessEntity entity, boolean negate, Restriction restriction) {
+        this(entity, negate);
+        this.restriction = restriction;
+    }
+
     public ExistsRestriction() {
+    }
+
+    public BusinessEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(BusinessEntity entity) {
+        this.entity = entity;
     }
 
     public boolean getNegate() {

@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 
 @MappedSuperclass
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public abstract class MetadataProperty implements HasOptionAndValue, HasPid {
+public abstract class MetadataProperty<T> implements HasOptionAndValue, HasPid {
 
     public MetadataProperty() {}
 
@@ -78,4 +78,7 @@ public abstract class MetadataProperty implements HasOptionAndValue, HasPid {
     public void setProperty(String property) {
         this.property = property;
     }
+
+    public abstract Class<T> getOwnerEntity();
+
 }

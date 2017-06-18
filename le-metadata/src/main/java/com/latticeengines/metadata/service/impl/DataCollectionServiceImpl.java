@@ -1,23 +1,25 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.metadata.entitymgr.impl.DataCollectionCache;
 import com.latticeengines.metadata.service.DataCollectionService;
-import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
@@ -30,22 +32,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private TableEntityMgr tableEntityMgr;
 
     @Autowired
-    private TenantService tenantService;
-
-    @Autowired
-    private DataCollectionCache dataCollectionCache;
-
-    @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Override
     public List<DataCollection> getDataCollections(String customerSpace) {
         return dataCollectionEntityMgr.findAll();
-    }
-
-    @Override
-    public DataCollection getDataCollectionByType(String customerSpace, DataCollectionType type) {
-        return dataCollectionCache.get(type);
     }
 
     @Override
@@ -64,8 +55,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public void addStats(String customerSpace, String collectionName, StatisticsContainer container,
-                                        String modelId) {
+    public void addStats(String customerSpace, String collectionName, StatisticsContainer container, String modelId) {
         DataCollection dataCollection = getDataCollection(customerSpace, collectionName);
         if (dataCollection == null) {
             throw new IllegalArgumentException(
@@ -101,6 +91,25 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole) {
         log.info("Getting all tables of role " + tableRole + " in collection " + collectionName);
         return dataCollectionEntityMgr.getTablesOfRole(collectionName, tableRole);
+    }
+
+    public AttributeRepository getAttrRepo(String customerSpace, String collectionName) {
+        StatisticsContainer statisticsContainer = getStats(customerSpace, collectionName, null);
+        if (statisticsContainer == null) {
+            return null;
+        }
+        Statistics statistics = statisticsContainer.getStatistics();
+        if (statistics == null) {
+            return null;
+        }
+        List<TableRoleInCollection> roles = AttributeRepository.extractServingRoles(statistics);
+        Map<TableRoleInCollection, Table> tableMap = new HashMap<>();
+        roles.forEach(role -> {
+            Table table = getTables(customerSpace, collectionName, role).get(0);
+            tableMap.put(role, table);
+        });
+        return AttributeRepository.constructRepo(statistics, tableMap, CustomerSpace.parse(customerSpace),
+                collectionName);
     }
 
 }

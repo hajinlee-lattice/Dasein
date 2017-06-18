@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_DATA_COLLECTION_PROPERTY")
-public class DataCollectionProperty extends MetadataProperty implements HasOptionAndValue, HasPid {
+public class DataCollectionProperty extends MetadataProperty<DataCollection> implements HasOptionAndValue, HasPid {
 
     public DataCollectionProperty(){}
 
@@ -21,13 +21,20 @@ public class DataCollectionProperty extends MetadataProperty implements HasOptio
     @ManyToOne
     @JoinColumn(name = "FK_DATA_COLLECTION_ID", nullable = false)
     @JsonIgnore
-    private DataCollection dataCollection;
+    private DataCollection owner;
 
-    public DataCollection getDataCollection() {
-        return dataCollection;
+    public DataCollection getOwner() {
+        return owner;
     }
 
-    public void setDataCollection(DataCollection dataCollection) {
-        this.dataCollection = dataCollection;
+    public void setOwner(DataCollection owner) {
+        this.owner = owner;
     }
+
+    @JsonIgnore
+    @Override
+    public Class<DataCollection> getOwnerEntity() {
+        return DataCollection.class;
+    }
+
 }

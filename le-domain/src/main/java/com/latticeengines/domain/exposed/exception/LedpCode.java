@@ -588,7 +588,7 @@ public enum LedpCode {
     LEDP_37009("Unsupported restriction {0}"), //
     LEDP_37010("Could not find attribute with name {0} in table {1}"), //
     LEDP_37011("Unsupported lookup type {0}"), //
-    LEDP_37012("Failed to retrieve data for object {0}"), //
+    LEDP_37012("Failed to retrieve data from {0}"), //
     LEDP_37013("Could not find data collection of type {0}"), //
 
     // le-dante

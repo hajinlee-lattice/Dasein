@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.DataFeedService;
 
@@ -42,16 +43,6 @@ public class DataCollectionResource {
     public List<DataCollection> getDataCollections(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.getDataCollections(customerSpace);
-    }
-
-    @Deprecated
-    @RequestMapping(value = "/types/{dataCollectionType}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get data collection by type.")
-    public DataCollection getDataCollectionByType(@PathVariable String customerSpace,
-            @PathVariable DataCollectionType dataCollectionType) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getDataCollectionByType(customerSpace, dataCollectionType);
     }
 
     @RequestMapping(value = "/{collectionName}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -123,6 +114,15 @@ public class DataCollectionResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedService.createDataFeed(customerSpace, collectionName, dataFeed);
         return SimpleBooleanResponse.successResponse();
+    }
+
+    @RequestMapping(value = "/{collectionName}/attrrepos", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get the main statistics of the collection.")
+    public AttributeRepository getAttrRepo(@PathVariable String customerSpace, //
+                                           @PathVariable String collectionName) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.getAttrRepo(customerSpace, collectionName);
     }
 
 }

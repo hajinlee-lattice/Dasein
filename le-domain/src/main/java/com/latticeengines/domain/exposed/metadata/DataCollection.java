@@ -64,7 +64,7 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "dataCollection")
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "owner")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("properties")
     private List<DataCollectionProperty> properties = new ArrayList<>();
@@ -73,10 +73,6 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private List<DataFeed> datafeeds = new ArrayList<>();
-
-    @Transient
-    @JsonProperty("tables")
-    private List<Table> tables = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "dataCollection")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -136,14 +132,6 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
         this.tenant = tenant;
     }
 
-    public List<Table> getTables() {
-        return tables;
-    }
-
-    public void setTables(List<Table> tables) {
-        this.tables = tables;
-    }
-
     public DataCollectionType getType() {
         return type;
     }
@@ -157,24 +145,6 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
         return JsonUtils.serialize(this);
     }
 
-    @JsonIgnore
-    public Table getTable(SchemaInterpretation objectType) {
-        if (objectType == null) {
-            return null;
-        }
-        return getTables().stream()
-                .filter(t -> t.getInterpretation() != null && t.getInterpretation().equals(objectType.toString())) //
-                .findFirst().orElse(null);
-
-    }
-
-    public Table getTable(String tableName) {
-        return getTables().stream().filter(t -> t.getName().equals(tableName)).findFirst().orElse(null);
-    }
-
-    public void addTable(Table table) {
-        tables.add(table);
-    }
 
     public List<DataCollectionProperty> getProperties() {
         return properties;

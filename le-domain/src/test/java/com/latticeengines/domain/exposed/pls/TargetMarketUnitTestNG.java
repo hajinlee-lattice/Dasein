@@ -4,16 +4,18 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.Restriction;
 
 public class TargetMarketUnitTestNG {
 
     @Test(groups = "unit")
     public void testSerDe() {
         TargetMarket market = new TargetMarket();
-        market.setAccountFilter(new ConcreteRestriction(false, null, ComparisonType.EQUAL, null));
-        market.setContactFilter(new ConcreteRestriction(false, null, ComparisonType.GREATER_OR_EQUAL, null));
+        market.setAccountFilter(Restriction.builder().let(BusinessEntity.Account, "A").eq("1").build());
+        market.setContactFilter(Restriction.builder().let(BusinessEntity.Account, "B").gte(2).build());
         String ser = JsonUtils.serialize(market);
         market = JsonUtils.deserialize(ser, TargetMarket.class);
         Assert.assertNotNull(market.getAccountFilter());

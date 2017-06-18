@@ -1,7 +1,5 @@
 package com.latticeengines.metadata.controller;
 
-import java.util.Collections;
-
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
@@ -40,7 +38,6 @@ public class DataFeedResourceTestNG extends DataCollectionFunctionalTestNGBase {
         TABLE_1.setName(TABLE1);
         dataCollection = new DataCollection();
         dataCollection.setType(DataCollectionType.Segmentation);
-        dataCollection.setTables(Collections.singletonList(TABLE_1));
         dataCollection = dataCollectionProxy.createOrUpdateDataCollection(customerSpace1, dataCollection);
         dataCollectionProxy.upsertTable(customerSpace1, dataCollection.getName(), TABLE1, TableRoleInCollection.ConsolidatedAccount);
         dataCollection = dataCollectionProxy.getDataCollection(customerSpace1, dataCollection.getName());

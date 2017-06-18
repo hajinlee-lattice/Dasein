@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PageFilter {
+
     @JsonProperty("row_offset")
     private long rowOffset;
+
     @JsonProperty("num_rows")
     private long numRows;
 

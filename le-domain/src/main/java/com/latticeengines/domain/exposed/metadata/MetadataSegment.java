@@ -14,8 +14,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
@@ -96,14 +94,13 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Column(name = "IS_MASTER_SEGMENT", nullable = false)
     private Boolean isMasterSegment = false;
 
-    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "metadataSegment", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "owner", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("segment_properties")
     private List<MetadataSegmentProperty> properties = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @Transient
     @JsonProperty("attributes")
-    @JoinTable(name = "METADATA_SEGMENT_ATTRIBUTE_DEPENDENCY", joinColumns = { @JoinColumn(name = "FK_ATTRIBUTE_ID") }, inverseJoinColumns = { @JoinColumn(name = "FK_SEGMENT_ID") })
     private List<Attribute> attributeDependencies = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "segment")

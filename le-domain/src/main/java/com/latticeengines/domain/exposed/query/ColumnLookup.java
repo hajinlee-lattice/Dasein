@@ -11,16 +11,14 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
-import io.swagger.annotations.ApiModelProperty;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ColumnLookup extends Lookup {
+
     @JsonProperty("column_name")
     private String columnName;
+
     @JsonProperty("object_type")
-    @ApiModelProperty("This may be left unspecified if the corresponding query is "
-            + "only against one logical object (e.g., Account)")
     private SchemaInterpretation objectType;
 
     public ColumnLookup(String columnName) {

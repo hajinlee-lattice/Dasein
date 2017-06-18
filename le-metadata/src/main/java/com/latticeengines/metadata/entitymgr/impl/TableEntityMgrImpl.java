@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRelationship;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -33,7 +32,6 @@ import com.latticeengines.metadata.dao.ExtractDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.dao.TableDao;
-import com.latticeengines.metadata.dao.TableRelationshipDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -67,9 +65,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private HiveTableDao hiveTableDao;
-
-    @Autowired
-    private TableRelationshipDao tableRelationshipDao;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -106,17 +101,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (entity.getDataRules() != null) {
             for (DataRule dataRule : entity.getDataRules()) {
                 dataRuleDao.create(dataRule);
-            }
-        }
-
-        if (entity.getRelationships() != null) {
-            for (TableRelationship relationship : entity.getRelationships()) {
-                if (findByName(relationship.getTargetTableName()) != null) {
-                    tableRelationshipDao.create(relationship);
-                } else {
-                    throw new RuntimeException((String.format("No target table name found with name %s",
-                            relationship.getTargetTableName())));
-                }
             }
         }
 
@@ -282,12 +266,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (table.getDataRules() != null) {
             for (DataRule dataRule : table.getDataRules()) {
                 dataRule.setTable(table);
-            }
-        }
-
-        if (table.getRelationships() != null) {
-            for (TableRelationship relationship : table.getRelationships()) {
-                relationship.setSourceTable(table);
             }
         }
     }

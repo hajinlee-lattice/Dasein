@@ -29,7 +29,7 @@ public class MetadataSegmentPropertyBag extends PropertyBag<MetadataSegmentPrope
 
     public void setMetadataSegment(MetadataSegment metadataSegment) {
         for (MetadataSegmentProperty metadataSegmentProperty : this.getBag()) {
-            metadataSegmentProperty.setMetadataSegment(metadataSegment);
+            metadataSegmentProperty.setOwner(metadataSegment);
         }
     }
 

@@ -4,7 +4,6 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,8 +71,8 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
 
         DataCollection dataCollection = new DataCollection();
         dataCollection.setType(DataCollectionType.Segmentation);
-        dataCollection.addTable(table);
-        dataCollection = dataCollectionProxy.createOrUpdateDataCollection(DEMO_CUSTOMERSPACE.toString(), dataCollection);
+        dataCollection = dataCollectionProxy.createOrUpdateDataCollection(DEMO_CUSTOMERSPACE.toString(),
+                dataCollection);
         dataCollectionName = dataCollection.getName();
         dataCollectionProxy.upsertTable(DEMO_CUSTOMERSPACE.toString(), dataCollectionName, table.getName(),
                 TableRoleInCollection.ConsolidatedAccount);
@@ -121,11 +120,12 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     }
 
     private void verifyDataCollection() {
-        DataCollection dataCollection = dataCollectionProxy.getDataCollectionByType(DEMO_CUSTOMERSPACE.toString(),
-                DataCollectionType.Segmentation);
+        DataCollection dataCollection = dataCollectionProxy.getDataCollection(DEMO_CUSTOMERSPACE.toString(),
+                dataCollectionName);
         Assert.assertNotNull(dataCollection);
 
-        Table profileTable = dataCollection.getTable(SchemaInterpretation.Profile);
+        Table profileTable = dataCollectionProxy.getTable(DEMO_CUSTOMERSPACE.toString(), dataCollectionName,
+                TableRoleInCollection.Profile);
         Assert.assertNotNull(profileTable);
 
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(DEMO_CUSTOMERSPACE.toString(),

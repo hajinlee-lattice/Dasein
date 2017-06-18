@@ -10,6 +10,7 @@ import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-query-context.xml" })
 public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+
     @Autowired
     protected QueryEvaluator queryEvaluator;
 

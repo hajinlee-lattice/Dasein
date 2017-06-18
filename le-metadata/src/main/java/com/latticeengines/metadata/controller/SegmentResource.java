@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,7 +28,8 @@ public class SegmentResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all segments")
-    public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
+    public List<MetadataSegment> getSegments(@PathVariable String customerSpace,
+            @RequestParam(value = "collection", required = false) String collectionName) {
         return segmentService.getSegments(customerSpace);
     }
 
@@ -35,7 +37,8 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
     public MetadataSegment getSegment(@PathVariable String customerSpace, //
-            @PathVariable String segmentName) {
+            @PathVariable String segmentName,
+            @RequestParam(value = "collection", required = false) String collectionName) {
         return segmentService.findByName(customerSpace, segmentName);
     }
 
@@ -43,13 +46,15 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Create a segment")
     public MetadataSegment createOrUpdateSegment(@PathVariable String customerSpace, //
-            @RequestBody MetadataSegment segment) {
+            @RequestBody MetadataSegment segment,
+            @RequestParam(value = "collection", required = false) String collectionName) {
         return segmentService.createOrUpdateSegment(customerSpace, segment);
     }
 
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ApiOperation(value = "Delete a segment by name")
-    public Boolean deleteSegmentByName(@PathVariable String customerSpace, @PathVariable String segmentName) {
+    public Boolean deleteSegmentByName(@PathVariable String customerSpace, @PathVariable String segmentName,
+            @RequestParam(value = "collection", required = false) String collectionName) {
         return segmentService.deleteSegmentByName(customerSpace, segmentName);
     }
 
