@@ -9,18 +9,18 @@
 
     <properties>
         <component-name>microservice-parent</component-name>
-        <le.monitor.version>3.6.0-SNAPSHOT</le.monitor.version>
-        <le.microservice.version>3.6.0-SNAPSHOT</le.microservice.version>
-        <le.propdata.version>3.6.0-SNAPSHOT</le.propdata.version>
-        <le.network.version>3.6.0-SNAPSHOT</le.network.version>
-        <le.quartz.version>3.6.0-SNAPSHOT</le.quartz.version>
-        <le.modelquality.version>3.6.0-SNAPSHOT</le.modelquality.version>
+        <le.monitor.version>3.7.0-SNAPSHOT</le.monitor.version>
+        <le.microservice.version>3.7.0-SNAPSHOT</le.microservice.version>
+        <le.propdata.version>3.7.0-SNAPSHOT</le.propdata.version>
+        <le.network.version>3.7.0-SNAPSHOT</le.network.version>
+        <le.quartz.version>3.7.0-SNAPSHOT</le.quartz.version>
+        <le.modelquality.version>3.7.0-SNAPSHOT</le.modelquality.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.6.0-SNAPSHOT</version>
+        <version>3.7.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

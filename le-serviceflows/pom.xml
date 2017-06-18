@@ -9,19 +9,19 @@
 
     <properties>
         <component-name>serviceflows</component-name>
-        <le.camille.version>3.6.0-SNAPSHOT</le.camille.version>
-        <le.dataflow.version>3.6.0-SNAPSHOT</le.dataflow.version>
-        <le.domain.version>3.6.0-SNAPSHOT</le.domain.version>
-        <le.serviceflows.core.version>3.6.0-SNAPSHOT</le.serviceflows.core.version>
-        <le.swlib.version>3.6.0-SNAPSHOT</le.swlib.version>
-        <le.workflow.version>3.6.0-SNAPSHOT</le.workflow.version>
+        <le.camille.version>3.7.0-SNAPSHOT</le.camille.version>
+        <le.dataflow.version>3.7.0-SNAPSHOT</le.dataflow.version>
+        <le.domain.version>3.7.0-SNAPSHOT</le.domain.version>
+        <le.serviceflows.core.version>3.7.0-SNAPSHOT</le.serviceflows.core.version>
+        <le.swlib.version>3.7.0-SNAPSHOT</le.swlib.version>
+        <le.workflow.version>3.7.0-SNAPSHOT</le.workflow.version>
     </properties>
 
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.6.0-SNAPSHOT</version>
+        <version>3.7.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

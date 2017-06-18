@@ -9,20 +9,20 @@
 
     <properties>
         <component-name>job</component-name>
-        <le.dataplatform.version>3.6.0-SNAPSHOT</le.dataplatform.version>
-        <le.dataflow.version>3.6.0-SNAPSHOT</le.dataflow.version>
-        <le.camille.version>3.6.0-SNAPSHOT</le.camille.version>
-        <le.propdata.version>3.6.0-SNAPSHOT</le.propdata.version>
-        <le.pls.version>3.6.0-SNAPSHOT</le.pls.version>
-        <le.liaison.version>3.6.0-SNAPSHOT</le.liaison.version>
-        <le.scoring.version>3.6.0-SNAPSHOT</le.scoring.version>
-        <le.dellebi.version>3.6.0-SNAPSHOT</le.dellebi.version>
+        <le.dataplatform.version>3.7.0-SNAPSHOT</le.dataplatform.version>
+        <le.dataflow.version>3.7.0-SNAPSHOT</le.dataflow.version>
+        <le.camille.version>3.7.0-SNAPSHOT</le.camille.version>
+        <le.propdata.version>3.7.0-SNAPSHOT</le.propdata.version>
+        <le.pls.version>3.7.0-SNAPSHOT</le.pls.version>
+        <le.liaison.version>3.7.0-SNAPSHOT</le.liaison.version>
+        <le.scoring.version>3.7.0-SNAPSHOT</le.scoring.version>
+        <le.dellebi.version>3.7.0-SNAPSHOT</le.dellebi.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.6.0-SNAPSHOT</version>
+        <version>3.7.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
