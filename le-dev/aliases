@@ -12,11 +12,10 @@ alias wfdpl='mvn -Pshaded-yarn -DskipTests clean install && wfdplnobld'
 
 alias dfapidplnobld='hadoop fs -rm -r /app/dataflowapi || true && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-dataflowapi/target/le-dataflowapi*shaded.jar /app/dataflowapi/lib'
 alias createpod='cd $WSHOME/le-baton && mvn -f pom-batontool.xml -DskipTests clean install && java -jar target/le-baton-tool-*-shaded.jar --podId Default --connectionString localhost:2181 createPod'
-
 alias dfapidpl='mvn -Pshaded-yarn -DskipTests clean install && dfapidplnobld'
 
 alias wfapidplnobld='hadoop fs -rm -r /app/workflowapi || true && hadoop fs -mkdir -p /app/workflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-workflowapi/target/le-workflowapi*shaded.jar /app/workflowapi/lib'
-alias wfapidpl='mvn -Pshaded-yarn -DskipTests clean install && wfapidplnobld'
+alias wfapidpl='dirs -c && pushd $WSHOME/le-workflowapi && mvn -Pshaded-yarn -DskipTests clean install && wfapidplnobld && popd'
 
 alias scoringdplnobld='hadoop fs -rm -r /app/scoring || true && hadoop fs -mkdir -p /app/scoring/lib  && hadoop fs -mkdir -p /app/scoring/scripts && hadoop fs -copyFromLocal $WSHOME/le-scoring/target/le-scoring*shaded.jar /app/scoring/lib && hadoop fs -copyFromLocal src/main/python/scoring.py /app/scoring/scripts'
 alias scoringdpl='mvn -Pshaded-yarn -DskipTests clean install && scoringdplnobld'
@@ -43,8 +42,6 @@ alias secdpl='mvn -DskipTests -Djavax.net.ssl.trustStore=certificates/laca-ldap.
 alias scheddpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-scheduler-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 alias perfdpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-perf-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 
-alias microservicedplnobld='bash -c "rm -f $JETTY_HOME/webapps/*" && cp eai/target/le-eai-*.war $JETTY_HOME/webapps && cp dataflowapi/target/le-dataflowapi-*.war $JETTY_HOME/webapps && cp metadata/target/le-metadata-*.war $JETTY_HOME/webapps && cp propdata/target/le-propdata-*.war $JETTY_HOME/webapps && cp core/target/le-microservice-*.war $JETTY_HOME/webapps && cp modeling/target/le-modeling-*.war $JETTY_HOME/webapps && cp workflowapi/target/le-workflowapi-*.war $JETTY_HOME/webapps && cp scoring/target/le-scoring-*.war $JETTY_HOME/webapps && cp quartz/target/le-quartz-*.war $JETTY_HOME/webapps && cp modelquality/target/le-modelquality-*.war $JETTY_HOME/webapps'
-alias microservicedpl='mvn -DskipTests clean package && microservicedplnobld'
 alias msbld='dirs -c && pushd $WSHOME/le-microservice && mvn -T6 -DskipTests clean package && popd'
 
 alias swlibdpldf='bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-cdl -i com.latticeengines.cdl.Initializer -f ../le-serviceflows/cdl/target/le-serviceflows-cdl-*-shaded.jar'

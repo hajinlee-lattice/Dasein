@@ -119,9 +119,6 @@
                                 <copy file="${project.basedir}/../le-microservice/datacloudapi/target/le-datacloudapi-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/datacloudapi.war"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../le-microservice/propdata/target/le-propdata-microservice-${project.version}.war"
-                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/propdata.war"
-                                      overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/dellebi/target/le-dellebi-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/dellebi.war"
                                       overwrite="true" />

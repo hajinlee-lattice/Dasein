@@ -55,10 +55,6 @@
                                     <destination>dataflowapi.war</destination>
                                 </source>
                                 <source>
-                                    <location>propdata/target/le-propdata-microservice-${le.rpm.version}.war</location>
-                                    <destination>propdata.war</destination>
-                                </source>
-                                <source>
                                     <location>datacloudapi/target/le-datacloudapi-microservice-${le.rpm.version}.war
                                     </location>
                                     <destination>datacloudapi.war</destination>

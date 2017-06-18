@@ -53,12 +53,12 @@ public class MetadataConverterUnitTestNG {
 
     @Test(groups = "unit")
     public void testBucketedTable() throws IOException {
-        String path = getResourceAbsolutePath("com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/am.avsc");
-        Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(configuration, path, null, null);
-        JdbcStorage storage = new JdbcStorage();
-        storage.setDatabaseName(DatabaseName.REDSHIFT);
-        storage.setTableNameInStorage("redshift_bucketedaccountmaster");
-        bucketedTable.setStorageMechanism(storage);
+//        String path = getResourceAbsolutePath("com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/am.avsc");
+//        Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(configuration, path, null, null);
+//        JdbcStorage storage = new JdbcStorage();
+//        storage.setDatabaseName(DatabaseName.REDSHIFT);
+//        storage.setTableNameInStorage("redshift_bucketedaccountmaster");
+//        bucketedTable.setStorageMechanism(storage);
 
 //        assertEquals(bucketedTable.getAttributes().size(), 16483);
 //        Attribute attribute = bucketedTable.getAttribute("TechIndicator_AdRoll");

@@ -26,10 +26,14 @@ public class FrontEndSort {
         setDescending(descending);
     }
 
+    private FrontEndSort(){}
+
+    @JsonIgnore
     public List<AttributeLookup> getAttributes() {
         return attributes;
     }
 
+    @JsonIgnore
     public void setAttributes(List<AttributeLookup> attributes) {
         this.attributes = attributes;
     }
