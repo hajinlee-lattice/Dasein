@@ -61,15 +61,24 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     public void create(DataFeedTask dataFeedTask) {
         Table dataTable = dataFeedTask.getImportData();
         Table templateTable = dataFeedTask.getImportTemplate();
-        if (dataTable != null && dataTable.getPid() == null && tableEntityMgr.findByName(dataTable.getName()) == null) {
-            dataTable.setTableType(TableType.DATATABLE);
-            tableEntityMgr.create(dataTable);
+        if (dataTable != null) {
+            Table existing = tableEntityMgr.findByName(dataTable.getName());
+            if (existing == null) {
+                dataTable.setTableType(TableType.DATATABLE);
+                tableEntityMgr.create(dataTable);
+            } else {
+                dataFeedTask.setImportData(existing);
+            }
         }
         tableTypeHolder.setTableType(TableType.IMPORTTABLE);
-        if (templateTable != null && templateTable.getPid() == null
-                && tableEntityMgr.findByName(templateTable.getName()) == null) {
-            templateTable.setTableType(TableType.IMPORTTABLE);
-            tableEntityMgr.create(templateTable);
+        if (templateTable != null) {
+            Table existing = tableEntityMgr.findByName(templateTable.getName());
+            if (existing == null) {
+                templateTable.setTableType(TableType.IMPORTTABLE);
+                tableEntityMgr.create(templateTable);
+            } else {
+               dataFeedTask.setImportTemplate(existing);
+            }
         }
         tableTypeHolder.setTableType(TableType.DATATABLE);
         datafeedTaskDao.create(dataFeedTask);
@@ -121,6 +130,10 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void addTableToQueue(DataFeedTask dataFeedTask, Table table) {
+        if (!TableType.DATATABLE.equals(table.getTableType())) {
+            throw new IllegalArgumentException(
+                    "Can only put data table in the queue. But " + table.getName() + " is a " + table.getTableType());
+        }
         DataFeedTaskTable datafeedTaskTable = new DataFeedTaskTable();
         datafeedTaskTable.setFeedTask(dataFeedTask);
         datafeedTaskTable.setTable(table);
@@ -148,6 +161,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             extractTable = TableUtils.clone(extractTable, NamingUtils.uuid("DataTable"));
             extractTable.setTenant(MultiTenantContext.getTenant());
             extractTable.addExtract(extract);
+            extractTable.setTableType(TableType.DATATABLE);
             tableTypeHolder.setTableType(TableType.DATATABLE);
             tableEntityMgr.create(extractTable);
             addTableToQueue(datafeedTask, extractTable);

@@ -143,11 +143,10 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             // create map entries if not there
             if (!statistics.getCategories().containsKey(category)) {
                 statistics.getCategories().put(category, new CategoryStatistics());
-            } else {
-                CategoryStatistics categoryStatistics = statistics.getCategories().get(category);
-                if (!categoryStatistics.getSubcategories().containsKey(subCategory)) {
-                    categoryStatistics.getSubcategories().put(subCategory, new SubcategoryStatistics());
-                }
+            }
+            CategoryStatistics categoryStatistics = statistics.getCategories().get(category);
+            if (!categoryStatistics.getSubcategories().containsKey(subCategory)) {
+                categoryStatistics.getSubcategories().put(subCategory, new SubcategoryStatistics());
             }
             // update the corresponding map entry
             SubcategoryStatistics subcategoryStatistics = statistics.getCategories().get(category).getSubcategories()
