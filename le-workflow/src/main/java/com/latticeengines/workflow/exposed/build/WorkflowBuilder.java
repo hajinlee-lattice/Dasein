@@ -20,6 +20,14 @@ public class WorkflowBuilder {
         return this;
     }
 
+    public WorkflowBuilder next(WorkflowInterface<?> nextWorkflow) {
+        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow().getSteps()) {
+            workflow.step(step);
+        }
+
+        return this;
+    }
+
     public WorkflowBuilder enableDryRun() {
         workflow.setDryRun(true);
         return this;

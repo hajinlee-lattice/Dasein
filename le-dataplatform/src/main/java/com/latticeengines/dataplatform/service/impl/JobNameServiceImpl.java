@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 @Component("jobNameService")
 public class JobNameServiceImpl implements JobNameService {
@@ -22,7 +23,9 @@ public class JobNameServiceImpl implements JobNameService {
 
     @Override
     public String createJobName(String customer, String jobType) {
-        return joiner.join(customer, jobType, dateTimeFormatter.print(new DateTime()));
+        CustomerSpace customerSpace = CustomerSpace.parse(customer);
+        String shortName = !customer.equals(customerSpace.toString()) ? customerSpace.getTenantId() : customer;
+        return joiner.join(shortName, jobType);
     }
 
     @Override

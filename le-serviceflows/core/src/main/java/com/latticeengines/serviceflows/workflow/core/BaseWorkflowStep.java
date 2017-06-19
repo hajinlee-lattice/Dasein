@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
@@ -52,8 +53,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVENT_COLUMN = "EVENT_COLUMN";
     protected static final String DB_CREDS = "DB_CREDS";
     protected static final String MATCH_COMMAND_ID = "MATCH_COMMAND_ID";
+    protected static final String MATCH_COMMAND = "MATCH_COMMAND";
     protected static final String MATCH_TABLE = "MATCH_TABLE";
-    protected static final String MATCH_ROOT_UID = "MATCH_ROOT_UID";
     protected static final String MATCH_RESULT_TABLE = "MATCH_RESULT_TABLE";
     protected static final String MATCH_IS_CASCADING_FLOW = "MATCH_IS_CASCADING_FLOW";
     protected static final String MATCH_PREDEFINED_SELECTION = "MATCH_PREDEFINED_SELECTION";
@@ -281,6 +282,27 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             eventToModelId.put(event, eventToModelSummary.get(event).getId());
         }
         return eventToModelId;
+    }
+
+    protected void skipEmbeddedWorkflow(Class<? extends WorkflowConfiguration> workflowClass) {
+        WorkflowConfiguration workflow = getObjectFromContext(workflowClass.getName(), workflowClass);
+        if (workflow == null) {
+            log.warn("There is no workflow conifguration of class " + workflowClass.getSimpleName() + " in context.");
+        }
+        log.info("Trying to skip embedded workflow " + workflow.getName());
+        Map<String, Class<?>> stepConfigClasses = workflow.getStepConfigClasses();
+        if (stepConfigClasses.isEmpty()) {
+            log.info("Cannot find any step config classes for embedded workflow " + workflow.getName());
+            return;
+        }
+        Map<String, String> registry = workflow.getConfigRegistry();
+        registry.forEach((name, config) -> {
+            Class<?> configClass = stepConfigClasses.get(name);
+            BaseStepConfiguration step = (BaseStepConfiguration) getObjectFromContext(name, configClass);
+            step.setSkipStep(true);
+            putObjectInContext(name, step);
+            log.info("Set step " + configClass.getSimpleName() + " to be skipped.");
+        });
     }
 
 }

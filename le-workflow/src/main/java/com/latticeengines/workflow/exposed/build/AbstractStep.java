@@ -15,6 +15,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 @StepScope
@@ -169,6 +170,19 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         String json = JsonUtils.serialize(val);
         executionContext.putString(key, json);
         log.info("Updating " + key + " in context to " + json);
+        // expand to its steps
+        if (val instanceof WorkflowConfiguration) {
+            WorkflowConfiguration workflowConfiguration = (WorkflowConfiguration) val;
+            Map<String, Class<?>> stepConfigClasses = workflowConfiguration.getStepConfigClasses();
+            if (!stepConfigClasses.isEmpty()) {
+                log.warn("Trying to update workflow config for " + key + ". But cannot find its step config classes.");
+                Map<String, String> configRegistry = workflowConfiguration.getConfigRegistry();
+                configRegistry.forEach((name, config) -> {
+                    Class<?> stepConfigClass = stepConfigClasses.get(name);
+                    putObjectInContext(name, JsonUtils.deserialize(config, stepConfigClass));
+                });
+            }
+        }
     }
 
     protected void putStringValueInContext(String key, String val) {

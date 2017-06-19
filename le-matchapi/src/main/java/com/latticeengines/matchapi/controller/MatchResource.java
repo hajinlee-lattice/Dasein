@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -25,6 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
 
 import io.swagger.annotations.Api;
@@ -35,8 +35,6 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/matches")
 public class MatchResource {
     private static final Log log = LogFactory.getLog(MatchResource.class);
-
-    private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
     private RealTimeMatchService realTimeMatchService;
@@ -106,6 +104,25 @@ public class MatchResource {
             matchMonitorService.precheck(matchVersion);
             BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.match(input, hdfsPod);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
+        }
+    }
+
+    @RequestMapping(value = "/bulkconf", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "
+            + "except using InputBuffer instead of embedding Data in json body directly. "
+            + "The request parameter podid is used to change the hdfs pod id. "
+            + "This parameter is mainly for testing purpose. "
+            + "Leave it empty will result in using the pod id defined in camille environment.")
+    public BulkMatchWorkflowConfiguration getBulkMatchConfig(@RequestBody MatchInput input,
+                                                             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
+        try {
+            String matchVersion = input.getDataCloudVersion();
+            matchMonitorService.precheck(matchVersion);
+            BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
+            return bulkMatchService.getWorkflowConf(input, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
         }

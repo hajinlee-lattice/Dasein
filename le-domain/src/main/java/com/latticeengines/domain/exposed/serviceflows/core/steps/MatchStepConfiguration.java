@@ -31,6 +31,9 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private String matchClient;
 
+    @JsonProperty("match_hdfs_pod")
+    private String matchHdfsPod = "";
+
     private boolean retainMatchTables;
 
     private boolean excludeUnmatchedWithPublicDomain = false;
@@ -230,6 +233,14 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("source_schema_interpretation")
     public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {
         this.sourceSchemaInterpretation = sourceSchemaInterpretation;
+    }
+
+    public String getMatchHdfsPod() {
+        return matchHdfsPod;
+    }
+
+    public void setMatchHdfsPod(String matchHdfsPod) {
+        this.matchHdfsPod = matchHdfsPod;
     }
 
     public boolean isSkipDedupe() {

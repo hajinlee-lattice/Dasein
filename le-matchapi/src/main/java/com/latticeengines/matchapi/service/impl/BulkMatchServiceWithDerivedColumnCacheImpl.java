@@ -2,11 +2,14 @@ package com.latticeengines.matchapi.service.impl;
 
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -64,10 +67,20 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
     public MatchCommand match(MatchInput input, String hdfsPodId) {
         MatchInputValidator.validateBulkInput(input, yarnConfiguration);
         input.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
-        String rootOperationUid = UUID.randomUUID().toString().toUpperCase();
+        String rootOperationUid = UUID.randomUUID().toString();
         hdfsPodId = setPodId(hdfsPodId);
 
         return submitBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
+    }
+
+    @Override
+    public BulkMatchWorkflowConfiguration getWorkflowConf(MatchInput input, String hdfsPodId) {
+        MatchInputValidator.validateBulkInput(input, yarnConfiguration);
+        input.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
+        String rootOperationUid = UUID.randomUUID().toString().toUpperCase();
+        hdfsPodId = setPodId(hdfsPodId);
+
+        return generateWorkflowConf(input, hdfsPodId, rootOperationUid);
     }
 
     protected String setPodId(String hdfsPodId) {
@@ -86,16 +99,22 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
 
     protected MatchCommand submitBulkMatchWorkflow(MatchInput input, String hdfsPodId, String rootOperationUid) {
         propDataTenantService.bootstrapServiceTenant();
+        BulkMatchWorkflowConfiguration configuration = generateWorkflowConf(input, hdfsPodId, rootOperationUid);
+        AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
+        ApplicationId appId = ConverterUtils.toApplicationId(appSubmission.getApplicationIds().get(0));
+        return matchCommandService.start(input, appId, rootOperationUid);
+    }
+
+    protected BulkMatchWorkflowConfiguration generateWorkflowConf(MatchInput input, String hdfsPodId, String rootOperationUid) {
         BulkMatchWorkflowSubmitter submitter = new BulkMatchWorkflowSubmitter();
-        ApplicationId appId = submitter //
+        return submitter //
                 .matchInput(input) //
                 .hdfsPodId(hdfsPodId) //
                 .rootOperationUid(rootOperationUid) //
                 .workflowProxy(workflowProxy) //
                 .microserviceHostport(microserviceHostport) //
                 .averageBlockSize(averageBlockSize) //
-                .submit();
-        return matchCommandService.start(input, appId, rootOperationUid);
+                .generateConfig();
     }
 
 }

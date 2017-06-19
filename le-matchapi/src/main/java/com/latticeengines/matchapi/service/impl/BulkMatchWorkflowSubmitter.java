@@ -3,10 +3,6 @@ package com.latticeengines.matchapi.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
-
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -54,10 +50,8 @@ public class BulkMatchWorkflowSubmitter {
         return this;
     }
 
-    public ApplicationId submit() {
-        BulkMatchWorkflowConfiguration configuration = builder.build();
-        AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
-        return ConverterUtils.toApplicationId(appSubmission.getApplicationIds().get(0));
+    public BulkMatchWorkflowConfiguration generateConfig() {
+        return builder.build();
     }
 
 }

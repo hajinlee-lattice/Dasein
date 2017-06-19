@@ -3,17 +3,20 @@ package com.latticeengines.serviceflows.workflow.match;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
@@ -26,26 +29,16 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
     private MetadataProxy metadataProxy;
 
     private static final String EVENT = "DataCloudMatchEvent";
-
+    private static final String LDC_MATCH = "DataCloudMatch";
     private String resultTableName;
-
-    private boolean isCascadingFlow = false;
 
     @Override
     public void onConfigurationInitialized() {
         ProcessMatchResultConfiguration configuration = getConfiguration();
-        String isCascadingFlowStr = getStringValueFromContext(MATCH_IS_CASCADING_FLOW);
-        if ("true".equals(isCascadingFlowStr)) {
-            isCascadingFlow = true;
-        }
-
-        Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
+        Table matchResultTable = createMatchResultTable();
         Table preMatchTable = getObjectFromContext(PREMATCH_EVENT_TABLE, Table.class);
         resultTableName = matchResultTable.getName();
-        String eventTableName = resultTableName;
-        if (!isCascadingFlow) {
-            eventTableName = resultTableName.replaceFirst(MatchDataCloud.LDC_MATCH, EVENT);
-        }
+        String eventTableName = resultTableName.replaceFirst(LDC_MATCH, EVENT);
         configuration.setTargetTableName(eventTableName);
         ParseMatchResultParameters parameters = new ParseMatchResultParameters();
         parameters.sourceTableName = matchResultTable.getName();
@@ -57,10 +50,8 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
 
     @Override
     public void execute() {
-        if (!isCascadingFlow) {
-            super.execute();
-        }
-    };
+        super.execute();
+    }
 
     @Override
     public void onExecutionCompleted() {
@@ -68,9 +59,23 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
                 configuration.getTargetTableName());
         putObjectInContext(EVENT_TABLE, eventTable);
         putObjectInContext(MATCH_RESULT_TABLE, eventTable);
-        if (!isCascadingFlow) {
-            metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), resultTableName);
+        metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), resultTableName);
+    }
+
+    private Table createMatchResultTable() {
+        MatchCommand matchCommand = getObjectFromContext(MATCH_COMMAND, MatchCommand.class);
+        Table matchResultTable = MetadataConverter.getTable(yarnConfiguration, matchCommand.getResultLocation(), null,
+                null);
+        String resultTableName = AvroUtils.getAvroFriendlyString(LDC_MATCH + "_" + matchCommand.getRootOperationUid());
+        matchResultTable.setName(resultTableName);
+        metadataProxy.createTable(configuration.getCustomerSpace().toString(), resultTableName, matchResultTable);
+        try {
+            // wait 3 seconds for metadata to create the table
+            Thread.sleep(3000L);
+        } catch (InterruptedException e) {
+            // ignore
         }
+        return matchResultTable;
     }
 
     private List<String> sourceCols(Table preMatchTable) {

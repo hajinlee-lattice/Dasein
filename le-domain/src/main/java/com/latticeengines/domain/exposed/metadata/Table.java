@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
@@ -628,10 +627,12 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
         fieldSchema.interpretation = interpretation;
 
-        log.info(String.format(
-                "Added field to realtime metadata -- Name:%s ApprovedUsage:%s LogicalDataType:%s FieldSchema:%s",
-                Strings.nullToEmpty(attr.getName()), StringUtils.join(attr.getApprovedUsage(), ","),
-                attr.getLogicalDataType(), JsonUtils.serialize(fieldSchema)));
+        if (log.isDebugEnabled()) {
+            log.debug(String.format(
+                    "Added field to realtime metadata -- Name:%s ApprovedUsage:%s LogicalDataType:%s FieldSchema:%s",
+                    Strings.nullToEmpty(attr.getName()), StringUtils.join(attr.getApprovedUsage(), ","),
+                    attr.getLogicalDataType(), JsonUtils.serialize(fieldSchema)));
+        }
 
         return fieldSchema;
     }

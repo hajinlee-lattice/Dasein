@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +23,9 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("prepareBulkMatchInput")
@@ -50,6 +51,20 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         log.info("Inside PrepareBulkMatchInput execute()");
         String avroDir = getConfiguration().getInputAvroDir();
         HdfsPodContext.changeHdfsPodId(getConfiguration().getHdfsPodId());
+
+        MatchInput input = getConfiguration().getMatchInput();
+        if (getConfiguration().getRootOperationUid() == null) {
+            String rootOperationUid = UUID.randomUUID().toString();
+            input.setRootOperationUid(rootOperationUid);
+            getConfiguration().setRootOperationUid(rootOperationUid);
+            log.info("Assign root operation uid " + rootOperationUid + " to match input.");
+            matchCommandService.start(input, null, rootOperationUid);
+        }
+
+        if (matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid()) == null) {
+            log.info("Insert new match command for root uid " + getConfiguration().getRootOperationUid());
+            matchCommandService.start(input, null, getConfiguration().getRootOperationUid());
+        }
 
         avroGlobs = MatchUtils.toAvroGlobs(avroDir);
         Long count = AvroUtils.count(yarnConfiguration, avroGlobs);
@@ -120,8 +135,13 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             jobConfiguration.setInputAvroSchema(getConfiguration().getInputAvroSchema());
             String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid())
                     .getApplicationId();
-            jobConfiguration.setAppName(String.format("%s~PropDataMatch[%s]~Block[%d/%d]", getConfiguration()
-                    .getCustomerSpace().toString(), appId, blockIdx, blocks.length));
+            if (StringUtils.isBlank(appId)) {
+                jobConfiguration.setAppName(String.format("%s~DataCloudMatch~Block[%d/%d]", getConfiguration()
+                        .getCustomerSpace().getTenantId(), blockIdx, blocks.length));
+            } else {
+                jobConfiguration.setAppName(String.format("%s~DataCloudMatch[%s]~Block[%d/%d]", getConfiguration()
+                        .getCustomerSpace().getTenantId(), appId, blockIdx, blocks.length));
+            }
             configurations.add(jobConfiguration);
         }
 

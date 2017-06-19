@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.network.exposed.propdata.MatchInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
@@ -18,19 +19,21 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/matches");
     }
 
-    @Override
     public MatchOutput matchRealTime(MatchInput input) {
         String url = constructUrl("/realtime");
         return post("realtime_match", url, input, MatchOutput.class);
     }
 
-    @Override
     public MatchCommand matchBulk(MatchInput matchInput, String hdfsPod) {
         String url = constructUrl("/bulk?podid={pod}", hdfsPod);
         return post("bulk_match", url, matchInput, MatchCommand.class);
     }
 
-    @Override
+    public BulkMatchWorkflowConfiguration getBulkConfig(MatchInput matchInput, String hdfsPod) {
+        String url = constructUrl("/bulkconf?podid={pod}", hdfsPod);
+        return post("bulk_match_conf", url, matchInput, BulkMatchWorkflowConfiguration.class);
+    }
+
     public MatchCommand bulkMatchStatus(String rootuid) {
         String url = constructUrl("/bulk/{rootuid}", rootuid);
         return get("bulk_status", url, MatchCommand.class);

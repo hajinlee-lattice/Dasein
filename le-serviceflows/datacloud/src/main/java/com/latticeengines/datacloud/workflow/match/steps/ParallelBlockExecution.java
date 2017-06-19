@@ -9,7 +9,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
@@ -100,6 +103,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         } catch (Exception e) {
             failTheWorkflowWithErrorMessage(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void onExecutionCompleted() {
+        putObjectInContext(MATCH_COMMAND, matchCommandService.getByRootOperationUid(rootOperationUid));
     }
 
     private void submitMatchBlocks(List<DataCloudJobConfiguration> jobConfigurations) {

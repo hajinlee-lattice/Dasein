@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -17,33 +16,29 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.IOBufferType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
-import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
-@Component("matchDataCloud")
-public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
+@Component("preMatchStep")
+public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(MatchDataCloud.class);
+    private static final Log log = LogFactory.getLog(PrepareMatchConfig.class);
     private static final Map<MatchKey, String> MATCH_KEYS_TO_DISPLAY_NAMES = new HashMap<>();
-    static final String LDC_MATCH = "DataCloudMatch";
 
     static {
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Name, InterfaceName.CompanyName.name());
@@ -62,26 +57,25 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     @Autowired
     private MetadataProxy metadataProxy;
 
-    private MatchCommand matchCommand;
-
     @Override
     public void execute() {
-        log.info("Inside MatchDataCloud execute()");
+        log.info("Inside PreMatchStep execute()");
         Table preMatchEventTable = preMatchEventTable();
         putObjectInContext(PREMATCH_EVENT_TABLE, preMatchEventTable);
-        match(preMatchEventTable);
-        putStringValueInContext(MATCH_ROOT_UID, matchCommand.getRootOperationUid());
-        Table matchResultTable = createMatchResultTable();
-        putObjectInContext(MATCH_RESULT_TABLE, matchResultTable);
+        MatchInput input = prepareMatchInput(preMatchEventTable);
+        BulkMatchWorkflowConfiguration configuration = matchProxy.getBulkConfig(input, getConfiguration().getMatchHdfsPod());
+        putObjectInContext(BulkMatchWorkflowConfiguration.class.getName(), configuration);
     }
 
     @Override
     public void skipStep() {
-        log.info("skipping matching step and registering event table now:");
+        log.info("Skip matching step and register event table now.");
         Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getInputTableName());
         putObjectInContext(EVENT_TABLE, table);
         putObjectInContext(MATCH_RESULT_TABLE, table);
+        log.info("Skip embedded bulk match workflow.");
+        skipEmbeddedWorkflow(BulkMatchWorkflowConfiguration.class);
     }
 
     private Table preMatchEventTable() {
@@ -89,17 +83,6 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
                 configuration.getInputTableName());
         preMatchEventTable.setName(preMatchEventTable.getName() + "_" + System.currentTimeMillis());
         return preMatchEventTable;
-    }
-
-    private void match(Table preMatchEventTable) {
-        MatchInput input = prepareMatchInput(preMatchEventTable);
-        matchCommand = matchProxy.matchBulk(input, "");
-        configContext();
-        waitForMatchCommand();
-    }
-
-    private void configContext() {
-        putStringValueInContext(MATCH_IS_CASCADING_FLOW, matchCommand.getCascadingFlow());
     }
 
     private MatchInput prepareMatchInput(Table preMatchEventTable) {
@@ -111,7 +94,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
             throw new RuntimeException("Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
         }
 
-        Predefined predefined = getConfiguration().getPredefinedColumnSelection();
+        ColumnSelection.Predefined predefined = getConfiguration().getPredefinedColumnSelection();
         if (predefined != null) {
             matchInput.setPredefinedSelection(predefined);
             String version = getConfiguration().getPredefinedSelectionVersion();
@@ -141,11 +124,11 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         Map<MatchKey, List<String>> matchInputKeys = new HashMap<>();
         if (configuration.getSourceSchemaInterpretation() != null
                 && configuration.getSourceSchemaInterpretation().equals(
-                        SchemaInterpretation.SalesforceAccount.toString())) {
+                SchemaInterpretation.SalesforceAccount.toString())) {
             if (preMatchEventTable.getAttribute(InterfaceName.Website.name()) == null
                     || (preMatchEventTable.getAttribute(InterfaceName.Website.name()).getApprovedUsage() != null && preMatchEventTable
-                            .getAttribute(InterfaceName.Website.name()).getApprovedUsage()
-                            .contains(ApprovedUsage.IGNORED.getName()))) {
+                    .getAttribute(InterfaceName.Website.name()).getApprovedUsage()
+                    .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
                 matchInputKeys.put(MatchKey.Domain, Collections.singletonList(InterfaceName.Website.name()));
@@ -154,8 +137,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
                 && configuration.getSourceSchemaInterpretation().equals(SchemaInterpretation.SalesforceLead.toString())) {
             if (preMatchEventTable.getAttribute(InterfaceName.Email.name()) == null
                     || (preMatchEventTable.getAttribute(InterfaceName.Email.name()).getApprovedUsage() != null && preMatchEventTable
-                            .getAttribute(InterfaceName.Email.name()).getApprovedUsage()
-                            .contains(ApprovedUsage.IGNORED.getName()))) {
+                    .getAttribute(InterfaceName.Email.name()).getApprovedUsage()
+                    .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
                 matchInputKeys.put(MatchKey.Domain, Collections.singletonList(InterfaceName.Email.name()));
@@ -164,10 +147,10 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         for (MatchKey matchKey : MATCH_KEYS_TO_DISPLAY_NAMES.keySet()) {
             if (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) == null
                     || (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) != null
-                            && preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
-                                    .getApprovedUsage() != null && preMatchEventTable
-                            .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)).getApprovedUsage()
-                            .contains(ApprovedUsage.IGNORED.getName()))) {
+                    && preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
+                    .getApprovedUsage() != null && preMatchEventTable
+                    .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)).getApprovedUsage()
+                    .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(matchKey, new ArrayList<>());
             } else {
                 log.info(String.format("attribute: %s is found as: %s", matchKey,
@@ -214,64 +197,6 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
 
         return matchInput;
-    }
-
-    private void waitForMatchCommand() {
-        String rootUid = matchCommand.getRootOperationUid();
-        String appId = matchCommand.getApplicationId();
-        if (StringUtils.isEmpty(appId)) {
-            appId = "null";
-        }
-        log.info(String.format("Waiting for match command %s [ApplicationId=%s] to complete", rootUid, appId));
-
-        MatchStatus status = null;
-        do {
-            matchCommand = matchProxy.bulkMatchStatus(rootUid);
-            status = matchCommand.getMatchStatus();
-            if (status == null) {
-                throw new LedpException(LedpCode.LEDP_28024, new String[] { rootUid });
-            }
-            appId = matchCommand.getApplicationId();
-            if (StringUtils.isEmpty(appId)) {
-                appId = "null";
-            }
-            String logMsg = "[ApplicationId=" + appId + "] Match Status = " + status;
-            if (MatchStatus.MATCHING.equals(status)) {
-                Float progress = matchCommand.getProgress();
-                logMsg += String.format(": %.2f %%", progress * 100);
-            }
-            log.info(logMsg);
-
-            try {
-                Thread.sleep(10000L);
-            } catch (InterruptedException e) {
-                // Ignore InterruptedException
-            }
-
-        } while (!status.isTerminal());
-
-        if (!MatchStatus.FINISHED.equals(status)) {
-            IllegalStateException inner = new IllegalStateException("The terminal status of match is " + status
-                    + " instead of " + MatchStatus.FINISHED);
-            throw new LedpException(LedpCode.LEDP_00006, inner);
-        }
-
-    }
-
-    private Table createMatchResultTable() {
-        Table matchResultTable = MetadataConverter.getTable(yarnConfiguration, matchCommand.getResultLocation(), null,
-                null);
-        String resultTableName = LDC_MATCH + "_" + matchCommand.getRootOperationUid();
-        matchResultTable.setName(resultTableName);
-        metadataProxy.createTable(configuration.getCustomerSpace().toString(), resultTableName, matchResultTable);
-
-        try {
-            // wait 3 seconds for metadata to create the table
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-        return matchResultTable;
     }
 
 }

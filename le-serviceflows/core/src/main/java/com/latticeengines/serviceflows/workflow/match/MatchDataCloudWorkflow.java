@@ -14,7 +14,10 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class MatchDataCloudWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Autowired
-    private MatchDataCloud matchDataCloud;
+    private PrepareMatchConfig prepareMatchConfig;
+
+    @Autowired
+    private BulkMatchWorkflow bulkMatchWorkflow;
 
     @Autowired
     private ProcessMatchResult processMatchResult;
@@ -27,7 +30,8 @@ public class MatchDataCloudWorkflow extends AbstractWorkflow<WorkflowConfigurati
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(matchDataCloud) //
+                .next(prepareMatchConfig) //
+                .next(bulkMatchWorkflow) //
                 .next(processMatchResult) //
                 .build();
     }

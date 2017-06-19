@@ -72,7 +72,9 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         command.setCreateTime(now);
         command.setLatestStatusUpdate(now);
 
-        command.setApplicationId(appId.toString());
+        if (appId != null) {
+            command.setApplicationId(appId.toString());
+        }
         command.setProgress(0f);
         command.setRootOperationUid(rootOperationUid);
 

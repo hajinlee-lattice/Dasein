@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.workflow;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,4 +103,9 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     public void setContainerMemoryMB(Integer containerMemoryMB) {
         this.containerMemoryMB = containerMemoryMB;
     }
+
+    public Map<String, Class<?>> getStepConfigClasses() {
+        return Collections.emptyMap();
+    }
+
 }

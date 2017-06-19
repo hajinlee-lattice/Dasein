@@ -1,16 +1,31 @@
 package com.latticeengines.domain.exposed.serviceflows.datacloud.match;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
+
+    private static Map<String, Class<?>> stepConfiClasses = new HashMap<>();
+
+    static {
+        stepConfiClasses.put(PrepareBulkMatchInputConfiguration.class.getCanonicalName(),
+                PrepareBulkMatchInputConfiguration.class);
+        stepConfiClasses.put(ParallelBlockExecutionConfiguration.class.getCanonicalName(),
+                ParallelBlockExecutionConfiguration.class);
+    }
+
+    @Override
+    public Map<String, Class<?>> getStepConfigClasses() {
+        return stepConfiClasses;
+    }
 
     public static class Builder {
 
