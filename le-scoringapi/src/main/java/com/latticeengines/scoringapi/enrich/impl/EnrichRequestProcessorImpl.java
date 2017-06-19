@@ -32,13 +32,16 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
 
     @Override
     public EnrichResponse process(CustomerSpace space, EnrichRequest request, String requestId) {
-        if (org.apache.commons.lang.StringUtils.isBlank(request.getDomain())) {
-            throw new ScoringApiException(LedpCode.LEDP_31113);
+        if (org.apache.commons.lang.StringUtils.isBlank(request.getDomain())
+                && org.apache.commons.lang.StringUtils.isBlank(request.getCompany())
+                && org.apache.commons.lang.StringUtils.isBlank(request.getDUNS())) {
+            throw new ScoringApiException(LedpCode.LEDP_31199);
         }
         requestInfo.put("Source", Strings.nullToEmpty(request.getSource()));
 
         Map<String, FieldSchema> fieldSchemas = new HashMap<>();
         fieldSchemas.put("domain", new FieldSchema(FieldSource.REQUEST, FieldType.STRING, FieldInterpretation.Domain));
+        fieldSchemas.put("duns", new FieldSchema(FieldSource.REQUEST, FieldType.STRING, FieldInterpretation.DUNS));
         fieldSchemas.put("companyName",
                 new FieldSchema(FieldSource.REQUEST, FieldType.STRING, FieldInterpretation.CompanyName));
         fieldSchemas.put("companyState",
@@ -50,6 +53,7 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
         record.put("companyName", request.getCompany());
         record.put("companyState", request.getState());
         record.put("companyCountry", request.getCountry());
+        record.put("duns", request.getDUNS());
         InterpretedFields interpreted = new InterpretedFields();
         interpreted.setDomain("domain");
         interpreted.setCompanyName("companyName");

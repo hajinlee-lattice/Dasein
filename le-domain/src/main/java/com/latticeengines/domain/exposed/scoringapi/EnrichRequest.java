@@ -1,9 +1,12 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonInclude(Include.NON_NULL)
 public class EnrichRequest {
 
     @JsonProperty("Domain")
@@ -25,6 +28,10 @@ public class EnrichRequest {
     @JsonProperty("source")
     @ApiModelProperty(value = "Name of the source system that originated this score request.")
     private String source;
+
+    @JsonProperty("DUNS")
+    @ApiModelProperty(value = "DUNS")
+    private String duns;
 
     public String getDomain() {
         return domain;
@@ -64,6 +71,14 @@ public class EnrichRequest {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public String getDUNS() {
+        return duns;
+    }
+
+    public void setDUNS(String duns) {
+        this.duns = duns;
     }
 
 }

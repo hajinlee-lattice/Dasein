@@ -43,8 +43,8 @@ public class ScoringApiEnrichProxy extends BaseRestApiProxy implements ScoringAp
                 JsonNode node = new ObjectMapper().readTree(body);
             } catch (Exception e) {
                 // Throw a non-LedpException to allow for retries
-                throw new RuntimeException(String.format("Received status code %s from scoring api (%s)",
-                        response.getStatusCode(), body));
+                throw new RuntimeException(
+                        String.format("Received status code %s from scoring api (%s)", response.getStatusCode(), body));
             }
             throw new RemoteLedpException(null, response.getStatusCode(), LedpCode.LEDP_00002, body);
         }
@@ -60,12 +60,11 @@ public class ScoringApiEnrichProxy extends BaseRestApiProxy implements ScoringAp
         String uuid = UuidUtils.packUuid(tenantIdentifier, credentialId);
         String url = constructUrl("/record/{uuid}", uuid);
         @SuppressWarnings("unchecked")
-        Map<String, String> map = post("enrichRecord", url, request, Map.class);
+        Map<String, ?> map = post("enrichRecord", url, request, Map.class);
         EnrichResponse response = new EnrichResponse();
         if (map.containsKey(EnrichResponse.ENRICH_RESPONSE_METADATA)) {
-            String responseMetadataString = JsonUtils.serialize(map.get(EnrichResponse.ENRICH_RESPONSE_METADATA));
-            EnrichResponseMetadata responseMetadata = JsonUtils.deserialize(responseMetadataString,
-                    EnrichResponseMetadata.class);
+            EnrichResponseMetadata responseMetadata = JsonUtils
+                    .convertValue(map.get(EnrichResponse.ENRICH_RESPONSE_METADATA), EnrichResponseMetadata.class);
             response.setResponseMetadata(responseMetadata);
         }
 

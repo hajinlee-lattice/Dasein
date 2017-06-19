@@ -25,6 +25,7 @@ public class EnrichResourceDeploymentTestNG extends ScoringResourceDeploymentTes
         enrichRequest.setCompany("Arrow Electronics");
         enrichRequest.setState("New York");
         enrichRequest.setCountry("United States");
+        enrichRequest.setDUNS("ABC");
 
         EnrichResponse enrichResponse = scoringApiEnrichProxy.enrichRecord(enrichRequest, customerSpace.toString(),
                 "123456");
@@ -36,20 +37,57 @@ public class EnrichResourceDeploymentTestNG extends ScoringResourceDeploymentTes
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void enrichRecordFail() throws IOException {
+    public void enrichRecordWithCompany() throws IOException {
         EnrichRequest enrichRequest = new EnrichRequest();
         enrichRequest.setDomain("");
         enrichRequest.setCompany("Arrow Electronics");
         enrichRequest.setState("New York");
         enrichRequest.setCountry("United States");
+        enrichRequest.setDUNS("");
+
+        EnrichResponse enrichResponse = scoringApiEnrichProxy.enrichRecord(enrichRequest, customerSpace.toString(),
+                "123456");
+
+        Assert.assertNotNull(enrichResponse.getEnrichmentAttributeValues());
+        System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
+                + enrichResponse.getEnrichmentAttributeValues().size() + "\n\n" + JsonUtils.serialize(enrichResponse));
+        Assert.assertTrue(enrichResponse.getEnrichmentAttributeValues().size() == 6);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void enrichRecordWithDuns() throws IOException {
+        EnrichRequest enrichRequest = new EnrichRequest();
+        enrichRequest.setDomain("");
+        enrichRequest.setCompany("");
+        enrichRequest.setState("");
+        enrichRequest.setCountry("");
+        enrichRequest.setDUNS("ABC");
+
+        EnrichResponse enrichResponse = scoringApiEnrichProxy.enrichRecord(enrichRequest, customerSpace.toString(),
+                "123456");
+        Assert.assertNotNull(enrichResponse.getEnrichmentAttributeValues());
+        System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
+                + enrichResponse.getEnrichmentAttributeValues().size() + "\n\n" + JsonUtils.serialize(enrichResponse));
+        Assert.assertTrue(enrichResponse.getEnrichmentAttributeValues().size() == 6);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void enrichRecordFail() throws IOException {
+        EnrichRequest enrichRequest = new EnrichRequest();
+        enrichRequest.setDomain("");
+        enrichRequest.setCompany("");
+        enrichRequest.setState("New York");
+        enrichRequest.setCountry("United States");
+        enrichRequest.setDUNS("");
 
         boolean exceptionThrown = false;
         try {
             scoringApiEnrichProxy.enrichRecord(enrichRequest, customerSpace.toString(), "123456");
         } catch (RemoteLedpException e) {
             exceptionThrown = true;
-            Assert.assertTrue(e.getMessage().contains(LedpCode.LEDP_31113.getExternalCode()));
+            Assert.assertTrue(e.getMessage().contains(LedpCode.LEDP_31199.getExternalCode()));
         }
         Assert.assertTrue(exceptionThrown);
     }
+
 }
