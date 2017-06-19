@@ -71,16 +71,16 @@ public class TransformationExecutorImpl implements TransformationExecutor {
                 new String[] { transformationService.getSource().getSourceName(), retries.toString() });
     }
 
-
     @SuppressWarnings("unchecked")
     @Override
-    public TransformationProgress kickOffNewPipelineProgress(TransformationProgressEntityMgr transformationProgressEntityMgr,
-           PipelineTransformationRequest request) {
+    public TransformationProgress kickOffNewPipelineProgress(
+            TransformationProgressEntityMgr transformationProgressEntityMgr, PipelineTransformationRequest request) {
         Integer retries = 0;
         while (retries++ < MAX_RETRY) {
             try {
                 PipelineTransformationService service = (PipelineTransformationService) transformationService;
-                TransformationConfiguration transformationConfiguration = service.createTransformationConfiguration(request);
+                TransformationConfiguration transformationConfiguration = service
+                        .createTransformationConfiguration(request);
 
                 if (transformationConfiguration != null) {
                     TransformationProgress progress = transformationService
@@ -98,6 +98,22 @@ public class TransformationExecutorImpl implements TransformationExecutor {
                 new String[] { transformationService.getSource().getSourceName(), retries.toString() });
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public TransformationWorkflowConfiguration generateNewPipelineWorkflowConf(PipelineTransformationRequest request) {
+        PipelineTransformationService service = (PipelineTransformationService) transformationService;
+        TransformationConfiguration transformationConfiguration = service
+                .createTransformationConfiguration(request);
+
+        if (transformationConfiguration != null) {
+            TransformationProgress progress = transformationService
+                    .startNewProgress(transformationConfiguration, jobSubmitter);
+            return getTransformationWorkflowConf(transformationConfiguration, progress);
+        } else {
+            throw new RuntimeException("Cannot create  TransformationConfiguration");
+        }
+    }
+
     @Override
     public void purgeOldVersions() {
     }
@@ -105,32 +121,15 @@ public class TransformationExecutorImpl implements TransformationExecutor {
     private void scheduleTransformationWorkflow(TransformationConfiguration transformationConfiguration,
             TransformationProgress progress, TransformationProgressEntityMgr transformationProgressEntityMgr) {
         log.info("Kick off workflow for progress " + progress + " in pod " + HdfsPodContext.getHdfsPodId());
-
-        builder = builder.workflowName("transformationWorkflow") //
-                .payloadName("Transformation") //
-                .customerSpace(customerSpace) //
-                .hdfsPodId(HdfsPodContext.getHdfsPodId()) //
-                .transformationConfiguration(transformationConfiguration) //
-                .rootOperationUid(progress.getRootOperationUID()) //
-                .serviceBeanName(transformationConfiguration.getServiceBeanName()) //
-                .internalResourceHostPort("propdata");
-
-        if (transformationConfiguration instanceof PipelineTransformationConfiguration) {
-            PipelineTransformationConfiguration ppConf = (PipelineTransformationConfiguration) transformationConfiguration;
-            builder.containerMemMB(ppConf.getContainerMemMB());
-        }
-
-        TransformationWorkflowConfiguration configuration = builder.build();
-
+        TransformationWorkflowConfiguration configuration = getTransformationWorkflowConf(transformationConfiguration,
+                progress);
         AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
         progress.setYarnAppId(appSubmission.getApplicationIds().get(0));
         transformationProgressEntityMgr.updateProgress(progress);
     }
 
-    private void getTransformationWorkflowConf(TransformationConfiguration transformationConfiguration,
-                                                TransformationProgress progress, TransformationProgressEntityMgr transformationProgressEntityMgr) {
-        log.info("Kick off workflow for progress " + progress + " in pod " + HdfsPodContext.getHdfsPodId());
-
+    private TransformationWorkflowConfiguration getTransformationWorkflowConf(TransformationConfiguration transformationConfiguration,
+                                                TransformationProgress progress) {
         builder = builder.workflowName("transformationWorkflow") //
                 .payloadName("Transformation") //
                 .customerSpace(customerSpace) //
@@ -144,11 +143,6 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             PipelineTransformationConfiguration ppConf = (PipelineTransformationConfiguration) transformationConfiguration;
             builder.containerMemMB(ppConf.getContainerMemMB());
         }
-
-        TransformationWorkflowConfiguration configuration = builder.build();
-
-        AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
-        progress.setYarnAppId(appSubmission.getApplicationIds().get(0));
-        transformationProgressEntityMgr.updateProgress(progress);
+        return builder.build();
     }
 }

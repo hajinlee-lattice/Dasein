@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.datacloud.etl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.TransformationStepExecutionConfiguration;
@@ -7,12 +8,30 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
+
+    private static Map<String, Class<?>> stepConfigClasses = new HashMap<>();
+
+    static {
+        stepConfigClasses.put(PrepareTransformationStepInputConfiguration.class.getCanonicalName(),
+                PrepareTransformationStepInputConfiguration.class);
+        stepConfigClasses.put(TransformationStepExecutionConfiguration.class.getCanonicalName(),
+                TransformationStepExecutionConfiguration.class);
+    }
+
+    @JsonIgnore
+    @Override
+    public Map<String, Class<?>> getStepConfigClasses() {
+        return stepConfigClasses;
+    }
 
     public static class Builder {
         private TransformationWorkflowConfiguration configuration = new TransformationWorkflowConfiguration();
         private PrepareTransformationStepInputConfiguration prepareConfig = new PrepareTransformationStepInputConfiguration();
-        private TransformationStepExecutionConfiguration parallelExecConfig = new TransformationStepExecutionConfiguration();
+        private TransformationStepExecutionConfiguration executeStep = new TransformationStepExecutionConfiguration();
         private CustomerSpace customerSpace;
         private String workflowName;
         private String payloadName;
@@ -36,7 +55,7 @@ public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
             prepareConfig
                     .setTransformationConfigurationClasspath(transformationConfiguration.getClass().getCanonicalName());
             configuration.add(prepareConfig);
-            configuration.add(parallelExecConfig);
+            configuration.add(executeStep);
 
             return configuration;
         }

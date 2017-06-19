@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -39,14 +38,15 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformationStep;
+import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component("calculateStatsStep")
-public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsStepConfiguration> {
+public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CalculateStatsStep.class);
 
@@ -68,15 +68,10 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
     @Autowired
     private MetadataProxy metadataProxy;
 
-    private String pipelineVersion;
-
     @Override
-    public void execute() {
-        log.info("Inside CalculateStats execute()");
-
+    protected TransformationWorkflowConfiguration executePreTransformation() {
         String customerSpace = configuration.getCustomerSpace().toString();
         String collectionName = configuration.getDataCollectionName();
-
         Table masterTable = dataCollectionProxy.getTable(customerSpace, collectionName,
                 TableRoleInCollection.ConsolidatedAccount);
         if (masterTable == null) {
@@ -84,25 +79,18 @@ public class CalculateStatsStep extends BaseTransformationStep<CalculateStatsSte
         }
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 masterTable.getName()));
-
         PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), masterTable);
-        TransformationProgress progress = transformationProxy.transform(request, "");
-        waitForFinish(progress);
-
-        pipelineVersion = progress.getVersion();
-        log.info(String.format("The pipeline version for customer %s is %s",
-                configuration.getCustomerSpace().toString(), pipelineVersion));
+        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
     @Override
-    public void onExecutionCompleted() {
+    protected void onPostTransformationCompleted() {
         String profileTableName = TableUtils.getFullTableName(PROFILE_TABLE_PREFIX, pipelineVersion);
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
         putStringValueInContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.FALSE.toString());
         upsertTables(configuration.getCustomerSpace().toString(), profileTableName, sortedTableName);
-
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
         putObjectInContext(TABLE_GOING_TO_REDSHIFT, sortedTable);
     }

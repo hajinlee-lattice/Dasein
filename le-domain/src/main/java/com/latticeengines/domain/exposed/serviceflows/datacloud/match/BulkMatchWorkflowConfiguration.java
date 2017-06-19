@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.datacloud.match;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
@@ -13,18 +14,19 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
 
-    private static Map<String, Class<?>> stepConfiClasses = new HashMap<>();
+    private static Map<String, Class<?>> stepConfigClasses = new HashMap<>();
 
     static {
-        stepConfiClasses.put(PrepareBulkMatchInputConfiguration.class.getCanonicalName(),
+        stepConfigClasses.put(PrepareBulkMatchInputConfiguration.class.getCanonicalName(),
                 PrepareBulkMatchInputConfiguration.class);
-        stepConfiClasses.put(ParallelBlockExecutionConfiguration.class.getCanonicalName(),
+        stepConfigClasses.put(ParallelBlockExecutionConfiguration.class.getCanonicalName(),
                 ParallelBlockExecutionConfiguration.class);
     }
 
+    @JsonIgnore
     @Override
     public Map<String, Class<?>> getStepConfigClasses() {
-        return stepConfiClasses;
+        return stepConfigClasses;
     }
 
     public static class Builder {

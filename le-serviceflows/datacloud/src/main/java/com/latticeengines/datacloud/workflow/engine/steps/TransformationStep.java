@@ -62,6 +62,7 @@ public class TransformationStep extends BaseWorkflowStep<PrepareTransformationSt
                 progress.setStatus(ProgressStatus.PROCESSING);
                 progress = transformationProgressEntityMgr.updateProgress(progress);
                 transformationService.transform(progress, transformationConfiguration);
+                putStringValueInContext(TRANSFORM_PIPELINE_VERSION, progress.getVersion());
             } else {
                 log.info("No new data available in firehose.");
             }

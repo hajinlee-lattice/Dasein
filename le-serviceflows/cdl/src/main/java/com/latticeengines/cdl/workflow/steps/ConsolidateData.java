@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -39,13 +38,14 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformationStep;
+import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component("consolidateData")
-public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfiguration> {
+public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataConfiguration> {
 
     private static final Log log = LogFactory.getLog(ConsolidateData.class);
 
@@ -62,7 +62,6 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     private DataCollectionProxy dataCollectionProxy;
 
     private List<String> inputTableNames = new ArrayList<>();
-    private String pipelineVersion;
     private String idField;
     Map<MatchKey, List<String>> keyMap = null;
     Boolean dataInitialLoaded = false;
@@ -76,7 +75,27 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
     private int sortStep;
 
     @Override
-    public void onConfigurationInitialized() {
+    protected TransformationWorkflowConfiguration executePreTransformation() {
+        initializeConfiguration();
+        return generateWorkflowConf();
+    }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
+                TableUtils.getFullTableName(masterTableName, pipelineVersion));
+        dataCollectionProxy.upsertTable(customerSpace.toString(), collectionName, newMasterTable.getName(),
+                TableRoleInCollection.ConsolidatedAccount);
+        if (isBucketing()) {
+            Table diffTable = metadataProxy.getTable(customerSpace.toString(),
+                    TableUtils.getFullTableName(consolidatedTableName, pipelineVersion));
+            putObjectInContext(TABLE_GOING_TO_REDSHIFT, diffTable);
+        }
+        putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
+        putObjectInContext(CONSOLIDATE_DOING_PUBLISH, isBucketing());
+    }
+
+    private void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         List<Table> inputTables = getListObjectFromContext(CONSOLIDATE_INPUT_TABLES, Table.class);
         inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
@@ -110,27 +129,9 @@ public class ConsolidateData extends BaseTransformationStep<ConsolidateDataConfi
         }
     }
 
-    @Override
-    public void execute() {
+    private TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getConcolidateReqest();
-        TransformationProgress progress = transformationProxy.transform(request, null);
-        pipelineVersion = progress.getVersion();
-        waitForFinish(progress);
-    }
-
-    @Override
-    public void onExecutionCompleted() {
-        Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(masterTableName, pipelineVersion));
-        dataCollectionProxy.upsertTable(customerSpace.toString(), collectionName, newMasterTable.getName(),
-                TableRoleInCollection.ConsolidatedAccount);
-        if (isBucketing()) {
-            Table diffTable = metadataProxy.getTable(customerSpace.toString(),
-                    TableUtils.getFullTableName(consolidatedTableName, pipelineVersion));
-            putObjectInContext(TABLE_GOING_TO_REDSHIFT, diffTable);
-        }
-        putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
-        putObjectInContext(CONSOLIDATE_DOING_PUBLISH, isBucketing());
+        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
     private boolean isBucketing() {

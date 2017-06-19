@@ -24,7 +24,7 @@ public class JobNameServiceImpl implements JobNameService {
     @Override
     public String createJobName(String customer, String jobType) {
         CustomerSpace customerSpace = CustomerSpace.parse(customer);
-        String shortName = !customer.equals(customerSpace.toString()) ? customerSpace.getTenantId() : customer;
+        String shortName = !customer.equals(customerSpace.toString()) ? customer : customerSpace.getTenantId();
         return joiner.join(shortName, jobType);
     }
 

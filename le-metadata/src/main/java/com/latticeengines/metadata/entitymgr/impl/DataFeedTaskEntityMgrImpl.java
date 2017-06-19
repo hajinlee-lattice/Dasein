@@ -61,14 +61,17 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     public void create(DataFeedTask dataFeedTask) {
         Table dataTable = dataFeedTask.getImportData();
         Table templateTable = dataFeedTask.getImportTemplate();
-        if (dataTable != null && tableEntityMgr.findByName(dataTable.getName()) == null) {
+        if (dataTable != null && dataTable.getPid() == null && tableEntityMgr.findByName(dataTable.getName()) == null) {
             dataTable.setTableType(TableType.DATATABLE);
             tableEntityMgr.create(dataTable);
         }
-        if (templateTable != null && tableEntityMgr.findByName(templateTable.getName()) == null) {
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        if (templateTable != null && templateTable.getPid() == null
+                && tableEntityMgr.findByName(templateTable.getName()) == null) {
             templateTable.setTableType(TableType.IMPORTTABLE);
             tableEntityMgr.create(templateTable);
         }
+        tableTypeHolder.setTableType(TableType.DATATABLE);
         datafeedTaskDao.create(dataFeedTask);
         addImportDataTableToQueue(dataFeedTask);
     }

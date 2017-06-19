@@ -7,12 +7,14 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.workflow.engine.steps.TransformationStep;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.etl.TransformationWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("transformationWorkflow")
-public class TransformationWorkflow extends AbstractWorkflow<TransformationWorkflowConfiguration> {
+public class TransformationWorkflowImpl extends AbstractWorkflow<TransformationWorkflowConfiguration>
+        implements TransformationWorkflow {
 
     @Autowired
     private TransformationStep transformationStep;

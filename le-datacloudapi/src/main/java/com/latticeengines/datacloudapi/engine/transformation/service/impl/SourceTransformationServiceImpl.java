@@ -3,6 +3,7 @@ package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,6 +90,21 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
 
         TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy);
         return executor.kickOffNewPipelineProgress(transformationProgressEntityMgr, request);
+    }
+
+    @Override
+    public TransformationWorkflowConfiguration generatePipelineWorkflowConf(PipelineTransformationRequest request,
+            String hdfsPod) {
+        if (StringUtils.isNotEmpty(hdfsPod)) {
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
+        }
+        if (request.getContainerMemMB() == null) {
+            request.setContainerMemMB(workflowMem);
+        }
+        TransformationService<?> transformationService = (TransformationService<?>) applicationContext
+                .getBean("pipelineTransformationService");
+        TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy);
+        return executor.generateNewPipelineWorkflowConf(request);
     }
 
     @Override

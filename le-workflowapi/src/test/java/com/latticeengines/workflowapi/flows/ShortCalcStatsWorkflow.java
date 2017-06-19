@@ -4,7 +4,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.CalculateStatsStep;
+import com.latticeengines.cdl.workflow.CalculateStatsWrapper;
 import com.latticeengines.cdl.workflow.steps.UpdateStatsObjects;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CalculateStatsWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -14,7 +14,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("shortCalcStatsWorkflow")
 public class ShortCalcStatsWorkflow extends AbstractWorkflow<CalculateStatsWorkflowConfiguration> {
 
-    private CalculateStatsStep calculateStatsStep = new CalculateStatsStep();
+    private CalculateStatsWrapper calculateStatsWrapper = new CalculateStatsWrapper();
 
     private UpdateStatsObjects updateStatsObjects = new UpdateStatsObjects();
 
@@ -25,10 +25,10 @@ public class ShortCalcStatsWorkflow extends AbstractWorkflow<CalculateStatsWorkf
 
     @Override
     public Workflow defineWorkflow() {
-        calculateStatsStep.setBeanName("calculateStatsStep");
+        calculateStatsWrapper.setBeanName("calculateStatsWrapper");
         updateStatsObjects.setBeanName("updateStatsObjects");
         return new WorkflowBuilder() //
-                .next(calculateStatsStep) //
+                .next(calculateStatsWrapper) //
                 .next(updateStatsObjects) //
                 .build();
     }

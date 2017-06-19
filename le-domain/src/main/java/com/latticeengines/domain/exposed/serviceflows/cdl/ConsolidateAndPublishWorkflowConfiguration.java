@@ -34,7 +34,6 @@ public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfigur
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             startExecutionConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            consolidateDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }

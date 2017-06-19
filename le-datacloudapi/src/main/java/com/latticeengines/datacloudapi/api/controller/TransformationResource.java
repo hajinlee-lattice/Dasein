@@ -1,8 +1,5 @@
 package com.latticeengines.datacloudapi.api.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import springfox.documentation.annotations.ApiIgnore;
-
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloudapi.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -26,8 +21,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
 import com.latticeengines.security.exposed.InternalResourceBase;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "transform", description = "REST resource for source transformation")
 @RestController
@@ -137,6 +137,28 @@ public class TransformationResource extends InternalResourceBase implements Tran
                 throw new IllegalStateException("Cannot start a new progress for your request");
             }
             return progress;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25011, e, new String[] { "Failed to start pipeline transformation" });
+        } finally {
+            hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
+        }
+    }
+
+    @RequestMapping(value = "pipelineconf", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiIgnore
+    @ApiOperation(value = "Get workflow configuration for a pipelined transformations. ")
+    public TransformationWorkflowConfiguration getWorkflowConf(@RequestBody PipelineTransformationRequest transformationRequest,
+                                                         @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
+                                                         HttpServletRequest request) {
+        checkHeader(request);
+        try {
+            if (StringUtils.isEmpty(hdfsPod)) {
+                hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+                HdfsPodContext.changeHdfsPodId(hdfsPod);
+            }
+            return sourceTransformationService.generatePipelineWorkflowConf(transformationRequest, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25011, e, new String[] { "Failed to start pipeline transformation" });
         } finally {

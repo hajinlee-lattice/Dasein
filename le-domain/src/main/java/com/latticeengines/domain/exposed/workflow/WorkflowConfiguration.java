@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -104,6 +105,7 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         this.containerMemoryMB = containerMemoryMB;
     }
 
+    @JsonIgnore
     public Map<String, Class<?>> getStepConfigClasses() {
         return Collections.emptyMap();
     }

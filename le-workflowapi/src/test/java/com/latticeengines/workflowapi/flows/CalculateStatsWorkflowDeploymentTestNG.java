@@ -91,7 +91,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     protected void cleanUpAfterWorkflow() throws Exception {
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testWorkflow() throws Exception {
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());
         CalculateStatsWorkflowConfiguration config = generateConfiguration();

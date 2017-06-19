@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.CalculateStatsListener;
-import com.latticeengines.cdl.workflow.steps.CalculateStatsStep;
 import com.latticeengines.cdl.workflow.steps.UpdateStatsObjects;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CalculateStatsWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -17,7 +16,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class CalculateStatsWorkflow extends AbstractWorkflow<CalculateStatsWorkflowConfiguration> {
 
     @Autowired
-    private CalculateStatsStep calculateStatsStep;
+    private CalculateStatsWrapper calculateStatsWrapper;
 
     @Autowired
     private UpdateStatsObjects updateStatsObjects;
@@ -36,7 +35,7 @@ public class CalculateStatsWorkflow extends AbstractWorkflow<CalculateStatsWorkf
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(calculateStatsStep)//
+                .next(calculateStatsWrapper)//
                 .next(updateStatsObjects) //
                 .next(redshiftPublishWorkflow) //
                 .listener(calculateStatsListener) //

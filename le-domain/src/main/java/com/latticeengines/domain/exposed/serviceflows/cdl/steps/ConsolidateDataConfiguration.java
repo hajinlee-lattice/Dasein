@@ -7,10 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 
-public class ConsolidateDataConfiguration extends MicroserviceStepConfiguration {
+public class ConsolidateDataConfiguration extends BaseWrapperStepConfiguration {
 
     @JsonProperty("data_collection_name")
     @NotNull
