@@ -70,6 +70,13 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "group":"root",
                         "authentication":"S3AccessCreds"
                     },
+                    "/createSSHAccounts.sh":{
+                        "source":"http://" + config.s3_endpoint() + "/" + bucket + "/ssh/createAccounts.sh",
+                        "mode":"000777",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
+                    },
                     "/etc/yum.repos.d/le.repo": {
                         "content": {
                             "Fn::Join": [
