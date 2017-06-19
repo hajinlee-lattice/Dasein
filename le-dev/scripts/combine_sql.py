@@ -19,7 +19,6 @@ def main():
 
     with open(out_file, 'w') as ofile:
         ofile.write('USE `PLS_MultiTenant`;\n')
-        ofile.write('SET FOREIGN_KEY_CHECKS = 0;\n\n')
 
     process_diff(diff_file)
     with open(out_file, 'a') as ofile:
@@ -32,11 +31,10 @@ def main():
         for line in LINES_TO_FILE:
             ofile.write(line)
 
-        # for table in TABLE_TO_DELETE:
-        #     ofile.write('DROP TABLE IF EXISTS `%s`;\n' % table)
-
-    with open(out_file, 'a') as ofile:
-        ofile.write('\nSET FOREIGN_KEY_CHECKS = 1;\n')
+    with open(out_file + '.2', 'w') as ofile:
+        ofile.write('USE `PLS_MultiTenant`;\n')
+        for table in TABLE_TO_DELETE:
+            ofile.write('DROP TABLE IF EXISTS `%s`;\n' % table)
 
 def process_diff(diff_file):
     flags = {

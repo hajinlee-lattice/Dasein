@@ -40,10 +40,5 @@
             <version>${le.microservice.version}</version>
             <classifier>classes</classifier>
         </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.30</version>
-        </dependency>
     </dependencies>
 </project>

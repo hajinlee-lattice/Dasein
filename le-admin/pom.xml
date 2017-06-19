@@ -32,11 +32,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.30</version>
-        </dependency>
-        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
             <version>${le.common.version}</version>
@@ -185,11 +180,6 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
             <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
-            <version>${sqljdbc4.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
