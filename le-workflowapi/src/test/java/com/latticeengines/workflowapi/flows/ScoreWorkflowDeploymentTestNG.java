@@ -117,6 +117,10 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
     private void score(String modelId, String tableToScore) throws Exception {
         ScoreWorkflowConfiguration configuration = scoreWorkflowSubmitter.generateConfiguration(modelId, tableToScore,
                 new Table(), tableToScore, TransformationGroup.STANDARD);
+        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
+                versionManager);
+        workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
+
         WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
 
         waitForCompletion(workflowId);

@@ -31,6 +31,9 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiFunctionalTestNGB
     @Test(groups = "deployment")
     public void testRegisterReport() throws Exception {
         TestReportWorkflowConfiguration configuration = generateConfiguration();
+        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
+                versionManager);
+        workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(testReportWorkflow.name(), configuration);
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);

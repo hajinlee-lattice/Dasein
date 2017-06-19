@@ -95,7 +95,9 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     public void testWorkflow() throws Exception {
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());
         CalculateStatsWorkflowConfiguration config = generateConfiguration();
-
+        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
+                versionManager);
+        workflowService.registerJob(config.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(config.getWorkflowName(), config);
 
         System.out.println("Workflow id = " + workflowId.getId());

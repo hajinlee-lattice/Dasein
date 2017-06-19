@@ -60,19 +60,22 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
     @Test(groups = "deployment", dataProvider = "pmmlFileNameProvider", enabled = true)
     public void testWorkflow(String pmmlFileName, String pivotValueFileName) throws Exception {
         setupFiles(PMML_CUSTOMERSPACE, pmmlFileName, pivotValueFileName);
-        PMMLModelWorkflowConfiguration workflowConfig = generatePMMLModelWorkflowConfiguration();
-        for (String key : workflowConfig.getConfigRegistry().keySet()) {
+        PMMLModelWorkflowConfiguration configuration = generatePMMLModelWorkflowConfiguration();
+        for (String key : configuration.getConfigRegistry().keySet()) {
             if (key.equals(CreatePMMLModelConfiguration.class.getCanonicalName())) {
                 ObjectMapper om = new ObjectMapper();
-                CreatePMMLModelConfiguration modelConfig = om.readValue(workflowConfig.getConfigRegistry().get(key),
+                CreatePMMLModelConfiguration modelConfig = om.readValue(configuration.getConfigRegistry().get(key),
                         CreatePMMLModelConfiguration.class);
                 modelName = modelConfig.getModelName();
-                System.out.println(workflowConfig.getConfigRegistry().get(key));
+                System.out.println(configuration.getConfigRegistry().get(key));
                 System.out.println("Model name = " + modelName);
             }
         }
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
-        WorkflowExecutionId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
+        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
+                versionManager);
+        workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
 
         waitForCompletion(workflowId);
 
