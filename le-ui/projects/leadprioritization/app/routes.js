@@ -213,10 +213,9 @@ angular
                             $scope.HasRatingsAvailable = false;
                         }
 
-                        $scope.canRemodel = FeatureFlagService.FlagIsEnabled(flags.VIEW_REMODEL) && !$scope.IsPmml && !$scope.Uploaded;
-
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
+                            $scope.canRemodel = FeatureFlagService.FlagIsEnabled(flags.VIEW_REMODEL) && !$scope.IsPmml && !$scope.Uploaded;
                             $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE) || FeatureFlagService.UserIs('EXTERNAL_ADMIN');
                             $scope.showAlerts = 0; // disable for all (PLS-1670) FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
                             $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
