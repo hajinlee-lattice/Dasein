@@ -2,7 +2,9 @@ package com.latticeengines.pls.dao.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -51,7 +53,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         Class<PlayLaunch> entityClz = getEntityClass();
         String queryStr = String.format(
                 "from %s where "//
-                        + "fk_play_id = :playId AND created_timestamp = :timestamp", //
+                        + "fk_play_id = :playId "//
+                        + "AND created_timestamp = :timestamp", //
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("fk_play_id", playId);
@@ -65,24 +68,32 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<PlayLaunch> findByPlayId(Long playId, LaunchState state) {
+    public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
         if (playId == null) {
             return null;
         }
 
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
+
         String queryStr = String.format(
                 "from %s where "//
                         + "fk_play_id = :playId", //
                 entityClz.getSimpleName());
-        if (state != null) {
-            queryStr += " AND state = :state";
+
+        if (CollectionUtils.isNotEmpty(states)) {
+            queryStr += " AND state IN ( :states )";
         }
+
         Query query = session.createQuery(queryStr);
         query.setLong("playId", playId);
-        if (state != null) {
-            query.setString("state", state.name());
+
+        if (CollectionUtils.isNotEmpty(states)) {
+            List<String> statesNameList = states.stream()//
+                    .map(LaunchState::name)//
+                    .collect(Collectors.toList());
+
+            query.setParameterList("states", statesNameList);
         }
         return query.list();
     }

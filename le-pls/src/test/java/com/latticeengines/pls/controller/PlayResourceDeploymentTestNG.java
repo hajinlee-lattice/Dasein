@@ -61,15 +61,35 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
     private void searchPlayLaunch() {
         List<PlayLaunch> launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches?launchState=" + LaunchState.Launching, List.class);
+                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Failed, List.class);
+
+        Assert.assertNotNull(launchList);
+        Assert.assertEquals(launchList.size(), 0);
+
+        launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
+                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Canceled + "&launchStates="
+                + LaunchState.Failed + "&launchStates=" + LaunchState.Launching, List.class);
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches?launchState=" + LaunchState.Launched, List.class);
+                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launching, List.class);
 
         Assert.assertNotNull(launchList);
+        Assert.assertEquals(launchList.size(), 1);
+
+        launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
+                "/pls/play/" + name + "/launches", List.class);
+
+        Assert.assertNotNull(launchList);
+        Assert.assertEquals(launchList.size(), 1);
+
+        launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
+                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launched, List.class);
+
+        Assert.assertNotNull(launchList);
+        Assert.assertEquals(launchList.size(), 0);
 
         PlayLaunch retrievedLaunch = restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId(), PlayLaunch.class);
@@ -82,7 +102,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId());
 
         List<PlayLaunch> launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches?launchState=" + LaunchState.Launching, List.class);
+                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launching, List.class);
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);

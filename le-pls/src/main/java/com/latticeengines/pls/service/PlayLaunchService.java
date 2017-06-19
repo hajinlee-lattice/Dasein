@@ -16,7 +16,7 @@ public interface PlayLaunchService {
 
     PlayLaunch findByPlayAndTimestamp(Long playId, Date timestamp);
 
-    List<PlayLaunch> findByPlayId(Long playId, LaunchState state);
+    List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> launchStates);
 
     List<PlayLaunch> findByState(LaunchState state);
 

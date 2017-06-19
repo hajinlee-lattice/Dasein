@@ -4,5 +4,6 @@ public enum LaunchState {
     Launching, //
     Launched, //
     Failed, //
-    Canceled
+    Canceled, //
+    Deleted
 }

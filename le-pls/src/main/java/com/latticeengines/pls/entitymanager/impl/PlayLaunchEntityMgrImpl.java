@@ -70,8 +70,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<PlayLaunch> findByPlayId(Long playId, LaunchState state) {
-        return playLaunchDao.findByPlayId(playId, state);
+    public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
+        return playLaunchDao.findByPlayId(playId, states);
     }
 
     @Override

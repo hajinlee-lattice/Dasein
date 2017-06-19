@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -97,9 +98,12 @@ public class PlayResource {
     @ResponseBody
     @ApiOperation(value = "Get list of launches for a given play")
     public List<PlayLaunch> getPlayLaunches(@PathVariable("playName") String playName, //
-            @RequestParam(value = "launchState", required = true) LaunchState launchState) {
+            @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates) {
         Play play = playService.getPlayByName(playName);
-        return playLaunchService.findByPlayId(play.getPid(), launchState);
+        if (launchStates == null) {
+            launchStates = new ArrayList<>();
+        }
+        return playLaunchService.findByPlayId(play.getPid(), launchStates);
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)

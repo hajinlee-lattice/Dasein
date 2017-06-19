@@ -1,5 +1,6 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -93,8 +94,24 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch.getLaunchId());
         Assert.assertEquals(retreivedPlayLaunch.getDescription(), LAUNCH_DESCRIPTION);
         Assert.assertNotNull(retreivedPlayLaunch);
+        List<LaunchState> states = new ArrayList<>();
+        states.add(LaunchState.Launched);
+        states.add(LaunchState.Failed);
 
-        List<PlayLaunch> playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), LaunchState.Launching);
+        List<PlayLaunch> playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states);
+        Assert.assertNotNull(playLaunchList);
+        Assert.assertEquals(playLaunchList.size(), 0);
+
+        List<LaunchState> states1 = new ArrayList<>();
+        states1.add(LaunchState.Launching);
+
+        playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states1);
+        Assert.assertNotNull(playLaunchList);
+        Assert.assertEquals(playLaunchList.size(), 1);
+
+        states.add(LaunchState.Launching);
+
+        playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 1);
         Assert.assertEquals(playLaunchList.get(0).getPid(), retreivedPlayLaunch.getPid());
@@ -140,8 +157,9 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch.getLaunchId());
         Assert.assertNull(retreivedPlayLaunch);
-
-        List<PlayLaunch> playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), LaunchState.Launching);
+        List<LaunchState> states = new ArrayList<>();
+        states.add(LaunchState.Launching);
+        List<PlayLaunch> playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 0);
 

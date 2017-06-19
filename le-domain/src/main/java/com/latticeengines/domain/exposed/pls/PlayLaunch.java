@@ -67,7 +67,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
 
     @Index(name = "PLAY_LAUNCH_STATE")
     @Column(name = "STATE", nullable = false)
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @JsonProperty("launch_state")
     private LaunchState launchState;
 

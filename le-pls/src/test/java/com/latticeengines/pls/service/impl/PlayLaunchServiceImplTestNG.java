@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -103,7 +104,14 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(retreivedPlayLaunch.getDescription(), LAUNCH_DESCRIPTION);
         Assert.assertNotNull(retreivedPlayLaunch);
 
-        List<PlayLaunch> playLaunchList = playLaunchService.findByPlayId(play.getPid(), LaunchState.Launching);
+        List<LaunchState> states = new ArrayList<>();
+        states.add(LaunchState.Launched);
+        List<PlayLaunch> playLaunchList = playLaunchService.findByPlayId(play.getPid(), states);
+        Assert.assertNotNull(playLaunchList);
+        Assert.assertEquals(playLaunchList.size(), 0);
+
+        states.add(LaunchState.Launching);
+        playLaunchList = playLaunchService.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 1);
         Assert.assertEquals(playLaunchList.get(0).getPid(), retreivedPlayLaunch.getPid());
@@ -138,8 +146,9 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private void checkNonExistance() {
         setupSecurityContext(tenant1);
-
-        List<PlayLaunch> playLaunchList = playLaunchService.findByPlayId(play.getPid(), LaunchState.Launching);
+        List<LaunchState> states = new ArrayList<>();
+        states.add(LaunchState.Launching);
+        List<PlayLaunch> playLaunchList = playLaunchService.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 0);
 

@@ -11,7 +11,7 @@ CREATE PROCEDURE `UpdatePLay`()
       `DESCRIPTION`            VARCHAR(255),
       `LAST_UPDATED_TIMESTAMP` DATETIME     NOT NULL,
       `LAUNCH_ID`              VARCHAR(255) NOT NULL UNIQUE,
-      `STATE`                  INTEGER      NOT NULL,
+      `STATE`                  VARCHAR(255) NOT NULL,
       `TABLE_NAME`             VARCHAR(255),
       `TENANT_ID`              BIGINT       NOT NULL,
       FK_PLAY_ID               BIGINT       NOT NULL,
