@@ -3,18 +3,9 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
-        <property name="locations">
-            <list>
-                <value>file:latticeengines.properties</value>
-            </list>
-        </property>
-        <property name="ignoreUnresolvablePlaceholders" value="false" />
-        <property name="ignoreResourceNotFound" value="false" />
-    </bean>
-
     <bean id="itemProcessor" class="com.latticeengines.datacloud.yarn.runtime.DataCloudProcessor" />
 
+    <import resource="common-am-properties-context.xml"/>
     <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
     <import resource="classpath:datacloud-yarn-context.xml" />
 

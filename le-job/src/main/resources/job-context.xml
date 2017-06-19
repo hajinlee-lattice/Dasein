@@ -13,16 +13,9 @@
         <context:exclude-filter type="assignable"
                                 expression="com.latticeengines.job.swagger.SwaggerConfig"/>
     </context:component-scan>
-    <mvc:annotation-driven/>
 
-    <context:component-scan base-package="com.latticeengines.dataplatform.mbean" />
-
-    <import resource="classpath:datacloud-etl-madison-context.xml"/>
+    <!-- <import resource="classpath:datacloud-etl-madison-context.xml"/> -->
+    <import resource="classpath:datacloud-etl-collection-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
-    <import resource="classpath:datacloudapi-job-quartz-${PROPDATA_COLLECTION_QUARTZ_ENABLED:disabled}-context.xml"/>
-
-    <bean id="jobHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
-        <property name="componentName" value="job" />
-    </bean>
 
 </beans>

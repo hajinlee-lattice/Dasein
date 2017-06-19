@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -19,19 +20,19 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     private OrchestrationProgressDao orchestrationProgressDao;
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         return orchestrationProgressDao.findProgressesByField(fields, orderFields);
     }
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public OrchestrationProgress findProgress(OrchestrationProgress progress) {
         return orchestrationProgressDao.findByKey(progress);
     }
 
     @Override
-    @Transactional(value = "propDataManage")
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
     public OrchestrationProgress saveProgress(OrchestrationProgress progress) {
         String podIdInProgress = progress.getHdfsPod();
         String podIdInContext = HdfsPodContext.getHdfsPodId();
@@ -46,7 +47,7 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     }
 
     @Override
-    @Transactional(value = "propDataManage")
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
     public void saveProgresses(List<OrchestrationProgress> progresses) {
         for (OrchestrationProgress progress : progresses) {
             saveProgress(progress);
@@ -54,13 +55,13 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     }
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<OrchestrationProgress> findProgressesToKickoff() {
         return orchestrationProgressDao.findProgressesToKickoff();
     }
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public boolean isDuplicateVersion(String orchName, String version) {
         return orchestrationProgressDao.isDuplicateVersion(orchName, version);
     }

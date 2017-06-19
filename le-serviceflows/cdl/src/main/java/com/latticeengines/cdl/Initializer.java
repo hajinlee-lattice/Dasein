@@ -10,7 +10,9 @@ public class Initializer implements SoftwarePackageInitializer {
     @Override
     public ApplicationContext initialize(ApplicationContext applicationContext, String module) {
         return new ClassPathXmlApplicationContext(
-                new String[] { String.format("serviceflows-cdl-%s-context.xml", getClassifier(module)) }, //
+                new String[] { //
+                        String.format("serviceflows-cdl-%s-context.xml", getClassifier(module)), //
+                        "common-am-properties-context.xml" }, //
                 applicationContext);
     }
 

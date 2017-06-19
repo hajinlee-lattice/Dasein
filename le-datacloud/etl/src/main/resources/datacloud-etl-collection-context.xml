@@ -7,6 +7,7 @@
     <context:component-scan base-package="com.latticeengines.datacloud.collection" />
 
     <import resource="classpath:datacloud-etl-context.xml" />
+    <import resource="classpath:datacloud-dataflow-context.xml" />
 
     <bean id="archiveProgressDao" class="com.latticeengines.datacloud.collection.dao.impl.ArchiveProgressDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>

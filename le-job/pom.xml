@@ -36,7 +36,6 @@
                         <artifactId>jetty-maven-plugin</artifactId>
                         <version>${jetty.version}</version>
                         <configuration>
-
                             <systemProperties>
                                 <systemProperty>
                                     <name>log4j.configuration</name>
@@ -73,7 +72,7 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-datacloudapi</artifactId>
+            <artifactId>le-datacloud-etl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- use this instead of <artifactId>persistence-api</artifactId> 1.0 due to a problem with "NoSuchMethodError:

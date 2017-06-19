@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.datacloud.etl.orchestration.dao.OrchestrationDao;
@@ -17,25 +18,25 @@ public class OrchestrationEntityMgrImpl implements OrchestrationEntityMgr {
     private OrchestrationDao orchestrationDao;
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Orchestration> findAll() {
         return orchestrationDao.findAll();
     }
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Orchestration findByField(String fieldName, Object value) {
         return orchestrationDao.findByField(fieldName, value);
     }
 
     @Override
-    @Transactional(value = "propDataManage")
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
     public void save(Orchestration orch) {
         orchestrationDao.createOrUpdate(orch);
     }
 
     @Override
-    @Transactional(value = "propDataManage")
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
     public void delete(Orchestration orch) {
         orchestrationDao.delete(orch);
     }

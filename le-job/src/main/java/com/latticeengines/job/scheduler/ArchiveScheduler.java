@@ -1,4 +1,4 @@
-package com.latticeengines.datacloudapi.job;
+package com.latticeengines.job.scheduler;
 
 import javax.annotation.PostConstruct;
 

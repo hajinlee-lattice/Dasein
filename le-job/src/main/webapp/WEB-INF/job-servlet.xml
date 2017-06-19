@@ -3,8 +3,6 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <import resource="classpath:job-context.xml"/>
-    <import resource="classpath:common-properties-context.xml"/>
-    <bean class="com.latticeengines.job.swagger.SwaggerConfig" />
+    <import resource="classpath:job-runtime-context.xml"/>
 
 </beans>
