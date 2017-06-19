@@ -23,7 +23,7 @@ public class PMMLModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setCustomerSpace(customerSpace);
+            configuration.setContainerConfiguration("pmmlModelWorkflow", customerSpace, "pmmlModelWorkflow");
             model.setCustomerSpace(customerSpace);
             return this;
         }
