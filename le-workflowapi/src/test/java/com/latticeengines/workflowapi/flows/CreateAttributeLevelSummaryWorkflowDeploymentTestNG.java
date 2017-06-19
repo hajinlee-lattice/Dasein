@@ -48,9 +48,6 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
     @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         CreateAttributeLevelSummaryWorkflowConfiguration workflowConfig = generateWorkflowConfiguration();
-        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
-                versionManager);
-        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
 
         System.out.println("Workflow id = " + workflowId.getId());

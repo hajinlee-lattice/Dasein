@@ -201,9 +201,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     private void score(String modelId, String tableToScore) throws Exception {
         RTSBulkScoreWorkflowConfiguration configuration = rtsBulkScoreWorkflowSubmitter.generateConfiguration(modelId,
                 tableToScore, tableToScore, true, false);
-        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
-                versionManager);
-        workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
         waitForCompletion(workflowId);
     }
