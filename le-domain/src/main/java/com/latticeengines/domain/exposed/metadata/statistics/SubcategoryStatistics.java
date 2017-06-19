@@ -17,21 +17,10 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class SubcategoryStatistics {
 
-    @JsonProperty("Count")
-    private Long count = 0L;
-
     @JsonProperty("Attributes")
     @JsonDeserialize(keyUsing = AttributeLookup.AttributeLookupKeyDeserializer.class)
     @JsonSerialize(keyUsing = AttributeLookup.AttributeLookupKeySerializer.class)
     private Map<AttributeLookup, AttributeStats> attributes = new HashMap<>();
-
-    public Long getCount() {
-        return count;
-    }
-
-    public void setCount(Long count) {
-        this.count = count;
-    }
 
     public Map<AttributeLookup, AttributeStats> getAttributes() {
         return attributes;
@@ -39,9 +28,5 @@ public class SubcategoryStatistics {
 
     public void setAttributes(Map<AttributeLookup, AttributeStats> attributes) {
         this.attributes = attributes;
-    }
-
-    void updateCount() {
-        count = attributes.values().stream().mapToLong(AttributeStats::getNonNullCount).sum();
     }
 }

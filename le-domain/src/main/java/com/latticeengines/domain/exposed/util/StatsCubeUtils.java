@@ -118,6 +118,7 @@ public class StatsCubeUtils {
             break;
         case 2:
             val = algo.getFalseLabelWithDefault();
+            break;
         default:
         }
         bucket.setBucketLabel(val);

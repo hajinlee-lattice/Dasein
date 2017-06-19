@@ -1,5 +1,10 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.testng.annotations.Test;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
@@ -7,11 +12,6 @@ import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class StatisticsUnitTestNG {
 
@@ -38,12 +38,10 @@ public class StatisticsUnitTestNG {
         Map<Category, CategoryStatistics> cats = new HashMap<>();
         cats.put(Category.FIRMOGRAPHICS, categoryStatistics);
         stats.setCategories(cats);
-        stats.updateCount();
 
         String serialized = JsonUtils.serialize(stats);
 
-        Statistics deserialized = JsonUtils.deserialize(serialized, Statistics.class);
-        Assert.assertEquals(deserialized.getCount(), new Long(2L));
+        JsonUtils.deserialize(serialized, Statistics.class);
     }
 
 

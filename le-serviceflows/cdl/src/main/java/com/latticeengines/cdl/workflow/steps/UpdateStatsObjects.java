@@ -119,7 +119,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
                 // an attribute from master table
                 attrLookup = new AttributeLookup(master, name);
                 category = StringUtils.isBlank(attrInMasterTable.getCategory()) ? null
-                        : Category.valueOf(attrInMasterTable.getCategory());
+                        : Category.fromName(attrInMasterTable.getCategory());
                 subCategory = attrInMasterTable.getSubcategory();
             } else if (colLookup.containsKey(name)) {
                 attrLookup = new AttributeLookup(am, name);
@@ -154,7 +154,6 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             subcategoryStatistics.getAttributes().put(attrLookup, statsInCube);
         }
 
-        statistics.updateCount();
         statsContainer.setStatistics(statistics);
 
         return statsContainer;

@@ -21,21 +21,11 @@ import com.latticeengines.domain.exposed.metadata.Category;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Statistics {
-    @JsonProperty("Count")
-    private Long count = 0L;
 
     @JsonProperty("Categories")
     @JsonDeserialize(keyUsing = CategoryKeyDeserializer.class)
     @JsonSerialize(keyUsing = CategoryKeySerializer.class)
     private Map<Category, CategoryStatistics> categories = new HashMap<>();
-
-    public Long getCount() {
-        return count;
-    }
-
-    public void setCount(Long count) {
-        this.count = count;
-    }
 
     public Map<Category, CategoryStatistics> getCategories() {
         return categories;
@@ -43,11 +33,6 @@ public class Statistics {
 
     public void setCategories(Map<Category, CategoryStatistics> categories) {
         this.categories = categories;
-    }
-
-    public void updateCount() {
-        categories.values().forEach(CategoryStatistics::updateCount);
-        count = categories.values().stream().mapToLong(CategoryStatistics::getCount).sum();
     }
 
     private static class CategoryKeyDeserializer extends KeyDeserializer {
