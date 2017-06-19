@@ -10,11 +10,5 @@
     <context:component-scan base-package="com.latticeengines.workflowapi"/>
 
     <import resource="classpath:proxy-context.xml"/>
-    <import resource="classpath:serviceflows-prospectdiscovery-workflow-context.xml"/>
-    <import resource="classpath:serviceflows-leadprioritization-workflow-context.xml"/>
-    <import resource="classpath:serviceflows-datacloud-workflow-context.xml"/>
-    <import resource="classpath:serviceflows-cdl-workflow-context.xml"/>
-
-
 
 </beans>

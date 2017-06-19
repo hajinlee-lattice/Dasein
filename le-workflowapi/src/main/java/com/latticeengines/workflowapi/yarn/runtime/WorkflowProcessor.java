@@ -64,7 +64,8 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         }
         log.info(String.format("Running WorkflowProcessor with workflowName:%s and config:%s",
                 workflowConfig.getWorkflowName(), workflowConfig.toString()));
-        appContext = loadSoftwarePackages("workflowapi", softwareLibraryService, appContext, versionManager);
+        appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", appContext, versionManager);
+        workflowService.registerJob(workflowConfig.getWorkflowName(), appContext);
 
         WorkflowExecutionId workflowId;
         try {

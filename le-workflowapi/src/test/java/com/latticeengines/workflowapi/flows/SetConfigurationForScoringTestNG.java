@@ -19,10 +19,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.workflow.core.WorkflowTranslator;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -36,7 +36,6 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
     @Autowired
     private JobRepository jobRepository;
 
-    @Autowired
     private SetConfigurationForScoring setConfigurationForScoring;
 
     @Autowired
@@ -47,6 +46,8 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
 
     @Test(groups = "functional")
     public void test() throws Exception {
+        setConfigurationForScoring = new SetConfigurationForScoring();
+        setConfigurationForScoring.setBeanName("setConfigurationForScoring");
         StepRunner runner = new StepRunner(jobLauncher, jobRepository);
         String jsonStr = IOUtils.toString(ClassLoader
                 .getSystemResourceAsStream("com/latticeengines/workflowapi/flows/leadprioritization/workflow.conf"));

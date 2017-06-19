@@ -36,9 +36,6 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     private final Log log = LogFactory.getLog(CalculateStatsWorkflowDeploymentTestNG.class);
 
     @Autowired
-    private ShortCalcStatsWorkflow calculateStatsWorkflow;
-
-    @Autowired
     private MetadataProxy metadataProxy;
 
     @Autowired
@@ -99,7 +96,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
         log.info("customer is " + DEMO_CUSTOMERSPACE.getTenantId());
         CalculateStatsWorkflowConfiguration config = generateConfiguration();
 
-        WorkflowExecutionId workflowId = workflowService.start(calculateStatsWorkflow.name(), config);
+        WorkflowExecutionId workflowId = workflowService.start(config.getWorkflowName(), config);
 
         System.out.println("Workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();

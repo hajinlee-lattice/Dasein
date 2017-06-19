@@ -19,10 +19,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.leadprioritization.workflow.ScoreWorkflow;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -39,9 +38,6 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
-
-    @Autowired
-    private ScoreWorkflow scoreWorkflow;
 
     @Autowired
     private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
@@ -121,7 +117,7 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
     private void score(String modelId, String tableToScore) throws Exception {
         ScoreWorkflowConfiguration configuration = scoreWorkflowSubmitter.generateConfiguration(modelId, tableToScore,
                 new Table(), tableToScore, TransformationGroup.STANDARD);
-        WorkflowExecutionId workflowId = workflowService.start(scoreWorkflow.name(), configuration);
+        WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
 
         waitForCompletion(workflowId);
     }

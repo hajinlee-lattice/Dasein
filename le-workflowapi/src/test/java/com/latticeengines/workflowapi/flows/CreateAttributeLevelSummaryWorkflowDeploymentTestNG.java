@@ -20,10 +20,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.CreateAttributeLevelSummaryWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.prospectdiscovery.workflow.steps.CreateAttributeLevelSummaryWorkflow;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.CreateAttributeLevelSummaryWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
@@ -41,9 +40,6 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
 
     private TargetMarket defaultTargetMarket;
 
-    @Autowired
-    private CreateAttributeLevelSummaryWorkflow createAttributeLevelSummaryWorkflow;
-
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupForAttributeLevelSummary();
@@ -53,8 +49,7 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
     public void testWorkflow() throws Exception {
         CreateAttributeLevelSummaryWorkflowConfiguration workflowConfig = generateWorkflowConfiguration();
 
-        WorkflowExecutionId workflowId = workflowService.start(createAttributeLevelSummaryWorkflow.name(),
-                workflowConfig);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
 
         System.out.println("Workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();

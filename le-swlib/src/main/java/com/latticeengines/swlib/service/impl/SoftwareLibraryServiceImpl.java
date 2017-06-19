@@ -17,14 +17,18 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
+import com.latticeengines.domain.exposed.swlib.SoftwarePackageInitializer;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 @Component("softwareLibraryService")
@@ -36,9 +40,13 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     private String topLevelPath = "/app/swlib";
 
     public SoftwareLibraryServiceImpl() {
+        setStackName(stackName);
     }
 
     @Override
@@ -49,7 +57,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     @Override
     public void setStackName(String stackName) {
         if (StringUtils.isNotEmpty(stackName)) {
-            topLevelPath = "/app/" +  stackName + "/swlib";
+            topLevelPath = "/app/" + stackName + "/swlib";
             log.info("Set top level path to " + topLevelPath);
         }
     }
@@ -124,7 +132,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
             }
         } catch (FileNotFoundException e) {
             log.warn(e.getMessage());
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error(e);
         }
         return packages;
@@ -176,6 +184,31 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
             }
         }
         return versionMatchedPackages;
+    }
+
+    @Override
+    public ApplicationContext loadSoftwarePackages(String module, ApplicationContext context,
+            VersionManager versionManager) {
+        List<SoftwarePackage> packages = getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
+        if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
+            packages = getLatestInstalledPackages(module);
+        }
+        log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
+        log.info(String.format("Found %d of software packages from the software library for this module.",
+                packages.size()));
+        for (SoftwarePackage pkg : packages) {
+            String initializerClassName = pkg.getInitializerClass();
+            log.info(String.format("Loading %s", initializerClassName));
+            SoftwarePackageInitializer initializer;
+            try {
+                Class<?> c = Class.forName(initializerClassName);
+                initializer = (SoftwarePackageInitializer) c.newInstance();
+                context = initializer.initialize(context, module);
+            } catch (Exception e) {
+                log.error(LedpException.buildMessage(LedpCode.LEDP_27004, new String[] { initializerClassName }), e);
+            }
+        }
+        return context;
     }
 
 }

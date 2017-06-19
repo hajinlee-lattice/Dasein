@@ -38,9 +38,8 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.RTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -54,9 +53,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     @Value("${common.test.pls.url}")
     private String plsApiHostPort;
-
-    @Autowired
-    private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -205,7 +201,8 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     private void score(String modelId, String tableToScore) throws Exception {
         RTSBulkScoreWorkflowConfiguration rtsBulkScoreWorkflowConfig = rtsBulkScoreWorkflowSubmitter
                 .generateConfiguration(modelId, tableToScore, tableToScore, true, false);
-        WorkflowExecutionId workflowId = workflowService.start(rtsBulkScoreWorkflow.name(), rtsBulkScoreWorkflowConfig);
+        WorkflowExecutionId workflowId = workflowService.start(rtsBulkScoreWorkflowConfig.getWorkflowName(),
+                rtsBulkScoreWorkflowConfig);
         waitForCompletion(workflowId);
     }
 

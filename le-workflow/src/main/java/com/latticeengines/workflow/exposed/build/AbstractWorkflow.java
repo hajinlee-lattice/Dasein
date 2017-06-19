@@ -12,7 +12,7 @@ public abstract class AbstractWorkflow<T> extends AbstractNameAwareBean {
     @Autowired
     private WorkflowTranslator workflowTranslator;
 
-    protected Job buildWorkflow() throws Exception {
+    public Job buildWorkflow() throws Exception {
         return workflowTranslator.buildWorkflow(name(), defineWorkflow());
     }
 

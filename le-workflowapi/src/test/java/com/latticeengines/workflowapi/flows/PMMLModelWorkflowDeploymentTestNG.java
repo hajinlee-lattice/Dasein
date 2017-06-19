@@ -19,10 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.Model;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflow;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.PMMLModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
@@ -32,9 +31,6 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PMMLModelWorkflowDeploymentTestNG.class);
-
-    @Autowired
-    private PMMLModelWorkflow pmmlModelWorkflow;
 
     @Autowired
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
@@ -76,7 +72,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
             }
         }
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
-        WorkflowExecutionId workflowId = workflowService.start(pmmlModelWorkflow.name(), workflowConfig);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
 
         waitForCompletion(workflowId);
 

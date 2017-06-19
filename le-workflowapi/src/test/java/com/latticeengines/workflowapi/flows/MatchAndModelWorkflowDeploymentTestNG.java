@@ -35,11 +35,10 @@ import com.latticeengines.domain.exposed.pls.ModelNotes;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.leadprioritization.workflow.MatchAndModelAndEmailWorkflow;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNotesService;
@@ -71,9 +70,6 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     @Autowired
     private MatchAndModelWorkflowSubmitter matchAndModelWorkflowSubmitter;
-
-    @Autowired
-    private MatchAndModelAndEmailWorkflow modelAndEmailWorkflow;
 
     @Autowired
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
@@ -171,7 +167,11 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         MatchAndModelWorkflowConfiguration configuration = matchAndModelWorkflowSubmitter.generateConfiguration(
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
-        WorkflowExecutionId workflowId = workflowService.start(modelAndEmailWorkflow.name(), configuration);
+
+        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
+                versionManager);
+        workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
 
         waitForCompletion(workflowId);
     }

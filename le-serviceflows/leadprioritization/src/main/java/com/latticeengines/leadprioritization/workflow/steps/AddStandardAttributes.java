@@ -1,15 +1,15 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AddStandardAttributesConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
-@Component("addStandardAttributes")
+@Component("addStandardAttributesDataFlow")
 public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConfiguration> {
 
     @Autowired
@@ -21,7 +21,8 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         configuration.setTargetTableName(eventTable.getName() + "_with_std_attrib");
         configuration.setDataFlowParams(DataFlowFactory.getAddStandardAttributesParameters( //
-                eventTable.getName(), configuration.getTransforms(), configuration.getRuntimeParams(), configuration.getSourceSchemaInterpretation()));
+                eventTable.getName(), configuration.getTransforms(), configuration.getRuntimeParams(),
+                configuration.getSourceSchemaInterpretation()));
     }
 
     @Override

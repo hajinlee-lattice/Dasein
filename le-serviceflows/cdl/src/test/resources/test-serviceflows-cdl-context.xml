@@ -8,7 +8,7 @@
     <context:component-scan base-package="com.latticeengines.cdl" />
 
     <import resource="classpath:common-properties-context.xml"/>
-    <import resource="classpath:serviceflows-cdl-context.xml"/>
+    <import resource="classpath:serviceflows-cdl-dataflow-context.xml"/>
     <import resource="classpath:serviceflows-cdl-workflow-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
 

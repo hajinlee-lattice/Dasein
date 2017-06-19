@@ -3,17 +3,20 @@ package com.latticeengines.workflowapi.flows;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
-import com.latticeengines.domain.exposed.serviceflows.cdl.RedshiftPublishWorkflowConfiguration;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -24,6 +27,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.cdl.RedshiftPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -35,8 +39,10 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
             .parse(RedshiftPublishWorkflowDeploymentTestNG.class.getSimpleName());
 
     protected static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/redshiftpublish/avrofiles";
+
     @Autowired
-    private RedshiftPublishWorkflow redshiftPublishWorkflow;
+    @Qualifier(value = "redshiftJdbcTemplate")
+    private JdbcTemplate redshiftJdbcTemplate;
 
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
@@ -100,8 +106,14 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
         builder.sourceTable(table);
         builder.customer(DEMO_CUSTOMERSPACE);
         builder.microServiceHostPort(microserviceHostPort);
-        WorkflowExecutionId workflowId = workflowService.start(redshiftPublishWorkflow.name(), builder.build());
+        RedshiftPublishWorkflowConfiguration config = builder.build();
+
+        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
+                versionManager);
+        workflowService.registerJob(config.getWorkflowName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(config.getWorkflowName(), config);
         waitForCompletion(workflowId);
+        verify(table.getName(), 5);
         HdfsUtils.rmdir(yarnConfiguration, dest);
     }
 
@@ -120,9 +132,17 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
         builder.sourceTable(table);
         builder.customer(DEMO_CUSTOMERSPACE);
         builder.microServiceHostPort(microserviceHostPort);
-        WorkflowExecutionId workflowId = workflowService.start(redshiftPublishWorkflow.name(), builder.build());
+        RedshiftPublishWorkflowConfiguration config = builder.build();
+        WorkflowExecutionId workflowId = workflowService.start(config.getWorkflowName(), config);
         waitForCompletion(workflowId);
+        verify(table.getName(), 8);
         HdfsUtils.rmdir(yarnConfiguration, dest);
+    }
+
+    private void verify(String table, int size) {
+        String sql = String.format("SELECT * FROM %s LIMIT 10", table);
+        List<Map<String, Object>> results = redshiftJdbcTemplate.queryForList(sql);
+        Assert.assertTrue(results.size() == size, "Got 0 result by querying [" + sql + "]");
     }
 
 }

@@ -9,15 +9,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflow;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportAndRTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 
 public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
-
-    @Autowired
-    private ImportAndRTSBulkScoreWorkflow importAndRTSBulkScoreWorkflow;
 
     @Autowired
     private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTABulkScoreWorkflowSubmitter;
@@ -42,7 +38,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
     private void score(String modelId, String tableToScore) throws Exception {
         ImportAndRTSBulkScoreWorkflowConfiguration configuration = importAndRTABulkScoreWorkflowSubmitter
                 .generateConfiguration(modelId, sourceFile, "Testing RTS Bulk Score Data", false, false);
-        WorkflowExecutionId workflowId = workflowService.start(importAndRTSBulkScoreWorkflow.name(), configuration);
+        WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
 
         waitForCompletion(workflowId);
     }

@@ -1,11 +1,11 @@
 package com.latticeengines.leadprioritization.workflow;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
@@ -22,13 +22,13 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
 
     @Autowired
-    private DedupEventTable dedupEventTable;
+    private DedupEventTable dedupEventTableDataFlow;
 
     @Autowired
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Autowired
-    private AddStandardAttributes addStandardAttributes;
+    private AddStandardAttributes addStandardAttributesDataFlow;
 
     @Autowired
     private ResolveMetadataFromUserRefinedAttributes resolveMetadataFromUserRefinedAttributes;
@@ -43,7 +43,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private ScoreWorkflow scoreWorkflow;
 
     @Autowired
-    private PivotScoreAndEvent pivotScoreAndEvent;
+    private PivotScoreAndEvent pivotScoreAndEventDataFlow;
 
     @Autowired
     private ExportData exportData;
@@ -60,13 +60,13 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(matchDataCloudWorkflow) //
-                .next(dedupEventTable) //
-                .next(addStandardAttributes) //
+                .next(dedupEventTableDataFlow) //
+                .next(addStandardAttributesDataFlow) //
                 .next(resolveMetadataFromUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(scoreWorkflow) //
-                .next(pivotScoreAndEvent) //
+                .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();

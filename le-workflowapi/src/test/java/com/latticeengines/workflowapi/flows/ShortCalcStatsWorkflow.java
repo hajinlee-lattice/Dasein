@@ -1,7 +1,6 @@
 package com.latticeengines.workflowapi.flows;
 
 import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +14,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("shortCalcStatsWorkflow")
 public class ShortCalcStatsWorkflow extends AbstractWorkflow<CalculateStatsWorkflowConfiguration> {
 
-    @Autowired
-    private CalculateStatsStep calculateStatsStep;
+    private CalculateStatsStep calculateStatsStep = new CalculateStatsStep();
 
-    @Autowired
-    private UpdateStatsObjects updateStatsObjects;
+    private UpdateStatsObjects updateStatsObjects = new UpdateStatsObjects();
 
     @Bean
     public Job shortCalcStatsWorkflowJob() throws Exception {
@@ -28,6 +25,8 @@ public class ShortCalcStatsWorkflow extends AbstractWorkflow<CalculateStatsWorkf
 
     @Override
     public Workflow defineWorkflow() {
+        calculateStatsStep.setBeanName("calculateStatsStep");
+        updateStatsObjects.setBeanName("updateStatsObjects");
         return new WorkflowBuilder() //
                 .next(calculateStatsStep) //
                 .next(updateStatsObjects) //

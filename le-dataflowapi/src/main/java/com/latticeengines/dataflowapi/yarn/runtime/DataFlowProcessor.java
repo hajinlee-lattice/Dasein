@@ -86,7 +86,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     @Override
     public String process(DataFlowConfiguration dataFlowConfig) throws Exception {
         log.info("Running processor.");
-        appContext = loadSoftwarePackages("dataflowapi", softwareLibraryService, appContext, versionManager);
+        appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", appContext, versionManager);
         Map<String, Table> sourceTables = new HashMap<>();
 
         List<DataFlowSource> dataFlowSources = dataFlowConfig.getDataSources();
@@ -102,8 +102,8 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
                 continue;
             }
             if (sourceTable.getExtracts().size() > 0) {
-                log.info(String.format("The first extract of table %s is located at %s", name, sourceTable
-                        .getExtracts().get(0).getPath()));
+                log.info(String.format("The first extract of table %s is located at %s", name,
+                        sourceTable.getExtracts().get(0).getPath()));
             }
             sourceTables.put(name, sourceTable);
         }

@@ -1,9 +1,7 @@
 package com.latticeengines.dataplatform.exposed.yarn.runtime;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -17,7 +15,6 @@ import org.springframework.batch.item.file.LineMapper;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.integration.channel.AbstractPollableChannel;
 import org.springframework.integration.channel.AbstractSubscribableChannel;
 import org.springframework.integration.channel.QueueChannel;
@@ -32,13 +29,7 @@ import org.springframework.yarn.integration.ip.mind.MindAppmasterServiceClient;
 import org.springframework.yarn.integration.ip.mind.MindRpcSerializer;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.progress.LedpProgressReporter;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
-import com.latticeengines.domain.exposed.swlib.SoftwarePackageInitializer;
-import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T, String>, StepExecutionListener {
 
@@ -49,7 +40,7 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     private ItemWriter<String> itemWriter = new SingleContainerWriter();
     private Class<T> type;
 
-    //@Autowired
+    // @Autowired
     protected LedpAppmasterService ledpAppmasterService;
 
     @Value("${dataplatform.hdfs.stack:}")
@@ -65,32 +56,38 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
         this.type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
-    public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService,
-            ApplicationContext context, VersionManager versionManager) {
-        if (softwareLibraryService != null) {
-            softwareLibraryService.setStackName(stackName);
-        }
-        List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
-        if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
-            packages = softwareLibraryService.getLatestInstalledPackages(module);
-        }
-        log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
-        log.info(String.format("Found %d of software packages from the software library for this module.",
-                packages.size()));
-        for (SoftwarePackage pkg : packages) {
-            String initializerClassName = pkg.getInitializerClass();
-            log.info(String.format("Loading %s", initializerClassName));
-            SoftwarePackageInitializer initializer;
-            try {
-                Class<?> c = Class.forName(initializerClassName);
-                initializer = (SoftwarePackageInitializer) c.newInstance();
-                context = initializer.initialize(context);
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                log.error(LedpException.buildMessage(LedpCode.LEDP_27004, new String[] { initializerClassName }), e);
-            }
-        }
-        return context;
-    }
+    // public ApplicationContext loadSoftwarePackages(String module,
+    // SoftwareLibraryService softwareLibraryService,
+    // ApplicationContext context, VersionManager versionManager) {
+    // if (softwareLibraryService != null) {
+    // softwareLibraryService.setStackName(stackName);
+    // }
+    // List<SoftwarePackage> packages =
+    // softwareLibraryService.getInstalledPackagesByVersion(module,
+    // versionManager.getCurrentVersion());
+    // if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
+    // packages = softwareLibraryService.getLatestInstalledPackages(module);
+    // }
+    // log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
+    // log.info(String.format("Found %d of software packages from the software
+    // library for this module.",
+    // packages.size()));
+    // for (SoftwarePackage pkg : packages) {
+    // String initializerClassName = pkg.getInitializerClass();
+    // log.info(String.format("Loading %s", initializerClassName));
+    // SoftwarePackageInitializer initializer;
+    // try {
+    // Class<?> c = Class.forName(initializerClassName);
+    // initializer = (SoftwarePackageInitializer) c.newInstance();
+    // context = initializer.initialize(context);
+    // } catch (InstantiationException | IllegalAccessException |
+    // ClassNotFoundException e) {
+    // log.error(LedpException.buildMessage(LedpCode.LEDP_27004, new String[] {
+    // initializerClassName }), e);
+    // }
+    // }
+    // return context;
+    // }
 
     public LineMapper<T> getLineMapper() {
         return lineMapper;
@@ -134,7 +131,7 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     public ExitStatus afterStep(StepExecution stepExecution) {
         return null;
     }
-    
+
     public void setProgress(float progress) {
         ledpProgressReporter.setProgress(progress);
     }

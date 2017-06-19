@@ -15,8 +15,7 @@
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
 
-    <import resource="classpath:serviceflows-core-context.xml"/>
-
-    <context:component-scan base-package="com.latticeengines.leadprioritization.dataflow" />
+    <import resource="classpath:serviceflows-core-dataflow-context.xml"/>
+    <context:component-scan base-package="com.latticeengines.cdl.dataflow" />
 
 </beans>

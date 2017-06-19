@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.JobParameters;
+import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -42,5 +43,7 @@ public interface WorkflowService {
     Map<String, String> getInputs(Map<String, String> inputContext);
 
     JobParameters createJobParams(WorkflowConfiguration workflowConfiguratio);
+
+    void registerJob(String name, ApplicationContext context);
 
 }

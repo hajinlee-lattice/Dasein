@@ -98,10 +98,6 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
         String sql = String.format("SELECT * FROM %s LIMIT 10", table);
         List<Map<String, Object>> results = redshiftJdbcTemplate.queryForList(sql);
         Assert.assertTrue(results.size() > 0, "Got 0 result by querying [" + sql + "]");
-
-        sql = String.format("SELECT * FROM %s LIMIT 10", table);
-        results = redshiftJdbcTemplate.queryForList(sql);
-        Assert.assertTrue(results.size() > 0, "Got 0 result by querying [" + sql + "]");
     }
 
     private void cleanup() throws Exception {

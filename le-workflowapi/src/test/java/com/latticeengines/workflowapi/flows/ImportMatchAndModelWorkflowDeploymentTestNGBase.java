@@ -31,9 +31,8 @@ import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
@@ -59,9 +58,6 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private ImportMatchAndModelWorkflow importMatchAndModelWorkflow;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -128,7 +124,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
     protected void model(ModelingParameters parameters) throws Exception {
         ImportMatchAndModelWorkflowConfiguration configuration = importMatchAndModelWorkflowSubmitter
                 .generateConfiguration(parameters);
-        WorkflowExecutionId workflowId = workflowService.start(importMatchAndModelWorkflow.name(), configuration);
+        WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
 
         waitForCompletion(workflowId);
     }

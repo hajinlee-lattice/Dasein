@@ -6,18 +6,11 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.util.Collection;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -41,6 +34,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.rest.URLUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -84,6 +78,12 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
 
+    @Autowired
+    protected SoftwareLibraryService softwareLibraryService;
+
+    @Autowired
+    protected VersionManager versionManager;
+
     @Value("${workflowapi.test.sfdc.user.name}")
     private String salesforceUserName;
 
@@ -109,9 +109,6 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private SoftwareLibraryService softwareLibraryService;
 
     protected Tenant tenant;
 
@@ -141,6 +138,9 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
                 PathBuilder.buildCustomerSpacePath("Production", WFAPITEST_CUSTOMERSPACE);
         HdfsUtils.rmdir(yarnConfiguration, path.toString());
         HdfsUtils.mkdir(yarnConfiguration, path.toString());
+
+        // installServiceFlow("le-serviceflows-prospectdiscovery",
+        // Initializer.class.getName());
     }
 
     protected AppSubmission submitWorkflow(WorkflowConfiguration configuration) {
@@ -170,12 +170,12 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     }
 
     protected void installServiceFlow(String artifactId, String initializerClassName) throws Exception {
-        String mavenHome = System.getProperty("MVN_HOME", "/usr");
-        String version = getVersionFromPomXmlFile();
+        String mavenHome = System.getProperty("MVN_HOME", "/usr/local");
+        String version = versionManager.getCurrentVersion();
         // Retrieve the service flow jar file from the maven repository
         String command = "%s/bin/mvn -DgroupId=com.latticeengines " + "-DartifactId=%s "
                 + "-Dversion=%s -Dclassifier=shaded -Ddest=%s.jar dependency:get";
-        String jarFileName = "le-serviceflows-prospectdiscovery-" + System.currentTimeMillis();
+        String jarFileName = "le-serviceflows-prospectdiscovery-" + versionManager.getCurrentVersion();
         command = String.format(command, mavenHome, artifactId, version, jarFileName);
 
         CommandLine cmdLine = CommandLine.parse(command);
@@ -201,56 +201,6 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
         } finally {
             FileUtils.deleteQuietly(localFile);
         }
-    }
-
-    private String getVersionFromPomXmlFile() throws Exception {
-        Collection<File> files = FileUtils.listFiles(new File("."), new IOFileFilter() {
-
-            @Override
-            public boolean accept(File file) {
-                return file.getName().equals("pom.xml");
-            }
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.equals("le-pls");
-            }
-
-        }, null);
-
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(files.iterator().next()));
-        StringBuilder content = null;
-        String version = null;
-        while (reader.hasNext() && version == null) {
-            int event = reader.next();
-
-            switch (event) {
-            case XMLStreamConstants.START_ELEMENT:
-                if ("version".equalsIgnoreCase(reader.getLocalName())) {
-                    content = new StringBuilder();
-                }
-                break;
-
-            case XMLStreamConstants.CHARACTERS:
-                if (content != null) {
-                    content.append(reader.getText().trim());
-                }
-                break;
-
-            case XMLStreamConstants.END_ELEMENT:
-                if (content != null) {
-                    version = content.toString();
-                }
-                content = null;
-                break;
-
-            case XMLStreamConstants.START_DOCUMENT:
-                break;
-            }
-        }
-
-        return version;
     }
 
     protected void setupUsers(CustomerSpace customerSpace) throws Exception {
