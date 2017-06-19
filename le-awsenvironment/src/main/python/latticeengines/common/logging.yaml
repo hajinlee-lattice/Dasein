@@ -1,0 +1,19 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+    simple:
+        format: "%(asctime)s [%(threadName)s] %(levelname)s %(module)s:%(lineno)d - %(message)s"
+        datefmt: '%H:%M:%S'
+    precise:
+        format: "%(asctime)s [%(threadName)s] %(levelname)s %(name)s:%(lineno)d - %(message)s"
+        datefmt: '%Y-%m-%d %H:%M:%S.%s %Z'
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: INFO
+        formatter: simple
+
+root:
+    level: DEBUG
+    handlers: [ console ]

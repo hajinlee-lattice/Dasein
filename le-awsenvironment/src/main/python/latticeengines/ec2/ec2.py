@@ -2,6 +2,13 @@ import boto3
 
 from ..elb.targetgroup import register, deregister
 
+EC2_CLIENT = None
+
+def get_client():
+    global EC2_CLIENT
+    if EC2_CLIENT is None:
+        EC2_CLIENT = boto3.client('ec2')
+    return EC2_CLIENT
 
 def register_ec2_to_targetgroup(stackname, tgrp):
     ids = find_ec2_ids(stackname)
@@ -35,7 +42,7 @@ def find_ec2_ids(stackname):
 
 
 def find_ec2_id_by_ip(private_ip):
-    client = boto3.client('ec2')
+    client = get_client()
     response = client.describe_instances(
         DryRun=False,
         Filters=[
@@ -56,3 +63,40 @@ def find_ec2_id_by_ip(private_ip):
                 return instance["InstanceId"]
 
     raise Exception("Cannot find instance with private ip " + private_ip)
+
+
+def find_ec2_id_by_sg(sg):
+    client = get_client()
+    response = client.describe_instances(
+        DryRun=False,
+        Filters=[
+            {
+                'Name': 'group-name',
+                'Values': [
+                    sg,
+                ]
+            },
+        ],
+        MaxResults=999
+    )
+    ids = []
+    reservations = response["Reservations"]
+    for reservation in reservations:
+        instances = reservation["Instances"]
+        for instance in instances:
+            ids.append(instance["InstanceId"])
+
+    return ids
+
+def tag_instance(ids, key, value):
+    client = get_client()
+    client.create_tags(
+        Resources=ids,
+        Tags=[
+            {
+                'Key': key,
+                'Value': value
+            },
+        ]
+    )
+
