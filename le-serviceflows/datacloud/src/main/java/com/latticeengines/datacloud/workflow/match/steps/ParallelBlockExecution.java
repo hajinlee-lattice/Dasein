@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
 import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -148,7 +149,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
     private void finalizeMatch() {
         try {
-            matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f).commit();
+            matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f)
+                    .commit();
 
             Long startTime = matchOutput.getReceivedAt().getTime();
             matchOutput.getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
@@ -170,11 +172,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             }
             Long count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
             log.info("Generated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
-
-            int timeElapsedInMinutes = (int) (TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime));
+            MatchCommand matchCommand = matchCommandService.getByRootOperationUid(rootOperationUid);
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
-                    .duration(timeElapsedInMinutes) //
+                    .duration((int) (TimeUnit.MILLISECONDS
+                            .toMinutes(System.currentTimeMillis() - matchCommand.getCreateTime().getTime()))) //
                     .dnbCommands() //
                     .rowsMatched(count.intValue()) //
                     .status(MatchStatus.FINISHED) //
@@ -338,12 +340,10 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.error("Failed to read the error for matcher " + blockOperationUid + " in application " + failedAppId
                     + " : " + e.getMessage());
         }
-
         matchCommandService.update(rootOperationUid) //
                 .status(terminalStatus) //
                 .errorMessage(errorMsg) //
                 .commit();
-
         throw new RuntimeException("Match failed. " + errorMsg);
     }
 

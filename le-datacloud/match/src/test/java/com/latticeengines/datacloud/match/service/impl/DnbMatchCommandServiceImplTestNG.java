@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.python.jline.internal.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -49,7 +48,6 @@ public class DnbMatchCommandServiceImplTestNG extends DataCloudMatchFunctionalTe
 
     @BeforeClass(groups = "functional")
     public void init() {
-        Log.info("array length : " + matchCommandDataProvider().length);
         for (int i = 0; i < matchCommandDataProvider().length; i++) {
             // populate records
             MatchCommand matchCommand = new MatchCommand();
