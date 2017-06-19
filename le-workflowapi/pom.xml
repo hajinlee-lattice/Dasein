@@ -40,6 +40,12 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-datacloud</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-redshiftdb</artifactId>
             <version>${project.version}</version>
             <exclusions>
