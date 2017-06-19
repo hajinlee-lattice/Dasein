@@ -44,7 +44,7 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     protected CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("CalculateStatsTest");
     protected String dataCollectionName;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     protected void setupForWorkflow() throws Exception {
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
         MultiTenantContext.setTenant(tenant);
