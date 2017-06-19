@@ -25,13 +25,13 @@ public class JobNameServiceImpl implements JobNameService {
     public String createJobName(String customer, String jobType) {
         CustomerSpace customerSpace = CustomerSpace.parse(customer);
         String shortName = !customer.equals(customerSpace.toString()) ? customer : customerSpace.getTenantId();
-        return joiner.join(shortName, jobType);
+        return joiner.join(shortName, jobType, dateTimeFormatter.print(new DateTime()));
     }
 
     @Override
     public String getDateTimeStringFromJobName(String jobName) {
         List<String> splits = jobNameSplitter.splitToList(jobName);
-        return splits.get(splits.size()-1);
+        return splits.get(splits.size() - 1);
     }
 
     @Override
