@@ -3,7 +3,6 @@ package com.latticeengines.prospectdiscovery.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
@@ -12,14 +11,15 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.IntentScore;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-dataflow-context.xml" })
 public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     protected QuotaFlowParameters getStandardParameters() {
@@ -64,8 +64,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
         QuotaFlowParameters parameters = getStandardParameters();
         // This should filter out everything so that only the single contact
         // that was never sent out is sent.
-        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket()
-                .getDataFlowConfiguration();
+        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket().getDataFlowConfiguration();
         dataFlowConfiguration.set(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, null);
         Table result = executeDataFlow(parameters);
 
@@ -83,8 +82,7 @@ public class QuotaFlowSomeProspectsAlreadySentTestNG extends ServiceFlowsDataFlo
     public void testFilterExistingAccounts() {
         setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
-        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket()
-                .getDataFlowConfiguration();
+        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket().getDataFlowConfiguration();
         dataFlowConfiguration.setBoolean( //
                 TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts, false);
         Table result = executeDataFlow(parameters);

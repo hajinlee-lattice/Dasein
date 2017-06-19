@@ -1,18 +1,19 @@
 package com.latticeengines.prospectdiscovery.dataflow;
 
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-dataflow-context.xml" })
 public class CreateScoreTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
-    
+
     private CreateScoreTableParameters getStandardParameters() {
-        CreateScoreTableParameters params = new CreateScoreTableParameters("ScoreResult", "EventTable", "LatticeAccountID");
+        CreateScoreTableParameters params = new CreateScoreTableParameters("ScoreResult", "EventTable",
+                "LatticeAccountID");
         return params;
-        
+
     }
 
     @Test(groups = "functional")

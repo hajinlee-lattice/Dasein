@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-dataflow-context.xml" })
 public class PreMatchEventTableFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")

@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })
 public class CombineInputTableWithScoreInternalIdTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     private CombineInputTableWithScoreParameters getStandardParameters() {

@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.Sor
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-cdl-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-cdl-dataflow-context.xml" })
 public class RedshiftPublishDataFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Value("${aws.test.s3.bucket}")
@@ -55,7 +55,8 @@ public class RedshiftPublishDataFlowTestNG extends ServiceFlowsDataFlowFunctiona
         redshiftTableConfig.setDistKey("lastmodifieddate");
         redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
         redshiftTableConfig.setSortKeys(Arrays.asList(new String[] { "id" }));
-        RedshiftPublishDataFlowParameters parameters = new RedshiftPublishDataFlowParameters("SourceTable", redshiftTableConfig);
+        RedshiftPublishDataFlowParameters parameters = new RedshiftPublishDataFlowParameters("SourceTable",
+                redshiftTableConfig);
         executeDataFlow(parameters);
     }
 

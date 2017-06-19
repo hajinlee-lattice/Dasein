@@ -16,7 +16,7 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.domain.exposed.dataflow.flows.PivotScoreAndEventParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })
 public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     private PivotScoreAndEventParameters getStandardParameters() {
@@ -36,9 +36,10 @@ public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTest
         assertEquals(outputRecords.size(), 17);
 
         CSVFormat format = LECSVFormat.format.withSkipHeaderRecord(true);
-        try (CSVParser parser = new CSVParser(new InputStreamReader(ClassLoader.getSystemResourceAsStream(String
-                .format("%s/%s/pivot_score_event_result.csv", //
-                        getFlowBeanName(), getStandardParameters().getScoreOutputTableName()))), format)) {
+        try (CSVParser parser = new CSVParser(new InputStreamReader(
+                ClassLoader.getSystemResourceAsStream(String.format("%s/%s/pivot_score_event_result.csv", //
+                        getFlowBeanName(), getStandardParameters().getScoreOutputTableName()))),
+                format)) {
             List<CSVRecord> csvRecords = parser.getRecords();
 
             for (int i = 0; i < outputRecords.size(); i++) {

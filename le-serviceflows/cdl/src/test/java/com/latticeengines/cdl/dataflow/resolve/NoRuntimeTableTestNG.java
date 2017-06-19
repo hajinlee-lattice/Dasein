@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.dataflow.flows.cdl.ResolveStagingAndRuntimeTableParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-cdl-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-cdl-dataflow-context.xml" })
 public class NoRuntimeTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
@@ -21,7 +21,7 @@ public class NoRuntimeTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBa
     protected String getFlowBeanName() {
         return "resolveStagingAndRuntimeTable";
     }
-    
+
     @Override
     protected String getScenarioName() {
         return "noRuntimeTable";
@@ -36,6 +36,5 @@ public class NoRuntimeTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBa
     protected String getLastModifiedColumnName(String tableName) {
         return null;
     }
-
 
 }

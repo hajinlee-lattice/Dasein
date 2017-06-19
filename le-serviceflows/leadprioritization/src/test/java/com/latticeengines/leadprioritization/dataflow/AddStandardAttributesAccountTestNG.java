@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })
 public class AddStandardAttributesAccountTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")

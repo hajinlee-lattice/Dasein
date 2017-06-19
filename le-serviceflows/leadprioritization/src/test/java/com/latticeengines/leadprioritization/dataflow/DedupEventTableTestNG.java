@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })
 public class DedupEventTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
@@ -51,7 +51,7 @@ public class DedupEventTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGB
 
     private Object[][] getData() {
         return new Object[][] { //
-        { 1, false, 1L, "1", "1", 0 }, //
+                { 1, false, 1L, "1", "1", 0 }, //
                 { 2, true, 2L, "1", "2", 0 }, //
                 { 4, true, 4L, "2", "4", 0 }, //
                 { 5, false, 5L, "2", "5", 0 }, //

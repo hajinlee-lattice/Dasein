@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameter
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })
 public class DedupLeadEventTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
     @Test(groups = "functional", enabled = false)
     public void test() {
@@ -27,22 +27,16 @@ public class DedupLeadEventTableTestNG extends ServiceFlowsDataFlowFunctionalTes
         final List<GenericRecord> publicDomains = readInput("PublicDomain");
         final Map<Object, Integer> histogram = histogramDomains(output);
         Assert.assertTrue(histogram.size() > 0);
-        Assert.assertTrue(histogram
-                .keySet()
-                .stream()
-                .allMatch(
-                        domain -> {
-                            int qty = histogram.get(domain);
-                            boolean isPublic = publicDomains.stream().anyMatch(
-                                    r -> r.get("Domain") != null
-                                            && r.get("Domain").toString().toUpperCase().equals(domain));
-                            boolean ok = qty == 1 || domain == null || domain.toString().equals("") || isPublic;
-                            if (!ok) {
-                                System.out.println(String.format("Domain: %s, qty: %d, public: %s", domain, qty,
-                                        isPublic));
-                            }
-                            return true;
-                        }));
+        Assert.assertTrue(histogram.keySet().stream().allMatch(domain -> {
+            int qty = histogram.get(domain);
+            boolean isPublic = publicDomains.stream()
+                    .anyMatch(r -> r.get("Domain") != null && r.get("Domain").toString().toUpperCase().equals(domain));
+            boolean ok = qty == 1 || domain == null || domain.toString().equals("") || isPublic;
+            if (!ok) {
+                System.out.println(String.format("Domain: %s, qty: %d, public: %s", domain, qty, isPublic));
+            }
+            return true;
+        }));
     }
 
     private void verifySource() {

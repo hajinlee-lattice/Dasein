@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameter
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })
 public class DedupEventTableDP3288TestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
     @Test(groups = "functional", enabled = false)
     public void test() {

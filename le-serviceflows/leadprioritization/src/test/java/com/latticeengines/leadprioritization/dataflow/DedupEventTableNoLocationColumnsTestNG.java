@@ -9,7 +9,7 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowF
 /**
  * Test for PLS-1286
  */
-@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })
 public class DedupEventTableNoLocationColumnsTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = false)

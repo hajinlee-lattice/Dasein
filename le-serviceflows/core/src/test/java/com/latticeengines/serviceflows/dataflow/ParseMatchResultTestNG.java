@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-core-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-core-dataflow-context.xml" })
 public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
@@ -41,10 +41,9 @@ public class ParseMatchResultTestNG extends ServiceFlowsDataFlowFunctionalTestNG
                 Pair.of("Domain", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1, "Name1", "City1", "State1", "Country1", 1L, "d.com"}, //
+                { 1, "Name1", "City1", "State1", "Country1", 1L, "d.com" }, //
                 { 2, "Name2", "City2", "State2", "Country2", 2L, "d.com" }, //
-                { 3, "Name3", "City3", "State3", "Country3", 3L, "d.com" }
-        };
+                { 3, "Name3", "City3", "State3", "Country3", 3L, "d.com" } };
         uploadDataToSharedAvroInput(data, fields);
 
         ParseMatchResultParameters parameters = new ParseMatchResultParameters();

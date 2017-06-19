@@ -23,13 +23,14 @@ import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-dataflow-context.xml" })
 public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testAgainstStandardTransform() {
         AddStandardAttributesParameters parameters = new AddStandardAttributesParameters("EventTable",
-                TransformationPipeline.getTransforms(TransformationGroup.STANDARD), SchemaInterpretation.SalesforceLead);
+                TransformationPipeline.getTransforms(TransformationGroup.STANDARD),
+                SchemaInterpretation.SalesforceLead);
         Table table = executeDataFlow(parameters);
         System.out.println(JsonUtils.serialize(table));
         Attribute attribute = table.getAttribute("Industry_Group");

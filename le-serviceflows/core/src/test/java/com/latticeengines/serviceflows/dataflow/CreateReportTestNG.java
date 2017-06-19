@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.dataflow.ReportColumn;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-core-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-core-dataflow-context.xml" })
 public class CreateReportTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
     @Test(groups = "functional")
     public void test() {

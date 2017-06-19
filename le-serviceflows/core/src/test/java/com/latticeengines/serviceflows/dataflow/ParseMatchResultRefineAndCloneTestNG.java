@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-core-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-core-dataflow-context.xml" })
 public class ParseMatchResultRefineAndCloneTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = false)

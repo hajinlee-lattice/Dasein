@@ -11,15 +11,15 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.IntentScore;
-import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
+import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
+import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowProperty;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
+@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-dataflow-context.xml" })
 public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     private QuotaFlowParameters getStandardParameters() {
@@ -60,8 +60,7 @@ public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsDataFlow
     public void testIntentResent() {
         setEngine("TEZ");
         QuotaFlowParameters parameters = getStandardParameters();
-        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket()
-                .getDataFlowConfiguration();
+        TargetMarketDataFlowProperty dataFlowConfiguration = parameters.getTargetMarket().getDataFlowConfiguration();
         dataFlowConfiguration.setInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends, 1);
 
         Table result = executeDataFlow(parameters);
