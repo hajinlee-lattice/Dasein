@@ -346,7 +346,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         handleBulkEnrichOnly(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching, requestId,
                 uniqueFieldSchemasMap, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
-                originalOrderModelSummaryList, unorderedLeadEnrichmentMap, unorderedMatchLogMap,
+                originalOrderModelSummaryList, unorderedCombinedRecordMap, unorderedLeadEnrichmentMap, unorderedMatchLogMap,
                 unorderedMatchErrorLogMap);
 
         handleBulkNoMatchAndEnrich(uniqueFieldSchemasMap, originalOrderParsedTupleList,
@@ -382,6 +382,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
             List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
             List<ModelSummary> originalOrderModelSummaryList,
+            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap,
             Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap,
             Map<RecordModelTuple, List<String>> unorderedMatchLogMap,
             Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
@@ -392,6 +393,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                             uniqueFieldSchemasMap, originalOrderModelSummaryList, request.isHomogeneous(),
                             enrichInternalAttributes, performFetchOnlyForMatching, shouldEnrichOnly, isDebug, requestId,
                             unorderedMatchLogMap, unorderedMatchErrorLogMap);
+
+            Map<RecordModelTuple, Map<String, Object>> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqMap = format(
+                    partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList);
+            addMissingFields(uniqueFieldSchemasMap, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqMap,
+                    partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList);
+            unorderedCombinedRecordMap.putAll(partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqMap);
 
             unorderedLeadEnrichmentMap.putAll(bulkExtractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT));
         }
