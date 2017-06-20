@@ -17,6 +17,8 @@ def tag_internal(sg, key, value):
     ids = find_ec2_id_by_sg(sg)
     for id in ids:
         logger.info("Found instance to tag: %s" % id)
+    if ids is None or len(ids) == 0:
+        logger.info("There is no instances to tag.")
     tag_instance(ids, key, value)
 
 
