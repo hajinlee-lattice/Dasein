@@ -28,7 +28,8 @@ public class SwlibTool {
                 addOption("c", "classifier", false, " -<classifier> (classifier Maven-style)"). //
                 addOption("f", "localFileName", true, " -<localFileName> (path to local file to install)"). //
                 addOption("i", "initializer", true, " -<initializer> (initializer class name)"). //
-                addOption("h", "defaultFS", true, "-<defaultFS> (Hadoop fs.defaultFS)");
+                addOption("h", "defaultFS", true, "-<defaultFS> (Hadoop fs.defaultFS)"). //
+                addOption("n", "name", true, "-<name> (software library name)");
 
         try {
             CommandLine cmd = parser.parse(options, args);
@@ -42,6 +43,7 @@ public class SwlibTool {
                 String classifier = cmd.getOptionValue("classifier");
                 String initializerClassName = cmd.getOptionValue("initializer");
                 String fsDefaultFS = cmd.getOptionValue("defaultFS");
+                String name = cmd.getOptionValue("name");
 
                 File fileToInstall = null;
                 SoftwareLibraryService swlibService = appContext.getBean("softwareLibraryService",
@@ -55,6 +57,7 @@ public class SwlibTool {
                 swPackage.setVersion(version);
                 swPackage.setClassifier(classifier);
                 swPackage.setInitializerClass(initializerClassName);
+                swPackage.setName(name);
 
                 if (operation.equals("install")) {
                     String fileName = cmd.getOptionValue("localFileName");
@@ -68,7 +71,6 @@ public class SwlibTool {
                     } else {
                         swlibService.installPackage(swPackage, fileToInstall);
                     }
-                    
 
                 } else if (operation.equals("uninstall")) {
                 }
