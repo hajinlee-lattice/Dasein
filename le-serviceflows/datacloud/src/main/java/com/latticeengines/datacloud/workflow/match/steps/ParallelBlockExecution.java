@@ -9,10 +9,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
-import com.latticeengines.domain.exposed.util.MetadataConverter;
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
@@ -172,11 +168,9 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             }
             Long count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
             log.info("Generated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
-            MatchCommand matchCommand = matchCommandService.getByRootOperationUid(rootOperationUid);
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
-                    .duration((int) (TimeUnit.MILLISECONDS
-                            .toMinutes(System.currentTimeMillis() - matchCommand.getCreateTime().getTime()))) //
+                    .duration() //
                     .dnbCommands() //
                     .rowsMatched(count.intValue()) //
                     .status(MatchStatus.FINISHED) //
