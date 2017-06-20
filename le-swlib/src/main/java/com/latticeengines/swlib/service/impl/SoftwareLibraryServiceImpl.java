@@ -197,6 +197,9 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
             if (o1.getModule().equals("datacloud")) {
                 return -1;
             }
+            if (o2.getModule().equals("datacloud")) {
+                return 1;
+            }
             return o1.getModule().compareTo(o2.getModule());
         });
         for (SoftwarePackage pkg : packages) {
