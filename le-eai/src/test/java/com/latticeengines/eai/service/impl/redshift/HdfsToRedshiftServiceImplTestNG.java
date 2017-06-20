@@ -85,7 +85,6 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     @Test(groups = "functional")
     public void testUploadToRedshift() throws Exception {
         HdfsToRedshiftConfiguration configuration = getExportConfiguration();
-        Assert.fail();
         EaiJob job = eaiYarnService.createJob(configuration);
 
         ApplicationId appId = testYarnJob(job.getClient(), job.getAppMasterPropertiesObject(),
