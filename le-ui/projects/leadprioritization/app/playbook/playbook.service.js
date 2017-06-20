@@ -62,7 +62,9 @@ angular.module('lp.playbook')
         var changed = false,
             opts = PlaybookWizardStore.settings;
 
-        opts.name = PlaybookWizardStore.currentPlay.name;
+        if(PlaybookWizardStore.currentPlay && PlaybookWizardStore.currentPlay.name) {
+            opts.name = PlaybookWizardStore.currentPlay.name;
+        }
 
         if(PlaybookWizardStore.settings) {
             if(PlaybookWizardStore.currentPlay) {
