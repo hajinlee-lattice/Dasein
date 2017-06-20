@@ -48,6 +48,16 @@
                                     </location>
                                 </source>
                                 <source>
+                                    <location>
+                                        cdl/target/le-serviceflows-cdl-${le.rpm.version}-shaded.jar
+                                    </location>
+                                </source>
+                                <source>
+                                    <location>
+                                        datacloud/target/le-serviceflows-datacloud-${le.rpm.version}-shaded.jar
+                                    </location>
+                                </source>
+                                <source>
                                     <location>../le-swlib/target/le-swlib-${le.rpm.version}-shaded.jar</location>
                                 </source>
                             </sources>
