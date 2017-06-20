@@ -281,7 +281,7 @@ def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_dri
     params["LE_ENVIRONMENT"] = environment
     params["CATALINA_OPTS"] = "-Xmx%dm -XX:ReservedCodeCacheSize=%dm" % (int(alloc["mem"] * 0.9), 256 if alloc["mem"] <= 1024 else 512)
     if 'QUARTZ_DB' not in params or params['QUARTZ_DB'] == '':
-        params['QUARTZ_DB'] = "QuartzDB_" + stackname
+        params['QUARTZ_DB'] = "QuartzDB"
     for k, v in params.items():
         container.set_env(k, v)
 
