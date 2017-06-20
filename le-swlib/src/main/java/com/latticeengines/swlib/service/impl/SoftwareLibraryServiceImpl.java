@@ -114,13 +114,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         try {
             List<String> files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, //
                     String.format("%s/%s", topLevelPath, module), //
-                    new HdfsFileFilter() {
-
-                        @Override
-                        public boolean accept(FileStatus file) {
-                            return file.getPath().toString().endsWith(".json");
-                        }
-                    });
+                    file -> file.getPath().toString().endsWith(".json"));
 
             for (String file : files) {
                 try {

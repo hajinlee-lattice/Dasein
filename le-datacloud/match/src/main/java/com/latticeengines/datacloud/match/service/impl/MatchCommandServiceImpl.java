@@ -257,8 +257,9 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             return this;
         }
 
-        public MatchCommandUpdaterImpl duration(int duration) {
-            matchCommand.setDuration(duration);
+        public MatchCommandUpdaterImpl duration() {
+            matchCommand.setDuration((int) (TimeUnit.MILLISECONDS
+                    .toMinutes(System.currentTimeMillis() - matchCommand.getCreateTime().getTime())));
             return this;
         }
 

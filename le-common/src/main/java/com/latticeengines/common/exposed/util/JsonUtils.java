@@ -135,6 +135,9 @@ public class JsonUtils {
     }
 
     public static <T> List<T> convertList(List<?> raw, Class<T> elementClazz) {
+        if (raw == null) {
+            return null;
+        }
         List<T> output = new ArrayList<>();
         for (Object elt : raw) {
             output.add(convertValue(elt, elementClazz));
@@ -144,6 +147,9 @@ public class JsonUtils {
 
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> convertMap(Map<?, ?> raw, Class<K> keyClazz, Class<V> valueClazz) {
+        if (raw == null) {
+            return null;
+        }
         Map<K, V> output = new HashMap<>();
         for (Object entry : raw.entrySet()) {
             Map.Entry<Object, Object> casted = (Map.Entry<Object, Object>) entry;
