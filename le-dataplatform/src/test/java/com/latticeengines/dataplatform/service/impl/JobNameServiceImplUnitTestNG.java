@@ -15,10 +15,8 @@ public class JobNameServiceImplUnitTestNG {
         
         String jobName = jobNameService.createJobName(customer, jobType);
         
-        String dateTimeStr = jobNameService.getDateTimeStringFromJobName(jobName);
-        
         assertEquals(customer, jobNameService.getCustomerFromJobName(jobName));
         
-        assertNotEquals(customer+jobType+dateTimeStr, jobName);
+        assertNotEquals(customer+jobType, jobName);
     }    
 }

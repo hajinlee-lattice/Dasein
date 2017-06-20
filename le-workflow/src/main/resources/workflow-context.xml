@@ -12,6 +12,7 @@
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
+    <import resource="classpath:workflow-persistence-context.xml"/>
 
     <bean id="jobRegistryBeanPostProcessor" class="com.latticeengines.workflow.core.CustomJobRegistryBeanPostProcessor">
         <property name="jobRegistry" ref="jobRegistry"/>

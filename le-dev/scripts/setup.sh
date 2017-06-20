@@ -97,10 +97,6 @@ else
     ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py
 fi
 
-#echo "Rebuild admin war"
-#pushd $WSHOME/le-admin; mvn -DskipTests clean install; popd;
-#processErrors
-
 if [ "${LE_ENVIRONMENT}" = "devcluster" ]; then
     VERSION=`leversion`
     echo "copying ${VERSION} artifacts from local hadoop to devcluster"

@@ -15,8 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import com.latticeengines.db.exposed.schemagen.postprocess.PostProcessor;
 import com.latticeengines.db.exposed.schemagen.postprocess.SQLServerPostProcessor;
 
@@ -111,27 +109,30 @@ public class SchemaGenerator {
     }
 
     public void appendStaticSql(File exportFile, DBDialect dbDialect) throws IOException {
-        String leafFolder = "";
-        switch (dbDialect) {
-        case MYSQL5INNODB:
-            leafFolder = "mysql";
-            break;
-        case SQLSERVER:
-            leafFolder = "sqlserver";
-            break;
-        default:
-            break;
-        }
-        Iterable<File> iterable = Files.fileTreeTraverser()
-                .children(new File("src/main/resources/staticsql/" + leafFolder));
-        for (File f : iterable) {
-            if (f.getName().equals(".svn") || f.isDirectory()) {
-                continue;
-            }
-            log.info(String.format("appending %s to %s", f.getAbsolutePath(), exportFile.getAbsolutePath()));
-            String staticSql = Files.toString(f, Charsets.UTF_8);
-            Files.append(staticSql, exportFile, Charsets.UTF_8);
-        }
+        log.info("static sql is by passed.");
+        return;
+
+//        String leafFolder = "";
+//        switch (dbDialect) {
+//        case MYSQL5INNODB:
+//            leafFolder = "mysql";
+//            break;
+//        case SQLSERVER:
+//            leafFolder = "sqlserver";
+//            break;
+//        default:
+//            break;
+//        }
+//        Iterable<File> iterable = Files.fileTreeTraverser()
+//                .children(new File("src/main/resources/staticsql/" + leafFolder));
+//        for (File f : iterable) {
+//            if (f.getName().equals(".svn") || f.isDirectory()) {
+//                continue;
+//            }
+//            log.info(String.format("appending %s to %s", f.getAbsolutePath(), exportFile.getAbsolutePath()));
+//            String staticSql = Files.toString(f, Charsets.UTF_8);
+//            Files.append(staticSql, exportFile, Charsets.UTF_8);
+//        }
 
     }
 

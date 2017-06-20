@@ -215,7 +215,6 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         ApplicationReport app = jobService.getJobReportById(applicationId);
         assertEquals(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
                 jobNameService.getCustomerFromJobName(app.getName()));
-        assertTrue(jobNameService.getDateTimeFromJobName(app.getName()).isBeforeNow());
     }
 
     @Test(groups = { "functional.platform", "functional.production" }, enabled = true)

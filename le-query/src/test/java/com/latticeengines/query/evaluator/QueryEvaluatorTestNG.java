@@ -88,10 +88,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
         // half range look up
         range1 = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").in("a", null) //
+                .let(BusinessEntity.Account, "companyname").gte("a") //
                 .build();
         range2 = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "alexaviewsperuser").in(null, 3.5) //
+                .let(BusinessEntity.LatticeAccount, "alexaviewsperuser").lt(3.5) //
                 .build();
         restriction = Restriction.builder().and(range1, range2).build();
         query = Query.builder().where(restriction).build();
@@ -103,7 +103,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .that(range1) //
                 .build();
         query = Query.builder().where(restriction).build();
-        queryEvaluator.evaluate(attrRepo, query); // 77058
+        queryEvaluator.evaluate(attrRepo, query); //
 
         // bucket
         Restriction lbl2 = Restriction.builder() //

@@ -33,7 +33,7 @@ public enum BusinessEntity implements GraphNode {
         // Storages
         Account.setBatchStore(ConsolidatedAccount);
         Account.setServingStore(BucketedAccount);
-        Contact.setServingStore(ConsolidatedContact);
+        Contact.setBatchStore(ConsolidatedContact);
         Contact.setServingStore(BucketedContact);
 
         LatticeAccount.setServingStore(AccountMaster);

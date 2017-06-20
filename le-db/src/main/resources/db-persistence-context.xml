@@ -1,29 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
-    xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:security="http://www.springframework.org/schema/security"
-    xmlns:util="http://www.springframework.org/schema/util"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-      http://www.springframework.org/schema/aop
-      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
       http://www.springframework.org/schema/tx
-      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
-      http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context-4.0.xsd
-      http://www.springframework.org/schema/jee
-      http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
-      http://www.springframework.org/schema/util
-      http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-    <bean id="dataSource"
-        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${db.datasource.driver}" />
-        <property name="url" value="${db.datasource.url}" />
-        <property name="username" value="${db.datasource.user}" />
+    <bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${db.datasource.driver}"/>
+        <property name="jdbcUrl" value="${db.datasource.url}"/>
+        <property name="user" value="${db.datasource.user}" />
         <property name="password" value="${db.datasource.password.encrypted}" />
+        <property name="acquireIncrement" value="1"/>
+        <property name="minPoolSize" value="2"/>
+        <property name="maxPoolSize" value="8"/>
+        <property name="checkoutTimeout" value="10000"/>
+        <property name="idleConnectionTestPeriod" value="10"/>
+        <property name="maxIdleTime" value="30"/>
     </bean>
 
     <!-- Hibernate session factory -->
