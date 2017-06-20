@@ -33,8 +33,13 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     @Override
     public List<MetadataSegment> getSegments() {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return metadataProxy.getMetadataSegments(customerSpace).stream() //
-                .map(this::translateForFrontend).collect(Collectors.toList());
+        List<MetadataSegment> backendSegments = metadataProxy.getMetadataSegments(customerSpace);
+        if (backendSegments == null) {
+            return null;
+        } else {
+            return metadataProxy.getMetadataSegments(customerSpace).stream() //
+                    .map(this::translateForFrontend).collect(Collectors.toList());
+        }
     }
 
     @Override

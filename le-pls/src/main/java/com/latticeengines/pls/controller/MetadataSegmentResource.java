@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.pls.service.MetadataSegmentService;
-import com.latticeengines.security.exposed.service.SessionService;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import io.swagger.annotations.Api;
@@ -21,9 +20,6 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping("/metadatasegments")
 public class MetadataSegmentResource {
-
-    @Autowired
-    private SessionService sessionService;
 
     @Autowired
     private MetadataSegmentService metadataSegmentService;

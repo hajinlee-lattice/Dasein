@@ -191,13 +191,13 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         log.info(String.format("Found %d of software packages from the software library for this module.",
                 packages.size()));
         packages.sort((o1, o2) -> {
-            if (o1.getName().equals(o2.getName())) {
+            if (o1.getModule().equals(o2.getModule())) {
                 return 0;
             }
-            if (o1.getName().equals("datacloud")) {
+            if (o1.getModule().equals("datacloud")) {
                 return -1;
             }
-            return o1.getName().compareTo(o2.getName());
+            return o1.getModule().compareTo(o2.getModule());
         });
         for (SoftwarePackage pkg : packages) {
             String initializerClassName = pkg.getInitializerClass();
