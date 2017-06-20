@@ -158,7 +158,7 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
     private void checkBuckets(List<Bucket> bucketList) {
         for (Bucket bucket : bucketList) {
             Assert.assertNotNull(bucket);
-            Assert.assertNotNull(bucket.getBucketLabel());
+            Assert.assertNotNull(bucket.getLabel());
             Assert.assertNotNull(bucket.getCount());
             // this should be null
             Assert.assertNull(bucket.getEncodedCountList());

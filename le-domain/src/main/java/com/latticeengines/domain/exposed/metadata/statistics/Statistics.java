@@ -22,6 +22,9 @@ import com.latticeengines.domain.exposed.metadata.Category;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Statistics {
 
+    @JsonProperty("Count")
+    private Long count;
+
     @JsonProperty("Categories")
     @JsonDeserialize(keyUsing = CategoryKeyDeserializer.class)
     @JsonSerialize(keyUsing = CategoryKeySerializer.class)
@@ -33,6 +36,26 @@ public class Statistics {
 
     public void setCategories(Map<Category, CategoryStatistics> categories) {
         this.categories = categories;
+    }
+         
+    public Long getCount() {
+        return count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
+    }
+
+    public CategoryStatistics getCategory(Category category) {
+        return categories.get(category);
+    }
+
+    public void putCategory(Category category, CategoryStatistics cateStats) {
+        categories.put(category, cateStats);
+    }
+
+    public boolean hasCategory(Category category) {
+        return categories.containsKey(category);
     }
 
     private static class CategoryKeyDeserializer extends KeyDeserializer {

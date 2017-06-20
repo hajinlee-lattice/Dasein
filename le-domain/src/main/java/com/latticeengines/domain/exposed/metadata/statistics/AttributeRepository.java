@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -18,10 +20,17 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class AttributeRepository {
 
+    @JsonProperty("Customer")
     private CustomerSpace customerSpace;
+
+    @JsonProperty("DataCollection")
     private String collectionName;
 
+    @JsonProperty("AttrMap")
+    @JsonDeserialize(keyUsing = AttributeLookup.AttributeLookupKeyDeserializer.class)
     private Map<AttributeLookup, Attribute> attributeMap;
+
+    @JsonProperty("TableNameMap")
     private Map<TableRoleInCollection, String> tableNameMap;
 
     // used for creating repository for le-query tests

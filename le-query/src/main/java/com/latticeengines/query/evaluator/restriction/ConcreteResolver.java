@@ -101,7 +101,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         int value = 0;
         if (bktLbl != null) {
             Bucket bkt = buckets.getBucketList().stream() //
-                    .filter(b -> b.getBucketLabel().equals(bktLbl)) //
+                    .filter(b -> b.getLabel().equals(bktLbl)) //
                     .findFirst().orElse(null);
             if (bkt == null) {
                 throw new QueryEvaluationException("Cannot find label [" + bktLbl + "] in statistics.");

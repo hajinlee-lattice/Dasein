@@ -4,20 +4,23 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+
+@JsonSerialize(using = AttributeLookup.AttributeLookupSerializer.class)
+@JsonDeserialize(using = AttributeLookup.AttributeLookupDeserializer.class)
 public class AttributeLookup extends Lookup {
 
     @JsonProperty("entity")
@@ -26,8 +29,8 @@ public class AttributeLookup extends Lookup {
     @JsonProperty("attribute")
     private String attribute;
 
-    public AttributeLookup(){
-            }
+    public AttributeLookup() {
+    }
 
     public AttributeLookup(BusinessEntity entity, String attrName) {
         this.entity = entity;
@@ -83,6 +86,39 @@ public class AttributeLookup extends Lookup {
         }
     }
 
+    public static class AttributeLookupDeserializer extends JsonDeserializer<AttributeLookup> {
+        public AttributeLookupDeserializer() {
+        }
+
+        @Override
+        public AttributeLookup deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+            ObjectCodec oc = jp.getCodec();
+            JsonNode node = oc.readTree(jp);
+            String str = node.asText();
+            return AttributeLookup.fromString(str);
+        }
+    }
+
+    public static class AttributeLookupSerializer extends JsonSerializer<AttributeLookup> {
+        public AttributeLookupSerializer() {
+        }
+
+        @Override
+        public void serialize(AttributeLookup value, JsonGenerator jgen, SerializerProvider provider)
+                throws IOException {
+            jgen.writeFieldName(value.toString());
+        }
+
+        @Override
+        public void serializeWithType(AttributeLookup value, JsonGenerator gen, SerializerProvider provider,
+                TypeSerializer typeSer) throws IOException {
+            typeSer.writeTypePrefixForObject(value, gen);
+            serialize(value, gen, provider); // call your customized serialize
+                                             // method
+            typeSer.writeTypeSuffixForObject(value, gen);
+        }
+    }
+
     public static class AttributeLookupKeyDeserializer extends KeyDeserializer {
         public AttributeLookupKeyDeserializer() {
         }
@@ -95,25 +131,6 @@ public class AttributeLookup extends Lookup {
             } else {
                 return new AttributeLookup(BusinessEntity.valueOf(elements[0]), key.replace(elements[0] + ".", ""));
             }
-        }
-    }
-
-    public static class AttributeLookupKeySerializer extends JsonSerializer<AttributeLookup> {
-        public AttributeLookupKeySerializer() {
-        }
-
-        @Override
-        public void serialize(AttributeLookup value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-            jgen.writeFieldName(value.toString());
-        }
-
-        @Override
-        public void serializeWithType(AttributeLookup value, JsonGenerator gen,
-                                      SerializerProvider provider, TypeSerializer typeSer)
-                throws IOException {
-            typeSer.writeTypePrefixForObject(value, gen);
-            serialize(value, gen, provider); // call your customized serialize method
-            typeSer.writeTypeSuffixForObject(value, gen);
         }
     }
 

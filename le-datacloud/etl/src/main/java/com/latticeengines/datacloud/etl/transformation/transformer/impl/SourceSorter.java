@@ -20,6 +20,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -156,29 +157,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     private void keepOnlyBiggestAvro(String workflowDir) {
         wd = new Path(workflowDir).toString();
         String avroGlob = wd + (wd.endsWith("/") ? "*.avro" : "/*.avro");
-        try {
-            List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
-            String biggestFile = "";
-            long maxFileSize = Integer.MIN_VALUE;
-            for (String file : files) {
-                long fileSize = HdfsUtils.getFileSize(yarnConfiguration, file);
-                if (fileSize > maxFileSize) {
-                    maxFileSize = fileSize;
-                    biggestFile = file;
-                }
-            }
-            if (StringUtils.isBlank(biggestFile)) {
-                throw new RuntimeException("Cannot determine the biggest file in " + avroGlob);
-            } else {
-                for (String file : files) {
-                    if (!file.equals(biggestFile)) {
-                        HdfsUtils.rmdir(yarnConfiguration, file);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to remove empty files", e);
-        }
+        TransformerUtils.removeAllButBiggestAvro(yarnConfiguration, avroGlob);
     }
 
     private void moveAvrosToOutput(String workflowDir) throws IOException {

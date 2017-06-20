@@ -33,6 +33,7 @@ public class BucketTestUtils {
 
     static final String ATTR_ENCODED_1 = "BitEncodeYes";
     static final String ATTR_ENCODED_2 = "BitEncodeNo";
+    static final String ATTR_ENCODED_3 = "BitEncodeFake";
 
     static final String ATTR_ENCODED = "Encoded";
     static final String ATTR_RELAY_STR = "RelayString";
@@ -60,6 +61,7 @@ public class BucketTestUtils {
         lowestBit.put(ATTR_BOOLEAN_4, 19);
         lowestBit.put(ATTR_ENCODED_1, 4);
         lowestBit.put(ATTR_ENCODED_2, 14);
+        lowestBit.put(ATTR_ENCODED_3, 24);
 
         numBits.put(ATTR_INTERVAL_INT, 3);
         numBits.put(ATTR_INTERVAL_DBL, 3);
@@ -71,9 +73,11 @@ public class BucketTestUtils {
         numBits.put(ATTR_BOOLEAN_4, BOOLEAN_NUM_BITS);
         numBits.put(ATTR_ENCODED_1, BOOLEAN_NUM_BITS);
         numBits.put(ATTR_ENCODED_2, BOOLEAN_NUM_BITS);
+        numBits.put(ATTR_ENCODED_3, BOOLEAN_NUM_BITS);
 
         encodeBitPos.put(ATTR_ENCODED_1, 3);
         encodeBitPos.put(ATTR_ENCODED_2, 1026);
+        encodeBitPos.put(ATTR_ENCODED_3, 16);
 
         encAttrs.put(ATTR_INTERVAL_INT, "EAttr1");
         encAttrs.put(ATTR_INTERVAL_DBL, "EAttr1");
@@ -85,6 +89,7 @@ public class BucketTestUtils {
         encAttrs.put(ATTR_BOOLEAN_4, "EAttr3");
         encAttrs.put(ATTR_ENCODED_1, "EAttr3");
         encAttrs.put(ATTR_ENCODED_2, "EAttr3");
+        encAttrs.put(ATTR_ENCODED_3, "EAttr3");
 
         bktAlgos.put(ATTR_INTERVAL_INT, intervalBucket());
         bktAlgos.put(ATTR_INTERVAL_DBL, intervalBucket());
@@ -96,6 +101,7 @@ public class BucketTestUtils {
         bktAlgos.put(ATTR_BOOLEAN_4, new BooleanBucket());
         bktAlgos.put(ATTR_ENCODED_1, new BooleanBucket());
         bktAlgos.put(ATTR_ENCODED_2, new BooleanBucket());
+        bktAlgos.put(ATTR_ENCODED_3, new BooleanBucket());
     }
 
     static Object[][] profileData() {
@@ -113,7 +119,8 @@ public class BucketTestUtils {
                 bktAttr(ATTR_BOOLEAN_3), //
                 bktAttr(ATTR_BOOLEAN_4), //
                 bktAttr(ATTR_ENCODED_1), //
-                bktAttr(ATTR_ENCODED_2) //
+                bktAttr(ATTR_ENCODED_2), //
+                bktAttr(ATTR_ENCODED_3)
         };
     }
 
@@ -305,6 +312,9 @@ public class BucketTestUtils {
             }
             if (b == encodeBitPos.get(ATTR_ENCODED_2)) {
                 result = setBooleanBit(result, lowestBit.get(ATTR_ENCODED_2), true);
+            }
+            if (b == encodeBitPos.get(ATTR_ENCODED_3)) {
+                result = setBooleanBit(result, lowestBit.get(ATTR_ENCODED_3), true);
             }
         }
         return result;

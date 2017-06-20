@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETED_FILTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
@@ -53,6 +54,8 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
     private static final String PROFILE_TABLE_PREFIX = "Profile";
     private static final String STATS_TABLE_PREFIX = "Stats";
     private static final String SORTED_TABLE_PREFIX = "Sorted";
+    private static final List<String> masterTableSortKeys = TableRoleInCollection.ConsolidatedAccount
+            .getForeignKeysAsStringList();
 
     private static int matchStep;
     private static int profileStep;
@@ -166,6 +169,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         step.setInputSteps(Collections.singletonList(matchStep));
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
+        conf.setEncAttrPrefix(CEAttr);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
@@ -219,7 +223,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         conf.setPartitions(500);
         conf.setSplittingThreads(maxSplitThreads);
         conf.setCompressResult(false);
-        conf.setSortingField(InterfaceName.LatticeAccountId.name());
+        conf.setSortingField(masterTableSortKeys.get(0)); //TODO: only support single sort key now
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;

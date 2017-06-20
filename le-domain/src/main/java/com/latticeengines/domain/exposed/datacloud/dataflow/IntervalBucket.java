@@ -44,7 +44,7 @@ public class IntervalBucket extends BucketAlgorithm {
             }
         }
         Number lastBoundary = boundaries.get(boundaries.size() - 1);
-        String lastLabel = String.format("> %s", formatBoundary(lastBoundary));
+        String lastLabel = String.format(">= %s", formatBoundary(lastBoundary));
 
         List<String> labels = new ArrayList<>();
         labels.add(null);

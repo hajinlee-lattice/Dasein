@@ -9,6 +9,7 @@ import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED_1;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED_2;
+import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_ENCODED_3;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_INTERVAL_DBL;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_INTERVAL_INT;
 import static com.latticeengines.datacloud.dataflow.bucket.BucketTestUtils.ATTR_RELAY_INT;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -63,10 +65,11 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Pair.of(ATTR_BOOLEAN_2, String.class), //
                 Pair.of(ATTR_BOOLEAN_3, Integer.class), //
                 Pair.of(ATTR_BOOLEAN_4, Boolean.class), //
-                Pair.of(ATTR_ENCODED, String.class) //
+                Pair.of(ATTR_ENCODED, String.class), //
+                Pair.of(ATTR_ENCODED_3, String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1L, "String1", 1, 1, 11.0, "Value2", "Group3A", "Y", "0", 1, true, createEncodedString() } };
+                { 1L, "String1", 1, 1, 11.0, "Value2", "Group3A", "Y", "0", 1, true, createEncodedString(), "Yes" } };
         uploadDataToSharedAvroInput(data, fields);
 
         List<Pair<String, Class<?>>> fields2 = BucketEncodeUtils.profileCols();
@@ -111,6 +114,7 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 tokens.add(ATTR_BOOLEAN_4 + "=" + getBkt(record, ATTR_BOOLEAN_4));
                 tokens.add(ATTR_ENCODED_1 + "=" + getBkt(record, ATTR_ENCODED_1));
                 tokens.add(ATTR_ENCODED_2 + "=" + getBkt(record, ATTR_ENCODED_2));
+                tokens.add(ATTR_ENCODED_3 + "=" + getBkt(record, ATTR_ENCODED_3));
                 System.out.println(StringUtils.join(tokens, ", "));
 
                 Assert.assertEquals(getBkt(record, ATTR_INTERVAL_INT), 2);
@@ -123,6 +127,7 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Assert.assertEquals(getBkt(record, ATTR_BOOLEAN_4), 1);
                 Assert.assertEquals(getBkt(record, ATTR_ENCODED_1), 1);
                 Assert.assertEquals(getBkt(record, ATTR_ENCODED_2), 2);
+                Assert.assertEquals(getBkt(record, ATTR_ENCODED_3), 1);
             }
         }
     }

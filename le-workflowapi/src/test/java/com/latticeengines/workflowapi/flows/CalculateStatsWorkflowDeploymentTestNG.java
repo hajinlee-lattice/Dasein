@@ -44,8 +44,8 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
     protected CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("CalculateStatsTest");
     protected String dataCollectionName;
 
-    @BeforeClass(groups = "deployment", enabled = false)
-    protected void setupForWorkflow() throws Exception {
+    @BeforeClass(groups = "deployment", enabled = true)
+    protected void setup() throws Exception {
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
         MultiTenantContext.setTenant(tenant);
         assertNotNull(MultiTenantContext.getTenant());
@@ -82,9 +82,9 @@ public class CalculateStatsWorkflowDeploymentTestNG extends WorkflowApiFunctiona
                 dataCollectionName);
         Assert.assertNotNull(retrievedCollection);
 
-        Table retrivedMasterTable = dataCollectionProxy.getTable(DEMO_CUSTOMERSPACE.toString(), dataCollectionName,
+        Table retrievedMasterTable = dataCollectionProxy.getTable(DEMO_CUSTOMERSPACE.toString(), dataCollectionName,
                 TableRoleInCollection.ConsolidatedAccount);
-        Assert.assertNotNull(retrivedMasterTable);
+        Assert.assertNotNull(retrievedMasterTable);
     }
 
     @AfterClass(groups = "deployment")

@@ -1,10 +1,5 @@
 package com.latticeengines.pls.workflow;
 
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.LEAccountIDLong;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
-
-import java.util.Collections;
-
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,9 +98,9 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
         exportConfig.setCreateNew(true);
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setDistStyle(DistStyle.Key);
-        redshiftTableConfig.setDistKey(LEAccountIDLong.name());
+        redshiftTableConfig.setDistKey(TableRoleInCollection.BucketedAccount.getPrimaryKey().name());
         redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
-        redshiftTableConfig.setSortKeys(Collections.singletonList(LatticeAccountId.name()));
+        redshiftTableConfig.setSortKeys(TableRoleInCollection.BucketedAccount.getForeignKeysAsStringList());
         redshiftTableConfig.setS3Bucket(s3Bucket);
         exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
         return exportConfig;

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -39,10 +40,14 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
     public Node construct(BucketEncodeParameters parameters) {
         Node source = addSource(parameters.getBaseTables().get(parameters.srcIdx));
 
+        // clean up bit decode strategy
+        parameters.encAttrs = cleanupDecodeStrategy(source.getFieldNames(), parameters.encAttrs);
+        parameters.retainAttrs.retainAll(source.getFieldNames());
+
         // handle exclude and rename fields
         List<String> toDiscard = new ArrayList<>(source.getFieldNames());
         toDiscard.removeAll(parameters.retainAttrs);
-        List<String> fieldsNeededForEncode = fieldsNeededForEncode(parameters.encAttrs);
+        List<String> fieldsNeededForEncode = fieldsNeededForEncode(parameters.encAttrs, source.getFieldNames());
         toDiscard.removeAll(fieldsNeededForEncode);
         source = source.discard(new FieldList(toDiscard));
 
@@ -59,6 +64,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         Set<String> fieldsToKeep = new HashSet<>(parameters.retainAttrs);
         newFields.forEach(fieldsToKeep::add);
         fieldsNeededForEncode.removeAll(fieldsToKeep);
+        fieldsNeededForEncode.retainAll(encoded.getFieldNames());
         return encoded.discard(new FieldList(fieldsNeededForEncode));
     }
 
@@ -104,8 +110,9 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         return fms;
     }
 
-    private List<String> fieldsNeededForEncode(List<DCEncodedAttr> encAttrs) {
+    private List<String> fieldsNeededForEncode(List<DCEncodedAttr> encAttrs, List<String> inputFields) {
         Set<String> neededFields = new HashSet<>();
+        Set<String> inputFieldSet = new HashSet<>(inputFields);
         for (DCEncodedAttr encAttr: encAttrs) {
             for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
                 String srcAttr;
@@ -114,10 +121,36 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                 } else {
                     srcAttr = bktAttr.resolveSourceAttr();
                 }
-                neededFields.add(srcAttr);
+                if (inputFieldSet.contains(srcAttr)) {
+                    neededFields.add(srcAttr);
+                }
             }
         }
         return new ArrayList<>(neededFields);
+    }
+
+    private List<DCEncodedAttr> cleanupDecodeStrategy(List<String> inputFields, List<DCEncodedAttr> encAttrs) {
+        Set<String> inputFieldSet = new HashSet<>(inputFields);
+        List<DCEncodedAttr> encodedAttrs2 = new ArrayList<>();
+        for (DCEncodedAttr encAttr: encAttrs) {
+            DCEncodedAttr encodedAttr2 = new DCEncodedAttr(encAttr.getEncAttr());
+            for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
+                BitDecodeStrategy decodeStrategy = bktAttr.getDecodedStrategy();
+                if (decodeStrategy != null) {
+                    String srcAttr = bktAttr.getSourceAttr();
+                    String nominalAttr = bktAttr.getNominalAttr();
+                    if (inputFieldSet.contains(srcAttr) || inputFieldSet.contains(nominalAttr)) {
+                        bktAttr.setDecodedStrategy(null);
+                        if (StringUtils.isBlank(srcAttr)) {
+                            bktAttr.setSourceAttr(srcAttr);
+                        }
+                    }
+                }
+                encodedAttr2.addBktAttr(bktAttr);
+            }
+            encodedAttrs2.add(encodedAttr2);
+        }
+        return encodedAttrs2;
     }
 
 }

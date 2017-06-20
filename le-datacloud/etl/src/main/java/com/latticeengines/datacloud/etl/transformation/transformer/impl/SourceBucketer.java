@@ -27,6 +27,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.dataflow.transformation.BucketEncode;
 import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
+import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
@@ -106,14 +107,7 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     }
 
     private boolean isProfileSource(Source source, String version) {
-        String avroPath;
-        if (source instanceof TableSource) {
-            Table table = ((TableSource) source).getTable();
-            avroPath = table.getExtracts().get(0).getPath();
-        } else {
-            String avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
-            avroPath = avroDir + "/*.avro";
-        }
+        String avroPath = TransformerUtils.avroPath(source, version, hdfsPathBuilder);
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroPath);
         if (records.hasNext()) {
             GenericRecord record = records.next();

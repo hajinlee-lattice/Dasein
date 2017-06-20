@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.dataflow.transformation.Copy;
+import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CopierParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(TRANSFORMER_NAME)
 public class SourceCopier extends AbstractDataflowTransformer<CopierConfig, CopierParameters> {
@@ -65,17 +65,21 @@ public class SourceCopier extends AbstractDataflowTransformer<CopierConfig, Copi
                 parameters.discardAttrs = inputAttrs;
             }
         }
+        parameters.sortKeys = configuration.getSortKeys();
+        parameters.sortDecending = Boolean.TRUE.equals(configuration.getSortDecending());
+    }
+
+    @Override
+    protected void postDataFlowProcessing(String workflowDir, CopierParameters paramters, CopierConfig configuration) {
+        if (configuration.getSortKeys() != null && !configuration.getSortKeys().isEmpty()) {
+            String wd = new Path(workflowDir).toString();
+            String avroGlob = wd + (wd.endsWith("/") ? "*.avro" : "/*.avro");
+            TransformerUtils.removeAllButBiggestAvro(yarnConfiguration, avroGlob);
+        }
     }
 
     private List<String> inputAttrs(Source source, String version) {
-        String avroPath;
-        if (source instanceof TableSource) {
-            Table table = ((TableSource) source).getTable();
-            avroPath = table.getExtracts().get(0).getPath();
-        } else {
-            String avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
-            avroPath = avroDir + "/*.avro";
-        }
+        String avroPath = TransformerUtils.avroPath(source, version, hdfsPathBuilder);
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroPath);
         return schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
     }

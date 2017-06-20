@@ -1,14 +1,47 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.google.common.collect.ImmutableList;
+
 public enum TableRoleInCollection {
     ConsolidatedAccount, //
     ConsolidatedContact, //
-    ConsolidatedTimeSeries, //
 
     Profile, //
 
     BucketedAccount, //
     BucketedContact, //
     
-    AccountMaster
+    AccountMaster;
+
+    private InterfaceName primaryKey;
+    private ImmutableList<InterfaceName> foreignKeys;
+
+    public InterfaceName getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public List<InterfaceName> getForeignKeys() {
+        return foreignKeys;
+    }
+
+    public List<String> getForeignKeysAsStringList() {
+        return foreignKeys.stream().map(InterfaceName::name).collect(Collectors.toList());
+    }
+
+    static {
+        ConsolidatedAccount.primaryKey = InterfaceName.AccountId;
+        ConsolidatedAccount.foreignKeys = ImmutableList.of(InterfaceName.LatticeAccountId);
+        BucketedAccount.primaryKey = ConsolidatedAccount.primaryKey;
+        BucketedAccount.foreignKeys = ConsolidatedAccount.foreignKeys;
+
+        ConsolidatedContact.primaryKey = InterfaceName.ContactId;
+        ConsolidatedContact.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
+        BucketedContact.primaryKey = ConsolidatedContact.primaryKey;
+        BucketedContact.foreignKeys = ConsolidatedContact.foreignKeys;
+
+        AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
+    }
 }

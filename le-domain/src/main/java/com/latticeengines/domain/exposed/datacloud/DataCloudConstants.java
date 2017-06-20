@@ -33,10 +33,14 @@ public final class DataCloudConstants {
     public static final String PROFILE_ATTR_SRC = "Attribute_Source";
     public static final String PROFILE_ATTR_SRC_CUSTOMER = "CUSTOMER";
 
+    public static final String CEAttr = "CEAttr";
+
     public static final String STATS_ATTR_NAME = "AttrName";
     public static final String STATS_ATTR_COUNT = "AttrCount";
     public static final String STATS_ATTR_BKTS = "BktCounts";
     public static final String STATS_ATTR_ALGO = PROFILE_ATTR_BKTALGO;
+
+    public static final String SOURCE_AM_PROFILE = "AccountMasterProfile";
 
     public static final String TRANSFORMER_AM_ENRICHER = "AMAttrEnricher";
     public static final String TRANSFORMER_PROFILER = "SourceProfiler";
@@ -44,5 +48,6 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_BUCKETED_FILTER = "bucketedFilter";
     public static final String TRANSFORMER_STATS_CALCULATOR = "statsCalculator";
     public static final String TRANSFORMER_SORTER = "sourceSorter";
+    public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
 }

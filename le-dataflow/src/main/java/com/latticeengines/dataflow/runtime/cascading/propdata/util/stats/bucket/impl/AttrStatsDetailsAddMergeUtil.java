@@ -62,7 +62,7 @@ public class AttrStatsDetailsAddMergeUtil extends AttrStatsDetailsMergeTemplate 
         Bucket matchingResultBucket = null;
         if (CollectionUtils.isNotEmpty(resultBucketsObj.getBucketList())) {
             for (Bucket resultBucket : resultBucketsObj.getBucketList()) {
-                if (resultBucket.getBucketLabel().equals(secondBucket.getBucketLabel())) {
+                if (resultBucket.getLabel().equals(secondBucket.getLabel())) {
                     matchingResultBucket = resultBucket;
                 }
             }

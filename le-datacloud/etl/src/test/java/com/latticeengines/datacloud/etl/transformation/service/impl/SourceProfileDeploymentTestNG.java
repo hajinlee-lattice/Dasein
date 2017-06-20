@@ -62,7 +62,8 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
 
     @Test(groups = "deployment")
     public void testTransformation() {
-        prepareAM();
+        uploadBaseSourceFile("AccountMaster", "master_temp", baseSourceVersion);
+        // prepareAM();
         prepareCustomer();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);

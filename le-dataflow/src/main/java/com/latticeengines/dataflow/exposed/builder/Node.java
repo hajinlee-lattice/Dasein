@@ -272,6 +272,10 @@ public class Node {
         return new Node(builder.register(new SortOperation(opInput(identifier), field, descending)), builder);
     }
 
+    public Node sort(List<String> fields, boolean descending) {
+        return new Node(builder.register(new SortOperation(opInput(identifier), fields, descending)), builder);
+    }
+
     public Node sort(Sort sort) {
         return new Node(builder.register(new SortOperation(opInput(identifier), sort)), builder);
     }

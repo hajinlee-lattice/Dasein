@@ -12,4 +12,10 @@ public class CopierParameters extends TransformationFlowParameters {
     @JsonProperty("discard_attrs")
     public List<String> discardAttrs;
 
+    @JsonProperty("sort_keys")
+    public List<String> sortKeys;
+
+    @JsonProperty("sort_descending")
+    public Boolean sortDecending;
+
 }

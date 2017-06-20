@@ -5,7 +5,7 @@ alias hdp-start='$WSHOME/le-dev/scripts/start-cluster.sh'
 alias hdp-stop='$WSHOME/le-dev/scripts/stop-cluster.sh'
 
 alias dfdplnobld='hadoop fs -rm -r -f "/app/dataflow/*" && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib'
-alias dfdpl='mvn -Pshaded-yarn -DskipTests clean install && dfdplnobld'
+alias dfdpl='dirs -c && pushd $WSHOME/le-dataflow && mvn -Pshaded-yarn -DskipTests clean install && dfdplnobld && popd'
 
 alias wfdplnobld='hadoop fs -rm -r -f "/app/workflow/*" && hadoop fs -mkdir -p /app/workflow'
 alias wfdpl='mvn -Pshaded-yarn -DskipTests clean install && wfdplnobld'

@@ -299,7 +299,7 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
             String fieldName, List<Bucket> bucketList, Long count, String lbl) {
 
         Bucket bucket = new Bucket();
-        bucket.setBucketLabel(lbl);
+        bucket.setLabel(lbl);
         bucket.setId(booleanTextHandler.assignIdForBooleanText(lbl));
         Long[] encodedCountArr = binaryCodedBuckets.get(fieldName).get(lbl);
         bucket.setEncodedCountList(encodedCountArr);
@@ -315,7 +315,7 @@ public class AMStatsLeafFieldSubstitutionFunction extends BaseOperation<Map> //
             List<Bucket> bucketList, Long count, String lbl) {
 
         Bucket bucket = new Bucket();
-        bucket.setBucketLabel(lbl);
+        bucket.setLabel(lbl);
         bucket.setId(nAttributeBucketIds.get(fieldName).get(lbl));
         bucket.setCount(attributeValueBuckets.get(fieldName).get(lbl));
         count += attributeValueBuckets.get(fieldName).get(lbl);

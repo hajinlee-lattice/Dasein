@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.dataflow.utils;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_BKTALGO;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_DECSTRAT;
@@ -147,7 +148,7 @@ public class BucketEncodeUtils {
     }
 
     public static boolean isCEAttr(String fieldName) {
-        return fieldName.matches("CEAttr\\d+");
+        return fieldName.matches(CEAttr + "\\d+");
     }
 
 }

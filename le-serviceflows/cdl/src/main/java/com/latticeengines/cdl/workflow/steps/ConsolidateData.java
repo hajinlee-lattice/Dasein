@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -52,6 +51,9 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     private String masterTableName;
     private String profileTableName;
     private static final String consolidatedTableName = "ConsolidatedTable";
+    private static final String accountId = TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name();
+    private static final List<String> masterTableSortKeys = TableRoleInCollection.ConsolidatedAccount
+            .getForeignKeysAsStringList();
 
     private CustomerSpace customerSpace = null;
 
@@ -62,7 +64,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     private DataCollectionProxy dataCollectionProxy;
 
     private List<String> inputTableNames = new ArrayList<>();
-    private String idField;
+    private String srcIdField;
     Map<MatchKey, List<String>> keyMap = null;
     Boolean dataInitialLoaded = false;
     private String collectionName;
@@ -82,6 +84,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
 
     @Override
     protected void onPostTransformationCompleted() {
+
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(masterTableName, pipelineVersion));
         dataCollectionProxy.upsertTable(customerSpace.toString(), collectionName, newMasterTable.getName(),
@@ -117,7 +120,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         }
         log.info("Set masterTableName=" + masterTableName);
 
-        idField = configuration.getIdField();
+        srcIdField = configuration.getIdField();
         keyMap = configuration.getMatchKeyMap();
 
         dataInitialLoaded = getObjectFromContext(DATA_INITIAL_LOADED, Boolean.class);
@@ -226,7 +229,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(masterTableName);
-        targetTable.setPrimaryKey(idField);
+        targetTable.setPrimaryKey(accountId);
         step3.setTargetTable(targetTable);
         return step3;
     }
@@ -240,7 +243,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
             targetTable.setNamePrefix(consolidatedTableName);
-            targetTable.setPrimaryKey(idField);
+            targetTable.setPrimaryKey(accountId);
             step4.setTargetTable(targetTable);
         }
         return step4;
@@ -271,7 +274,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(consolidatedTableName);
-        targetTable.setPrimaryKey(idField);
+        targetTable.setPrimaryKey(srcIdField);
         step6.setTargetTable(targetTable);
         return step6;
     }
@@ -280,7 +283,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         try {
             SorterConfig config = new SorterConfig();
             config.setPartitions(100);
-            config.setSortingField(InterfaceName.LatticeAccountId.name());
+            config.setSortingField(masterTableSortKeys.get(0)); // TODO: only support single sorting key now
             config.setCompressResult(false);
             return appendEngineConf(config, lightEngineConfig());
         } catch (Exception ex) {
@@ -290,13 +293,13 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
 
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(idField);
+        config.setSrcIdField(srcIdField);
         return appendEngineConf(config, lightEngineConfig());
     }
 
     private String getConsolidateDeltaConfig() {
         ConsolidateDeltaTransformerConfig config = new ConsolidateDeltaTransformerConfig();
-        config.setSrcIdField(idField);
+        config.setSrcIdField(srcIdField);
         return appendEngineConf(config, lightEngineConfig());
     }
 

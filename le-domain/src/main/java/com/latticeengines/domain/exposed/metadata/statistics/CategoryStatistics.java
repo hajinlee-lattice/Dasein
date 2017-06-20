@@ -23,4 +23,16 @@ public class CategoryStatistics {
     public void setSubcategories(Map<String, SubcategoryStatistics> subcategories) {
         this.subcategories = subcategories;
     }
+
+    public SubcategoryStatistics getSubcategory(String subcategory) {
+        return subcategories.get(subcategory);
+    }
+
+    public void putSubcategory(String subcategory, SubcategoryStatistics subcatStats) {
+        subcategories.put(subcategory, subcatStats);
+    }
+
+    public boolean hasSubcategory(String subcategory) {
+        return subcategories.containsKey(subcategory);
+    }
 }

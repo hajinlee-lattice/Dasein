@@ -1,10 +1,8 @@
 package com.latticeengines.domain.exposed.query.frontend;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +13,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class FrontEndSort {
 
-    @JsonIgnore
+    @JsonProperty("attributes")
     private List<AttributeLookup> attributes;
 
     @JsonProperty("descending")
@@ -28,12 +26,10 @@ public class FrontEndSort {
 
     private FrontEndSort(){}
 
-    @JsonIgnore
     public List<AttributeLookup> getAttributes() {
         return attributes;
     }
 
-    @JsonIgnore
     public void setAttributes(List<AttributeLookup> attributes) {
         this.attributes = attributes;
     }
@@ -51,20 +47,4 @@ public class FrontEndSort {
         this.descending = Boolean.TRUE.equals(descending) ? true : null;
     }
 
-    @JsonProperty("attrs")
-    private List<String> getAttrsAsStrings() {
-        if (attributes == null) {
-            return null;
-        }
-        return attributes.stream().map(AttributeLookup::toString).collect(Collectors.toList());
-    }
-
-    @JsonProperty("attrs")
-    private void setAttrsViaStrings(List<String> tokens) {
-        if (tokens == null) {
-            this.attributes = null;
-        } else {
-            this.attributes = tokens.stream().map(AttributeLookup::fromString).collect(Collectors.toList());
-        }
-    }
 }

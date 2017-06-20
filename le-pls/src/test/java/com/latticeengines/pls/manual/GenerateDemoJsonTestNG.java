@@ -112,7 +112,7 @@ public class GenerateDemoJsonTestNG {
         }
         buckets.setType(BucketType.Boolean);
         Bucket bucket = new Bucket();
-        bucket.setBucketLabel(value);
+        bucket.setLabel(value);
         bucket.setCount(frequency);
         buckets.getBucketList().add(bucket);
         statistics.getRowBasedStatistics().setNonNullCount(

@@ -33,16 +33,18 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
     private final String sortField;
     private final int partitions;
     private final String dummyJoinKeyField;
+    private final Class<?> sortFieldClz;
 
     private FileBackedOrderedList<?> ids;
 
     // output fields (dummyJoinKey, grpBdriesField)
     @SuppressWarnings("unchecked")
-    public SortPartitionBuffer(String sortField, String dummyJoinKeyField, String grpBdriesField, int partitions) {
+    public SortPartitionBuffer(String sortField, String dummyJoinKeyField, String grpBdriesField, Class<?> sortFieldClz, int partitions) {
         super(new Fields(dummyJoinKeyField, grpBdriesField));
         this.sortField = sortField;
         this.dummyJoinKeyField = dummyJoinKeyField;
         this.partitions = partitions;
+        this.sortFieldClz = sortFieldClz;
     }
 
     @SuppressWarnings("unchecked")
@@ -73,12 +75,16 @@ public class SortPartitionBuffer extends BaseOperation implements Buffer {
 
     private void bootstrapIdList(Object id) {
         LogManager.getLogger(FileBackedOrderedList.class).setLevel(Level.DEBUG);
-        if (id instanceof Integer) {
+        if (Integer.class.equals(sortFieldClz)) {
             ids = FileBackedOrderedList.newIntList(ID_BUFFER_SIZE);
-        } else if (id instanceof Long) {
+        } else if (Long.class.equals(sortFieldClz)) {
             ids = FileBackedOrderedList.newLongList(ID_BUFFER_SIZE);
-        } else if (id instanceof String || id instanceof Utf8) {
+        } else if (String.class.equals(sortFieldClz)) {
             ids = FileBackedOrderedList.newStrList(ID_BUFFER_SIZE);
+        } else if (Float.class.equals(sortFieldClz)) {
+            ids = FileBackedOrderedList.newFloatList(ID_BUFFER_SIZE);
+        } else if (Double.class.equals(sortFieldClz)) {
+            ids = FileBackedOrderedList.newDoubleList(ID_BUFFER_SIZE);
         }
     }
 

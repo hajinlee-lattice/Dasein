@@ -3,6 +3,8 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -18,12 +20,19 @@ public class ConsolidateDeltaFlow extends ConfigurableFlowBase<ConsolidateDeltaT
     public Node construct(TransformationFlowParameters parameters) {
 
         ConsolidateDeltaTransformerConfig config = getTransformerConfig(parameters);
+        String srcId = config.getSrcIdField();
+        String masterId = TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name();
 
         List<Node> sources = new ArrayList<>();
         List<String> sourceNames = new ArrayList<>();
         for (int i = 0; i < parameters.getBaseTables().size(); i++) {
             String sourceName = parameters.getBaseTables().get(i);
-            sources.add(addSource(sourceName));
+            Node source = addSource(sourceName);
+            List<String> srcFields = source.getFieldNames();
+            if (srcFields.contains(srcId) && !srcFields.contains(masterId)) {
+                source = source.rename(new FieldList(srcId), new FieldList(masterId));
+            }
+            sources.add(source);
             sourceNames.add(sourceName);
         }
         if (sources.size() <= 1) {
@@ -33,12 +42,11 @@ public class ConsolidateDeltaFlow extends ConfigurableFlowBase<ConsolidateDeltaT
             throw new RuntimeException("There should be two tables: input and master table!");
         }
 
-        String srcIdField = config.getSrcIdField();
-        Node idNode = sources.get(0).retain(new FieldList(srcIdField));
+        Node idNode = sources.get(0).retain(new FieldList(masterId));
         Node masterNode = sources.get(1);
         List<String> fieldToRetain = masterNode.getFieldNames();
 
-        Node result = idNode.leftJoin(new FieldList(srcIdField), masterNode, new FieldList(srcIdField));
+        Node result = idNode.leftJoin(new FieldList(masterId), masterNode, new FieldList(masterId));
         result = result.retain(new FieldList(fieldToRetain));
         return result;
     }

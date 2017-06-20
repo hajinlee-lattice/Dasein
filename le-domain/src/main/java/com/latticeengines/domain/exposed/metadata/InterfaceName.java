@@ -6,7 +6,10 @@ public enum InterfaceName {
     DUNS, //
     Event, //
     Domain, //
-    AccountId, // reused in cdl to be unique in one customer universe
+
+    // IDS - shared between LPI and CDL
+    AccountId, //
+    ContactId, //
     CategoryId, //
     SubcategoryId, //
 

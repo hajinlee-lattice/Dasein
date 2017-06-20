@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -23,7 +24,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndBucket;
 
 public class StatsCubeUtils {
 
@@ -87,8 +87,8 @@ public class StatsCubeUtils {
             String label = labels.get(i);
             Bucket bucket = new Bucket();
             bucket.setId((long) i);
-            bucket.setBucketLabel(label);
-            bucket.setBkt(FrontEndBucket.nullBkt());
+            bucket.setLabel(label);
+            bucket.setRange(null);
             bucket.setCount(0L);
             bucketList.add(bucket);
         }
@@ -121,8 +121,8 @@ public class StatsCubeUtils {
             break;
         default:
         }
-        bucket.setBucketLabel(val);
-        bucket.setBkt(FrontEndBucket.value(val));
+        bucket.setLabel(val);
+        bucket.setRange(null);
     }
 
     private static void updateIntervalBucket(Bucket bucket, IntervalBucket algo, int bktId) {
@@ -131,8 +131,8 @@ public class StatsCubeUtils {
         Number max = bktId == boundaries.size() + 1 ? null : boundaries.get(bktId - 1);
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
-        bucket.setBucketLabel(bucketLabel);
-        bucket.setBkt(FrontEndBucket.range(min, max));
+        bucket.setLabel(bucketLabel);
+        bucket.setRange(Pair.of(min, max));
     }
 
 }

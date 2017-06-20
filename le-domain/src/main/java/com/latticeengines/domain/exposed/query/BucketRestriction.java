@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -22,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndBucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 
 /**
  * This restriction is only needed by front end
@@ -36,16 +38,15 @@ public class BucketRestriction extends Restriction {
     private AttributeLookup attr;
 
     @JsonProperty("bkt")
-    private FrontEndBucket bkt;
+    private Bucket bkt;
 
-    public BucketRestriction(AttributeLookup attr, FrontEndBucket bkt) {
+    public BucketRestriction(AttributeLookup attr, Bucket bkt) {
         this.attr = attr;
         this.bkt = bkt;
     }
 
     public BucketRestriction() {
     }
-
 
     public AttributeLookup getAttr() {
         return attr;
@@ -55,11 +56,11 @@ public class BucketRestriction extends Restriction {
         this.attr = attr;
     }
 
-    public FrontEndBucket getBkt() {
+    public Bucket getBkt() {
         return bkt;
     }
 
-    public void setBkt(FrontEndBucket bkt) {
+    public void setBkt(Bucket bkt) {
         this.bkt = bkt;
     }
 
@@ -94,13 +95,15 @@ public class BucketRestriction extends Restriction {
         visitor.visit(this, ctx);
     }
 
+    // from UI to backend
     public ConcreteRestriction convert() {
-        if (bkt.getRange() == null && bkt.getValue() == null) {
+        if (bkt.getRange() == null && StringUtils.isBlank(bkt.getLabel())) {
             return new ConcreteRestriction(false, attr, EQUAL, null);
         } else if (bkt.getRange() != null) {
-            return new ConcreteRestriction(false, attr, IN_RANGE, new RangeLookup(bkt.getRange().getLeft(), bkt.getRange().getRight()));
+            return new ConcreteRestriction(false, attr, IN_RANGE,
+                    new RangeLookup(bkt.getRange().getLeft(), bkt.getRange().getRight()));
         } else {
-            return new ConcreteRestriction(false, attr, EQUAL, new ValueLookup(bkt.getValue()));
+            return new ConcreteRestriction(false, attr, EQUAL, new ValueLookup(bkt.getLabel()));
         }
     }
 
@@ -108,65 +111,73 @@ public class BucketRestriction extends Restriction {
         return from((ConcreteRestriction) restriction);
     }
 
+    // from backend to UI
     private static BucketRestriction from(ConcreteRestriction restriction) {
         if (restriction.getNegate()) {
             throw new IllegalArgumentException("Negate concrete restriction cannot be converted to bucket.");
         }
         AttributeLookup attributeLookup = (AttributeLookup) restriction.getLhs();
-        FrontEndBucket bucket = new FrontEndBucket();
+        Bucket bucket = new Bucket();
         BucketRestriction bucketRestriction = new BucketRestriction();
         bucketRestriction.setAttr(attributeLookup);
         bucketRestriction.setBkt(bucket);
         ComparisonType operator = restriction.getRelation();
         Lookup rhs = restriction.getRhs();
         switch (operator) {
-            case EQUAL:
-            case GREATER_OR_EQUAL:
-            case LESS_THAN:
-                if (rhs instanceof ValueLookup) {
-                    ValueLookup valueLookup = (ValueLookup) rhs;
-                    Object val = valueLookup.getValue();
-                    if (EQUAL.equals(operator)) {
-                        if (val != null && val instanceof String) {
-                            bucket.setValue((String) val);
-                            return bucketRestriction;
-                        } else if (val == null) {
-                            return bucketRestriction;
-                        } else {
-                            throw new IllegalArgumentException("Cannot handle non string value.");
-                        }
-                    } else if (GREATER_OR_EQUAL.equals(operator)) {
-                        if (val != null && val instanceof Number) {
-                            bucket.setRange(Pair.of(val, null));
-                            return bucketRestriction;
-                        } else {
-                            throw new IllegalArgumentException(
-                                    "Cannot convert greater than or equal to for the given value: " + val);
-                        }
-                    } else if (LESS_THAN.equals(operator)) {
-                        if (val != null && val instanceof Number) {
-                            bucket.setRange(Pair.of(null, val));
-                            return bucketRestriction;
-                        } else {
-                            throw new IllegalArgumentException("Cannot convert less than for for the given value: " + val);
-                        }
-                    }
-                } else {
-                    throw new IllegalArgumentException("The right hand side of EQUAL must be a value.");
-                }
-            case IN_RANGE:
-                if (rhs instanceof RangeLookup) {
-                    RangeLookup rangeLookup = (RangeLookup) rhs;
-                    Object min = rangeLookup.getMin();
-                    Object max = rangeLookup.getMax();
-                    Pair<Object, Object> range = Pair.of(min, max);
-                    bucket.setRange(range);
-                    return bucketRestriction;
-                } else {
-                    throw new IllegalArgumentException("Cannot convert to bucket.");
-                }
-            default:
-                throw new IllegalArgumentException("Cannot convert " + operator);
+        case EQUAL:
+        case GREATER_OR_EQUAL:
+        case LESS_THAN:
+            if (rhs instanceof ValueLookup) {
+                return updateForValueLookup(bucketRestriction, operator, (ValueLookup) rhs);
+            } else {
+                throw new IllegalArgumentException("The right hand side of EQUAL must be a value.");
+            }
+        case IN_RANGE:
+            if (rhs instanceof RangeLookup) {
+                RangeLookup rangeLookup = (RangeLookup) rhs;
+                Object min = rangeLookup.getMin();
+                Object max = rangeLookup.getMax();
+                Pair<Object, Object> range = ImmutablePair.of(min, max);
+                bucket.setRange(range);
+                return bucketRestriction;
+            } else {
+                throw new IllegalArgumentException("Cannot convert to bucket.");
+            }
+        default:
+            throw new IllegalArgumentException("Cannot convert " + operator);
+        }
+    }
+
+    private static BucketRestriction updateForValueLookup(BucketRestriction restriction, ComparisonType operator,
+            ValueLookup valueLookup) {
+        Object val = valueLookup.getValue();
+        if (EQUAL.equals(operator)) {
+            if (val != null && val instanceof String) {
+                restriction.getBkt().setLabel((String) val);
+                return restriction;
+            } else if (val == null) {
+                return restriction;
+            } else {
+                throw new IllegalArgumentException("Cannot handle non string value.");
+            }
+        } else if (GREATER_OR_EQUAL.equals(operator)) {
+            if (val != null && val instanceof Comparable) {
+                restriction.getBkt().setRange(Pair.of(val, null));
+                return restriction;
+            } else {
+                throw new IllegalArgumentException(
+                        "Cannot convert greater than or equal to for the given value: " + val);
+            }
+        } else if (LESS_THAN.equals(operator)) {
+            if (val != null && val instanceof Comparable) {
+                restriction.getBkt().setRange(Pair.of(null, val));
+                return restriction;
+            } else {
+                throw new IllegalArgumentException("Cannot convert less than for for the given value: " + val);
+            }
+        } else {
+            throw new UnsupportedOperationException("Only support " + EQUAL + ", " + GREATER_OR_EQUAL + " and "
+                    + LESS_THAN + " for value lookup reverse translation");
         }
     }
 

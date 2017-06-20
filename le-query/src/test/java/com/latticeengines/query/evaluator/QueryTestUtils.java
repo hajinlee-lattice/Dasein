@@ -62,13 +62,13 @@ public class QueryTestUtils {
         Buckets bkts = new Buckets();
         bkts.setType(BucketType.Enum);
         Bucket bkt1 = new Bucket();
-        bkt1.setBucketLabel("Label1");
+        bkt1.setLabel("Label1");
         bkt1.setId(0L);
         Bucket bkt2 = new Bucket();
-        bkt2.setBucketLabel("Label2");
+        bkt2.setLabel("Label2");
         bkt2.setId(1L);
         Bucket bkt3 = new Bucket();
-        bkt3.setBucketLabel("Label3");
+        bkt3.setLabel("Label3");
         bkt3.setId(2L);
         bkts.setBucketList(Arrays.asList(bkt1, bkt2, bkt3));
         stats.setBuckets(bkts);

@@ -110,6 +110,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         // get all other metadata from master table and matchapi
         Map<String, AttributeStats> attributeStatsMap = statsCube.getStatistics();
         Statistics statistics = new Statistics();
+        statistics.setCount(statsCube.getCount());
         for (String name : attributeStatsMap.keySet()) {
             AttributeLookup attrLookup;
             Category category;
@@ -141,19 +142,17 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
 
             AttributeStats statsInCube = attributeStatsMap.get(name);
             // create map entries if not there
-            if (!statistics.getCategories().containsKey(category)) {
-                statistics.getCategories().put(category, new CategoryStatistics());
+            if (!statistics.hasCategory(category)) {
+                statistics.putCategory(category, new CategoryStatistics());
             }
-            CategoryStatistics categoryStatistics = statistics.getCategories().get(category);
-            if (!categoryStatistics.getSubcategories().containsKey(subCategory)) {
-                categoryStatistics.getSubcategories().put(subCategory, new SubcategoryStatistics());
+            CategoryStatistics categoryStatistics = statistics.getCategory(category);
+            if (!categoryStatistics.hasSubcategory(subCategory)) {
+                categoryStatistics.putSubcategory(subCategory, new SubcategoryStatistics());
             }
             // update the corresponding map entry
-            SubcategoryStatistics subcategoryStatistics = statistics.getCategories().get(category).getSubcategories()
-                    .get(subCategory);
-            subcategoryStatistics.getAttributes().put(attrLookup, statsInCube);
+            SubcategoryStatistics subcategoryStatistics = statistics.getCategory(category).getSubcategory(subCategory);
+            subcategoryStatistics.putAttrStats(attrLookup, statsInCube);
         }
-
         statsContainer.setStatistics(statistics);
 
         return statsContainer;

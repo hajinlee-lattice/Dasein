@@ -44,8 +44,8 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
             int numJoinKeys = Math.min(Math.max(parameters.getPartitions() * 10, 256), 10240);
             // add dummy group to put all in one group
             source = source.addColumnWithFixedValue(DUMMY_GROUP, UUID.randomUUID().toString(), String.class);
-            source = source.apply(String.format("System.currentTimeMillis() %% %d", numJoinKeys), new FieldList(parameters.getSortingField()),
-                    new FieldMetadata(DUMMY_JOIN_KEY, Long.class));
+            source = source.apply(String.format("System.currentTimeMillis() %% %d", numJoinKeys),
+                    new FieldList(parameters.getSortingField()), new FieldMetadata(DUMMY_JOIN_KEY, Long.class));
             // find partition boundaries
             Node boundaries = profile(source, parameters).renamePipe("boundaries").checkpoint("boundaries");
             source = source.leftJoin(new FieldList(DUMMY_JOIN_KEY), boundaries, new FieldList(DUMMY_JOIN_KEY));
@@ -64,7 +64,9 @@ public class Sort extends TypesafeDataFlowBuilder<SorterParameters> {
     private Node profile(Node source, SorterParameters parameters) {
         Node node = source.retain(new FieldList(parameters.getSortingField(), DUMMY_GROUP, DUMMY_JOIN_KEY));
         String sortField = parameters.getSortingField();
-        Buffer buffer = new SortPartitionBuffer(sortField, DUMMY_JOIN_KEY, SORTED_GROUPS, parameters.getPartitions());
+        Class<?> sortFieldClz = source.getSchema(sortField).getJavaType();
+        Buffer buffer = new SortPartitionBuffer(sortField, DUMMY_JOIN_KEY, SORTED_GROUPS, sortFieldClz,
+                parameters.getPartitions());
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(DUMMY_JOIN_KEY, String.class));
         fms.add(new FieldMetadata(SORTED_GROUPS, String.class));

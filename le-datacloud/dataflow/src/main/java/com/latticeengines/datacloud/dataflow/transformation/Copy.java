@@ -46,6 +46,10 @@ public class Copy extends TypesafeDataFlowBuilder<CopierParameters> {
             first = first.retain(new FieldList(parameters.discardAttrs));
         }
 
+        if (parameters.sortKeys != null && !parameters.sortKeys.isEmpty()) {
+            first = first.sort(parameters.sortKeys, parameters.sortDecending);
+        }
+
         return first;
     }
 

@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
@@ -66,10 +67,10 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .dataCollectionName(dataCollectionName) //
                 .idField(InterfaceName.LEAccountIDLong.name()) //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder().put(MatchKey.Domain, Arrays.asList("URL")) //
-                        .put(MatchKey.City, Arrays.asList(InterfaceName.City.name())) //
-                        .put(MatchKey.State, Arrays.asList("StateProvince")) //
-                        .put(MatchKey.Country, Arrays.asList(InterfaceName.Country.name())) //
-                        .put(MatchKey.Zipcode, Arrays.asList("Zip")) //
+                        .put(MatchKey.City, Collections.singletonList(InterfaceName.City.name())) //
+                        .put(MatchKey.State, Collections.singletonList("StateProvince")) //
+                        .put(MatchKey.Country, Collections.singletonList(InterfaceName.Country.name())) //
+                        .put(MatchKey.Zipcode, Collections.singletonList("Zip")) //
                         .build()) //
                 .build();
     }
@@ -80,9 +81,9 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         exportConfig.setCleanupS3(true);
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setDistStyle(DistStyle.Key);
-        redshiftTableConfig.setDistKey(InterfaceName.LEAccountIDLong.name());
+        redshiftTableConfig.setDistKey(TableRoleInCollection.BucketedAccount.getPrimaryKey().name());
         redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
-        redshiftTableConfig.setSortKeys(Collections.<String> singletonList(InterfaceName.LatticeAccountId.name()));
+        redshiftTableConfig.setSortKeys(TableRoleInCollection.BucketedAccount.getForeignKeysAsStringList());
         redshiftTableConfig.setS3Bucket(s3Bucket);
         exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
         return exportConfig;

@@ -482,7 +482,7 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
 
     private void printBucket(Bucket actualBkt) {
 
-        System.out.print("Bucket " + actualBkt.getBucketLabel() + " " + actualBkt.getCount() + " " + actualBkt.getId());
+        System.out.print("Bucket " + actualBkt.getLabel() + " " + actualBkt.getCount() + " " + actualBkt.getId());
         if (actualBkt.getEncodedCountList() != null) {
             System.out.print("Encoded counts ");
             for (int i = 0; i < actualBkt.getEncodedCountList().length; i++) {
@@ -539,7 +539,7 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
 
     private void compareBuckets(Bucket expectedBkt, Bucket actualBkt) {
 
-        Assert.assertEquals(actualBkt.getBucketLabel(), expectedBkt.getBucketLabel());
+        Assert.assertEquals(actualBkt.getLabel(), expectedBkt.getLabel());
         Assert.assertEquals(actualBkt.getId(), expectedBkt.getId());
 
         if (expectedBkt.getEncodedCountList() != null) {

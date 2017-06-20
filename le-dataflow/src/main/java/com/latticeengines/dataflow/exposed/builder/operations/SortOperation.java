@@ -1,8 +1,10 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
@@ -19,12 +21,13 @@ import cascading.tuple.Fields;
 
 public class SortOperation extends Operation {
     public SortOperation(Input prior, String field, boolean descending) {
-        List<Lookup> lookups = new ArrayList<>();
-        ColumnLookup lookup = new ColumnLookup(field);
-        lookups.add(lookup);
+        this(prior, Collections.singletonList(field), descending);
+    }
+
+    public SortOperation(Input prior, List<String> fields, boolean descending) {
+        List<Lookup> lookups = fields.stream().map(ColumnLookup::new).collect(Collectors.toList());
         Sort sort = new Sort(lookups);
         sort.setDescending(descending);
-
         init(prior, sort);
     }
 
@@ -41,7 +44,7 @@ public class SortOperation extends Operation {
         for (FieldMetadata fm : prior.metadata) {
             originalFields.add(fm.getFieldName());
         }
-        String randomColumnName = "SortTmp" + UUID.randomUUID().toString().replace("-", "");
+        String randomColumnName = "_SortTmp_" + UUID.randomUUID().toString().replace("-", "") + "_";
         String randomColumnValue = UUID.randomUUID().toString().replace("-", "");
         AddFieldStrategy addFieldStrategy = new AddColumnWithFixedValueStrategy(randomColumnName, randomColumnValue,
                 String.class);

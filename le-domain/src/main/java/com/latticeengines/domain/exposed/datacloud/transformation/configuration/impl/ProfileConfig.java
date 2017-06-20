@@ -16,6 +16,9 @@ public class ProfileConfig extends TransformerConfig {
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose, leave it null for real use case
 
+    @JsonProperty("EncAttrPrefix")
+    private String encAttrPrefix; // used for testing purpose, leave it null for real use case
+
     public boolean isNumBucketEqualSized() {
         return numBucketEqualSized;
     }
@@ -48,4 +51,11 @@ public class ProfileConfig extends TransformerConfig {
         this.randSeed = randSeed;
     }
 
+    public String getEncAttrPrefix() {
+        return encAttrPrefix;
+    }
+
+    public void setEncAttrPrefix(String encAttrPrefix) {
+        this.encAttrPrefix = encAttrPrefix;
+    }
 }

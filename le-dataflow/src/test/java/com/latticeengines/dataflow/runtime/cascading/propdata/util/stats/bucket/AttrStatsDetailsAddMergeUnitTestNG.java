@@ -41,7 +41,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         firstBuckets.setType(BucketType.Boolean);
         List<Bucket> firstBucketList = new ArrayList<>();
         Bucket fb1 = new Bucket();
-        fb1.setBucketLabel(Boolean.FALSE.toString());
+        fb1.setLabel(Boolean.FALSE.toString());
         fb1.setId(1L);
         fb1.setCount(20L);
         firstBucketList.add(fb1);
@@ -55,7 +55,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         secondBuckets.setType(BucketType.Boolean);
         List<Bucket> secondBucketList = new ArrayList<>();
         Bucket sb1 = new Bucket();
-        sb1.setBucketLabel(Boolean.TRUE.toString());
+        sb1.setLabel(Boolean.TRUE.toString());
         sb1.setId(0L);
         sb1.setCount(30L);
         secondBucketList.add(sb1);
@@ -69,11 +69,11 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);
         Assert.assertNotNull(resultStatsDetails.getBuckets().getBucketList());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().size(), 2);
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getBucketLabel(),
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getLabel(),
                 Boolean.TRUE.toString());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getId(), new Long(0));
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getCount(), new Long(30));
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getBucketLabel(),
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getLabel(),
                 Boolean.FALSE.toString());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getId(), new Long(1));
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getCount(), new Long(20));
@@ -87,12 +87,12 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         firstBuckets.setType(BucketType.Numerical);
         List<Bucket> firstBucketList = new ArrayList<>();
         Bucket fb1 = new Bucket();
-        fb1.setBucketLabel("100-200");
+        fb1.setLabel("100-200");
         fb1.setId(1L);
         fb1.setCount(10L);
         firstBucketList.add(fb1);
         Bucket fb2 = new Bucket();
-        fb2.setBucketLabel("200-300");
+        fb2.setLabel("200-300");
         fb2.setId(2L);
         fb2.setCount(10L);
         firstBucketList.add(fb2);
@@ -106,17 +106,17 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         secondBuckets.setType(BucketType.Numerical);
         List<Bucket> secondBucketList = new ArrayList<>();
         Bucket sb1 = new Bucket();
-        sb1.setBucketLabel("0-100");
+        sb1.setLabel("0-100");
         sb1.setId(0L);
         sb1.setCount(20L);
         secondBucketList.add(sb1);
         Bucket sb2 = new Bucket();
-        sb2.setBucketLabel("100-200");
+        sb2.setLabel("100-200");
         sb2.setId(1L);
         sb2.setCount(5L);
         secondBucketList.add(sb2);
         Bucket fb3 = new Bucket();
-        fb3.setBucketLabel("200-300");
+        fb3.setLabel("200-300");
         fb3.setId(2L);
         fb3.setCount(5L);
         secondBucketList.add(fb3);
@@ -130,13 +130,13 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Numerical);
         Assert.assertNotNull(resultStatsDetails.getBuckets().getBucketList());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().size(), 3);
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getBucketLabel(), "0-100");
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getLabel(), "0-100");
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getId(), new Long(0));
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getCount(), new Long(20));
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getBucketLabel(), "100-200");
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getLabel(), "100-200");
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getId(), new Long(1));
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getCount(), new Long(15));
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(2).getBucketLabel(), "200-300");
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(2).getLabel(), "200-300");
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(2).getId(), new Long(2));
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(2).getCount(), new Long(15));
     }
@@ -149,7 +149,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         firstBuckets.setType(BucketType.Boolean);
         List<Bucket> firstBucketList = new ArrayList<>();
         Bucket fb1 = new Bucket();
-        fb1.setBucketLabel(Boolean.FALSE.toString());
+        fb1.setLabel(Boolean.FALSE.toString());
         fb1.setId(1L);
         Long[] firstEncodedFalseCountList = new Long[] { 20L, 20L, 20L, 20L };
         fb1.setEncodedCountList(firstEncodedFalseCountList);
@@ -164,7 +164,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         secondBuckets.setType(BucketType.Boolean);
         List<Bucket> secondBucketList = new ArrayList<>();
         Bucket sb1 = new Bucket();
-        sb1.setBucketLabel(Boolean.TRUE.toString());
+        sb1.setLabel(Boolean.TRUE.toString());
         sb1.setId(0L);
         Long[] secondEncodedTrueCountList = new Long[] { 30L, 30L, 30L, 30L };
         sb1.setEncodedCountList(secondEncodedTrueCountList);
@@ -179,7 +179,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);
         Assert.assertNotNull(resultStatsDetails.getBuckets().getBucketList());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().size(), 2);
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getBucketLabel(),
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getLabel(),
                 Boolean.TRUE.toString());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getId(), new Long(0));
         Assert.assertNull(resultStatsDetails.getBuckets().getBucketList().get(0).getCount());
@@ -190,7 +190,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
             Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getEncodedCountList()[i],
                     new Long(30));
         }
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getBucketLabel(),
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getLabel(),
                 Boolean.FALSE.toString());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getId(), new Long(1));
         Assert.assertNull(resultStatsDetails.getBuckets().getBucketList().get(1).getCount());
@@ -212,13 +212,13 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         firstBuckets.setType(BucketType.Boolean);
         List<Bucket> firstBucketList = new ArrayList<>();
         Bucket fb1 = new Bucket();
-        fb1.setBucketLabel(Boolean.TRUE.toString());
+        fb1.setLabel(Boolean.TRUE.toString());
         fb1.setId(0L);
         Long[] firstEncodedTrueCountList = new Long[] { 20L, 10L, 0L, 5L };
         fb1.setEncodedCountList(firstEncodedTrueCountList);
         firstBucketList.add(fb1);
         Bucket fb2 = new Bucket();
-        fb2.setBucketLabel(Boolean.FALSE.toString());
+        fb2.setLabel(Boolean.FALSE.toString());
         fb2.setId(1L);
         Long[] firstEncodedFalseCountList = new Long[] { 0L, 10L, 20L, 15L };
         fb2.setEncodedCountList(firstEncodedFalseCountList);
@@ -233,13 +233,13 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         secondBuckets.setType(BucketType.Boolean);
         List<Bucket> secondBucketList = new ArrayList<>();
         Bucket sb1 = new Bucket();
-        sb1.setBucketLabel(Boolean.TRUE.toString());
+        sb1.setLabel(Boolean.TRUE.toString());
         sb1.setId(0L);
         Long[] secondEncodedTrueCountList = new Long[] { 3L, 0L, 15L, 30L };
         sb1.setEncodedCountList(secondEncodedTrueCountList);
         secondBucketList.add(sb1);
         Bucket sb2 = new Bucket();
-        sb2.setBucketLabel(Boolean.FALSE.toString());
+        sb2.setLabel(Boolean.FALSE.toString());
         sb2.setId(1L);
         Long[] secondEncodedFalseCountList = new Long[] { 27L, 30L, 15L, 0L };
         sb2.setEncodedCountList(secondEncodedFalseCountList);
@@ -257,7 +257,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
         Assert.assertEquals(resultStatsDetails.getBuckets().getType(), BucketType.Boolean);
         Assert.assertNotNull(resultStatsDetails.getBuckets().getBucketList());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().size(), 2);
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getBucketLabel(),
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getLabel(),
                 Boolean.TRUE.toString());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getId(), new Long(0));
         // Assert.assertNull(resultStatsDetails.getBuckets().getBucketList().get(0).getCount());
@@ -268,7 +268,7 @@ public class AttrStatsDetailsAddMergeUnitTestNG {
             Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(0).getEncodedCountList()[i],
                     expectedTrueCountList[i]);
         }
-        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getBucketLabel(),
+        Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getLabel(),
                 Boolean.FALSE.toString());
         Assert.assertEquals(resultStatsDetails.getBuckets().getBucketList().get(1).getId(), new Long(1));
         // Assert.assertNull(resultStatsDetails.getBuckets().getBucketList().get(1).getCount());

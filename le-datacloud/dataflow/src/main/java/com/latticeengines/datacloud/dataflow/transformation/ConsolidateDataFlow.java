@@ -9,9 +9,6 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import cascading.operation.Function;
-import cascading.tuple.Fields;
-
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
@@ -20,6 +17,10 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+
+import cascading.operation.Function;
+import cascading.tuple.Fields;
 
 @Component("consolidateDataFlow")
 public class ConsolidateDataFlow extends ConfigurableFlowBase<ConsolidateDataTransformerConfig> {
@@ -29,12 +30,20 @@ public class ConsolidateDataFlow extends ConfigurableFlowBase<ConsolidateDataTra
 
         ConsolidateDataTransformerConfig config = getTransformerConfig(parameters);
 
+        String srcId = config.getSrcIdField();
+        String masterId = TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name();
+
         List<Node> sources = new ArrayList<>();
         List<Table> sourceTables = new ArrayList<>();
         List<String> sourceNames = new ArrayList<>();
         for (int i = 0; i < parameters.getBaseTables().size(); i++) {
             String sourceName = parameters.getBaseTables().get(i);
-            sources.add(addSource(sourceName));
+            Node source = addSource(sourceName);
+            List<String> srcFields = source.getFieldNames();
+            if (srcFields.contains(srcId) && !srcFields.contains(masterId)) {
+                source = source.rename(new FieldList(srcId), new FieldList(masterId));
+            }
+            sources.add(source);
             sourceTables.add(getSourceMetadata(sourceName));
             sourceNames.add(sourceName);
         }
@@ -49,7 +58,7 @@ public class ConsolidateDataFlow extends ConfigurableFlowBase<ConsolidateDataTra
         consolidateHelper.preProcessSources(sourceNames, sources, dupeFieldMap, fieldToRetain, commonFields);
 
         List<FieldList> groupFieldLists = consolidateHelper.getGroupFieldList(sourceNames, sourceTables, dupeFieldMap,
-                config.getSrcIdField());
+                masterId);
 
         Node result = sources.get(0).coGroup(groupFieldLists.get(0), sources.subList(1, sources.size()),
                 groupFieldLists.subList(1, groupFieldLists.size()), JoinType.OUTER);
@@ -60,7 +69,6 @@ public class ConsolidateDataFlow extends ConfigurableFlowBase<ConsolidateDataTra
                 new FieldList(allFieldNames), Fields.REPLACE);
 
         result = result.retain(new FieldList(fieldToRetain));
-
         return result;
     }
 

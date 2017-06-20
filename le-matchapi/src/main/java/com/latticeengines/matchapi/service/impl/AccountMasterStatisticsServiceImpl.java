@@ -351,10 +351,10 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         }
         List<Bucket> buckets = rowBasedStats.getBuckets().getBucketList();
         for (Bucket bucket : buckets) {
-            if (isEquivalentYes(bucket.getBucketLabel())) {
-                bucket.setBucketLabel(YES);
-            } else if (isEquivalentNo(bucket.getBucketLabel())) {
-                bucket.setBucketLabel(NO);
+            if (isEquivalentYes(bucket.getLabel())) {
+                bucket.setLabel(YES);
+            } else if (isEquivalentNo(bucket.getLabel())) {
+                bucket.setLabel(NO);
             }
 
             // BucketRange is retired. if need to show range in UI, use FrontEndBucket
@@ -477,13 +477,13 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                     if (bucket.getEncodedCountList().length > idx) {
                         decodedBuckets.getBucketList().get(loopId).setCount(bucket.getEncodedCountList()[idx]);
                         total += bucket.getEncodedCountList()[idx];
-                        if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(NO)) {
+                        if (decodedBuckets.getBucketList().get(loopId).getLabel().equalsIgnoreCase(NO)) {
                             noBucketId = loopId;
                             noBucketCount = bucket.getEncodedCountList()[idx];
                         }
                     } else {
                         decodedBuckets.getBucketList().get(loopId).setCount(0L);
-                        if (decodedBuckets.getBucketList().get(loopId).getBucketLabel().equalsIgnoreCase(NO)) {
+                        if (decodedBuckets.getBucketList().get(loopId).getLabel().equalsIgnoreCase(NO)) {
                             noBucketId = loopId;
                             noBucketCount = 0L;
                         }
