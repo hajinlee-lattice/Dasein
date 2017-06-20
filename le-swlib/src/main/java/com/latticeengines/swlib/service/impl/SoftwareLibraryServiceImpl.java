@@ -152,14 +152,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         Collection<List<SoftwarePackage>> values = packagesByGroupAndArtifact.values();
         packages = new ArrayList<>();
         for (List<SoftwarePackage> value : values) {
-            Collections.sort(value, new Comparator<SoftwarePackage>() {
-
-                @Override
-                public int compare(SoftwarePackage o1, SoftwarePackage o2) {
-                    return o2.getVersion().compareTo(o1.getVersion());
-                }
-
-            });
+            value.sort((o1, o2) -> o2.getVersion().compareTo(o1.getVersion()));
             packages.add(value.get(0));
         }
 
@@ -191,16 +184,16 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         log.info(String.format("Found %d of software packages from the software library for this module.",
                 packages.size()));
         packages.sort((o1, o2) -> {
-            if (o1.getModule().equals(o2.getModule())) {
+            if (o1.getArtifactId().equals(o2.getArtifactId())) {
                 return 0;
             }
-            if (o1.getModule().equals("datacloud")) {
+            if (o1.getArtifactId().contains("datacloud")) {
                 return -1;
             }
-            if (o2.getModule().equals("datacloud")) {
+            if (o2.getArtifactId().contains("datacloud")) {
                 return 1;
             }
-            return o1.getModule().compareTo(o2.getModule());
+            return o1.getArtifactId().compareTo(o2.getArtifactId());
         });
         for (SoftwarePackage pkg : packages) {
             String initializerClassName = pkg.getInitializerClass();
