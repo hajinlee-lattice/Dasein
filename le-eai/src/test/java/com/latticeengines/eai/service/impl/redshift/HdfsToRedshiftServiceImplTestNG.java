@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
@@ -35,7 +36,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     private static final String HDFS_DIR = "/tmp/hdfs2sf";
     private static final String FILENAME = "uncompressed.avro";
 
-    private static final String TEST_TABLE = "CAMEL_TEST";
+    private static final String TEST_TABLE = "eai_test";
 
     @Autowired
     private HdfsToRedshiftService hdfsToRedshiftService;
@@ -84,6 +85,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     @Test(groups = "functional")
     public void testUploadToRedshift() throws Exception {
         HdfsToRedshiftConfiguration configuration = getExportConfiguration();
+        Assert.fail();
         EaiJob job = eaiYarnService.createJob(configuration);
 
         ApplicationId appId = testYarnJob(job.getClient(), job.getAppMasterPropertiesObject(),
@@ -103,6 +105,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     private void cleanup() throws Exception {
         HdfsUtils.rmdir(miniclusterConfiguration, HDFS_DIR);
         HdfsToRedshiftConfiguration configuration = getExportConfiguration();
+        System.out.println(JsonUtils.pprint(configuration));
         hdfsToRedshiftService.cleanupS3(configuration);
         String table = configuration.getRedshiftTableConfiguration().getTableName();
         redshiftService.dropTable(table);

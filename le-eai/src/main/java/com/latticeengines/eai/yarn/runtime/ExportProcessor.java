@@ -45,11 +45,11 @@ public class ExportProcessor extends SingleContainerYarnProcessor<ExportConfigur
             hdfsToRedshiftService.uploadDataObjectToS3(configuration);
             setProgress(0.6f);
         }
-        hdfsToRedshiftService.createRedshiftTableIfNotExist(configuration);
         setProgress(0.65f);
         if (configuration.isAppend()) {
             hdfsToRedshiftService.copyToRedshift(configuration);
         } else {
+            hdfsToRedshiftService.createRedshiftTableIfNotExist(configuration);
             hdfsToRedshiftService.updateExistingRows(configuration);
         }
         setProgress(0.95f);

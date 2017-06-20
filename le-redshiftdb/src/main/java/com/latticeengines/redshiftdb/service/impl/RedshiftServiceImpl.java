@@ -34,6 +34,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void createTable(RedshiftTableConfiguration redshiftTableConfig, Schema schema) {
         try {
+            log.info("Creating redshift table " + redshiftTableConfig.getTableName());
             redshiftJdbcTemplate.execute(RedshiftUtils.getCreateTableStatement(redshiftTableConfig, schema));
         } catch (Exception e) {
             throw new RuntimeException(
@@ -63,6 +64,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void dropTable(String tableName) {
         try {
+            log.info("Dropping redshift table " + tableName);
             redshiftJdbcTemplate.execute(RedshiftUtils.dropTableStatement(tableName));
         } catch (Exception e) {
             throw new RuntimeException(String.format("Could not drop table %s in Redshift", tableName), e);
@@ -72,6 +74,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void createStagingTable(String stageTableName, String targetTableName) {
         try {
+            log.info("Creating staging redshift table " + stageTableName + " for target table " + targetTableName);
             redshiftJdbcTemplate.execute(RedshiftUtils.createStagingTableStatement(stageTableName, targetTableName));
         } catch (Exception e) {
             throw new RuntimeException(String.format("Could not create stage table %s in Redshift", stageTableName), e);
@@ -81,6 +84,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void renameTable(String originalTableName, String newTableName) {
         try {
+            log.info("Renaming redshift table " + originalTableName + " to " + newTableName);
             redshiftJdbcTemplate.execute(RedshiftUtils.renameTableStatement(originalTableName, newTableName));
         } catch (Exception e) {
             throw new RuntimeException(

@@ -8,6 +8,6 @@ public enum ExportDestination {
     SALESFORCE, //
     S3, //
     DYNAMO, //
-    RedShift
+    REDSHIFT
 
 }

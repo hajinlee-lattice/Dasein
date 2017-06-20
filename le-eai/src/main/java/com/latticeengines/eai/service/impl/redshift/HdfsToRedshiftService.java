@@ -88,12 +88,10 @@ public class HdfsToRedshiftService {
         if (configuration.isCreateNew()) {
             String stagingTableName = tableName + "_staging";
             redshiftTableConfig.setTableName(stagingTableName);
-
-            dropRedshiftTable(configuration);
-            createRedshiftTableIfNotExist(configuration);
-
             redshiftService.loadTableFromAvroInS3(stagingTableName, redshiftTableConfig.getS3Bucket(),
                     s3Prefix(tableName), redshiftTableConfig.getJsonPathPrefix());
+            dropRedshiftTable(configuration);
+            createRedshiftTableIfNotExist(configuration);
             redshiftService.replaceTable(stagingTableName, tableName);
         } else {
             redshiftService.loadTableFromAvroInS3(tableName, redshiftTableConfig.getS3Bucket(), s3Prefix(tableName),

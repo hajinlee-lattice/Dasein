@@ -136,8 +136,11 @@ public class HdfsToS3ExportService {
             throw new IllegalArgumentException("Splitting only works for avro file now.");
         }
 
-        Long totalRecords = AvroUtils.count(yarnConfiguration, hdfsPath);
-        log.info("Found " + totalRecords + " records in input files.");
+        Long totalRecords = 0L;
+        if (needToSplit) {
+            totalRecords = AvroUtils.count(yarnConfiguration, hdfsPath);
+            log.info("Found " + totalRecords + " records in input files.");
+        }
 
         List<String> filePaths = new ArrayList<>();
         try {
