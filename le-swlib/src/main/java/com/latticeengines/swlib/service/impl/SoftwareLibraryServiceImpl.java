@@ -196,6 +196,15 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
         log.info(String.format("Found %d of software packages from the software library for this module.",
                 packages.size()));
+        packages.sort((o1, o2) -> {
+            if (o1.getName().equals(o2.getName())) {
+                return 0;
+            }
+            if (o1.getName().equals("datacloud")) {
+                return -1;
+            }
+            return o1.getName().compareTo(o2.getName());
+        });
         for (SoftwarePackage pkg : packages) {
             String initializerClassName = pkg.getInitializerClass();
             log.info(String.format("Loading %s", initializerClassName));
