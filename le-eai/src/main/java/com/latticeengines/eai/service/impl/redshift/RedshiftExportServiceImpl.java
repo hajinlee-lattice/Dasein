@@ -9,7 +9,7 @@ import com.latticeengines.eai.service.ExportService;
 public class RedshiftExportServiceImpl extends ExportService {
 
     protected RedshiftExportServiceImpl() {
-        super(ExportDestination.RedShift);
+        super(ExportDestination.REDSHIFT);
     }
 
 }
