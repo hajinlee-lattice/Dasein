@@ -17,6 +17,7 @@ public class TargetMarketUnitTestNG {
         market.setAccountFilter(Restriction.builder().let(BusinessEntity.Account, "A").eq("1").build());
         market.setContactFilter(Restriction.builder().let(BusinessEntity.Account, "B").gte(2).build());
         String ser = JsonUtils.serialize(market);
+        System.out.println(JsonUtils.pprint(market));
         market = JsonUtils.deserialize(ser, TargetMarket.class);
         Assert.assertNotNull(market.getAccountFilter());
         Assert.assertEquals(market.getAccountFilter().getClass(), ConcreteRestriction.class);

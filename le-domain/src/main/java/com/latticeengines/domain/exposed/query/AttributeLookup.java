@@ -4,23 +4,21 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
 
-@JsonSerialize(using = AttributeLookup.AttributeLookupSerializer.class)
-@JsonDeserialize(using = AttributeLookup.AttributeLookupDeserializer.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class AttributeLookup extends Lookup {
 
     @JsonProperty("entity")
@@ -83,19 +81,6 @@ public class AttributeLookup extends Lookup {
             }
         } else {
             return null;
-        }
-    }
-
-    public static class AttributeLookupDeserializer extends JsonDeserializer<AttributeLookup> {
-        public AttributeLookupDeserializer() {
-        }
-
-        @Override
-        public AttributeLookup deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-            ObjectCodec oc = jp.getCodec();
-            JsonNode node = oc.readTree(jp);
-            String str = node.asText();
-            return AttributeLookup.fromString(str);
         }
     }
 

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -23,12 +25,16 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ConcreteRestriction extends Restriction {
+
     @JsonProperty("negate")
     private boolean negate;
+
     @JsonProperty("lhs")
     private Lookup lhs;
+
     @JsonProperty("relation")
     private ComparisonType relation;
+
     @JsonProperty("rhs")
     private Lookup rhs;
 

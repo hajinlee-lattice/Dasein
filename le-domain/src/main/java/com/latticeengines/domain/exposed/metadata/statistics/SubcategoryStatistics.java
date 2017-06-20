@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 
@@ -17,6 +18,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 public class SubcategoryStatistics {
 
     @JsonProperty("Attributes")
+    @JsonSerialize(keyUsing = AttributeLookup.AttributeLookupSerializer.class)
     @JsonDeserialize(keyUsing = AttributeLookup.AttributeLookupKeyDeserializer.class)
     private Map<AttributeLookup, AttributeStats> attributes = new HashMap<>();
 

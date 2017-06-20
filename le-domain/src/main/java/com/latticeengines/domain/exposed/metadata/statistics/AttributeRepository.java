@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -27,6 +28,7 @@ public class AttributeRepository {
     private String collectionName;
 
     @JsonProperty("AttrMap")
+    @JsonSerialize(keyUsing = AttributeLookup.AttributeLookupSerializer.class)
     @JsonDeserialize(keyUsing = AttributeLookup.AttributeLookupKeyDeserializer.class)
     private Map<AttributeLookup, Attribute> attributeMap;
 
