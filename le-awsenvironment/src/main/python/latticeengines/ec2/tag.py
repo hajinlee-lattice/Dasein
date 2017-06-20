@@ -15,11 +15,12 @@ def tag(args):
 def tag_internal(sg, key, value):
     logger.info('Adding tag (%s=%s) to ec2 instances in security group %s' % (key, value, sg))
     ids = find_ec2_id_by_sg(sg)
-    for id in ids:
-        logger.info("Found instance to tag: %s" % id)
     if ids is None or len(ids) == 0:
         logger.info("There is no instances to tag.")
-    tag_instance(ids, key, value)
+    else:
+        for id in ids:
+            logger.info("Found instance to tag: %s" % id)
+        tag_instance(ids, key, value)
 
 
 def parse_args():
