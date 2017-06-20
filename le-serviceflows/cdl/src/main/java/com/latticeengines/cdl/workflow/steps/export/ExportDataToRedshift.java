@@ -67,7 +67,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
         exportConfig.setExportTargetPath(sourceTable.getName());
         exportConfig.setNoSplit(!needToSplit);
-        exportConfig.setExportDestination(ExportDestination.RedShift);
+        exportConfig.setExportDestination(ExportDestination.REDSHIFT);
         RedshiftTableConfiguration redshiftTableConfig = exportConfig.getRedshiftTableConfiguration();
         redshiftTableConfig.setTableName(sourceTable.getName());
         redshiftTableConfig.setJsonPathPrefix(
