@@ -29,7 +29,7 @@ class FeatureSelectionStep(PipelineStep):
                                           min_samples_split=25,
                                           min_samples_leaf=10,
                                           max_depth=5,
-                                          max_features=None,
+                                          max_features=0.5,
                                           random_state=123456,
                                           bootstrap=True)
         mediator = self.getMediator()
