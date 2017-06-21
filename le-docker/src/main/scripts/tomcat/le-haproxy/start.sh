@@ -76,22 +76,22 @@ fi
 replace_token lpi ${LPI_HOSTPORTS} true
 replace_token adminconsole ${ADMINCONSOLE_HOSTPORTS} true
 replace_token swagger ${SWAGGER_HOSTPORTS}
-replace_token pls ${PLS_HOSTPORTS}
-replace_token admin ${ADMIN_HOSTPORTS}
-replace_token scoringapi ${SCORINGAPI_HOSTPORTS}
-replace_token matchapi ${MATCHAPI_HOSTPORTS}
-replace_token oauth2 ${OAUTH2_HOSTPORTS}
-replace_token playmaker ${PLAYMAKER_HOSTPORTS}
-replace_token eai ${EAI_HOSTPORTS}
-replace_token metadata ${METADATA_HOSTPORTS}
-replace_token scoring ${SCORING_HOSTPORTS}
-replace_token modeling ${MODELING_HOSTPORT}
-replace_token dataflowapi ${DATAFLOWAPI_HOSTPORTS}
-replace_token workflowapi ${WORKFLOWAPI_HOSTPORTS}
-replace_token quartz ${QUATZ_HOSTPORTS}
-replace_token modelquality ${MODELQUALITY_HOSTPORTS}
-replace_token datacloudapi ${DATACLOUDAPI_HOSTPORTS}
-replace_token dellebi ${DELLEBI_HOSTPORTS}
+replace_token pls ${PLS_HOSTPORTS} true
+replace_token admin ${ADMIN_HOSTPORTS} true
+replace_token scoringapi ${SCORINGAPI_HOSTPORTS} true
+replace_token matchapi ${MATCHAPI_HOSTPORTS} true
+replace_token oauth2 ${OAUTH2_HOSTPORTS} true
+replace_token playmaker ${PLAYMAKER_HOSTPORTS} true
+replace_token eai ${EAI_HOSTPORTS} true
+replace_token metadata ${METADATA_HOSTPORTS} true
+replace_token scoring ${SCORING_HOSTPORTS} true
+replace_token modeling ${MODELING_HOSTPORT} true
+replace_token dataflowapi ${DATAFLOWAPI_HOSTPORTS} true
+replace_token workflowapi ${WORKFLOWAPI_HOSTPORTS} true
+replace_token quartz ${QUATZ_HOSTPORTS} true
+replace_token modelquality ${MODELQUALITY_HOSTPORTS} true
+replace_token datacloudapi ${DATACLOUDAPI_HOSTPORTS} true
+replace_token dellebi ${DELLEBI_HOSTPORTS} true
 
 cat /usr/local/etc/haproxy/haproxy.cfg
 
