@@ -39,6 +39,10 @@ angular.module('mainApp.setup.modals.FieldMappingSettingsModal', [
             scope.sourceType = sourceType;
             scope.modelCreation = true;
 
+            var infoAccount = "Excludes all the duplicate lead records that belong to the same account within a country and keeps one which has a positive event. Maintains a ratio of positive to negative events desired for better model training",
+                infoLead = "Excludes all the duplicate records that belong to the same account within a country and keeps one which has a positive event. Maintains a ratio of positive to negative events desired for better model training";
+            scope.sourceTypeInfoTemplate = "<div class='row'><div class='twelve columns'><p>" + (sourceType != 'SalesforceAccount' ? infoAccount : infoLead ) + "</p></div></div>";
+
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
 

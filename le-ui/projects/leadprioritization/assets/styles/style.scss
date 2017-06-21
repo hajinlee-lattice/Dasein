@@ -3821,6 +3821,13 @@ ul.inbox-pagination li {
 .modal-body label {
     font-weight:400;
     font-family: 'Open Sans',sans-serif;
+    tooltip {
+        position: relative;
+        top: -2px;
+        tip .row {
+            width: 350px;
+        }
+    }
 }
 .modal-body p {
     font-family:'ProximaNova-Regular','Open Sans',sans-serif;

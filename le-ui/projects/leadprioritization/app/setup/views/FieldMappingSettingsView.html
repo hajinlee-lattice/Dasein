@@ -17,8 +17,18 @@
         <div data-ng-hide="saveInProgress">
             <div class="modal-body">
                 <div class="row">
-                    <label id="oneLeadPerDomainCheckbox"><input type="checkbox" id="cbox1" data-ng-model="oneLeadPerDomain">{{sourceType!='SalesforceAccount' ? "Use One Lead Per Domain" : "Use One Account Per Domain"}}</label></br>
-                    <label id="includePersonalEmailDomainsCheckbox"><input type="checkbox" id="cbox2" data-ng-model="includePersonalEmailDomains" data-ng-checked="includePersonalEmailDomains"> Include Personal Email Domains </label></br>
+                    <label id="oneLeadPerDomainCheckbox">
+                        <input type="checkbox" id="cbox1" data-ng-model="oneLeadPerDomain">{{sourceType!='SalesforceAccount' ? "One Lead Per Account" : "One Record Per Account"}}
+                        <span 
+                            ng-if="sourceTypeInfoTemplate"
+                            tooltips 
+                            tooltip-template="{{ sourceTypeInfoTemplate }}"
+                            tooltip-size="large"
+                            tooltip-side="bottom"
+                            tooltip-close-button="true" 
+                        class="more-info">&#105;</span>
+                    </label><br />
+                    <label id="includePersonalEmailDomainsCheckbox"><input type="checkbox" id="cbox2" data-ng-model="includePersonalEmailDomains" data-ng-checked="includePersonalEmailDomains"> Include Personal Email Domains </label><br />
                     <label id="useLatticeAttributesCheckbox"><input type="checkbox" id="cbox3" data-ng-model="useLatticeAttributes" data-ng-checked="useLatticeAttributes"> Use Lattice Data Cloud Attributes </label>
                     <label id="enableTransfromationsCheckbox"><input type="checkbox" id="cbox4" data-ng-model="enableTransformations" data-ng-checked="enableTransformations"> Enable Transformations </label>
                 </div>
