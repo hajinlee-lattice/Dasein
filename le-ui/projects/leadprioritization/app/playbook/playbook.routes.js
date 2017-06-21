@@ -3,6 +3,7 @@ angular
     'common.wizard',
     'lp.cg.talkingpoint',
     'lp.playbook.plays',
+    'lp.playbook.dashboard',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.segment',
     'lp.playbook.wizard.rating',
@@ -39,6 +40,14 @@ angular
                     controller: 'PlayListController',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/playList/playList.component.html'
+                }
+            }
+        })
+        .state('home.playbook.dashboard', {
+            url: '/dashboard/:play_name',
+            views: {
+                'main@': {
+                    templateUrl: 'app/playbook/content/dashboard/dashboard.component.html'
                 }
             }
         })
