@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -86,5 +87,10 @@ public class PipelineTransformationRequest {
 
     public void setContainerMemMB(Integer containerMemMB) {
         this.containerMemMB = containerMemMB;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }
