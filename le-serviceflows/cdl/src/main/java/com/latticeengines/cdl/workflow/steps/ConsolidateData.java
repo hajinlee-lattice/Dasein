@@ -101,6 +101,9 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     private void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         List<Table> inputTables = getListObjectFromContext(CONSOLIDATE_INPUT_TABLES, Table.class);
+        if (inputTables == null || inputTables.isEmpty()) {
+            throw new RuntimeException("There is no input tables to consolidate.");
+        }
         inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
                 : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
                         : t.getLastModifiedKey().getLastModifiedTimestamp())
