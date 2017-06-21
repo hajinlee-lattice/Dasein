@@ -50,7 +50,7 @@ do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&
     echo "Deploying ${service} to local Hadoop using ${cmd}" &&
-    pushd $WSHOME/le-$service &&
+    pushd $WSHOME/le-${service} &&
     eval $cmd 2>> /tmp/errors.txt &&
     popd &
 done
@@ -61,7 +61,7 @@ do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&
     echo "Deploying ${service} to local Hadoop using ${cmd}" &&
-    pushd $WSHOME/le-$service &&
+    pushd $WSHOME/le-${service} &&
     eval $cmd 2>> /tmp/errors.txt &&
     popd &
 done

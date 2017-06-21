@@ -1,5 +1,6 @@
 package com.latticeengines.workflowapi.yarn.runtime;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -64,7 +65,14 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         }
         log.info(String.format("Running WorkflowProcessor with workflowName:%s and config:%s",
                 workflowConfig.getWorkflowName(), workflowConfig.toString()));
-        appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", appContext, versionManager);
+        String pkgName = workflowConfig.getSwpkgName();
+        if (StringUtils.isBlank(pkgName)) {
+            log.info("Enriching application context with all sw packages available.");
+            appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", appContext, versionManager);
+        } else {
+            log.info("Enriching application context with sw package " + pkgName);
+            appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", pkgName, appContext, versionManager);
+        }
         workflowService.registerJob(workflowConfig.getWorkflowName(), appContext);
 
         WorkflowExecutionId workflowId;

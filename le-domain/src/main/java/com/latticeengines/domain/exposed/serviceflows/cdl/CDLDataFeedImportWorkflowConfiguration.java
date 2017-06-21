@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.Impor
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class CDLDataFeedImportWorkflowConfiguration extends WorkflowConfiguration {
+public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
 //    private String microServiceHostPort;
 

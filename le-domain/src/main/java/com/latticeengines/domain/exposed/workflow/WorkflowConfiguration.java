@@ -22,6 +22,8 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("containerMemMB")
     private Integer containerMemoryMB;
 
+    private String swpkgName;
+
     @JsonProperty
     private boolean restart;
 
@@ -30,6 +32,16 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     @JsonProperty
     private Map<String, String> inputProperties = new HashMap<>();
+
+    @JsonProperty("swpkgName")
+    public String getSwpkgName() {
+        return swpkgName;
+    }
+
+    @JsonProperty("swpkgName")
+    public void setSwpkgName(String swpkgName) {
+        this.swpkgName = swpkgName;
+    }
 
     protected void add(BaseStepConfiguration configuration) {
         configRegistry.put(configuration.getClass().getName(), configuration.toString());

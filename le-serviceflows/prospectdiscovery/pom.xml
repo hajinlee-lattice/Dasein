@@ -47,7 +47,6 @@
             <classifier>tests</classifier>
         </dependency>
 
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>

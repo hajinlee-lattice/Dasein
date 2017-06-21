@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.Ru
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
+public class FitModelWorkflowConfiguration extends BasePDWorkflowConfiguration {
 
     private FitModelWorkflowConfiguration() {
     }

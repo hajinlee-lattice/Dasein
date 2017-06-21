@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 
-public class ImportAndCreateDiffWorkflowConfiguration extends WorkflowConfiguration {
+public class ImportAndCreateDiffWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     private ImportAndCreateDiffWorkflowConfiguration() {
     }

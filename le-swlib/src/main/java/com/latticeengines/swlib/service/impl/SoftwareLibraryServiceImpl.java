@@ -3,10 +3,12 @@ package com.latticeengines.swlib.service.impl;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -105,6 +107,41 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     }
 
     @Override
+    public List<SoftwarePackage> getLatestInstalledPackages(String module) {
+        List<SoftwarePackage> packages = getInstalledPackages(module);
+
+        Map<String, List<SoftwarePackage>> packagesByGroupAndArtifact = new HashMap<>();
+
+        for (SoftwarePackage pkg : packages) {
+            String key = String.format("%s.%s", pkg.getGroupId(), pkg.getArtifactId());
+            List<SoftwarePackage> list = packagesByGroupAndArtifact.computeIfAbsent(key, k -> new ArrayList<>());
+            list.add(pkg);
+        }
+
+        Collection<List<SoftwarePackage>> values = packagesByGroupAndArtifact.values();
+        packages = new ArrayList<>();
+        for (List<SoftwarePackage> value : values) {
+            value.sort((o1, o2) -> o2.getVersion().compareTo(o1.getVersion()));
+            packages.add(value.get(0));
+        }
+
+        return packages;
+    }
+
+    @Override
+    public List<SoftwarePackage> getInstalledPackagesByVersion(String module, String version) {
+        List<SoftwarePackage> packages = getInstalledPackages(module);
+        List<SoftwarePackage> versionMatchedPackages = new ArrayList<>();
+        for (SoftwarePackage pkg : packages) {
+            if (StringUtils.isNotBlank(version) && pkg.getVersion().equals(version)) {
+                versionMatchedPackages.add(pkg);
+            }
+        }
+        return versionMatchedPackages;
+    }
+
+
+    @Override
     public List<SoftwarePackage> getInstalledPackages(String module) {
         List<SoftwarePackage> packages = new ArrayList<>();
         try {
@@ -128,70 +165,48 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         return packages;
     }
 
-    @Override
-    public List<SoftwarePackage> getLatestInstalledPackages(String module) {
+    private SoftwarePackage getInstalledPackageByNameVersion(String module, String name, String version) {
         List<SoftwarePackage> packages = getInstalledPackages(module);
-
-        Map<String, List<SoftwarePackage>> packagesByGroupAndArtifact = new HashMap<>();
-
         for (SoftwarePackage pkg : packages) {
-            String key = String.format("%s.%s", pkg.getGroupId(), pkg.getArtifactId());
-            List<SoftwarePackage> list = packagesByGroupAndArtifact.get(key);
-
-            if (list == null) {
-                list = new ArrayList<>();
-                packagesByGroupAndArtifact.put(key, list);
+            if (!pkg.getName().equals(name)) {
+                continue;
             }
-            list.add(pkg);
-        }
-
-        Collection<List<SoftwarePackage>> values = packagesByGroupAndArtifact.values();
-        packages = new ArrayList<>();
-        for (List<SoftwarePackage> value : values) {
-            value.sort((o1, o2) -> o2.getVersion().compareTo(o1.getVersion()));
-            packages.add(value.get(0));
-        }
-
-        return packages;
-    }
-
-    @Override
-    public List<SoftwarePackage> getInstalledPackagesByVersion(String module, String version) {
-        List<SoftwarePackage> packages = getInstalledPackages(module);
-
-        List<SoftwarePackage> versionMatchedPackages = new ArrayList<>();
-
-        for (SoftwarePackage pkg : packages) {
-            if (pkg.getVersion().equals(version)) {
-                versionMatchedPackages.add(pkg);
+            if (StringUtils.isBlank(version) || version.equals(pkg.getVersion())) {
+                return pkg;
             }
         }
-        return versionMatchedPackages;
+        return null;
     }
 
     @Override
     public ApplicationContext loadSoftwarePackages(String module, ApplicationContext context,
             VersionManager versionManager) {
-        List<SoftwarePackage> packages = getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
-        if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
-            packages = getLatestInstalledPackages(module);
-        }
-        log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
-        log.info(String.format("Found %d of software packages from the software library for this module.",
-                packages.size()));
-        packages.sort((o1, o2) -> {
-            if (o1.getArtifactId().equals(o2.getArtifactId())) {
-                return 0;
+        log.info("Did not specify a pkg name, loading all libraries.");
+        List<SoftwareLibrary> deps = SoftwareLibrary.getLoadingSequence(Arrays.asList(SoftwareLibrary.values()));
+        return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
+    }
+
+    public ApplicationContext loadSoftwarePackages(String module, String name, ApplicationContext context,
+            VersionManager versionManager) {
+        SoftwareLibrary lib = SoftwareLibrary.fromName(name);
+        log.info("Trying to load software libraries for " + lib.getName());
+        List<SoftwareLibrary> deps = lib.getLoadingSequence();
+        return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
+    }
+
+    private ApplicationContext loadSoftwarePackagesInSequence(String module, List<SoftwareLibrary> deps,
+                                                              ApplicationContext context, String version) {
+        log.info("There are " + deps.size() + " libraries to load, the loading sequence is "
+                + StringUtils.join(deps.stream().map(SoftwareLibrary::getName).collect(Collectors.toList()), " -> "));
+        for (SoftwareLibrary dep : deps) {
+            SoftwarePackage pkg = getInstalledPackageByNameVersion(module, dep.getName(), version);
+            if (pkg == null) {
+                throw new RuntimeException("Cannot find software package named " + dep.getName() + " for module "
+                        + module + " at version " + version);
             }
-            if (o1.getArtifactId().contains("datacloud")) {
-                return -1;
-            }
-            if (o2.getArtifactId().contains("datacloud")) {
-                return 1;
-            }
-            return o1.getArtifactId().compareTo(o2.getArtifactId());
-        });
-        for (SoftwarePackage pkg : packages) {
+            log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
+            log.info(String.format("Found software package %s from the software library for this module %s.",
+                    pkg.getName(), pkg.getModule()));
             String initializerClassName = pkg.getInitializerClass();
             log.info(String.format("Loading %s", initializerClassName));
             SoftwarePackageInitializer initializer;

@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.C
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
+public class ScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     private ScoreWorkflowConfiguration() {
     }

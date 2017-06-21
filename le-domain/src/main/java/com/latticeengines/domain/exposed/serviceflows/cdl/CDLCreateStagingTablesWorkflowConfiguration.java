@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchListO
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.stage.StageListOfEntitiesConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class CDLCreateStagingTablesWorkflowConfiguration extends WorkflowConfiguration {
+public class CDLCreateStagingTablesWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
     
     private String microServiceHostPort;
     

@@ -5,10 +5,10 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class PublishWorkflowConfiguration extends WorkflowConfiguration {
+public class PublishWorkflowConfiguration extends BaseDataCloudWorkflowConfiguration {
 
     public static class Builder {
 

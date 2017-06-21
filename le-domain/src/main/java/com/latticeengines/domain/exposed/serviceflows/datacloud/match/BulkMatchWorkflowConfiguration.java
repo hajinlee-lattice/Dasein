@@ -8,11 +8,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
+public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfiguration {
 
     private static Map<String, Class<?>> stepConfigClasses = new HashMap<>();
 

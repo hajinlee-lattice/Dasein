@@ -14,6 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -21,6 +22,7 @@ import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
 @Component("bulkMatchProcessorExecutor")
+@Scope("prototype")
 public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
     private static final Log log = LogFactory.getLog(BulkMatchProcessorExecutorImpl.class);

@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.BasePDWorkflowConfiguration;
 
-public class CreateAttributeLevelSummaryWorkflowConfiguration extends WorkflowConfiguration {
+public class CreateAttributeLevelSummaryWorkflowConfiguration extends BasePDWorkflowConfiguration {
 
     private CreateAttributeLevelSummaryWorkflowConfiguration() {
     }

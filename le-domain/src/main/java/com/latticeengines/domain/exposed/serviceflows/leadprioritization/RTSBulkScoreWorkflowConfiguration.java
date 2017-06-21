@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.C
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
+public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     private RTSBulkScoreWorkflowConfiguration() {
     }

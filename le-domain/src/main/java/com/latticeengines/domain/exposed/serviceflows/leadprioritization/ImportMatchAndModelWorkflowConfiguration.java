@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
+public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     public static class Builder {
         private ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration();

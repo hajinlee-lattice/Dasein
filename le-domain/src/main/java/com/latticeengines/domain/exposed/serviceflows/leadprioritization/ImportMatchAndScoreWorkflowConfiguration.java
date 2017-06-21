@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 
-public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfiguration {
+public class ImportMatchAndScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     private ImportMatchAndScoreWorkflowConfiguration() {
     }

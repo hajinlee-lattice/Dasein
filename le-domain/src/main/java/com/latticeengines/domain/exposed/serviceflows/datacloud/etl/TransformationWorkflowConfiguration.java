@@ -1,17 +1,17 @@
 package com.latticeengines.domain.exposed.serviceflows.datacloud.etl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.TransformationStepExecutionConfiguration;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-
 import java.util.HashMap;
 import java.util.Map;
 
-public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.TransformationStepExecutionConfiguration;
+
+public class TransformationWorkflowConfiguration extends BaseDataCloudWorkflowConfiguration {
 
     private static Map<String, Class<?>> stepConfigClasses = new HashMap<>();
 

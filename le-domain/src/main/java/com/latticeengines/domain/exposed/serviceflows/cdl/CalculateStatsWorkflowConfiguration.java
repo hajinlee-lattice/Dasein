@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsSt
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class CalculateStatsWorkflowConfiguration extends WorkflowConfiguration {
+public class CalculateStatsWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     private CalculateStatsWorkflowConfiguration() {
     }

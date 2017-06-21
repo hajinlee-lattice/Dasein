@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class PMMLModelWorkflowConfiguration extends WorkflowConfiguration {
+public class PMMLModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     public static class Builder {
         private PMMLModelWorkflowConfiguration configuration = new PMMLModelWorkflowConfiguration();

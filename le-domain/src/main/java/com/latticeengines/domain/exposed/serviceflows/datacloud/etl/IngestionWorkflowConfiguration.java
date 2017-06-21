@@ -6,10 +6,10 @@ import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.IngestionStepConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class IngestionWorkflowConfiguration extends WorkflowConfiguration {
+public class IngestionWorkflowConfiguration extends BaseDataCloudWorkflowConfiguration {
     public static class Builder {
         private IngestionWorkflowConfiguration ingestionWorkflowConfig = new IngestionWorkflowConfiguration();
         private IngestionStepConfiguration ingestionConfig = new IngestionStepConfiguration();

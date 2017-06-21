@@ -7,11 +7,11 @@ import java.util.Properties;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CascadingBulkMatchStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
-public class CascadingBulkMatchWorkflowConfiguration extends WorkflowConfiguration {
+public class CascadingBulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfiguration {
 
     public static class Builder {
 

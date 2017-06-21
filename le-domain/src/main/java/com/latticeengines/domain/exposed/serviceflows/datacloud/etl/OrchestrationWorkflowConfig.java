@@ -6,10 +6,11 @@ import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.OrchestrationConfig;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.OrchestrationStepConfig;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class OrchestrationWorkflowConfig extends WorkflowConfiguration {
+public class OrchestrationWorkflowConfig extends BaseDataCloudWorkflowConfiguration {
     public static class Builder {
         private OrchestrationWorkflowConfig orchWorkflowConfig = new OrchestrationWorkflowConfig();
         private OrchestrationStepConfig orchStepConfig = new OrchestrationStepConfig();

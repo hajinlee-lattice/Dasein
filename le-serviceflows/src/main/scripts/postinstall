@@ -33,6 +33,7 @@ do
     echo "install le-serviceflows-${library} for ${module}"
     java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
         -o install \
+        -n ${library} \
         -m ${module} \
         -g com.latticeengines \
         -a le-serviceflows-${library} \

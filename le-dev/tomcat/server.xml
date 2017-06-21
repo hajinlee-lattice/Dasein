@@ -19,30 +19,17 @@
                   pathname="conf/tomcat-users.xml"/>
     </GlobalNamingResources>
 
-    <Service name="MS">
-        <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000"
+    <Service name="MatchAPI">
+        <Connector port="8076" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
                    compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <Engine name="MicroserviceEngine" defaultHost="localhost">
-            <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
-            </Realm>
-            <Host name="localhost" appBase="webapps/ms" unpackWARs="true" autoDeploy="true" undeployOldVersions="true"
-                  startStopThreads="8"/>
-        </Engine>
-    </Service>
 
-    <Service name="PLS">
-        <Connector port="8081" protocol="HTTP/1.1" connectionTimeout="20000"
-                   compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <Engine name="PlsEngine" defaultHost="localhost">
+        <Engine name="MatchApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/pls" unpackWARs="true" autoDeploy="true"
+            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
@@ -147,21 +134,6 @@
         </Engine>
     </Service>
 
-    <Service name="MatchAPI">
-        <Connector port="8076" protocol="HTTP/1.1" connectionTimeout="20000"
-                   compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-
-        <Engine name="MatchApiEngine" defaultHost="localhost">
-            <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
-            </Realm>
-            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
-        </Engine>
-    </Service>
-
     <Service name="Job">
         <Connector port="8077" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
@@ -172,6 +144,34 @@
                        resourceName="UserDatabase"/>
             </Realm>
             <Host name="localhost" appBase="webapps/job" unpackWARs="true" autoDeploy="true"
+                  undeployOldVersions="true"/>
+        </Engine>
+    </Service>
+
+    <Service name="MS">
+        <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+        <Engine name="MicroserviceEngine" defaultHost="localhost">
+            <Realm className="org.apache.catalina.realm.LockOutRealm">
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                       resourceName="UserDatabase"/>
+            </Realm>
+            <Host name="localhost" appBase="webapps/ms" unpackWARs="true" autoDeploy="true" undeployOldVersions="true"
+                  startStopThreads="8"/>
+        </Engine>
+    </Service>
+
+    <Service name="PLS">
+        <Connector port="8081" protocol="HTTP/1.1" connectionTimeout="20000"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
+        <Engine name="PlsEngine" defaultHost="localhost">
+            <Realm className="org.apache.catalina.realm.LockOutRealm">
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                       resourceName="UserDatabase"/>
+            </Realm>
+            <Host name="localhost" appBase="webapps/pls" unpackWARs="true" autoDeploy="true"
                   undeployOldVersions="true"/>
         </Engine>
     </Service>

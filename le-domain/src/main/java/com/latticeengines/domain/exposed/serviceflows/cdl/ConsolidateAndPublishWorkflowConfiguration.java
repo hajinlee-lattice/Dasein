@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataC
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class ConsolidateAndPublishWorkflowConfiguration extends WorkflowConfiguration {
+public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     private ConsolidateAndPublishWorkflowConfiguration() {
     }

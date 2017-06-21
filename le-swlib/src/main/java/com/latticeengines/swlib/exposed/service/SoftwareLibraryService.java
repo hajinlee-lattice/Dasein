@@ -14,6 +14,7 @@ public interface SoftwareLibraryService {
 
     void installPackage(SoftwarePackage swPackage, File localFile);
 
+    @Deprecated
     List<SoftwarePackage> getInstalledPackages(String module);
 
     List<SoftwarePackage> getLatestInstalledPackages(String module);
@@ -26,4 +27,6 @@ public interface SoftwareLibraryService {
 
     ApplicationContext loadSoftwarePackages(String module, ApplicationContext context, VersionManager versionManager);
 
+    ApplicationContext loadSoftwarePackages(String module, String name, ApplicationContext context,
+                         VersionManager versionManager);
 }

@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class RedshiftPublishWorkflowConfiguration extends WorkflowConfiguration {
+public class RedshiftPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     private RedshiftPublishWorkflowConfiguration() {
     }

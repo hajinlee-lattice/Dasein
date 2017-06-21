@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
+public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     private static final Log log = LogFactory.getLog(MatchAndModelWorkflowConfiguration.class);
 

@@ -21,6 +21,7 @@ public class SwlibTool {
         Options options = new Options();
         options.addOption("o", "operation", true, " -<operation> (install or uninstall)"). //
                 addOption("m", "module", true, " -<module> (module name - dataflow or workflow)"). //
+                addOption("n", "name", true, " -<name> (package name - cdl, leadprioritization or datacloud)"). //
                 addOption("g", "groupId", true, " -<groupId> (group id Maven-style)"). //
                 addOption("a", "artifactId", true, " -<artifactId> (artifact id Maven-style)"). //
                 addOption("s", "stack", true, " -<stack> (stackName: a or b)"). //
@@ -28,13 +29,13 @@ public class SwlibTool {
                 addOption("c", "classifier", false, " -<classifier> (classifier Maven-style)"). //
                 addOption("f", "localFileName", true, " -<localFileName> (path to local file to install)"). //
                 addOption("i", "initializer", true, " -<initializer> (initializer class name)"). //
-                addOption("h", "defaultFS", true, "-<defaultFS> (Hadoop fs.defaultFS)"). //
-                addOption("n", "name", true, "-<name> (software library name)");
+                addOption("h", "defaultFS", true, "-<defaultFS> (Hadoop fs.defaultFS)"); //
 
         try {
             CommandLine cmd = parser.parse(options, args);
             if (cmd.hasOption("operation")) {
                 String operation = cmd.getOptionValue("operation");
+                String name = cmd.getOptionValue("name");
                 String module = cmd.getOptionValue("module");
                 String groupId = cmd.getOptionValue("groupId");
                 String artifactId = cmd.getOptionValue("artifactId");
@@ -43,7 +44,6 @@ public class SwlibTool {
                 String classifier = cmd.getOptionValue("classifier");
                 String initializerClassName = cmd.getOptionValue("initializer");
                 String fsDefaultFS = cmd.getOptionValue("defaultFS");
-                String name = cmd.getOptionValue("name");
 
                 File fileToInstall = null;
                 SoftwareLibraryService swlibService = appContext.getBean("softwareLibraryService",
@@ -51,13 +51,13 @@ public class SwlibTool {
                 swlibService.setStackName(stackName);
 
                 SoftwarePackage swPackage = new SoftwarePackage();
+                swPackage.setName(name);
                 swPackage.setModule(module);
                 swPackage.setGroupId(groupId);
                 swPackage.setArtifactId(artifactId);
                 swPackage.setVersion(version);
                 swPackage.setClassifier(classifier);
                 swPackage.setInitializerClass(initializerClassName);
-                swPackage.setName(name);
 
                 if (operation.equals("install")) {
                     String fileName = cmd.getOptionValue("localFileName");

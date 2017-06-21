@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepC
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
+public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     private ImportAndRTSBulkScoreWorkflowConfiguration() {
     }

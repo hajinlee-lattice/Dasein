@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
+@Scope("prototype")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
     private static final int NUM_10K = 10_000;
