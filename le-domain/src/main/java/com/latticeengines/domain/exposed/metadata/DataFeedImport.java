@@ -21,6 +21,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
@@ -134,5 +135,10 @@ public class DataFeedImport implements HasPid, Serializable {
 
     public void setSourceConfig(String sourceConfig) {
         this.sourceConfig = sourceConfig;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }

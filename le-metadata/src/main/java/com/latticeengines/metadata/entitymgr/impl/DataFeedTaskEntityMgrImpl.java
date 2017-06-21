@@ -2,6 +2,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,6 +30,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("datafeedTaskEntityMgr")
 public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> implements DataFeedTaskEntityMgr {
+
+    private static final Logger log = Logger.getLogger(DataFeedTaskEntityMgrImpl.class);
 
     @Autowired
     private DataFeedTaskDao datafeedTaskDao;
@@ -77,7 +80,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
                 templateTable.setTableType(TableType.IMPORTTABLE);
                 tableEntityMgr.create(templateTable);
             } else {
-               dataFeedTask.setImportTemplate(existing);
+                dataFeedTask.setImportTemplate(existing);
             }
         }
         tableTypeHolder.setTableType(TableType.DATATABLE);
@@ -153,7 +156,10 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         boolean dataTableConsumed = datafeedTask.getImportData() == null;
 
         if (!dataTableConsumed) {
+            log.info(String.format("directly appending extract to data table %s",
+                    datafeedTask.getImportData().getName()));
             tableEntityMgr.addExtract(datafeedTask.getImportData(), extract);
+
         } else {
             tableTypeHolder.setTableType(TableType.IMPORTTABLE);
             Table extractTable = tableEntityMgr.findByName(tableName);
@@ -163,6 +169,8 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             extractTable.addExtract(extract);
             extractTable.setTableType(TableType.DATATABLE);
             tableTypeHolder.setTableType(TableType.DATATABLE);
+            log.info(String.format("data table has been consumed, adding extract to new data table %s",
+                    extractTable.getName()));
             tableEntityMgr.create(extractTable);
             addTableToQueue(datafeedTask, extractTable);
         }
@@ -175,6 +183,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             datafeedTask.setImportData(newDataTable);
             datafeedTask.setStatus(Status.Active);
             datafeedTask.setLastImported(new Date());
+            log.info(String.format("creating new import table for data feed task %s", datafeedTask));
             createOrUpdate(datafeedTask);
             addTableToQueue(datafeedTask, datafeedTask.getImportData());
         }

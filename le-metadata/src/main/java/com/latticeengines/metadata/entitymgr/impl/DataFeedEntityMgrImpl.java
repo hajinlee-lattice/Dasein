@@ -67,7 +67,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeed.setDataCollection(dataCollection);
         datafeed.setStatus(Status.Initing);
         super.create(datafeed);
-        datafeed = findByName(datafeed.getName());
+        log.info(String.format("creating data feed tasks %s.", datafeed.getTasks()));
         for (DataFeedTask task : datafeed.getTasks()) {
             task.setDataFeed(datafeed);
             datafeedTaskEntityMgr.create(task);
@@ -78,6 +78,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.create(execution);
         datafeed.setActiveExecutionId(execution.getPid());
         datafeed.setActiveExecution(execution);
+        log.info(String.format("created data feed %s.", datafeed));
         update(datafeed);
     }
 
@@ -130,6 +131,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         for (DataFeedImport datafeedImport : imports) {
             datafeedImportEntityMgr.create(datafeedImport);
         }
+        log.info(String.format("starting execution %s", execution));
         datafeedExecutionEntityMgr.update(execution);
 
         datafeed.setActiveExecution(execution);
@@ -142,6 +144,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             task.setImportData(null);
             datafeedTaskEntityMgr.update(task);
         });
+        log.info(String.format("starting execution: updating data feed to %s", datafeed));
         datafeedDao.update(datafeed);
         return execution;
     }
@@ -171,6 +174,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         } else if (datafeed.getStatus() == Status.Consolidating) {
             datafeed.setStatus(Status.Active);
         }
+        log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName, datafeed));
         datafeedDao.update(datafeed);
         return execution;
     }

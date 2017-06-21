@@ -32,7 +32,9 @@ public class DataFeedExecutionListener extends LEJobListener {
         String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
         String customerSpace = job.getTenant().getId();
 
-        metadataProxy.updateExecutionWorkflowId(customerSpace, datafeedName, jobExecution.getId());
+        DataFeedExecution execution = metadataProxy.updateExecutionWorkflowId(customerSpace, datafeedName,
+                jobExecution.getId());
+        log.info(String.format("current running execution %s", execution));
     }
 
     @Override
@@ -42,12 +44,14 @@ public class DataFeedExecutionListener extends LEJobListener {
         String customerSpace = job.getTenant().getId();
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             DataFeedExecution execution = metadataProxy.finishExecution(customerSpace, datafeedName);
+            log.info(String.format("trying to finish running execution %s", execution));
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");
             DataFeedExecution execution = metadataProxy.failExecution(customerSpace, datafeedName);
+            log.info(String.format("trying to fail running execution %s", execution));
             if (execution.getStatus() != Status.Failed) {
                 throw new RuntimeException("Can't fail execution");
             }

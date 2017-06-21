@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
@@ -32,12 +31,6 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
 
     @Autowired
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
-
-    @Autowired
-    private DataCollectionEntityMgr dataCollectionEntityMgr;
-
-    @Autowired
-    private TableTypeHolder tableTypeHolder;
 
     private static final String DATA_FEED_NAME = "datafeed";
 
