@@ -2,9 +2,10 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.stage;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.BaseCDLDataFlowStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
-public class StageDataConfiguration extends DataFlowStepConfiguration {
+public class StageDataConfiguration extends BaseCDLDataFlowStepConfiguration {
     
     @NotNull
     private SourceFile sourceFile;

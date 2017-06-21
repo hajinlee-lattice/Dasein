@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
-public class DedupEventTableConfiguration extends DataFlowStepConfiguration {
+public class DedupEventTableConfiguration extends BaseLPDataFlowStepConfiguration {
 
     @JsonProperty("dedup_type")
     private DedupType dedupType;

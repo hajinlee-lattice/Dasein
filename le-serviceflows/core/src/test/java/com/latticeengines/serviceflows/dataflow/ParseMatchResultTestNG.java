@@ -12,7 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-core-dataflow-context.xml" })

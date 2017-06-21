@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
-import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;

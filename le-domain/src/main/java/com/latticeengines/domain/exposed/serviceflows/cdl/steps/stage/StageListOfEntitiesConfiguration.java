@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dataflow.flows.cdl.CreateStagingTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateStagingTableParameters;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 

@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
-public class CombineInputTableWithScoreDataFlowConfiguration extends DataFlowStepConfiguration {
+public class CombineInputTableWithScoreDataFlowConfiguration extends BaseLPDataFlowStepConfiguration {
 
     private List<BucketMetadata> bucketMetadata;
     private String modelType;

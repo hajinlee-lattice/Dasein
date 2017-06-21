@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.FilterReportColumn;
 import com.latticeengines.domain.exposed.dataflow.ReportColumn;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.report.BaseDataFlowReportStep;

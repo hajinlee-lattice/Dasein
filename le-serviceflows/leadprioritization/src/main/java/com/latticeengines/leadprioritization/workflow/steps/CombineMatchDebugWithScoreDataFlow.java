@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.C
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
-import com.latticeengines.domain.exposed.dataflow.flows.CombineMatchDebugWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineMatchDebugWithScoreParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 

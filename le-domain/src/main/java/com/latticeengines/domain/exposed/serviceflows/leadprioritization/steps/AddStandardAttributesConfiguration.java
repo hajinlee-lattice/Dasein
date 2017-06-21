@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
-public class AddStandardAttributesConfiguration extends DataFlowStepConfiguration {
+public class AddStandardAttributesConfiguration extends BaseLPDataFlowStepConfiguration {
 
     private TransformationGroup transformationGroup;
     private Map<String, String> runTimeParams;

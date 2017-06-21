@@ -1,6 +1,7 @@
 package com.latticeengines.swlib;
 
 import java.io.File;
+import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -8,6 +9,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
@@ -20,7 +22,6 @@ public class SwlibTool {
         CommandLineParser parser = new PosixParser();
         Options options = new Options();
         options.addOption("o", "operation", true, " -<operation> (install or uninstall)"). //
-                addOption("m", "module", true, " -<module> (module name - dataflow or workflow)"). //
                 addOption("n", "name", true, " -<name> (package name - cdl, leadprioritization or datacloud)"). //
                 addOption("g", "groupId", true, " -<groupId> (group id Maven-style)"). //
                 addOption("a", "artifactId", true, " -<artifactId> (artifact id Maven-style)"). //
@@ -36,7 +37,6 @@ public class SwlibTool {
             if (cmd.hasOption("operation")) {
                 String operation = cmd.getOptionValue("operation");
                 String name = cmd.getOptionValue("name");
-                String module = cmd.getOptionValue("module");
                 String groupId = cmd.getOptionValue("groupId");
                 String artifactId = cmd.getOptionValue("artifactId");
                 String version = cmd.getOptionValue("version");
@@ -52,7 +52,6 @@ public class SwlibTool {
 
                 SoftwarePackage swPackage = new SoftwarePackage();
                 swPackage.setName(name);
-                swPackage.setModule(module);
                 swPackage.setGroupId(groupId);
                 swPackage.setArtifactId(artifactId);
                 swPackage.setVersion(version);
@@ -66,17 +65,29 @@ public class SwlibTool {
                     if (!fileToInstall.exists()) {
                         throw new Exception(String.format("File %s does not exist.", fileName));
                     }
-                    if (fsDefaultFS != null) {
-                        swlibService.installPackage(fsDefaultFS, swPackage, fileToInstall);
-                    } else {
-                        swlibService.installPackage(swPackage, fileToInstall);
-                    }
-
+                    installForAllModules(swlibService, fsDefaultFS, swPackage, fileToInstall);
                 } else if (operation.equals("uninstall")) {
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void installForAllModules(SoftwareLibraryService swlibService, String fsDefaultFS,
+            SoftwarePackage swPackage, File fileToInstall) {
+        SoftwareLibrary swLib = SoftwareLibrary.fromName(swPackage.getName());
+        if (swLib == null) {
+            throw new RuntimeException("Cannot find software library for name " + swPackage.getName());
+        }
+        Set<SoftwareLibrary.Module> modules = swLib.getModules();
+        for (SoftwareLibrary.Module module: modules) {
+            swPackage.setModule(module.name());
+            if (fsDefaultFS != null) {
+                swlibService.installPackage(fsDefaultFS, swPackage, fileToInstall);
+            } else {
+                swlibService.installPackage(swPackage, fileToInstall);
+            }
         }
     }
 

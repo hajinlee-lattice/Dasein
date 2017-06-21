@@ -3,9 +3,9 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.export;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.BaseCDLDataFlowStepConfiguration;
 
-public class RedshiftPublishStepConfiguration extends DataFlowStepConfiguration {
+public class RedshiftPublishStepConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     @JsonProperty("redshiftTableConfig")
     private RedshiftTableConfiguration redshiftTableConfig;

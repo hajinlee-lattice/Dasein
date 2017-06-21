@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
@@ -83,12 +86,21 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
     @Override
     public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = getHdfsEntries(containerProperties, true);
-        hdfsEntries = appendModuleHdfsEntries(hdfsEntries);
+        SoftwareLibrary swlib = getSoftwareLibrary(containerProperties);
+        hdfsEntries = appendModuleHdfsEntries(hdfsEntries, swlib);
         return hdfsEntries;
     }
 
+    private SoftwareLibrary getSoftwareLibrary(Properties containerProperties) {
+        String pkgName = containerProperties.getProperty(ContainerProperty.SWLIB_PKG.name());
+        if (StringUtils.isNotBlank(pkgName)) {
+            return SoftwareLibrary.fromName(pkgName);
+        }
+        return null;
+    }
+
     protected Collection<LocalResourcesFactoryBean.TransferEntry> appendModuleHdfsEntries(
-            Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries) {
+            Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries, SoftwareLibrary swlib) {
         String module = getModuleName();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
@@ -96,13 +108,25 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                 false));
         if (softwareLibraryService != null) {
             softwareLibraryService.setStackName(stackName);
-            List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module,
-                    versionManager.getCurrentVersion());
+            List<SoftwarePackage> packages;
             if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
                 packages = softwareLibraryService.getLatestInstalledPackages(module);
+            } else {
+                packages = softwareLibraryService.getInstalledPackagesByVersion(module,
+                        versionManager.getCurrentVersion());
+            }
+            List<SoftwarePackage> requiredPackages;
+            if (swlib != null) {
+                log.info("Filter by dependencies of software library " + swlib.getName());
+                Set<String> deps = swlib.getLoadingSequence(SoftwareLibrary.Module.valueOf(module)).stream() //
+                        .map(SoftwareLibrary::getName).collect(Collectors.toSet());
+                requiredPackages = packages.stream().filter(p -> deps.contains(p.getName()))
+                        .collect(Collectors.toList());
+            } else {
+                requiredPackages = packages;
             }
 
-            for (SoftwarePackage pkg : packages) {
+            for (SoftwarePackage pkg : requiredPackages) {
                 String hdfsJar = String.format("%s/%s", //
                         softwareLibraryService.getTopLevelPath(), pkg.getHdfsPath());
                 log.info(String.format("Adding %s to hdfs entry.", hdfsJar));

@@ -65,13 +65,14 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         }
         log.info(String.format("Running WorkflowProcessor with workflowName:%s and config:%s",
                 workflowConfig.getWorkflowName(), workflowConfig.toString()));
-        String pkgName = workflowConfig.getSwpkgName();
-        if (StringUtils.isBlank(pkgName)) {
+        String swlib = workflowConfig.getSwpkgName();
+        if (StringUtils.isBlank(swlib)) {
             log.info("Enriching application context with all sw packages available.");
             appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", appContext, versionManager);
         } else {
-            log.info("Enriching application context with sw package " + pkgName);
-            appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", pkgName, appContext, versionManager);
+            log.info("Enriching application context with sw package " + swlib);
+            appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", swlib, appContext,
+                    versionManager);
         }
         workflowService.registerJob(workflowConfig.getWorkflowName(), appContext);
 

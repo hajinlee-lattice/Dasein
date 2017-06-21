@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.core.steps;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
-public class ProcessMatchResultConfiguration extends DataFlowStepConfiguration {
+public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfiguration {
 
     @JsonProperty("data_cloud_version")
     private String dataCloudVersion;

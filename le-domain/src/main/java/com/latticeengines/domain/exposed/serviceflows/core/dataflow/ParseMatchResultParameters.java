@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.match;
+package com.latticeengines.domain.exposed.serviceflows.core.dataflow;
 
 import java.util.List;
 

@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.A
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class ScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 

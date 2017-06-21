@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.CreateAttributeLevelSummaryWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.CreateAttributeLevelSummaryWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;

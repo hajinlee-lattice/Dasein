@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
-public class RunScoreTableDataFlowConfiguration extends DataFlowStepConfiguration {
+public class RunScoreTableDataFlowConfiguration extends BasePDDataFlowStepConfiguration {
     
     private String[] accountMasterAndPath;
     private String scoreResult;

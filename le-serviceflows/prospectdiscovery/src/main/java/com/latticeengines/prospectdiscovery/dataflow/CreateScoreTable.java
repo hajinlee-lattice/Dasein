@@ -8,7 +8,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateScoreTableParameters;
 
 @Component("createScoreTable")
 public class CreateScoreTable extends TypesafeDataFlowBuilder<CreateScoreTableParameters> {

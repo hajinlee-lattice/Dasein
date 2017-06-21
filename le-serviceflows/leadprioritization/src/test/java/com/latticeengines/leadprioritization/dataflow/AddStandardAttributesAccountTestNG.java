@@ -3,7 +3,7 @@ package com.latticeengines.leadprioritization.dataflow;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;

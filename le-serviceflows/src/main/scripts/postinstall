@@ -21,20 +21,21 @@ fi
 
 echo $VERSION
 
-for sf in 'dataflowapi|prospectdiscovery' 'dataflowapi|leadprioritization' 'dataflowapi|cdl' 'workflowapi|prospectdiscovery' 'workflowapi|leadprioritization' 'workflowapi|cdl' 'workflowapi|datacloud'
+for sf in 'prospectdiscovery' 'leadprioritization' 'cdl' 'datacloud'
 do
     module=$(echo ${sf} | cut -d \| -f 1)
     library=$(echo ${sf} | cut -d \| -f 2)
 
     echo "clean up hdfs for module=${module} library=${library}"
-    hdfs dfs -mkdir -p /app/${LE_STACK}/swlib/${module}/com/latticeengines/le-serviceflows-${library}/${VERSION}
-    hdfs dfs -rm -r -f /app/${LE_STACK}/swlib/${module}/com/latticeengines/le-serviceflows-${library}/${VERSION}/*
+    hdfs dfs -mkdir -p /app/${LE_STACK}/swlib/workflowapi/com/latticeengines/le-serviceflows-${library}/${VERSION}
+    hdfs dfs -rm -r -f /app/${LE_STACK}/swlib/workflowapi/com/latticeengines/le-serviceflows-${library}/${VERSION}/*
+    hdfs dfs -mkdir -p /app/${LE_STACK}/swlib/dataflowapi/com/latticeengines/le-serviceflows-${library}/${VERSION}
+    hdfs dfs -rm -r -f /app/${LE_STACK}/swlib/dataflowapi/com/latticeengines/le-serviceflows-${library}/${VERSION}/*
 
     echo "install le-serviceflows-${library} for ${module}"
     java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
         -o install \
         -n ${library} \
-        -m ${module} \
         -g com.latticeengines \
         -a le-serviceflows-${library} \
         -v ${VERSION} \

@@ -49,7 +49,7 @@ sed -i".orig" "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|"
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     hdfs namenode -format
     
-    echo "Bootstrapping up sqoop ..."
+    echo "Bootstrapping sqoop ..."
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
 
     if [ ! -f "$ARTIFACT_DIR/sqoop-1.4.6.2.4.3.0-227.tar.gz" ]; then

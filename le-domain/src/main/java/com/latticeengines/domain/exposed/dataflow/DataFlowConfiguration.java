@@ -38,6 +38,9 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("namespace")
     private String namespace;
 
+    @JsonProperty("swlib")
+    private String swlib;
+
     @JsonProperty("skip_registering_table")
     private boolean skipRegisteringTable = false;
 
@@ -129,4 +132,11 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
         this.skipRegisteringTable = skipRegisteringTable;
     }
 
+    public String getSwlib() {
+        return swlib;
+    }
+
+    public void setSwlib(String swlib) {
+        this.swlib = swlib;
+    }
 }

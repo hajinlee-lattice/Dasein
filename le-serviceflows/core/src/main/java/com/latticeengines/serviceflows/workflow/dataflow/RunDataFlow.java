@@ -7,7 +7,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.dataflowapi.DataFlowApiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -54,6 +54,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setJobProperties(configuration.getJobProperties());
         dataFlowConfig.setEngine(configuration.getEngine());
         dataFlowConfig.setQueue(configuration.getQueue());
+        dataFlowConfig.setSwlib(configuration.getSwlib());
 
         dataFlowConfig.setCustomerSpace(configuration.getCustomerSpace());
         dataFlowConfig.setDataFlowBeanName(configuration.getBeanName());

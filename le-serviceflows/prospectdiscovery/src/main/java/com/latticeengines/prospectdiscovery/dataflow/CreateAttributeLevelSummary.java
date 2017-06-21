@@ -11,7 +11,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
 
 @Component("createAttributeLevelSummary")
 public class CreateAttributeLevelSummary extends TypesafeDataFlowBuilder<CreateAttributeLevelSummaryParameters> {

@@ -16,20 +16,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
-import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
-import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.CombineMatchDebugWithScoreParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.PivotScoreAndEventParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.RedshiftPublishDataFlowParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.cdl.CreateStagingTableParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.cdl.ResolveStagingAndRuntimeTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.AddStandardAttributesParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineMatchDebugWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateScoreTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.DedupEventTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.PivotScoreAndEventParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.QuotaFlowParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.RedshiftPublishDataFlowParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateStagingTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ResolveStagingAndRuntimeTableParameters;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //

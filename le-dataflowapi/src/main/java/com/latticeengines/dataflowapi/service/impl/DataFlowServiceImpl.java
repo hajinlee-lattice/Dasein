@@ -2,6 +2,7 @@ package com.latticeengines.dataflowapi.service.impl;
 
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,6 +87,11 @@ public class DataFlowServiceImpl implements DataFlowService {
                 containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkLocalVcores));
                 containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkLocalMemory));
             }
+        }
+
+        String swLib = dataFlowConfig.getSwlib();
+        if (StringUtils.isNotBlank(swLib)) {
+            containerProperties.put(ContainerProperty.SWLIB_PKG.name(), swLib);
         }
 
         dataFlowJob.setAppMasterPropertiesObject(appMasterProperties);

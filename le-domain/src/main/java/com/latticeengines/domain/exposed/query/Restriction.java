@@ -9,7 +9,6 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
-        @Type(value = BucketRestriction.class, name = "bucket"),
         @Type(value = ConcreteRestriction.class, name = "concrete"),
         @Type(value = ExistsRestriction.class, name = "exists"),
         @Type(value = LogicalRestriction.class, name = "logical") })

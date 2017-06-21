@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -86,7 +86,14 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     @Override
     public String process(DataFlowConfiguration dataFlowConfig) throws Exception {
         log.info("Running processor.");
-        appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", appContext, versionManager);
+        String swlib = dataFlowConfig.getSwlib();
+        if (StringUtils.isNotBlank(swlib)) {
+            log.info("Enriching application context with sw package " + swlib);
+            appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", swlib, appContext, versionManager);
+        } else {
+            log.info("Enriching application context with all sw packages available.");
+            appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", appContext, versionManager);
+        }
         Map<String, Table> sourceTables = new HashMap<>();
 
         List<DataFlowSource> dataFlowSources = dataFlowConfig.getDataSources();

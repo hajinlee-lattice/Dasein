@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
-import com.latticeengines.domain.exposed.dataflow.flows.cdl.CreateStagingTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateStagingTableParameters;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
 @Component("createStagingTable")

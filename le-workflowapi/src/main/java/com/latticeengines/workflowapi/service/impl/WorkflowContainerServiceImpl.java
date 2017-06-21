@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -120,6 +121,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(mem));
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(mem));
+
+        String swpkgName = workflowConfig.getSwpkgName();
+        if (StringUtils.isNotBlank(swpkgName)) {
+            containerProperties.put(ContainerProperty.SWLIB_PKG.name(), swpkgName);
+        }
 
         job.setAppMasterPropertiesObject(appMasterProperties);
         job.setContainerPropertiesObject(containerProperties);

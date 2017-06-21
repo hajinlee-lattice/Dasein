@@ -13,7 +13,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.dataflow.FilterReportColumn;
 import com.latticeengines.domain.exposed.dataflow.GroupByDomainReportColumn;
 import com.latticeengines.domain.exposed.dataflow.ReportColumn;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;

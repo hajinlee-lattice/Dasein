@@ -2,7 +2,6 @@ package com.latticeengines.serviceflows.workflow.report;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseDataFlowReportStepConfiguration;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.joda.time.DateTime;
@@ -11,11 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseDataFlowReportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
 public abstract class BaseDataFlowReportStep<T extends BaseDataFlowReportStepConfiguration> extends BaseReportStep<T> {
 

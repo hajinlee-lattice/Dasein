@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.domain.exposed.dataflow.GroupByDomainReportColumn;
 import com.latticeengines.domain.exposed.dataflow.ReportColumn;
-import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CreateReportParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-core-dataflow-context.xml" })

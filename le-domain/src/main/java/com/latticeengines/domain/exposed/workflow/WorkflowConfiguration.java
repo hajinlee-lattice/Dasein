@@ -33,7 +33,7 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     @JsonProperty
     private Map<String, String> inputProperties = new HashMap<>();
 
-    @JsonProperty("swpkgName")
+    @JsonProperty("swlib")
     public String getSwpkgName() {
         return swpkgName;
     }

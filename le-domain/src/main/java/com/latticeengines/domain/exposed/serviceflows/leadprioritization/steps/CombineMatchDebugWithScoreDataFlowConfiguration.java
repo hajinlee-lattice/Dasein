@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
 
-public class CombineMatchDebugWithScoreDataFlowConfiguration extends DataFlowStepConfiguration {
+public class CombineMatchDebugWithScoreDataFlowConfiguration extends BaseLPDataFlowStepConfiguration {
 
     public CombineMatchDebugWithScoreDataFlowConfiguration() {
         setBeanName("combineMatchDebugWithScore");

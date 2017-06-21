@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
-import com.latticeengines.domain.exposed.dataflow.flows.RedshiftPublishDataFlowParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.RedshiftPublishDataFlowParameters;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 

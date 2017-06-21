@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackageInitializer;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
@@ -140,7 +141,6 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         return versionMatchedPackages;
     }
 
-
     @Override
     public List<SoftwarePackage> getInstalledPackages(String module) {
         List<SoftwarePackage> packages = new ArrayList<>();
@@ -182,7 +182,8 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     public ApplicationContext loadSoftwarePackages(String module, ApplicationContext context,
             VersionManager versionManager) {
         log.info("Did not specify a pkg name, loading all libraries.");
-        List<SoftwareLibrary> deps = SoftwareLibrary.getLoadingSequence(Arrays.asList(SoftwareLibrary.values()));
+        List<SoftwareLibrary> deps = SoftwareLibrary.getLoadingSequence(SoftwareLibrary.Module.valueOf(module),
+                Arrays.asList(SoftwareLibrary.values()));
         return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
     }
 
@@ -190,32 +191,34 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
             VersionManager versionManager) {
         SoftwareLibrary lib = SoftwareLibrary.fromName(name);
         log.info("Trying to load software libraries for " + lib.getName());
-        List<SoftwareLibrary> deps = lib.getLoadingSequence();
+        List<SoftwareLibrary> deps = lib.getLoadingSequence(SoftwareLibrary.Module.valueOf(module));
         return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
     }
 
     private ApplicationContext loadSoftwarePackagesInSequence(String module, List<SoftwareLibrary> deps,
-                                                              ApplicationContext context, String version) {
+            ApplicationContext context, String version) {
         log.info("There are " + deps.size() + " libraries to load, the loading sequence is "
                 + StringUtils.join(deps.stream().map(SoftwareLibrary::getName).collect(Collectors.toList()), " -> "));
         for (SoftwareLibrary dep : deps) {
             SoftwarePackage pkg = getInstalledPackageByNameVersion(module, dep.getName(), version);
             if (pkg == null) {
-                throw new RuntimeException("Cannot find software package named " + dep.getName() + " for module "
-                        + module + " at version " + version);
-            }
-            log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
-            log.info(String.format("Found software package %s from the software library for this module %s.",
-                    pkg.getName(), pkg.getModule()));
-            String initializerClassName = pkg.getInitializerClass();
-            log.info(String.format("Loading %s", initializerClassName));
-            SoftwarePackageInitializer initializer;
-            try {
-                Class<?> c = Class.forName(initializerClassName);
-                initializer = (SoftwarePackageInitializer) c.newInstance();
-                context = initializer.initialize(context, module);
-            } catch (Exception e) {
-                log.error(LedpException.buildMessage(LedpCode.LEDP_27004, new String[] { initializerClassName }), e);
+                log.warn("Cannot find software package named " + dep.getName() + " for module " + module
+                        + " at version [" + version + "]. Skip");
+            } else {
+                log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
+                log.info(String.format("Found software package %s from the software library for this module %s.",
+                        pkg.getName(), pkg.getModule()));
+                String initializerClassName = pkg.getInitializerClass();
+                log.info(String.format("Loading %s", initializerClassName));
+                SoftwarePackageInitializer initializer;
+                try {
+                    Class<?> c = Class.forName(initializerClassName);
+                    initializer = (SoftwarePackageInitializer) c.newInstance();
+                    context = initializer.initialize(context, module);
+                } catch (Exception e) {
+                    log.error(LedpException.buildMessage(LedpCode.LEDP_27004, new String[] { initializerClassName }),
+                            e);
+                }
             }
         }
         return context;

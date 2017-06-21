@@ -6,7 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunScoreTableDataFlowConfiguration;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateScoreTableParameters;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("runScoreTableDataFlow")

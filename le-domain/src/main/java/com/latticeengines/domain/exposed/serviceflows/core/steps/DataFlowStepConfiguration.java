@@ -48,6 +48,9 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("user_id")
     private String userId;
 
+    @JsonProperty("swlib")
+    private String swlib;
+
     
     public Map<String, String> getExtraSources() {
         return extraSources;
@@ -141,4 +144,11 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
         this.userId = userId;
     }
 
+    public String getSwlib() {
+        return swlib;
+    }
+
+    public void setSwlib(String swlib) {
+        this.swlib = swlib;
+    }
 }

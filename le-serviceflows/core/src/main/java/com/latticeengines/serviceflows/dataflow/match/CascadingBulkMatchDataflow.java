@@ -22,7 +22,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CheckAndMapDatatyp
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainMergeAndCleanFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DunsMergeFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MatchIDGenerationFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DecodedPair;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;

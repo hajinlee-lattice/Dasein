@@ -1,11 +1,13 @@
-package com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps;
+package com.latticeengines.domain.exposed.serviceflows.prospectdiscovery;
 
 import java.util.List;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.BasePDWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunScoreTableDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
 
 public class CreateAttributeLevelSummaryWorkflowConfiguration extends BasePDWorkflowConfiguration {
 

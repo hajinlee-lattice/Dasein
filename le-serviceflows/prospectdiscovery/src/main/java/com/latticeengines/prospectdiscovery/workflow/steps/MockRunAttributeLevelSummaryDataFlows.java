@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
 
 @Component("mockRunAttributeLevelSummaryDataFlows")
 public class MockRunAttributeLevelSummaryDataFlows

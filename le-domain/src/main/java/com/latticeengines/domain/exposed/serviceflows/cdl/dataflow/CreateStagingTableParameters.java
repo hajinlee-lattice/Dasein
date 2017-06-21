@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.dataflow.flows.cdl;
+package com.latticeengines.domain.exposed.serviceflows.cdl.dataflow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;

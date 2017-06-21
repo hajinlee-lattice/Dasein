@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.dataflow.flows.RedshiftPublishDataFlowParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.RedshiftPublishDataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage.DatabaseName;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
