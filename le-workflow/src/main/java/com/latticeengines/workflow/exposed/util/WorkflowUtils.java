@@ -6,6 +6,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -31,9 +32,9 @@ public class WorkflowUtils {
                         .getJobStatus(workflowJob.getApplicationId());
                 jobState = status.getState();
                 workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
-            } catch (Exception e) {
+            } catch (RemoteLedpException e) {
                 log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId()
-                        + ".  Assuming it failed and was purged from the system.");
+                        + ".  Assuming it failed and was purged from the system.", e);
                 try {
                     com.latticeengines.domain.exposed.dataplatform.JobStatus terminal = getTerminalStatus(workflowJob);
                     jobState = terminal.getState();
