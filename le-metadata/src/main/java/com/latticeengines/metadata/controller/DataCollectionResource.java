@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -120,7 +119,7 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get the main statistics of the collection.")
     public AttributeRepository getAttrRepo(@PathVariable String customerSpace, //
-                                           @PathVariable String collectionName) {
+            @PathVariable String collectionName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.getAttrRepo(customerSpace, collectionName);
     }
