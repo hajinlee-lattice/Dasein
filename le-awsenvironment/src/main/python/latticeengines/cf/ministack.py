@@ -267,7 +267,7 @@ def tomcat_container(environment, stackname, app, ip, profile_file, tag, log_dri
             "labels": "stack,app"
         })
 
-    container.publish_port(8443, alloc["port"])
+    container.publish_port(8080, alloc["port"])
     container.hostname("%s-%s" % (stackname, app))
 
     params = get_profile_vars(profile_file)
