@@ -42,6 +42,8 @@ public class WorkflowUtils {
                 } catch (Exception inner) {
                     log.error("Failed to update WorkflowJob so that successive queries aren't necessary", inner);
                 }
+            } catch (Exception e) {
+                log.warn("some database related exception ocurred", e);
             }
         }
         // We only trust the WorkflowJob status if it is non-null
