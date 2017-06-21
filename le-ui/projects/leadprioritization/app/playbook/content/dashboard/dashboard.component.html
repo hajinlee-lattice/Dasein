@@ -1,20 +1,49 @@
-<section class="container playbook" ng-controller="PlaybookDashboard as vm">
-  <div class="row">
-    <div class="columns twelve box-outline">
-      <div class="section-header">
-        <h4>{{ vm.play.display_name }}</h4>
-        Created by someone on <time>{{vm.play.timestamp|date:'M/d/yyyy \'at\' h:mm:ssa'}}</time>
-      </div>
-      <hr />
-      <div class="section-body with-padding row">
-        <div class="columns ten wizard-content" ui-view="wizard_content">
-            <a ui-sref="home.playbook.wizard.settings({play_name: vm.play.name})">temp edit link</a>
-            <pre>{{vm.play|json}}</pre>
+<section class="container playbook-dashboard">
+    <div class="container-body">
+        <div class="dashboard-section play">
+            <div class="dashboard-section-container">
+                <div class="dashboard-section-header">
+                    <h2>{{ vm.play.display_name||'Play Name' }}</h2>
+                    Created by someone on <time>{{vm.play.timestamp|date:'M/d/yyyy \'at\' h:mm:ssa'}}</time>
+                </div>
+                <div class="dashboard-section-content">
+                    <a ui-sref="home.playbook.wizard.settings({play_name: vm.play.name})">temp edit link</a>
+                    <pre>{{vm.play|json}}</pre>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="container section-actions row form-actions">
-        <div ui-view="wizard_controls"></div>
-      </div>
+
+        <div class="dashboard-section talking-points">
+            <div class="dashboard-section-container">
+                <div class="dashboard-section-header">
+                    <h2>Talking points:</h2>
+                </div>
+                <div class="dashboard-section-content">
+                    <pre>{{vm.talkingPoints|json}}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-section notes">
+            <div class="dashboard-section-container">
+                <div class="dashboard-section-header">
+                    <h2>Notes:</h2>
+                </div>
+                <div class="dashboard-section-content">
+                    <pre>{{vm.notes|json}}</pre>
+                </div> 
+            </div>
+        </div>
+
+        <div class="dashboard-section launch-history">
+            <div class="dashboard-section-container">
+                <div class="dashboard-section-header">
+                    <h2>Last launch:</h2>
+                </div>
+                <div class="dashboard-section-content">
+                    <pre>{{vm.launchHistory|json}}</pre>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </section>

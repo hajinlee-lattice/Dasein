@@ -1,17 +1,20 @@
 angular.module('lp.playbook.dashboard', [])
 .controller('PlaybookDashboard', function(
-    $stateParams, PlaybookWizardStore
+    $stateParams, PlaybookWizardStore, CgTalkingPointStore, TalkingPointAttributes, TalkingPoints
 ) {
     var vm = this;
 
     angular.extend(vm, {
-        play: null
+        play: null,
+        talkingPointsAttributes: TalkingPointAttributes,
+        talkingPoints: TalkingPoints
     });
-        PlaybookWizardStore.clear();
-        if($stateParams.play_name) {
-            PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
-                vm.play = play;
-           });
-        }
+
+    PlaybookWizardStore.clear();
+    if($stateParams.play_name) {
+        PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+            vm.play = play;
+        });
+    }
 
 });

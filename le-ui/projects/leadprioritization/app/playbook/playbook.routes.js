@@ -45,8 +45,18 @@ angular
         })
         .state('home.playbook.dashboard', {
             url: '/dashboard/:play_name',
+            resolve: {
+                TalkingPoints: function(CgTalkingPointStore) {
+                    return CgTalkingPointStore.getTalkingPoints();
+                },
+                TalkingPointAttributes: function (CgTalkingPointStore) {
+                    return CgTalkingPointStore.getAttributes();
+                }
+            },
             views: {
                 'main@': {
+                    controller: 'PlaybookDashboard',
+                    controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/dashboard/dashboard.component.html'
                 }
             }
