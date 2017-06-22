@@ -140,7 +140,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     }
 
     private boolean isBucketing() {
-        return !Boolean.TRUE.equals(isActive);
+        return Boolean.TRUE.equals(isActive);
     }
 
     private PipelineTransformationRequest getConcolidateReqest() {
