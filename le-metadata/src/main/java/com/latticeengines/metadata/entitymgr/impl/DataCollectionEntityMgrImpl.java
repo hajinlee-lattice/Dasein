@@ -66,6 +66,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public DataCollection createDataCollection(DataCollection dataCollection) {
+        if (StringUtils.isBlank(dataCollection.getName())) {
+            dataCollection.setName(NamingUtils.timestamp("DataCollection"));
+        }
         if (getDataCollection(dataCollection.getName()) != null) {
             throw new IllegalStateException("Data collection " + dataCollection.getName() + " already exist.");
         }

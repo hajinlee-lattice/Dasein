@@ -92,7 +92,7 @@ public class ColumnMetadataResource {
     @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")
     @ApiOperation(value = "Update the columns for a specific cloud version")
     public AttributeRepository getAttrRepoAtVersion(
-            @RequestParam(value = "datacloudversion") String dataCloudVersion) {
+            @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         if (StringUtils.isBlank(dataCloudVersion)){
             dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
         }

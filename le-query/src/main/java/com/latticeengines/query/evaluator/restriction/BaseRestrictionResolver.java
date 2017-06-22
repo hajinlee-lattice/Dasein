@@ -7,14 +7,18 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.query.evaluator.lookup.LookupResolverFactory;
+import com.latticeengines.query.util.AttrRepoUtils;
 
 public abstract class BaseRestrictionResolver<T extends Restriction> {
+
+    protected AttrRepoUtils attrRepoUtils;
 
     protected RestrictionResolverFactory factory;
     protected LookupResolverFactory lookupFactory;
     private AttributeRepository attrRepo;
 
     BaseRestrictionResolver(RestrictionResolverFactory factory) {
+        this.attrRepoUtils = factory.getAttrRepoUtils();
         this.lookupFactory = factory.getLookupFactory();
         this.factory = factory;
     }
@@ -24,11 +28,15 @@ public abstract class BaseRestrictionResolver<T extends Restriction> {
     }
 
     protected AttributeStats findAttributeStats(AttributeLookup attributeLookup) {
+        ColumnMetadata attribute = findAttributeMetadata(attributeLookup);
+        return attribute.getStats();
+    }
+
+    protected ColumnMetadata findAttributeMetadata(AttributeLookup attributeLookup) {
         if (attrRepo == null) {
             attrRepo = getAttrRepo();
         }
-        ColumnMetadata attribute = attrRepo.getColumnMetadata(attributeLookup);
-        return attribute.getStats();
+        return attrRepoUtils.getAttribute(attrRepo, attributeLookup);
     }
 
 }

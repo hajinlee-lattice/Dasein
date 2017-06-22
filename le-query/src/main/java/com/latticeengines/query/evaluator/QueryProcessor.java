@@ -25,6 +25,7 @@ import com.latticeengines.query.evaluator.restriction.RestrictionResolver;
 import com.latticeengines.query.evaluator.restriction.RestrictionResolverFactory;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
@@ -43,9 +44,12 @@ public class QueryProcessor {
     @Autowired
     private QueryFactory queryFactory;
 
+    @Autowired
+    private AttrRepoUtils attrRepoUtils;
+
     public SQLQuery<?> process(AttributeRepository repository, Query query) {
         query.analyze();
-        LookupResolverFactory resolverFactory = new LookupResolverFactory(repository);
+        LookupResolverFactory resolverFactory = new LookupResolverFactory(attrRepoUtils, repository);
         SQLQuery<?> sqlQuery = from(repository, query);
         if (query.getRestriction() != null) {
             BooleanExpression whereClause = processRestriction(query.getRestriction(), resolverFactory,
@@ -71,7 +75,7 @@ public class QueryProcessor {
      */
     private SQLQuery<?> from(AttributeRepository repository, Query query) {
         BusinessEntity mainEntity = query.getMainEntity();
-        StringPath mainTable = QueryUtils.getTablePath(repository, mainEntity);
+        StringPath mainTable = attrRepoUtils.getTablePath(repository, mainEntity);
         SQLQuery<?> sqlQuery = queryFactory.getQuery(repository).from(mainTable.as(mainEntity.name()));
         return addJoins(sqlQuery, repository, query);
     }
@@ -86,7 +90,7 @@ public class QueryProcessor {
         List<Predicate> joinKeys = new ArrayList<>();
         for (JoinSpecification join : lookupJoins) {
             BusinessEntity target = join.getDestinationEntity();
-            QueryUtils.getTablePath(repository, target);
+            attrRepoUtils.getTablePath(repository, target);
             // from all seen entities find one can join the current target
             BusinessEntity.Relationship relationship = joinedEntities.stream() //
                     .map(e -> e.join(target)) //
@@ -97,7 +101,7 @@ public class QueryProcessor {
                         "Broken Connectivity: Cannot find a connected path to entity " + target + ".");
             }
             // JOIN T1
-            EntityPath<String> targetTableName = QueryUtils.getTablePathBuilder(repository, target);
+            EntityPath<String> targetTableName = attrRepoUtils.getTablePathBuilder(repository, target);
             sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(target.name()));
             joinKeys.addAll(QueryUtils.getJoinPredicates(relationship));
             joinedEntities.add(target);
@@ -124,8 +128,9 @@ public class QueryProcessor {
 
     @SuppressWarnings("unchecked")
     private BooleanExpression processRestriction(Restriction restriction, LookupResolverFactory resolverFactory,
-                                                 List<JoinSpecification> existsJoins) {
-        RestrictionResolverFactory factory = new RestrictionResolverFactory(resolverFactory, existsJoins, queryFactory);
+            List<JoinSpecification> existsJoins) {
+        RestrictionResolverFactory factory = new RestrictionResolverFactory(attrRepoUtils, resolverFactory, existsJoins,
+                queryFactory);
         RestrictionResolver resolver = factory.getRestrictionResolver(restriction.getClass());
         return resolver.resolve(restriction);
     }

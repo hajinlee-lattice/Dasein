@@ -18,6 +18,7 @@ import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -113,6 +114,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             throw new RuntimeException(e);
         }
         return metadataList;
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    public AttributeRepository getAttrRepo() {
+        String url = constructUrl("/attrrepo");
+        return get("get AM attr repo", url, AttributeRepository.class);
     }
 
     private DataCloudVersion requestLatestVersion(String compatibleVersion) {

@@ -1,12 +1,8 @@
 package com.latticeengines.query.evaluator;
 
-import static com.latticeengines.query.evaluator.QueryTestUtils.getAttributeRepo;
-
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -14,13 +10,6 @@ import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 
 public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
-
-    private AttributeRepository attrRepo;
-
-    @BeforeTest(groups = "functional")
-    public void setup() {
-        attrRepo = getAttributeRepo();
-    }
 
     @Test(groups = "functional")
     public void testAutowire() {

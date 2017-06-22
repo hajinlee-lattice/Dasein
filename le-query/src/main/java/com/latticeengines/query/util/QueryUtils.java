@@ -6,14 +6,9 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.query.exposed.exception.QueryEvaluationException;
-import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringPath;
 
 public final class QueryUtils {
@@ -22,28 +17,6 @@ public final class QueryUtils {
 
     public static StringPath getAttributePath(BusinessEntity entity, String attrName) {
         return Expressions.stringPath(Expressions.stringPath(entity.name()), attrName);
-    }
-
-    public static StringPath getTablePath(AttributeRepository repository, BusinessEntity entity) {
-        String tableName = getTableName(repository, entity);
-        return Expressions.stringPath(tableName);
-    }
-
-    public static EntityPath<String> getTablePathBuilder(AttributeRepository repository, BusinessEntity entity) {
-        String tableName = getTableName(repository, entity);
-        return new PathBuilder<>(String.class, tableName);
-    }
-
-    private static String getTableName(AttributeRepository repository, BusinessEntity entity) {
-        TableRoleInCollection tableRole = entity.getServingStore();
-        if (tableRole == null) {
-            throw new QueryEvaluationException("Cannot find a serving store for " + entity);
-        }
-        String tableName = repository.getTableName(tableRole);
-        if (tableName == null) {
-            throw new QueryEvaluationException("Cannot find table of role " + tableRole + " in the repository.");
-        }
-        return tableName;
     }
 
     public static List<Predicate> getJoinPredicates(BusinessEntity.Relationship relationship) {

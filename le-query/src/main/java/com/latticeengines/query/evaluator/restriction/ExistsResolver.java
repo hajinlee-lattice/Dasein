@@ -43,7 +43,7 @@ public class ExistsResolver extends BaseRestrictionResolver<ExistsRestriction>
         BusinessEntity srcEntity = join.getSourceEntity();
         BusinessEntity.Relationship relationship = srcEntity.join(tgtEntity);
         List<Predicate> joinPredicates = QueryUtils.getJoinPredicates(relationship);
-        StringPath mainTable = QueryUtils.getTablePath(attrRepo, tgtEntity);
+        StringPath mainTable = attrRepoUtils.getTablePath(attrRepo, tgtEntity);
         SQLQuery<?> query = queryFactory.getQuery(attrRepo).from(mainTable.as(tgtEntity.name()));
         Restriction innerRestriction = restriction.getRestriction();
         RestrictionResolver innerResolver = factory.getRestrictionResolver(innerRestriction.getClass());

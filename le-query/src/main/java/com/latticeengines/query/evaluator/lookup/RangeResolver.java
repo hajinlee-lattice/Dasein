@@ -6,14 +6,15 @@ import java.util.List;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 
 public class RangeResolver extends BaseLookupResolver<RangeLookup> implements LookupResolver<RangeLookup> {
 
-    RangeResolver(AttributeRepository repository) {
-        super(repository);
+    RangeResolver(AttrRepoUtils attrRepoUtils, AttributeRepository repository) {
+        super(attrRepoUtils, repository);
     }
 
     @Override

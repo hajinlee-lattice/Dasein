@@ -1,4 +1,4 @@
-package com.latticeengines.query.evaluator;
+package com.latticeengines.query.functionalframework;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
@@ -24,20 +24,28 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class QueryTestUtils {
 
-    static AttributeRepository getAttributeRepo() {
+    private static AttributeRepository amAttrRepo;
+
+    static AttributeRepository getCustomerAttributeRepo() {
         CustomerSpace customerSpace = CustomerSpace.parse("Query");
         String collectionName = "querytest";
         Map<AttributeLookup, ColumnMetadata> attrMap = getAttrMap();
-        Map<TableRoleInCollection, String> tableNameMap = getTableNameMap();
+        Map<TableRoleInCollection, String> tableNameMap = new HashMap<>();
+        tableNameMap.put(BucketedAccount, "querytest_table");
+        tableNameMap.put(BucketedContact, "querytest_table_dup");
         return new AttributeRepository(customerSpace, collectionName, attrMap, tableNameMap);
     }
 
-    private static Map<TableRoleInCollection, String> getTableNameMap() {
-        Map<TableRoleInCollection, String> map = new HashMap<>();
-        map.put(BucketedAccount, "querytest_table");
-        map.put(AccountMaster, "querytest_table_dup");
-        map.put(BucketedContact, "querytest_table_dup");
-        return map;
+    static AttributeRepository getAMAttributeRepo() {
+        if (amAttrRepo == null) {
+            CustomerSpace customerSpace = CustomerSpace.parse("Query");
+            String collectionName = "querytest";
+            Map<AttributeLookup, ColumnMetadata> attrMap = getAttrMap();
+            Map<TableRoleInCollection, String> tableNameMap = new HashMap<>();
+            tableNameMap.put(AccountMaster, "querytest_table_dup");
+            amAttrRepo = new AttributeRepository(customerSpace, collectionName, attrMap, tableNameMap);
+        }
+        return amAttrRepo;
     }
 
     private static Map<AttributeLookup, ColumnMetadata> getAttrMap() {

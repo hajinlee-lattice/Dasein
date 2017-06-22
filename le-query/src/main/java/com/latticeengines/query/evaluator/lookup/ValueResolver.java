@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.ValueLookup;
+import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -12,8 +13,8 @@ import com.querydsl.core.types.dsl.Expressions;
 public class ValueResolver extends BaseLookupResolver<ValueLookup>
         implements LookupResolver<ValueLookup> {
 
-    ValueResolver(AttributeRepository repository) {
-        super(repository);
+    ValueResolver(AttrRepoUtils attrRepoUtils, AttributeRepository repository) {
+        super(attrRepoUtils, repository);
     }
 
     @Override

@@ -1,22 +1,20 @@
 package com.latticeengines.query.evaluator;
 
-import static com.latticeengines.query.evaluator.QueryTestUtils.getAttributeRepo;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.latticeengines.query.util.QueryUtils;
 
@@ -25,11 +23,8 @@ import com.latticeengines.query.util.QueryUtils;
  */
 public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
 
-    private AttributeRepository attrRepo;
-
     @BeforeTest(groups = "functional")
     public void setup() {
-        attrRepo = getAttributeRepo();
         QueryUtils.testmode = true;
     }
 
