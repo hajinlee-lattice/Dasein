@@ -58,9 +58,6 @@ public class MatchCommand implements HasPid {
     @Column(name = "RowsMatchedByDnB")
     private Integer rowsMatchedByDnb = 0;
 
-    @Column(name = "Duration")
-    private Integer duration = 0;
-
     @Column(name = "DnBDurationAvg")
     private Integer dnbDurationAvg = 0;
 
@@ -171,16 +168,6 @@ public class MatchCommand implements HasPid {
     @JsonProperty("RowsMatchedByDnB")
     public void setRowsMatchedByDnb(Integer rowsMatchedByDnb) {
         this.rowsMatchedByDnb = rowsMatchedByDnb;
-    }
-
-    @JsonProperty("Duration")
-    public Integer getDuration() {
-        return duration;
-    }
-
-    @JsonProperty("Duration")
-    public void setDuration(Integer duration) {
-        this.duration = duration;
     }
 
     @JsonProperty("DnBDurationAvg")

@@ -176,7 +176,6 @@ public class DnbMatchCommandServiceImplTestNG extends DataCloudMatchFunctionalTe
         // checking computed columns
         Assert.assertEquals(matchCommand.getRowsToDnb(), rowsToDnb);
         Assert.assertEquals(matchCommand.getRowsMatchedByDnb(), rowsMatchedByDnb);
-        Assert.assertEquals(matchCommand.getDuration(), duration);
         Assert.assertEquals(matchCommand.getDnbDurationAvg(), dnbDurationAvg);
     }
 

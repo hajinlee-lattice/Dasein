@@ -170,7 +170,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.info("Generated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
-                    .duration() //
                     .dnbCommands() //
                     .rowsMatched(count.intValue()) //
                     .status(MatchStatus.FINISHED) //

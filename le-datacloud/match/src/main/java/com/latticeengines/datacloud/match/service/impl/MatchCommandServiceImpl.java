@@ -257,12 +257,6 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             return this;
         }
 
-        public MatchCommandUpdaterImpl duration() {
-            matchCommand.setDuration((int) (TimeUnit.MILLISECONDS
-                    .toMinutes(System.currentTimeMillis() - matchCommand.getCreateTime().getTime())));
-            return this;
-        }
-
         public MatchCommandUpdaterImpl dnbCommands() {
             // populating the list of DnBMatchCommand into MatchCommand
             List<DnBMatchCommand> dnbMatchList = dnbMatchCommandEntityMgr.findAllByField("RootOperationUID",
