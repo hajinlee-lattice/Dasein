@@ -63,14 +63,14 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public StatisticsContainer findInSegment(String segmentName, String modelId) {
-        return statisticsContainerDao.findInSegment(segmentName, modelId);
+    public StatisticsContainer findInSegment(String segmentName) {
+        return statisticsContainerDao.findInSegment(segmentName);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public StatisticsContainer findInMasterSegment(String collectionName, String modelId) {
+    public StatisticsContainer findInMasterSegment(String collectionName) {
         collectionName = StringUtils.isBlank(collectionName) ? dataCollectionEntityMgr.getDefaultCollectionName() : collectionName;
-        return statisticsContainerDao.findInMasterSegment(collectionName, modelId);
+        return statisticsContainerDao.findInMasterSegment(collectionName);
     }
 }

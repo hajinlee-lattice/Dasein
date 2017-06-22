@@ -54,8 +54,8 @@ public class StatisticsContainerServiceImplTestNG extends DataCollectionFunction
         statistics.getCategories().get(Category.ACCOUNT_INFORMATION).getSubcategories()
                 .put(ColumnMetadata.SUBCATEGORY_OTHER, subcategoryStatistics);
         container.setStatistics(statistics);
-        dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container, null);
-        container = dataCollectionService.getStats(customerSpace1, collectionName, null);
+        dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container);
+        container = dataCollectionService.getStats(customerSpace1, collectionName);
         Long pid = container.getPid();
         StatisticsContainer container2 = statisticsContainerService.findByName(customerSpace1, container.getName());
         Assert.assertEquals(container2.getPid(), pid);

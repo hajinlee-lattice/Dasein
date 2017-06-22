@@ -1,20 +1,18 @@
 package com.latticeengines.proxy.exposed.metadata;
 
+import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("dataCollectionProxy")
@@ -38,20 +36,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("get stats", url, StatisticsContainer.class);
     }
 
-    public AttributeRepository getAttrRepoFromDefaultCollection(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo",
-                shortenCustomerSpace(customerSpace));
-        return get("get attr repo", url, AttributeRepository.class);
-    }
-
     // full collection apis
-
-    public List<DataCollection> getDataCollections(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollections",
-                shortenCustomerSpace(customerSpace));
-        List<?> list = get("getDataCollections", url, List.class);
-        return JsonUtils.convertList(list, DataCollection.class);
-    }
 
     public List<Table> getAllTables(String customerSpace, String collectionName) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollections/{collectionName}/tables",
@@ -78,13 +63,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("getDataCollection", url, DataCollection.class);
     }
 
-    @Deprecated
-    public DataCollection getDataCollectionByType(String customerSpace, DataCollectionType type) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollections/types/{type}",
-                shortenCustomerSpace(customerSpace), type);
-        return get("getDataCollection", url, DataCollection.class);
-    }
-
     public DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollections",
                 shortenCustomerSpace(customerSpace));
@@ -105,42 +83,15 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public void upsertStats(String customerSpace, String collectionName, StatisticsContainer container) {
-        upsertStatsForModel(customerSpace, collectionName, container, null);
-    }
-
-    public void upsertStatsForModel(String customerSpace, String collectionName, StatisticsContainer container,
-            String modelId) {
-        String url;
-        if (StringUtils.isBlank(modelId)) {
-            url = constructUrl("/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats",
-                    shortenCustomerSpace(customerSpace), collectionName);
-        } else {
-            url = constructUrl(
-                    "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats?model={modelId}",
-                    shortenCustomerSpace(customerSpace), collectionName, modelId);
-        }
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats",
+                shortenCustomerSpace(customerSpace), collectionName);
         post("upsertStats", url, container, SimpleBooleanResponse.class);
     }
 
     public StatisticsContainer getStats(String customerSpace, String collectionName) {
-        return getStatsForModel(customerSpace, collectionName, null);
-    }
-
-    public StatisticsContainer getStatsForModel(String customerSpace, String collectionName, String modelId) {
-        String url;
-        if (StringUtils.isBlank(modelId)) {
-            url = constructUrl("/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats",
-                    shortenCustomerSpace(customerSpace), collectionName);
-        } else {
-            url = constructUrl(
-                    "/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats?model={modelId}",
-                    shortenCustomerSpace(customerSpace), collectionName, modelId);
-        }
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollections/{dataCollectionName}/stats",
+                shortenCustomerSpace(customerSpace), collectionName);
         return get("getStats", url, StatisticsContainer.class);
-    }
-
-    private String shortenCustomerSpace(String customerSpace) {
-        return CustomerSpace.parse(customerSpace).getTenantId();
     }
 
 }

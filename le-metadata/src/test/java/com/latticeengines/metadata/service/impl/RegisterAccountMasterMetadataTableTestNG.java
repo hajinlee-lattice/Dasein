@@ -96,7 +96,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
         StatisticsContainer container = new StatisticsContainer();
         container.setStatistics(statistics);
         dataCollectionService.upsertTable(customerSpace, collection.getName(), tableName, TableRoleInCollection.AccountMaster);
-        dataCollectionService.addStats(customerSpace, collection.getName(), container, null);
+        dataCollectionService.addStats(customerSpace, collection.getName(), container);
     }
 
     private File unzipFile(String amArtifact) throws IOException {

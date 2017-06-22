@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
@@ -14,7 +13,6 @@ import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
@@ -194,35 +192,6 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         String url = constructUrl("/customerspaces/{customerSpace}/artifactpath?file={artifactPath}", //
                 customerSpace, artifactPath);
         return get("getArtifactByPath", url, Artifact.class);
-    }
-
-    @Override
-    public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment metadataSegment) {
-        String url = constructUrl("/customerspaces/{customerSpace}/segments", //
-                customerSpace);
-        return post("createOrUpdateSegment", url, metadataSegment, MetadataSegment.class);
-    }
-
-    @Override
-    public void deleteSegmentByName(String customerSpace, String segmentName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/segments/{segmentName}", //
-                customerSpace, segmentName);
-        delete("deleteSegmentByName", url);
-    }
-
-    @Override
-    public MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/segments/name/{segmentName}", //
-                customerSpace, segmentName);
-        return get("getSegment", url, MetadataSegment.class);
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public List<MetadataSegment> getMetadataSegments(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/segments/all", customerSpace);
-        List raw = get("getSegments", url, List.class);
-        return JsonUtils.convertList(raw, MetadataSegment.class);
     }
 
     @Override

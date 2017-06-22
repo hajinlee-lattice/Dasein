@@ -16,13 +16,13 @@ public interface DataCollectionService {
 
     DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection);
 
-    void addStats(String customerSpace, String collectionName, StatisticsContainer container, String modelId);
+    void addStats(String customerSpace, String collectionName, StatisticsContainer container);
 
     void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection tableRole);
 
     List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole);
 
-    StatisticsContainer getStats(String customerSpace, String collectionName, String modelId);
+    StatisticsContainer getStats(String customerSpace, String collectionName);
 
     AttributeRepository getAttrRepo(String customerSpace, String collectionName);
 

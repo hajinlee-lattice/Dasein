@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -105,6 +106,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(retrieved.getId(), CustomerSpace.parse(DL_TENANT_NAME).toString());
 
         attachProtectedProxy(dataFeedProxy);
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(firstTenant));
 
         log.info("Test environment setup finished.");
         createDataFeed();

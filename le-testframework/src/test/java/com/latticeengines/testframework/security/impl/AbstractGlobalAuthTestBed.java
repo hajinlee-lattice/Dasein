@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -42,6 +43,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     private Map<String, UserDocument> userTenantSessions = new HashMap<>();
 
     protected List<Tenant> testTenants = new ArrayList<>();
+    protected List<String> excludedCleanupTenantIds = new ArrayList<>();
     private Integer mainTenantIdx = 0;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
@@ -180,8 +182,12 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         }
 
         for (Tenant tenant : testTenants) {
-            log.info("Clean up test tenant " + tenant.getId());
-            deleteTenant(tenant);
+            if (excludedCleanupTenantIds.contains(tenant.getId())) {
+                log.info("Skip cleaning up " + tenant.getId());
+            } else {
+                log.info("Clean up test tenant " + tenant.getId());
+                deleteTenant(tenant);
+            }
         }
 
         cleanupHdfs();
@@ -238,6 +244,11 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
         log.info("Adding test tenant " + tenantId);
         return tenant;
+    }
+
+    @Override
+    public void excludeTestTenantsForCleanup(List<Tenant> tenants) {
+        excludedCleanupTenantIds.addAll(tenants.stream().map(Tenant::getId).collect(Collectors.toList()));
     }
 
     public abstract void createTenant(Tenant tenant);

@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.QueryTranslator;
 import com.latticeengines.domain.exposed.util.ReverseQueryTranslator;
 import com.latticeengines.pls.service.MetadataSegmentService;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -25,7 +25,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private static final Log log = LogFactory.getLog(MetadataSegmentServiceImpl.class);
 
     @Autowired
-    private MetadataProxy metadataProxy;
+    private SegmentProxy segmentProxy;
 
     @Autowired
     private AccountProxy accountProxy;
@@ -33,11 +33,11 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     @Override
     public List<MetadataSegment> getSegments() {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        List<MetadataSegment> backendSegments = metadataProxy.getMetadataSegments(customerSpace);
+        List<MetadataSegment> backendSegments = segmentProxy.getMetadataSegments(customerSpace);
         if (backendSegments == null) {
             return null;
         } else {
-            return metadataProxy.getMetadataSegments(customerSpace).stream() //
+            return segmentProxy.getMetadataSegments(customerSpace).stream() //
                     .map(this::translateForFrontend).collect(Collectors.toList());
         }
     }
@@ -45,7 +45,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     @Override
     public MetadataSegment getSegmentByName(String name) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return translateForFrontend(metadataProxy.getMetadataSegmentByName(customerSpace, name));
+        return translateForFrontend(segmentProxy.getMetadataSegmentByName(customerSpace, name));
     }
 
     @Override
@@ -53,13 +53,13 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         translateForBackend(segment);
         updateStatistics(segment);
-        return translateForFrontend(metadataProxy.createOrUpdateSegment(customerSpace, segment));
+        return translateForFrontend(segmentProxy.createOrUpdateSegment(customerSpace, segment));
     }
 
     @Override
     public void deleteSegmentByName(String name) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        metadataProxy.deleteSegmentByName(customerSpace, name);
+        segmentProxy.deleteSegmentByName(customerSpace, name);
     }
 
     private MetadataSegment translateForBackend(MetadataSegment segment) {

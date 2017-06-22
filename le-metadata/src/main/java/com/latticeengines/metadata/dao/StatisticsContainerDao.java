@@ -5,8 +5,8 @@ import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 
 public interface StatisticsContainerDao extends BaseDao<StatisticsContainer> {
 
-    StatisticsContainer findInSegment(String segmentName, String modelId);
+    StatisticsContainer findInSegment(String segmentName);
 
-    StatisticsContainer findInMasterSegment(String collectionName, String modelId);
+    StatisticsContainer findInMasterSegment(String collectionName);
 
 }

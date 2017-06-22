@@ -87,10 +87,9 @@ public class DataCollectionResource {
     @ApiOperation(value = "Create or update the main statistics of the collection")
     public SimpleBooleanResponse addStats(@PathVariable String customerSpace, //
             @PathVariable String collectionName, //
-            @RequestBody StatisticsContainer statisticsContainer, //
-            @RequestParam(value = "model", required = false) String modelId) {
+            @RequestBody StatisticsContainer statisticsContainer) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataCollectionService.addStats(customerSpace, collectionName, statisticsContainer, modelId);
+        dataCollectionService.addStats(customerSpace, collectionName, statisticsContainer);
         return SimpleBooleanResponse.successResponse();
     }
 
@@ -98,10 +97,9 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get the main statistics of the collection.")
     public StatisticsContainer getMainStats(@PathVariable String customerSpace, //
-            @PathVariable String collectionName, //
-            @RequestParam(value = "model", required = false) String modelId) {
+            @PathVariable String collectionName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getStats(customerSpace, collectionName, modelId);
+        return dataCollectionService.getStats(customerSpace, collectionName);
     }
 
     @RequestMapping(value = "/{collectionName}/datafeeds", method = RequestMethod.POST, headers = "Accept=application/json")

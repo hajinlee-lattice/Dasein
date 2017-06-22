@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.metadata.service.SegmentService;
-import com.latticeengines.metadata.service.StatisticsContainerService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,9 +25,6 @@ public class SegmentResource {
 
     @Autowired
     private SegmentService segmentService;
-
-    @Autowired
-    private StatisticsContainerService statisticsContainerService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -67,7 +63,7 @@ public class SegmentResource {
     @ApiOperation(value = "Get segment by name")
     public StatisticsContainer getSegmentStats(@PathVariable String customerSpace, @PathVariable String segmentName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.getStats(customerSpace, segmentName, null);
+        return segmentService.getStats(customerSpace, segmentName);
     }
 
 }

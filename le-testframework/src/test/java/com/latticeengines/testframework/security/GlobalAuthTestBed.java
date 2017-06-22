@@ -70,4 +70,5 @@ public interface GlobalAuthTestBed {
 
     void overwriteFeatureFlag(Tenant tenant, String featureFlagName, boolean value);
 
+    void excludeTestTenantsForCleanup(List<Tenant> tenants);
 }

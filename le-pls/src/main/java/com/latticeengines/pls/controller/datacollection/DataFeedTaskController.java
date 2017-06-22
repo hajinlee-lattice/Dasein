@@ -51,29 +51,4 @@ public class DataFeedTaskController {
         return JsonUtils.serialize(ImmutableMap.of("application_id",
                 dataFeedTaskManagerService.submitImportJob(taskIdentifier, metadata)));
     }
-
-    @RequestMapping(value = "/datacollection/datafeedtasks/createtask", method = RequestMethod.POST, headers =
-            "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
-    public String createDataFeedTask(@RequestParam (value = "source") String source,
-                                     @RequestParam (value = "feedtype") String feedtype,
-                                     @RequestParam (value = "entity") String entity,
-                                     @RequestParam (value = "datafeedname") String datafeedName,
-                                     @RequestBody String metadata,
-                                     HttpServletRequest request) {
-        return JsonUtils.serialize(ImmutableMap.of("task_id",
-                dataFeedTaskManagerService.createDataFeedTask(feedtype, entity, source, datafeedName, metadata)));
-    }
-
-    @RequestMapping(value = "/datacollection/datafeedtasks/import/{taskIdentifier:\\w+\\.\\w+\\.\\w+\\.\\w+}", method = RequestMethod.POST, headers =
-            "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
-    public String startImportJob(@PathVariable String taskIdentifier, @RequestBody String metadata,
-                                 HttpServletRequest request) {
-        return JsonUtils.serialize(ImmutableMap.of("application_id",
-                dataFeedTaskManagerService.submitImportJob(taskIdentifier, metadata)));
-    }
-
 }

@@ -55,16 +55,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public void addStats(String customerSpace, String collectionName, StatisticsContainer container, String modelId) {
-        DataCollection dataCollection = getDataCollection(customerSpace, collectionName);
-        if (dataCollection == null) {
-            throw new IllegalArgumentException(
-                    "Cannot find data collection named " + collectionName + " for customer " + customerSpace);
-        }
-        dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container, modelId);
-    }
-
-    @Override
     public void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table == null) {
@@ -83,8 +73,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public StatisticsContainer getStats(String customerSpace, String collectionName, String modelId) {
-        return statisticsContainerEntityMgr.findInMasterSegment(collectionName, modelId);
+    public void addStats(String customerSpace, String collectionName, StatisticsContainer container) {
+        DataCollection dataCollection = getDataCollection(customerSpace, collectionName);
+        if (dataCollection == null) {
+            throw new IllegalArgumentException(
+                    "Cannot find data collection named " + collectionName + " for customer " + customerSpace);
+        }
+        dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container);
+    }
+
+    @Override
+    public StatisticsContainer getStats(String customerSpace, String collectionName) {
+        return statisticsContainerEntityMgr.findInMasterSegment(collectionName);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     public AttributeRepository getAttrRepo(String customerSpace, String collectionName) {
-        StatisticsContainer statisticsContainer = getStats(customerSpace, collectionName, null);
+        StatisticsContainer statisticsContainer = getStats(customerSpace, collectionName);
         if (statisticsContainer == null) {
             return null;
         }

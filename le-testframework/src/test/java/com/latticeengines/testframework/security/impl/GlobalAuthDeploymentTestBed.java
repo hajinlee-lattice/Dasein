@@ -342,42 +342,50 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     private void cleanupTenantsInZK() {
         for (Tenant tenant : testTenants) {
-            log.info("Clean up test tenant " + tenant.getId() + " from zk.");
-            Camille camille = CamilleEnvironment.getCamille();
-            String podId = CamilleEnvironment.getPodId();
-            String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
-            Path contractPath = PathBuilder.buildContractPath(podId, contractId);
-            try {
-                camille.delete(contractPath);
-            } catch (Exception e) {
-                log.error("Failed delete contract path " + contractPath + " from zk.");
+            if (excludedCleanupTenantIds.contains(tenant.getId())) {
+                log.info("Skip cleaning up " + tenant.getId());
+            } else {
+                log.info("Clean up test tenant " + tenant.getId() + " from zk.");
+                Camille camille = CamilleEnvironment.getCamille();
+                String podId = CamilleEnvironment.getPodId();
+                String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
+                Path contractPath = PathBuilder.buildContractPath(podId, contractId);
+                try {
+                    camille.delete(contractPath);
+                } catch (Exception e) {
+                    log.error("Failed delete contract path " + contractPath + " from zk.");
+                }
             }
         }
     }
 
     private void cleanupTenantsInDL() {
         for (Tenant tenant : testTenants) {
-            log.info("Clean up test tenant " + tenant.getId() + " from DL.");
-            CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
-            String tenantName = customerSpace.getTenantId();
+            if (excludedCleanupTenantIds.contains(tenant.getId())) {
+                log.info("Skip cleaning up " + tenant.getId());
+            } else {
+                log.info("Clean up test tenant " + tenant.getId() + " from DL.");
+                CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+                String tenantName = customerSpace.getTenantId();
 
-            try {
-                adminInternalProxy.deletePermStore(tenantName);
-                log.info("Cleanup VDB permstore for tenant " + tenantName);
-            } catch (Exception e) {
-                log.error("Failed to clean up permstore for vdb " + tenantName + " : "
-                        + getErrorHandler().getStatusCode() + ", " + getErrorHandler().getResponseString());
-            }
+                try {
+                    adminInternalProxy.deletePermStore(tenantName);
+                    log.info("Cleanup VDB permstore for tenant " + tenantName);
+                } catch (Exception e) {
+                    log.error("Failed to clean up permstore for vdb " + tenantName + " : "
+                            + getErrorHandler().getStatusCode() + ", " + getErrorHandler().getResponseString());
+                }
 
-            try {
-                TenantDocument tenantDoc = adminTenantProxy.getTenant(customerSpace.getTenantId());
-                String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
-                DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenantName, "3");
-                InstallResult result = dataLoaderService.deleteDLTenant(request, dlUrl, true);
-                log.info("Delete DL tenant " + tenantName + " result=" + JsonUtils.serialize(result));
-            } catch (Exception e) {
-                log.error("Failed to clean up dl tenant " + tenantName + " : " + getErrorHandler().getStatusCode()
-                        + ", " + getErrorHandler().getResponseString());
+                try {
+                    TenantDocument tenantDoc = adminTenantProxy.getTenant(customerSpace.getTenantId());
+                    String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
+                    DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenantName, "3");
+                    InstallResult result = dataLoaderService.deleteDLTenant(request, dlUrl, true);
+                    log.info("Delete DL tenant " + tenantName + " result=" + JsonUtils.serialize(result));
+                } catch (Exception e) {
+                    log.error("Failed to clean up dl tenant " + tenantName + " : " + getErrorHandler().getStatusCode()
+                            + ", " + getErrorHandler().getResponseString());
+                }
             }
         }
     }

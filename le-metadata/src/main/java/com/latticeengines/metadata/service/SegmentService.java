@@ -19,7 +19,7 @@ public interface SegmentService {
 
     MetadataSegment findMaster(String customerSpace, String collectionName);
 
-    StatisticsContainer getStats(String customerSpace, String segmentName, String modelId);
+    StatisticsContainer getStats(String customerSpace, String segmentName);
 
     void deleteAllSegments(String customerSpace);
 }

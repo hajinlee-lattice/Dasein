@@ -56,7 +56,7 @@ public class DefaultDataCollectionResource {
     @ApiOperation(value = "Get the main statistics of the default collection.")
     public StatisticsContainer getMainStats(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getStats(customerSpace, null, null);
+        return dataCollectionService.getStats(customerSpace, null);
     }
 
     @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")

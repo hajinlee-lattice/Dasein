@@ -104,9 +104,9 @@ public class DataCollectionEntityMgrImplTestNG extends DataCollectionFunctionalT
         Statistics statistics = new Statistics();
         StatisticsContainer statisticsContainer = new StatisticsContainer();
         statisticsContainer.setStatistics(statistics);
-        dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, statisticsContainer, null);
+        dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, statisticsContainer);
 
-        StatisticsContainer retrieved = statisticsContainerEntityMgr.findInMasterSegment(collectionName, null);
+        StatisticsContainer retrieved = statisticsContainerEntityMgr.findInMasterSegment(collectionName);
         Assert.assertNotNull(retrieved);
     }
 

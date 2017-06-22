@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.metadata.service.StatisticsContainerService;
 
@@ -27,6 +28,7 @@ public class StatisticsContainerResource {
     @ApiOperation(value = "Get statistics by name")
     public StatisticsContainer getStatistics(@PathVariable String customerSpace, //
             @PathVariable String statisticsName) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return statisticsContainerService.findByName(customerSpace, statisticsName);
     }
 
@@ -35,6 +37,7 @@ public class StatisticsContainerResource {
     @ApiOperation(value = "Persist the specified statistics")
     public StatisticsContainer createOrUpdateStatistics(@PathVariable String customerSpace, //
             @RequestBody StatisticsContainer statistics) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return statisticsContainerService.createOrUpdate(customerSpace, statistics);
     }
 
@@ -43,6 +46,7 @@ public class StatisticsContainerResource {
     @ApiOperation(value = "Delete the specified statistics")
     public void deleteStatistics(@PathVariable String customerSpace, //
             @PathVariable String statisticsName) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         statisticsContainerService.delete(customerSpace, statisticsName);
     }
 }

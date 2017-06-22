@@ -3,7 +3,6 @@ package com.latticeengines.network.exposed.metadata;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface MetadataInterface {
@@ -33,13 +32,5 @@ public interface MetadataInterface {
     Table copyTable(String sourceTenantId, String targetCustomerSpace, String tableName);
 
     void validateArtifact(String customerSpace, ArtifactType artifactType, String filePath);
-
-    MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment metadataSegment);
-
-    void deleteSegmentByName(String customerSpace, String segmentName);
-
-    MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName);
-
-    List<MetadataSegment> getMetadataSegments(String customerSpace);
 
 }

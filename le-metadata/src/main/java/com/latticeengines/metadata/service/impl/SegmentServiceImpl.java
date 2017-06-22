@@ -21,9 +21,6 @@ public class SegmentServiceImpl implements SegmentService {
     private SegmentEntityMgr segmentEntityMgr;
 
     @Autowired
-    private DataCollectionEntityMgr dataCollectionEntityMgr;
-
-    @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Override
@@ -69,8 +66,8 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public StatisticsContainer getStats(String customerSpace, String segmentName, String modelId) {
-        return statisticsContainerEntityMgr.findInSegment(segmentName, modelId);
+    public StatisticsContainer getStats(String customerSpace, String segmentName) {
+        return statisticsContainerEntityMgr.findInSegment(segmentName);
     }
 
     @Override

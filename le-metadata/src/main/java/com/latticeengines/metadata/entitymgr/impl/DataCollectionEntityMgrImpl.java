@@ -173,8 +173,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer,
-            String modelId) {
+    public void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer) {
         DataCollection dataCollection = StringUtils.isBlank(collectionName) ? getDefaultCollection()
                 : getDataCollection(collectionName);
         if (dataCollection == null) {
@@ -190,7 +189,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         if (masterSeg == null) {
             throw new IllegalStateException("Cannot find master segment of the collection " + collectionName);
         }
-        StatisticsContainer oldStats = statisticsContainerEntityMgr.findInMasterSegment(collectionName, modelId);
+        StatisticsContainer oldStats = statisticsContainerEntityMgr.findInMasterSegment(collectionName);
         if (oldStats != null) {
             log.info("There is already a main stats for collection " + collectionName + ". Remove it first.");
             statisticsContainerEntityMgr.delete(oldStats);
