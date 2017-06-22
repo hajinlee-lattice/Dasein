@@ -1,23 +1,35 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
-public class ProfileConfig extends TransformerConfig {
-
+public class ProfileConfig extends TblDrivenTransformerConfig {
     @JsonProperty("NumBucketEqualSized")
-    private boolean numBucketEqualSized;    // true: bucket size is roughly equal  false: decide bucket upon distribution
+    private boolean numBucketEqualSized;// true: bucket size is roughly equal
+                                        // false: decide bucket upon distribution
 
     @JsonProperty("BucketNum")
-    private int bucketNum = 3;  // roughly bucket number (might not be exactly same in final profiling)
+    private int bucketNum = 5;// roughly bucket number (might not be exactly
+                              // same in final profiling)
 
     @JsonProperty("MinBucketSize")
-    private int minBucketSize = 2; // used for numBucketEqualSized = false
+    private int minBucketSize = 10; // only for numBucketEqualSized = false
 
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose, leave it null for real use case
 
     @JsonProperty("EncAttrPrefix")
     private String encAttrPrefix; // used for testing purpose, leave it null for real use case
+
+    @Override
+    public String getStage() {
+        return DataCloudConstants.PROFILE_STAGE;
+    }
+
+    @Override
+    public String getTransformer() {
+        return DataCloudConstants.TRANSFORMER_PROFILER;
+    }
 
     public boolean isNumBucketEqualSized() {
         return numBucketEqualSized;

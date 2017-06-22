@@ -40,6 +40,9 @@ public class TransformerServiceImpl implements TransformerService {
         }
 
         for (ConfigurableFlow flow : configurableFlows) {
+            if (transformerMap.containsKey(flow.getTransformerName())) {
+                continue;
+            }
             ConfigurableDataflowTransformer transformer = new ConfigurableDataflowTransformer();
             transformer.setConfigClass(flow.getTransformerConfigClass());
             transformer.setName(flow.getTransformerName());

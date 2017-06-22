@@ -25,7 +25,6 @@ import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.AMAttrEnricher;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -62,8 +61,8 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
 
     @Test(groups = "deployment")
     public void testTransformation() {
-        uploadBaseSourceFile("AccountMaster", "master_temp", baseSourceVersion);
-        // prepareAM();
+        //uploadBaseSourceFile("AccountMaster", "master_temp", baseSourceVersion);
+        prepareAM();
         prepareCustomer();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -111,7 +110,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
             Map<String, SourceTable> baseTables = new HashMap<>();
             baseTables.put(customerTable.getSourceName(), sourceTable);
             step0.setBaseTables(baseTables);
-            step0.setTransformer(AMAttrEnricher.TRANSFORMER_NAME);
+            step0.setTransformer(DataCloudConstants.TRANSFORMER_AM_ENRICHER);
             step0.setConfiguration(getCustomerUniverseConfig());
             step0.setTargetSource("Enriched");
 

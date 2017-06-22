@@ -7,13 +7,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ProfileParameters extends TransformationFlowParameters {
     @JsonProperty("NumBucketEqualSized")
     private boolean numBucketEqualSized;// true: bucket size is roughly equal
-                                        // false: decide bucket upon distribution
+                                        // false: decide bucket upon
+                                        // distribution
 
     @JsonProperty("BucketNum")
-    private int bucketNum = 5;// roughly bucket number (might not be exactly same in final profiling)
+    private int bucketNum = 5;// roughly bucket number (might not be exactly
+                              // same in final profiling)
 
     @JsonProperty("MinBucketSize")
     private int minBucketSize = 10; // only for numBucketEqualSized = false
+
+    @JsonProperty("RandSeed")
+    private Long randSeed; // used for testing purpose, leave it null for real
+                           // use case
+
+    @JsonProperty("EncAttrPrefix")
+    private String encAttrPrefix; // used for testing purpose, leave it null for
+                                  // real use case
 
     @JsonProperty("IDAttr")
     private String idAttr;
@@ -21,14 +31,14 @@ public class ProfileParameters extends TransformationFlowParameters {
     @JsonProperty("NumericAttrs")
     private List<Attribute> numericAttrs;
 
-    @JsonProperty("EncodedAttrs")
-    private List<Attribute> encodedAttrs;
+    @JsonProperty("AMAttrsToEnc")
+    private List<Attribute> amAttrsToEnc;
 
-    @JsonProperty("RetainedAttrs")
-    private List<Attribute> retainedAttrs;
+    @JsonProperty("ExternalAttrsToEnc")
+    private List<Attribute> exAttrsToEnc;
 
-    @JsonProperty("RandSeed")
-    private Long randSeed; // used for testing purpose
+    @JsonProperty("AttrsToRetain")
+    private List<Attribute> attrsToRetain;
 
     public boolean isNumBucketEqualSized() {
         return numBucketEqualSized;
@@ -62,20 +72,20 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.randSeed = randSeed;
     }
 
+    public String getEncAttrPrefix() {
+        return encAttrPrefix;
+    }
+
+    public void setEncAttrPrefix(String encAttrPrefix) {
+        this.encAttrPrefix = encAttrPrefix;
+    }
+
     public String getIdAttr() {
         return idAttr;
     }
 
     public void setIdAttr(String idAttr) {
         this.idAttr = idAttr;
-    }
-
-    public List<Attribute> getEncodedAttrs() {
-        return encodedAttrs;
-    }
-
-    public void setEncodedAttrs(List<Attribute> encodedAttrs) {
-        this.encodedAttrs = encodedAttrs;
     }
 
     public List<Attribute> getNumericAttrs() {
@@ -86,12 +96,28 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.numericAttrs = numericAttrs;
     }
 
-    public List<Attribute> getRetainedAttrs() {
-        return retainedAttrs;
+    public List<Attribute> getAmAttrsToEnc() {
+        return amAttrsToEnc;
     }
 
-    public void setRetainedAttrs(List<Attribute> retainedAttrs) {
-        this.retainedAttrs = retainedAttrs;
+    public void setAmAttrsToEnc(List<Attribute> amAttrsToEnc) {
+        this.amAttrsToEnc = amAttrsToEnc;
+    }
+
+    public List<Attribute> getExAttrsToEnc() {
+        return exAttrsToEnc;
+    }
+
+    public void setExAttrsToEnc(List<Attribute> exAttrsToEnc) {
+        this.exAttrsToEnc = exAttrsToEnc;
+    }
+
+    public List<Attribute> getAttrsToRetain() {
+        return attrsToRetain;
+    }
+
+    public void setAttrsToRetain(List<Attribute> attrsToRetain) {
+        this.attrsToRetain = attrsToRetain;
     }
 
     public static class Attribute {
@@ -140,4 +166,5 @@ public class ProfileParameters extends TransformationFlowParameters {
         }
 
     }
+
 }

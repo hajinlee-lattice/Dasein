@@ -4,7 +4,6 @@ import static com.latticeengines.datacloud.etl.transformation.transformer.impl.S
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
 import static com.latticeengines.domain.exposed.metadata.FundamentalType.AVRO_PROP_KEY;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +13,7 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -27,9 +27,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.Profile;
-import com.latticeengines.datacloud.dataflow.utils.FileParser;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategorizedIntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -49,8 +50,12 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
     private static final Log log = LogFactory.getLog(SourceProfiler.class);
 
-    private static final String STRATEGY_ENCODED_COLUMN = "EncodedColumn";
     public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILER;
+    private static final String IS_SEGMENT = "IsSegment";
+    private static final String DECODE_STRATEGY = "DecodeStrategy";
+    private static final String ENCODED_COLUMN = "EncodedColumn";
+    private static final String NUM_BITS = "NumBits";
+    private static final String BKT_ALGO = "BktAlgo";
 
     @Value("${datacloud.etl.profile.encode.bit:64}")
     private int encodeBits;
@@ -62,6 +67,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    SourceAttributeEntityMgr srcAttrEntityMgr;
 
     @Override
     protected String getDataFlowBeanName() {
@@ -84,39 +92,42 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     }
 
     @Override
-    protected void updateParameters(ProfileParameters parameters, Source[] baseTemplates, Source targetTemplate,
-            ProfileConfig config, List<String> baseVersions) {
-        parameters.setNumBucketEqualSized(config.isNumBucketEqualSized());
-        parameters.setBucketNum(config.getBucketNum());
-        parameters.setMinBucketSize(config.getMinBucketSize());
-        parameters.setRandSeed(config.getRandSeed());
-    }
-
-    @Override
-    protected void preDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters parameters,
-            ProfileConfig configuration) {
+    protected void preDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
+            ProfileConfig config) {
         List<String> idAttrs = new ArrayList<>();
         List<ProfileParameters.Attribute> numericAttrs = new ArrayList<>();
-        List<ProfileParameters.Attribute> retainedAttrs = new ArrayList<>();
-        List<ProfileParameters.Attribute> encodedAttrs = new ArrayList<>();
-        classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), idAttrs, numericAttrs, retainedAttrs,
-                encodedAttrs);
-        if (idAttrs.size() != 1) {
-            throw new RuntimeException(
-                    "One and only one lattice account id is required. Allowed id field: LatticeAccountId, LatticeID");
+        List<ProfileParameters.Attribute> attrsToRetain = new ArrayList<>();
+        List<ProfileParameters.Attribute> amAttrsToEnc = new ArrayList<>();
+        List<ProfileParameters.Attribute> exAttrsToEnc = new ArrayList<>();
+        classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), config, idAttrs, numericAttrs,
+                attrsToRetain, amAttrsToEnc, exAttrsToEnc);
+        if (CollectionUtils.isEmpty(idAttrs)) {
+            log.warn("Cannot find ID field (LatticeAccountId, LatticeID).");
         }
-        parameters.setNumericAttrs(numericAttrs);
-        parameters.setRetainedAttrs(retainedAttrs);
-        parameters.setEncodedAttrs(encodedAttrs);
-        parameters.setIdAttr(idAttrs.get(0));
+        if (idAttrs.size() > 1) {
+            throw new RuntimeException("Only allow one ID field (LatticeAccountId or LatticeID)");
+        }
+        paras.setNumBucketEqualSized(config.isNumBucketEqualSized());
+        paras.setBucketNum(config.getBucketNum());
+        paras.setMinBucketSize(config.getMinBucketSize());
+        paras.setRandSeed(config.getRandSeed());
+        paras.setEncAttrPrefix(config.getEncAttrPrefix());
+        paras.setIdAttr(idAttrs.get(0));
+        paras.setNumericAttrs(numericAttrs);
+        paras.setAttrsToRetain(attrsToRetain);
+        paras.setAmAttrsToEnc(amAttrsToEnc);
+        paras.setExAttrsToEnc(exAttrsToEnc);
     }
 
     @SuppressWarnings("unchecked")
-    private void classifyAttrs(Source baseSrc, String baseVer, List<String> idAttrs,
-            List<ProfileParameters.Attribute> numericAttrs, List<ProfileParameters.Attribute> retainedAttrs,
-            List<ProfileParameters.Attribute> encodedAttrs) {
-        // TODO: Will replace by reading from SourceAttribute table
-        Map<String, Map<String, Object>> amAttrConf = FileParser.parseAMProfileConfig();
+    private void classifyAttrs(Source baseSrc, String baseVer, ProfileConfig config, List<String> idAttrs,
+            List<ProfileParameters.Attribute> numericAttrs, List<ProfileParameters.Attribute> attrsToRetain,
+            List<ProfileParameters.Attribute> amAttrsToEnc, List<ProfileParameters.Attribute> exAttrsToEnc) {
+        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(null, config.getStage(),
+                config.getTransformer());
+        Map<String, SourceAttribute> amAttrConf = new HashMap<>();
+        srcAttrs.forEach(attr -> amAttrConf.put(attr.getAttribute(), attr));
+
         Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(baseSrc, baseVer);
         if (schema == null) {
             String avroGlob = TransformerUtils.avroPath(baseSrc, baseVer, hdfsPathBuilder);
@@ -126,81 +137,80 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         Set<String> numTypes = new HashSet<>(Arrays.asList(new String[] { "int", "long", "float", "double" }));
         Set<String> boolTypes = new HashSet<>(Arrays.asList(new String[] { "boolean" }));
         Map<String, List<ProfileParameters.Attribute>> attrsToDecode = new HashMap<>();
-        // Attributes need to decode
-        for (Map.Entry<String, Map<String, Object>> conf : amAttrConf.entrySet()) {
-            if (StringUtils.isBlank((String) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[2]))
-                    || !((Boolean) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[1]))) {
-                continue;
-            }
-            String decodeStrategy = (String) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[2]);
-            String attrToDecode = null;
-            try {
-                JsonNode strategy = om.readTree(decodeStrategy);
-                attrToDecode = strategy.get(STRATEGY_ENCODED_COLUMN).asText();
+        try {
+            // Attributes encoded in the account master which need to decode
+            for (SourceAttribute amAttr : amAttrConf.values()) {
+                JsonNode arg = om.readTree(amAttr.getArguments());
+                if (!arg.get(IS_SEGMENT).asBoolean() || !arg.hasNonNull(DECODE_STRATEGY)) {
+                    continue;
+                }
+                JsonNode decodeStrategy = arg.get(DECODE_STRATEGY);
+                String attrToDecode = decodeStrategy.get(ENCODED_COLUMN).asText();
                 if (!attrsToDecode.containsKey(attrToDecode)) {
                     attrsToDecode.put(attrToDecode, new ArrayList<>());
                 }
-            } catch (IOException e) {
-                throw new RuntimeException("Fail to parse decodeStrategy in json format: " + decodeStrategy, e);
+                int numBits = arg.get(NUM_BITS).asInt();
+                BucketAlgorithm bktAlgo = parseBucketAlgo(arg.get(BKT_ALGO).asText());
+                attrsToDecode.get(attrToDecode).add(new ProfileParameters.Attribute(amAttr.getAttribute(), numBits,
+                        decodeStrategy.toString(), bktAlgo));
             }
-            Integer encodeBitUnit = conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[3]) == null ? null
-                    : (Integer) (conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[3]));
-            BucketAlgorithm algo = parseBucketAlgo(
-                    (String) conf.getValue().get(FileParser.AM_PROFILE_CONFIG_HEADER[4]));
-            attrsToDecode.get(attrToDecode)
-                    .add(new ProfileParameters.Attribute(conf.getKey(), encodeBitUnit, decodeStrategy, algo));
-        }
-        // Attributes exist in schema of source to profile
-        for (Field field : schema.getFields()) {
-            if (field.name().equals(DataCloudConstants.LATTIC_ID)
-                    || field.name().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) { // lattice
-                                                                                     // account
-                                                                                     // id
-                log.info(String.format("ID attr: %s (unencoded)", field.name()));
-                idAttrs.add(field.name());
-                continue;
-            }
-            boolean isSeg = true; // from encoded AM attr or customer field
-            if (amAttrConf.containsKey(field.name())) { // from AM attr
-                isSeg = (Boolean) amAttrConf.get(field.name()).get(FileParser.AM_PROFILE_CONFIG_HEADER[1]);
-            }
-            if (!isSeg) { // If not for segment, exclude it from profiling
-                log.info(String.format("Discarded attr: %s", field.name()));
-                continue;
-            }
-            if (attrsToDecode.containsKey(field.name())) {
-                for (ProfileParameters.Attribute attr : attrsToDecode.get(field.name())) {
-                    if (attr.getAlgo() instanceof BooleanBucket) {
-                        log.info(String.format("%s attr %s (encoded)", attr.getAlgo().getClass().getSimpleName(),
-                                attr.getAttr()));
-                        encodedAttrs.add(attr);
-                    } else if (attr.getAlgo() instanceof IntervalBucket) {
-                        log.info(String.format("%s attr %s (unencoded)", attr.getAlgo().getClass().getSimpleName(),
-                                attr.getAttr()));
-                        numericAttrs.add(attr);
-                    } else {
-                        log.info(String.format("%s attr %s (unencoded)", attr.getAlgo().getClass().getSimpleName(),
-                                attr.getAttr()));
-                        retainedAttrs.add(attr);
-                    }
+            // Attributes exist in the basesource
+            for (Field field : schema.getFields()) {
+                if (field.name().equals(DataCloudConstants.LATTIC_ID)
+                        || field.name().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) {
+                    log.info(String.format("ID attr: %s (unencoded)", field.name()));
+                    idAttrs.add(field.name());
+                    continue;
                 }
-                continue;
+                boolean isSeg = true; // from encoded AM attr or external field
+                if (amAttrConf.containsKey(field.name())) { // from AM attr
+                    JsonNode arg = om.readTree(amAttrConf.get(field.name()).getArguments());
+                    isSeg = arg.get(IS_SEGMENT).asBoolean();
+                }
+                if (!isSeg) { // If not for segment, exclude it from profiling
+                    log.info(String.format("Discarded attr: %s", field.name()));
+                    continue;
+                }
+                if (attrsToDecode.containsKey(field.name())) {
+                    for (ProfileParameters.Attribute attr : attrsToDecode.get(field.name())) {
+                        if (attr.getAlgo() instanceof BooleanBucket) {
+                            log.info(String.format("%s attr %s (encoded)", attr.getAlgo().getClass().getSimpleName(),
+                                    attr.getAttr()));
+                            amAttrsToEnc.add(attr); // No external attrs needs to decode
+                        } else if (attr.getAlgo() instanceof IntervalBucket) {
+                            log.info(String.format("%s attr %s (unencoded)", attr.getAlgo().getClass().getSimpleName(),
+                                    attr.getAttr()));
+                            numericAttrs.add(attr);
+                        } else {
+                            log.info(String.format("%s attr %s (unencoded)", attr.getAlgo().getClass().getSimpleName(),
+                                    attr.getAttr()));
+                            attrsToRetain.add(attr);
+                        }
+                    }
+                    continue;
+                }
+                String type = field.schema().getTypes().get(0).getName();
+                if (numTypes.contains(type)) {
+                    log.info(String.format("Interval bucketed attr %s (type %s unencoded)", field.name(), type));
+                    numericAttrs.add(new ProfileParameters.Attribute(field.name(), null, null, new IntervalBucket()));
+                    continue;
+                }
+                if (boolTypes.contains(type)
+                        || FundamentalType.BOOLEAN.getName().equalsIgnoreCase(field.getProp(AVRO_PROP_KEY))) {
+                    log.info(String.format("Boolean bucketed attr %s (type %s encoded)", field.name(), type));
+                    BucketAlgorithm algo = new BooleanBucket();
+                    if (amAttrConf.containsKey(field.name())) {
+                        amAttrsToEnc.add(new ProfileParameters.Attribute(field.name(), 2, null, algo));
+                    } else {
+                        exAttrsToEnc.add(new ProfileParameters.Attribute(field.name(), 2, null, algo));
+                    }
+                    continue;
+                }
+                log.info(String.format("Retained attr: %s (unencoded)", field.name()));
+                attrsToRetain.add(new ProfileParameters.Attribute(field.name(), null, null, null));
             }
-            String type = field.schema().getTypes().get(0).getName();
-            if (numTypes.contains(type)) {
-                log.info(String.format("Interval bucketed attr %s (type %s unencoded)", field.name(), type));
-                numericAttrs.add(new ProfileParameters.Attribute(field.name(), null, null, new IntervalBucket()));
-                continue;
-            }
-            if (boolTypes.contains(type)
-                    || FundamentalType.BOOLEAN.getName().equalsIgnoreCase(field.getProp(AVRO_PROP_KEY))) {
-                log.info(String.format("Boolean bucketed attr %s (type %s encoded)", field.name(), type));
-                BucketAlgorithm algo = new BooleanBucket();
-                encodedAttrs.add(new ProfileParameters.Attribute(field.name(), 2, null, algo));
-                continue;
-            }
-            log.info(String.format("Retained attr: %s (unencoded)", field.name()));
-            retainedAttrs.add(new ProfileParameters.Attribute(field.name(), null, null, null));
+        } catch (Exception ex) {
+            throw new RuntimeException("Fail to classify attributes", ex);
         }
     }
 
@@ -224,24 +234,37 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     }
 
     @Override
-    protected void postDataFlowProcessing(String workflowDir, ProfileParameters para, ProfileConfig config) {
+    protected void postDataFlowProcessing(String workflowDir, ProfileParameters paras, ProfileConfig config) {
         List<Object[]> result = new ArrayList<>();
-        result.add(profileIdAttr(para.getIdAttr()));
-        for (ProfileParameters.Attribute attr : para.getRetainedAttrs()) {
-            result.add(profileRetainedAttr(attr));
+        result.add(profileIdAttr(paras.getIdAttr()));
+        for (ProfileParameters.Attribute attr : paras.getAttrsToRetain()) {
+            result.add(profileAttrToRetain(attr));
         }
-        String prefix = StringUtils.isNotBlank(config.getEncAttrPrefix()) ? config.getEncAttrPrefix() : "EAttr";
-        Map<String, List<ProfileParameters.Attribute>> encodedAttrs = groupEncodedAttrs(para.getEncodedAttrs(), prefix);
-        int size = result.size() + para.getNumericAttrs().size() + encodedAttrs.size();
-        log.info(String.format("1 LatticeAccountId attr, %d numeric attrs, %d encoded attrs, %d retained attrs",
-                para.getNumericAttrs().size(), encodedAttrs.size(), para.getRetainedAttrs().size()));
+        Map<String, List<ProfileParameters.Attribute>> amEncodedAttrs = groupAttrsToEnc(paras.getAmAttrsToEnc(),
+                DataCloudConstants.EAttr);
+        Map<String, List<ProfileParameters.Attribute>> exEncodedAttrs = groupAttrsToEnc(paras.getExAttrsToEnc(),
+                StringUtils.isBlank(config.getEncAttrPrefix()) ? DataCloudConstants.CEAttr : config.getEncAttrPrefix());
+        int size = result.size() + paras.getNumericAttrs().size() + amEncodedAttrs.size() + exEncodedAttrs.size();
+        log.info(String.format(
+                "1 LatticeAccountId attr, %d numeric attrs, %d am encoded attrs, %d external encoded attrs, %d retained attrs",
+                paras.getNumericAttrs().size(), amEncodedAttrs.size(), exEncodedAttrs.size(),
+                paras.getAttrsToRetain().size()));
         if (size > maxAttrs) {
             log.warn(String.format("Attr num in bucketed am %d exceeds expected maximum limit %d", size, maxAttrs));
+        } else {
+            log.info("Attr num in bucketed am: %d");
         }
-        for (Map.Entry<String, List<ProfileParameters.Attribute>> entry : encodedAttrs.entrySet()) {
+        for (Map.Entry<String, List<ProfileParameters.Attribute>> entry : amEncodedAttrs.entrySet()) {
             int lowestBit = 0;
             for (ProfileParameters.Attribute attr : entry.getValue()) {
-                result.add(profileEncodedAttr(attr, entry.getKey(), lowestBit));
+                result.add(profileAttrToEnc(attr, entry.getKey(), lowestBit));
+                lowestBit += attr.getEncodeBitUnit();
+            }
+        }
+        for (Map.Entry<String, List<ProfileParameters.Attribute>> entry : exEncodedAttrs.entrySet()) {
+            int lowestBit = 0;
+            for (ProfileParameters.Attribute attr : entry.getValue()) {
+                result.add(profileAttrToEnc(attr, entry.getKey(), lowestBit));
                 lowestBit += attr.getEncodeBitUnit();
             }
         }
@@ -285,7 +308,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return data;
     }
 
-    private Object[] profileRetainedAttr(ProfileParameters.Attribute attr) {
+    private Object[] profileAttrToRetain(ProfileParameters.Attribute attr) {
         Object[] data = new Object[7];
         data[0] = attr.getAttr();
         data[1] = attr.getAttr();
@@ -302,7 +325,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return data;
     }
 
-    private Object[] profileEncodedAttr(ProfileParameters.Attribute attr, String encodedAttr, int lowestBit) {
+    private Object[] profileAttrToEnc(ProfileParameters.Attribute attr, String encodedAttr, int lowestBit) {
         Object[] data = new Object[7];
         data[0] = attr.getAttr();
         data[1] = attr.getAttr();
@@ -319,13 +342,11 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return data;
     }
 
-    private Map<String, List<ProfileParameters.Attribute>> groupEncodedAttrs(List<ProfileParameters.Attribute> attrs, String prefix) {
-        attrs.sort((x, y) -> y.getEncodeBitUnit().compareTo(x.getEncodeBitUnit())); // descending
-                                                                                    // order
+    private Map<String, List<ProfileParameters.Attribute>> groupAttrsToEnc(List<ProfileParameters.Attribute> attrs,
+            String encAttrPrefix) {
+        attrs.sort((x, y) -> y.getEncodeBitUnit().compareTo(x.getEncodeBitUnit())); // descending order
         Map<String, List<ProfileParameters.Attribute>> encodedAttrs = new HashMap<>();
-        List<Map<String, List<ProfileParameters.Attribute>>> availableBits = new ArrayList<>(); // 0
-                                                                                                // -
-                                                                                                // 63
+        List<Map<String, List<ProfileParameters.Attribute>>> availableBits = new ArrayList<>(); // 0 - encodeBits-1
         for (int i = 0; i < encodeBits; i++) {
             availableBits.add(new HashMap<>());
         }
@@ -344,7 +365,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             List<ProfileParameters.Attribute> attachedAttrs = null;
             if (index == encodeBits) { // No available encode attr to add this
                                        // attr. Add a new encode attr
-                encodedAttr = createEncodeAttrName(encodedSeq, prefix);
+                encodedAttr = createEncodeAttrName(encAttrPrefix, encodedSeq);
                 encodedSeq++;
                 attachedAttrs = new ArrayList<>();
             } else { // find available encode attr to add this attr
@@ -361,8 +382,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         return encodedAttrs;
     }
 
-    private String createEncodeAttrName(int encodedSeq, String prefix) {
-        return prefix + String.valueOf(encodedSeq);
+    private String createEncodeAttrName(String encAttrPrefix, int encodedSeq) {
+        return encAttrPrefix + String.valueOf(encodedSeq);
     }
 
     @Override

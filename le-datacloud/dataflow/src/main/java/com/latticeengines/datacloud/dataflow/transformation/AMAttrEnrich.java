@@ -1,8 +1,6 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -13,31 +11,26 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AMAttrEnrichParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMAttrEnrichConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 @Component(AMAttrEnrich.BEAN_NAME)
-public class AMAttrEnrich extends TransformationFlowBase<BasicTransformationConfiguration, AMAttrEnrichParameters> {
+public class AMAttrEnrich extends ConfigurableFlowBase<AMAttrEnrichConfig> {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AMSeedMerge.class);
 
     public static final String BEAN_NAME = "AMAttrEnrich";
 
+    private AMAttrEnrichConfig config;
+
     @Override
-    public Node construct(AMAttrEnrichParameters paras) {
+    public Node construct(TransformationFlowParameters paras) {
+        config = getTransformerConfig(paras);
         Node input = addSource(paras.getBaseTables().get(0));
-        // Used to mark ATTR_SOURCE in postDataflowProcessing
-        List<String> inputAttrs = new ArrayList<>();
-        for (String attr : input.getFieldNames()) {
-            if (!attr.equals(paras.getInputLatticeId())) {
-                inputAttrs.add(attr);
-            }
-        }
-        paras.setInputAttrs(inputAttrs);
-        if (paras.isNotJoinAM()) {
-            return input.rename(new FieldList(paras.getInputLatticeId()),
+        if (config.isNotJoinAM()) {
+            return input.rename(new FieldList(config.getInputLatticeId()),
                     new FieldList(DataCloudConstants.LATTICE_ACCOUNT_ID));
         }
         Node am = addSource(paras.getBaseTables().get(1));
@@ -50,17 +43,17 @@ public class AMAttrEnrich extends TransformationFlowBase<BasicTransformationConf
             }
         }
         // Resolve lattice account id
-        input = input.rename(new FieldList(paras.getInputLatticeId()),
-                new FieldList(renameInputId(paras.getInputLatticeId())));
-        input = input.retain(new FieldList(input.getFieldNames())); // wolk-around for the bug in column alignment of rename
-        am = am.rename(new FieldList(paras.getAmLatticeId()), new FieldList(renameAMId(paras.getAmLatticeId())));
-        am = am.retain(new FieldList(am.getFieldNames()));// wolk-around for the bug in column alignment of rename
-        Node joined = input.join(renameInputId(paras.getInputLatticeId()), am, renameAMId(paras.getAmLatticeId()),
+        input = input.rename(new FieldList(config.getInputLatticeId()),
+                new FieldList(renameInputId(config.getInputLatticeId())));
+        input = input.retain(new FieldList(input.getFieldNames())); // walk-around for the bug in column alignment of rename
+        am = am.rename(new FieldList(config.getAmLatticeId()), new FieldList(renameAMId(config.getAmLatticeId())));
+        am = am.retain(new FieldList(am.getFieldNames()));// walk-around for the bug in column alignment of rename
+        Node joined = input.join(renameInputId(config.getInputLatticeId()), am, renameAMId(config.getAmLatticeId()),
                 JoinType.LEFT);
         joined = joined
-                .rename(new FieldList(renameInputId(paras.getInputLatticeId())),
+                .rename(new FieldList(renameInputId(config.getInputLatticeId())),
                         new FieldList(DataCloudConstants.LATTICE_ACCOUNT_ID))
-                .discard(renameAMId(paras.getAmLatticeId()));
+                .discard(renameAMId(config.getAmLatticeId()));
         return joined;
     }
 
@@ -73,8 +66,19 @@ public class AMAttrEnrich extends TransformationFlowBase<BasicTransformationConf
     }
 
     @Override
-    public Class<? extends TransformationConfiguration> getTransConfClass() {
-        return BasicTransformationConfiguration.class;
+    public String getDataFlowBeanName() {
+        return BEAN_NAME;
     }
+
+    @Override
+    public String getTransformerName() {
+        return DataCloudConstants.TRANSFORMER_AM_ENRICHER;
+    }
+
+    @Override
+    public Class<? extends TransformerConfig> getTransformerConfigClass() {
+        return AMAttrEnrichConfig.class;
+    }
+
 
 }

@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.core.dao.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -23,12 +24,15 @@ public class SourceAttributeDaoImpl extends BaseDaoWithAssignedSessionFactoryImp
     @Override
     public List<SourceAttribute> getAttributes(String source, String stage, String transformer) {
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format("from %s where Source = :source And Stage = :stage And Transformer = :transformer order by SourceAttributeID",
-                getEntityClass().getSimpleName());
+        String queryStr = String.format(
+                "from %s where Stage = :stage And Transformer = :transformer %s order by SourceAttributeID",
+                getEntityClass().getSimpleName(), StringUtils.isBlank(source) ? "" : " And Source = :source");
         Query query = session.createQuery(queryStr);
-        query.setString("source", source);
         query.setString("stage", stage);
         query.setString("transformer", transformer);
+        if (StringUtils.isNotBlank(source)) {
+            query.setString("source", source);
+        }
         return (List<SourceAttribute>) query.list();
     }
 }
