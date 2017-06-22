@@ -32,6 +32,7 @@
     <span class="lesser-description" ng-if="vm.lookupMode">
         {{ enrichment.Description }}
     </span>
+    <!--
     <div class="stats-boolean" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && !vm.lookupMode && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' && vm.section == 'team'">
         <h3>{{vm.booleanStats(vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List).Yes.Cnt|number}}</h3>
         <h4>Businesses with this product</h4>
@@ -39,7 +40,7 @@
             About {{vm.NumberUtility.AbbreviateLargeNumber(vm.booleanStats(vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List).No.Cnt, 1)}} mid-sized and enterprise companies don't use this.
         </p>
     </div>
-
+    -->
     <div class="stats" ng-if="  vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && 
                                 vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && 
                                 !vm.lookupMode && 
